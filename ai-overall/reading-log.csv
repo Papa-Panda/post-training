@@ -1,0 +1,2 @@
+Date,Title,Folder,Link,Tags,OneLineSummary,Status
+2026-08-05,Frontis-MA1: Training an AI4AI Model towards Recursive Self-Improvement in Machine Learning Engineering,2026_frontis-ma1,https://arxiv.org/abs/2607.28568,"ai4ai,rsi,mle,agentic-rl,post-training",35B meta-evolution agent for MLE using 4 atomic operators + OpenMLE full-stack (Gym/RL/Evo) improves Medal Avg 39.39->60.61% on MLE-Bench Lite,done
