@@ -3,7 +3,7 @@ Date,Phase,Track,Topic,Knowledge Point,Learning Goal,Small Daily Task (30-60min)
 2026-08-03,Foundation 1-3mo,Infra Systems,PyTorch Distributed,FSDP intro,知道FSDP为什么比DDP省显存,把昨天的mnist改成FSDP，对比显存/速度,跟你做机械负载建模一样：分片是为了让系统不超限,FAIR FSDP docs,done,
 2026-08-04,Foundation 1-3mo,Reasoning Data,Coding Data,Code data flywheel 概念,说清 coding data 在 post-training 的位置,把你现在做的 coding data 画成 flywheel 图：采-洗-评-训,把你手头的清洗/合成任务贴到图上,internal docs,done,
 2026-08-05,Foundation 1-3mo,RL Training,RL Basics,Agentic RL vs RLHF 区别,能用一句话区分 RLHF/DPO/GRPO,看一篇 Dec 2024 OpenAI RLHF infra blog，提炼1个问题,金融里 reward 不确定性定价思路,OpenAI RLHF blog / InstructGPT,done,"FSDP per-block CPU profiler done: all_gather 32×~2.0ms / gloo 64×0.82ms, 7B/2×A100 ~42.5GB bf16-mix, 待H100验证; code day-03-fsdp-perblock/fsdp_day3_profiler.py"
-2026-08-06,Foundation 1-3mo,Infra Systems,JAX,pjit / sharding 概念,理解 JAX 比 PyTorch 多解决了什么,用 JAX 写一个 10 行的 pjit 分片 matmul，观察 device mesh,物理建模里多变量耦合 ~ sharding 思路,JAX Docs - pjit,todo,
+2026-08-06,Foundation 1-3mo,Infra Systems,JAX,pjit / sharding 概念,理解 JAX 比 PyTorch 多解决了什么,用 JAX 写一个 10 行的 pjit 分片 matmul，观察 device mesh,物理建模里多变量耦合 ~ sharding 思路,JAX Docs - pjit,done,JAX pjit 10-line matmul, device mesh 1×N, PartitionSpec 行切 demo CPU ok, 待H100真分片; logic vs PyTorch command声明式
 2026-08-07,Foundation 1-3mo,Reasoning Data,Papers,你的Paper1拆解,提炼 autoscaling 系统的核心建模方法,把 Paper1 的方法论写成5条 bullet，能迁移到 RL 的,,Paper1 draft,todo,
 2026-08-08,Foundation 1-3mo,Infra Systems,PyTorch Distributed,Checkpoint & Recovery,理解大规模训练为什么总要断点续训,给 FSDP 加上 checkpoint，模拟一次失败恢复,类比你 SLO 压测：预测瓶颈,PyTorch checkpoint docs,todo,
 2026-08-09,Foundation 1-3mo,RL Training,Eval,Eval infra 为什么是瓶颈,知道为什么 eval 会卡住训练,梳理你组里 coding data 的 eval 是怎么跑的，列出延迟点,ML for Infra 里的 nowcasting：预测 eval 延迟,Your current team eval flow,todo,
