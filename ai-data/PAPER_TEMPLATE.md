@@ -1,6 +1,6 @@
 # Paper 模板
 
-> 复制这个模板到 `papers/{name}/NOTES.md`
+> 复制这个模板到 `{name}/NOTES.md`（现在直接在 ai-data 下平铺，不再有 papers/ 中间层）
 
 ## 元信息
 - Title:
