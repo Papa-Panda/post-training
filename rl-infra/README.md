@@ -15,7 +15,8 @@ rl-infra/
 ├── day-07-checkpoint-recovery/  FSDP checkpoint & crash recovery
 ├── day-07-h100-beyond-7b/       H100 7B/13B/70B 外推、vLLM profiler
 ├── day-08-eval-infra/           Eval infra 瓶颈 — sync vs async / queue / nowcasting
-└── day-10-vllm/                 vLLM rollout 基座
+├── day-10-vllm/                 vLLM rollout 基座
+└── day-11-paper2-mech-load/     Paper2 机械负载非线性 SSM → GPU 热/功耗映射
 ```
 
 ## 为什么要收敛
