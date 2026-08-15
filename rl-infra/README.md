@@ -14,6 +14,7 @@ rl-infra/
 ├── day-06-paper1-rl-infra/      Paper1 autoscaling → RL bridge
 ├── day-07-checkpoint-recovery/  FSDP checkpoint & crash recovery
 ├── day-07-h100-beyond-7b/       H100 7B/13B/70B 外推、vLLM profiler
+├── day-08-eval-infra/           Eval infra 瓶颈 — sync vs async / queue / nowcasting
 └── day-10-vllm/                 vLLM rollout 基座
 ```
 
