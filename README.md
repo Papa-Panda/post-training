@@ -10,7 +10,9 @@
   - `ICL/` — In-Context Learning 知识脉络与数学（含 trajectory-error prompting 的四种用法、code 版 Socratic-SWE）
   - `grpo-vs-ppo/` — PPO vs GRPO 对比，含 GLM-5.2 回归 PPO 讨论
   - `vllm-rollout/` — vLLM rollout 压测 & 失败 taxonomy
-  - `eval-compression/` — 评估压缩：Factory 方法 + Hermes probe harness + 三类压缩对比
+  - `eval-context-compression/` — 评估压缩：Factory 方法 + Hermes probe harness + 三类压缩对比（原 eval-compression）
+  - `eval-bench-efficiency/` — 高效评测：metabench IRT 蒸馏 28632→858 (<3%) + mRMR 特征选择 DIoR x100
+  - `eval/` — 评估索引（指向上面两个平铺 track）
   - `ai-data/` — Data-centric papers：coding data / SFT / RL data / curation
   - `ai_daily.csv` — source of truth，45 天 2026-08-02 → 2026-09-15
 - **Tracks**: Infra Systems (18d) / RL Training (11d) / Reasoning Data (8d) / Papers (5d) / Reflection (3d)
