@@ -1,6 +1,6 @@
 # Day 12 NOTES — Reward Model OAS Calibration
 
-> Connection to Prev: Day11 Paper2 mechanical load → Day12 Reward Model OAS calibration: vLLM rollout 80%墙钟功率burst引发rack热抖动是reward噪声的物理源头，所以reward必须像MBS定价那样给不确定性加OAS利差；Day10 vLLM rollout 5类失败率(12-18%长CoT)坑用ensemble std + OAS spread阈值过滤解决；Day8/9 eval瓶颈nowcasting缺物理先验用γ*(ΔT)^2，二阶残差思路同构到reward校准二次Brier/ECE。
+> Connection to Prev: Day11 Paper2 mechanical load → Day12 Reward Model OAS calibration: vLLM rollout 80%墙钟功率burst引发rack热抖动是reward噪声的物理源头，所以需要用 ensemble 不确定度 + 校准 offset 过滤高噪 rollout；Day10 vLLM rollout 5类失败率(12-18%长CoT)坑用ensemble std + OAS spread阈值过滤解决；Day8/9 eval瓶颈nowcasting缺物理先验用γ*(ΔT)^2，二阶残差思路同构到reward校准二次Brier/ECE。
 
 Date: 2026-08-12 (RL Training / RL Concepts Reward Model)
 
@@ -14,7 +14,7 @@ Date: 2026-08-12 (RL Training / RL Concepts Reward Model)
 - **reward_std_mean (ensemble σ mean) = 0.04498102888464928**
   含义：5个bootstrap RM 预测 std 平均4.5%，对应 rollout/标注不确定性可量化
 - **oas_spread_mean (|cal - raw| mean) = 0.053879059851169586**
-  含义：Platt a=0.716 b=0.084 校准后，平均校准位移5.39% → 类比 MBS OAS 利差，补偿不确定性
+  含义：Platt a=0.716 b=0.084 校准后，平均校准位移5.39%，补偿高不确定区间的过自信
 
 Bonus真数：
 
@@ -45,10 +45,10 @@ Bonus真数：
 
 ## OAS → Reward 映射表
 
-| 固定收益 MBS | RL Reward Model | 本code量 |
+| 概念 | RL Reward Model | 本code量 |
 |---|---|---|
 | 国债无风险 y_T | oracle真效用 r_true(w_true·diff) | w_true随机单位化，diff = x_a-x_b |
-| MBS收益率 y_MBS | RM未校准 r_raw = sigmoid(w·diff) | logits→probs |
+| 未校准 r_raw | RM未校准 r_raw = sigmoid(w·diff) | logits→probs |
 | 期权成本 option_cost (提前还款) | rollout失败/标注分歧/热节流不确定性 | flip15% + ensemble σ 0.045 |
 | OAS spread | calibrated - raw / σ·λ | oas_spread 0.0539，σ 0.045 |
 | Z-spread剥离 | Platt a/b缩放 | a=0.716 b=0.084 收缩过自信 |
@@ -56,7 +56,7 @@ Bonus真数：
 
 ## 迁移面试一句
 
-“我在Citi做过MBS OAS/Z-spread定价，给嵌入式期权不确定性剥利差；平移到RL是给reward的不确定性剥利差——rollout长CoT失败12-18% + 热节流0.83% + 标注15%分歧三噪叠加，ensemble 5模型得σ≈4.5%量级，Platt校准把ECE从0.0906压到0.0881，OAS spread 5.39%是risk premium，高σ rollout直接过滤，省 $/有用 rollout 8-12%。”
+“rollout长CoT失败12-18% + 热节流0.83% + 标注15%分歧三噪叠加，ensemble 5模型得σ≈4.5%量级，Platt校准把ECE从0.0906压到0.0881，|cal-raw| 5.39% 当风险补偿，高σ rollout直接过滤，省 $/有用 rollout 8-12%。”
 
 ## 代码
 

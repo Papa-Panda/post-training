@@ -3,10 +3,9 @@
 Day 12 — Reward Model uncertainty + OAS calibration
 CPU gloo 2-rank runnable, GPU NCCL待验证
 
-Finance → RL mapping:
-- MBS OAS: market price = risk-free discounted cashflow + spread for prepay option uncertainty
+Uncertainty → calibration mapping:
 - Reward OAS: observed human preference = true utility + annotation noise + rollout jitter (thermal/eval flaky)
-  calibrated reward = raw RM score + λ*σ_uncertainty, where σ from ensemble/MC-dropout
+  calibrated reward = a*raw + b, uncertainty σ from ensemble, filtered if σ > threshold
 
 Minimal runnable teaches:
 - train simple classification RM on noisy preference pairs

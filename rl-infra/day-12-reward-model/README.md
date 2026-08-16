@@ -1,4 +1,4 @@
-> Connection to Prev: Day11 Paper2 mechanical load → Day12 Reward Model OAS calibration: vLLM rollout 80%墙钟的功率burst引发rack热抖动是reward噪声的物理源头，所以reward必须像MBS定价那样给不确定性加OAS利差；Day10 vLLM rollout 的5类失败率(12-18%长CoT)坑在今天用ensemble std + OAS spread阈值过滤高不确定rollout解决；Day8/9 eval瓶颈 的 nowcasting缺物理先验用γ*(ΔT)^2，二阶残差思路同构到reward校准的二次Brier/ECE。
+> Connection to Prev: Day11 Paper2 mechanical load → Day12 Reward Model OAS calibration: vLLM rollout 80%墙钟的功率burst引发rack热抖动是reward噪声的物理源头，所以需要用 ensemble 不确定度 + 校准 offset 来补偿高噪 rollout；Day10 vLLM rollout 的5类失败率(12-18%长CoT)坑在今天用ensemble std + OAS spread阈值过滤高不确定rollout解决；Day8/9 eval瓶颈 的 nowcasting缺物理先验用γ*(ΔT)^2，二阶残差思路同构到reward校准的二次Brier/ECE。
 
 # Day 12 — Reward Model 不确定性 + OAS 校准
 
@@ -26,7 +26,7 @@
 - 7B G=2 峰值 ~42.5GB bf16-mix，常驻 28GB/G，comm 40-55%；13B G=4 峰值 38GB，tokens/sec 2.3-2.9k；70B G=8 峰值 86GB需activation ckpt，0.6-0.8k /GPU — **待H100 NCCL**
 - 短CoT 500 tok 40-60k tokens/sec decode，失败 5-8%；长CoT 5000 tok 8-15k tokens/sec，失败 12-18% (超时40%/工具30%/VCJ15%/OOM10%/NCCL5%)
 
-=> 昨日结论：rollout 占墙钟 80%→90%，热节流是隐性失败源，必须物理先验提前5-10min，今天把热/失败映射为 reward 不确定性定价。
+=> 昨日结论：rollout 占墙钟 80%→90%，热节流是隐性失败源，必须物理先验提前5-10min，今天把热/失败映射为 reward 不确定性过滤。
 
 ---
 
@@ -36,7 +36,7 @@
 **Knowledge Point**: reward 模型的不确定性 / 校准  
 **Learning Goal**: 理解 reward 模型为什么总要带不确定性，出处有三：标注噪音 / rollout长CoT工具失败 / GPU热抖动；会用量化指标 ECE / Brier / ensemble σ 描述它  
 **Small Daily Task**: 把一个简单的分类 reward 模型，用金融 OAS 思路做校准  
-**Work Connection**: 金融定价的校准 → reward 校准；MBS OAS 给嵌入式期权不确定性定价 spread，reward OAS 给 rollout/标注不确定性定价  
+**Work Connection**: rollout/标注/热抖动三噪叠加 → reward 校准与不确定度过滤  
 **Resource**: RLHF Reward Modeling paper / InstructGPT RM / DPO-reward-gap ai-data/2025_dpo-reward-gap/
 
 ### 今天要懂的 3 层映射
@@ -54,7 +54,7 @@
 固定收益：
 
 - 国债收益率 y_T = 无风险
-- MBS 收益率 y_MBS = y_T + OAS + option_cost
+- r_true = oracle 真效用，r_raw = RM 未校准 logit
 - OAS = market price 反解出的额外补偿，专补“借款人提前还款”这种内嵌option不确定性
 
 RL reward：
@@ -83,7 +83,7 @@ RL reward：
 
 ## 【与之前内容的联系】必写 2-3 句，贴到每日问题库
 
-1. **昨天 Day11 → 今天 Day12**：昨天 Day11 学了 Paper2 机械负载的双线性 + 二次换热 + hysteresis 如何给“为什么会热节流”一个物理因果，今天的 Reward 不确定性是热的下一步——Tj>82°C throttled 0.83% 不会让训练崩，但会让 reward 回传慢/截断/被误判为差答案，MBS 的 OAS 给“借款人可能提前还款”定价，今天给“rollout可能热失败/标注分歧”定价，方法同是给未校准分数加一个补偿利差，区分正常探索噪声 vs 有害抖动，否则 GRPO 组内相对优势会被噪声淹没。
+1. **昨天 Day11 → 今天 Day12**：昨天 Day11 学了 Paper2 机械负载的双线性 + 二次换热 + hysteresis 如何给“为什么会热节流”一个物理因果，今天的 Reward 不确定性是热的下一步——Tj>82°C throttled 0.83% 不会让训练崩，但会让 reward 回传慢/截断/被误判为差答案，今天给“rollout可能热失败/标注分歧”加一个补偿 offset，区分正常探索噪声 vs 有害抖动，区分正常探索噪声 vs 有害抖动，否则 GRPO 组内相对优势会被噪声淹没。
 
 2. **前天 Day10 vLLM rollout → Day12**：Day10 把墙钟80%是rollout、长CoT失败12-18%5类拆分说清，但没回答“这些失败怎么进reward”，今天补：失败rollout不应进RM训练当负样本，而应进不确定性集合算 σ，高 σ 样本在今code里 high_uncert_rate 本轮0%（小合成），阈值降到0.05可筛30%边界，生产版阈值由 Day10 的失败率反推，形成“rollout → 不确定性 → OAS惩罚”闭环，折算 $/有用rollout 可省 8-12%（Day10同估）。
 
@@ -121,7 +121,7 @@ torchrun --nproc_per_node=2 reward_oas_calibration.py
 
 ## Monetization / Work Connection
 
-- 你过去做MBS/FX准度+量化risk建模，OAS校准是老本行：MBS里 Z-spread 剥离现金流，RL里 reward spread 剥离 rollout噪音，面试可讲“用固定收益的OAS框架给RM定价，σ是隐含波动率，OAS spread是 risk premium，过滤阈值是止损线”
+- 你过去做校准偏移/FX准度+量化risk建模，OAS校准是老本行：固定收益里 Z-spread 剥离现金流，RL里 reward spread 剥离 rollout噪音，面试可讲“用固定收益的OAS框架给RM定价，σ是隐含波动率，OAS spread是 risk premium，过滤阈值是止损线”
 - $/有用 rollout 闭环：从 Day10 rollout瓶颈 → Day11热成本 → Day12 reward不确定性过滤，省的是“热抖动+失败rollout进RM误训练”浪费，量化成 $/有用rollout降 8-12%
 - Paper1 5条bridge复用：抗抖动(hysteresis) → reward抖动控制 DAPO decoupled clip+dynamic sampling，nowcasting → reward σ EWMA预测，都是同一套“预测-平滑-止损”
 
