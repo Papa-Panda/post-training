@@ -8,6 +8,9 @@
 - **Structure**:
   - `rl-infra/` — Infra Systems 实战：DDP/FSDP/pjit/checkpoint/H100 beyond-7B/vLLM（原 `day-01`~`day-10` 已收敛进来）
   - `ICL/` — In-Context Learning 知识脉络与数学（含 trajectory-error prompting 的四种用法、code 版 Socratic-SWE）
+  - `grpo-vs-ppo/` — PPO vs GRPO 对比，含 GLM-5.2 回归 PPO 讨论
+  - `vllm-rollout/` — vLLM rollout 压测 & 失败 taxonomy
+  - `eval-compression/` — 评估压缩：Factory 方法 + Hermes probe harness + 三类压缩对比
   - `ai-data/` — Data-centric papers：coding data / SFT / RL data / curation
   - `ai_daily.csv` — source of truth，45 天 2026-08-02 → 2026-09-15
 - **Tracks**: Infra Systems (18d) / RL Training (11d) / Reasoning Data (8d) / Papers (5d) / Reflection (3d)
