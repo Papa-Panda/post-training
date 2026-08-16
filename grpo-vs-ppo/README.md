@@ -23,8 +23,11 @@ Post-training / agentic RL 的 rollout 贵、带工具调用、多步长：
 ├── 03_math_comparison.md    # 方差/偏差/内存/计算比分
 ├── 04_infra_tradeoffs.md    # vLLM rollout / token / multi-step
 ├── 05_code/                 # 最小复现 + verl/OpenRLHF 片段
+├── 06_glm52_ppo_comeback.md # 2026 Z.ai GLM-5.2 回归 PPO — task-dependent 分水岭
 └── papers.md                # 关键论文卡
 ```
+
+> 2026 新增：GLM-5.2（744B MoE 40B active 1M上下文）长程阶段放弃 GRPO、回归 token-level PPO + value net，因长 horizon 压缩后 sub-trajectory 长度/数量高度不均无法公平组队对比，直接旁证 RL 算法选型已 task-dependent 短验=GRPO便宜稳 长程=ciritic-PPO【1131884512538087896†L40-L45】并由 slime 框架支撑大规模 rollout【3245468999939399584†L118-L128】。详见 `06_glm52_ppo_comeback.md`。
 
 ## TL;DR 对比
 
