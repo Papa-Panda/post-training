@@ -17,7 +17,8 @@ rl-infra/
 ├── day-08-eval-infra/           Eval infra 瓶颈 — sync vs async / queue / nowcasting
 ├── day-10-vllm/                 vLLM rollout 基座
 ├── day-11-paper2-mech-load/     Paper2 机械负载非线性 SSM → GPU 热/功耗映射
-└── day-12-reward-model/         Reward Model 不确定性 + OAS 校准 (金融→RL)
+├── day-12-reward-model/         Reward Model 不确定性 + OAS 校准 (金融→RL)
+└── day-13-reliability-slo/      Cluster Reliability 3 SLOs — success/queue/power  (seed42 0.955/0.385s/0.146)
 ```
 
 ## 为什么要收敛
