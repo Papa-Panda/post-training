@@ -19,7 +19,7 @@ rl-infra/
 ├── day-11-paper2-mech-load/     Paper2 机械负载非线性 SSM → GPU 热/功耗映射
 ├── day-12-reward-model/         Reward Model 不确定性 + OAS 校准 (金融→RL)
 ├── day-13-reliability-slo/      Cluster Reliability 3 SLOs — success/queue/power  (seed42 0.955/0.385s/0.146)
-└── day-14-pue-cost/          Paper3 PUE → COST $/useful rollout (PUE 1.2576 $/1k useful 0.2438)      Cluster Reliability 3 SLOs — success/queue/power  (seed42 0.955/0.385s/0.146)
+└── day-14-pue-cost/            Paper3 PUE → COST $/useful rollout (PUE 1.2576 $/1k useful 0.2438)
 ```
 
 ## 为什么要收敛
@@ -37,4 +37,3 @@ rl-infra/
 python rl-infra/day-01-ddp-basics/ddp_day1_mnist.py
 python rl-infra/day-03-fsdp-perblock/fsdp_day3_profiler.py
 ```
-
