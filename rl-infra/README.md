@@ -19,7 +19,9 @@ rl-infra/
 ├── day-11-paper2-mech-load/     Paper2 机械负载非线性 SSM → GPU 热/功耗映射
 ├── day-12-reward-model/         Reward Model 不确定性 + OAS 校准 (金融→RL)
 ├── day-13-reliability-slo/      Cluster Reliability 3 SLOs — success/queue/power  (seed42 0.955/0.385s/0.146)
-└── day-14-pue-cost/            Paper3 PUE → COST $/useful rollout (PUE 1.2576 $/1k useful 0.2438)
+├── day-14-pue-cost/            Paper3 PUE → COST $/useful rollout (PUE 1.2576 $/1k useful 0.2438)
+├── day-15-megatron-3d/          Megatron 3D Parallelism DP/TP/PP 何时切 (70B 182→TP4+PP2 25GB)
+└── day-16-monetization-v1/      Cross Story v1 — $200M → RL稳定性 ROI叙事 (queue 68.8% thermal 1.67pp cost 22.1% save)
 ```
 
 ## 为什么要收敛
