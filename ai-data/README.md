@@ -1,6 +1,7 @@
 # ai-data — Data-centric AI Papers
 
-> 专门读 data 相关的 AI paper 的沉淀区。服务于从 ML for Infra → Post-training / Agentic RL Infra 转型，重点是 **coding data / SFT / RL data / data curation / quality / flywheel**。
+> 专门读 **data** 相关的 AI paper 的沉淀区。服务于从 ML for Infra → Post-training / Agentic RL Infra 转型，重点是 **coding data / SFT / RL data / data curation / quality / flywheel**。
+> **Scope：只谈数据，不谈算法。** 算法（GRPO/PPO/RLHF、optimizer、TTS解码策略）归 `rl-infra/`、`grpo-vs-ppo/` 轨道。这里只关心：数据怎么来、怎么洗、怎么选、怎么评、怎么量多样性/复杂度。
 > 命名已全量对齐 `rl-infra/day-01-xxx`，`ai-data/day-01-xxx` ~ `day-20-xxx`，便于 Day N 直连。
 
 ## 结构
@@ -92,30 +93,32 @@ graph TD
 
 > 核心结论：SFT memorizes, RL generalizes，但精心SFT 817也能泛化40%+，区别是阈值看预训练完备性
 
-### Day N 映射表
+### Day N 映射表 (纯 Data 视角)
 
-| Day | Folder | 一句话定位 | Tier |
-|-----|--------|------------|------|
+| Day | Folder | Data贡献 (非算法) | Tier |
+|-----|--------|-------------------|------|
 | 01 | day-01-example-starcoder2 | 入门：600规则扫curation | 示例 |
-| 02 | day-02-2017-influence-functions | 鼻祖：定义influence | S |
-| 03 | day-03-2020-tracin | 实用化：ckpt点积无Hessian | S |
-| 04 | day-04-2024-less | 选SFT：5%打赢全量 | S |
-| 05 | day-05-2024-datainf | 加速：LoRA闭式1秒一条 | A |
-| 06 | day-06-2023-phi-1 | 合成：教科书1.3B 50% HumanEval | S |
-| 07 | day-07-2024-llama3 | 瀑布：15.6T 5级过滤 | S |
-| 08 | day-08-2024-deepseek-v3 | MoE管线：14.8T 30%code | S |
-| 09 | day-09-2024-qwen2.5 | 飞轮：18T→1M SFT→多阶段RL | S |
-| 10 | day-10-2024-llama3.1-3.2 | 后训练：RS+DPO+蒸馏剪枝 | B |
-| 11 | day-11-2025-limr | RL少即：1389难例+16.7% | A |
-| 12 | day-12-2024-superfiltering | 弱到强：125M IFD选7B | B |
-| 13 | day-13-2025-dpo-reward-gap | 偏好：gap小10%留 | B |
-| 14 | day-14-2024-starcoder2 | Curation：600+语言1T | S |
-| 15 | day-15-2025-deepseek-r1 | 范式：<10k冷启动+纯RL涌现 | S |
-| 16 | day-16-2024-qwen2.5-coder | 执行：parser+exec三级洗5.5T | S |
-| 17 | day-17-2025-limo | SFT极点：817张AIME 6→63% | S |
-| 18 | day-18-2025-s1 | TTS：1k+budget forcing | S |
-| 19 | day-19-2023-vendi-score | 多样性：kernel熵公理 | B |
-| 20 | day-20-2023-deita | 三合一：复杂度×质量×多样6k | B |
+| 02 | day-02-2017-influence-functions | 数据归因：定义train→test影响 | S |
+| 03 | day-03-2020-tracin | 归因工程化：ckpt点积无Hessian，可算self-influence扫脏 | S |
+| 04 | day-04-2024-less | 选SFT：梯度相似挑5%目标任务数据 | S |
+| 05 | day-05-2024-datainf | 选LoRA：闭式1秒一条，扫脏 | A |
+| 06 | day-06-2023-phi-1 | 合成数据：教科书1B+精筛6B | S |
+| 07 | day-07-2024-llama3 | 预训练瀑布：15.6T 5级过滤+去重+配比 | S |
+| 08 | day-08-2024-deepseek-v3 | MoE数据配比：14.8T 30%code+FIM | S |
+| 09 | day-09-2024-qwen2.5 | 飞轮数据：18T→1M SFT→多阶段RL数据门禁 | S |
+| 10 | day-10-2024-llama3.1-3.2 | 后训练数据切分：多轮RS/DPO数据来源 | B |
+| 11 | day-11-2025-limr | RL数据：LIM轨迹选1389难例 | A |
+| 12 | day-12-2024-superfiltering | SFT数据：125M弱模型IFD选7B | B |
+| 13 | day-13-2025-dpo-reward-gap | 偏好数据：gap小难对留10% | B |
+| 14 | day-14-2024-starcoder2 | Code数据：600+语言1T清洗+PII | S |
+| 15 | day-15-2025-deepseek-r1 | RL数据：<10k冷启动合成+可验证奖励数据 | S |
+| 16 | day-16-2024-qwen2.5-coder | Code执行数据：parser+exec三级洗5.5T | S |
+| 17 | day-17-2025-limo | SFT数据极点：817条认知模板 | S |
+| 18 | day-18-2025-s1 | SFT+TTS数据：1k长链+难度/去重 | S |
+| 19 | day-19-2023-vendi-score | 数据多样性度量：kernel熵公理 | B |
+| 20 | day-20-2023-deita | 数据质量配方：复杂度×质量×多样6k | B |
+
+> 算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。
 
 ### 缺口 (下一步 Day21+ 建议)
 
