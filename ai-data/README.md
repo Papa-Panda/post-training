@@ -16,7 +16,7 @@ ai-data/
     └── assets/
 ```
 
-## 发展路线图 (20/30 - 主干已成型，剩8-10篇闭环)
+## 发展路线图 (21/30 - 主干已成型，剩7-9篇闭环)
 
 > 总计 **28-30篇** 即闭环，当前20篇已覆盖归因→选择→预训练瀑布→少即是多→R1范式，缺口在 **合成指令源头 / 预训练去重源头 / 偏好数据底座**。
 
@@ -65,7 +65,7 @@ graph TD
   end
 
   subgraph 合成指令源头 待补 S-tier
-    T[Day21 Self-Instruct 2022]
+    T[Day21 Self-Instruct 2022 ✅已完成]
     T --> U[Day22 Evol-Instruct/WizardLM 2023]
     U --> V[Day27 OSS-Instruct/Magicoder 23-24]
     V --> I
@@ -109,7 +109,7 @@ graph TD
   style W fill:#87CEEB
 ```
 
-### 主线 vs 支线 判定 (20已完成)
+### 主线 vs 支线 判定 (21已完成)
 
 | Tier | 判定 | Days | 说明 |
 |------|------|------|------|
@@ -124,7 +124,7 @@ graph TD
 
 | Day | 拟定 Folder | 标题 | 为什么是主干 (Data视角) | Tier |
 |-----|-------------|------|------------------------|------|
-| 21 | day-21-2022-self-instruct | Self-Instruct | 合成SFT起点，175种子→52k，bootstrap范式，后面所有合成都抄它 | S |
+| 21 | day-21-2022-self-instruct | Self-Instruct ✅已完成 2026-08-21 | 合成SFT起点，175种子→52k，bootstrap范式，后面所有合成都抄它 | S |
 | 22 | day-22-2023-evol-instruct | WizardLM / Evol-Instruct | 复杂度演化 In-depth/Breadth 70k，Magpie的爹，解决Self-Instruct太简单 | S |
 | 23 | day-23-2023-lima | LIMA: Less Is More for Alignment | 1k高质量打赢全量，LIMO/s1前身，证质量>数量 | S |
 | 24 | day-24-2023-semdedup-d4 | SemDeDup / D4 | embedding cos> threshold去重剪枝，Vendi的工程版，Llama3去重对照 | S |
@@ -137,13 +137,13 @@ graph TD
 
 > 跑完这10篇，**合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏** 全链条贯通。
 
-### 三条子脉络 (已完成20)
+### 三条子脉络 (已完成21)
 
 **1. 选择线 (Influence → Selection)：** Day02 → Day03 → Day04(LESS 5%) → Day05(DataInf) → Day12(IFD) → Day11(RL轨迹) → Day17(817) → Day18(1k) → Day20(DEITA)
 **2. 预训练/合成线 (Quality → Scale)：** Day21(Self-Instruct) → Day22(Evol) → Day27(OSS-Instruct) → Day06(Phi-1) → Day07(Llama3) → Day08(DeepSeek-V3) → Day09(Qwen2.5) → Day14(StarCoder2) → Day16(Qwen-Coder) → Day29(SWE-Gym)
 **3. SFT vs RL 范式线：** Day23(LIMA 1k) → Day04/12(SFT选) → Day11(RL要换LIM) → Day28(DeepScaleR) → Day15(R1冷启动+纯RL) → Day17/18(精心SFT也能OOD)
 
-### Day N 映射表 (20已完成，纯 Data 视角)
+### Day N 映射表 (21已完成，纯 Data 视角)
 
 | Day | Folder | Data贡献 (非算法) | Tier |
 |-----|--------|-------------------|------|
@@ -167,6 +167,7 @@ graph TD
 | 18 | day-18-2025-s1 | SFT+TTS数据：1k长链+难度/去重 | S |
 | 19 | day-19-2023-vendi-score | 数据多样性度量：kernel熵公理 | B |
 | 20 | day-20-2023-deita | 数据质量配方：复杂度×质量×多样6k | B |
+| 21 | day-21-2022-self-instruct | 合成指令源头：175 种子→52k bootstrap，无外部依赖自举 SFT，合成范式起点 | S |
 
 > 算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。
 
