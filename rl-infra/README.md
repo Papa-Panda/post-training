@@ -79,7 +79,8 @@ rl-infra/
 ├── day-13-reliability-slo/      [SLO] success0.955 queue p95 0.385s jitter0.146 tj90.5C throttle2.5%
 ├── day-14-pue-cost/            [side-track] PUE 1.2576 overhead25.76%→$/useful 0.000244，纯AI Infra不考核
 ├── day-15-megatron-3d/          [分布式] 7B 17GB→8.62GB TP2, 70B G8 TP4PP2 25GB bubble12%
-└── day-16-monetization-v1/      [连接] queue 68.8% thermal1.67pp cost22.1% Star
+├── day-16-monetization-v1/      [连接] queue 68.8% thermal1.67pp cost22.1% Star
+└── day-17-profile-tool/         [分布式] DDP AllReduce 0.0404s comm 46.5% CPU proxy → FSDP AllGather 60% vs ReduceScatter 40% per-block 32×1.99ms
 ```
 
 ## 为什么4层
