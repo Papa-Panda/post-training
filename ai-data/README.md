@@ -8,7 +8,7 @@
 
 ```
 ai-data/
-├── README.md                # 本路线图（20已完成/30总规划）
+├── README.md                # 本路线图（22已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ ai-data/
     └── assets/
 ```
 
-## 发展路线图 (21/30 - 主干已成型，剩7-9篇闭环)
+## 发展路线图 (22/30 - 主干已成型，剩8篇闭环)
 
-> 总计 **28-30篇** 即闭环，当前20篇已覆盖归因→选择→预训练瀑布→少即是多→R1范式，缺口在 **合成指令源头 / 预训练去重源头 / 偏好数据底座**。
+> 总计 **30篇** 即闭环，当前22篇已覆盖归因→选择→预训练瀑布→少即是多→Self-Instruct 合成起点→Evol-Instruct 复杂度演化，缺口在 **对齐极简 / 预训练去重源头 / 偏好数据底座 / code合成与可验证数据**。
 
 ### 图谱总览 (Mermaid - 完整版 30篇)
 
@@ -64,9 +64,9 @@ graph TD
     S --> F
   end
 
-  subgraph 合成指令源头 待补 S-tier
+  subgraph 合成指令源头 已点亮 S-tier
     T[Day21 Self-Instruct 2022 ✅已完成]
-    T --> U[Day22 Evol-Instruct/WizardLM 2023]
+    T --> U[Day22 Evol-Instruct/WizardLM 2023 ✅已完成]
     U --> V[Day27 OSS-Instruct/Magicoder 23-24]
     V --> I
   end
@@ -103,29 +103,29 @@ graph TD
   style O fill:#ff6b6b
   style G fill:#ff6b6b
   style H fill:#ff6b6b
-  style T fill:#87CEEB
-  style U fill:#87CEEB
+  style T fill:#ffd700
+  style U fill:#ffd700
   style Y fill:#87CEEB
   style W fill:#87CEEB
 ```
 
-### 主线 vs 支线 判定 (21已完成)
+### 主线 vs 支线 判定 (22已完成)
 
 | Tier | 判定 | Days | 说明 |
 |------|------|------|------|
-| **S-tier 必读** | 范式定义 | 02,03,04,06,07,08,09,14,15,16,17,18 | Influence→TracIn→LESS奠定选择；Phi-1/Llama3/DeepSeek/Qwen/StarCoder2/QwenCoder奠定洗数据；R1/LIMO/s1奠定现在少即是多 |
+| **S-tier 必读** | 范式定义 | 02,03,04,06,07,08,09,14,15,16,17,18,21,22 | Influence→TracIn→LESS奠定选择；Phi-1/Llama3/DeepSeek/Qwen/StarCoder2/QwenCoder奠定洗数据；R1/LIMO/s1奠定少即是多；Self-Instruct→Evol-Instruct奠定合成指令与复杂度演化 |
 | **A-tier 重要** | 你的coding冷启动直接可用 | 05,11 | DataInf LoRA扫脏快1000倍；LIMR RL少即是多1.3k |
 | **B-tier 技巧** | 单点改进，可替换 | 10,12,13,19,20 | 10 Llama3.1后训练工程化；12 SuperFiltering弱到强IFD；13 DPO-gap难对；19 Vendi多样性度量；20 DEITA三因子工程配方 |
 | **示例** | 入门 | 01 | Day01 example_starcoder2 仅作curation入门示例 |
 
-### 还剩多少最主要的 (Day21-30 闭环计划)
+### 还剩多少最主要的 (Day21-30 闭环计划，已完成2/10)
 
-> **8篇主干必读 + 2篇收口 = 10篇** 即全量闭环，总计30篇。
+> Day21-22 已完成；**还剩 6 篇主干必读 + 2 篇收口 = 8篇**，完成后总计30篇闭环。
 
 | Day | 拟定 Folder | 标题 | 为什么是主干 (Data视角) | Tier |
 |-----|-------------|------|------------------------|------|
 | 21 | day-21-2022-self-instruct | Self-Instruct ✅已完成 2026-08-21 | 合成SFT起点，175种子→52k，bootstrap范式，后面所有合成都抄它 | S |
-| 22 | day-22-2023-evol-instruct | WizardLM / Evol-Instruct | 复杂度演化 In-depth/Breadth 70k，Magpie的爹，解决Self-Instruct太简单 | S |
+| 22 | day-22-2023-evol-instruct | WizardLM / Evol-Instruct ✅已完成 2026-08-22 | 复杂度演化 In-depth/Breadth 约70k，解决 Self-Instruct 自举数据偏简单 | S |
 | 23 | day-23-2023-lima | LIMA: Less Is More for Alignment | 1k高质量打赢全量，LIMO/s1前身，证质量>数量 | S |
 | 24 | day-24-2023-semdedup-d4 | SemDeDup / D4 | embedding cos> threshold去重剪枝，Vendi的工程版，Llama3去重对照 | S |
 | 25 | day-25-2023-fineweb-refinedweb | FineWeb / RefinedWeb | 15T过滤管线：hueristics+MinHash+C4规则，预训练高质数据标杆 | S |
@@ -137,13 +137,13 @@ graph TD
 
 > 跑完这10篇，**合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏** 全链条贯通。
 
-### 三条子脉络 (已完成21)
+### 三条子脉络 (已完成22)
 
 **1. 选择线 (Influence → Selection)：** Day02 → Day03 → Day04(LESS 5%) → Day05(DataInf) → Day12(IFD) → Day11(RL轨迹) → Day17(817) → Day18(1k) → Day20(DEITA)
 **2. 预训练/合成线 (Quality → Scale)：** Day21(Self-Instruct) → Day22(Evol) → Day27(OSS-Instruct) → Day06(Phi-1) → Day07(Llama3) → Day08(DeepSeek-V3) → Day09(Qwen2.5) → Day14(StarCoder2) → Day16(Qwen-Coder) → Day29(SWE-Gym)
 **3. SFT vs RL 范式线：** Day23(LIMA 1k) → Day04/12(SFT选) → Day11(RL要换LIM) → Day28(DeepScaleR) → Day15(R1冷启动+纯RL) → Day17/18(精心SFT也能OOD)
 
-### Day N 映射表 (21已完成，纯 Data 视角)
+### Day N 映射表 (22已完成，纯 Data 视角)
 
 | Day | Folder | Data贡献 (非算法) | Tier |
 |-----|--------|-------------------|------|
@@ -168,10 +168,11 @@ graph TD
 | 19 | day-19-2023-vendi-score | 数据多样性度量：kernel熵公理 | B |
 | 20 | day-20-2023-deita | 数据质量配方：复杂度×质量×多样6k | B |
 | 21 | day-21-2022-self-instruct | 合成指令源头：175 种子→52k bootstrap，无外部依赖自举 SFT，合成范式起点 | S |
+| 22 | day-22-2023-evol-instruct | 指令复杂度演化：In-depth/Breadth 将简单任务递归改写为约70k复杂多样 SFT 数据 | S |
 
 > 算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。
 
-### 待补 Day21-30 如何接每日Job
+### Day21-30 如何接每日Job（Day21-22 已完成）
 
 - 命名继续 `day-{21..30}-{year}-{slug}` 两位数，顺序递增，对齐 rl-infra
 - 每日Job自动：建骨架 → 更新 reading-log → push commit `feat(ai-data): Day N` → 同步Sheet `ai data` tab → 更新本README映射表新增一行（若为S-tier，同步mermaid点亮从蓝色→金/红）
