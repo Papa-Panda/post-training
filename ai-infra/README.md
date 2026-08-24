@@ -3,6 +3,8 @@
 > 目标：45天粗略理解 **纯 AI Infra** 全链路，`计算/通信/显存` 不可能三角取舍，不含机房 PUE。
 > 草帽路飞《AI Infra学习路线》四层：地基→CUDA→分布式训练→推理部署，对齐已重写进 Sheet `ai_infra` (1JxGiu)。
 
+https://www.zhihu.com/collection/838612291
+
 ## 四层图（mermaid）
 
 ```mermaid
