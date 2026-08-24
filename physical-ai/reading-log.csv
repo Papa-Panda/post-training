@@ -1,2 +1,3 @@
 date,title,org,tags,one_line_takeaway,folder,link
 2026-08-23,Meta ARI / MSL / Robotics Studio - Physical AGI via Humanoid,Meta MSL / ARI (Xiaolong Wang / Lerrel Pinto),"physical-ai,humanoid,physical-agi,msl,robotics-studio,ari",Meta 收购 ARI 入 MSL 携手 Robotics Studio 定 humanoid 为 physical AGI 载体 提出 scaling via human experience 而非 teleop alone,day-01-2025-ari-msl-robotics-studio,https://www.pymnts.com/meta/2026/meta-acquires-ari-to-fuel-humanoid-robot-push/
+2026-08-23,MuJoCo — Multi-Joint dynamics with Contact,DeepMind / Roboti LLC,"physical-ai,mujoco,sim2real,contact-model,humanoid,control",DeepMind 主力物理引擎 rich-yet-efficient contact 单机 CPU 10k steps/s MJX TPU 百万步 并行 是 humanoid 控制与 RL 采样的轻量基座,day-02-2024-mujoco,https://mujoco.org/
