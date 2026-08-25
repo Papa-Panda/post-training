@@ -8,7 +8,7 @@
 
 ```
 ai-data/
-├── README.md                # 本路线图（24已完成/30总规划）
+├── README.md                # 本路线图（25已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ ai-data/
     └── assets/
 ```
 
-## 发展路线图 (24/30 - 主干已成型，剩6篇闭环)
+## 发展路线图 (25/30 - 主干已成型，剩5篇闭环)
 
-> 总计 **30篇** 即闭环，当前24篇已覆盖归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重与多样化剪枝，缺口在 **大规模预训练过滤 / 偏好数据底座 / code合成与可验证数据**。
+> 总计 **30篇** 即闭环，当前25篇已覆盖归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重、多样化剪枝与大规模网页过滤，缺口在 **偏好数据底座 / code合成与可验证数据**。
 
 ### 图谱总览 (Mermaid - 完整版 30篇)
 
@@ -71,8 +71,8 @@ graph TD
     V --> I
   end
 
-  subgraph 预训练去重源头 Day24已完成 S-tier
-    W[Day25 FineWeb/RefinedWeb 24]
+  subgraph 预训练去重与过滤源头 Day24-25已完成 S-tier
+    W[Day25 FineWeb/RefinedWeb 24 ✅已完成]
     X[Day24 D4/SemDeDup 23 ✅已完成]
     W --> X
     X --> P
@@ -108,21 +108,21 @@ graph TD
   style AC fill:#ffd700
   style X fill:#ffd700
   style Y fill:#87CEEB
-  style W fill:#87CEEB
+  style W fill:#ffd700
 ```
 
-### 主线 vs 支线 判定 (24已完成)
+### 主线 vs 支线 判定 (25已完成)
 
 | Tier | 判定 | Days | 说明 |
 |------|------|------|------|
-| **S-tier 必读** | 范式定义 | 02,03,04,06,07,08,09,14,15,16,17,18,21,22,23,24 | Influence→TracIn→LESS奠定选择；Phi-1/Llama3/DeepSeek/Qwen/StarCoder2/QwenCoder奠定洗数据；R1/LIMO/s1奠定少即是多；Self-Instruct→Evol-Instruct奠定合成指令与复杂度演化；LIMA奠定对齐极简；D4奠定语义去重与多样化剪枝 |
+| **S-tier 必读** | 范式定义 | 02,03,04,06,07,08,09,14,15,16,17,18,21,22,23,24,25 | Influence→TracIn→LESS奠定选择；Phi-1/Llama3/DeepSeek/Qwen/StarCoder2/QwenCoder奠定洗数据；R1/LIMO/s1奠定少即是多；Self-Instruct→Evol-Instruct奠定合成指令与复杂度演化；LIMA奠定对齐极简；D4奠定语义去重与多样化剪枝；FineWeb/RefinedWeb奠定可复现大规模网页过滤与消融 |
 | **A-tier 重要** | 你的coding冷启动直接可用 | 05,11 | DataInf LoRA扫脏快1000倍；LIMR RL少即是多1.3k |
 | **B-tier 技巧** | 单点改进，可替换 | 10,12,13,19,20 | 10 Llama3.1后训练工程化；12 SuperFiltering弱到强IFD；13 DPO-gap难对；19 Vendi多样性度量；20 DEITA三因子工程配方 |
 | **示例** | 入门 | 01 | Day01 example_starcoder2 仅作curation入门示例 |
 
-### 还剩多少最主要的 (Day21-30 闭环计划，已完成4/10)
+### 还剩多少最主要的 (Day21-30 闭环计划，已完成5/10)
 
-> Day21-24 已完成；**还剩 4 篇主干必读 + 2 篇收口 = 6篇**，完成后总计30篇闭环。
+> Day21-25 已完成；**还剩 3 篇主干必读 + 2 篇收口 = 5篇**，完成后总计30篇闭环。
 
 | Day | 拟定 Folder | 标题 | 为什么是主干 (Data视角) | Tier |
 |-----|-------------|------|------------------------|------|
@@ -130,7 +130,7 @@ graph TD
 | 22 | day-22-2023-evol-instruct | WizardLM / Evol-Instruct ✅已完成 2026-08-22 | 复杂度演化 In-depth/Breadth 约70k，解决 Self-Instruct 自举数据偏简单 | S |
 | 23 | day-23-2023-lima | LIMA: Less Is More for Alignment ✅已完成 2026-08-23 | 1k高质量打赢全量，LIMO/s1前身，证质量>数量 | S |
 | 24 | day-24-2023-semdedup-d4 | D4 / SemDeDup ✅已完成 2026-08-24 | 语义近重复去除+原型式多样化剪枝，Vendi的工程版，Llama3去重对照 | S |
-| 25 | day-25-2023-fineweb-refinedweb | FineWeb / RefinedWeb | 15T过滤管线：hueristics+MinHash+C4规则，预训练高质数据标杆 | S |
+| 25 | day-25-2023-fineweb-refinedweb | FineWeb / RefinedWeb ✅已完成 2026-08-25 | 15T过滤管线：heuristics+MinHash+C4规则，预训练高质数据标杆 | S |
 | 26 | day-26-2023-ultrafeedback | UltraFeedback | 64k AI偏好对，RLHF/DPO数据底座，给DPO-gap提供数据源 | S |
 | 27 | day-27-2023-oss-instruct | OSS-Instruct / Magicoder | Code版Self-Instruct，开源种子+自演绎，75k code指令，补Phi-1 code侧 | S |
 | 28 | day-28-2025-deepscaler-openreasoner | DeepScaleR / OpenReasoner-Zero Data | 40k可验证难题RL数据，LIMR→R1中间态，难度分层采样 | S |
@@ -139,13 +139,13 @@ graph TD
 
 > 跑完这10篇，**合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏** 全链条贯通。
 
-### 三条子脉络 (已完成24)
+### 三条子脉络 (已完成25)
 
 **1. 选择线 (Influence → Selection)：** Day02 → Day03 → Day04(LESS 5%) → Day05(DataInf) → Day12(IFD) → Day11(RL轨迹) → Day17(817) → Day18(1k) → Day20(DEITA)
-**2. 预训练/合成线 (Quality → Scale)：** Day21(Self-Instruct) → Day22(Evol) → Day27(OSS-Instruct) → Day06(Phi-1) → Day24(D4/SemDeDup) → Day07(Llama3) → Day08(DeepSeek-V3) → Day09(Qwen2.5) → Day14(StarCoder2) → Day16(Qwen-Coder) → Day29(SWE-Gym)
+**2. 预训练/合成线 (Quality → Scale)：** Day21(Self-Instruct) → Day22(Evol) → Day27(OSS-Instruct) → Day06(Phi-1) → Day24(D4/SemDeDup) → Day25(FineWeb/RefinedWeb) → Day07(Llama3) → Day08(DeepSeek-V3) → Day09(Qwen2.5) → Day14(StarCoder2) → Day16(Qwen-Coder) → Day29(SWE-Gym)
 **3. SFT vs RL 范式线：** Day23(LIMA 1k) → Day04/12(SFT选) → Day11(RL要换LIM) → Day28(DeepScaleR) → Day15(R1冷启动+纯RL) → Day17/18(精心SFT也能OOD)
 
-### Day N 映射表 (24已完成，纯 Data 视角)
+### Day N 映射表 (25已完成，纯 Data 视角)
 
 | Day | Folder | Data贡献 (非算法) | Tier |
 |-----|--------|-------------------|------|
@@ -173,10 +173,11 @@ graph TD
 | 22 | day-22-2023-evol-instruct | 指令复杂度演化：In-depth/Breadth 将简单任务递归改写为约70k复杂多样 SFT 数据 | S |
 | 23 | day-23-2023-lima | 对齐极简：1k 条经来源、风格与多样性策展的高质 SFT，验证质量与覆盖优先于规模 | S |
 | 24 | day-24-2023-semdedup-d4 | 预训练去重：语义近重复删除+原型式多样化剪枝，压缩冗余同时保留长尾覆盖 | S |
+| 25 | day-25-2023-fineweb-refinedweb | 网页过滤工厂：15T-token逐级过滤、去重与训练消融，把规则清单升级为可复现可审计数据配方 | S |
 
 > 算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。
 
-### Day21-30 如何接每日Job（Day21-24 已完成）
+### Day21-30 如何接每日Job（Day21-25 已完成）
 
 - 命名继续 `day-{21..30}-{year}-{slug}` 两位数，顺序递增，对齐 rl-infra
 - 每日Job自动：建骨架 → 更新 reading-log → push commit `feat(ai-data): Day N` → 同步Sheet `ai data` tab → 更新本README映射表新增一行（若为S-tier，同步mermaid点亮从蓝色→金/红）
