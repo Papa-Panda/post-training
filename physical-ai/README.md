@@ -18,7 +18,7 @@ physical-ai/
 
 ## 发展路线图 (3/30 - 已起步)
 
-> 总计 **30篇** 即闭环，当前 Day01 ARI/MSL + Day02 MuJoCo + Day03 Isaac Lab 已完成。
+> 总计 **30篇** 即闭环，当前 Day01 ARI/MSL + Day02 MuJoCo + Day03 Isaac Lab + Day04 Genie 已完成。
 
 ### 图谱总览
 
@@ -44,6 +44,7 @@ graph TD
 | 01 | day-01-2025-ari-msl-robotics-studio | Meta ARI / MSL / Robotics Studio ✅ 2026-08-23 | S |
 | 02 | day-02-2024-mujoco | MuJoCo Contact Model ✅ 2026-08-23 | S |
 | 03 | day-03-2025-isaac-lab | Isaac Lab / Isaac Sim — USD + PhysX + Sim2Real ✅ 2026-08-24 | S |
+| 04 | day-04-2024-genie-world-model | Genie 11B foundation world model 无标签视频→可交互虚拟世界 latent action 3D 720p 1min记忆 | S |
 | 04 | day-04-2024-genie-world-model | Genie / Genie2 | S |
 | 05 | day-05-2024-unisim | UniSim | S |
 | 06 | day-06-2023-dreamerv3 | DreamerV3 | S |
@@ -59,6 +60,7 @@ graph TD
 | 01 | day-01-2025-ari-msl-robotics-studio | Physical AGI 定义，MSL 生态，humanoid scaling 哲学，learning from human experience vs teleop | S |
 | 02 | day-02-2024-mujoco | MuJoCo fast accurate contact, MJCF, MJX million steps/s, lightweight baseline for humanoid control | S |
 | 03 | day-03-2025-isaac-lab | OpenUSD scene layer + PhysX Direct-GPU + RTX tiled rendering + manager-based MDP + domain randomization, scalable sim2real platform | S |
+| 04 | day-04-2024-genie-world-model | Genie 11B foundation world model 无标签视频→可交互虚拟世界 latent action 3D 720p 1min记忆 | S |
 
 ---
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai
