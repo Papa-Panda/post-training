@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（5已完成/30总规划）
+├── README.md                # 本路线图（6已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (5/30 - 已起步)
+## 发展路线图 (6/30 - 已起步)
 
-> 总计 **30篇** 即闭环，当前 Day01 ARI/MSL + Day02 MuJoCo + Day03 Isaac Lab + Day04 Genie + Day05 UniSim 已完成。
+> 总计 **30篇** 即闭环，当前 Day01 ARI/MSL + Day02 MuJoCo + Day03 Isaac Lab + Day04 Genie + Day05 UniSim + Day06 DreamerV3 已完成。
 
 ### 图谱总览
 
@@ -46,13 +46,13 @@ graph TD
 | 03 | day-03-2025-isaac-lab | Isaac Lab / Isaac Sim — USD + PhysX + Sim2Real ✅ 2026-08-24 | S |
 | 04 | day-04-2024-genie-world-model | Genie / Genie 2 / Genie 3 — latent action 可交互生成式世界 | S |
 | 05 | day-05-2023-unisim | UniSim — action-conditioned video diffusion + learned simulator RL | S |
-| 06 | day-06-2023-dreamerv3 | DreamerV3 | S |
+| 06 | day-06-2023-dreamerv3 | DreamerV3 — latent RSSM + imagined actor-critic ✅ 2026-08-27 | S |
 | 07 | day-07-2024-humanoid-whole-body | Whole-body Control | S |
 | 08 | day-08-2024-locomotion | Locomotion | A |
 | 09 | day-09-2024-rt2-openvla | RT-2 / OpenVLA | S |
 | 10 | day-10-2024-habitat | Habitat 3.0 / Habitat Lab | A |
 
-### Day N 映射表 (5已完成)
+### Day N 映射表 (6已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -61,6 +61,7 @@ graph TD
 | 03 | day-03-2025-isaac-lab | OpenUSD scene layer + PhysX Direct-GPU + RTX tiled rendering + manager-based MDP + domain randomization, scalable sim2real platform | S |
 | 04 | day-04-2024-genie-world-model | Genie foundation world model：无标签视频 → latent action → 可交互生成式世界 | S |
 | 05 | day-05-2023-unisim | 多源数据统一为 action-in-video-out；video diffusion simulator + learned reward 支持 VLM / RL 与 zero-shot real-robot transfer | S |
+| 06 | day-06-2023-dreamerv3 | 离散 latent RSSM + imagined actor-critic；free bits / symlog / two-hot / percentile normalization 支撑固定超参跨 150+ tasks | S |
 
 ---
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai
