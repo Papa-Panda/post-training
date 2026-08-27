@@ -26,3 +26,13 @@
 - D²特性：trajectory一长就爆，长rollout RL瓶颈
 
 总前向 = 线性主导 + 注意力二次项，backward≈2×forward。
+
+---
+## Paper 来源（2026-08-27 补）
+
+- Attention Is All You Need (Vaswani et al., NeurIPS 2017): https://arxiv.org/abs/1706.03762 - 提出 QKᵀ/√d_k → softmax → PV，Multi-Head，Positional Encoding，Encoder-Decoder
+- The Illustrated Transformer (Jay Alammar): https://jalammar.github.io/illustrated-transformer/ - 图解 Decoder Block 维度流 (B,S,D) 前向
+- RoPE (Su et al., 2021): https://arxiv.org/abs/2104.09864 - 相对位置旋转编码，支持外推
+- Pre-Norm vs Post-Norm (Xiong et al., 2020): https://arxiv.org/abs/2002.04745 - 为何大模型用Pre-Norm更稳
+- Chinchilla Scaling (Hoffmann et al., 2022): https://arxiv.org/abs/2203.15556 - forward 2ND，6ND total，MFU定义来源
+- LLaMA Architecture (Touvron et al., 2023): https://arxiv.org/abs/2302.13971 - SwiGLU FFN 11008，RMSNorm，RoPE实例
