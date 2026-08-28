@@ -8,6 +8,10 @@ try:
     HAS_JAX=True
 except ImportError:
     HAS_JAX=False
+    # mock P for proxy prints
+    class P:
+        def __init__(self, *args): self.args=args
+        def __repr__(self): return f"P{self.args}"
 
 def run():
     if not HAS_JAX:
@@ -18,6 +22,9 @@ def run():
         print("[Step2] PartitionSpec: P('data',None) 切batch轴，hidden不切")
         print("  代码: in_shardings=(P('data',None), P(None,'model'))")
         print("  -> A 1024x1024 按行切 data，B 1024x1024 按列切 model")
+        print("  代码: a_pspec = P('data', None)  # A 行切2份 512行")
+        print("  代码: b_pspec = P(None, 'model') # B 列切4份 256列")
+        print("  代码: c_pspec = P('data', 'model') # C 行切2列切4 每卡512x256")
         print("[Step3] pjit声明: pjit(lambda x,y: x@y, in_shardings=..., out_shardings=P('data','model'))")
         print("  代码: @pjit def matmul(a,b): return a@b  # 无显式通信")
         print("  -> 对比DDP: dist.init_process_group + all_reduce 10行，这里0行通信，改PSpec即切")
@@ -40,16 +47,26 @@ def run():
     mesh_shape = (len(devices),) if len(devices)<2 else (2, max(1,len(devices)//2))
     mesh = Mesh(mesh_utils.create_device_mesh(mesh_shape), ('data',) if len(mesh_shape)==1 else ('data','model'))
     print(f"[Step1] Mesh {mesh} shape {mesh_shape}")
+    print(f"  代码: mesh = Mesh(mesh_utils.create_device_mesh({mesh_shape}), {mesh.axis_names})")
 
-    # Step2 PSpec
-    print("[Step2] PSpec P('data',None) 切batch，P(None,'model') 切hidden")
+    # Step2 PSpec 真代码
+    a_pspec = P('data', None)
+    b_pspec = P(None, 'model') if len(mesh_shape)>1 else P(None, None)
+    c_pspec = P('data', 'model') if len(mesh_shape)>1 else P('data', None)
+    print(f"[Step2] a_pspec={a_pspec} 行切data 512行")
+    print(f"  代码: a_pspec = P('data', None)")
+    print(f"[Step2] b_pspec={b_pspec} 列切model 256列")
+    print(f"  代码: b_pspec = P(None, 'model')")
+    print(f"[Step2] c_pspec={c_pspec} 行切列切 每卡512x256")
+    print(f"  代码: c_pspec = P('data', 'model')")
 
     # Step3 pjit声明
     @pjit
     def matmul(a,b):
         # Step4 逻辑计算 C=A@B
         return a@b
-    print("[Step3] pjit matmul声明 ok，0行显式通信")
+    print(f"[Step3] pjit matmul声明 ok，in_shardings=({a_pspec},{b_pspec}) out={c_pspec} 0行显式通信")
+    print(f"  代码: matmul = pjit(lambda a,b: a@b, in_shardings=({a_pspec},{b_pspec}), out_shardings={c_pspec})")
 
     # Step4-5 逻辑计算 + 编译插通信
     a=jnp.ones((1024,1024))
@@ -57,11 +74,14 @@ def run():
     # Step6 执行
     c=matmul(a,b)
     print(f"[Step4-6] matmul done {c.shape} 声明式 ok")
+    print(f"  代码: c = matmul(a,b)  # 1024x1024")
     # Step6 Sharding可视化 (单卡无切分，8卡才有)
     try:
         jax.debug.visualize_sharding(c)
+        print("  代码: jax.debug.visualize_sharding(c)")
     except:
         print("[Step6] visualize_sharding 单卡无切分，待H100 8卡 2x4")
+        print("  代码: jax.debug.visualize_sharding(c) # 8卡棋盘")
 
 if __name__=="__main__":
     run()
