@@ -2,43 +2,62 @@
 
 ## 元信息
 - Title: Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model
-- Authors / Org: Open-Reasoner-Zero Team
+- Authors: Jingcheng Hu, Yinmin Zhang, Qi Han, Daxin Jiang, Xiangyu Zhang, Heung-Yeung Shum
 - Link / arXiv: https://arxiv.org/abs/2503.24290
+- Related: ProRL — https://arxiv.org/abs/2505.24864
 - Date read: 2026-08-28
-- Tags: [rl-data, reasoning-data, verifiable-data, difficulty, curation, quality]
+- Tags: [rl-data, reasoning-data, verifiable-data, pass-rate, hard-example-mining, prolonged-rl]
 
 ## 一句话总结
-从约 40k 可验证数学题构造可持续采样的数据池，并用可验证答案、难度分层和质量门禁支撑推理数据飞轮，把“少量高价值题”从 Day 11 LIMR 的静态选择推进到可验证 RL 数据闭环。
+Open-Reasoner-Zero 用可验证题目、基于模型通过率的两端过滤，以及 v1 中“129k 全量 RL → 13k 困难尾部继续 RL”的 hard-example mining 支撑约 1,200 步长程强化学习；它是后来 ProRL 系统化“prolonged RL”路线的重要先行证据。
+
+## 版本说明：v1 与 v2
+- **v1（2025-03）**：初始数据约 129k；32B 模型先在全量数据上训练 1,100 步，再把 64 次作答中答对少于 4 次的题定义为困难题，得到约 13k，继续训练 100 步。
+- **v2（2025-07，当前 arXiv 版本）**：报告的主要训练集为 ORZ 57k；保留“用 LLM 估计通过率并删除极端通过率样本”的描述，但不再完整保留 v1 的 129k → 13k 两阶段细节。
+- 因此不能笼统写成“固定 easy / medium / hard 分桶 + 持续动态采样”。更准确的是：**模型通过率过滤；v1 另有一次训练后困难样本挖掘。**
 
 ## 和之前工作的关系
-- **知识图谱位置**：偏好 / RL 数据线：Day 26 UltraFeedback（造偏好池）→ Day 13 DPO-Gap（选难偏好对）→ Day 11 LIMR（选高价值 RL 题）→ **Day 28 Open-Reasoner-Zero / DeepScaleR（可验证题池与难度分层）** → Day 15 DeepSeek-R1（冷启动 + 可验证推理数据）。
-- **接了哪条线**：承接 Day 11 LIMR 的“RL 数据也要少而精”，也接 Day 16 Qwen2.5-Coder 的 execution-filter 思路：数学最终答案校验与代码执行一样，都是把训练样本变成可自动验证的数据。
-- **补了哪个短板**：LIMR 更像一次性挑题，Day 15 R1 又没有展开开放数据配方；本篇补上题源清洗、答案可验证性、难度分层与持续采样这几个可复现的数据层环节。
-- **替代 / 分叉 / 改进**：不是替代 UltraFeedback 的主观 AI feedback，而是分叉出 objective-verifiable data；相对 Day 13 的偏好对筛选，这里直接围绕“题—最终答案—验证器”组织样本，反馈噪声更低。
-- **直接对比 Day 11**：Day 11 问“哪些题最值得留下”，Day 28 进一步问“留下后如何按当前能力持续采样，并用验证结果回流更新题池”。
+- **知识图谱位置**：Day 26 UltraFeedback（偏好池）→ Day 13 DPO-Gap（困难偏好对）→ Day 11 LIMR（高价值 RL 题）→ **Day 28 ORZ（可验证题池 + pass-rate filtering + hard mining）** → Day 15 DeepSeek-R1（大规模可验证推理 RL）。
+- **连接 ProRL**：ORZ 已经显示，大规模、多样、可验证数据能让 RL 从通常的几百步延长到约 1,200 步，并持续提升 reward、回答长度与 benchmark 表现。随后 ProRL 把这条路线明确命名并系统化到 2,000+ 步，加入动态采样、KL 控制与 reference-policy reset。可以把关系概括为：**ORZ 提供先行证据，ProRL 提供完整的 prolonged-RL recipe。**
+- **连接 LIMR**：LIMR 按学习轨迹与整体曲线的对齐度筛高价值题；ORZ 更直接地用可验证 rollout 的经验通过率刻画“对当前模型有多难”。
+- **连接 coding data**：数学答案 verifier 对应 compiler / unit tests / sandbox；`pass rate` 可直接映射为测试通过率，构造当前模型相对难度。
+- **区别 UltraFeedback**：UltraFeedback 依赖 AI 对开放回答做多维主观评价；ORZ 围绕“题目—最终答案—确定性 verifier”构造低噪声结果奖励数据。
 
-## 为什么今天读它
-- **coding data**：把数学答案验证器映射到 unit test / compiler / sandbox；可直接复用“可验证 + 难度分层 + 失败回流”的数据骨架。
-- **SFT data**：区分带完整解答的冷启动样本与仅有可验证答案的题目池，避免把所有推理题都做成昂贵的长 CoT 标注。
-- **RL data**：重点不在优化算法，而在题源、去重、答案标准化、可验证覆盖率、难度桶与动态采样；这些决定 RL 是否有稳定、低噪声的数据供给。
+## 数据与难度处理
+1. **题源**：AIME（截至 2023）、MATH、Numina-Math、Tulu3 MATH、OpenR1-Math-220k、AoPS，以及程序化合成的逻辑、多步推理和反事实题。
+2. **可验证门禁**：删除难以用规则可靠评分的题，例如证明题；v1 还明确排除了选择题。
+3. **初始难度过滤**：用 LLM 多次解题，以经验通过率
+   \[
+   p_i=\frac{\text{correct rollouts}}{\text{total rollouts}}
+   \]
+   作为模型相对难度；删除通过率过高的题和通过率为 0 的题，避免太简单无学习信号，以及不可解、答案错误或完全超出能力边界的样本。
+4. **v1 困难尾部挖掘**：全量训练 1,100 步后，每题采样 64 次；若答对少于 4 次，即 \(p_i<4/64=6.25\%\)，进入约 13k 的 hard set。
+5. **应用方式**：从第 1,100 步的同一模型检查点继续，用 hard set 再做 100 步 PPO。两阶段都是 RL，不是 SFT → RL。
 
-## 今天的 3 问
-1. 约 40k 题从哪些来源进入数据池？去重、污染检查、答案标准化与可验证性门禁各自淘汰了多少样本？
-2. 难度分层应依据静态来源标签，还是依据当前模型 pass rate 动态更新；怎样避免只采“刚好会一点”的题导致覆盖坍缩？
-3. 对比 Day 11 LIMR：静态高价值选题与 Day 28 的可验证难度采样，在 coding task 上分别该映射成哪些信号（梯度 / 轨迹价值 vs unit-test pass rate / execution failure）？
+## 为什么它对长程 RL 重要
+- 短 RL 容易在简单题上迅速饱和；扩大题目数量和能力覆盖，可推迟 plateau。
+- 只用最难题也不行：全 0 奖励没有正轨迹，且可能混入坏题或错误答案。
+- ORZ 的思路是先保留“可验证且可学习”的主体，再在模型变强后挖出它当时仍薄弱的困难尾部。
+- 这解释了它为什么像 ProRL：两者都把**足够大、足够多样、始终能产生有效奖励的数据供给**视为延长 RL 的前提；只是 ProRL 后来增加了更完整的长期稳定机制。
 
-## 核心
-1. **Motivation**: 为什么通用数学语料不能直接成为低噪声、可持续的推理训练数据？
-2. **Data Pipeline**: 题源 → 去重 / 防污染 → 答案标准化 → verifier 检查 → 难度分桶 → 采样 → 失败结果回流。
-3. **Key Tricks**: 记录题源与 license；统一答案格式；用当前模型通过率重估难度并保留跨桶覆盖。
-4. **Results**: 重点核对数据规模、有效验证率、难度分布，以及不同数据配方对 downstream 的增益。
+## 关键实验结果
+- v2 中 ORZ 57k 相比 MATH train 7.5k，训练 reward 与回答长度继续增长，而小数据较早 plateau。
+- ORZ 在 Qwen2.5-{0.5B, 1.5B, 7B, 32B} 上均显示可扩展趋势。
+- 相同 Qwen2.5-32B base 下，ORZ 在 AIME2024、MATH500 和 GPQA Diamond 上取得强结果，并报告只需 DeepSeek-R1-Zero pipeline 约十分之一的训练步数。
 
-## 可迁移
-- 对你现在 coding data 工作的 1-2 个直接可试的点：把 unit-test pass rate 作为动态难度标签；按错误类型（compile / runtime / wrong answer / timeout）回流成数据质量与课程采样信号。
-- Infra 视角：可扩展性 / 成本 / 评测自动化的启发：把 verifier 结果一次落盘，同时服务过滤、难度估计、训练抽样和 eval，避免重复执行；按题目哈希与测试版本做 lineage。
+## 可迁移到 coding data
+- 用 `passed_tests / total_tests` 代替数学题通过率，得到模型相对难度。
+- 先删除始终全过的题，以及所有 rollout 都编译失败或被测试基础设施误杀的题；后者需先区分“真难”与“坏测试”。
+- 全量 RL 后再重跑 rollout，挖出低但非纯噪声的通过率尾部做第二阶段训练。
+- 将 compile error、runtime error、wrong answer、timeout 分开记录；同样的 0 分不应被视为同一种数据问题。
 
-## 疑问 / 下一步
-- 数据池的难度分布会随模型变强而漂移，怎样定义稳定的重采样与退役规则，同时保留长尾能力覆盖？
+## 局限
+- v1 的 `<4/64` 是一次 hard mining 阈值，不等于完整的持续动态课程。
+- 难度是相对于生成这些 rollout 的模型与采样配置，不是题目的永久属性。
+- verifier 只能保证最终答案或测试结果可检查，不能保证中间推理真实、简洁或无投机。
+- v1 与 v2 数据规模和训练叙述不同，引用数字时必须注明版本。
 
-## 原文金句 (1-2句)
-> 待读完原文后补充；只摘与数据构造、可验证性或难度采样相关的句子。
+## 原文关键句
+> We also employ LLM-based filtering to evaluate problem difficulty, removing samples with extreme pass rates to maintain a balanced dataset.
+
+> We initially train the 32B model for 1100 steps with data sampled from the complete 129k-sample dataset. Subsequently, we pinpoint particularly difficult prompts, defined as those where the model achieves fewer than 4 correct answers out of a total of 64 attempts, resulting in approximately 13k challenging prompts.
