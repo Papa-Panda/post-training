@@ -37,7 +37,7 @@ Prismatic Synthesis 定义样本表征：
 $$
 g_\theta(x,y)=
 \frac{-\nabla_\theta\log p_\theta(y\mid x)}
-{\| -\nabla_\theta\log p_\theta(y\mid x)\|_2},
+{\lVert -\nabla_\theta\log p_\theta(y\mid x)\rVert_2},
 $$
 
 再用 Rademacher 随机矩阵 $\Pi\in\{-1,+1\}^{|\theta|\times d}$ 降维：
@@ -49,7 +49,7 @@ $$
 对 $G=[\tilde g_1;\ldots;\tilde g_n]$，以 $GG^\top/n$（或当 $n\gg d$ 时等价地使用 $G^\top G/n$ 的非零谱）计算 Vendi：
 
 $$
-\mathrm{G\!{-}\!Vendi}(D)=
+\text{G-Vendi}(D)=
 \exp\left(-\sum_j\lambda_j\log\lambda_j\right).
 $$
 
