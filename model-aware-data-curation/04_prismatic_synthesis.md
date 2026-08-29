@@ -4,11 +4,11 @@
 
 静态选择只能从已有池中重排预算；当池子在某些学习方向上根本没有样本，selector 无法补洞。Prismatic Synthesis（2025）将数据覆盖变成生成控制信号：
 
-\[
+$$
 D_t \xrightarrow{\text{gradient map}} \text{sparse regions}
 \xrightarrow{\text{generate}} C_t
 \xrightarrow{\text{accept sparse}} D_{t+1}.
-\]
+$$
 
 这把三条已有路线接起来：目标价值（LESS-like）+ 集合多样性（Vendi-like）+ synthetic generation。
 
@@ -66,13 +66,13 @@ coding data 还应加入：parse / compile、unit tests、sandbox execution、ti
 
 原始 Prismatic 更接近无显式目标分布下的 coverage maximization。对 coding flywheel，可以把接收条件改成：
 
-\[
+$$
 \mathrm{accept}(z)=
 \mathbf 1[q(z)=1]
 \mathbf 1[c(z)\ge\tau_c]
 \mathbf 1[v(z)\ge\tau_v]
 \mathbf 1[r(z)\le\tau_r].
-\]
+$$
 
 - $q$：正确性/执行/污染；
 - $c$：稀疏簇或 G-Vendi marginal gain；

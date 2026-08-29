@@ -10,9 +10,9 @@
 
 训练样本 $z$ 对目标样本 $v$ 的价值，可看成“训练一步后目标 loss 降多少”。一阶展开：
 
-\[
+$$
 L_v(\theta-\eta g_z)\approx L_v(\theta)-\eta g_v^\top g_z.
-\]
+$$
 
 不同方法主要在回答：应该使用哪个梯度、哪个曲率、哪个 checkpoint、如何降维。
 
@@ -31,10 +31,10 @@ TRAK（Tracing with the Randomly-projected After Kernel）将每条样本的梯�
 
 若 $\Phi$ 按行堆叠训练样本特征、$Q=\mathrm{diag}(1-p_i^*)$，一组训练样本对目标 $v$ 的 attribution 向量可抽象写成：
 
-\[
+$$
 \tau(v,D)=\phi(v)^\top
 (\Phi^\top\Phi+\lambda I)^{-1}\Phi^\top Q.
-\]
+$$
 
 并对少量独立训练模型/子集取平均以降低 seed 方差。实际 estimator 还包含论文定义的 soft-thresholding 等细节，应遵循原论文/官方代码，而非把上式当作完整复现。
 
@@ -44,11 +44,11 @@ TRAK（Tracing with the Randomly-projected After Kernel）将每条样本的梯�
 
 归因问“谁造成了预测”；目标化选择把同一几何反向用于候选排序：
 
-\[
+$$
 s_i=\frac{\langle P g_i,\ P\bar g_V\rangle}
 {\|Pg_i\|\,\|P\bar g_V\|},
 \qquad P\in\mathbb R^{d\times |\theta|}.
-\]
+$$
 
 - $P$ 可由 LoRA 梯度、随机投影或选定层组成；
 - LESS 强调 Adam-aware 表征和可复用 datastore；
@@ -59,11 +59,11 @@ s_i=\frac{\langle P g_i,\ P\bar g_V\rangle}
 
 对第 $t$ 轮候选问题 $p_i$，由 rollout/reward 得到 policy gradient $g^{RL}_{i,t}$；trusted validation set 给出：
 
-\[
+$$
 \bar g^{RL}_{V,t}=\frac1{|V|}\sum_{v\in V}g^{RL}_{v,t},
 \qquad
 a_{i,t}=\cos(g^{RL}_{i,t},\bar g^{RL}_{V,t}).
-\]
+$$
 
 选择 $a_{i,t}$ 高的题训练，并周期性以新 policy 重算。这和 LESS 最大的系统差异不是余弦公式，而是：
 

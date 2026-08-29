@@ -61,10 +61,10 @@ LLM 全参数逐样本梯度不可直接落盘。由便宜到贵：
 
 用 microbatch + vectorized per-sample gradient，立即随机投影并丢弃原始高维向量：
 
-\[
+$$
 \tilde g_i=\frac{1}{\sqrt d}R^\top g_i,
 \qquad R_{jk}\in\{-1,+1\}.
-\]
+$$
 
 ### Storage
 
@@ -74,10 +74,10 @@ $n$ 条、$d=1024$、FP16 的向量约占 $2nd$ bytes：100 万条约 2.05 GB（
 
 定义 proxy drift：
 
-\[
+$$
 \Delta_t=1-\mathrm{Spearman}
 \big(s_{\theta_{t-1}}(Q),s_{\theta_t}(Q)\big)
-\]
+$$
 
 其中 $Q$ 是固定 probe subset。超过阈值才全量刷新；否则只补新数据，降低梯度计算成本。
 
