@@ -5,9 +5,9 @@
 传统 data curation 给每条样本一个与模型弱相关的静态分数：规则质量、长度、语言、去重距离。Model-aware curation 则显式依赖当前模型状态 $\theta_t$：
 
 $$
-\mathcal D_{t+1}=\operatorname{Curate}(\mathcal P_t,\theta_t,V_t,B),
+\mathcal D_{t+1}=\mathrm{Curate}(\mathcal P_t,\theta_t,V_t,B),
 \qquad
-\theta_{t+1}=\operatorname{Train}(\theta_t,\mathcal D_{t+1}),
+\theta_{t+1}=\mathrm{Train}(\theta_t,\mathcal D_{t+1}),
 $$
 
 其中 $\mathcal P_t$ 是候选池，$V_t$ 是目标/保护验证集，$B$ 是训练预算。因为 $\theta$ 在变，数据价值也会变；因此这不是一次性 ETL，而是控制回路。
@@ -29,8 +29,8 @@ $$
 若已选集合为 $S$，可用谱熵增益：
 
 $$
-c(z\mid S)=\log \operatorname{GV}(S\cup\{z\})-
-\log \operatorname{GV}(S).
+c(z\mid S)=\log \mathrm{GV}(S\cup\{z\})-
+\log \mathrm{GV}(S).
 $$
 
 ### Safety / retention：是否与保护能力冲突
@@ -47,7 +47,7 @@ $V^-$ 代表要保留的一般能力、格式约束或安全行为。负余弦�
 
 $$
 \max_{S\subseteq\mathcal P,\ |S|\le B}
-\sum_{z\in S}v(z)+\lambda\log\operatorname{GV}(S)
+\sum_{z\in S}v(z)+\lambda\log\mathrm{GV}(S)
 \quad\text{s.t.}\quad
 \frac1{|S|}\sum_{z\in S}r(z)\le\epsilon,
 \quad q(z)=1.

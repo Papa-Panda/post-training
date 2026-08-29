@@ -29,7 +29,7 @@ L_v(\theta-\eta g_z)\approx L_v(\theta)-\eta g_v^\top g_z.
 
 TRAK（Tracing with the Randomly-projected After Kernel）将每条样本的梯度/输出敏感度投影为低维特征 $\phi(z)$，再通过线性化后的核矩阵求 attribution。抽象写作：
 
-若 $\Phi$ 按行堆叠训练样本特征、$Q=\operatorname{diag}(1-p_i^*)$，一组训练样本对目标 $v$ 的 attribution 向量可抽象写成：
+若 $\Phi$ 按行堆叠训练样本特征、$Q=\mathrm{diag}(1-p_i^*)$，一组训练样本对目标 $v$ 的 attribution 向量可抽象写成：
 
 \[
 \tau(v,D)=\phi(v)^\top

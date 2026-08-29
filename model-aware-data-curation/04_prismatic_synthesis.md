@@ -67,7 +67,7 @@ coding data 还应加入：parse / compile、unit tests、sandbox execution、ti
 原始 Prismatic 更接近无显式目标分布下的 coverage maximization。对 coding flywheel，可以把接收条件改成：
 
 \[
-\operatorname{accept}(z)=
+\mathrm{accept}(z)=
 \mathbf 1[q(z)=1]
 \mathbf 1[c(z)\ge\tau_c]
 \mathbf 1[v(z)\ge\tau_v]

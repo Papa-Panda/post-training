@@ -75,7 +75,7 @@ $n$ 条、$d=1024$、FP16 的向量约占 $2nd$ bytes：100 万条约 2.05 GB（
 定义 proxy drift：
 
 \[
-\Delta_t=1-\operatorname{Spearman}
+\Delta_t=1-\mathrm{Spearman}
 \big(s_{\theta_{t-1}}(Q),s_{\theta_t}(Q)\big)
 \]
 

@@ -43,7 +43,7 @@ full domain pool -> 1-epoch probe -> gradient statistics
 但“完全正交”只表示不干扰，也可能没有目标学习价值；所以实际目标应同时包含 domain gain：
 
 \[
-\max_{S,|S|\le B}\ \operatorname{Gain}_{domain}(S)
+\max_{S,|S|\le B}\ \mathrm{Gain}_{\mathrm{domain}}(S)
 \quad\text{s.t.}\quad
 \mathbb E_{z\in S}[\text{conflict}(z)]\le\epsilon.
 \]

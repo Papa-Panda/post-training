@@ -16,13 +16,13 @@ embedding diversity 衡量表面语义或预训练表示上的差异；model-awa
 
 \[
 K_{ij}=\frac{u_i^\top u_j}{n},\qquad
-\sum_j\lambda_j(K)=\operatorname{tr}(K)=1.
+\sum_j\lambda_j(K)=\mathrm{tr}(K)=1.
 \]
 
 Vendi Score 是谱分布的有效秩：
 
 \[
-\operatorname{VS}(D)=
+\mathrm{VS}(D)=
 \exp\left(-\sum_j\lambda_j\log\lambda_j\right).
 \]
 
@@ -49,7 +49,7 @@ g_\theta(x,y)=
 对 $G=[\tilde g_1;\ldots;\tilde g_n]$，以 $GG^\top/n$（或当 $n\gg d$ 时等价地使用 $G^\top G/n$ 的非零谱）计算 Vendi：
 
 \[
-\operatorname{G\text{-}Vendi}(D)=
+\mathrm{G\!{-}\!Vendi}(D)=
 \exp\left(-\sum_j\lambda_j\log\lambda_j\right).
 \]
 
@@ -79,7 +79,7 @@ exact dedup -> semantic dedup -> quality gate -> gradient-space coverage
 
 \[
 z^*=\arg\max_{z\notin S}
-\left[\alpha v(z)+\beta\Delta\log\operatorname{GV}(z\mid S)\right]
+\left[\alpha v(z)+\beta\Delta\log\mathrm{GV}(z\mid S)\right]
 \quad\text{s.t.}\ r(z)\le\epsilon.
 \]
 
