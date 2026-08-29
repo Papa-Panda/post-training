@@ -1,6 +1,6 @@
-# post-training-rl-infra
+# post-training
 
-> GitHub: `post-training-rl-infra` → 本地简称 **post-training**，顶层现在按轨道拆分，infra 实战都进 `ai-infra/`。
+> GitHub: [`Papa-Panda/post-training`](https://github.com/Papa-Panda/post-training)。顶层按轨道拆分，infra 实战统一在 `ai-infra/`。
 
 45-day journey from ML for Infra (data center predictive modeling, autoscaling, $400M savings) to Post-training / Agentic RL Infra.
 
@@ -13,6 +13,7 @@
   - `eval-context-compression/` — 评估压缩：Factory 方法 + Hermes probe harness + 三类压缩对比（原 eval-compression）
   - `eval-bench-efficiency/` — 高效评测：metabench IRT 蒸馏 28632→858 (<3%) + mRMR 特征选择 DIoR x100
   - `eval/` — 评估索引（指向上面两个平铺 track）
+  - `model-aware-data-curation/` — 梯度驱动的数据价值、覆盖、主动生成与持续学习闭环（跨论文系统专题，不重复 `ai-data`）
   - `ai-data/` — Data-centric papers：coding data / SFT / RL data / curation
   - `ai_daily.csv` — source of truth，45 天 2026-08-02 → 2026-09-15
 - **Tracks**: Infra Systems (18d) / RL Training (11d) / Reasoning Data (8d) / Papers (5d) / Reflection (3d)
