@@ -1,5 +1,11 @@
 # 07 — Coding-data Flywheel 落地
 
+## 元信息
+- 内容类型：应用设计，不对应单篇论文
+- 理论锚点：[LESS](https://arxiv.org/abs/2402.04333)（目标价值）· [Prismatic Synthesis](https://arxiv.org/abs/2505.20161)（覆盖与主动生成）· [OGS](https://arxiv.org/abs/2602.06359)（保护能力）
+- 本章定位：把上述信号落到可执行、可验证的 coding-data flywheel。
+
+
 ## 1. 闭环目标
 
 不是生成更多题，而是让每轮数据解决当前模型尚未覆盖的可验证能力：

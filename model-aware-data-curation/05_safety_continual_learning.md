@@ -1,5 +1,12 @@
 # 05 — 安全与持续学习：GrADS / OGS
 
+## 元信息
+- 内容类型：双论文对照 + 持续学习综合
+- Paper 1: **Learn More, Forget Less: A Gradient-Aware Data Selection Approach for LLM (GrADS)** — https://arxiv.org/abs/2511.08620
+- Paper 2: **Training Data Selection with Gradient Orthogonality for Efficient Domain Adaptation (OGS)** — https://arxiv.org/abs/2602.06359
+- 论文状态：均为预印本；本章把实验结论与工程推演分开标注。
+
+
 ## 1. 稳定—可塑性不是附加指标
 
 目标域数据梯度为 $g_d$，保护集梯度为 $g_p$。一步 SGD 后：

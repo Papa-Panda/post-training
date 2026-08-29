@@ -1,5 +1,11 @@
 # 01 — 统一问题：Value × Coverage × Safety
 
+## 元信息
+- 内容类型：跨论文方法论综合，不对应单篇论文
+- 核心来源：[Influence Functions](https://arxiv.org/abs/1703.04730) · [TracIn](https://arxiv.org/abs/2002.08484) · [LESS](https://arxiv.org/abs/2402.04333) · [Prismatic Synthesis](https://arxiv.org/abs/2505.20161)
+- 完整论文索引：[papers.md](papers.md)
+
+
 ## 1. 从静态过滤到模型闭环
 
 传统 data curation 给每条样本一个与模型弱相关的静态分数：规则质量、长度、语言、去重距离。Model-aware curation 则显式依赖当前模型状态 $\theta_t$：

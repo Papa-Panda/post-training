@@ -1,5 +1,11 @@
 # 02 — 从归因到目标化选择
 
+## 元信息
+- 内容类型：跨论文方法综述（归因 → 目标化选择）
+- 新增核心论文：[TRAK: Attributing Model Behavior at Scale](https://arxiv.org/abs/2303.14186) · [GradAlign: Gradient-Aligned Data Selection for LLM Reinforcement Learning](https://arxiv.org/abs/2602.21492v2)
+- 已有 `ai-data` 精读：[Influence Functions](../ai-data/day-02-2017-influence-functions/NOTES.md) · [TracIn](../ai-data/day-03-2020-tracin/NOTES.md) · [LESS](../ai-data/day-04-2024-less/NOTES.md) · [DataInf](../ai-data/day-05-2024-datainf/NOTES.md)
+
+
 > 本章只建立跨方法坐标系。已有逐篇笔记不复制：
 > [Influence Functions](../ai-data/day-02-2017-influence-functions/NOTES.md) ·
 > [TracIn](../ai-data/day-03-2020-tracin/NOTES.md) ·

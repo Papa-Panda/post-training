@@ -1,5 +1,15 @@
 # 04 — Prismatic Synthesis：从选数据到主动造数据
 
+## 元信息
+- 内容类型：单篇论文精读 + 工程扩展
+- Title: **Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning**
+- Venue: NeurIPS 2025
+- Link / arXiv: https://arxiv.org/abs/2505.20161
+- Project: https://nvlabs.github.io/prismatic-synthesis/
+- Code: https://github.com/omeraj/prismatic-synthesis
+- 本章边界：第 2–4 节总结论文；第 5–7 节是面向 coding-data flywheel 的工程延伸，会显式标注，不冒充论文结论。
+
+
 ## 1. 为什么是总纲论文
 
 静态选择只能从已有池中重排预算；当池子在某些学习方向上根本没有样本，selector 无法补洞。Prismatic Synthesis（2025）将数据覆盖变成生成控制信号：

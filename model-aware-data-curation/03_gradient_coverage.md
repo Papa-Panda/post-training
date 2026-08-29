@@ -1,5 +1,11 @@
 # 03 — 多样性覆盖：从语义空间到梯度空间
 
+## 元信息
+- 内容类型：跨论文方法综述（embedding diversity → gradient diversity）
+- 核心论文：[Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning](https://arxiv.org/abs/2505.20161)
+- 已有 `ai-data` 精读：[Vendi Score](../ai-data/day-19-2023-vendi-score/NOTES.md) · [D4 / SemDeDup](../ai-data/day-24-2023-semdedup-d4/NOTES.md)
+
+
 > 已有逐篇笔记只复用：
 > [Vendi Score](../ai-data/day-19-2023-vendi-score/NOTES.md) ·
 > [D4 / SemDeDup](../ai-data/day-24-2023-semdedup-d4/NOTES.md)

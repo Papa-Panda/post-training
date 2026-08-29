@@ -1,5 +1,11 @@
 # 06 — 系统架构：Gradient Datastore + Curation Control Plane
 
+## 元信息
+- 内容类型：跨论文系统设计，不对应单篇论文
+- 方法来源：[LESS](https://arxiv.org/abs/2402.04333) · [TRAK](https://arxiv.org/abs/2303.14186) · [Prismatic Synthesis](https://arxiv.org/abs/2505.20161) · [GradAlign](https://arxiv.org/abs/2602.21492v2)
+- 本章定位：将论文中的 gradient sketch、attribution、coverage 和动态重算拼成可部署 control plane。
+
+
 ## 1. 数据面与控制面分离
 
 ```text
