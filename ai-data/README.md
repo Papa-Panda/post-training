@@ -8,7 +8,7 @@
 
 ```
 ai-data/
-├── README.md                # 本路线图（28已完成/30总规划）
+├── README.md                # 本路线图（29已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ ai-data/
     └── assets/
 ```
 
-## 发展路线图 (28/30 - 主干已闭环，剩2篇收口)
+## 发展路线图 (29/30 - 主干已闭环，剩1篇收口)
 
-> 总计 **30篇** 即闭环，当前28篇已覆盖归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重、多样化剪枝→大规模网页过滤→AI反馈偏好数据底座→开源代码锚定合成→可验证RL数据，缺口在 **code执行环境 / 防污染收口**。
+> 总计 **30篇** 即闭环，当前29篇已覆盖归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重、多样化剪枝→大规模网页过滤→AI反馈偏好数据底座→开源代码锚定合成→可验证RL数据，缺口只剩 **防污染收口**。
 
 ### 图谱总览 (Mermaid - 完整版 30篇)
 
@@ -84,7 +84,7 @@ graph TD
     Y --> S
     Z[Day28 DeepScaleR/OpenReasoner-Zero 25 ✅已完成]
     Z --> F
-    AA[Day29 SWE-Gym 24]
+    AA[Day29 SWE-Gym 24 ✅已完成]
     AA --> N
     AB[Day30 Decontamination]
     AB -.防漏.-> J
@@ -111,9 +111,10 @@ graph TD
   style W fill:#ffd700
   style V fill:#ffd700
   style Z fill:#ffd700
+  style AA fill:#ffd700
 ```
 
-### 主线 vs 支线 判定 (28已完成)
+### 主线 vs 支线 判定 (29已完成)
 
 | Tier | 判定 | Days | 说明 |
 |------|------|------|------|
@@ -124,7 +125,7 @@ graph TD
 
 ### 还剩多少最主要的 (Day21-30 闭环计划，已完成8/10)
 
-> Day21-28 已完成；**还剩 2 篇收口**，完成后总计30篇闭环。
+> Day21-29 已完成；**还剩 1 篇收口**，完成后总计30篇闭环。
 
 | Day | 拟定 Folder | 标题 | 为什么是主干 (Data视角) | Tier |
 |-----|-------------|------|------------------------|------|
@@ -136,12 +137,12 @@ graph TD
 | 26 | day-26-2023-ultrafeedback | UltraFeedback ✅已完成 2026-08-26 | 64k prompts×4多模型回答+GPT-4细粒度反馈，偏好数据底座，给DPO-gap提供上游池 | S |
 | 27 | day-27-2023-oss-instruct | OSS-Instruct / Magicoder ✅已完成 2026-08-27 | 开源代码片段锚定合成约75k code指令，补Self-Instruct少种子与Evol固定规则的来源偏置 | S |
 | 28 | day-28-2025-deepscaler-openreasoner | DeepScaleR / OpenReasoner-Zero Data ✅已完成 2026-08-28 | v2 57k可验证题池；v1 129k全量RL→13k困难尾部继续RL，是ProRL长程RL路线的先行证据 | S |
-| 29 | day-29-2024-swe-gym | SWE-Gym | 2k+可执行code环境，PR级别RL数据，接Qwen2.5-Coder exec | A |
+| 29 | day-29-2024-swe-gym | SWE-Gym ✅已完成 2026-08-29 | 2,438个真实issue任务+可执行环境+单元测试，形成repo级可验证轨迹数据，接Qwen2.5-Coder exec | A |
 | 30 | day-30-2024-decontamination | Data Contamination Detection | 13-gram+embedding检漏，防LESS/s1挑到test，质量门最后一道 | A |
 
 > 跑完这10篇，**合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏** 全链条贯通。
 
-### 三条子脉络 (已完成28)
+### 三条子脉络 (已完成29)
 
 **1. 选择线 (Influence → Selection)：** Day02 → Day03 → Day04(LESS 5%) → Day05(DataInf) → Day12(IFD) → Day11(RL轨迹) → Day17(817) → Day18(1k) → Day20(DEITA)
 **2. 预训练/合成线 (Quality → Scale)：** Day21(Self-Instruct) → Day22(Evol) → Day27(OSS-Instruct) → Day06(Phi-1) → Day24(D4/SemDeDup) → Day25(FineWeb/RefinedWeb) → Day07(Llama3) → Day08(DeepSeek-V3) → Day09(Qwen2.5) → Day14(StarCoder2) → Day16(Qwen-Coder) → Day29(SWE-Gym)
@@ -149,7 +150,7 @@ graph TD
 
 **长程RL延伸：** Day28 ORZ（约1,200步，证明大规模多样可验证数据可继续支撑RL）→ ProRL（2,000+步，并用动态采样、KL控制与reference-policy reset系统化 prolonged RL）。
 
-### Day N 映射表 (28已完成，纯 Data 视角)
+### Day N 映射表 (29已完成，纯 Data 视角)
 
 | Day | Folder | Data贡献 (非算法) | Tier |
 |-----|--------|-------------------|------|
@@ -181,10 +182,11 @@ graph TD
 | 26 | day-26-2023-ultrafeedback | 偏好数据底座：64k prompts×4多模型回答，经GPT-4细粒度评价与打分形成可追溯AI反馈池 | S |
 | 27 | day-27-2023-oss-instruct | Code合成：80K开源代码片段锚定生成，经去重和benchmark防污染得到约75K条现实、多样、可控的coding SFT数据 | S |
 | 28 | day-28-2025-deepscaler-openreasoner | 可验证RL数据：v2使用57k题池；v1先在129k上RL 1,100步，再挖出约13k困难尾部继续100步；承接LIMR并为ProRL长程RL提供先行证据 | S |
+| 29 | day-29-2024-swe-gym | 可执行code环境：2,438个真实issue任务封装repo、依赖、单元测试与agent轨迹，把静态样本升级为仓库级可验证交互数据 | A |
 
 > 算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。
 
-### Day21-30 如何接每日Job（Day21-28 已完成）
+### Day21-30 如何接每日Job（Day21-29 已完成）
 
 - 命名继续 `day-{21..30}-{year}-{slug}` 两位数，顺序递增，对齐 rl-infra
 - 每日Job自动：建骨架 → 更新 reading-log → push commit `feat(ai-data): Day N` → 同步Sheet `ai data` tab → 更新本README映射表新增一行（若为S-tier，同步mermaid点亮从蓝色→金/红）
