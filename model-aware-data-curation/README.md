@@ -53,6 +53,42 @@ python3 model-aware-data-curation/code/demo.py
 python3 -m unittest discover -s model-aware-data-curation/tests -v
 ```
 
+## 路线图
+
+> 目标：把“选数据”从静态过滤，升级为 **model-in-the-loop 的控制系统**。按下面三阶段走，每阶段都有可验证产出。
+
+### Phase 1 — 统一框架（Day 1–2）
+
+- 读 `01` 建立 Value × Coverage × Safety 的统一优化式，理解 **选有用的、补缺的、不添乱的**；
+- 读 `02` 掌握归因到目标化选择的演进：Influence → TracIn/TRAK → LESS/DataInf → GradAlign；
+- 产出：能说清为什么不能把三个目标压成一个 cosine score。
+
+### Phase 2 — 覆盖与生成（Day 3–5）
+
+- 读 `03`：embedding diversity → G-Vendi，proxy 选择（Qwen2.5-0.5B-Instruct 不做 warm-up，1024维投影，$\rho=0.909$/$0.898$/$0.772$）；
+- 读 `04`：Prismatic 三步循环，稀疏簇生成与质量门；
+- 读 `09`：SPICE 的 Fisher/log-det coverage + selected-set conflict，以及四种梯度几何的边界；
+- 动手：跑 `code/demo.py` 看 G-Vendi / SPICE / 隔离度计算。
+
+### Phase 3 — 系统与落地（Day 6–10）
+
+- 读 `06`：proxy 选择五原则（白盒可微、loss 匹配、LoRA/head、家族一致性、ranking 相关性验证）与 refresh 策略；
+- 读 `05` + `07`：安全/持续学习约束，coding-data flywheel 的失败簇 → 生成 → 执行验证 → 训练 → 回归；
+- 读 `08`：与 `ai-data/` 的边界，避免重复造笔记；
+- 产出：一个带质量门、conflict gate、G-Vendi 监控和 shadow mode 的最小 curation job。
+
+```text
+01 统一框架 ──► 02 归因与目标化 ──► 03 覆盖 (G-Vendi/Fisher)
+      │                   │                      │
+      ▼                   ▼                      ▼
+06 系统架构 ◄── 09 协调与冲突 ◄── 04 主动生成 (Prismatic)
+      │                   │
+      ▼                   ▼
+05 安全/持续学习 ──► 07 coding flywheel
+```
+
+完成后，你会得到：**一套可复用的 gradient datastore + 三维 dashboard（correctness × target alignment × coverage）+ 可回放的版本化数据版本**。
+
 ## 核心判断
 
 Prismatic Synthesis 把原本分开的三段串成闭环：
