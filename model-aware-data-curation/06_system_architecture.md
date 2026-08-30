@@ -124,3 +124,15 @@ $$\Delta_t=1-\mathrm{Spearman} \big(s_{\theta_{t-1}}(Q),s_{\theta_t}(Q)\big)$$
 5. 每周/每里程碑跑全量 eval，日常可跑压缩 eval；
 6. 新 selector shadow mode 先记录、不影响训练；
 7. 数据版本、模型版本和 projection seed 可完全回放。
+
+> 相关：proxy 五原则与方法适配见本文 §3，coverage 原理见 [03](03_gradient_coverage.md)，SPICE 协调性见 [09](09_spice_information_conflict.md)。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[05 安全与持续学习](05_safety_continual_learning.md)
+- 下一篇：[07 Coding Flywheel](07_coding_data_flywheel.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

@@ -111,3 +111,15 @@ Prismatic 报告 G-Vendi 与 OOD performance 的 Spearman $\rho\approx0.9$，且
 - 随机/错误输出带来的梯度熵就是有益覆盖。
 
 因此至少联合三个 dashboard：`correctness × target alignment × G-Vendi`。
+
+> 相关：SPICE 的 Fisher 覆盖见 [09 SPICE](09_spice_information_conflict.md)，系统实现见 [06 系统架构](06_system_architecture.md)。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[02 归因到目标化](02_attribution_to_targeting.md)
+- 下一篇：[04 Prismatic 主动生成](04_prismatic_synthesis.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

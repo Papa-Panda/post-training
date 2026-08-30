@@ -116,3 +116,13 @@ Boundary: recent preprint aimed at non-stationary LLM RL; do not conflate with t
 | G-Vendi guarantees OOD improvement on arbitrary tasks | **not claimed** |
 | GrADS universal best subset size is 5% | **not claimed** |
 | OGS/GradAlign are mature production standards | **not claimed** |
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[09 SPICE 协调性](09_spice_information_conflict.md)
+- 下一篇：[目录](README.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

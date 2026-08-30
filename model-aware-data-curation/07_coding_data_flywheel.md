@@ -126,3 +126,13 @@ RL 中同一道题随 policy 变化可能从“有学习信号”变成“全对
 - proxy-target rank correlation 可接受；
 - 生成新增覆盖而非新增噪声；
 - 端到端节省的训练预算大于 gradient/verification 开销。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[06 系统架构](06_system_architecture.md)
+- 下一篇：[08 与 ai-data 边界](08_ai_data_boundary.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

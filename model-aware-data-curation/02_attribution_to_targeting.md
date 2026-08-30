@@ -101,3 +101,15 @@ quality gate
 归因给“价值”，但不保证“覆盖”；下一章用谱熵补上这一维。
 
 Proxy 适配差异：**TRAK/TracIn** 若要解释某个具体模型，最好直接用该模型或它的 checkpoints；**LESS/Prismatic/G-Vendi** 更适合小型 instruction-tuned proxy（论文主设置如 Qwen2.5-0.5B-Instruct）；**GradAlign** 最严格，最好用当前或接近当前的 policy 并周期性刷新。太弱的 proxy 只会产生“我什么都不会”的噪声梯度，工程上必须抽样验证 proxy 与目标模型的 ranking 相关性。
+
+> 相关：覆盖度量见 [03](03_gradient_coverage.md)，生成闭环见 [04](04_prismatic_synthesis.md)。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[01 统一框架](01_problem_formulation.md)
+- 下一篇：[03 梯度覆盖](03_gradient_coverage.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

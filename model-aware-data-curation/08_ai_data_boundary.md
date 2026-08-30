@@ -66,3 +66,13 @@ synthetic data papers -> generator/input pipeline
 - [ ] 是否解释 model state / gradient 如何改变 curation decision？
 - [ ] 是否包含可运行 primitive、架构或实验设计，而非第二份论文摘要？
 - [ ] 是否明确 claim 的论文版本、实验范围与外推边界？
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[07 Coding Flywheel](07_coding_data_flywheel.md)
+- 下一篇：[09 SPICE 协调性](09_spice_information_conflict.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

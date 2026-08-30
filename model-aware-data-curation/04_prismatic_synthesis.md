@@ -90,3 +90,13 @@ $$\mathrm{accept}(z)= \mathbf 1[q(z)=1] \mathbf 1[c(z)\ge\tau_c] \mathbf 1[v(z)\
 5. execution gate 后训练同一 base model；
 6. 对照 random、embedding-diverse、target-only、G-Vendi-only、target+G-Vendi；
 7. 报告 ID/OOD pass@1、失败簇覆盖、污染、GPU-hours 与重复率。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[03 梯度覆盖](03_gradient_coverage.md)
+- 下一篇：[05 安全与持续学习](05_safety_continual_learning.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

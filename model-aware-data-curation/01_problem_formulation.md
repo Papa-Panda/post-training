@@ -72,3 +72,13 @@ $$\mathbf s(z)=(v(z),\ c(z\mid S),\ -r(z)).$$
 5. **非平稳性**：RL policy 或持续学习状态变化后，旧 datastore 需刷新。
 
 下一步：[`02_attribution_to_targeting.md`](02_attribution_to_targeting.md) 将这些量连接到具体方法；[`06_system_architecture.md`](06_system_architecture.md) 给出工程实现。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[目录](README.md)
+- 下一篇：[02 归因到目标化](02_attribution_to_targeting.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

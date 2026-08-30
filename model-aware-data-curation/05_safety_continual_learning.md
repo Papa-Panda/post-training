@@ -105,3 +105,15 @@ if proxy/target rank correlation drops:
 - 低冲突样本没有数据污染。
 
 必须保留独立 held-out retention suite、红队/安全 eval、全量周期回归和 rollback checkpoint。
+
+> 相关：SPICE conflict ≠ retention 的完整几何辨析见 [09 SPICE §6](09_spice_information_conflict.md#6-四种不能混成一个-cosine-的梯度几何)。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[04 Prismatic 主动生成](04_prismatic_synthesis.md)
+- 下一篇：[06 系统架构](06_system_architecture.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+

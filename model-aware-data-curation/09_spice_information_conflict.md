@@ -225,3 +225,13 @@ $$\bar g_S=e_1, \qquad g_{\mathrm{protected}}=-e_1, \qquad g_{\mathrm{target}}=e
 4. 孤立梯度可以有高 novelty、同时没有 target value，因此不能自动标成 useful diversity。
 
 这个 toy implementation 用完整小矩阵强调数学语义；生产实现需要低秩 sketch、Cholesky/rank-one update、候选预筛和 proxy-transfer 监控。
+
+<!-- NAVIGATION -->
+## 导航
+
+- 上一篇：[08 与 ai-data 边界](08_ai_data_boundary.md)
+- 下一篇：[论文证据](papers.md)
+- 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
+
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+
