@@ -8,7 +8,7 @@
 
 ```
 ai-data/
-├── README.md                # 本路线图（29已完成/30总规划）
+├── README.md                # 本路线图（30已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ ai-data/
     └── assets/
 ```
 
-## 发展路线图 (29/30 - 主干已闭环，剩1篇收口)
+## 发展路线图 (30/30 - 主干闭环完成)
 
-> 总计 **30篇** 即闭环，当前29篇已覆盖归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重、多样化剪枝→大规模网页过滤→AI反馈偏好数据底座→开源代码锚定合成→可验证RL数据，缺口只剩 **防污染收口**。
+> 总计 **30篇** 已闭环：归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重、多样化剪枝→大规模网页过滤→AI反馈偏好数据底座→开源代码锚定合成→可验证RL数据→代码 benchmark 防污染。
 
 ### 图谱总览 (Mermaid - 完整版 30篇)
 
@@ -86,7 +86,7 @@ graph TD
     Z --> F
     AA[Day29 SWE-Gym 24 ✅已完成]
     AA --> N
-    AB[Day30 Decontamination]
+    AB[Day30 Code Decontamination 24 ✅已完成]
     AB -.防漏.-> J
     AB -.防漏.-> O
   end
@@ -112,20 +112,21 @@ graph TD
   style V fill:#ffd700
   style Z fill:#ffd700
   style AA fill:#ffd700
+  style AB fill:#ffd700
 ```
 
-### 主线 vs 支线 判定 (29已完成)
+### 主线 vs 支线 判定 (30已完成)
 
 | Tier | 判定 | Days | 说明 |
 |------|------|------|------|
 | **S-tier 必读** | 范式定义 | 02,03,04,06,07,08,09,14,15,16,17,18,21,22,23,24,25,26,27,28 | Influence→TracIn→LESS奠定选择；Phi-1/Llama3/DeepSeek/Qwen/StarCoder2/QwenCoder奠定洗数据；R1/LIMO/s1奠定少即是多；Self-Instruct→Evol-Instruct奠定合成指令与复杂度演化；LIMA奠定对齐极简；D4奠定语义去重与多样化剪枝；FineWeb/RefinedWeb奠定可复现大规模网页过滤与消融；UltraFeedback奠定可追溯AI反馈偏好池；OSS-Instruct奠定真实开源代码锚定的合成指令路线；Open-Reasoner-Zero / DeepScaleR 奠定可验证RL题池、pass-rate过滤与长程RL数据供给路线，并成为后来 ProRL 系统化 prolonged RL 的先行证据 |
-| **A-tier 重要** | 你的coding冷启动直接可用 | 05,11 | DataInf LoRA扫脏快1000倍；LIMR RL少即是多1.3k |
+| **A-tier 重要** | 你的coding冷启动直接可用 | 05,11,29,30 | DataInf LoRA扫脏；LIMR RL少即是多；SWE-Gym repo级可验证任务；代码 benchmark surface+semantic 防污染 |
 | **B-tier 技巧** | 单点改进，可替换 | 10,12,13,19,20 | 10 Llama3.1后训练工程化；12 SuperFiltering弱到强IFD；13 DPO-gap难对；19 Vendi多样性度量；20 DEITA三因子工程配方 |
 | **示例** | 入门 | 01 | Day01 example_starcoder2 仅作curation入门示例 |
 
-### 还剩多少最主要的 (Day21-30 闭环计划，已完成8/10)
+### Day21-30 闭环计划（已完成10/10）
 
-> Day21-29 已完成；**还剩 1 篇收口**，完成后总计30篇闭环。
+> Day21-30 已完成；30篇 data 主线现已闭环。
 
 | Day | 拟定 Folder | 标题 | 为什么是主干 (Data视角) | Tier |
 |-----|-------------|------|------------------------|------|
@@ -138,19 +139,20 @@ graph TD
 | 27 | day-27-2023-oss-instruct | OSS-Instruct / Magicoder ✅已完成 2026-08-27 | 开源代码片段锚定合成约75k code指令，补Self-Instruct少种子与Evol固定规则的来源偏置 | S |
 | 28 | day-28-2025-deepscaler-openreasoner | DeepScaleR / OpenReasoner-Zero Data ✅已完成 2026-08-28 | v2 57k可验证题池；v1 129k全量RL→13k困难尾部继续RL，是ProRL长程RL路线的先行证据 | S |
 | 29 | day-29-2024-swe-gym | SWE-Gym ✅已完成 2026-08-29 | 2,438个真实issue任务+可执行环境+单元测试，形成repo级可验证轨迹数据，接Qwen2.5-Coder exec | A |
-| 30 | day-30-2024-decontamination | Data Contamination Detection | 13-gram+embedding检漏，防LESS/s1挑到test，质量门最后一道 | A |
+| 30 | day-30-2024-decontamination | Quantifying Code Contamination ✅已完成 2026-08-30 | surface-level + semantic-level code matching 检漏，防 coding SFT/RL 数据泄漏 HumanEval/MBPP，质量门最后一道 | A |
 
-> 跑完这10篇，**合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏** 全链条贯通。
+> 这10篇已跑完，**合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏** 全链条贯通。
 
-### 三条子脉络 (已完成29)
+### 四条子脉络 (已完成30)
 
 **1. 选择线 (Influence → Selection)：** Day02 → Day03 → Day04(LESS 5%) → Day05(DataInf) → Day12(IFD) → Day11(RL轨迹) → Day17(817) → Day18(1k) → Day20(DEITA)
 **2. 预训练/合成线 (Quality → Scale)：** Day21(Self-Instruct) → Day22(Evol) → Day27(OSS-Instruct) → Day06(Phi-1) → Day24(D4/SemDeDup) → Day25(FineWeb/RefinedWeb) → Day07(Llama3) → Day08(DeepSeek-V3) → Day09(Qwen2.5) → Day14(StarCoder2) → Day16(Qwen-Coder) → Day29(SWE-Gym)
 **3. SFT vs RL / 偏好数据线：** Day23(LIMA 1k) → Day04/12(SFT选) → Day26(UltraFeedback造偏好池) → Day13(DPO-Gap选难对) → Day11(RL要换LIM) → Day28(ORZ可验证数据+困难尾部挖掘) → Day15(R1冷启动+纯RL) → Day17/18(精心SFT也能OOD)
+**4. 防污染质量门：** Day24(D4训练集内去重) → Day27(OSS-Instruct benchmark decontamination) → Day29(SWE-Gym repo/时间切分问题) → Day30(code surface+semantic train–eval 检漏)
 
 **长程RL延伸：** Day28 ORZ（约1,200步，证明大规模多样可验证数据可继续支撑RL）→ ProRL（2,000+步，并用动态采样、KL控制与reference-policy reset系统化 prolonged RL）。
 
-### Day N 映射表 (29已完成，纯 Data 视角)
+### Day N 映射表 (30已完成，纯 Data 视角)
 
 | Day | Folder | Data贡献 (非算法) | Tier |
 |-----|--------|-------------------|------|
@@ -183,10 +185,11 @@ graph TD
 | 27 | day-27-2023-oss-instruct | Code合成：80K开源代码片段锚定生成，经去重和benchmark防污染得到约75K条现实、多样、可控的coding SFT数据 | S |
 | 28 | day-28-2025-deepscaler-openreasoner | 可验证RL数据：v2使用57k题池；v1先在129k上RL 1,100步，再挖出约13k困难尾部继续100步；承接LIMR并为ProRL长程RL提供先行证据 | S |
 | 29 | day-29-2024-swe-gym | 可执行code环境：2,438个真实issue任务封装repo、依赖、单元测试与agent轨迹，把静态样本升级为仓库级可验证交互数据 | A |
+| 30 | day-30-2024-decontamination | 代码防污染：surface-level + semantic-level 双重匹配 train–eval 近重复，保护 HumanEval/MBPP 等 benchmark 的可信度 | A |
 
 > 算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。
 
-### Day21-30 如何接每日Job（Day21-29 已完成）
+### Day21-30 如何接每日Job（Day21-30 已完成）
 
 - 命名继续 `day-{21..30}-{year}-{slug}` 两位数，顺序递增，对齐 rl-infra
 - 每日Job自动：建骨架 → 更新 reading-log → push commit `feat(ai-data): Day N` → 同步Sheet `ai data` tab → 更新本README映射表新增一行（若为S-tier，同步mermaid点亮从蓝色→金/红）
