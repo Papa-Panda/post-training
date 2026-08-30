@@ -23,6 +23,21 @@ from model_aware_curation import (  # noqa: E402
 
 
 class ModelAwareCurationTest(unittest.TestCase):
+    def test_github_display_math_stays_on_one_line(self):
+        topic_dir = pathlib.Path(__file__).parents[1]
+        for path in topic_dir.glob("*.md"):
+            for line_number, line in enumerate(path.read_text().splitlines(), start=1):
+                if "$$" in line:
+                    self.assertEqual(
+                        line.count("$$"),
+                        2,
+                        f"{path.name}:{line_number} has a split or unpaired math block",
+                    )
+            text = path.read_text()
+            self.assertNotIn("\\[", text, path.name)
+            self.assertNotIn("\\]", text, path.name)
+            self.assertNotIn("\\operatorname", text, path.name)
+
     def test_vendi_identical_is_one(self):
         g = np.array([[1.0, 0.0], [2.0, 0.0], [3.0, 0.0]])
         self.assertAlmostEqual(gradient_vendi(g), 1.0, places=10)

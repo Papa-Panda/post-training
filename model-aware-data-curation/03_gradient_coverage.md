@@ -20,17 +20,11 @@ embedding diversity 衡量表面语义或预训练表示上的差异；model-awa
 
 给定单位化特征 $u_i$，构造核：
 
-$$
-K_{ij}=\frac{u_i^\top u_j}{n},\qquad
-\sum_j\lambda_j(K)=\mathrm{tr}(K)=1.
-$$
+$$K_{ij}=\frac{u_i^\top u_j}{n},\qquad \sum_j\lambda_j(K)=\mathrm{tr}(K)=1.$$
 
 Vendi Score 是谱分布的有效秩：
 
-$$
-\mathrm{VS}(D)=
-\exp\left(-\sum_j\lambda_j\log\lambda_j\right).
-$$
+$$\mathrm{VS}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$
 
 - 所有方向完全相同：VS 接近 1；
 - $m$ 个正交且均匀方向：VS 接近 $m$；
@@ -40,24 +34,15 @@ $$
 
 Prismatic Synthesis 定义样本表征：
 
-$$
-g_\theta(x,y)=
-\frac{-\nabla_\theta\log p_\theta(y\mid x)}
-{\lVert -\nabla_\theta\log p_\theta(y\mid x)\rVert_2},
-$$
+$$g_\theta(x,y)= \frac{-\nabla_\theta\log p_\theta(y\mid x)} {\lVert -\nabla_\theta\log p_\theta(y\mid x)\rVert_2},$$
 
 再用 Rademacher 随机矩阵 $\Pi\in\{-1,+1\}^{|\theta|\times d}$ 降维：
 
-$$
-\tilde g_\theta(x,y)=\Pi^\top g_\theta(x,y),\qquad d\ll |\theta|.
-$$
+$$\tilde g_\theta(x,y)=\Pi^\top g_\theta(x,y),\qquad d\ll |\theta|.$$
 
 对 $G=[\tilde g_1;\ldots;\tilde g_n]$，以 $GG^\top/n$（或当 $n\gg d$ 时等价地使用 $G^\top G/n$ 的非零谱）计算 Vendi：
 
-$$
-\text{G-Vendi}(D)=
-\exp\left(-\sum_j\lambda_j\log\lambda_j\right).
-$$
+$$\text{G-Vendi}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$
 
 论文实验使用 $d=1024$，并展示无需 in-domain warm-up 的小型 instruction-tuned proxy 也可提供有用梯度几何。
 
@@ -83,21 +68,11 @@ exact dedup -> semantic dedup -> quality gate -> gradient-space coverage
 
 SPICE 沿用 Fisher/D-optimal design 的集合目标：
 
-$$
-F_S=\sum_{i\in S}g_i g_i^\top,
-\qquad
-U(S)=\log\det(I+\alpha F_S).
-$$
+$$F_S=\sum_{i\in S}g_i g_i^\top, \qquad U(S)=\log\det(I+\alpha F_S).$$
 
 其候选边际覆盖增益为：
 
-$$
-\Delta_x(S)
-=
-\log\left(
-1+\alpha g_x^\top(I+\alpha F_S)^{-1}g_x
-\right).
-$$
+$$\Delta_x(S) = \log\left( 1+\alpha g_x^\top(I+\alpha F_S)^{-1}g_x \right).$$
 
 它与 G-Vendi 都读取梯度谱，但优化语义不同：
 
@@ -112,11 +87,7 @@ $$
 
 从目标化 shortlist 中迭代加入使谱熵增益最大的样本：
 
-$$
-z^*=\arg\max_{z\notin S}
-\left[\alpha v(z)+\beta\Delta\log\mathrm{GV}(z\mid S)\right]
-\quad\text{s.t.}\ r(z)\le\epsilon.
-$$
+$$z^*=\arg\max_{z\notin S} \left[\alpha v(z)+\beta\Delta\log\mathrm{GV}(z\mid S)\right] \quad\text{s.t.}\ r(z)\le\epsilon.$$
 
 生产上不必每次完整特征分解：
 

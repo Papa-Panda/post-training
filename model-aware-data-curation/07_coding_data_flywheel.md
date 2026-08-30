@@ -67,9 +67,7 @@ provenance 和 parent IDs 用于发现生成循环中的近重复与污染。
 
 每簇抽取少量去污染、人工/执行可信的 $V_k$，计算 $\bar g_{V_k}$。候选样本可同时拥有多个 alignment：
 
-$$
-a_{ik}=\cos(\tilde g_i,\bar g_{V_k}).
-$$
+$$a_{ik}=\cos(\tilde g_i,\bar g_{V_k}).$$
 
 这样能按能力缺口分配预算，而不是把所有 coding data 压成单个总分。
 

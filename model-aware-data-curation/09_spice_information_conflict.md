@@ -12,9 +12,7 @@
 
 SPICE 仍从每个样本的 loss gradient 出发：
 
-$$
-g_i=\nabla_\theta \ell(z_i;\theta).
-$$
+$$g_i=\nabla_\theta \ell(z_i;\theta).$$
 
 per-sample gradient、proxy model、随机投影和 Fisher information 都已有清晰前序工作。SPICE 新增的关键不是一种新的 gradient embedding，而是一个逐步构造集合的规则：
 
@@ -30,36 +28,21 @@ per-sample gradient、proxy model、随机投影和 Fisher information 都已有
 
 对已选集合 $S$，定义经验 Fisher 矩阵：
 
-$$
-F_S=\sum_{i\in S}g_i g_i^\top.
-$$
+$$F_S=\sum_{i\in S}g_i g_i^\top.$$
 
 信息效用为：
 
-$$
-U(S)=\log\det(I+\alpha F_S).
-$$
+$$U(S)=\log\det(I+\alpha F_S).$$
 
 加入候选 $x$ 的边际增益可由 matrix determinant lemma 写为：
 
-$$
-\Delta_x(S)
-=
-\log\left(
-1+\alpha g_x^\top
-(I+\alpha F_S)^{-1}g_x
-\right).
-$$
+$$\Delta_x(S) = \log\left( 1+\alpha g_x^\top (I+\alpha F_S)^{-1}g_x \right).$$
 
 如果 $g_x$ 主要落在当前 Fisher 尚未覆盖的方向，逆矩阵项不会把它压小，$\Delta_x(S)$ 较大；如果它与已选子空间高度重复，增益就会下降。
 
 纯 $U(S)$ 是 normalized、monotone、submodular。固定预算 $k$ 下，纯 Fisher greedy 有经典保证：
 
-$$
-U(S_{\mathrm{greedy}})
-\ge
-\left(1-\frac1e\right)U(S^\star).
-$$
+$$U(S_{\mathrm{greedy}}) \ge \left(1-\frac1e\right)U(S^\star).$$
 
 这部分是 D-optimal design / Fisher selection 的共同数学骨架，不是 SPICE 独有的 gradient representation。
 
@@ -67,15 +50,11 @@ $$
 
 对任意梯度 $g$：
 
-$$
-gg^\top=(-g)(-g)^\top.
-$$
+$$gg^\top=(-g)(-g)^\top.$$
 
 所以给定同一个已选集合，$g$ 和 $-g$ 的 Fisher marginal gain 完全相同：
 
-$$
-\Delta_g(S)=\Delta_{-g}(S).
-$$
+$$\Delta_g(S)=\Delta_{-g}(S).$$
 
 这意味着 Fisher/log-det 能判断“是否带来新的轴或新的 information volume”，却不能判断“这个更新沿该轴向前还是向后”。
 
@@ -90,31 +69,15 @@ $$
 
 令已选集合平均梯度为：
 
-$$
-\bar g_S=\frac1{|S|}\sum_{i\in S}g_i.
-$$
+$$\bar g_S=\frac1{|S|}\sum_{i\in S}g_i.$$
 
 SPICE 定义候选相对于已选集合的冲突：
 
-$$
-\mathrm{conflict}(x\mid S)
-=
-\max\left\{
-0,
--\frac{g_x^\top\bar g_S}
-{\lVert g_x\rVert_2\lVert\bar g_S\rVert_2+\eta}
-\right\}.
-$$
+$$\mathrm{conflict}(x\mid S) = \max\left\{ 0, -\frac{g_x^\top\bar g_S} {\lVert g_x\rVert_2\lVert\bar g_S\rVert_2+\eta} \right\}.$$
 
 实际 greedy score 是：
 
-$$
-\mathrm{score}(x\mid S)
-=
-\Delta_x(S)
--
-\lambda\,\mathrm{conflict}(x\mid S).
-$$
+$$\mathrm{score}(x\mid S) = \Delta_x(S) - \lambda\,\mathrm{conflict}(x\mid S).$$
 
 因此：
 
@@ -124,11 +87,7 @@ $$
 
 论文默认 $\lambda=0.1$，并报告 $\lambda\in[0.1,0.5]$ 时表现较稳定。SPICE+ 还可用信息增益而非总 score 提前停止：
 
-$$
-\Delta_{x_t}(S_{t-1})
-\le
-\omega\Delta_{x_1}(\varnothing),
-$$
+$$\Delta_{x_t}(S_{t-1}) \le \omega\Delta_{x_1}(\varnothing),$$
 
 默认 $\omega=0.5$。
 
@@ -138,58 +97,31 @@ $$
 
 论文定义空集合上的单点基线：
 
-$$
-b_x=\Delta_x(\varnothing)
-=\log(1+\alpha\lVert g_x\rVert_2^2),
-$$
+$$b_x=\Delta_x(\varnothing) =\log(1+\alpha\lVert g_x\rVert_2^2),$$
 
 以及边际增益衰减：
 
-$$
-\epsilon_x(S)=\Delta_x(S)-b_x\le 0.
-$$
+$$\epsilon_x(S)=\Delta_x(S)-b_x\le 0.$$
 
 其近似分析把衰减幅度连接到 pairwise gradient interaction：
 
-$$
-|\epsilon_x(S)|
-\le
-C
-\frac{
-\alpha^2\sum_{y\in S}(g_x^\top g_y)^2
-}{
-1+\alpha\lVert g_x\rVert_2^2
-}.
-$$
+$$|\epsilon_x(S)| \le C \frac{ \alpha^2\sum_{y\in S}(g_x^\top g_y)^2 }{ 1+\alpha\lVert g_x\rVert_2^2 }.$$
 
 也可用 total curvature：
 
-$$
-c=
-1-\min_x
-\frac{\Delta_x(D\setminus\{x\})}
-{\Delta_x(\varnothing)}
-$$
+$$c= 1-\min_x \frac{\Delta_x(D\setminus\{x\})} {\Delta_x(\varnothing)}$$
 
 写出更细的数据依赖保证：
 
-$$
-U(S_{\mathrm{greedy}})
-\ge
-\frac{1-e^{-c}}{c}U(S^\star).
-$$
+$$U(S_{\mathrm{greedy}}) \ge \frac{1-e^{-c}}{c}U(S^\star).$$
 
 但这里有一个不能略过的逻辑边界：理论中的 interaction 是
 
-$$
-(g_x^\top g_y)^2,
-$$
+$$(g_x^\top g_y)^2,$$
 
 它对正负号不敏感；实际 conflict penalty 却只惩罚
 
-$$
-g_x^\top\bar g_S<0.
-$$
+$$g_x^\top\bar g_S<0.$$
 
 所以二者控制的不是同一个量：
 
@@ -206,13 +138,7 @@ $$
 
 对象是整个已选集合的 span、kernel spectrum 或 information volume：
 
-$$
-\Delta_x^{\mathrm{cover}}(S)
-=
-\log\det(I+\alpha F_{S\cup\{x\}})
--
-\log\det(I+\alpha F_S).
-$$
+$$\Delta_x^{\mathrm{cover}}(S) = \log\det(I+\alpha F_{S\cup\{x\}}) - \log\det(I+\alpha F_S).$$
 
 参照物是**已覆盖子空间**，输出是 set-dependent marginal gain。它不需要一个单独的 target direction，而且 Fisher 外积本身 sign-blind。
 
@@ -220,9 +146,7 @@ $$
 
 SPICE 比较：
 
-$$
-g_x\quad\text{vs.}\quad\bar g_S.
-$$
+$$g_x\quad\text{vs.}\quad\bar g_S.$$
 
 参照物是**由 selector 自己构造、不断变化的已选集合均值**。它回答的是 optimizer coherence，而不是业务目标价值或安全保留。
 
@@ -230,17 +154,9 @@ $$
 
 真正的 retention anchor 来自 held-out general/safety/replay set：
 
-$$
-g_{\mathrm{protected}}
-=
-\frac1{|P|}\sum_{p\in P}\nabla_\theta\ell(p;\theta),
-$$
+$$g_{\mathrm{protected}} = \frac1{|P|}\sum_{p\in P}\nabla_\theta\ell(p;\theta),$$
 
-$$
-\mathrm{risk}_{\mathrm{retain}}(x)
-=
-\max\{0,-\cos(g_x,g_{\mathrm{protected}})\}.
-$$
+$$\mathrm{risk}_{\mathrm{retain}}(x) = \max\{0,-\cos(g_x,g_{\mathrm{protected}})\}.$$
 
 参照物是**外部定义的 protected objective**。即使 $g_x$ 与 $\bar g_S$ 同向、SPICE conflict 为 0，它也可能与 $g_{\mathrm{protected}}$ 反向并导致遗忘。因此 selected-set conflict 不等于 retention safety。
 
@@ -248,13 +164,7 @@ $$
 
 梯度孤立只是一个静态症状：
 
-$$
-\mathrm{Isolation}(x)
-=
-1-
-\max_{y\in D\setminus\{x\}}
-|\cos(g_x,g_y)|.
-$$
+$$\mathrm{Isolation}(x) = 1- \max_{y\in D\setminus\{x\}} |\cos(g_x,g_y)|.$$
 
 高 isolation 可能表示：
 
@@ -269,13 +179,7 @@ $$
 
 设当前已选均值、保护梯度和目标梯度分别为：
 
-$$
-\bar g_S=e_1,
-\qquad
-g_{\mathrm{protected}}=-e_1,
-\qquad
-g_{\mathrm{target}}=e_1.
-$$
+$$\bar g_S=e_1, \qquad g_{\mathrm{protected}}=-e_1, \qquad g_{\mathrm{target}}=e_1.$$
 
 候选 $x$ 的梯度为 $g_x=e_1$：
 

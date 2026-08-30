@@ -11,10 +11,7 @@
 
 目标域数据梯度为 $g_d$，保护集梯度为 $g_p$。一步 SGD 后：
 
-$$
-L_p(\theta-\eta g_d)
-\approx L_p(\theta)-\eta g_p^\top g_d.
-$$
+$$L_p(\theta-\eta g_d) \approx L_p(\theta)-\eta g_p^\top g_d.$$
 
 若 $g_p^\top g_d<0$，目标域更新会一阶增加保护集损失，即梯度冲突。高 target relevance 并不排除这种冲突。
 
@@ -39,21 +36,13 @@ full domain pool -> 1-epoch probe -> gradient statistics
 
 两个基本量：
 
-$$
-\text{conflict}(z)=\max(0,-\cos(g_z,g_p)),
-$$
+$$\text{conflict}(z)=\max(0,-\cos(g_z,g_p)),$$
 
-$$
-\text{orthogonality}(z)=1-|\cos(g_z,g_p)|.
-$$
+$$\text{orthogonality}(z)=1-|\cos(g_z,g_p)|.$$
 
 但“完全正交”只表示不干扰，也可能没有目标学习价值；所以实际目标应同时包含 domain gain：
 
-$$
-\max_{S,|S|\le B}\ \mathrm{Gain}_{\mathrm{domain}}(S)
-\quad\text{s.t.}\quad
-\mathbb E_{z\in S}[\text{conflict}(z)]\le\epsilon.
-$$
+$$\max_{S,|S|\le B}\ \mathrm{Gain}_{\mathrm{domain}}(S) \quad\text{s.t.}\quad \mathbb E_{z\in S}[\text{conflict}(z)]\le\epsilon.$$
 
 OGS 将 optimizer 每步投影的几何思想变成离线/阶段性 data surgery，减少 target training 的 runtime overhead；论文还使用 Navigator–Target 架构与 RL-driven selection policy。它是较新的预印本，需独立复现后再判断跨模型迁移可靠性。
 
@@ -61,23 +50,13 @@ OGS 将 optimizer 每步投影的几何思想变成离线/阶段性 data surgery
 
 SPICE 的参照物是已选集合的平均梯度：
 
-$$
-\bar g_S=\frac1{|S|}\sum_{i\in S}g_i,
-$$
+$$\bar g_S=\frac1{|S|}\sum_{i\in S}g_i,$$
 
-$$
-\mathrm{conflict}_{\mathrm{SPICE}}(x\mid S)
-=
-\max\{0,-\cos(g_x,\bar g_S)\}.
-$$
+$$\mathrm{conflict}_{\mathrm{SPICE}}(x\mid S) = \max\{0,-\cos(g_x,\bar g_S)\}.$$
 
 Retention 的参照物则必须来自明确的 protected set：
 
-$$
-\mathrm{risk}_{\mathrm{retain}}(x)
-=
-\max\{0,-\cos(g_x,g_{\mathrm{protected}})\}.
-$$
+$$\mathrm{risk}_{\mathrm{retain}}(x) = \max\{0,-\cos(g_x,g_{\mathrm{protected}})\}.$$
 
 两者虽然都用了负 cosine，语义却完全不同：
 

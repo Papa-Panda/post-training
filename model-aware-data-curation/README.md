@@ -22,10 +22,7 @@ select or generate ──► train ──► eval ──► refresh gradient map
 
 设候选样本为 $z=(x,y)$，当前代理模型参数为 $\theta$，目标验证集为 $V$：
 
-$$
-g_z=-\nabla_\theta\log p_\theta(y\mid x),\qquad
-\bar g_V=\frac1{|V|}\sum_{v\in V}g_v.
-$$
+$$g_z=-\nabla_\theta\log p_\theta(y\mid x),\qquad \bar g_V=\frac1{|V|}\sum_{v\in V}g_v.$$
 
 | 线 | 核心问题 | 几何对象 | 代表方法 |
 |---|---|---|---|
@@ -60,11 +57,7 @@ python3 -m unittest discover -s model-aware-data-curation/tests -v
 
 Prismatic Synthesis 把原本分开的三段串成闭环：
 
-$$
-\underbrace{\text{LESS-like target signal}}_{\text{想学什么}}
-+\underbrace{\text{G-Vendi coverage}}_{\text{还缺什么}}
-+\underbrace{\text{synthetic generation}}_{\text{主动补什么}}.
-$$
+$$\underbrace{\text{LESS-like target signal}}_{\text{想学什么}} +\underbrace{\text{G-Vendi coverage}}_{\text{还缺什么}} +\underbrace{\text{synthetic generation}}_{\text{主动补什么}}.$$
 
 但它仍是前沿而非成熟范式：
 
