@@ -54,7 +54,17 @@ raw / synthetic pool ──► quality + execution gates │
 
 必须把 `proxy_id/objective/layer_scope/projection_seed` 放进 key；不同协议的向量不可静默混用。
 
-## 3. 计算路径
+## 3. 计算路径与 Proxy 选择
+
+核心不是模型必须多大，而是两点：**梯度拿得到**，而且**梯度几何能代表目标模型**。
+
+1. 必须是白盒、可微模型，能计算每条样本的 loss/log-prob 对参数的梯度；只有闭源 API 输出通常不够。
+2. loss 要与目标匹配：SFT 用 answer NLL；RL 用当前 policy 的 log-prob × advantage；保护能力用 retention set loss。
+3. 不必计算全参数梯度，通常只取 LoRA、LM head 或若干层，再随机投影和归一化。
+4. proxy 不必和最终模型一样大，但最好同 tokenizer、同模型家族、同训练目标，而且至少已经具备基本任务能力；太弱的模型只会产生“我什么都不会”的噪声梯度。
+5. 必须抽样验证 proxy 与目标模型的数据排名相关性，否则小模型选出的数据未必对大模型有效。
+
+方法之间要求也不同：**TRAK/TracIn** 若要解释某个具体模型，最好直接用该模型或它的训练 checkpoints；**LESS/Prismatic/G-Vendi** 更适合用小型 instruction-tuned proxy；**GradAlign** 最严格，最好使用当前或接近当前的 policy，并随着 RL 训练周期性刷新。实践上可以从 **0.5B–7B proxy + LoRA/LM-head 梯度 + 256/1024维投影**开始，但这只是工程起点，不是理论保证。
 
 ### Per-sample gradients
 

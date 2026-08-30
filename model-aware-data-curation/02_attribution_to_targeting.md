@@ -66,7 +66,7 @@ $$\bar g^{RL}_{V,t}=\frac1{|V|}\sum_{v\in V}g^{RL}_{v,t}, \qquad a_{i,t}=\cos(g^
 
 GradAlign 是 2026 年预印本，适合作为前沿方向和系统设计参照，不应写成已成熟工业标准。
 
-## 5. 组合方式
+## 5. 组合方式与 Proxy 适配
 
 实用 pipeline：
 
@@ -81,3 +81,5 @@ quality gate
 ```
 
 归因给“价值”，但不保证“覆盖”；下一章用谱熵补上这一维。
+
+Proxy 适配差异：**TRAK/TracIn** 若要解释某个具体模型，最好直接用该模型或它的 checkpoints；**LESS/Prismatic/G-Vendi** 更适合小型 instruction-tuned proxy（论文主设置如 Qwen2.5-0.5B-Instruct）；**GradAlign** 最严格，最好用当前或接近当前的 policy 并周期性刷新。太弱的 proxy 只会产生“我什么都不会”的噪声梯度，工程上必须抽样验证 proxy 与目标模型的 ranking 相关性。
