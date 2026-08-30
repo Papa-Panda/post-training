@@ -32,11 +32,11 @@ $$\mathrm{VS}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$
 
 ## 3. G-Vendi：把特征换成 model-induced gradients
 
-Prismatic Synthesis 定义样本表征：
+Prismatic Synthesis 定义样本表征。这里用的不是最终 student model，也不是负责生成数据的 32B/72B teacher，而是一个单独的 **gradient proxy model**。论文主设置用 **Qwen2.5-0.5B-Instruct**，直接使用现成权重，**不做额外 warm-up 或微调**。对每条 $(x,y)$ 计算整个 proxy 的归一化 NLL 梯度：
 
 $$g_\theta(x,y)= \frac{-\nabla_\theta\log p_\theta(y\mid x)} {\lVert -\nabla_\theta\log p_\theta(y\mid x)\rVert_2},$$
 
-再用 Rademacher 随机矩阵 $\Pi\in\{-1,+1\}^{|\theta|\times d}$ 降维：
+再用 Rademacher 随机矩阵 $\Pi\in\{-1,+1\}^{|\theta|\times d}$ 降到 $d=1024$ 维：
 
 $$\tilde g_\theta(x,y)=\Pi^\top g_\theta(x,y),\qquad d\ll |\theta|.$$
 
@@ -44,7 +44,13 @@ $$\tilde g_\theta(x,y)=\Pi^\top g_\theta(x,y),\qquad d\ll |\theta|.$$
 
 $$\text{G-Vendi}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$
 
-论文实验使用 $d=1024$，并展示无需 in-domain warm-up 的小型 instruction-tuned proxy 也可提供有用梯度几何。
+Proxy 选择的已核实对比（论文报告 G-Vendi 与 OOD 表现的 Spearman 相关性）：
+
+- **Llama-3.2-1B-Instruct**：$\rho=0.909$
+- **Qwen2.5-0.5B-Instruct**：$\rho=0.898$
+- **Qwen2.5-0.5B base**：$\rho=0.772$
+
+说明模型家族影响不算大，但 **instruction-tuned proxy 明显好于 base model**；若 proxy 与最终 student 同模型家族，可能更好。这也解释了论文为何强调无需 in-domain warm-up 的小型 instruction-tuned proxy 也可提供有用梯度几何。
 
 ## 4. D4 / SemDeDup 与 G-Vendi 的关系
 

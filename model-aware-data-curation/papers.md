@@ -59,6 +59,8 @@ Verified from paper v2:
 - synthetic pool exceeds **3 million samples**;
 - G-Vendi reaches **Spearman $\rho\approx0.9$** with OOD performance on both NLI and math reasoning;
 - gradient sketch uses Rademacher random projection with $d=1024$ in experiments;
+- proxy is not the final student nor the 32B/72B generator; main setup uses **Qwen2.5-0.5B-Instruct** with off-the-shelf weights and no extra warm-up/fine-tuning; per-sample full-parameter normalized NLL gradient is projected to 1024 dims for G-Vendi and clustering;
+- ablated proxy correlation with OOD: Llama-3.2-1B-Instruct $\rho=0.909$, Qwen2.5-0.5B-Instruct $\rho=0.898$, Qwen2.5-0.5B base $\rho=0.772$, indicating instruction-tuned proxy is substantially better than base while family effect is modest;
 - process: gradient-space clustering → few-shot generation → keep sparse-cluster samples;
 - final datasets: **1.0M** Nemotron-PrismMath pairs and **515K** PrismNLI pairs;
 - PrismMath-7B result is better than R1-Distill-Qwen-7B on **6 of 7** listed benchmarks; PrismNLI improves average OOD accuracy by **8 percentage points** over the best prior mixture in the paper.
@@ -105,6 +107,7 @@ Boundary: recent preprint aimed at non-stationary LLM RL; do not conflate with t
 | TRAK reduces “thousands of models” to “a handful” | verified, exact original wording; no fixed count asserted |
 | Prismatic uses 300+ training runs/models | verified |
 | G-Vendi–OOD Spearman $\rho\approx0.9$ on NLI and math | verified |
+| Gradient proxy is Qwen2.5-0.5B-Instruct (no warm-up) with full-param NLL gradient → 1024-dim Rademacher projection; proxy ablation $\rho=0.909$ / $0.898$ / $0.772$ | verified |
 | Prismatic sparse-gradient-cluster loop | verified |
 | SPICE uses 10% of its roughly 97.5K pool in fixed-budget experiments | verified |
 | Pure Fisher/log-det is sign-blind, while SPICE's practical conflict penalty is sign-sensitive | verified from equations |

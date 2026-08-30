@@ -22,7 +22,7 @@ $$D_t \xrightarrow{\text{gradient map}} \text{sparse regions} \xrightarrow{\text
 
 从 seed pool $D_0$ 开始，每轮：
 
-1. **Cluster**：用 off-the-shelf proxy 计算 loss gradients，随机投影后做 $k$-means；
+1. **Cluster**：用 off-the-shelf proxy 计算 loss gradients，随机投影后做 $k$-means；这里用的不是最终 student，也不是 32B/72B teacher，而是单独的 gradient proxy。论文主设置用 **Qwen2.5-0.5B-Instruct**，不做额外 warm-up/微调，对每条 $(x,y)$ 计算全参数归一化 NLL 梯度并投影到 1024 维。论文还对比了 proxy 选择对 G-Vendi 与 OOD 表现相关性的影响：Llama-3.2-1B-Instruct $\rho=0.909$，Qwen2.5-0.5B-Instruct $\rho=0.898$，Qwen2.5-0.5B base $\rho=0.772$，说明 instruction-tuned 明显好于 base，家族差异相对较小；
 2. **Generate**：从当前池随机抽 few-shot examples，提示 generator 产生新样本；
 3. **Diversify**：只接收落入稀疏梯度簇的候选，再加入池中迭代。
 
