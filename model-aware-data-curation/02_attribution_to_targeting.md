@@ -41,6 +41,24 @@ $$\tau(v,D)=\phi(v)^\top (\Phi^\top\Phi+\lambda I)^{-1}\Phi^\top Q.$$
 
 **已核实 claim**：TRAK 原论文说 *a handful of trained models* 可匹配需要 *thousands of models* 的 attribution 方法。论文摘要没有承诺一个跨任务固定的模型数，所以本专题不写“固定 5 个”或“固定 20 个”。
 
+### 2.1 TRAK vs TracIn：同一家族，两条路线
+
+它们都用梯度估计训练数据对模型行为的影响，但 TRAK 不是 TracIn 的简单升级版。
+
+**TracIn 追踪训练轨迹：**
+
+$$\mathrm{TracIn}(z,v)=\sum_t\eta_t\,g_v(\theta_t)^\top g_z(\theta_t)$$
+
+看训练样本 $z$ 与目标 $v$ 在多个 checkpoint 上是否持续梯度同向。优点是直观、不求 Hessian；缺点是依赖训练 checkpoint，而且没有显式校正大量相似数据之间的相关性。
+
+**TRAK 在训练完成附近做线性化：**
+
+$$\tau(v,z)\approx \phi(v)^\top(\Phi^\top\Phi+\lambda I)^{-1}\phi(z)$$
+
+它随机投影高维梯度，用 Gram 矩阵逆校正特征相关性，再对少量独立模型取平均，逼近“删掉某些训练数据会怎样”的反事实影响。
+
+一句话：**TracIn 看一条样本沿训练过程做过多少贡献；TRAK 建立一个局部线性模型，更高效地估计训练集对子行为的反事实贡献。** TracIn 更像训练录像回放，TRAK 更像训练完成后的因果审计模型。
+
 ## 3. Targeted selection：从解释过去到选择未来
 
 归因问“谁造成了预测”；目标化选择把同一几何反向用于候选排序：
