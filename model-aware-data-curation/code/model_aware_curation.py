@@ -76,6 +76,76 @@ def gradient_vendi(gradients: Array, eps: float = 1e-12) -> float:
     return float(np.exp(-np.sum(p * np.log(p))))
 
 
+def fisher_logdet(gradients: Array, alpha: float = 1.0) -> float:
+    """Log determinant of I + alpha times the empirical Fisher matrix."""
+    g = _as_2d(gradients)
+    if alpha < 0.0:
+        raise ValueError("alpha must be non-negative")
+    information = np.eye(g.shape[1]) + alpha * (g.T @ g)
+    sign, value = np.linalg.slogdet(information)
+    if sign <= 0.0:
+        raise ValueError("information matrix must be positive definite")
+    return float(value)
+
+
+def fisher_marginal_gain(
+    selected_gradients: Array, candidate_gradient: Array, alpha: float = 1.0
+) -> float:
+    """Marginal Fisher/log-det gain from adding one candidate gradient."""
+    selected = _as_2d(selected_gradients)
+    candidate = np.asarray(candidate_gradient, dtype=np.float64).reshape(-1)
+    if candidate.shape[0] != selected.shape[1]:
+        raise ValueError("selected and candidate gradient dimensions do not match")
+    before = fisher_logdet(selected, alpha=alpha)
+    after = fisher_logdet(np.vstack([selected, candidate]), alpha=alpha)
+    return after - before
+
+
+def selected_set_conflict(
+    candidate_gradient: Array, selected_gradients: Array, eta: float = 1e-12
+) -> float:
+    """SPICE's negative-cosine penalty against the selected-set mean."""
+    selected = _as_2d(selected_gradients)
+    candidate = np.asarray(candidate_gradient, dtype=np.float64).reshape(-1)
+    if candidate.shape[0] != selected.shape[1]:
+        raise ValueError("selected and candidate gradient dimensions do not match")
+    if selected.shape[0] == 0:
+        return 0.0
+    mean = selected.mean(axis=0)
+    denominator = float(np.linalg.norm(candidate) * np.linalg.norm(mean) + eta)
+    cosine = float(candidate @ mean) / denominator
+    return max(0.0, -cosine)
+
+
+def spice_score(
+    selected_gradients: Array,
+    candidate_gradient: Array,
+    alpha: float = 1.0,
+    conflict_weight: float = 0.1,
+    eta: float = 1e-12,
+) -> float:
+    """Fisher marginal gain minus SPICE's selected-set conflict penalty."""
+    if conflict_weight < 0.0:
+        raise ValueError("conflict_weight must be non-negative")
+    gain = fisher_marginal_gain(selected_gradients, candidate_gradient, alpha)
+    conflict = selected_set_conflict(candidate_gradient, selected_gradients, eta)
+    return gain - conflict_weight * conflict
+
+
+def gradient_isolation_scores(gradients: Array, eps: float = 1e-12) -> Array:
+    """One minus maximum absolute cosine to any other sample.
+
+    This is a novelty diagnostic, not a usefulness or learnability score.
+    """
+    g = row_normalize(gradients, eps=eps)
+    n = g.shape[0]
+    if n < 2:
+        return np.ones(n, dtype=np.float64)
+    similarities = np.clip(np.abs(g @ g.T), 0.0, 1.0)
+    np.fill_diagonal(similarities, -np.inf)
+    return 1.0 - np.max(similarities, axis=1)
+
+
 def conflict_scores(gradients: Array, protection_gradient: Array) -> Array:
     """Positive risk for directions opposed to a protected capability."""
     return np.maximum(0.0, -cosine_scores(gradients, protection_gradient))
@@ -105,6 +175,79 @@ class SelectionResult:
     target_scores: Array
     conflict_scores: Array
     vendi: float
+
+
+@dataclass(frozen=True)
+class SpiceSelectionResult:
+    indices: list[int]
+    information_gains: list[float]
+    conflicts: list[float]
+    scores: list[float]
+    logdet: float
+
+
+def spice_greedy_select(
+    gradients: Array,
+    budget: int,
+    alpha: float = 1.0,
+    conflict_weight: float = 0.1,
+    early_stop_ratio: float | None = None,
+    eta: float = 1e-12,
+) -> SpiceSelectionResult:
+    """Greedily maximize Fisher gain minus selected-set conflict.
+
+    If ``early_stop_ratio`` is set, selection stops before adding a later
+    candidate whose Fisher gain is no larger than that fraction of the first
+    selected candidate's gain. This mirrors the SPICE+ stopping criterion.
+    """
+    g = _as_2d(gradients)
+    if budget < 0:
+        raise ValueError("budget must be non-negative")
+    if conflict_weight < 0.0:
+        raise ValueError("conflict_weight must be non-negative")
+    if early_stop_ratio is not None and not 0.0 <= early_stop_ratio <= 1.0:
+        raise ValueError("early_stop_ratio must be in [0, 1]")
+
+    selected: list[int] = []
+    remaining = list(range(g.shape[0]))
+    information_gains: list[float] = []
+    conflicts: list[float] = []
+    scores: list[float] = []
+    first_gain: float | None = None
+
+    while remaining and len(selected) < budget:
+        selected_gradients = g[selected]
+        best: tuple[float, int, float, float] | None = None
+        for index in remaining:
+            gain = fisher_marginal_gain(selected_gradients, g[index], alpha)
+            conflict = selected_set_conflict(g[index], selected_gradients, eta)
+            score = gain - conflict_weight * conflict
+            candidate = (float(score), -index, float(gain), float(conflict))
+            if best is None or candidate > best:
+                best = candidate
+
+        assert best is not None
+        score, negative_index, gain, conflict = best
+        index = -negative_index
+        if (
+            first_gain is not None
+            and early_stop_ratio is not None
+            and gain <= early_stop_ratio * first_gain
+        ):
+            break
+
+        selected.append(index)
+        remaining.remove(index)
+        information_gains.append(gain)
+        conflicts.append(conflict)
+        scores.append(score)
+        if first_gain is None:
+            first_gain = gain
+
+    final_logdet = fisher_logdet(g[selected], alpha) if selected else 0.0
+    return SpiceSelectionResult(
+        selected, information_gains, conflicts, scores, final_logdet
+    )
 
 
 def greedy_select(

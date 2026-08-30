@@ -2,7 +2,7 @@
 
 ## 元信息
 - 内容类型：跨论文方法综述（embedding diversity → gradient diversity）
-- 核心论文：[Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning](https://arxiv.org/abs/2505.20161)
+- 核心论文：[Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning](https://arxiv.org/abs/2505.20161) · [SPICE: Submodular Penalized Information-Conflict Selection for Efficient Large Language Model Training](https://arxiv.org/pdf/2601.23155v2)
 - 已有 `ai-data` 精读：[Vendi Score](../ai-data/day-19-2023-vendi-score/NOTES.md) · [D4 / SemDeDup](../ai-data/day-24-2023-semdedup-d4/NOTES.md)
 
 
@@ -79,7 +79,36 @@ exact dedup -> semantic dedup -> quality gate -> gradient-space coverage
 
 低成本规则先缩池，昂贵梯度只算在剩余候选上。
 
-## 5. Coverage-aware greedy selection
+## 5. Fisher/log-det：另一种 gradient-space coverage
+
+SPICE 沿用 Fisher/D-optimal design 的集合目标：
+
+$$
+F_S=\sum_{i\in S}g_i g_i^\top,
+\qquad
+U(S)=\log\det(I+\alpha F_S).
+$$
+
+其候选边际覆盖增益为：
+
+$$
+\Delta_x(S)
+=
+\log\left(
+1+\alpha g_x^\top(I+\alpha F_S)^{-1}g_x
+\right).
+$$
+
+它与 G-Vendi 都读取梯度谱，但优化语义不同：
+
+| 方法 | 集合量 | 更直接鼓励什么 |
+|---|---|---|
+| G-Vendi | 归一化谱的指数熵 | 有效方向数与谱均匀度 |
+| Fisher/log-det | $\log\det(I+\alpha F_S)$ | information volume 与新方向的边际增益 |
+
+两者还有一个共同边界：基于 $g_i g_i^\top$ 或 Gram spectrum 的 coverage 对 $g_i$ 与 $-g_i$ 不敏感。它们能识别“轴是否新”，不能单独识别“沿该轴更新的符号是否会抵消训练”。SPICE 因此在 Fisher marginal gain 外另加 sign-sensitive conflict penalty；完整推导见 [`09_spice_information_conflict.md`](09_spice_information_conflict.md)。
+
+## 6. Coverage-aware greedy selection
 
 从目标化 shortlist 中迭代加入使谱熵增益最大的样本：
 
@@ -96,7 +125,7 @@ $$
 - 周期性精确算 G-Vendi 作为监控，而非每个候选都做 eigendecomposition；
 - 记录每个簇的 correctness rate，防止“噪声 = 多样性”。
 
-## 6. 证据边界
+## 7. 证据边界
 
 Prismatic 报告 G-Vendi 与 OOD performance 的 Spearman $\rho\approx0.9$，且在 NLI 和数学推理上观察到；这是受控数据规模/质量下的秩相关。它不意味着：
 

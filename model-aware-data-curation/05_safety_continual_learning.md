@@ -1,7 +1,7 @@
 # 05 — 安全与持续学习：GrADS / OGS
 
 ## 元信息
-- 内容类型：双论文对照 + 持续学习综合
+- 内容类型：双论文对照 + 持续学习综合；用 SPICE 反例澄清 selected-set conflict 不等于 retention
 - Paper 1: **Learn More, Forget Less: A Gradient-Aware Data Selection Approach for LLM (GrADS)** — https://arxiv.org/abs/2511.08620
 - Paper 2: **Training Data Selection with Gradient Orthogonality for Efficient Domain Adaptation (OGS)** — https://arxiv.org/abs/2602.06359
 - 论文状态：均为预印本；本章把实验结论与工程推演分开标注。
@@ -57,15 +57,45 @@ $$
 
 OGS 将 optimizer 每步投影的几何思想变成离线/阶段性 data surgery，减少 target training 的 runtime overhead；论文还使用 Navigator–Target 架构与 RL-driven selection policy。它是较新的预印本，需独立复现后再判断跨模型迁移可靠性。
 
-## 4. 与 GradAlign 的区别
+## 4. SPICE conflict 为什么不是 retention safety
+
+SPICE 的参照物是已选集合的平均梯度：
+
+$$
+\bar g_S=\frac1{|S|}\sum_{i\in S}g_i,
+$$
+
+$$
+\mathrm{conflict}_{\mathrm{SPICE}}(x\mid S)
+=
+\max\{0,-\cos(g_x,\bar g_S)\}.
+$$
+
+Retention 的参照物则必须来自明确的 protected set：
+
+$$
+\mathrm{risk}_{\mathrm{retain}}(x)
+=
+\max\{0,-\cos(g_x,g_{\mathrm{protected}})\}.
+$$
+
+两者虽然都用了负 cosine，语义却完全不同：
+
+- $\bar g_S$ 由 selector 内生决定，问“会不会抵消当前训练集合”；
+- $g_{\mathrm{protected}}$ 由安全、通用能力或旧任务目标外生定义，问“会不会损害必须保留的能力”。
+
+若 $g_x=\bar g_S=-g_{\mathrm{protected}}$，则 SPICE conflict 为 0，但 retention risk 为 1。集合内部高度协调，完全可能一致地朝损害旧能力的方向更新。因此 SPICE 可作为 optimization-coherence 项，不能代替 held-out retention anchor、回放或安全评估。更完整的 Fisher/sign 分析见 [`09_spice_information_conflict.md`](09_spice_information_conflict.md)。
+
+## 5. 与 GradAlign 的区别
 
 | 方法 | 被保护/优化对象 | 信号 | 更新频率 |
 |---|---|---|---|
 | GrADS | 域能力 + 一般能力 | embedding/LM-head 梯度统计 | preliminary pass 后选数 |
 | OGS | 域能力，同时保护 general anchor | 正交/冲突几何 + selector policy | 选择阶段动态决策 |
+| SPICE | 已选训练集合内部协调 | candidate 与 selected-set mean 的负 cosine | 每次 greedy 加点时更新 |
 | GradAlign | RL downstream validation | 当前 policy gradient 对齐 | 周期性重算 curriculum |
 
-## 5. 持续学习控制面
+## 6. 持续学习控制面
 
 每轮 $t$ 保存四类指标：
 
@@ -86,7 +116,7 @@ if proxy/target rank correlation drops:
     refresh proxy or sample gradients on target model
 ```
 
-## 6. 安全边界
+## 7. 安全边界
 
 梯度不冲突只是一阶局部条件，不保证：
 

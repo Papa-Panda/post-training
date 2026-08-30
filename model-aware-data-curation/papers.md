@@ -31,6 +31,23 @@ Verified from the paper abstract:
 
 Boundary: “handful” is the authors' wording; the abstract does not define one universal count, so this repo does not replace it with a guessed number.
 
+### SPICE (2026, ICLR)
+
+**SPICE: Submodular Penalized Information-Conflict Selection for Efficient Large Language Model Training**
+[arXiv v2](https://arxiv.org/pdf/2601.23155v2) · [OpenReview](https://openreview.net/attachment?id=9rCRy58TPF&name=pdf) · [official code](https://github.com/Chang-pw/SPICE)
+
+Verified from the ICLR 2026 paper and official repository:
+
+- selects SFT subsets by combining Fisher/log-det marginal information gain with a negative-cosine penalty against the selected-set mean gradient;
+- pure Fisher/log-det is monotone submodular and supports the classical greedy approximation guarantee;
+- the paper's interaction bound depends on squared gradient inner products, while the implemented conflict penalty is sign-sensitive;
+- supports proxy gradients and SPICE+ early stopping; the paper uses default conflict weight $\lambda=0.1$ and stopping ratio $\omega=0.5$;
+- training pool is about 97.5K examples from math, code, ShareGPT and Alpaca; fixed-budget experiments select 10%;
+- across 8 benchmarks, Qwen2-7B averages 58.0 versus 56.4 for full-data, while LLaMA2-7B averages 31.1 versus 30.8 for full-data;
+- same-family proxy transfer is substantially more reliable than the reported LLaMA-proxy to Qwen2-7B transfer.
+
+Boundary: SPICE measures gradient-space information coverage and selected-set optimization coherence. Its selected-set conflict is not a protected-set retention objective. The submodular/curvature guarantee for pure Fisher/log-det greedy does not fully establish the actual sign-sensitive penalized score. Table 2 labels the LLaMA2 average improvement as `+1.8`, but the displayed averages differ by $31.1-30.8=0.3$; `1.8` is the sum of the eight per-benchmark differences, not their average.
+
 ### Prismatic Synthesis / G-Vendi (2025, NeurIPS)
 
 **Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning**
@@ -89,6 +106,10 @@ Boundary: recent preprint aimed at non-stationary LLM RL; do not conflate with t
 | Prismatic uses 300+ training runs/models | verified |
 | G-Vendi–OOD Spearman $\rho\approx0.9$ on NLI and math | verified |
 | Prismatic sparse-gradient-cluster loop | verified |
+| SPICE uses 10% of its roughly 97.5K pool in fixed-budget experiments | verified |
+| Pure Fisher/log-det is sign-blind, while SPICE's practical conflict penalty is sign-sensitive | verified from equations |
+| Pure Fisher greedy's approximation guarantee automatically applies to the penalized SPICE score | **not claimed** |
+| SPICE selected-set conflict guarantees protected-capability retention | **not claimed** |
 | G-Vendi guarantees OOD improvement on arbitrary tasks | **not claimed** |
 | GrADS universal best subset size is 5% | **not claimed** |
 | OGS/GradAlign are mature production standards | **not claimed** |

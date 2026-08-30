@@ -4,9 +4,12 @@
 import numpy as np
 
 from model_aware_curation import (
+    fisher_marginal_gain,
     gradient_vendi,
     greedy_select,
+    selected_set_conflict,
     sparse_cluster_ids,
+    spice_greedy_select,
 )
 
 
@@ -45,3 +48,25 @@ if __name__ == "__main__":
 
     # Cluster IDs could come from k-means over a real gradient datastore.
     print("sparse cluster IDs:", sparse_cluster_ids([0, 0, 0, 1, 1, 2], 0.34))
+
+    # Fisher coverage cannot distinguish a gradient from its negation, while
+    # SPICE's selected-set conflict is sign-sensitive.
+    selected = np.array([[1.0, 0.0]])
+    positive = np.array([1.0, 0.0])
+    negative = -positive
+    print(
+        "Fisher gains (+g, -g):",
+        round(fisher_marginal_gain(selected, positive), 4),
+        round(fisher_marginal_gain(selected, negative), 4),
+    )
+    print(
+        "SPICE conflicts (+g, -g):",
+        round(selected_set_conflict(positive, selected), 4),
+        round(selected_set_conflict(negative, selected), 4),
+    )
+
+    spice_pool = np.array([[1.0, 0.0], [1.0, 0.0], [-1.0, 0.0], [0.0, 1.0]])
+    spice_result = spice_greedy_select(
+        spice_pool, budget=3, alpha=1.0, conflict_weight=0.5
+    )
+    print("SPICE selected indices:", spice_result.indices)
