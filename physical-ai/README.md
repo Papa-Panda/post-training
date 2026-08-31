@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（9已完成/30总规划）
+├── README.md                # 本路线图（10已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (9/30 - 已起步)
+## 发展路线图 (10/30 - 已起步)
 
-> 总计 **30篇** 即闭环，当前 Day01 ARI/MSL + Day02 MuJoCo + Day03 Isaac Lab + Day04 Genie + Day05 UniSim + Day06 DreamerV3 + Day07 H2O Whole-Body Control + Day08 Humanoid-Gym Locomotion + Day09 RT-2 / OpenVLA 已完成。
+> 总计 **30篇** 即闭环，当前 Day01 ARI/MSL + Day02 MuJoCo + Day03 Isaac Lab + Day04 Genie + Day05 UniSim + Day06 DreamerV3 + Day07 H2O Whole-Body Control + Day08 Humanoid-Gym Locomotion + Day09 RT-2 / OpenVLA + Day10 Habitat 3.0 已完成。
 
 ### 图谱总览
 
@@ -52,9 +52,9 @@ graph TD
 | 07 | day-07-2024-h2o-whole-body-control | H2O — Human-to-Humanoid Real-Time Whole-Body Teleoperation ✅ 2026-08-28 | S |
 | 08 | day-08-2024-humanoid-gym-locomotion | Humanoid-Gym — RL Locomotion + Sim2Sim + Zero-Shot Sim2Real ✅ 2026-08-29 | A |
 | 09 | day-09-2024-rt2-openvla | RT-2 / OpenVLA — action tokenization + web knowledge transfer + open VLA scaling ✅ 2026-08-30 | S |
-| 10 | day-10-2024-habitat | Habitat 3.0 / Habitat Lab | A |
+| 10 | day-10-2023-habitat-3 | Habitat 3.0 / Habitat-Lab — humanoid simulation + HITL + social collaboration ✅ 2026-08-31 | A |
 
-### Day N 映射表 (9已完成)
+### Day N 映射表 (10已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -67,6 +67,7 @@ graph TD
 | 07 | day-07-2024-h2o-whole-body-control | sim-to-data 筛掉 embodiment-infeasible motions；deployable goal state + PPO + domain randomization 实现 RGB 驱动 H1 全身控制与 zero-shot sim2real | S |
 | 08 | day-08-2024-humanoid-gym-locomotion | Isaac Gym 8192-env PPO + 15-frame history + asymmetric critic + gait prior；MuJoCo sim2sim gate 后在 XBot-S/L 展示 zero-shot sim2real locomotion | A |
 | 09 | day-09-2024-rt2-openvla | RT-2 把 action 变成 token 并用 web+robot co-finetuning 保留语义；OpenVLA 用 970k OpenX demonstrations、DINOv2+SigLIP+Llama 2 7B 与 LoRA/量化把 VLA 变成开源可适配系统 | S |
+| 10 | day-10-2023-habitat-3 | 高速 SMPL-X humanoid + HITL + Social Navigation/Rearrangement；以 partner population 和未见场景评测协作泛化，暴露 oracle skill → learned skill 的层间 distribution shift | A |
 
 ---
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai
