@@ -24,6 +24,46 @@ grid
 - `block` 内线程可通过 shared memory 和 block barrier 协作；
 - `grid` 是一次 kernel launch 的全部 blocks。
 
+### 一个 SM 对应一个还是多个 blocks？
+
+**一个 block 只能在一个 SM 上执行，不能跨 SM 拆分；一个 SM 则通常可以同时驻留多个 blocks。** block 被调度到某个 SM 后，会一直留在那里直到执行完成。grid 中暂时放不下的 blocks 排队等待，等某个 SM 释放资源后再进入，因此 blocks 是分批（waves）执行的。
+
+```text
+Grid
+  ├─ Block 0 ─┐
+  ├─ Block 1 ─┼─> SM 0
+  ├─ Block 2 ─┘
+  ├─ Block 3 ─┐
+  └─ Block 4 ─┴─> SM 1
+```
+
+每个 SM 能同时驻留多少 blocks，不只取决于 block 数量上限，而是多种资源约束的最小值：
+
+$$B_{resident}=\min\left(B_{hw},\left\lfloor\frac{T_{SM}}{T_{block}}\right\rfloor,\left\lfloor\frac{W_{SM}}{W_{block}}\right\rfloor,\left\lfloor\frac{R_{SM}}{R_{block}}\right\rfloor,\left\lfloor\frac{S_{SM}}{S_{block}}\right\rfloor\right)$$
+
+其中 $T/W/R/S$ 分别代表 threads、warps、registers 和 shared memory。以 H100 的每 SM 最多 64 resident warps 为例：
+
+- `blockDim=256`：每 block 有 8 warps，只看 warp 上限最多是 $64/8=8$ blocks；
+- `blockDim=1024`：每 block 有 32 warps，只看 warp 上限最多是 $64/32=2$ blocks。
+
+实际值还可能被 registers 或 shared memory 进一步压低，所以 block 更大不保证更快。
+
+### 一个 warp 与 32 个 threads
+
+在当前 NVIDIA GPU 上，一个 warp 固定包含 32 threads。GPU 以 warp 为基本执行调度单位，但每个 thread 仍有自己的 `threadIdx`、register state 和数据地址。
+
+```text
+blockDim.x = 256
+Warp 0: threads   0–31
+Warp 1: threads  32–63
+...
+Warp 7: threads 224–255
+```
+
+因此一个 256-thread block 包含 8 warps。若 block 有 100 threads，则需要 $\lceil100/32\rceil=4$ warps；最后一个 warp 只有 4 个有效 threads，但仍占一个 warp 的调度位置。
+
+同一 warp 的 threads 执行相同指令、处理不同元素。如果同一 warp 内的 threads 走不同控制流路径，就会发生 **warp divergence**：硬件分别执行各条路径，并屏蔽当前路径不活跃的 lanes。分支本身不是问题；同一 warp 内路径不同才是问题。
+
 对 $N=1000$、`blockDim.x=256`：
 
 $$\text{gridDim.x}=\left\lceil\frac{1000}{256}\right\rceil=4$$

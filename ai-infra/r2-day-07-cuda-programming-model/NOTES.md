@@ -9,6 +9,52 @@
 - **Shared-memory bank conflict**：同一 warp 对多个不同地址的访问映射到同一 bank 时，请求被拆分/序列化；多个线程读同一地址的 broadcast 是例外。
 - **Occupancy**：active warps per SM 与该 SM 最大可能 active warps 的比值；它帮助隐藏延迟，但最大 occupancy 不是优化目标本身。
 
+## 核心心智模型：SM、block、warp、thread
+
+### SM 与 block 不是一一对应
+
+- 一个 block 只能驻留在一个 SM，不能跨 SM 拆分，也不会执行到一半迁移到另一个 SM；
+- 一个 SM 通常可以同时驻留多个 blocks，并在这些 blocks 的 ready warps 之间调度；
+- 放不下的 blocks 等待已有 blocks 完成，形成一轮一轮的 execution waves；
+- 每 SM 的 resident block 数由 thread、warp、register、shared-memory 和硬件 block 上限共同决定。
+
+$$B_{resident}=\min\left(B_{hw},\left\lfloor\frac{T_{SM}}{T_{block}}\right\rfloor,\left\lfloor\frac{W_{SM}}{W_{block}}\right\rfloor,\left\lfloor\frac{R_{SM}}{R_{block}}\right\rfloor,\left\lfloor\frac{S_{SM}}{S_{block}}\right\rfloor\right)$$
+
+H100 每个 SM 最多 64 resident warps。若暂时只看 warp 上限：
+
+| threads/block | warps/block | warp 上限给出的 blocks/SM 上界 |
+|---:|---:|---:|
+| 128 | 4 | 16 |
+| 256 | 8 | 8 |
+| 512 | 16 | 4 |
+| 1024 | 32 | 2 |
+
+这是资源上界，不是实测 occupancy；registers 和 shared memory 可能让实际 resident blocks 更少。
+
+### Warp 是 32 个 threads 的执行组
+
+`blockDim.x=256` 时：
+
+```text
+Warp 0: thread 0–31
+Warp 1: thread 32–63
+...
+Warp 7: thread 224–255
+```
+
+所以该 block 有 $256/32=8$ warps。若 block 有 100 threads，则创建 $\lceil100/32\rceil=4$ warps，最后一个 warp 只有 4 个有效 lanes。
+
+warp 是执行调度单位，不意味着 32 个 threads 共享一个逻辑线程：每个 thread 仍有自己的 index、register state 和输入/输出地址。对于：
+
+```cuda
+int i = blockIdx.x * blockDim.x + threadIdx.x;
+C[i] = A[i] + B[i];
+```
+
+一个 warp 的 32 个 threads 执行同一条 add 指令，但计算 32 个不同的 `i`。
+
+若同一 warp 内偶数 lanes 走路径 A、奇数 lanes 走路径 B，硬件需要分别执行两条路径并 mask 掉另一半 lanes，这叫 warp divergence。若整个 warp 一起选择同一路径，则没有 intra-warp divergence。
+
 ## 可手算小例子 1：launch geometry
 
 $N=1000$，每 block 256 threads：
