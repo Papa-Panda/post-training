@@ -1,6 +1,6 @@
 # Model-aware Data Curation
 
-> **基于梯度的数据价值、覆盖与生成**：不是再做一套逐篇 paper notes，而是把归因、目标化选择、多样性覆盖、主动生成与持续学习接成一个 model-in-the-loop 控制闭环。
+> **基于梯度与模型行为干预的数据价值、覆盖与生成**：不是再做一套逐篇 paper notes，而是把归因、目标化选择、多样性覆盖、主动生成与持续学习接成一个 model-in-the-loop 控制闭环。
 
 ## 一句话定位
 
@@ -10,7 +10,7 @@
 candidate pool / generator
         │
         ▼
-gradient probe ──► value / target alignment / coverage / conflict
+gradient / ICL probe ──► value / target alignment / coverage / conflict
         │                           │
         ▼                           ▼
 select or generate ──► train ──► eval ──► refresh gradient map
@@ -18,7 +18,7 @@ select or generate ──► train ──► eval ──► refresh gradient map
         └──────────────────────────────────────┘
 ```
 
-## 七条线，一套统一几何
+## 八条线，两类模型信号
 
 设候选样本为 $z=(x,y)$，当前代理模型参数为 $\theta$，目标验证集为 $V$：
 
@@ -28,6 +28,7 @@ $$g_z=-\nabla_\theta\log p_\theta(y\mid x),\qquad \bar g_V=\frac1{|V|}\sum_{v\in
 |---|---|---|---|
 | 归因基础 | 谁导致了这个行为？ | $g_z^\top H^{-1}g_v$ 或轨迹/投影近似 | Influence Functions, TracIn, TRAK |
 | 目标化选择 | 哪些样本推动目标能力？ | $\cos(\tilde g_z,\tilde g_V)$ | LESS, DataInf, GradAlign |
+| 无梯度估值 | 哪条 demonstration 能立刻改善目标探针集？ | 受控 ICL 干预下的 assessment PPL 改善 | RICo, Nuggets / ICP |
 | 多样性覆盖 | 当前梯度空间还缺哪些方向？ | 梯度核谱熵或 Fisher/log-det | Vendi, D4/SemDeDup, G-Vendi, FisherSFT |
 | 集合协调 | 候选会不会抵消已选集合的平均更新？ | candidate 与 selected-set mean 的负 cosine | SPICE |
 | 主动生成 | 如何补稀疏区域而非继续堆重复样本？ | 稀疏梯度簇 + rejection sampling | Prismatic Synthesis |
@@ -45,8 +46,9 @@ $$g_z=-\nabla_\theta\log p_\theta(y\mid x),\qquad \bar g_V=\frac1{|V|}\sum_{v\in
 7. [`07_coding_data_flywheel.md`](07_coding_data_flywheel.md) — coding-data 闭环：失败簇 → 生成 → 验证 → 训练 → 回归。
 8. [`08_ai_data_boundary.md`](08_ai_data_boundary.md) — 与 `ai-data/` 的边界、复用规则和去重清单。
 9. [`09_spice_information_conflict.md`](09_spice_information_conflict.md) — SPICE 的 Fisher/log-det、conflict-aware greedy、理论边界，以及 diversity / conflict / retention / unlearnability 四分法。
-10. [`papers.md`](papers.md) — 论文索引、年份、状态与 claim 证据。
-11. [`code/`](code/) + [`tests/`](tests/) — NumPy 最小 demo：target alignment、G-Vendi、Fisher/log-det、SPICE、稀疏簇选择与安全约束。
+10. [`10_rico_icl_valuation.md`](10_rico_icl_valuation.md) — RICo 用受控 ICL 干预近似训练贡献，补上 LESS/DataInf 之外的 gradient-free valuation 分支。
+11. [`papers.md`](papers.md) — 论文索引、年份、状态与 claim 证据。
+12. [`code/`](code/) + [`tests/`](tests/) — NumPy 最小 demo：target alignment、G-Vendi、Fisher/log-det、SPICE、稀疏簇选择与安全约束。
 
 ```bash
 python3 model-aware-data-curation/code/demo.py
@@ -61,7 +63,8 @@ python3 -m unittest discover -s model-aware-data-curation/tests -v
 
 - 读 `01` 建立 Value × Coverage × Safety 的统一优化式，理解 **选有用的、补缺的、不添乱的**；
 - 读 `02` 掌握归因到目标化选择的演进：Influence → TracIn/TRAK → LESS/DataInf → GradAlign；
-- 产出：能说清为什么不能把三个目标压成一个 cosine score。
+- 读 `10` 对比 LESS/DataInf 的梯度估值与 RICo 的 ICL 干预估值，理解 function-space proxy 的成本优势与偏差；
+- 产出：能说清为什么不能把 value、coverage、safety 压成一个 cosine score，也不能把 ICL contribution 直接当成 SGD contribution。
 
 ### Phase 2 — 覆盖与生成（Day 3–5）
 
@@ -78,8 +81,8 @@ python3 -m unittest discover -s model-aware-data-curation/tests -v
 - 产出：一个带质量门、conflict gate、G-Vendi 监控和 shadow mode 的最小 curation job。
 
 ```text
-01 统一框架 ──► 02 归因与目标化 ──► 03 覆盖 (G-Vendi/Fisher)
-      │                   │                      │
+01 统一框架 ──► 02 梯度估值 / 10 ICL估值 ──► 03 覆盖 (G-Vendi/Fisher)
+      │                        │                         │
       ▼                   ▼                      ▼
 06 系统架构 ◄── 09 协调与冲突 ◄── 04 主动生成 (Prismatic)
       │                   │
@@ -87,7 +90,7 @@ python3 -m unittest discover -s model-aware-data-curation/tests -v
 05 安全/持续学习 ──► 07 coding flywheel
 ```
 
-完成后，你会得到：**一套可复用的 gradient datastore + 三维 dashboard（correctness × target alignment × coverage）+ 可回放的版本化数据版本**。
+完成后，你会得到：**一套可复用的 gradient / ICL probe layer + 三维 dashboard（correctness × target value × coverage）+ 可回放的版本化数据版本**。
 
 ## 核心判断
 
@@ -102,6 +105,7 @@ $$\underbrace{\text{LESS-like target signal}}_{\text{想学什么}} +\underbrace
 - SPICE 的 Fisher/log-det 衡量 coverage，selected-set negative cosine 衡量 optimization coherence；两者不是同一个几何量；
 - diversity、selected-set conflict、protected-set retention 与 unlearnability 分别回答“缺不缺”“抵不抵消”“伤不伤旧能力”“学不学得进去”，不能混成一个 cosine score；
 - GradAlign、GrADS、OGS 的适用场景不同，不能把“高价值”“高覆盖”“低冲突”压成一个无条件总分；
+- RICo 用受控 ICL 效应近似训练价值，降低了逐样本梯度成本，但 ICL contribution 不等于 SGD contribution，且 assessment set 本身定义了价值函数；
 - 生产系统应保留质量门、执行验证、去污染和周期性全量评估。
 
 ## Verified headline numbers
@@ -110,5 +114,6 @@ $$\underbrace{\text{LESS-like target signal}}_{\text{想学什么}} +\underbrace
 - **Prismatic Synthesis (NeurIPS 2025)**：分析覆盖 **over 300 training runs**；G-Vendi 与 OOD 表现的 **Spearman $\rho\approx0.9$** 同时报告于 NLI 和数学推理；论文还构造了超过 300 万条样本的合成池。
 - **Prismatic 生成闭环**：梯度空间聚类 → few-shot 生成 → 只接收稀疏簇样本；论文实例使用最稀疏的簇（示例为 top 20%，具体实现为保留最小的 $k/2$ 个簇）。
 - **SPICE (ICLR 2026)**：从约 97.5K 条训练池选择 10%；Qwen2-7B 平均 58.0、full-data 56.4，LLaMA2-7B 平均 31.1、full-data 30.8。经典 submodular/curvature guarantee 直接对应纯 Fisher/log-det greedy，不完整覆盖加入 sign-sensitive conflict penalty 后的实际 score。
+- **RICo (2025 preprint / AAAI 2026 accepted)**：摘要报告 LLaMA3.1-8B 使用 15% RICo 数据比全量数据平均高 5.42 个百分点；原始 candidate × assessment 评分为 $O(nm)$，蒸馏为轻量 selector 后对全池为 $O(m)$。这不证明 ICL contribution 与真实 SGD contribution 等价。
 
 所有数字与出处见 [`papers.md`](papers.md)。

@@ -230,8 +230,8 @@ $$\bar g_S=e_1, \qquad g_{\mathrm{protected}}=-e_1, \qquad g_{\mathrm{target}}=e
 ## 导航
 
 - 上一篇：[08 与 ai-data 边界](08_ai_data_boundary.md)
-- 下一篇：[论文证据](papers.md)
+- 下一篇：[10 RICo：ICL 估值](10_rico_icl_valuation.md)
 - 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
 
-> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 10 RICo → 论文证据
 

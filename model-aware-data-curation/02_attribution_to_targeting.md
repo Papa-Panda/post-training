@@ -2,7 +2,7 @@
 
 ## 元信息
 - 内容类型：跨论文方法综述（归因 → 目标化选择）
-- 新增核心论文：[TRAK: Attributing Model Behavior at Scale](https://arxiv.org/abs/2303.14186) · [GradAlign: Gradient-Aligned Data Selection for LLM Reinforcement Learning](https://arxiv.org/abs/2602.21492v2)
+- 新增核心论文：[TRAK: Attributing Model Behavior at Scale](https://arxiv.org/abs/2303.14186) · [GradAlign: Gradient-Aligned Data Selection for LLM Reinforcement Learning](https://arxiv.org/abs/2602.21492v2) · [RICo: Refined In-Context Contribution](https://arxiv.org/abs/2505.05327)
 - 已有 `ai-data` 精读：[Influence Functions](../ai-data/day-02-2017-influence-functions/NOTES.md) · [TracIn](../ai-data/day-03-2020-tracin/NOTES.md) · [LESS](../ai-data/day-04-2024-less/NOTES.md) · [DataInf](../ai-data/day-05-2024-datainf/NOTES.md)
 
 
@@ -27,6 +27,7 @@ $$L_v(\theta-\eta g_z)\approx L_v(\theta)-\eta g_v^\top g_z.$$
 | TRAK | 随机投影梯度 + after-kernel 线性化 + 少量模型 ensemble | 把高维归因压入可复用矩阵计算 | 大规模行为归因 |
 | LESS | optimizer-aware、低秩梯度 datastore 与目标 few-shot 相似度 | 一次建库，多目标复用；SFT 静态选择 | 目标能力选数 |
 | DataInf | 针对 LoRA / empirical Fisher 的高效闭式近似 | 适合参数高效微调 | LoRA 场景曲率校正 |
+| RICo | candidate 作为 demonstration 后对 assessment set 的受控 PPL 改善 | 无逐样本训练梯度，但存在 ICL→SGD 代理错配 | gradient-free SFT 数据估值 |
 | GradAlign | 当前 policy gradient 与 trusted validation gradient 的 cosine | 周期性重算，适应 RL 非平稳性 | 在线 RL curriculum |
 
 ## 2. TRAK：重要的不是“又一个点积”
@@ -100,6 +101,8 @@ quality gate
 
 归因给“价值”，但不保证“覆盖”；下一章用谱熵补上这一维。
 
+RICo 是这条路线的无梯度分叉：它不比较 $g_z$ 与 $g_V$，而比较真实 demonstration 与等长随机 context 对 assessment PPL 的影响。完整公式、扩展方式和 coding 可证伪实验见 [10 — RICo：用 ICL 干预近似训练数据价值](10_rico_icl_valuation.md)。
+
 Proxy 适配差异：**TRAK/TracIn** 若要解释某个具体模型，最好直接用该模型或它的 checkpoints；**LESS/Prismatic/G-Vendi** 更适合小型 instruction-tuned proxy（论文主设置如 Qwen2.5-0.5B-Instruct）；**GradAlign** 最严格，最好用当前或接近当前的 policy 并周期性刷新。太弱的 proxy 只会产生“我什么都不会”的噪声梯度，工程上必须抽样验证 proxy 与目标模型的 ranking 相关性。
 
 > 相关：覆盖度量见 [03](03_gradient_coverage.md)，生成闭环见 [04](04_prismatic_synthesis.md)。
@@ -111,5 +114,5 @@ Proxy 适配差异：**TRAK/TracIn** 若要解释某个具体模型，最好直�
 - 下一篇：[03 梯度覆盖](03_gradient_coverage.md)
 - 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
 
-> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据
+> 串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 10 RICo → 论文证据
 

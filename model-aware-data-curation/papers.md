@@ -31,6 +31,22 @@ Verified from the paper abstract:
 
 Boundary: “handful” is the authors' wording; the abstract does not define one universal count, so this repo does not replace it with a guessed number.
 
+### RICo (2025 preprint; AAAI 2026 accepted)
+
+**RICo: Refined In-Context Contribution for Automatic Instruction-Tuning Data Selection**
+[arXiv:2505.05327](https://arxiv.org/abs/2505.05327) · [official code](https://github.com/annayang2020/rico_data_selection_for_instruction-tuning)
+
+Verified from paper v2 and the official repository:
+
+- gradient-free instruction-tuning data selection: a candidate is used as an ICL demonstration and valued by its perplexity improvement on an independent assessment set;
+- a semantically meaningless random sequence of the same length is used as the context baseline, and the improvement is normalized by the target sample's base perplexity;
+- task-level contributions are averaged over the assessment set to form global-RICo;
+- direct scoring costs $O(nm)$ inference calls for $n$ assessment samples and $m$ candidates; the paper labels a scored subset, trains a LoRA selection classifier, and scans the full pool in $O(m)$;
+- the abstract reports that, on LLaMA3.1-8B, 15% RICo-selected data exceeds full-data training by 5.42 average percentage points and exceeds common selection baselines by 2.06 points;
+- selected samples are empirically diverse and tend toward moderate-to-high rather than extreme difficulty.
+
+Boundary: ICL does not reproduce batch SGD dynamics, so RICo is a functional proxy for training contribution, not a causal proof of it. Equal-weight averaging makes the assessment-set composition the operational definition of value; pointwise top-$k$ does not guarantee set-level coverage. The learned classifier adds a second proxy layer and may absorb surface style or source cues.
+
 ### SPICE (2026, ICLR)
 
 **SPICE: Submodular Penalized Information-Conflict Selection for Efficient Large Language Model Training**
@@ -105,6 +121,9 @@ Boundary: recent preprint aimed at non-stationary LLM RL; do not conflate with t
 | Claim | Status |
 |---|---|
 | TRAK reduces “thousands of models” to “a handful” | verified, exact original wording; no fixed count asserted |
+| RICo uses same-length random context control and reduces distilled full-pool scanning from $O(nm)$ to $O(m)$ | verified |
+| RICo proves ICL contribution equals SGD training contribution | **not claimed** |
+| RICo pointwise top-$k$ guarantees diversity/coverage | **not claimed** |
 | Prismatic uses 300+ training runs/models | verified |
 | G-Vendi–OOD Spearman $\rho\approx0.9$ on NLI and math | verified |
 | Gradient proxy is Qwen2.5-0.5B-Instruct (no warm-up) with full-param NLL gradient → 1024-dim Rademacher projection; proxy ablation $\rho=0.909$ / $0.898$ / $0.772$ | verified |
@@ -120,7 +139,7 @@ Boundary: recent preprint aimed at non-stationary LLM RL; do not conflate with t
 <!-- NAVIGATION -->
 ## 导航
 
-- 上一篇：[09 SPICE 协调性](09_spice_information_conflict.md)
+- 上一篇：[10 RICo：ICL 估值](10_rico_icl_valuation.md)
 - 下一篇：[目录](README.md)
 - 回到：[目录 README](README.md) | [论文证据](papers.md) | [路线图](README.md#路线图)
 

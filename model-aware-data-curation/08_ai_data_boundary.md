@@ -13,7 +13,7 @@
 | 内容单位 | 一篇论文一份 NOTES | 跨论文方法论与系统闭环 |
 | 主问题 | 数据如何产生、清洗、筛选、去重、验证 | 当前模型缺什么，下一批数据选/造什么 |
 | 时间尺度 | dataset recipe / release 级 | checkpoint / policy round 级 |
-| 信号 | quality、规则、来源、embedding、执行 | gradient value、target alignment、coverage、conflict |
+| 信号 | quality、规则、来源、embedding、执行 | gradient value、ICL intervention、target alignment、coverage、conflict |
 | 输出 | 可复现数据配方与论文路线图 | selector/generator control plane 与在线 flywheel |
 | 代码 | 单论文 demo | 统一 gradient geometry primitives |
 
@@ -42,18 +42,19 @@ synthetic data papers -> generator/input pipeline
 
 1. **TRAK**：把 attribution 推向可扩展随机投影/ensemble；
 2. **GradAlign**：RL 非平稳场景的在线 target-aligned curriculum；
-3. **G-Vendi**：把 Vendi kernel 换成模型诱导的梯度方向；
-4. **Prismatic Synthesis**：从“挑已有数据”升级到“针对稀疏方向主动生成”；
-5. **GrADS / OGS**：把遗忘与梯度冲突纳入选择约束；
-6. **统一系统**：gradient datastore、refresh、proxy-target 校准、control plane；
-7. **coding-data flywheel**：执行验证、失败簇、生成、选择、训练、回归。
+3. **RICo**：用受控 ICL 行为变化近似训练贡献，补上 gradient-free valuation 分支；
+4. **G-Vendi**：把 Vendi kernel 换成模型诱导的梯度方向；
+5. **Prismatic Synthesis**：从“挑已有数据”升级到“针对稀疏方向主动生成”；
+6. **GrADS / OGS**：把遗忘与梯度冲突纳入选择约束；
+7. **统一系统**：gradient datastore、refresh、proxy-target 校准、control plane；
+8. **coding-data flywheel**：执行验证、失败簇、生成、选择、训练、回归。
 
 ## 4. 未来内容放哪里
 
 判断规则：
 
 - 新论文主要贡献是 corpus 配方、过滤器、数据集、去重或 synthetic recipe → `ai-data/day-xx-*`；
-- 新论文主要贡献是根据模型梯度动态决定数据价值/覆盖/生成/保护 → 本专题；
+- 新论文主要贡献是根据模型梯度或受控行为干预决定数据价值/覆盖/生成/保护 → 本专题；
 - 同时横跨两边 → `ai-data` 保留逐篇 NOTES，本专题只补系统接口与交叉比较，并用相对链接引用；
 - 算法主要改变 PPO/GRPO objective 或 rollout engine → 分别去 `grpo-vs-ppo/` 或 `vllm-rollout/`，不因“使用数据”而塞进这里。
 
@@ -63,7 +64,7 @@ synthetic data papers -> generator/input pipeline
 
 - [ ] 是否已经有 `ai-data/day-*` NOTES？有则只引用。
 - [ ] 新内容是否至少连接两类方法或一个系统闭环？
-- [ ] 是否解释 model state / gradient 如何改变 curation decision？
+- [ ] 是否解释 model state / gradient / controlled behavior probe 如何改变 curation decision？
 - [ ] 是否包含可运行 primitive、架构或实验设计，而非第二份论文摘要？
 - [ ] 是否明确 claim 的论文版本、实验范围与外推边界？
 
