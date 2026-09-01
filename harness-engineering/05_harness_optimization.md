@@ -1,99 +1,234 @@
-# 05 — Harness Optimization：从 Prompt 到可执行搜索空间
+# 05 — Harness Optimization：Context、Workflow、Code 三层搜索
 
 ## 元信息
 
 - 核心论文：[Meta-Harness](https://arxiv.org/abs/2603.28052) · [AlphaEvolve](https://arxiv.org/abs/2506.13131)
 - 前序方法：[ADAS](https://arxiv.org/abs/2408.08435v2) · [AFlow](https://arxiv.org/abs/2410.10762v4)
+- 本章目标：定义可搜索空间、proposal semantics、评价预算与 archive，而不是把“LLM 改 prompt”泛化成任意自改进。
 
-## 1. 优化对象逐层扩大
+## 1. Search object：结构化 harness
+
+使用统一分解：
+
+$$h=(h^C,h^W,h^K,h^M).$$
+
+候选 edit：
+
+$$\delta=(\delta^C,\delta^W,\delta^K,\delta^M),\qquad h'=h\oplus\delta.$$
+
+不同层的可搜索性不同：
+
+| 层 | 参数化方式 | 典型优化 | 验证难度 | 主要风险 |
+|---|---|---|---|---|
+| Context $h^C$ | 文本、模板、检索/压缩配置 | prompt optimizer、bandit、ACE | 低到中 | leakage、冗余、staleness |
+| Workflow $h^W$ | typed graph / DSL | MCTS、graph rewrite、AFlow | 中 | 成本膨胀、循环、join error |
+| Code $h^K$ | source diff、tool/middleware | coding agent、evolution | 高 | 越权、破坏状态、evaluator tampering |
+| Memory $h^M$ | schema、rules、read/write policy | incremental curation、MCE | 中到高 | 自我污染、错误持久化 |
+
+标题中的三层把 $h^M$ 视为 Layer C 的 stateful information plane；这里单独列出，是因为 memory write 会跨 rollout 持久化，验证和回滚语义强于普通 prompt edit。Prompt search 是 $\mathcal H_C$ 的一个子集；完整 Harness Engineering 不是它的同义词。
+
+## 2. Objective：黑盒、约束、多目标
+
+模型参数冻结时，candidate 仍要通过执行估计效用：
+
+$$\hat J_D(h)=\frac1{|D|}\sum_{x\in D}\frac1m\sum_{j=1}^mR(\tau_{x,j},x),\qquad \tau_{x,j}\sim p_{\theta,h}.$$
+
+搜索问题：
+
+$$\max_{h\in\mathcal H_{\mathrm{editable}}}\ \hat J_D(h)-\lambda_KK(h)-\lambda_L\mathrm{Lat}(h)-\lambda_QQ(h),$$
+
+$$\text{s.t.}\quad h\models\mathrm{Schema},\quad \mathrm{Cap}(h)\subseteq\Pi,\quad K(h)\le B.$$
+
+由于 $h$ 包含字符串、图和代码，目标离散、随机、昂贵且不可微。优化器可能是随机搜索、Bayesian optimization、MCTS、evolutionary search 或 LLM proposer；无论哪种，真正瓶颈常是 evaluator sample complexity。
+
+若一次 candidate evaluation 的方差为 $\sigma^2$，$m$ 次独立 rollout 的均值标准误约为：
+
+$$\mathrm{SE}(\hat J)=\frac{\sigma}{\sqrt m}.$$
+
+只跑一次就比较小差距，会让搜索偏好 lucky candidate。
+
+## 3. Typed edit grammar
+
+任意自由文本 diff 很难保护不变量。可以定义 edit grammar：
 
 ```text
-instruction prompt
-  -> structured context policy
-  -> workflow graph
-  -> full harness code
-  -> optimizer that proposes harness code
+ContextEdit:
+  add_rule | remove_rule | reorder_section | change_retrieval | change_compressor
+WorkflowEdit:
+  insert_node | delete_node | replace_node | change_edge | change_join | change_budget
+CodeEdit:
+  patch_tool | patch_parser | patch_middleware | add_test | migrate_state
+MemoryEdit:
+  add_entry | supersede_entry | change_schema | change_read_policy
 ```
 
-设 harness 源码和配置的可编辑区域为 $\Omega$，候选 edit 为 $\delta\in\Omega$：
+每个 edit 带 manifest：
 
-$$h'=\mathrm{Apply}(h,\delta),\qquad \delta^\star=\arg\max_{\delta\in\Omega}\hat J(h';D)-\lambda K(h').$$
+```json
+{
+  "parent_digest": "...",
+  "layer": "workflow",
+  "evidence": ["run-31:event-77"],
+  "failure_cluster": "duplicate-write-after-timeout",
+  "hypothesis": "reconcile before retry removes duplicate side effects",
+  "operations": [{"op": "insert_node", "after": "timeout", "node": "reconcile"}],
+  "expected_fix": ["duplicate-write"],
+  "at_risk": ["latency", "tool-budget"],
+  "required_capabilities": ["read-operation-status"]
+}
+```
 
-因为 harness 中包含离散控制流、工具和文件结构，通常不能对 $h$ 直接求梯度；但候选可以执行、测试和比较，因此适合黑盒、贝叶斯、MCTS 或 evolutionary search。
+Static validation 在执行前检查 schema、可达性、循环上界、permission path、import allowlist 和 state migration。
 
-## 2. Code 为什么是统一表示
+## 4. 三种搜索粒度
 
-代码能够同时表达：
+### 4.1 Local edit
 
-- prompt 和 context formatting；
-- if/loop/retry/timeout；
-- tool schema、middleware 与 permission check；
-- subagent spawn/join；
-- memory read/write；
-- verifier 与 rollout logging。
+每次修改一个组件，便于归因：
 
-所以 code-level search 比 prompt search 更广，但风险也更大：候选可能修改 evaluator、提高预算、泄漏答案或破坏环境。
+$$h_{t+1}=h_t\oplus\delta_t.$$
 
-## 3. Meta-Harness：端到端搜索 Harness
+优点是 audit 和 rollback 简单；缺点是无法跨越需要协同修改的 valley。
 
-[Meta-Harness](https://arxiv.org/abs/2603.28052) 固定基础模型，优化 executable harness：
+### 4.2 Bundle edit
 
-$$H^\star=\arg\max_H\mathbb E_{x\sim\mathcal X,\tau\sim p_M(H,x)}[r(\tau,x)].$$
+同时改 context、workflow 和 code：
 
-其 proposer 是 coding agent：读取先前候选的代码、score 和 trajectories，提出新 harness，在任务上执行，再把合格候选保留在 archive / Pareto frontier。
+$$\delta_t=(\delta_t^C,\delta_t^W,\delta_t^K).$$
 
-Pareto 不是装饰。实际目标至少包含任务质量、token、latency 和风险：
+能实现完整功能，但若性能变化，难判断是哪一部分贡献。应要求 bundle 内部 ablation 或依赖说明。
 
-$$h_a\succ h_b\iff J_a\ge J_b,\ K_a\le K_b,\ \mathrm{Risk}_a\le\mathrm{Risk}_b,$$
+### 4.3 Population / archive
 
-并且至少一项严格更优。只报告最高任务分会隐藏通过增加调用和 context 获得的收益。
+维护多个候选谱系：
 
-## 4. Evolutionary search
+$$\mathcal P_{t+1}=\mathrm{Keep}(\mathcal P_t\cup\{h_c\}),\qquad h_c=h_p\oplus\delta.$$
 
-当搜索空间离散、不可微但容易评价时，可维护种群 $\mathcal P_t$：
+## 5. Search algorithms
 
-$$h_p\sim \mathrm{Select}(\mathcal P_t),\quad h_c\sim q_M(\cdot\mid h_p,\text{feedback}),\quad \mathcal P_{t+1}=\mathrm{Keep}(\mathcal P_t\cup\{h_c\}).$$
+### Random / coordinate search
 
-设计点包括：
+逐层采样 edit，适合小空间和建立 baseline。没有简单 baseline，就无法判断复杂 LLM proposer 是否真的有效。
 
-- **parent selection**：平衡高分 exploitation 与低 offspring 数的 exploration；
-- **mutation**：限定 edit surface，优先小而可解释的 diff；
-- **novelty**：拒绝与 archive 过近的候选，避免 diversity collapse；
-- **elitism**：保留强候选，但不能让一个局部模式垄断种群；
-- **budget**：比较单位 compute 的收益而非裸分。
+### Bandit / Bayesian optimization
 
-## 5. AlphaEvolve：程序与 meta-prompt 共演化
+适合低维连续超参，如 retrieval top-$k$、timeout、fan-out；对任意代码 diff 的 kernel/距离定义困难。
 
-[AlphaEvolve](https://arxiv.org/abs/2506.13131) 使用冻结的 LLM coding agents 生成程序 diff，并以自动 evaluator 保留高 fitness 子代。其可迁移的 harness 设计思想是：
+### MCTS
 
-- parent program、结果和 instructions 一起进入 proposer context；
-- 可编辑代码块显式标记；
-- solution code 与 meta-prompt 可以共同演化；
-- archive 保持多个候选，而不是每轮只覆盖一个 active 版本。
+把 workflow rewrite 视为 tree action。UCB：
 
-它最适用于 fitness 清晰、可快速执行的程序搜索。把同样机制搬到开放研究时，evaluator 质量会成为主要瓶颈。
+$$h_t=\arg\max_h\left[\hat J(h)+c\sqrt{\frac{\log N}{n_h}}\right].$$
 
-## 6. Search 过拟合
+适合有局部可组合 edit 的结构搜索，但 rollout 昂贵、树统计易受非平稳 evaluator 影响。
 
-设候选数为 $N$，即使每个候选真实质量相同，选择 search score 最高者也会利用 evaluator 噪声。候选越多，winner's curse 越强：
+### Evolutionary search
+
+$$h_p\sim\mathrm{Select}(\mathcal P_t),\qquad h_c\sim \rho_\phi(\cdot\mid h_p,z_t),$$
+
+$$\mathcal P_{t+1}=\mathrm{Archive}(\mathcal P_t,h_c,\mathbf y_c).$$
+
+需要 parent selection、novelty、elitism、lineage、budget 和 sandbox。LLM 负责 mutation 不等于 LLM 负责 acceptance。
+
+## 6. Meta-Harness：端到端 executable harness search
+
+[Meta-Harness](https://arxiv.org/abs/2603.28052) 固定基础模型，用 coding-agent proposer 读取候选代码、scores 和 trajectories，优化 executable harness：
+
+$$H^\star=\arg\max_H\mathbb E_{x,\tau\sim p_M(H,x)}[r(\tau,x)].$$
+
+它的重要贡献是把 prompt、control flow、tools 等放进同一 code search space，并保留 quality/cost Pareto frontier。论文报告：online classification 相对 ACE 增加 $7.7$ accuracy points 且 context tokens 少 $4\times$；200 道未见 IMO-level math problems 上五个模型相对 no retrieval 平均增加 $4.7$ points。
+
+边界同样重要：TerminalBench-2 的 89 tasks 同时用于搜索和最终评估，因此 Opus 4.6 的 $76.4\%$、Haiku 4.5 的 $37.6\%$ 不是干净 held-out generalization。详见 [`papers.md`](papers.md)。
+
+## 7. AlphaEvolve：程序搜索的可迁移机制
+
+[AlphaEvolve](https://arxiv.org/abs/2506.13131) 的核心：
+
+```text
+initial program + mutable blocks + evaluator
+  -> sample parents/inspirations from database
+  -> model ensemble proposes code diff
+  -> execute evaluator cascade
+  -> store fit and diverse children
+  -> repeat
+```
+
+其 archive 类似 MAP-Elites/island 思路，支持多指标和分布式 evaluator。可迁移到 harness 的原则：
+
+- 显式标记 mutable region；
+- 先跑便宜 validity checks，再跑昂贵 benchmark；
+- 保存 lineage 与失败；
+- 选择质量和多样性，而非单一最高分；
+- evaluator 必须足够自动化。
+
+论文的数学/系统成果很强，但主要适用于可自动评分问题；“能跑并得高分”不能防止 specification gaming。生产例子还经过额外部署或人工验证，不能只照搬 evolution loop。
+
+## 8. Pareto archive 与选择
+
+候选指标：
+
+$$\mathbf y(h)=(J_{\mathrm{task}},-K_{\mathrm{token}},-K_{\mathrm{tool}},-L,Q_{\mathrm{safety}},-C_{\mathrm{maint}}).$$
+
+非支配关系：
+
+$$h_a\succ h_b\iff \forall j,\ y_j(h_a)\ge y_j(h_b)\ \land\ \exists j,\ y_j(h_a)>y_j(h_b).$$
+
+Archive 只解决“保留哪些候选”，不解决“上线哪一个”。部署仍需要业务权重、hard constraints 和 approval。维护成本可用代码复杂度、组件数、迁移数量、failure recovery time 等 proxy，但不能假装一个 proxy 等于真实长期成本。
+
+## 9. Optimizer overfitting 与 winner's curse
+
+若 $N$ 个真实质量相同的候选分数为 $J+\epsilon_i$：
 
 $$\mathbb E\left[\max_{1\le i\le N}(J+\epsilon_i)\right]>J.$$
 
-因此要：
+搜索次数越多，最高分越可能只是噪声。缓解：
 
-1. search/validation/test 三分；
-2. 多随机种子并报告方差；
-3. 记录搜索使用了多少次 evaluator；
-4. 在新任务或新模型上冻结 harness 后复测；
-5. 不让 proposer 读取 held-out labels 或 verifier internals。
+1. 记录 evaluator query count；
+2. candidate 使用 $D_{\mathrm{search}}$；
+3. promotion 使用隐藏 $D_{\mathrm{ho}}$；
+4. 最终冻结后只在 $D_{\mathrm{test}}$ 一次评估；
+5. 多 seed、paired comparison、置信区间；
+6. 在新模型/新任务上做 transfer；
+7. 对 benchmark-specific rules 加 complexity penalty。
 
-## 7. 优化 Harness 还是重新训练模型
+若 $D_{\mathrm{ho}}$ 被每轮反复查询，它实际上是 validation set，不应再叫 untouched test。
 
-优先 harness edit：错误来自缺 context、工具调用顺序、retry、memory、并行或验证流程。
+## 10. Failure attribution 决定搜索效率
 
-优先 weight update：错误跨任务重复、模型连协议都不能稳定遵循，或通用行为值得内化以降低 inference 成本。
+没有 attribution，proposal distribution 接近盲搜。给 trace $\tau$ 和 failure label $y$，attributor 产生 component posterior：
 
-这不是二选一；第 `08` 章将二者写成双时间尺度优化。
+$$p_A(z\mid\tau,y),\qquad z\in\{C,W,K,M,\theta,\mathcal E,V\}.$$
+
+其中 $\mathcal E$ 是外部环境，$V$ 是 verifier。只有 $z\in\{C,W,K,M\}$ 才进入 harness edit；若最大概率是模型能力、环境故障或 verifier bug，应转给相应 owner。
+
+Proposal acquisition 可综合收益、不确定性和成本：
+
+$$\mathrm{Acq}(\delta)=\mathbb E[\Delta J\mid z,\delta]+\beta\mathrm{Uncertainty}(\delta)-\lambda_E\mathrm{EvalCost}(\delta)-\lambda_R\mathrm{Risk}(\delta).$$
+
+高不确定但低风险的 edit 值得探索；高风险 edit 不能仅因潜在收益大而自动测试在真实环境。
+
+## 11. Failure modes
+
+- search space 太宽，候选多数不可执行；
+- proposer 同时读 verifier internals 和 hidden labels；
+- 只报 best-of-$N$，不报 $N$、成本和方差；
+- 增加模型能力/预算却记作 harness gain；
+- archive diversity 只按文本差异，不按行为差异；
+- bundle edit 无 ablation，credit assignment 失真；
+- candidate 修改 state schema 却无 migration；
+- objective hacking：修 detector 而非真实 failure；
+- 在 benchmark search set 上长期演化，再宣称泛化。
+
+## 12. Engineering checklist
+
+- [ ] 三层 editable surface 和 control plane 明确分离；
+- [ ] edit grammar 有 schema、type 和 static validation；
+- [ ] candidate 在 sandbox 内、最小权限运行；
+- [ ] archive 保存 lineage、metrics、cost、failures 和 evaluator version；
+- [ ] quality/cost/latency/risk 保留 Pareto 信息；
+- [ ] evaluator query count、seed、attempts 和选择规则可复现；
+- [ ] hidden regression 与 final test 分开；
+- [ ] attribution 错误能路由到 model/data/infra/verifier，而不是强行改 harness。
 
 <!-- NAVIGATION -->
 ## 导航

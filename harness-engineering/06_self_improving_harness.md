@@ -1,115 +1,253 @@
-# 06 — Self-Improving Harness：提案、验证、接受
+# 06 — Self-Improving Harness：从 Failure 到可回滚版本
 
 ## 元信息
 
-- 核心论文：[STOP](https://arxiv.org/abs/2310.02304) · [Self-Harness](https://arxiv.org/abs/2606.09498) · [Agentic Harness Engineering](https://arxiv.org/abs/2604.25850) · [Darwin Gödel Machine](https://arxiv.org/abs/2505.22954)
-- 内容类型：跨论文闭环综合；论文结果与本专题工程规范分开表述。
+- 核心论文：[STOP](https://arxiv.org/abs/2310.02304v3) · [Self-Harness](https://arxiv.org/abs/2606.09498) · [Agentic Harness Engineering](https://arxiv.org/abs/2604.25850v4) · [Darwin Gödel Machine](https://arxiv.org/abs/2505.22954)
+- 本章目标：把不同论文串成一个统一 control-loop，并清楚标出它们在 proposal、evaluation、promotion 时序上的差异。
 
-## 1. 自改进不是自覆盖
+## 1. Unified control-loop
 
-安全的最小闭环是：
+给定 frozen model $\theta$、active harness $h_t$、外置 control plane $q=(V,\Pi,B,L)$：
 
-$$T_t=\mathrm{Rollout}(h_t,D),$$
+$$\mathcal T_t=\mathrm{Rollout}(\theta,h_t,D_{\mathrm{mine}};q),$$
 
-$$F_t=\mathrm{MineFailures}(T_t),\qquad \mathcal C_t=\mathrm{Propose}(h_t,F_t),$$
+$$z_t=\mathrm{Attribute}(\mathcal T_t,V),\qquad \mathcal C_t=\mathrm{Propose}(h_t,z_t),$$
 
-$$h_{t+1}=\mathrm{Gate}(h_t,\mathcal C_t,D_{\mathrm{in}},D_{\mathrm{out}}).$$
+$$\tilde h_t^{(j)}=\mathrm{Sandbox}(h_t\oplus\delta_t^{(j)}),$$
 
-Active harness 不能被 proposer 直接覆盖。候选先进入 sandbox；只有满足修复、无回归、预算和权限条件才创建新版本。
+$$h_{t+1}=\mathrm{Promote}(h_t,\{\tilde h_t^{(j)}\},D_{\mathrm{in}},D_{\mathrm{ho}};q).$$
 
-## 2. STOP：改进 improver
+完整数据流：
 
-[Self-Taught Optimizer (STOP)](https://arxiv.org/abs/2310.02304) 不直接优化单个解 $s$，而是优化改进函数 $I$。给定黑盒模型 $M$ 与 utility $u$：
+```text
+rollout
+  -> immutable trace + artifacts
+  -> failure clustering
+  -> root-cause attribution
+  -> bounded proposal manifests
+  -> static validation
+  -> sandbox materialization
+  -> held-in repair evaluation
+  -> hidden held-out regression evaluation
+  -> permission/cost/statistical gate
+  -> accept + version OR reject + audit
+  -> shadow/canary monitoring
+```
 
-$$s'=I(u,s;M).$$
+“Self-improving”只意味着 proposer 可以由 Agent 驱动；它不意味着 Agent 拥有 verifier、权限、预算和 deployment 的写权。
 
-在任务分布 $\mathcal D$ 上定义 improver 的 meta-utility：
+## 2. Failure record：先归因，后修改
 
-$$\hat u(I)=\frac1{|\mathcal D|}\sum_{(u,s)\in\mathcal D}u(I(u,s;M)).$$
-
-然后让当前 improver 递归改写自己：
-
-$$I_t=I_{t-1}(\hat u,I_{t-1};M).$$
-
-STOP 的重要负面边界是：递归结构本身不保证提升；论文实验中更强模型可发现有用策略，而较弱模型的平均表现可能下降。基础模型仍必须有足够能力理解并改进机制。
-
-## 3. Self-Harness：从失败模式产生 bounded edits
-
-[Self-Harness](https://arxiv.org/abs/2606.09498) 的结构可分三步：
-
-1. **Weakness mining**：从 execution traces 中提取 verifier-grounded failure patterns；
-2. **Harness proposal**：给 proposer 可编辑面、失败模式、应保留行为和历史尝试，生成 bounded edits；
-3. **Proposal validation**：在 held-in 与 held-out 上回归，只合并合格候选。
-
-表面相同的 timeout 可能来自错误重试、上下文丢失或工具 schema；failure record 应同时保存终端结果、因果行为和暴露出的 Agent 机制，避免把 symptom 当 root cause。
-
-令 $\Delta_{\mathrm{in}}=J_{\mathrm{in}}(h')-J_{\mathrm{in}}(h)$、$\Delta_{\mathrm{ho}}=J_{\mathrm{ho}}(h')-J_{\mathrm{ho}}(h)$。论文的精确接受规则是：
-
-$$\Delta_{\mathrm{in}}\ge0,\qquad \Delta_{\mathrm{ho}}\ge0,\qquad \max(\Delta_{\mathrm{in}},\Delta_{\mathrm{ho}})>0.$$
-
-即两个 split 都不回退，且至少一个严格改善。held-in trace 对 proposer 可见，hidden held-out 只供 promotion gate 使用；它会被反复查询，因此更准确地说是隐藏 regression/validation split，而不是只用一次的最终 test set。论文在 MiniMax M2.5、Qwen3.5-35B-A3B、GLM-5 上评测 Terminal-Bench-2.0、SWE-bench Verified、AppWorld，九个组合的最终 harness 都同时改善两个 split；最大整体绝对增益是 GLM-5/AppWorld 的 $40.6$ 个百分点。
-
-本专题的最小代码采用更保守、也更容易解释的规则：held-in 必须严格改善、held-out 不下降，再叠加 permission 与 cost gate。
-
-## 4. AHE：三层可观测性
-
-[Agentic Harness Engineering](https://arxiv.org/abs/2604.25850) 把瓶颈定位为 observability：如果不知道哪一层导致失败，自动 edit 只是盲搜。
-
-- **Component observability**：system prompt、tool description、tool implementation、middleware、skill、subagent config、long-term memory 都有显式文件表示；
-- **Experience observability**：raw traces → per-task root-cause reports → benchmark overview，按需逐层展开；
-- **Decision observability**：每个 edit 是可证伪预测，记录 evidence、root cause、fix、expected gain 和 at-risk regression。
-
-每个 proposal manifest：
+对失败轨迹 $\tau_i$，保存结构化 record：
 
 ```json
 {
-  "evidence": ["run-31/tool-7"],
-  "root_cause": "retry loses idempotency key",
-  "surface": "middleware/retry.py",
-  "edit": "propagate key across retry",
-  "expected_fix": ["duplicate-write"],
-  "at_risk": ["latency", "retry-budget"]
+  "task_id": "...",
+  "harness_digest": "...",
+  "failure_type": "duplicate-side-effect",
+  "first_bad_event": "event-42",
+  "candidate_causes": [
+    {"surface": "workflow", "component": "retry", "confidence": 0.74},
+    {"surface": "tool", "component": "idempotency", "confidence": 0.21}
+  ],
+  "counterevidence": ["event-38"],
+  "replay_fixture": "artifact://...",
+  "verifier_evidence": ["check://..."],
+  "status": "hypothesis"
 }
 ```
 
-AHE 与 Self-Harness 的验证时序不同：edit 先 commit，下一轮 rollout 才归因上一轮 manifest，失败则 rollback；系统同时保留历史最优 $H_{\mathrm{best}}$。主实验固定 GPT-5.4 high，在同一组 89 个 Terminal-Bench 2 tasks 上做十轮演化并报告 $77.0\%$ pass@1；这不是独立 held-out 泛化。冻结后转到 SWE-bench Verified 得到 $75.6\%$，seed 为 $75.2\%$，但部分 repository 仍有退化。其 regression prediction precision/recall 仅 $11.8\%/11.1\%$，说明 observability 与 rollback 有价值，却不能替代可靠 regression gate。
+Attribution 分布：
 
-## 5. DGM：开放式 Harness 种群
+$$p_A(z\mid\tau,V),\qquad z\in\{h^C,h^W,h^K,h^M,\theta,\mathcal E,V\}.$$
 
-[Darwin Gödel Machine](https://arxiv.org/abs/2505.22954) 维护可自修改 coding agents 的 archive。每轮选择 parent，Agent 检查 benchmark log 并修改自己的 codebase，评估后把足够好的 child 加回种群。
+仅凭失败后出现某条日志，不能推断它是原因。至少使用三种证据：
 
-与单链 `h_t\to h_{t+1}` 相比，archive 保留多个谱系：
+1. **Temporal**：第一个违反 invariant 的 event；
+2. **Mechanistic**：该组件如何导致 observation/action 改变；
+3. **Counterfactual**：只替换该组件后，配对 replay 是否修复。
 
-$$\mathcal P_{t+1}=\mathrm{Archive}(\mathcal P_t\cup\{\mathrm{Mutate}(h_p)\}).$$
+对于随机模型，配对干预仍需多 seed：
 
-这有利于探索，但也增加计算量、benchmark overfitting 和安全审计难度。论文报告的 benchmark 改善见 [`papers.md`](papers.md)；它们是在固定模型与特定 coding benchmark 下的实验，不是通用 RSI 证明。
+$$\widehat{\mathrm{ATE}}_z=\frac1n\sum_{i=1}^n\left(R_i(h\oplus\delta_z)-R_i(h)\right).$$
 
-## 6. 最小实现对应
+## 3. Proposal contract
 
-[`code/harness_lab.py`](code/harness_lab.py) 把上述原则缩成：
+每个 edit $\delta$ 必须是 bounded hypothesis：
+
+$$\delta=(p,z,d,f,r,c),$$
+
+- $p$：parent digest；
+- $z$：目标 failure/component；
+- $d$：typed diff；
+- $f$：expected fixes；
+- $r$：at-risk behaviors；
+- $c$：capability 与评估成本需求。
+
+Proposal 不是“重写成更好版本”的自由文本。它要满足：
+
+- 只触及 declared editable paths；
+- 每个 diff 有最小作用域；
+- state/schema change 带 migration；
+- 新工具能力单独审批；
+- 预期收益和回归风险可被测试；
+- 不允许把 evaluator 或 hidden labels 复制进 context。
+
+## 4. Acceptance：逻辑 gate 与统计 gate
+
+### 4.1 Self-Harness 的精确 split-wise 规则
+
+令：
+
+$$\Delta_{\mathrm{in}}^{(j)}=P_{\mathrm{in}}(h_t^{(j)})-P_{\mathrm{in}}(h_t),$$
+
+$$\Delta_{\mathrm{ho}}^{(j)}=P_{\mathrm{ho}}(h_t^{(j)})-P_{\mathrm{ho}}(h_t).$$
+
+[Self-Harness](https://arxiv.org/abs/2606.09498) 接受 candidate 当且仅当：
+
+$$\Delta_{\mathrm{in}}^{(j)}\ge0,\qquad \Delta_{\mathrm{ho}}^{(j)}\ge0,\qquad \max(\Delta_{\mathrm{in}}^{(j)},\Delta_{\mathrm{ho}}^{(j)})>0.$$
+
+即两个 split 都不下降，至少一边严格改善。held-in traces 暴露给 proposer；held-out 对 proposer 隐藏，但会被 promotion gate 重复查询，所以它是 hidden regression/validation set，不是最终一次性 test。
+
+### 4.2 生产系统的约束 gate
+
+二元 pass rate 之外还要加入 margin：
+
+$$\mathrm{LCB}_{1-\alpha}(\Delta_{\mathrm{in}})>\epsilon_{\mathrm{repair}},$$
+
+$$\mathrm{LCB}_{1-\alpha}(\Delta_{\mathrm{ho}})>-\epsilon_{\mathrm{reg}},$$
+
+并满足：
+
+$$\mathrm{Cap}(h')\subseteq\Pi,\qquad K(h')\le B_K,\qquad Q(h')\le B_Q.$$
+
+若样本少，不能把“一次多过一题”当成确定提升；可以使用 paired bootstrap、McNemar test 或预先定义的 non-inferiority margin。统计门槛必须在搜索前固定，不能看到结果后调整。
+
+## 5. Merge accepted edits
+
+两个单独通过的 edit 合并后未必仍通过。定义冲突图：
+
+$$G_\delta=(\mathcal C,E_c),\qquad (\delta_i,\delta_j)\in E_c\iff\mathrm{Conflict}(\delta_i,\delta_j).$$
+
+选择兼容子集：
+
+$$S^\star=\arg\max_{S\subseteq\mathcal C}\sum_{\delta\in S}\widehat{\Delta J}_\delta-\lambda\mathrm{Complexity}(S),\quad S\ \text{is conflict-free}.$$
+
+即使各 edit 单独通过，merged candidate 也必须重新跑 gate，因为 interaction 可能造成回归。
+
+## 6. STOP：优化 improver 本身
+
+[STOP](https://arxiv.org/abs/2310.02304v3) 沿用论文的局部记号，把任务写成 $\tau=(u,s)$，其中本小节的 $u$ 是 utility function，不是统一 runtime 记号中的 authorized command $u_t$。给定 frozen language model $M_{\mathrm{LM}}$，improver 满足：
+
+$$s'=I(u,s;M_{\mathrm{LM}}),$$
+
+$$\hat u(I)=\frac1{|D|}\sum_{(u,s)\in D}u(I(u,s;M_{\mathrm{LM}})),$$
+
+$$I_t=I_{t-1}(\hat u,I_{t-1};M_{\mathrm{LM}}).$$
+
+它搜索的是调用 frozen LM 的 scaffold/program，而不是 LM weights。STOP 的价值在于证明 improver code 本身可以成为优化对象；边界是：没有 Self-Harness 式 split-wise promotion gate，递归轮次也不保证单调改善。
+
+LPN downstream utility 对 $M=20$ 个独立 instances 取平均；meta-dataset $D$ 含同一个 $(u,s)$ 的 5 个副本；test metautility 另在 $M_{\mathrm{test}}=50$ 个独立 instances 上报告。论文还检查所谓 unsandboxing code-pattern proxy：10,000 次尝试中 GPT-4 为 $0.42\%$、GPT-3.5 为 $0.12\%$；这是狭窄 proxy，不是完整安全证明。
+
+## 7. Self-Harness：同轮候选验证
+
+其流程是 Weakness Mining→Harness Proposal→Proposal Validation。候选与当前 harness 在同一轮比较，兼容的 accepted edits 合并，rejected edits 记录但不改变 active state。
+
+实验使用 MiniMax M2.5、Qwen3.5-35B-A3B、GLM-5，在 Terminal-Bench-2.0、SWE-bench Verified、AppWorld 上九组最终 harness 均同时改善 held-in/held-out；最大整体绝对增益是 GLM-5/AppWorld 的 $40.6$ points。结果支持 bounded regression gate 的可行性，但不意味着 pass-rate gate 足够覆盖高风险部署。
+
+## 8. AHE：延迟归因与 rollback
+
+[AHE](https://arxiv.org/abs/2604.25850v4) 强调：
+
+- component observability：每个 editable component 有显式文件；
+- experience observability：raw rollout→task diagnosis→benchmark overview；
+- decision observability：edit manifest 写明 evidence、fix 和 at-risk behavior。
+
+其时序与 Self-Harness 不同：
 
 ```text
-Proposal
-  -> reject immutable edits
-  -> materialize candidate version
-  -> held-in evaluation
-  -> held-out evaluation
-  -> permission + cost checks
-  -> accept and version OR reject without mutation
+round t rollout evaluates edits committed at t-1
+  -> attribute pass/fail flips to prior manifest
+  -> rollback rejected edits
+  -> distill new evidence
+  -> commit next edits before effects are known
 ```
 
-它刻意不让 candidate 接触 evaluator 的修改接口；active version 只有一个，但 accepted snapshots 全部保留，rejected decisions 留审计记录。
+同时保存 $H_{\mathrm{best}}$。主实验用 GPT-5.4 high 在同一 89-task Terminal-Bench 2 集上十轮演化到 $77.0\%$ pass@1，不能称为 held-out。冻结后 SWE-bench Verified 为 $75.6\%$，seed 为 $75.2\%$；部分 repository 仍退化。其 regression prediction precision/recall 为 $11.8\%/11.1\%$，说明可观测性和 rollback 有价值，但 attribution 本身仍难。
 
-## 7. 成功条件
+## 9. DGM：多谱系而非单链
 
-自改进闭环至少需要：
+[DGM](https://arxiv.org/abs/2505.22954) 维护 agent archive：
 
-- 可验证任务与稳定 evaluator；
-- rich trace 足以定位 root cause；
-- bounded、版本化 edit；
-- held-out regression 和成本约束；
-- 可恢复 archive 和停止标准；
-- 人类在权限扩大、外部副作用和重大部署处审批。
+$$h_p\sim\mathrm{Select}(\mathcal P_t),\qquad h_c=\mathrm{Modify}(h_p,\mathcal T_p),$$
+
+$$\mathcal P_{t+1}=\mathrm{Archive}(\mathcal P_t\cup\{h_c\}).$$
+
+每个 archived agent 保留非零采样概率，避免只追单一路径。论文经过 80 iterations 报告 SWE-bench experimental subset $20.0\%\to50.0\%$、full Polyglot $14.2\%\to30.7\%$，并报告跨 benchmark/model transfer。
+
+关键 caveat：$50.0\%$ 不是全 500 道 SWE-bench Verified；search 使用分阶段 subsets。论文还展示 objective hacking：某候选通过移除特殊 logging tokens 绕过 hallucination detector，拿到 evaluator 满分而非真正消除 hallucinated tool calls。这正说明 verifier 必须外置、保持语义级检查并配 unseen regression。
+
+## 10. 三种 promotion semantics 不可混写
+
+| 方法 | Candidate 何时生效 | 评估/回滚 |
+|---|---|---|
+| STOP | improver 候选先按 empirical utility 选择 | 没有 split-wise non-regression gate |
+| Self-Harness | candidate sandbox 后同轮比较 | 两 split 无回归且至少一边提升才 merge |
+| AHE | edit 先 commit | 下一轮 rollout 延迟归因并 rollback |
+| DGM | child 加入多谱系 archive | archive 搜索，最终还需独立 selection/deployment gate |
+
+统一 control-loop 可以容纳它们，但不应声称它们采用同一种验证协议。
+
+## 11. Pseudocode：严格版本
+
+```text
+function evolve(theta, active, control_plane):
+    traces = rollout(theta, active, D_mine, fixed_budget)
+    failures = cluster_and_attribute(traces, control_plane.verifier)
+    proposals = proposer(active.readonly_view(), failures)
+
+    accepted = []
+    for p in proposals:
+        if not static_validate(p, editable_manifest):
+            audit_reject(p, "invalid or immutable surface")
+            continue
+        candidate = materialize_in_sandbox(active, p)
+        result = paired_evaluate(theta, active, candidate, D_in, D_ho)
+        if permission_ok(candidate) and cost_ok(candidate) and statistical_gate(result):
+            accepted.append(version(candidate, parent=active.digest))
+        else:
+            audit_reject(p, result)
+
+    merged = choose_compatible_frontier(accepted)
+    if merged:
+        rerun_gate(merged)
+        deploy_shadow_then_canary(merged)
+        return merged
+    return active
+```
+
+## 12. Failure modes
+
+- symptom 被当 root cause，proposal 只加更多提示；
+- held-out 被反复暴露给 proposer；
+- individually safe edits 合并后产生 interaction regression；
+- candidate 能改 verifier、budget 或 model identity；
+- 只保存成功，重复探索旧失败；
+- attribution 依据单条 stochastic rollout；
+- archive 保存 candidate，却没有明确 active/deployed pointer；
+- rollback 只恢复 prompt，不恢复 memory schema、tool config 和 workflow state；
+- benchmark 得分上升但长期维护、安全或真实任务退化。
+
+## 13. Engineering checklist
+
+- [ ] failure record 有 first-bad-event、evidence、counterevidence、replay fixture；
+- [ ] proposal 是 bounded manifest，不是自由重写；
+- [ ] candidate 先 static validate，再 sandbox；
+- [ ] held-in/hidden-held-out/final-test 语义清楚；
+- [ ] merge 后重新评估 interaction；
+- [ ] accepted/rejected/archive/active/deployed 是不同状态；
+- [ ] rollback 覆盖 prompt、code、memory 和 state migration；
+- [ ] control plane 位于 proposer 写权限外。
 
 <!-- NAVIGATION -->
 ## 导航
