@@ -1,39 +1,44 @@
-# ICL — In-Context Learning 知识脉络与数学
+# ICL — In-Context Learning：理论、机制与工程
 
-> 冻结权重 θ，给一段 `[(x₁,y₁)...(x_k,y_k), x_q]`，模型直接 `pθ(y|prompt)` 就能干活。  
-> 这个文件夹是把之前聊过的三条主线、数学比分、trajectory-error prompting、以及 code 版的迁移，沉淀成 repo 里的可引用笔记。
+ICL 指冻结参数的自回归模型，仅通过上下文中的任务描述与示例改变当前预测：
 
-## 结构
+$$p_\theta(y_q\mid D_k,x_q),\qquad D_k=((x_1,y_1),\ldots,(x_k,y_k))$$
 
+这里的“学习”发生在前向计算与激活中，不等于优化器更新了模型参数。这个目录把三条常被混写的解释分开，并要求每条结论标明适用范围：
+
+1. **Bayesian**：描述应该推断什么——潜在任务或概念的后验。
+2. **Gradient descent / estimator**：描述某些模型问题中可实现或学到的算法。
+3. **Circuit**：定位具体信息搬运与因果组件。
+
+它们可以相容，但目前没有证据证明真实语言模型总是按“Bayes 目标 → GD 算法 → induction-head 硬件”这一条唯一链路工作。
+
+## 学习路径
+
+| 顺序 | 内容 | 读完应能回答 |
+|---|---|---|
+| [01](01_definition_timeline.md) | 定义与证据层级 | 哪些现象算 ICL，哪些只是检索或提示遵循？ |
+| [02](02_line_I_bayesian.md) | 隐式 Bayesian 推断 | 后验赔率为何随证据累积？原论文究竟证明到哪里？ |
+| [03](03_line_II_gd.md) | 线性注意力与 GD | 一步 GD 如何严格改写成 attention-like 求和？ |
+| [04](04_line_III_circuit.md) | induction heads 与 task/function vectors | 关联、干预与充分性有什么区别？ |
+| [05](05_comparison.md) | 统一坐标系 | 三条线如何互补，哪里不能直接等同？ |
+| [06](06_trajectory_error_prompt.md) | 轨迹错误到规则 | 怎样避免把一次反思当成可泛化规则？ |
+| [07](07_coding_data.md) | coding-data 闭环 | 如何把失败轨迹变成可执行、可归因的数据？ |
+| [08](08_systems_and_evaluation.md) | 系统成本与评测 | shot 数增加时，质量、延迟、显存如何一起测？ |
+| [References](references.md) | 主来源证据账本 | 每项核心主张由哪篇原始论文支持？ |
+
+## 可运行最小模型
+
+[`icl_mechanisms.py`](icl_mechanisms.py) 不模拟完整语言模型，而是把三条线最容易混淆的代数做成可执行规范：有限概念后验、一步全批量 GD 与线性注意力等价、exact-match induction、KV-cache/attention-score 计数。
+
+```bash
+python3 ICL/icl_mechanisms.py
+python3 -m unittest discover -s ICL/tests -v
 ```
-ICL/
-├── README.md                      # 你现在看的
-├── 01_definition_timeline.md       # 定义 + 时间线
-├── 02_line_I_bayesian.md           # 线 I：隐式贝叶斯
-├── 03_line_II_gd.md                # 线 II：前向梯度下降（最硬核证明）
-├── 04_line_III_circuit.md          # 线 III：回路 / Induction Head
-├── 05_comparison.md                # 三线比分 + 统一视角
-├── 06_trajectory_error_prompt.md   # trajectory error → 通用 prompt
-└── 07_coding_data.md               # code 专用版（Socratic-SWE / SWE-Gym / CYCLE）
-```
 
-## 一句话总览
+## 阅读纪律
 
-- GPT-2 已有 zero-shot 苗头，GPT-3 2020 年《Language Models are Few-Shot Learners》正式命名 ICL 为能力。
-- 三条解释线：**Bayes（目标是什么）→ GD（算法怎么算）→ Circuit（硬件谁在搬）**。三者投影同一现象。
-- 衍生：CoT = 链上连续触发 induction；many-shot = log k 持续提升但需 LayerNorm；in-context RL = 把 reward 放进 prompt 做 policy improvement。
-
-## 怎么用到你的 post-training / agentic RL
-
-- **数据侧**：按潜在概念 c 平衡 few-shot 分布（线 I）
-- **格式侧**：让 demo 结构利于 $V K^T Q$ 累加，KV 对齐梯度形式（线 II）
-- **评测侧**：单测 induction 分数，比整体 loss 更早预示 ICL 是否起飞（线 III）
-- **数据飞轮**：把 trajectory 失败聚类成 3-5 条通用军规，做法有四种（见 06）：
-  1. system 常驻军规
-  2. 反洗成 SFT/RL 数据（最值钱）
-  3. 当 reward model verifier
-  4. 人工写 agent SOP
-
-对应论文卡在 06/07，交互版可视化在之前的 artifact `ts-spaces/icl/index.html`。
-
-> 维护：这个 ICL 路径跟 `ai-data/papers/` 并行，paper 级别的沉淀仍走 `ai-data/`，这里做主线的数学笔记 + coding data 落地。
+- “存在一组权重可实现”不等于“预训练模型实际学到了同一算法”。
+- synthetic regression / associative recall 的结论不能无条件外推到自然语言或代码。
+- 相关性、activation patching、ablation、端到端收益是不同证据强度。
+- 示例更多不保证单调变好；顺序、格式、标签语义、噪声和上下文预算都会改变结果。
+- 所有系统结论都应同时报告质量、总 token、prefill 延迟、decode 延迟和峰值显存。

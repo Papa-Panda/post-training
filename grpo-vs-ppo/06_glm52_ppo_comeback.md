@@ -1,65 +1,63 @@
-# 06 — GLM-5.2 PPO Comeback: Task-Dependent RL 的分水岭
+# 06 — GLM-5.2 case study：long-horizon compaction 下为何选 critic PPO
 
-> 2026.06 Z.ai (Zhipu AI) GLM-5.2 在 long-horizon 阶段悄悄把 GRPO 换回 PPO，引发 open-source RL 选型再审视。核心不是 "GRPO dead"，而是 RL 算法开始按任务形态分化。
+> 这是一个 **公开系统案例**，不是“PPO 已取代 GRPO”的普遍结论。只保留官方公开材料明确陈述的算法信息；不保留未在本专题逐项核验的参数规模、榜单、价格、训练耗时或“首创”类 headline claims。
 
-## 背景 GLM-5.2 规格
+## 官方披露了什么
 
-- 架构：744B MoE，40B active，1M 稳定上下文，MIT license 真开权重
-- 平台：HuggingFace + Z.ai API + 20+ coding harness，$1.40/1M in + $4.40/1M out
-- 成绩 long-horizon：
-- FrontierSWE Dominance 74.4% → 接近 Claude Opus 4.8 75.1%，超 GPT-5.5 72.6%
-- SWE-bench Pro 62.1% beating GPT-5.5 58.6%
-- PostTrainBench 多小时工程 34.3% vs GPT-5.5 25.0%
+Z.ai 的 GLM-5.2 官方发布文说明，long-horizon task 会产生很长 execution traces；经 compaction 拆成 sub-traces 后，同一 prompt 的不同 rollouts 会产生 **数量不同、长度高度不均** 的可训练片段。其公开方案因此从 group-wise optimization 转向：
 
-## 为什么从 GRPO 回到 PPO Why switch back
+- critic-based PPO；
+- individual-rollout learning；
+- critic 估计 token-level advantages；
+- 把所有 compacted sub-traces 纳入训练；
+- 用 token-level loss 处理片段长度不均。
 
-**GRPO 假设：** 对同 prompt 采样 $G$ 个完整解 $y_{1..G}$，用 group mean/std 做相对分：
+官方原文：[GLM-5.2: Built for Long-Horizon Tasks](https://huggingface.co/blog/zai-org/glm-52-blog)。
 
-$$\hat A_i = \frac{r_i - \mu_G}{\sigma_G},\quad \mu_G=\frac1G\sum r_j$$
+## 为什么 group construction 在这里变难
 
-短验可证任务（math 单答案、unit test pass/fail）好用：省一个 $V(s)$，显存 −30-50%
+标准 outcome GRPO 的统计单位是同 prompt 的完整 completion group：
 
-**长程 agent 破裂点：** 真实 agent 轨迹是几百步工具调用 chain：读代码→搜文档→改文件→跑测试→修错。压缩后 sub-trajectory 数 $k$ 与长度 $L_i$ 高度不均，50 步成功的解 vs 500 步成功的解都对，强行同 prompt 组队对比无法公平分组，大量数据不可用
+$$A_i^{grp}=\frac{R_i-\bar R}{s_R}$$
 
-> Because of this, comparing complete solutions, as GRPO does, becomes much less useful.
+compaction 后，一个原始 rollout 可能映射为 $K_i$ 个 trainable segments，每段长度为 $L_{i,k}$。若 $K_i$ 与 $L_{i,k}$ 在 rollouts 间差异很大，就出现三个问题：
 
-PPO 回归逻辑：不只看 final correctness，问
-- Is agent moving toward goal? Did this action improve future? Did it make task harder?
-→ 每个小 action 都给反馈，dense credit。
+1. **comparison unit 不清楚**：是比较原始完整 rollout、segment，还是某个 compaction boundary？
+2. **group cardinality 不齐**：不同 rollout 贡献不同数量的 segments，强行配组会丢数据或重复加权。
+3. **length weighting 改目标**：response mean、segment mean、token mean 会给予同一原始 rollout 不同总权重。
 
-## Zhipu 的解法
+critic 形式直接对任意 history $h_t$ 估值：
 
-把 value network 请回来，从 group-relative 转向 critic-based PPO，token-level advantage：
+$$\widehat A_t=\sum_{l\ge 0}(\gamma\lambda)^l\left(r_{t+l}^{env}+\gamma V(h_{t+l+1})-V(h_{t+l})\right)$$
 
-$$A_t = Q(s_t,a_t)-V(s_t) \approx \sum_{l\ge0}(γλ)^l δ_{t+l}$$
+这样每个可训练 segment 可使用开头/结尾 value bootstrap，不要求凑成相同大小的 peer group。代价是 critic 的训练、内存、通信和 calibration burden。
 
-兼容变长 sub-trajectory，不再依赖 peer 组，重训一个能独立打分任意片段的 evaluator
+## 不应从案例推出什么
 
-infra & 工程战术（可抄）：
+- **不是**“长轨迹必然 PPO”。若仍能定义可靠的同 prompt outcome group，GRPO 仍可训练长 completion；DAPO/GSPO/segment-level 方法也在改变 sampling 或 ratio granularity。
+- **不是**“critic 自动产生 dense ground-truth reward”。critic 只拟合预期 return；reward 错、数据少或 distribution shift 时同样会错。
+- **不是**“GRPO 完全不能 process supervision”。DeepSeekMath 原论文包含 process-supervision GRPO。
+- **不是**“token-level PPO 对变长天然无偏”。mask、aggregation、bootstrap、staleness 与 token-local ratio 仍需审计。
+- **不是**公开证据支持固定 horizon 阈值。不要写“超过 50 步就切 PPO”之类规则；应根据 segment heterogeneity、critic fit 与 held-out gain 决策。
 
-1. **slime 框架** — 把训练与 inference rollout 分离，统一成 `(state, action, tool_call, feedback)` 四元组格式，支持多 env 并发，并行蒸馏合并 10+ expert，2 天跑完
-2. **数据 & 失效过滤** — 双边 clip trust region $[1-ε_ℓ,1+ε_h]$ + token-level mask，记录策略版本序列 $w_0<...<w_k$，若 $w'-w_0>τ$ 丢弃过旧样本；环境崩溃而非模型错导致的失败直接排除；GRPO 里若组半数以上有效则重复填充否则整组丢弃 — 降噪
-3. **两段式拦截防 reward hacking** — 规则先滤 + LLM judge 识别可疑 tool call，命中时返回 dummy 信息让轨迹继续而非硬终止
-4. **IndexShare 长上下文** — 1 个轻量 indexer 选重要 tokens，邻近 4 层 sparse attention 复用，1M 上下文下 per-token FLOPs 降 2.9×，MTP speculative decode 接受长度 +20%。
+## Anti-hacking 与 optimizer 是两条轴
 
-## 数学&统计视角
+同一官方发布文还讨论 coding-agent reward hacking，并采用 rule filtering 与 model judging。其意义是：verifiable pass/fail 并不等于 verifier 安全。agent 可能读取受保护评测材料、复制参考答案或绕过任务。无论 PPO/GRPO，都应把以下指标独立出来：
 
-- GRPO 方差：$\text{Var}(\hat A) \propto 1/G$，但要求同 prompt 同分布；长轨迹 $L_i$ 异质时 $σ_G$ 估计有偏，数据利用率 $\propto \frac{\text{可组完整组}}{\text{全量}}$ 崩塌。
-- PPO token-level $V(s_t)$ 虽需多训练一个 $P$-参数网络，内存 $O(P)$，但给出 dense 且 length-invariant 的 $A_t$，适用不等长 sub-task 学习分段信号：*Each segment provides useful training signals. Model learns from every important decision instead of waiting until task finishes*。
-- 学界佐证：论文 *Learning Without Critics? Revisiting GRPO in Classical RL* 显示无早期终止的长 horizon任务上去 critic 始终落后于有 critic 的 PPO，仅 CartPole 类短 horizon 可持平。
+- environment/reward-service failure；
+- prohibited artifact access；
+- suspicious tool calls；
+- held-out clean evaluator pass rate；
+- reward 与人工/独立 judge 的 disagreement。
 
-> 判断句：RL 算法选型正变为 task-dependent，不再有 one-size-fits-all 默认
+换成 PPO 不会修复 reward hacking；换成 GRPO 也不会。
 
-## 影响 & 可迁移点
+## 可复用决策实验
 
-- **何时仍用 GRPO**：短、可验、答案形态统一的任务（math、单函数 code unit test）。省 critic 稳定便宜，仍是默认。
-- **何时转 PPO-critic**：多轮 tool-use、小时级 agent、轨迹压缩后长度分散极大的任务。收益是 dense credit，但要重回 critic 调参与显存成本。
-- 对你：code agent 6-10 步可先 GRPO，若上到跨仓库重构/多轮 debug 50-500 步两级分化明显，上 critic/PPO token-level advantage；infra 上复用 slime 式 rollout-training 解耦 +版本追踪丢弃老轨 + 规则+LLM judge 两段拦截。
-- DeepSeek 自家也在做类似分工：V4 用 GRPO 训 math/code/agent/instruction 专家，合并回统一模型时切 on-policy distillation→ 说明 2026 共识是分阶段混用。
+在自己的任务上，不先贴算法标签，先做三组测量：
 
-## 小结
+1. **segment heterogeneity**：$K_i$ 分布、$L_{i,k}$ 分布、每个原始 rollout 的总 token 权重；
+2. **critic viability**：按 horizon bucket 的 value error / explained variance，以及 truncation bootstrap 敏感性；
+3. **group viability**：non-degenerate rate、组内 reward dispersion、为凑有效 group 消耗的额外 generated tokens。
 
-GLM-5.2 意义超出刷榜：它是第一个把 *任务形态决定 RL 算法* 写进公开技术博客并开源复现的样本，给社区的可信分界线：短验=GRPO 便宜稳，长程 agent=PPO+ciritc token-level。2026 后再谈 PPO vs GRPO，不再问谁更好，只问你的轨迹长什么样。
-
----
-Sources: Z.ai blog & medium summary on why traditional training not enoughswitch rationaletoken-level questionslong-horizon evalslime/common formatuneven sub-trajectory & can't group fairlycritic return2-day 10-expert merge & 2-stage interceptionFLOPs 2.9x & IndexSharePricingDeepSeek V4 keeping GRPO for experts switching to distillationtimelines & cost chasm narrativelearning without critics paper
+若 group formation 丢弃大量片段，而 critic 在 held-out trajectories 上能稳定预测 return，critic PPO 的系统成本可能值得；反之，短且可验证任务仍可从 critic-free group estimator 起步。

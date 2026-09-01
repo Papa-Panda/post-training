@@ -22,9 +22,7 @@
 1. **Kernel Ridge Regression** 代替线性回归：$K(x_i,x_j)=\exp(-\gamma \|x_i-x_j\|^2)$，对非线性交互更强，显著提升现有方法。
 2. **mRMR (minimum Redundancy Maximum Relevance)** 信息论选题：
 
-$$
-J(f) = I(f; y) - \frac1{|S|}\sum_{s\in S} I(f; s)
-$$
+$$J(f) = I(f; y) - \frac1{|S|}\sum_{s\in S} I(f; s)$$
 
 - $I(f;y)$ = 题 f 与总分互信息，越高越 relevant
 - 减去与已选题平均冗余，**最大相关最小冗余**

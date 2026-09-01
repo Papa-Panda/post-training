@@ -1,32 +1,89 @@
-> Connection to Prev: r2-Day02 PyTorch 基础 → r2-Day03 通信拓扑: 单机train loop能跑后，多卡DDP/FSDP的瓶颈就是NVLink/IB带宽，今天把topo -m和Ring AllReduce量算清；Day02的DistributedSampler切分在今天对应到NCCL的通信拓扑选择。
+# r2-Day03 — Topology and Ring Collectives
 
-# r2-Day03 - 通信拓扑 NVLink vs IB/RoCE
+## Connection to Prev
 
-## 昨日复盘
-r2-Day02 PyTorch 6步闭环：DataLoader→forward→loss→backward→step→scheduler→ckpt，DistributedSampler支持DDP，ckpt含model+opt+scheduler+epoch+rng，single 2.31s proxy / 2-rank gloo 3.12s。
+r2-Day02 established a single-process training loop. Scaling it requires two separate models:
 
-## 今日主题
-**看懂 nvidia-smi topo -m 的 NV12/SYS/NODE 和 Ring AllReduce 耗时**
+1. the **logical collective**: which tensor is reduced or gathered and how many bytes each rank sends;
+2. the **physical path**: NVLink/NVSwitch, PCIe, or a NIC/fabric, including topology and contention.
 
-- NVLink 900GB/s 单向 vs PCIe 64GB/s vs IB 400Gbps (≈50GB/s) vs RoCE
-- Ring AllReduce 通信量：2*(N-1)/N * data，耗时 = 通信量 / 带宽
-- AllGather/ReduceScatter 各是 AllReduce的一半，FSDP用它省显存
-- Topo -m 里 NV=同NVSwitch，PIX=同PCIe switch，SYS=跨NUMA，NODE=跨机需IB
+Conflating a product's aggregate link headline with measured collective bandwidth is the main trap in back-of-the-envelope estimates.
 
-## 最小可跑任务（30-60min）
-跑 `topo_demo.py` 算 8卡 1GB梯度：
-- NVLink 900GB/s Ring 耗时 vs PCIe 64GB/s 差 14倍
-- 解释为何TP不能跨机（带宽差10倍以上）
+## 1. Collective semantics
 
-## 检验
-- 不查说出 8卡 Ring 1GB 梯度在 NVLink 上耗时 ≈ 2*(7/8)*1GB/900GB/s ≈ 1.94ms
-- 看懂 topo -m 一行 NV12 是满互联
-- 能说清 AllReduce=ReduceScatter+AllGather
+For $p$ ranks and a logical payload of $S$ bytes per rank, a ring partitions the payload into $p$ chunks.
 
-## 资源
-- NVIDIA DL Perf Guide
-- NCCL docs Ring vs Tree
-- nvidia-smi topo -m manual
+- Reduce-scatter uses $p-1$ steps and sends $(p-1)S/p$ bytes per rank.
+- All-gather uses $p-1$ steps and sends $(p-1)S/p$ bytes per rank.
+- Ring all-reduce composes the two, using $2(p-1)$ steps and sending $2(p-1)S/p$ bytes per rank.
 
-## 待H100
-CPU proxy，待H100跑 `nvidia-smi topo -m` 真机 + `nccl-tests all_reduce_perf -b 1M -e 1G -f 2 -g 8` 补 BW 真数
+$$V_{\mathrm{AR}}=2\frac{p-1}{p}S.$$
+
+This is **per-rank bytes sent by the algorithm**. It is not the sum over all ranks, and it is not application-level tensor bytes alone.
+
+A minimal latency-bandwidth model is:
+
+$$T\approx n_{\mathrm{steps}}\alpha+\frac{V}{B_{\mathrm{effective}}}.$$
+
+- $\alpha$ is startup latency per modeled step;
+- $B_{\mathrm{effective}}$ is effective one-way payload bandwidth under a stated assumption or measurement;
+- protocol overhead, channels, chunking, contention, routing, and overlap are omitted.
+
+For 8 ranks and a 1 GB payload, ring all-reduce sends 1.75 GB per rank in 14 steps. If one explicitly assumes 450 GB/s effective one-way bandwidth and $2\ \mu s$ startup per step, the model gives $3.917$ ms. That is an estimate, not an H100 or NCCL measurement.
+
+## 2. Units before numbers
+
+- `400 Gb/s` is a bit rate: the decimal line-rate conversion is `50 GB/s` before encoding and protocol overhead.
+- `GB/s` and `GiB/s` differ by a factor of $10^9/2^{30}$.
+- A vendor's “total” or bidirectional NVLink number must not be inserted as one-way effective ring bandwidth without explaining the conversion.
+- NCCL's algorithm bandwidth and bus bandwidth are reporting conventions; compare like with like.
+
+## 3. Reading `nvidia-smi topo -m`
+
+The matrix describes paths among GPUs and NICs **inside one system**.
+
+| Label | Meaning |
+|---|---|
+| `X` | same device |
+| `PIX` | at most one PCIe switch |
+| `PXB` | multiple PCIe switches, no PCIe host bridge |
+| `PHB` | through a PCIe host bridge |
+| `NODE` | through PCIe host bridges within one NUMA node |
+| `SYS` | through PCIe and the interconnect between NUMA nodes |
+| `NV#` | bonded set of `#` NVLinks |
+
+`NODE` does **not** mean “another machine” and does not identify InfiniBand or RoCE. Inter-host analysis needs the NIC placement, fabric, routing, and benchmark output in addition to the local matrix.
+
+## 4. Why tensor parallelism is topology-sensitive
+
+Tensor parallelism commonly places collectives inside each transformer layer, so startup and transfer costs repeatedly enter the forward/backward critical path. Pipeline parallelism communicates activations at stage boundaries; data parallelism reduces gradient buckets during backward. Those differences explain why tensor-parallel groups are often kept inside a fast local domain, but “TP can never cross a host” is too absolute: feasibility depends on message size, compute/communication overlap, topology, model shape, and the performance target.
+
+The correct workflow is:
+
+1. derive payload and collective frequency from the actual partitioning;
+2. inspect GPU–GPU and GPU–NIC locality;
+3. benchmark the relevant message-size range;
+4. profile overlap and exposed communication on the real training step.
+
+## 5. Run the analytical model
+
+```bash
+python3 ai-infra/r2-day-03-topo-nccl/topo_demo.py
+python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v
+```
+
+The tests check unit conversion, ring volume/step counts, reduce-scatter + all-gather composition, latency accounting, and the important `NODE` semantic.
+
+For hardware validation, record the machine and software configuration, then run the local topology command and an NCCL benchmark over representative sizes. Do not copy a peak product number into the results table.
+
+## Status
+
+- Verified here: formulas, units, topology-label semantics, and seven CPU tests.
+- Not verified here: NCCL algorithm choice, effective bandwidth, latency, overlap, or any H100 timing.
+
+## Primary sources
+
+- NCCL collective semantics: https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2183/user-guide/docs/usage/collectives.html
+- `nvidia-smi topo` command and legend: https://man.archlinux.org/man/nvidia-utils/nvidia-smi.1.en
+- PyTorch DDP design note (bucketed reductions and overlap): https://docs.pytorch.org/docs/main/notes/ddp
+- Ring all-reduce paper: https://doi.org/10.1016/j.jpdc.2009.05.002

@@ -13,9 +13,7 @@ Long context 时有三件不同的事，大家都叫 compression，tradeoff 完�
 
 公式视角：
 
-$$
-\text{speedup} \approx \frac{T_{prefill}(L)}{T_{prefill}(r L)} \approx \frac{1}{r} \text{ for large } L
-$$
+$$\text{speedup} \approx \frac{T_{prefill}(L)}{T_{prefill}(r L)} \approx \frac{1}{r} \text{ for large } L$$
 
 其中 $r = 0.4$ compression ratio，理论 2.5x，但有 decompression overhead + quality loss，所以实测 1.18x。
 
@@ -32,9 +30,7 @@ $$
 
 关键 difference：此压缩是 **stateful** 的，多次调用，每次都有损累积误差 `ε_t` :
 
-$$
-M_{t+1} = compress(M_t \cup \Delta_t) ;\; \|M_{t+1} - ideal(M)\| \leq \|M_t - ideal\| + \epsilon_{compress}
-$$
+$$M_{t+1} = compress(M_t \cup \Delta_t) ;\; \|M_{t+1} - ideal(M)\| \leq \|M_t - ideal\| + \epsilon_{compress}$$
 
 多次压缩后高方差问题和 GLM-5.2 放弃 GRPO 理由同构：长度方差大、group 不齐。
 
@@ -51,9 +47,7 @@ $$
 
 数学：量化误差 $\|K - \hat K\|_F \leq \epsilon$，但 attention softmax 放大：
 
-$$
-|\text{Attn}(Q,K) - \text{Attn}(Q,\hat K)| \leq O(\exp(\epsilon))
-$$
+$$|\text{Attn}(Q,K) - \text{Attn}(Q,\hat K)| \leq O(\exp(\epsilon))$$
 
 所以 KV quant 在长 context 下阈值更敏感。
 

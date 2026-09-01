@@ -27,9 +27,9 @@ Open-Reasoner-Zero 用可验证题目、基于模型通过率的两端过滤，�
 1. **题源**：AIME（截至 2023）、MATH、Numina-Math、Tulu3 MATH、OpenR1-Math-220k、AoPS，以及程序化合成的逻辑、多步推理和反事实题。
 2. **可验证门禁**：删除难以用规则可靠评分的题，例如证明题；v1 还明确排除了选择题。
 3. **初始难度过滤**：用 LLM 多次解题，以经验通过率
-   \[
-   p_i=\frac{\text{correct rollouts}}{\text{total rollouts}}
-   \]
+
+   $$p_i=\frac{\text{correct rollouts}}{\text{total rollouts}}$$
+
    作为模型相对难度；删除通过率过高的题和通过率为 0 的题，避免太简单无学习信号，以及不可解、答案错误或完全超出能力边界的样本。
 4. **v1 困难尾部挖掘**：全量训练 1,100 步后，每题采样 64 次；若答对少于 4 次，即 \(p_i<4/64=6.25\%\)，进入约 13k 的 hard set。
 5. **应用方式**：从第 1,100 步的同一模型检查点继续，用 hard set 再做 100 步 PPO。两阶段都是 RL，不是 SFT → RL。

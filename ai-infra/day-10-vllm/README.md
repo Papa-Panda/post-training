@@ -22,7 +22,7 @@
 ```
 
 ## Quick link to theory source
-Reuses `post-training/rl-infra/day-07-h100-beyond-7b/{README, vllm_rollout_stress_test.py, fsdp_h100_profiler_beyond7b.py}` — same $/useful rollout formula, same 5-way failure split.
+Historical capacity notes now live in `../day-07-h100-beyond-7b/`; this directory owns the maintained rollout stress-test copy. Treat its generated failures as simulation output, not a measured production distribution.
 
 ## Scope
 - H100-only for perf numbers; CPU fallback provides logic CI via Poisson arrival sim.

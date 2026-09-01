@@ -74,11 +74,7 @@ Day06 路线图指定 DreamerV3。它是从“world model 作为可交互生成�
 
 把环境写成部分可观测系统：
 
-$$
-s_{t+1}\sim p(s_{t+1}\mid s_t,a_t),\qquad
-o_t\sim p(o_t\mid s_t),\qquad
-r_t=r(s_t,a_t).
-$$
+$$s_{t+1}\sim p(s_{t+1}\mid s_t,a_t),\qquad o_t\sim p(o_t\mid s_t),\qquad r_t=r(s_t,a_t).$$
 
 真实状态 $s_t$ 通常不可见，只能看到图像或传感器观察 $o_t$。MuJoCo / Isaac Lab 显式给出近似物理转移；Day04–06 则都从数据学习 transition，但接口不同：
 
@@ -92,10 +88,7 @@ $$
 
 把每帧图像压成离散视觉 tokens：
 
-$$
-z_t=E_{\text{video}}(x_t),\qquad
-z_t\in\{1,\ldots,K\}^{H'\times W'}.
-$$
+$$z_t=E_{\text{video}}(x_t),\qquad z_t\in\{1,\ldots,K\}^{H'\times W'}.$$
 
 于是视频从 RGB 序列变成 $(z_1,\ldots,z_T)$，dynamics 不必直接回归每个像素。
 
@@ -103,21 +96,15 @@ $$
 
 训练数据只有视频，没有键盘或机器人控制标签。action encoder 观察历史与下一帧：
 
-$$
-\tilde a_t=E_{\text{act}}(x_{\le t},x_{t+1}),
-$$
+$$\tilde a_t=E_{\text{act}}(x_{\le t},x_{t+1}),$$
 
 再通过 VQ bottleneck 得到小型离散动作码本：
 
-$$
-a_t=\operatorname{VQ}(\tilde a_t)\in\{1,\ldots,|\mathcal A|\}.
-$$
+$$a_t=\mathrm{VQ}(\tilde a_t)\in\{1,\ldots,|\mathcal A|\}.$$
 
 decoder 必须利用历史和 $a_t$ 重建下一帧：
 
-$$
-\hat x_{t+1}=D_{\text{act}}(x_{\le t},a_t).
-$$
+$$\hat x_{t+1}=D_{\text{act}}(x_{\le t},a_t).$$
 
 小 codebook 迫使模型把视频变化压成可复用的控制原语，例如左、右、跳。但编号没有预设语义，重新训练后可以整体置换；摄像机运动、主体动作和背景变化也可能纠缠，因此 latent action 只是“能解释变化的码”，不保证等于真实因果控制量。
 
@@ -125,15 +112,11 @@ $$
 
 学习视觉 transition：
 
-$$
-p_\theta(z_{t+1}\mid z_{\le t},a_t).
-$$
+$$p_\theta(z_{t+1}\mid z_{\le t},a_t).$$
 
 时间上逐帧生成；一帧内部不是 GPT 式从左到右 next-token，而是用 MaskGIT 反复补全 masked visual tokens。推理时从初始图开始，用户选 latent action，模型生成下一帧，再把新帧放回历史。
 
-$$
-\boxed{\text{无标签视频}\rightarrow\text{latent action}+\text{视觉动力学}}
-$$
+$$\boxed{\text{无标签视频}\rightarrow\text{latent action}+\text{视觉动力学}}$$
 
 核心价值是从约 30,000 小时无标签平台游戏视频中构造可控世界，而不是精确恢复牛顿力学。
 
@@ -141,9 +124,7 @@ $$
 
 UniSim 直接学习：
 
-$$
-p_\theta(o_{t:t+K}\mid h_{t-1},a_{t-1}),
-$$
+$$p_\theta(o_{t:t+K}\mid h_{t-1},a_{t-1}),$$
 
 其中 $h_{t-1}$ 是有限近期帧，$a_{t-1}$ 可以是语言、相机运动或低层机器人控制，输出是下一段可变长度视频。
 
@@ -155,9 +136,7 @@ $$
 
 这里的“统一动作空间”不是宣称各种动作物理等价，而是把它们转换成共同的 conditioning interface：
 
-$$
-a^{\text{text}},a^{\text{motor}},a^{\text{camera}}\longrightarrow e_a.
-$$
+$$a^{\text{text}},a^{\text{motor}},a^{\text{camera}}\longrightarrow e_a.$$
 
 静态图像提供外观覆盖，人类视频提供活动先验，机器人数据提供细粒度控制，扫描数据提供空间运动。
 
@@ -165,22 +144,13 @@ $$
 
 令目标未来视频为 $y_0$，前向过程加入高斯噪声：
 
-$$
-y_\tau=\alpha_\tau y_0+\sigma_\tau\epsilon,
-\qquad \epsilon\sim\mathcal N(0,I).
-$$
+$$y_\tau=\alpha_\tau y_0+\sigma_\tau\epsilon, \qquad \epsilon\sim\mathcal N(0,I).$$
 
 3D video U-Net 学习条件噪声预测：
 
-$$
-\hat\epsilon_\theta
-=\epsilon_\theta(y_\tau,\tau,h_{t-1},a_{t-1}),
-$$
+$$\hat\epsilon_\theta =\epsilon_\theta(y_\tau,\tau,h_{t-1},a_{t-1}),$$
 
-$$
-\mathcal L_{\text{diff}}
-=\mathbb E\|\epsilon-\hat\epsilon_\theta\|_2^2.
-$$
+$$\mathcal L_{\text{diff}} =\mathbb E\|\epsilon-\hat\epsilon_\theta\|_2^2.$$
 
 推理时从噪声反复去噪得到下一段视频；生成 segment 再作为下一个 segment 的 history，形成 autoregressive rollout。
 
@@ -196,30 +166,21 @@ step(action):
 
 transition 与 reward 分开。UniSim 比 Genie 的 action grounding 更明确，但 rollout 需要多步 diffusion，成本高；它主要模拟视觉后果，不天然提供 force、torque、mass、friction 或不可见接触状态，所以“视频逼真”不等于“动力学正确”。
 
-$$
-\boxed{\text{显式动作}+\text{近期视频}\rightarrow\text{下一段视觉结果}}
-$$
+$$\boxed{\text{显式动作}+\text{近期视频}\rightarrow\text{下一段视觉结果}}$$
 
 ### 4. DreamerV3：RSSM belief state + latent imagination
 
 DreamerV3 使用完整 RL transition $(o_t,a_t,r_t,c_t)$，其中 $c_t$ 表示 episode 是否继续。RSSM 状态为：
 
-$$
-m_t=(h_t,z_t),
-$$
+$$m_t=(h_t,z_t),$$
 
 $h_t$ 是确定性 recurrent memory，$z_t$ 是离散随机 latent。
 
 #### 4.1 真实观察下的 posterior update
 
-$$
-h_t=f_\theta(h_{t-1},z_{t-1},a_{t-1}),
-$$
+$$h_t=f_\theta(h_{t-1},z_{t-1},a_{t-1}),$$
 
-$$
-e_t=E_\theta(o_t),\qquad
-z_t\sim q_\theta(z_t\mid h_t,e_t).
-$$
+$$e_t=E_\theta(o_t),\qquad z_t\sim q_\theta(z_t\mid h_t,e_t).$$
 
 这相当于 belief filtering：先依据旧状态与动作预测，再用新观察纠正。
 
@@ -227,35 +188,19 @@ $$
 
 没有真实观察时，只能从 prior rollout：
 
-$$
-z_t\sim p_\theta(z_t\mid h_t),\qquad
-a_t\sim\pi_\phi(a_t\mid h_t,z_t),
-$$
+$$z_t\sim p_\theta(z_t\mid h_t),\qquad a_t\sim\pi_\phi(a_t\mid h_t,z_t),$$
 
-$$
-h_{t+1}=f_\theta(h_t,z_t,a_t),\qquad
-z_{t+1}\sim p_\theta(z_{t+1}\mid h_{t+1}).
-$$
+$$h_{t+1}=f_\theta(h_t,z_t,a_t),\qquad z_{t+1}\sim p_\theta(z_{t+1}\mid h_{t+1}).$$
 
 从 $(h_t,z_t)$ 同时预测 observation、reward 与 continuation：
 
-$$
-\hat o_t=D_\theta(h_t,z_t),\quad
-\hat r_t=R_\theta(h_t,z_t),\quad
-\hat c_t=C_\theta(h_t,z_t).
-$$
+$$\hat o_t=D_\theta(h_t,z_t),\quad \hat r_t=R_\theta(h_t,z_t),\quad \hat c_t=C_\theta(h_t,z_t).$$
 
 world-model loss 包含 observation / reward / continuation prediction，以及拆开的 dynamics KL 与 representation KL：
 
-$$
-\mathcal L_{\text{dyn}}
-=\max\{1,D_{KL}[\operatorname{sg}(q)\Vert p]\},
-$$
+$$\mathcal L_{\text{dyn}} =\max\{1,D_{KL}[\mathrm{sg}(q)\Vert p]\},$$
 
-$$
-\mathcal L_{\text{rep}}
-=\max\{1,D_{KL}[q\Vert\operatorname{sg}(p)]\}.
-$$
+$$\mathcal L_{\text{rep}} =\max\{1,D_{KL}[q\Vert\mathrm{sg}(p)]\}.$$
 
 前者训练 prior 追上 posterior；后者约束 posterior 不要编码完全不可预测的信息。stop-gradient 分开两条优化方向，1 nat free bits 防止 posterior collapse。
 
@@ -263,18 +208,11 @@ $$
 
 从 replay 中的 posterior states 起步，在 prior 内想象 16 步。critic 学 $\lambda$-return：
 
-$$
-G_t^\lambda
-=\hat r_t+\gamma\hat c_t
-\left[(1-\lambda)V_\psi(m_{t+1})+\lambda G_{t+1}^\lambda\right].
-$$
+$$G_t^\lambda =\hat r_t+\gamma\hat c_t \left[(1-\lambda)V_\psi(m_{t+1})+\lambda G_{t+1}^\lambda\right].$$
 
 actor 最大化 normalized imagined return 与 entropy。训练 policy 时不必逐步解码 RGB，因此 latent rollout 比 UniSim diffusion 快得多。
 
-$$
-\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow
-\text{imagined trajectory}\rightarrow\text{actor-critic}}
-$$
+$$\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow \text{imagined trajectory}\rightarrow\text{actor-critic}}$$
 
 ### 5. 三者对照
 

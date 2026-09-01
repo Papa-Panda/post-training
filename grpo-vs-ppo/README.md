@@ -1,53 +1,83 @@
-# GRPO vs PPO — Post-training / Agentic RL 的两条 RL 路线
+# GRPO vs PPO — estimator、ratio 与 systems trade-offs
 
-> PPO 是 RLHF 的经典，GRPO 是 DeepSeekMath/R1 把 critic 干掉、靠组内相对分做 baseline 的新解。  
-> This folder is a compact note in the same style as `ICL/` — math first, infra second.
+PPO 和 GRPO 都不是一个固定 recipe。这个专题统一 token/group 记号，从 policy gradient 推到 clipped surrogate，拆开 behavior policy 与 reference policy，并把算法选择落到 memory、communication、rollout-token budget 与 failure diagnostics。
 
-## 为什么关心 Why care (agentic RL)
+## 先纠正四个常见误解
 
-Post-training / agentic RL 的 rollout 贵、带工具调用、多步长：
+1. **GRPO 不等于“按排名训练”**：原始形式用组内 reward 的 mean/std normalization；只有 reward 本身来自 ranking 时才可口头说“排名”。
+2. **PPO 不等于“四个模型常驻”**：actor、critic、reference、reward 的部署方式各异；behavior policy 也可只保存 old log-probs。rule reward 不需要 reward model。
+3. **去 critic 不等于固定省 30–50% 显存**：确定省掉 critic path，但总 peak 还取决于 optimizer state、sharding、activations、reference 与 rollout KV cache。
+4. **critic 不等于 dense ground truth**：GAE 可给 token-specific estimate 和 bootstrap，但 value model 仍只是在拟合 return；错误 reward 不会被 optimizer 修好。
 
-- PPO 需要 `actor + critic + ref + reward` 4 个模型常驻，显存高，且价值网络 `V(s)` 在稀疏 reward / code 任务上很难学准。
-- GRPO 把 critic 换成 group mean/std baseline，**显存省 ~30-50%，稳定省调参**，天然适配 R1/DeepSeekMath 的 `G 次采样 → 排名` 范式。
-- 但 PPO 的 GAE + critic 方差更低，对需要长 horizon credit assignment 的 env 仍有优势。
+## Map
 
-> 结论：code/math 的 rule-based reward 任务优先 GRPO，密集 reward / 强价值建模场景仍看 PPO。
-
-## 结构 Structure
-
-```
-.
-├── README.md                # 你现在看的
-├── 01_ppo_objective.md      # PPO 目标 / clipping / GAE
-├── 02_grpo_objective.md     # GRPO / group baseline / no critic
-├── 03_math_comparison.md    # 方差/偏差/内存/计算比分
-├── 04_infra_tradeoffs.md    # vLLM rollout / token / multi-step
-├── 05_code/                 # 最小复现 + verl/OpenRLHF 片段
-├── 06_glm52_ppo_comeback.md # 2026 Z.ai GLM-5.2 回归 PPO — task-dependent 分水岭
-└── papers.md                # 关键论文卡
+```text
+00_notation.md              unified q / group / token / policy notation
+01_ppo_objective.md         PPO-Clip derivation, sign behavior, GAE, truncation
+02_grpo_objective.md        group advantage, KL estimators, bias and edge cases
+03_math_comparison.md       baseline/ratio/aggregation axes and method boundaries
+04_infra_tradeoffs.md       memory, collectives, token budget, async staleness
+05_code/                    dependency-free reference code + semantic tests
+06_glm52_ppo_comeback.md    sourced long-horizon compaction case study
+papers.md                   primary-source ledger
 ```
 
-> 2026 新增：GLM-5.2（744B MoE 40B active 1M上下文）长程阶段放弃 GRPO、回归 token-level PPO + value net，因长 horizon 压缩后 sub-trajectory 长度/数量高度不均无法公平组队对比，直接旁证 RL 算法选型已 task-dependent 短验=GRPO便宜稳 长程=ciritic-PPO【1131884512538087896†L40-L45】并由 slime 框架支撑大规模 rollout【3245468999939399584†L118-L128】。详见 `06_glm52_ppo_comeback.md`。
+## One-screen comparison
 
-## TL;DR 对比
-
-| 维度 | PPO | GRPO |
+| 维度 | Critic PPO | Outcome GRPO |
 |---|---|---|
-| **Objective** | $E[\min(r_t A_t, \text{clip}(r_t) A_t)]$ | $E[\frac1G\sum_i \min(r_{i,t}\hat A_i, \text{clip} \hat A_i) - \beta KL]$ |
-| **Advantage** | GAE: $(γλ)$ 递推，需 $V(s)$ | Group relative: $\hat A_i = \frac{r_i-μ}{σ}$，无 $V$ |
-| **Model 数** | 4: policy / old / critic / ref | 2-3: policy / ref / reward (no critic) |
-| **显存 peak** | 高，多 1x critic | 省 critic，适合 70B+ RL |
-| **Variance** | 低 (GAE smoothing) | 高一些，但组归一化降方差 |
-| **Sparse reward** | critic 难学，偏差大 | 更鲁棒，math/code 友好 |
-| **多步 agentic** | 需价值传播，调参多 | 每 outcome 一个标量 reward 即可 |
+| rollout organization | 每 prompt 可一条或多条 | 同 prompt 要 $G>1$ completions |
+| advantage | token/state-specific GAE | group-normalized outcome，通常整条 response 广播 |
+| learned baseline | $V_\phi(h_t)$ | none |
+| extra cost | critic state、forward/backward、collectives | grouped generation、group sync、可能更多 rollout tokens |
+| degenerate case | critic collapse / poor bootstrap | all-equal reward group gives zero signal |
+| temporal credit | 可 bootstrap；仍依赖 critic/reward quality | vanilla outcome form 粗；process-supervision variant 可更细 |
+| ratio unit | 常用 token ratio | 原始 GRPO 也常用 token ratio；不要和 sequence product 混写 |
+| natural starting point | variable-length segments / critic 可可靠拟合 | short verifiable outcomes / critic 成本高 |
 
-参考交互：看 ICL 专题的数学比分风格，这里延续 scorecard 思路。
+## Minimal equations
 
-## 怎么用落地
+Token ratio uses the behavior snapshot:
 
-1. **math/code RL**: 试 GRPO + rule reward，G=8~64，采样多样性靠温度。
-2. **infra**: 用 vLLM 批量出 G 条 rollout，critic 省下来的卡给更大 batch。
-3. **稳定化**: KL 0.02-0.08，advantage clip 而非只 clip ratio。
-4. **评估**: 对比 PPO critic loss 震荡 vs GRPO reward-group std。
+$$\rho_{i,t}=\frac{\pi_\theta(y_{i,t}\mid q,y_{i,<t})}{\pi_b(y_{i,t}\mid q,y_{i,<t})}$$
 
-> Maintained bilingual, LaTeX-first, no employer IDs. Source papers in `papers.md`.
+PPO-style clipped token surrogate, with $c(x,l,u)=\min(\max(x,l),u)$:
+
+$$s(\rho,A)=\min(\rho A,c(\rho,1-\epsilon_l,1+\epsilon_h)A)$$
+
+PPO usually inserts GAE:
+
+$$A_{i,t}^{GAE}=\sum_{l\ge0}(\gamma\lambda)^l\delta_{i,t+l}$$
+
+Outcome GRPO inserts group-normalized reward:
+
+$$A_i^{grp}=\frac{R_i-\bar R}{s_R}$$
+
+KL compares the trainable policy to a separate reference anchor:
+
+$$D_{KL}(\pi_\theta\Vert\pi_{ref})$$
+
+## Selection workflow
+
+不要先问“PPO 还是 GRPO”，先量：
+
+1. reward 是 terminal、process 还是可被 hack 的 proxy？
+2. 同 prompt 能否产生独立、可比较且 non-degenerate 的 group？
+3. 固定 generated-token budget 下，增大 $G$ 后 prompt coverage 损失多少？
+4. critic 在 held-out trajectories 上的 value error / explained variance 如何？
+5. peak memory 主项是 critic、actor optimizer、activations 还是 KV cache？
+6. trajectory 是自然终止还是基础设施截断？
+7. loss 按 response、segment 还是 token 加权？
+
+没有这些测量时，不给固定 `G`、KL coefficient、GPU 数或内存节省百分比。原论文里的具体设置是复现实验起点，不是跨任务推荐。
+
+## Run the checks
+
+```bash
+cd grpo-vs-ppo/05_code
+python3 ppo_vs_grpo_advantage.py
+python3 -m unittest -v test_rl_objectives.py test_docs.py
+python3 -m py_compile *.py
+```
+
+Primary sources and claim scope are in [`papers.md`](papers.md).

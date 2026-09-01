@@ -19,8 +19,8 @@ Meta 2026-05-01 收购 ARI（Assured Robot Intelligence，20人，SD，Xiaolong 
 
 > 知识图谱位置：Physical AI 轨道 Day01 起点，对应你 ai-data Day01 / ai-infra Day01 的“地基”位；后续 Day02 Isaac Lab / Day03 World Model / Day06 Whole-body Control 都接在这里的战略定义上。
 
-- **接了哪条线：** 接你 Mentor 建议探索 Physical AI / SpaceX 的主线，补 Meta AAI → MSL 视野缺口；是 Meta 内部从 pure software LLM 到 physical world 的延伸。
-- **补了哪个短板：** 此前你对 AI Infra / Post-training 熟，但对 Physical AI 产业格局、humanoid 为什么是答案、MSL 内部分工（MSL 负责 frontier intelligence + self-learning / whole-body control，Robotics Studio 负责 hardware + sensors + software platform）不熟。
+- **接了哪条线：** 从 software LLM / post-training 延伸到 physical-world learning，比较 data、simulation、control 与 hardware 的接口。
+- **补了哪个短板：** 补充 Physical AI 产业格局、humanoid 路线假设，以及 MSL 与 Robotics Studio 的公开分工。
 - **替代 / 分叉 / 改进：** ARI 不是卖成品机器人，而是卖 robotic intelligence：理解/预测/适应 human behaviors in dynamic environments 的 foundation model；与 Tesla Optimus / Figure / 1X 的 hardware-first 不同，Meta 走的是 ecosystem + intelligence layer。
 - **对之前 Day X 的直接对比：** vs 你之前看的 Tesla / SpaceX Physical AI（硬件驱动），Meta 路径是 data/ecosystem 驱动 + human experience scaling，infra 复用 Meta 现有 compute / data flywheel。
 

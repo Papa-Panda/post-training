@@ -37,7 +37,7 @@
 **Knowledge Point**: 非线性物理系统建模技巧  
 **Learning Goal**: 提炼 Paper2 的非线性物理建模，能写出状态空间并映射到 GPU 热/功耗  
 **Small Daily Task**: 写 Paper2 的状态空间模型，思考如何对应到 GPU 热/功耗  
-**Work Connection**: 机械负载建模 = GPU 集群热/功耗建模，都是“大惯性 + 非线性耦合 + 阶梯启停防抖”，做过省 $400M 的你直接复用  
+**Systems Connection**: 机械负载与 GPU 集群热/功耗都可抽象为“大惯性 + 非线性耦合 + 阶梯启停防抖”，但参数必须由目标系统重新辨识
 **Resource**: Paper2 draft（数据中心机械负载预测系统）
 
 ### 今天要懂的 3 个非线性技巧（Paper2 → GPU）
@@ -126,11 +126,11 @@ torchrun --nproc_per_node=2 paper2_mech_to_gpu_thermal.py
 - CPU gloo 2-rank 逻辑通，机械→GPU 联动 RMSE 等比真实数据中心数小（ scaled ），不当真机读。
 - throttle_rate 0.83% 是本次 seed 42 的 CPU 模拟单一突发模式，非大样本统计，需 H100 上长跑 + 真 Tj sensor + RAPL 功率采样。
 
-## Monetization / Work Connection
+## Cost and transfer boundaries
 
-- 你过去省 $400M 里含机械负载建模，PUE Modeling Paper3 已连接：`COST = new PUE` 里分子多一项 `+ P_cooling_overhead + $/thermal_throttle_waste`
-- RL Infra 面试一句：*“我在数据中心做过机械负载非线性 SSM（双线性耦合+二次换热+加机 hysteresis），平移到 RL 就是 GPU 热两节点 SSM + 风扇立方律非线性 + 82/72°C 节流 hysteresis，物理先验把 Tj 预测提前 5-10min，避免 rollout 占 90% 墙钟时被硬件节流反咬，折算 $/有用 rollout 可降 8-12%，同复用 Paper1 的冷却防抖思想。”*
-- Reward OAS 校准 Day12 将复用这里 `p_mech_std 9.38kW` 类似的残差 STD 思路量化 reward 不确定性。
+- 成本账本可拆成计算功耗、冷却开销与热节流浪费；任何金额或节省比例都需要真实功率、温度、吞吐和计费数据支持。
+- 机械系统的状态空间结构可以启发 GPU 热模型，但时间常数、阈值和 hysteresis 必须在目标硬件上重新辨识，不能直接平移。
+- Day12 的 reward 校准只复用“用残差分布表达不确定性”的方法，不复用本实验的 synthetic residual 数值。
 
 ---
 **Artifacts**: `paper2_mech_to_gpu_thermal.py` CPU ok，NOTES.md 3 数待H100。

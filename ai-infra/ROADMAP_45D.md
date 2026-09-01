@@ -1,8 +1,9 @@
-# AI Infra 45天 · 知识面覆盖版（纯 AI Infra，不含机房 PUE）
+# AI Infra 45天 · 计划覆盖图（不含设施 PUE）
 
-> 目标：45天走完 **纯 AI Infra** 全链路，能对别人讲清每层 **牺牲什么 换取什么**，面试/系统设计能画出链路即可。
-> 对标：草帽路飞 《AI Infra学习路线》四层结构 + 你的 post-training / Agentic RL 背景。
-> 约束：每天 30-60min 鸟瞰式，不做深度 kernel 手搓；公共 repo 不出现雇主标识；已有 day-11/14 机房线移至 side-track。
+> 本文是计划中的课程覆盖图，不代表 45 个主题均已实现或验证。完成状态以各目录中的代码、测试与测量记录为准。
+> 目标：建立纯 AI Infra 全链路的系统直觉，能讲清每层 **牺牲什么、换取什么、何时不赚**。
+> 参考：草帽路飞《AI Infra学习路线》的四层结构，并连接 post-training / Agentic RL 系统。
+> 约束：每节为 30–60 分钟鸟瞰，不以手写完整 kernel 为目标；设施/热管理主题只作为非核心 side track。
 
 灵感源：https://zhuanlan.zhihu.com/p/2021970155182326008
 
@@ -78,14 +79,13 @@ graph TD
 - **第一层 06-13天 CUDA**：GPU存储 寄存器>ShMem>L1/L2>HBM，coalesced，最朴素Reduce→Shuffle，Tiled GEMM 50% cuBLAS，FlashAttention tiling+online softmax，Triton fused，Nsight System看host拖后+Compute看SOL
 - **第二层 14-19天 分布式**：MHA→MLA省KV，7B FP16 14GB+Adam 56GB单80GB判断，ZeRO三句区分，64卡TP=8机内PP=4 DP=2为何TP不能跨机，BF16指数8位vs 5位，Megatron/DeepSpeed/FSDP一句选型，DCP async ckpt
 - **第三层 21-32天 推理**：Compute vs Memory bound，7B 2*32*32*128*4096*16*2B≈32GB cache，vLLM Paged虚拟页，Static vs Continuous 30%→80%，Shared前缀复用，长prefill分块防拖慢，真机部署对比表，70B 2*A100 140GB→INT4 35GB压法，INT4慢于INT8边界，Spec实习生草稿+主编验证无偏，DistServe/Splitwise网约车分拣，Goodput才等于体验，GenAI-Perf一键6指标，TPOT P95退化5%即block
-- **Portfolio 33-45天 连接到你的 post-training**：RLHF vs GRPO，RM ECE 0.0906→0.0881 σ0.045，ToolUse 5类失败，训练→vLLM流水 async省52%墙，$/有用，coding data飞轮，Star 150字 $200M迁移，E2E Demo，系统设计白板，复盘/LinkedIn honest/Final总结
+- **Portfolio 33-45天 post-training 连接**：RLHF vs GRPO、RM 校准、ToolUse 失败分类、训练→vLLM 流水线、异步评测、$/useful rollout、coding-data flywheel、端到端 demo 与系统设计复盘
 
 ---
 
-## 45天日历（知识面覆盖版，已写入 ai_infra Sheet）
+## 45天日历（计划覆盖版）
 
-> 每行=鸟瞰问题+可验证产出，30-60min，不求手搓极致
-> Sheet ID `1JxGiuanIdwHWD2_e6FRMiVLBvB2kNnD8QAree8ZXfUc` gid `ai_infra` A2:J46 已重写 45行
+> 每行是一个鸟瞰问题与可验证产出；此列表不等于完成清单。
 
 - 01 Transformer架构
 - 02 PyTorch loop
@@ -114,13 +114,13 @@ graph TD
 - 29-31 Disagg + Goodput配比1:3
 - 31-32 Benchmark 6指标+门禁
 - 33-40 RL芯连接：GRPO/RM σ/ECE/ToolUse 5失败/vLLM联动/async eval/$有用/coding flywheel/Star故事
-- 41-45 E2E Demo+系统设计+复盘+LinkedIn honest+Final 300字
+- 41-45 E2E Demo+系统设计+复盘+最终总结
 
 ---
 
-## 已有 side-track（原机房线）说明
+## 非核心 side track
 
-- `day-11-paper2-mech-load` SSML→GPU Tj 82.49C throttle0.83% / `day-14-pue-cost` PUE 1.2576 25.76% overhead / `day-06-paper1-rl-infra` autoscaling 已保留，不在主干考核，属于 **ML for Infra→AI Infra可迁移思维**，面试可讲方法论迁移但不算AI Infra核心。
+- `day-11-paper2-mech-load`、`day-14-pue-cost` 与 `day-06-paper1-rl-infra` 保留为历史实验；它们研究设施/热/工作负载预测，不属于 AI Infra 主干。其代理或模拟数字不能当作 GPU 系统测量。
 
 ---
 
@@ -140,14 +140,13 @@ graph TD
 - Spec Sampling无偏保证 rejection sampling数学等价
 - DistServe动机：混批TPOT P95被prefill拖慢3-5倍定量
 - Benchmark能输出固定模板6指标复现config只改一变量
-- `43-45` 讲出 Star 2分钟省$200M→RL稳定故事 队列68.8%热1.67pp成本22.1%（待H100真机替换待H100标记）
+- `43-45` 能用可复现配置、测量记录和残余风险总结端到端系统设计
 
 ---
 
-## 接下来怎么用这个 repo
+## 使用方式
 
-1. 每天按 Sheet 完成 `Small Task`，笔记进对应 `rl-infra/day-0x/NOTES.md` 加一句 Connection to Prev: Day{prev}→Day{curr}
-2. 45天后你有：DDP/FSDP/ZeRO账、FlashAttention白板、vLLM对比表、量化决策树、Spec/Disagg动机、6指标Benchmark模版、RLHF/GRPO一页、RM校准小跑、5失败库、Star故事
-3. 这就是你想的“多少有一点粗略理解”——全链路都摸过一遍，面试能指到瓶颈，不露怯
-
-> 关联：`ai_daily.csv` 同步需 manually 更新 status→done，`ai-data/` 30篇图谱互补（LESS/TRACIN/STAR...），`eval-xxx` 两条评测轨并行
+1. 从当前完成度较高的 `r2-day-*` 课程开始；每节在相邻主题之间写清 `Connection to Prev`。
+2. 对公式运行语义测试；对性能结论保存硬件、软件、配置、命令和原始测量。
+3. 只有具备实现与证据的条目才标为完成；计划项继续保留在本路线图中。
+4. 数据与评测专题分别参考 `ai-data/`、`model-aware-data-curation/` 与 `eval-*`。

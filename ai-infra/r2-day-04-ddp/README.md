@@ -1,33 +1,66 @@
-> Connection to Prev: r2-Day03 通信拓扑 → r2-Day04 DDP: 上一篇算清了 NVLink 900GB/s vs IB 50GB/s 差14倍，AllReduce耗时公式；今天把 DDP 落地，Day02 的 DistributedSampler + 手写 AllReduce 正是 DDP 的原型，DDP就是把这套自动化+bucket化。
+# r2-Day04 — Distributed Data Parallel Semantics
 
-# r2-Day04 - DDP 分布式数据并行
+## Connection to Prev
 
-## 昨日复盘
-r2-Day03 8卡1GB Ring 1.94ms NVLink vs 27.3ms PCIe，TP不能跨机因为每层2次同步AllReduce在关键路径，PP/DP可跨机因为可overlap。
+r2-Day03 separated logical collective volume from physical bandwidth. DDP supplies the training semantics around those collectives: replicated parameters, partitioned inputs, averaged gradients, and identical optimizer updates.
 
-## 今日主题
-**DDP 多进程梯度AllReduce同步**
+## 1. What DDP guarantees—and what it does not
 
-- 每GPU一份完整模型，不同数据
-- backward完梯度 AllReduce SUM / world_size
-- bucket化：多梯度拼成25MB bucket再AllReduce，省启动开销
-- DistributedSampler 保证不重复
-- DDP vs 手写：DDP自动hook，overlap backward与AllReduce，broadcast初始权重
+PyTorch DDP synchronizes module state when the wrapper is constructed and registers autograd hooks that communicate gradient buckets during backward. It does **not** partition input data; the application normally supplies a `DistributedSampler`.
 
-## 最小可跑任务（30-60min）
-把 r2-day-02 的 loop 改 DDP：
-- `dist.init_process_group(gloo, rank, world_size)`
-- `model = DDP(model)` 或手写 `all_reduce grad`
-- 2进程 `torchrun --nproc_per_node=2` 跑通，验证 loss一致
+For equally sized local minibatches on $G$ ranks, DDP's averaged gradient is:
 
-## 检验
-- 不查说出 DDP通信量 = 参数量*2*(N-1)/N ≈ 参数量
-- 能说清为何 DDP 要 broadcast 权重
-- 能说清 bucket 25MB 意义
+$$g=\frac{1}{G}\sum_{r=0}^{G-1}g_r.$$
 
-## 资源
-- PyTorch DDP tutorial
-- https://pytorch.org/docs/stable/distributed.html
+That equals the gradient of the concatenated global minibatch under the usual per-example mean loss. Unequal local batch sizes require weighting; an unweighted mean of rank means is then not the global example mean.
 
-## 待H100
-CPU gloo proxy，待H100跑 NCCL 2/4/8卡真数 `torch.cuda.max_memory_allocated` 补 MFU
+The default correctness invariants are:
+
+1. every rank starts from the same logical dataset and a synchronized model state;
+2. sampler ownership has the expected coverage, padding, or dropped-tail behavior;
+3. corresponding parameters receive the same averaged gradient;
+4. replicas remain equal after each optimizer step.
+
+Rank-local minibatch losses need **not** be equal because each rank processes different examples.
+
+## 2. Data ownership
+
+`DistributedSampler` pads by repeating indices when the dataset is not divisible by world size and `drop_last=False`. Therefore “each sample appears exactly once” is only true for divisible sizes (or an explicitly dropped tail). With shuffling, call `sampler.set_epoch(epoch)` so every rank uses the same deterministic permutation before taking its strided shard.
+
+Every rank in the demo constructs the same deterministic logical dataset. The earlier version seeded dataset generation with `42 + rank`, which created different rank-local datasets before sampling and invalidated the intended partitioning model.
+
+## 3. Communication and overlap
+
+For a ring all-reduce over a gradient payload of $S$ bytes, idealized per-rank sent volume is:
+
+$$V_{AR}=2\frac{G-1}{G}S.$$
+
+DDP buckets parameters so a bucket can become ready and start reducing while autograd continues computing earlier layers. Bucket size is a tunable trade-off between startup overhead, overlap opportunity, and memory. Do not treat a historical default value as a universal optimum.
+
+## 4. Run
+
+Dependency-free semantic tests:
+
+```bash
+python3 -m unittest discover -s ai-infra/r2-day-04-ddp -p 'test_*.py' -v
+```
+
+Optional PyTorch integration:
+
+```bash
+torchrun --standalone --nproc-per-node=2 \
+  ai-infra/r2-day-04-ddp/ddp_demo.py
+```
+
+The integration demo reads `RANK`, `WORLD_SIZE`, and `LOCAL_RANK` from `torchrun`; uses Gloo on CPU and NCCL when CUDA is available; checks parameter checksums after DDP initialization and every optimizer step; and writes one replicated-state checkpoint on rank 0 only.
+
+## Status
+
+- Verified without PyTorch: sampler coverage/padding, gradient averaging, update equality, and ring volume.
+- Not verified in this environment: PyTorch two-process execution (PyTorch is not installed), NCCL, GPU performance, bucket overlap, or MFU.
+
+## Primary sources
+
+- DDP design note: https://docs.pytorch.org/docs/main/notes/ddp
+- DDP API: https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html
+- DistributedSampler API: https://docs.pytorch.org/docs/stable/data.html#torch.utils.data.distributed.DistributedSampler

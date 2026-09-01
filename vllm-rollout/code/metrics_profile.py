@@ -1,92 +1,107 @@
 #!/usr/bin/env python3
+"""Capture selected vLLM Prometheus samples in long-form CSV.
+
+No values are fabricated when the endpoint is unavailable. Metric names are
+version-sensitive; unknown names remain visible when --all is used.
 """
-metrics_profile.py — scrape vLLM metrics endpoint + local GPU stats
-Endpoint: http://localhost:8000/metrics  (vLLM default when --enable-metrics)
-If no endpoint, falls back to cpu sim metrics from /tmp/vllm_rollout_fail.json
+from __future__ import annotations
 
-Usage:
-  python code/metrics_profile.py --endpoint http://localhost:8000/metrics --interval 1 --out /tmp/live_metrics.csv
-  # then run vllm serve ... & sweep.sh in parallel
-"""
-import argparse, time, csv, json, sys
-try:
-    import requests
-except ImportError:
-    requests=None
+import argparse
+import csv
+import re
+import sys
+import time
+from pathlib import Path
+from typing import Dict, Iterable, List
+from urllib.request import urlopen
 
-def scrape(endpoint):
-    if not requests or not endpoint:
-        return None
+SAMPLE_RE = re.compile(r'^(?P<name>[a-zA-Z_:][a-zA-Z0-9_:]*)(?:\{(?P<labels>.*)\})?\s+(?P<value>[-+0-9.eE]+)$')
+DEFAULT_PREFIXES = (
+    "vllm:num_requests_",
+    "vllm:kv_cache_usage_perc",
+    "vllm:gpu_cache_usage_perc",
+    "vllm:num_preemptions",
+    "vllm:prompt_tokens",
+    "vllm:generation_tokens",
+    "vllm:request_success",
+    "vllm:request_queue_time_seconds",
+    "vllm:request_prefill_time_seconds",
+    "vllm:request_prompt_tokens",
+    "vllm:request_generation_tokens",
+    "vllm:request_time_per_output_token_seconds",
+    "vllm:time_to_first_token_seconds",
+    "vllm:inter_token_latency_seconds",
+    "vllm:time_per_output_token_seconds",
+    "vllm:e2e_request_latency_seconds",
+)
+
+
+def parse_prometheus(text: str) -> List[Dict[str, object]]:
+    rows: List[Dict[str, object]] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        match = SAMPLE_RE.match(line)
+        if not match:
+            continue
+        try:
+            value = float(match.group("value"))
+        except ValueError:
+            continue
+        rows.append({"metric": match.group("name"), "labels": match.group("labels") or "", "value": value})
+    return rows
+
+
+def scrape(endpoint: str, timeout_s: float) -> List[Dict[str, object]]:
+    with urlopen(endpoint, timeout=timeout_s) as response:  # nosec B310: explicit operator endpoint
+        return parse_prometheus(response.read().decode("utf-8"))
+
+
+def selected(rows: Iterable[Dict[str, object]], include_all: bool) -> List[Dict[str, object]]:
+    if include_all:
+        return list(rows)
+    return [r for r in rows if str(r["metric"]).startswith(DEFAULT_PREFIXES)]
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--endpoint", default="http://127.0.0.1:8000/metrics")
+    parser.add_argument("--interval", type=float, default=1.0)
+    parser.add_argument("--duration", type=float, default=0.0, help="0 captures once")
+    parser.add_argument("--timeout", type=float, default=2.0)
+    parser.add_argument("--out", default="vllm_metrics.csv")
+    parser.add_argument("--all", action="store_true", help="retain every metric")
+    args = parser.parse_args()
+    if args.interval <= 0 or args.duration < 0 or args.timeout <= 0:
+        parser.error("interval and timeout must be positive; duration must be non-negative")
+
+    out = Path(args.out)
+    deadline = time.monotonic() + args.duration
+    captures = 0
     try:
-        r=requests.get(endpoint, timeout=2)
-        # vLLM exposes prometheus text
-        # parse few keys: vllm:num_requests_running, vllm:gpu_cache_usage_perc, vllm:avg_latency
-        txt=r.text
-        d={}
-        for line in txt.splitlines():
-            if line.startswith("#"): continue
-            # e.g. vllm:num_requests_running 12
-            parts=line.split()
-            if len(parts)>=2:
-                try:
-                    d[parts[0]]=float(parts[1])
-                except: pass
-        return d
-    except Exception as e:
-        return {"err": str(e)}
+        with out.open("w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=["captured_unix_s", "metric", "labels", "value"])
+            writer.writeheader()
+            while True:
+                now = time.time()
+                rows = selected(scrape(args.endpoint, args.timeout), args.all)
+                for row in rows:
+                    writer.writerow({"captured_unix_s": now, **row})
+                handle.flush()
+                captures += 1
+                if args.duration == 0 or time.monotonic() >= deadline:
+                    break
+                time.sleep(args.interval)
+    except Exception as exc:
+        print(f"metrics scrape failed: {exc}", file=sys.stderr)
+        try:
+            out.unlink()
+        except FileNotFoundError:
+            pass
+        raise SystemExit(2)
+    print(f"captured {captures} scrape(s) to {out}")
 
-def cpu_fallback():
-    try:
-        j=json.load(open("/tmp/vllm_rollout_fail.json"))
-        return {
-            "vllm:num_requests_running": j["stats"]["total"]*0.3,
-            "vllm:gpu_cache_usage_perc": 0.75,
-            "vllm:gpu_prefix_cache_hit_rate": 0.4,
-            "p95_wall": j["stats"]["p95_wall"],
-            "fail_rate": j["stats"]["fail_rate"],
-        }
-    except:
-        return {"mode":"waiting for /tmp/vllm_rollout_fail.json"}
 
-def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument("--endpoint", default="http://localhost:8000/metrics")
-    ap.add_argument("--interval", type=float, default=1.0)
-    ap.add_argument("--out", default="/tmp/live_metrics.csv")
-    ap.add_argument("--duration", type=float, default=120.0, help="sec, 0=inf")
-    args=ap.parse_args()
-    print(f"[PROF] scrape {args.endpoint} every {args.interval}s → {args.out} (fallback cpu sim if no server)")
-    headers_written=False
-    t0=time.time()
-    with open(args.out, "w", newline="") as csvf:
-        writer=None
-        while True:
-            m=scrape(args.endpoint)
-            if m is None or "err" in (m or {}) or not m:
-                m=cpu_fallback()
-                m["source"]="cpu_sim"
-            else:
-                m["source"]="vllm_metrics"
-            m["ts"]=time.time()
-            # dynamic headers
-            if not headers_written:
-                writer=csv.DictWriter(csvf, fieldnames=sorted(m.keys()))
-                writer.writeheader()
-                headers_written=True
-            else:
-                # ensure fieldnames compat
-                # rewrite if new keys
-                pass
-            writer.writerow(m)
-            csvf.flush()
-            # console summary
-            run = m.get("vllm:num_requests_running", "?")
-            gpu = m.get("vllm:gpu_cache_usage_perc", m.get("gpu_cache_usage_perc","?"))
-            lat = m.get("vllm:avg_generation_throughput_toks_per_s", m.get("p95_wall","?"))
-            print(f"{time.time()-t0:6.1f}s run={run} gpu_cache={gpu} p95_or_tput={lat} src={m.get('source')}")
-            if args.duration>0 and time.time()-t0>args.duration:
-                break
-            time.sleep(args.interval)
-
-if __name__=="__main__":
+if __name__ == "__main__":
     main()

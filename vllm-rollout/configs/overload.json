@@ -1,0 +1,20 @@
+{
+  "duration_s": 20.0,
+  "drain_s": 20.0,
+  "step_s": 0.01,
+  "arrival_rate_rps": 40.0,
+  "prompt_tokens_mean": 256,
+  "output_tokens_mean": 128,
+  "length_cv": 0.25,
+  "max_num_seqs": 32,
+  "max_num_batched_tokens": 512,
+  "prefill_tokens_per_s": 20000.0,
+  "decode_tokens_per_s": 4000.0,
+  "kv_capacity_tokens": 8192,
+  "prefill_chunk_tokens": 512,
+  "request_timeout_s": 20.0,
+  "max_preemptions_per_request": 2,
+  "policy_update_interval_s": 5.0,
+  "accept_probability": 0.9,
+  "seed": 7
+}

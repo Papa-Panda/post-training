@@ -39,8 +39,8 @@
 **Knowledge Point**: 给训练集群定SLO  
 **Learning Goal**: 能用3条SLO把小集群的“可用”量化，不用拍脑袋  
 **Small Daily Task**: 给小集群写3条SLO：作业成功率/排队时长/功率抖动  
-**Work Connection**: 复用你 SLO 建模经验 — 过去做数据中心容量 & PUE建模时定过可用性，现在把同一套量化迁到RL训练/推理集群，面试可讲“$400M节省里有SLO防抖”  
-**Resource**: Your previous SLO work (thermal/mechanical + autoscaling SLO)
+**Systems Connection**: 复用 SLO 的通用方法——定义服务对象、指标窗口、误差预算与触发动作；阈值必须由目标训练/推理系统的数据校准
+**Resource**: Reliability/SLO methods applied to thermal, queueing, and rollout systems
 
 ### 今天要懂的3条SLO（RL infra语言）
 
@@ -112,11 +112,11 @@ torchrun --nproc_per_node=2 slo_sim.py
 - CPU gloo 2-rank 逻辑通，sim 200jobs seed42 scaled，不当真机读。
 - throttle_rate 2.5%是本次 seed42单一突发模式，非大样本统计，需 H100上长跑 + 真 Tj sensor + RAPL采样 + vLLM长CoT 500→5000 tok失败率替换。
 
-## Monetization / Work Connection
+## Cost and transfer boundaries
 
-- 你过去省 $400M里含SLO建模：`SLO = new PUE`里可用性是分子，`(1-SLO_fail)*GPU_hours`省掉的浪费=直接省钱
-- RL Infra面试一句：*“我在数据中心做过 mechanically-coupled SLO (热/功率/排队)，平移到 RL就是 3条——job success≥98%用 vLLM 5类失败映射、queue p95<120s用 eval异步省52%、power jitter σ/mean<0.15 + Tj节流<1%用 Paper2两节点SSM提前5-10min调风扇，SSM+hysteresis防抖复用 Paper1冷却窗口，SLO超阈就联动 GRPO过滤阈值，折算 $/有用 rollout降 8-12%。”*
-- Reward校准Day12将复用这里 `power_jitter 0.146`类似的残差STD思路量化reward不确定性SLO budget。
+- 可把失败和等待转换为浪费的 GPU-hours，但货币成本需要真实资源价格、重试次数和 useful-goodput 数据。
+- 文中的 success、queue、power-jitter 与 thermal 阈值都是示例控制面；没有目标集群基线和误差预算时，不应写成生产 SLO。
+- Day12 的 reward 校准只复用“用残差分布分配 uncertainty budget”的方法，不复用本模拟的 `power_jitter` 数值。
 
 ---
 **Artifacts**: `slo_sim.py` CPU ok，NOTES.md 3数待H100，本README含 Connection。

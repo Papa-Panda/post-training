@@ -1,51 +1,80 @@
-# 03 线 II：前向就是梯度下降 — 数学最硬
+# 03 线 II：线性注意力与一步梯度下降
 
-Papers：von Oswald et al. 2022, Akyürek et al. 2022, Dai et al. 2022
+[← 02 Bayesian](02_line_I_bayesian.md) · [下一章：Circuit →](04_line_III_circuit.md)
 
-## 核心构造（线性回归情形）
+## 1. 先统一形状和归一化
 
-任务：$y = W^* x$，loss $\ell = \frac12 \|W x - y\|^2$。一步 GD：
+给 $k$ 个演示，$x_i\in\mathbb R^d$、$y_i\in\mathbb R^m$，参数 $W\in\mathbb R^{m\times d}$。采用 mean squared loss：
 
-$$
-W_1 = W_0 - \eta \sum_i (W_0 x_i - y_i) x_i^\top = W_0 + \eta \sum_i e_i x_i^\top,\quad e_i = y_i - W_0 x_i
-$$
+$$L(W)=\frac{1}{2k}\sum_{i=1}^{k}\lVert Wx_i-y_i\rVert_2^2$$
 
-线性注意力（去掉 softmax）：
+在 $W_0$ 处定义 residual $e_i=y_i-W_0x_i$，一步 full-batch GD 为：
 
-$$
-\text{Attn}(Q,K,V) = V K^\top Q
-$$
+$$W_1=W_0-\eta\nabla L(W_0)=W_0+\frac{\eta}{k}\sum_{i=1}^{k}e_ix_i^\top$$
 
-构造：令 token $e_i = [x_i; y_i]$ 拼进 KV，query $q = [x_q; 0]$，则
+对 query $x_q$：
 
-$$
-V K^\top Q = \sum_i [0; e_i][x_i^\top 0][x_q;0] = [0; (\sum_i e_i x_i^\top) x_q] = \Delta W x_q
-$$
+$$W_1x_q=W_0x_q+\frac{\eta}{k}\sum_{i=1}^{k}e_i(x_i^\top x_q)$$
 
-加 residual：$out = W_0 x_q + \Delta W x_q = W_1 x_q$。证毕。**单层 Transformer 可精确实现一步 GD**。
+最后一项已经是 attention-like 聚合：key $k_i=x_i$，query $q=x_q$，value $v_i=e_i$，score $k_i^\top q$。因此无 softmax 的线性注意力修正为：
 
-## 深层推广
+$$\Delta y_q=\frac{\eta}{k}V K^\top q=\frac{\eta}{k}\sum_{i=1}^{k}v_i(k_i^\top q)$$
 
-- $L$ 层 = $L$ 步 GD。Garg et al. 2022 在正弦、稀疏线性、决策树上复现：loss 随层数对数下降，与 GD 曲线相关 >0.98。
-- Dai Dual Form：
+代入 $v_i=e_i$ 即得到 $W_1x_q-W_0x_q$。这里的 $1/k$ 很重要：使用 mean loss 时，复制同一批示例不应让更新幅度线性爆炸。
 
+## 2. “等价”究竟有多强
+
+von Oswald et al. 给出线性 self-attention 的显式权重构造，使其数据变换等价于 regression loss 的一个 GD step。[T-construct] 他们还在简单回归任务上发现训练出的 attention-only 模型与该构造或 GD predictor 相近。[E-synthetic]
+
+Akyürek et al. 进一步证明 Transformer 可构造实现 GD 与 closed-form ridge regression，并观察训练后的 ICL predictor 会随深度和噪声在 GD、ridge、least squares 等算法之间变化。[T-construct, E-synthetic]
+
+所以正确表述是：
+
+- **可以实现**：特定编码、projection、mask 与线性 attention 下可严格等价；
+- **有时学到**：合成线性任务的训练模型可接近这些估计器；
+- **尚未普遍证明**：标准 softmax、MLP、位置编码、自然语言 tokenization 下，每层都等于一次 GD。
+
+## 3. softmax 为什么破坏精确恒等式
+
+标准 attention 使用归一化正权重：
+
+$$a_i=\frac{\exp(k_i^\top q/\sqrt{d_h})}{\sum_j\exp(k_j^\top q/\sqrt{d_h})},\qquad \Delta y_q=\sum_i a_iv_i$$
+
+而 GD 需要可正可负、未必和为一的系数 $x_i^\top x_q$。额外 heads、feature lifting 或 value encoding 可以逼近更广的运算，但这已经不是上节的一行等式。
+
+## 4. 深度、preconditioning 与其他估计器
+
+“$L$ 层等于 $L$ 步 GD”只对明确的迭代构造成立。真实训练模型可能：
+
+- 在不同层编码 moment matrices 或隐式参数；
+- 学到 curvature correction / preconditioning，快于 plain GD；
+- 近似 ridge 或 least squares，而不是固定学习率 GD；
+- 使用 retrieval、pattern matching 或已有参数知识绕开拟合。
+
+Garg et al. 证明的是标准 Transformer 能从头训练为多种函数类的 in-context learner，并与任务特定算法比较；它不是“层间轨迹与 GD 相关系数固定大于某数”的证据。
+
+## 5. 可运行等价测试
+
+[`icl_mechanisms.py`](icl_mechanisms.py) 同时计算：
+
+1. 显式更新 $W_1$ 后的 $W_1x_q$；
+2. residual-as-value、feature-as-key 的线性 attention 输出。
+
+```bash
+python3 -m unittest ICL.tests.test_icl_mechanisms.GradientDescentTests -v
 ```
-h_q' = h_q + Σ_i α_{qi} v_i
-若 v_i = η e_i ⊗ x_i，α = <k_i,q>
-则 h_q' = h_q - η ∇_{h_q} Σ_i ℓ(x_i,y_i)
-```
 
-attention 的 key-query 相似度 = 梯度门控，value = 梯度方向。
+测试覆盖多输出维度、mean-loss 的 $1/k$、样本顺序不变性与 shape failure。它没有声称 softmax attention 也满足等式。
 
-## 预言 vs 实测
+## 6. coding-data 可证伪预测
 
-| 维度 | GD 观点预言 | 实测 |
-|---|---|---|
-| 顺序 | 求和可交换 → 应顺序不变 | softmax 非线性引入位置偏置 → 半对 |
-| scaling | $k$ 越大，$\|\Delta W\|$ 线性增 → 溢出 | many-shot 需 LayerNorm 救场，否则 early stop |
-| 非线性 | 多层可拟多步 | 实测比一阶 GD 更快，暗含 preconditioning |
+若某任务主要近似 kernel/GD 式聚合，则：
 
-## 对你做 infra / prompt 的用处
+- 顺序置换的影响应小于删除高相似度示例的影响；
+- 复制所有示例在正确归一化后不应大幅改变预测；
+- 反标签或 residual 符号翻转应产生方向一致的输出变化；
+- 改变 query 与 demo 的表面相似度会系统改变权重。
 
-- 设计 prompt 格式让 demo 形态利于 $V K^\top Q$ 累加：KV 对齐梯度形式，demo 用等长、显式 `x->y`
-- many-shot 需监控 $\|\Delta W\|$ 发散，加 LayerNorm / 按类重排 KV 缓解
+若这些均不成立，不应继续用“隐式 GD”解释该任务。评测设计见 [08](08_systems_and_evaluation.md)。
+
+来源：[von Oswald et al.](https://arxiv.org/abs/2212.07677) · [Akyürek et al.](https://arxiv.org/abs/2211.15661) · [Garg et al.](https://arxiv.org/abs/2208.01066) · [证据账本](references.md)

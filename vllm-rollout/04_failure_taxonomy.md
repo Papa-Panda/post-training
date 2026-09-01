@@ -1,48 +1,65 @@
-# 04 — Failure Taxonomy (Rollout side, mirrors FSDP taxonomy)
+# 04 — Failure taxonomy and response
 
-Mapping from FSDP failure modes (NCCL timeout, OOM, deadlock) to vLLM rollout failures.
+A useful taxonomy is mutually exclusive at the **attempt** level, while preserving contributing signals. Do not call every dropped trajectory an engine failure.
 
-## 5-way + 2 infra (same as day-07 sim, extended)
+| Class | Boundary | Example evidence | Retry guidance |
+|---|---|---|---|
+| `client_transport` | client, proxy, network | connection reset, client deadline | retry only if request idempotency and budget allow |
+| `admission_reject` | validation/admission | context length exceeds limit, malformed request | do not retry unchanged |
+| `queue_timeout` | before or during engine service | oldest queue age, server/client deadline | retry with backoff only if load has changed |
+| `kv_preemption` | scheduler/cache pressure | preemption counter delta, recompute-token delta, high cache usage | not automatically fatal; tune capacity/concurrency |
+| `worker_failure` | engine process or device rank | worker exit, health check failure, collective error | restart/fail over; retry with attempt lineage |
+| `tool_environment` | external action execution | tool timeout, sandbox crash, invalid tool response | policy-dependent; distinguish deterministic from transient |
+| `response_invalid` | generated protocol/content | parse error, missing required fields | possibly regenerate; count generated waste |
+| `scorer_verifier` | reward/scoring path | scorer timeout, verifier crash, unavailable tests | preserve rollout; rescore when possible |
+| `freshness_drop` | learner acceptance gate | policy lag beyond configured maximum | do not hide as model-quality failure |
+| `cancelled` | orchestration | run cancelled after target batch completed | normally no retry |
+| `unknown` | unclassified | missing evidence | page on rising rate; never redistribute silently |
 
-| # | Type | Symptom | Root cause | Detect | Mitigate | $ bleed |
-|---|------|---------|------------|--------|----------|---------|
-| 1 | `timeout` | wall > SLO 30s P95 | long CoT 5000 decode bound + queue, λ > μ (Little's law) | P95 wall >3×P50 | ↓λ, ↑max_num_seqs, chunked prefill | 40% of fails, dominant long |
-| 2 | `tool_call` | `json parse error`, sandbox returns 500 | code exec timeout, unparsable tool | log `tool_parser` error | retry 3× + cool 10min, sandboxed timeout 15s | 30% |
-| 3 | `vcj_verifier` | reward 0 but answer right | verifier prompt brittle, unit test timeout | mismatch manual audit | DAPO decoupled clip — don't discard, down-weight | 15% |
-| 4 | `oom_kv` | `KVCacheFull`, `EngineDead` | concurrency L >> cache blocks, max_model_len too big, `gpu_mem_util=0.90` no headroom | `free_blocks==0`, frag <0.3 | swap_space 0 for detection, prod 4GB; lower L or max_num_seqs | 10% |
-| 5 | `contiguity` / `fragment` | free>0 but alloc fails | long prompt 16k splits block table non-contig (P17) | `frag>0.4` && OOM | enable_chunked_prefill, defrag on preempt restart | part of 4 |
-| 6 | `nccl_preempt` | NCCL `Watchdog` 15m, engine stalls | TP=2/4/8 all-reduce deadlocks when one rank OOM, H100 NVLink | `NCCL WARN`, `engine dead` | `NCCL_ASYNC_ERROR_HANDLING=1`, TP restart group | 5% |
-| 7 | `engine_deadlock` | no output, metrics frozen 30s, `async_engine` stuck | producer-consumer `step()` blocking on `seq_group_metadata` lock (vLLM #5678) | `metrics endpoint` not changing, `queue depth` rising | `max_num_seqs` too high, enforce eager off, vLLM bump |
+## Attempt identity and lineage
 
-## How to classify (reuse FSDP script logic)
+Each record should include:
 
-Same classifier as `post-training/rl-infra/day-02-fsdp/…` but rollout side:
-
-```python
-def classify(log_line, metrics):
-    if "TimeoutError" in log_line or metrics.wall > SLO: return "timeout"
-    if "tool" in log_line.lower() or "JSON" in log_line: return "tool_call"
-    if "verifier" in log_line or "VCJ" in log_line: return "vcj_verifier"
-    if "KV cache" in log_line or metrics.free_blocks==0: return "oom_kv"
-    if metrics.frag>0.4: return "contiguity"
-    if "NCCL" in log_line: return "nccl_preempt"
-    if metrics.frozen>30: return "engine_deadlock"
-    return "ok"
+```json
+{
+  "rollout_id": "stable logical id",
+  "attempt_id": "unique execution id",
+  "parent_attempt_id": null,
+  "policy_version": 41,
+  "engine_instance": "replica-2",
+  "prompt_tokens": 512,
+  "generated_tokens": 933,
+  "finish_reason": "stop",
+  "failure_class": null,
+  "accepted": true
+}
 ```
 
-Log to `failure_log.json`: `{idx, fail_type, wall, prompt_len, cot_len, free_blocks, frag, tp_rank_error}` — mirrors day-07 `/tmp/vllm_rollout_fail.json`.
+Do not reuse an `attempt_id` after retry. Otherwise token cost, duplicate delivery, and policy age cannot be reconstructed.
 
-## Rollout vs Training separation lesson
+## Diagnostic decision tree
 
-- Day-07 expected 80% wall-clock rollout (short) → 90% long. Real bottleneck is failure retries, not pure toks/sec.
-- Reusable infra idea: translate datacenter PUE / burst prediction (autoscaling) → predict `queue_depth` burst, async eval, hysteresis retry (Day-06 note).
-- Failure budget: keep ≤15% long CoT, otherwise $/useful rollout doubles.
+1. **Was the request admitted?** If not, classify validation or admission rejection.
+2. **Did the client lose the response?** Cross-check server completion by rollout/attempt ID before retrying.
+3. **Did engine work begin?** Compare admission/first-scheduled timestamps and queue age.
+4. **Did cache pressure occur?** Inspect version-correct KV usage, preemption, and recomputation counters plus logs.
+5. **Did generation finish?** Preserve finish reason and token counts.
+6. **Did tool or scorer fail after generation?** Attribute failure to that boundary while retaining generated-token cost.
+7. **Was the sample dropped for staleness or filtering?** Mark it as completed-but-not-accepted.
 
-## Checklist before claiming "H100 ready"
+## Common mistakes corrected
 
-- [ ] CPU sim passes (fail_rate 7% short / 14% long) — `pytest` in `code/`
-- [ ] H100 single run 50 samples logs TTFT/TPOT/toks/s P50/P95
-- [ ] sweep.csv shows knee (max goodput before OOM)
-- [ ] taxonomy CSV 5-way adds to 100% of failures, not ok
-- [ ] NCCL env set: `NCCL_ASYNC_ERROR_HANDLING=1`, `TORCH_NCCL_HEARTBEAT_TIMEOUT=900`
-- [ ] Metrics endpoint scraped 1Hz, no 30s freeze
+- Paged KV allocation invalidates a generic “contiguous free span” diagnosis. Do not infer fragmentation from fabricated internals.
+- A preemption is a performance event, not necessarily a failed request.
+- An empty or truncated output can be a stop configuration, transport truncation, or client parser error—not automatically an out-of-memory event.
+- P95 greater than a multiple of P50 is a tail symptom, not a timeout definition.
+- Enabling CPU swap or changing eager execution is not a universal remedy; both are version- and workload-dependent experiments.
+- A verifier rejection must not be mixed with transport or engine availability when computing infrastructure reliability.
+
+## Retry budget
+
+Bound retries by both attempts and tokens:
+
+$$retry\ amplification = \frac{attempted\ generation\ tokens}{first\ attempt\ generation\ tokens}$$
+
+Use exponential backoff with jitter only for transient classes. Admission errors and deterministic invalid requests should fail fast. Keep a deduplication key at the downstream dataset boundary so a client timeout does not create duplicate training examples.

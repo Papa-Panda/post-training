@@ -1,28 +1,71 @@
-# post-training
+# Post-training Systems & Data
 
-> GitHub: [`Papa-Panda/post-training`](https://github.com/Papa-Panda/post-training)。顶层按轨道拆分，infra 实战统一在 `ai-infra/`。
+A public, implementation-oriented knowledge base for post-training: objectives, data, distributed systems, rollout serving, evaluation, agent runtimes, and the GPU mechanisms underneath them.
 
-45-day journey from ML for Infra (data center predictive modeling, autoscaling, $400M savings) to Post-training / Agentic RL Infra.
+The repository favors a consistent progression:
 
-- **Goal**: 6-12 month transition in coding data + post-training → Staff+ / E6+ at large Bay Area / SF frontier labs
-- **Structure**:
-  - `ai-infra/` — Infra Systems 实战：DDP/FSDP/pjit/checkpoint/H100 beyond-7B/vLLM（原 `day-01`~`day-10` 已收敛进来）
-  - `ICL/` — In-Context Learning 知识脉络与数学（含 trajectory-error prompting 的四种用法、code 版 Socratic-SWE）
-  - `grpo-vs-ppo/` — PPO vs GRPO 对比，含 GLM-5.2 回归 PPO 讨论
-  - `vllm-rollout/` — vLLM rollout 压测 & 失败 taxonomy
-  - `eval-context-compression/` — 评估压缩：Factory 方法 + Hermes probe harness + 三类压缩对比（原 eval-compression）
-  - `eval-bench-efficiency/` — 高效评测：metabench IRT 蒸馏 28632→858 (<3%) + mRMR 特征选择 DIoR x100
-  - `eval/` — 评估索引（指向上面两个平铺 track）
-  - `model-aware-data-curation/` — 梯度驱动的数据价值、覆盖、主动生成与持续学习闭环（跨论文系统专题，不重复 `ai-data`）
-  - [`harness-engineering/`](harness-engineering/README.md) — Agent Runtime、context/memory、workflow/subagents、可观测性与可回归的自改进 Harness
-  - [`gpu-architecture/`](gpu-architecture/README.md) — GPU 架构、SIMT/内存/Tensor Core、CUDA、NCCL、虚拟内存、Roofline 与 LLM kernel 映射
-  - `ai-data/` — Data-centric papers：coding data / SFT / RL data / curation
-  - `ai_daily.csv` — source of truth，45 天 2026-08-02 → 2026-09-15
-- **Tracks**: Infra Systems (18d) / RL Training (11d) / Reasoning Data (8d) / Papers (5d) / Reflection (3d)
-- **Daily sync**: 06:00 America/Los_Angeles → 每日问题库 app (dual tab: investment / AI learning)
+1. write down the objective and assumptions;
+2. derive the relevant compute, communication, or memory cost;
+3. connect the derivation to a system design;
+4. run a small executable model or harness;
+5. test semantic invariants, not only syntax.
 
-This repo is the public artifact for the transition - each day: code + NOTES with 3 numbers (single-GPU time, 2-GPU time, comm overhead). Infra labs 现在统一在 `ai-infra/day-0x/`.
+## Start here
 
-Daily habit: meditation + 王继武健身十六式打卡 08:30.
+| Track | Primary question | Suggested entry point |
+|---|---|---|
+| [AI infrastructure](ai-infra/README.md) | How do training and inference systems trade compute, communication, and memory? | Current second-pass labs, then the 45-day map |
+| [GPU architecture](gpu-architecture/README.md) | Which hardware and kernel mechanisms create those costs? | SIMT → memory → GEMM → collectives → profiling |
+| [PPO vs. GRPO](grpo-vs-ppo/README.md) | How do the objectives and training-system requirements differ? | Objective derivations before infra trade-offs |
+| [vLLM rollout](vllm-rollout/README.md) | How should rollout serving be measured and stress-tested? | TTFT/TPOT metrics → configuration → failures |
+| [Model-aware data curation](model-aware-data-curation/README.md) | Which examples move the current model toward a target while preserving coverage and safety? | Attribution → gradient coverage → closed-loop selection |
+| [AI data reading track](ai-data/README.md) | What do the major data-selection, synthesis, and filtering papers contribute? | Paper index and reading log |
+| [In-context learning](ICL/README.md) | How can learning-like behavior arise from context without weight updates? | Bayesian, gradient-descent, and circuit views |
+| [Harness engineering](harness-engineering/README.md) | How should a frozen model's context, workflow, tools, memory, and release gates be engineered? | Runtime loop → state/memory → evaluation/security |
+| [Evaluation: context compression](eval-context-compression/README.md) | Does compressed context preserve task-relevant behavior? | Evaluation design and probe harness |
+| [Evaluation: benchmark efficiency](eval-bench-efficiency/README.md) | Can a smaller benchmark preserve ranking and decision quality? | IRT/mRMR methods and practical checks |
+| [Evaluation index](eval/README.md) | Where are the evaluation subtracks? | Navigation only |
 
-> Eye constraint: 20/20/20 reminders explicitly stopped 2026-07-31, only keeping evening winddown 21:00 + nightly log 21:30.
+## Topic boundaries
+
+- **`ai-infra/`** is the training/inference systems spine: DDP, FSDP, sharding, collectives, checkpointing, rollout serving, and performance models.
+- **`gpu-architecture/`** goes one layer lower: SIMT execution, memory hierarchy, Tensor Cores, CUDA, interconnects, virtual memory, and profiling. It does not duplicate end-to-end distributed-training labs.
+- **`vllm-rollout/`** specializes in serving and rollout behavior; `ai-infra/` links to it rather than maintaining a second canonical copy.
+- **`ai-data/`** is a paper-reading corpus. **`model-aware-data-curation/`** is a cross-paper synthesis and runnable model-in-the-loop selection system.
+- **`ICL/`** studies behavior induced by context. **`harness-engineering/`** studies the executable system that constructs context, calls tools, manages state, and promotes changes.
+- **`grpo-vs-ppo/`** owns optimization-objective comparisons; infrastructure tracks discuss only their systems consequences.
+- **`eval-*`** tracks own measurement methodology and should not be treated as training or serving implementations.
+
+## Repository status
+
+This is a learning repository, not a benchmark leaderboard or a production framework.
+
+- CPU analytical models and simulations are labeled as such.
+- Hardware throughput, latency, memory, and scaling numbers are not considered measured unless the corresponding command, configuration, and environment are recorded.
+- Recent papers and preprints are separated from mature mechanisms where the distinction matters.
+- Primary papers and official documentation are preferred for technical claims.
+- GitHub display math uses one-line `$$...$$` blocks.
+
+## Quick checks
+
+The topic directories with runnable suites can be checked independently:
+
+```bash
+# Whole-repository links, GitHub math, control characters, and Python parsing.
+python3 tools/check_repo.py
+
+# Topic-level semantic suites.
+python3 -m unittest discover -s ICL/tests -v
+(cd grpo-vs-ppo/05_code && python3 -m unittest -v test_rl_objectives.py test_docs.py)
+python3 -m unittest discover -s vllm-rollout/tests -v
+python3 -m unittest discover -s model-aware-data-curation/tests -v
+python3 -m unittest discover -s harness-engineering/tests -v
+python3 -m unittest discover -s gpu-architecture/tests -v
+python3 -m unittest discover -s ai-infra/day-07-h100-beyond-7b -p 'test_*.py' -v
+python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v
+python3 -m unittest discover -s ai-infra/r2-day-04-ddp -p 'test_*.py' -v
+python3 -m unittest discover -s ai-infra/r2-day-06-gpu-architecture -p 'test_*.py' -v
+python3 -m unittest discover -s ai-infra/r2-day-07-cuda-programming-model -p 'test_*.py' -v
+```
+
+Some labs additionally require PyTorch, JAX, CUDA, NCCL, or a multi-GPU host. A successful CPU model is evidence for its formulas and control flow only; it is not evidence of accelerator performance.
