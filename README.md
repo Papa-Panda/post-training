@@ -14,6 +14,7 @@
   - `eval-bench-efficiency/` — 高效评测：metabench IRT 蒸馏 28632→858 (<3%) + mRMR 特征选择 DIoR x100
   - `eval/` — 评估索引（指向上面两个平铺 track）
   - `model-aware-data-curation/` — 梯度驱动的数据价值、覆盖、主动生成与持续学习闭环（跨论文系统专题，不重复 `ai-data`）
+  - [`harness-engineering/`](harness-engineering/README.md) — Agent Runtime、context/memory、workflow/subagents、可观测性与可回归的自改进 Harness
   - `ai-data/` — Data-centric papers：coding data / SFT / RL data / curation
   - `ai_daily.csv` — source of truth，45 天 2026-08-02 → 2026-09-15
 - **Tracks**: Infra Systems (18d) / RL Training (11d) / Reasoning Data (8d) / Papers (5d) / Reflection (3d)
