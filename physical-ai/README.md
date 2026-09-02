@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（11已完成/30总规划）
+├── README.md                # 本路线图（12已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (11/30 - 进行中)
+## 发展路线图 (12/30 - 进行中)
 
-> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day11 π₀ Flow VLA 已完成。Day11–30 主题已锁定，后续严格按表顺延。
+> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day12 Diffusion Policy 已完成。Day11–30 主题已锁定，后续严格按表顺延。
 
 ### 图谱总览
 
@@ -55,7 +55,7 @@ graph TD
 | 09 | day-09-2024-rt2-openvla | RT-2 / OpenVLA — action tokenization + web knowledge transfer + open VLA scaling ✅ 2026-08-30 | S |
 | 10 | day-10-2023-habitat-3 | Habitat 3.0 / Habitat-Lab — humanoid simulation + HITL + social collaboration ✅ 2026-08-31 | A |
 | 11 | day-11-2024-pi0-flow-vla | π₀ — flow matching VLA + high-frequency action chunks ✅ 2026-09-01 | S |
-| 12 | day-12-2023-diffusion-policy | Diffusion Policy — visuomotor diffusion + receding-horizon control | S |
+| 12 | day-12-2023-diffusion-policy | Diffusion Policy — visuomotor diffusion + receding-horizon control ✅ 2026-09-02 | S |
 | 13 | day-13-2024-octo | Octo — open generalist robot policy + diffusion readout | S |
 | 14 | day-14-2025-pi05-open-world | π₀.₅ — open-world VLA + knowledge insulation | S |
 | 15 | day-15-2023-open-x-embodiment-rtx | Open X-Embodiment / RT-X — cross-robot data scaling | S |
@@ -75,7 +75,7 @@ graph TD
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
 
-### Day N 映射表 (11已完成)
+### Day N 映射表 (12已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -90,7 +90,7 @@ graph TD
 | 09 | day-09-2024-rt2-openvla | RT-2 把 action 变成 token 并用 web+robot co-finetuning 保留语义；OpenVLA 用 970k OpenX demonstrations、DINOv2+SigLIP+Llama 2 7B 与 LoRA/量化把 VLA 变成开源可适配系统 | S |
 | 10 | day-10-2023-habitat-3 | 高速 SMPL-X humanoid + HITL + Social Navigation/Rearrangement；以 partner population 和未见场景评测协作泛化，暴露 oracle skill → learned skill 的层间 distribution shift | A |
 | 11 | day-11-2024-pi0-flow-vla | PaliGemma + 300M action expert，以 conditional flow matching 联合生成 50-step 连续 action chunk；10k+ 小时跨 embodiment 预训练后用高质量数据 post-train | S |
-| 12 | day-12-2023-diffusion-policy | 用条件扩散建模多峰连续动作序列，结合 action horizon 与 receding-horizon 执行稳定视觉操作 | S |
+| 12 | day-12-2023-diffusion-policy | 在动作序列上做条件 DDPM/DDIM，以 observation/prediction/execution 三个 horizon 连接多峰行为克隆、时间一致性与闭环重规划 | S |
 | 13 | day-13-2024-octo | 以 OXE 跨 embodiment 数据、Transformer backbone 与 diffusion action head 构建开放可微调 generalist policy | S |
 | 14 | day-14-2025-pi05-open-world | 通过 co-training / knowledge insulation 强化未见环境、长时程任务与语言条件泛化 | S |
 | 15 | day-15-2023-open-x-embodiment-rtx | 统一 22 种机器人数据 schema，研究跨机器人规模化与 embodiment transfer 的收益边界 | S |
