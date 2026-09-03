@@ -152,3 +152,80 @@ $$\mathrm{TracInCP}(z,z)=\sum_k\eta_k\|\nabla\ell(w_{t_k},z)\|_2^2\ge 0.$$
 - NeurIPS PDF: https://proceedings.neurips.cc/paper/2020/file/e6385d39ec9394f2f3a354d9d2b88eec-Paper.pdf
 - Official code: https://github.com/frederick0329/TracIn
 - GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-03-2020-tracin
+
+
+## 数学补充：TracIn 与 Influence Functions 的统一推导
+
+先统一记号：
+
+$$g_z=\nabla_\theta L(z,\theta),\qquad g_*=\nabla_\theta L(z_{\mathrm{target}},\theta),$$
+
+其中 $z$ 是候选训练样本，$z_{\mathrm{target}}$ 是目标/验证样本。SGD 公式中的 $z_t$ 若出现，只表示第 $t$ 个训练 step 采到的数据，不能与 target 混用。
+
+### 1. TracIn 来自一步 SGD 的 Taylor 展开
+
+训练样本 $z$ 产生一步更新：
+
+$$\theta'=\theta-\eta g_z.$$
+
+目标 loss 在当前参数处一阶展开：
+
+$$L_*(\theta')\approx L_*(\theta)-\eta g_*^\top g_z.$$
+
+因此目标 loss 的下降量是：
+
+$$S_{\mathrm{TracIn}}(z,z_*)\approx\eta g_*^\top g_z.$$
+
+沿 checkpoints 累加得到：
+
+$$S_{\mathrm{TracInCP}}(z,z_*)=\sum_k\eta_k(g_*^k)^\top g_z^k.$$
+
+这回答的是：**在实际训练路径的多个模型状态上，候选数据的即时更新与目标梯度是否同向。**
+
+### 2. Influence 来自最优条件的隐式求导
+
+把训练样本 $z$ 的权重增加 $\epsilon$ 并重新优化：
+
+$$\theta_\epsilon=\arg\min_\theta\left[L_{\mathrm{train}}(\theta)+\epsilon L(z,\theta)\right].$$
+
+因为新参数仍需满足最优条件：
+
+$$\frac{d\theta_\epsilon}{d\epsilon}\Big|_{\epsilon=0}=-H^{-1}g_z,$$
+
+从而：
+
+$$\frac{dL_*}{d\epsilon}=-g_*^\top H^{-1}g_z.$$
+
+若 helpful score 取目标 loss 的下降量，则：
+
+$$S_{\mathrm{IF}}(z,z_*)=g_*^\top H^{-1}g_z.$$
+
+所以两篇只差 $H^{-1}$ 的表象背后，是两个不同问题：TracIn 计算**一次真实更新的即时作用**；Influence 计算**改变样本权重、让模型重新达到局部最优后的总作用**。
+
+### 3. 曲率如何改变排名
+
+若 Hessian 分解为：
+
+$$H=Q\,\mathrm{diag}(\lambda_i)Q^\top,$$
+
+并把 $g_*,g_z$ 在第 $i$ 个特征方向上的分量记为 $a_i,b_i$，则：
+
+$$S_{\mathrm{TracIn}}\propto\sum_i a_i b_i,$$
+
+$$S_{\mathrm{IF}}=\sum_i\frac{a_i b_i}{\lambda_i}.$$
+
+TracIn 对各方向使用普通点积；Influence 会放大低曲率的平坦方向，并压低高曲率方向。因此某条数据可能与目标梯度高度同向而获得高 TracIn，但若该方向曲率很高、很容易被其他数据拉回，它的 endpoint Influence 仍可能较小。
+
+### 4. $H^{-1}$ 可以看成未来优化传播的总和
+
+在局部二次损失和稳定的小步长 GD 下：
+
+$$H^{-1}\approx\eta\sum_{j=0}^{\infty}(I-\eta H)^j.$$
+
+右边表示一次参数扰动在后续优化中不断传播、衰减后的累计效果。因此 Influence 可看成局部动力学走到新平衡点后的总响应；TracIn 则在真实训练轨迹上对即时作用取样记账。真实 trajectory 会隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式且精确的 $H^{-1}$。
+
+若使用 Adam 或 momentum，更准确的一步 target loss 变化应写成：
+
+$$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z,$$
+
+其中 $\Delta\theta_z$ 包含一阶矩、二阶矩、裁剪、weight decay 与学习率调度。直接使用 $\eta g_*^\top g_z$ 只是 SGD 近似，这正是 Day 04 LESS 引入 optimizer-aware update representation 的动机。

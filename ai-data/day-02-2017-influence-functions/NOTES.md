@@ -112,3 +112,76 @@ $$(H+\lambda I)s_t=g_t,$$
 - Paper: https://proceedings.mlr.press/v70/koh17a.html
 - arXiv: https://arxiv.org/abs/1703.04730
 - GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-02-2017-influence-functions
+
+
+## 数学补充：为什么 Influence 比 TracIn 多一个 $H^{-1}$
+
+统一记号，避免把 target 和训练 step 都写成下标 $t$：
+
+$$g_z=\nabla_\theta L(z,\theta),\qquad g_*=\nabla_\theta L(z_{\mathrm{target}},\theta),$$
+
+其中 $z$ 是候选训练样本，$z_{\mathrm{target}}$ 是目标/验证样本。
+
+### 1. TracIn：一次训练更新的即时作用
+
+若训练样本 $z$ 产生一步 SGD 更新：
+
+$$\theta'=\theta-\eta g_z,$$
+
+对目标 loss 做一阶展开：
+
+$$L_*(\theta')\approx L_*(\theta)-\eta g_*^\top g_z.$$
+
+所以目标 loss 的下降量为：
+
+$$S_{\mathrm{TracIn}}(z,z_*)\approx \eta g_*^\top g_z.$$
+
+它测的是：**在当前模型状态下，这条训练数据的即时更新是否与目标梯度同向。** TracInCP 只是沿多个 checkpoint 累加这个量：
+
+$$S_{\mathrm{TracInCP}}(z,z_*)=\sum_k\eta_k(g_*^k)^\top g_z^k.$$
+
+### 2. Influence：改变数据权重并重新达到最优点
+
+Influence 不是只走一步。它把 $z$ 的训练权重永久增加 $\epsilon$，然后让模型重新优化：
+
+$$\theta_\epsilon=\arg\min_\theta\left[L_{\mathrm{train}}(\theta)+\epsilon L(z,\theta)\right].$$
+
+新的最优点仍满足一阶条件。对该条件做隐式求导：
+
+$$\frac{d\theta_\epsilon}{d\epsilon}\Big|_{\epsilon=0}=-H^{-1}g_z.$$
+
+因此目标 loss 的变化是：
+
+$$\frac{dL_*}{d\epsilon}=-g_*^\top H^{-1}g_z.$$
+
+若把“降低目标 loss”定义为正的 helpful score：
+
+$$S_{\mathrm{IF}}(z,z_*)=g_*^\top H^{-1}g_z.$$
+
+所以 $H^{-1}$ 来自**重新优化后的全局参数响应**：改变一个样本的权重后，其余训练数据会通过局部曲率抵消或放大该扰动。
+
+### 3. Hessian 特征方向上的差别
+
+若
+
+$$H=Q\,\mathrm{diag}(\lambda_i)Q^\top,$$
+
+并把 $g_*,g_z$ 在这些方向上的分量分别记作 $a_i,b_i$，那么：
+
+$$S_{\mathrm{TracIn}}\propto\sum_i a_i b_i,\qquad S_{\mathrm{IF}}=\sum_i\frac{a_i b_i}{\lambda_i}.$$
+
+因此 TracIn 对各方向做普通梯度点积；Influence 用 $1/\lambda_i$ 校正曲率：平坦方向被放大，高曲率方向被压低。高 loss 或大 gradient norm 并不自动等于高 Influence，关键还包括扰动所在方向是否容易被整个训练集“拉回来”。
+
+### 4. 两者为什么又有联系
+
+在局部二次损失、小步长 gradient descent 且动力学稳定时：
+
+$$H^{-1}\approx\eta\sum_{k=0}^{\infty}(I-\eta H)^k.$$
+
+这说明 $H^{-1}$ 可以理解为：一次扰动经过未来许多步局部优化后残留作用的总和。于是：
+
+- **TracIn** 是 path-wise 的即时梯度记账；
+- **Influence** 是 endpoint 的重优化反事实；
+- checkpoint 轨迹会隐式包含曲率动力学，但 TracInCP 没有显式、精确地应用同一个 $H^{-1}$。
+
+若 optimizer 是 Adam 或带 momentum 的方法，一步真实作用更接近 $g_*^\top\Delta\theta_z$，而不只是 $\eta g_*^\top g_z$；这也是 LESS 加入 optimizer-aware 表示的原因。
