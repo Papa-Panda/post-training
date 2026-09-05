@@ -123,3 +123,90 @@ $$\lambda\to 0,\qquad \lambda\to\infty$$
 ## 原文链接
 - Paper: https://arxiv.org/abs/2402.04333
 - GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less
+
+## 问答补充（2026-09-04）
+
+本节收录 2026-09-04 晚侧聊中的用户问答（已按"先问题、再推导、最后几何含义"整理为结构化条目），不改动上方既有内容。
+
+### Q1：BM25 是什么
+
+BM25 是经典的信息检索相关度公式：给定查询 $q$ 与文档池，按相关度排序文档。核心三项——词频（边际递减）、逆文档频率（罕见词权重高）、长度归一化（惩罚堆词长文档）：
+
+$$\text{BM25}(d,q)=\sum_{t\in q}\underbrace{\text{IDF}(t)}_{\text{词重要性}}\cdot\underbrace{\frac{f(t,d)(k_1+1)}{f(t,d)+k_1(1-b+b\frac{|d|}{\text{avgdl}})}}_{\text{词频 + 长度惩罚}}$$
+
+与 LESS 的关系：BM25 看的是**词有没有出现**（纯词面匹配），LESS 看的是**梯度方向是否对齐**（模型驱动）。在 LESS 的实验里，BM25 代表"只看文本相似度"的便宜对照做法。
+
+### Q2：BM25 并不是 30 篇论文家族的一篇（纠错）
+
+用户指出："BM25在我们的论文家族里没有出现啊"。经核对，正确的说法是：**BM25 是 LESS 论文自己实验部分的一个对照 baseline**（与 random、DSIR、RDS 并列），代表"只用词频/文本相似度"的选数方法。论文结论：这种词频选法几乎没比随机好多少，LESS 的梯度对齐方法 consistently 强于它。
+
+修正说明：本轮问答开始时的回答曾把 BM25 表述为"LESS 里经常出现的 baseline"，容易被误读为论文路线中的一篇；现修正为——BM25 是 LESS 论文**实验内部**的对照基线，不是我们 30 篇阅读路线的一篇。
+
+### Q3：LESS 的数学怎么做的
+
+记号：$$z=(x,y),\qquad \mathcal{V}=\text{few-shot 目标样本}$$
+
+设 $$g_z=\nabla_\theta L(z,\theta)$$ 为候选数据 $z$ 的训练梯度，$$g_{\mathcal{V}}=\nabla_\theta L(\mathcal{V},\theta)$$ 为目标验证集的梯度，$$\Delta\theta_z$$ 为模型在 $z$ 上实际走的 optimizer update。
+
+LESS 的问题：**让模型用 $z$ 做一次真实更新之后，目标 loss 下降多少？**
+
+$$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z$$
+
+关键改动在 $\Delta\theta_z$ 的写法：TracIn / Influence 用 SGD 更新 $\eta g_z$，但实际训练用 Adam：
+
+$$\Delta\theta_z=-\eta\,\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$
+
+其中 $\hat m_z$ 是梯度一阶矩（起平滑作用），$\hat v_z$ 是二阶矩（按方向缩放）。LESS 定义 **Adam-aware 表示**：
+
+$$\Gamma(z)=\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$
+
+score 是候选表示与目标均值表示的 cosine：
+
+$$\mathrm{score}(z)=\cos\left(\bar\Gamma_{\mathcal{V}},\ \Gamma(z)\right)$$
+
+其中 $\bar\Gamma_{\mathcal{V}}$ 是 few-shot 目标样本的平均 Adam 表示。
+
+为什么用 cosine 而不是点积：TracIn 的点积 $g_*^\top g_z$ 同时包含方向和大小；LESS 故意丢掉大小只留方向——优点是排名对高梯度噪声样本不敏感，代价是同方向下"推得多 vs 推得少"无法区分。这是**有意的取舍**，不是随意改的。
+
+工程上两层压缩：只取 **LoRA 梯度**（假设推理能力的"有用方向"能被低秩空间表达）；随机投影到 8192 维（Johnson–Lindenstrauss 保证内积大体保住）。注意：JL 保的是**内积**，而 LESS 用的是 **cosine**，投影后必须重归一化——这是"便宜但有噪声"的来源。
+
+为什么必须 warmup：base 模型上所有指令的梯度共享一个巨大的"学 chat 格式"方向，cosine 会坍缩成几乎一样。随机 5% 数据 warmup 把参数推入"格式已学会、推理成分可分"的 basin；同时 warmup 产出 Adam 的 $m/v$ 状态，否则 $\Gamma(z)$ 算不出来。
+
+图谱位置：前驱是 TracIn 的梯度点积思想；改动是把 $\eta g_*^\top g_z$ 换成 $\cos(\bar\Gamma_{\mathcal{V}},\Gamma(z))$；缺口是目标只是一个均值向量——异构多技能目标下均值只指向主导技能，且完全没有 diversity 项（呼应上方"第二轮复习"第 2 点：单均值坍缩 + 无去重）。
+
+一句话：**LESS = 用 Adam 视角回答 TracIn 的问题，但丢了 magnitude 和 diversity。**
+
+### Q4："LESS 中实际训练用的是 Adam 从而导出 cosine，没看懂"（追问）
+
+关键澄清："从 Adam 导出 cosine"其实是**两个独立的决定**。
+
+TracIn 用 $\eta\,g_*^\top g_z$，等于在假设"模型走的是 SGD 更新"；实际走的是 Adam 更新，正确的即时作用应该是：
+
+$$g_*^\top\Delta\theta_z^{\text{Adam}}=-\eta\,g_*^\top\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$
+
+1. **用 Adam 表示代替原始梯度**——这是从优化器真实性来的，是 LESS 的核心改进；
+2. **用 cosine 代替点积**——这是工程取舍，丢掉梯度大小换排名鲁棒性。
+
+一句话：**Adam 解释了为什么用 $\Gamma(z)$，工程鲁棒性解释了为什么用 cosine。**
+
+### Q5："所以并非严格数学，只是一种类比"（确认 + 精确化）
+
+用户总结得到确认。严格说法分两层：
+
+第一层数学上**成立**：把真实训练的 Adam 更新代入 Taylor 展开：
+
+$$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx -\eta\,g_*^\top\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$
+
+只要 $\hat m_z,\hat v_z$ 是当时真实的 Adam 状态。
+
+第二层就不严格了。LESS 没有直接用这个点积，而是用 $\cos(\bar\Gamma_{\text{target}},\Gamma(z))$；这个改动做了三件事，每件都有代价：
+
+- **丢掉学习率 $\eta$**：所有样本都乘同一个 $\eta$，不影响排名；
+- **目标梯度 $g_*$ 换成 $\bar\Gamma_{\text{target}}$**：目标也套了 Adam 预处理，但真实的 loss 下降用的是原始 $g_*$，不是预处理后的；
+- **点积换 cosine**：丢掉梯度大小，只留方向。
+
+即：$$g_*^\top\Delta\theta_z\quad\Longrightarrow\quad\cos(\bar\Gamma_{\text{target}},\Gamma(z))$$
+
+中间是一个"去掉大小、只看对齐"的类比跳跃，**不是等价变换**。LESS 的价值在于把 TracIn 的 SGD 近似换成了更接近训练现实的 Adam 视角；但若把它当成严格的反事实数学，就走远了。
+
+**知识图谱关系**：Q3–Q5 共同构成了"LESS 计分规则的完整推导链条"，上接本 NOTES"核心 §2 Data Pipeline（Adam 修正后的 influence）"与"第二轮复习 §1 核心命题"，下接 Day 19 Vendi / Day 24 D4 的"单均值 + 无 diversity"缺口讨论。Q1–Q2 澄清了 BM25 的准确位置：LESS 实验的文本相似度对照基线（与 random、DSIR、RDS 并列），非 30 篇阅读路线成员。
