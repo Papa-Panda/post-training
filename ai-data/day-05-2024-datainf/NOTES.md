@@ -138,3 +138,40 @@ DataInf 的分数为 $$I(z_j, z_{test}) = -g_{test}^\top (S + \lambda I)^{-1} g_
 ## 原文链接
 - Paper: https://arxiv.org/abs/2310.00902
 - GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-05-2024-datainf
+
+## 问答补充（2026-09-06）
+
+### Q1: LESS 里的 H 是什么？模型的 Hessian 吗？
+
+**LESS 里根本没有 H。** 定义 $$H = \nabla^2_\theta L_{train}(\hat\theta)$$ 为训练 loss 在最优点的 Hessian（d×d，d 为参数量），它出现在 Day 02 Influence 的 $$S_{IF}(z,z_*) = g_*^\top H^{-1} g_z$$ 里。LESS 的 score 是 $$\cos(\bar\Gamma_{target}, \Gamma(z))$$，其中 $$\Gamma(z) = \hat m_z / (\sqrt{\hat v_z} + \epsilon)$$ 为 Adam 预条件更新表示——**没有任何 H**。LESS 是故意把曲率扔掉的那一支。顺带：Adam 的二阶矩 $$\hat v$$ 可视为**对角曲率近似**（每坐标独立缩放），所以 LESS 保留的是优化器视角的廉价曲率，而非 H 这种带方向耦合的完整曲率。
+
+### Q2: 为什么能用 S（梯度外积矩阵）近似 H？——信息矩阵等式完整推导
+
+设 loss 为负对数似然 $$\ell(\theta; z) = -\log p_\theta(y|x)$$，记 score 函数 $$s(\theta; z) = \nabla_\theta \log p_\theta = -g_z$$。
+
+**推导（对 $$\int p_\theta = 1$$ 求两次导）：**
+
+1. $$\int \nabla_\theta p_\theta\,dy = 0$$，除以 $$p_\theta$$ 得 $$\mathbb{E}_{p_\theta}[s] = 0$$（score 零均值）。
+2. 再求导：$$\int \nabla^2_\theta p_\theta\,dy = 0$$。对 $$\nabla_\theta p_\theta = p_\theta \cdot s$$ 用乘积法则：
+$$\nabla^2_\theta p_\theta = p_\theta \cdot s s^\top + p_\theta \cdot \nabla^2_\theta \log p_\theta$$
+3. 除以 $$p_\theta$$ 取期望：$$\mathbb{E}[s s^\top] + \mathbb{E}[\nabla^2_\theta \log p_\theta] = 0$$。
+
+换成 NLL 语言（$$\nabla^2 \ell = -\nabla^2 \log p$$，$$g_z = -s$$）：
+$$\boxed{\mathbb{E}[\nabla^2 \ell(\theta)] = \mathbb{E}[g_z g_z^\top]}$$
+
+即**信息矩阵等式**：NLL 的期望 Hessian = 梯度外积的期望 = Fisher 信息。注意 S 是**外积**（outer product，得 d×d 矩阵），不是内积（标量）。
+
+**从期望到经验，DataInf 偷换了两步：**
+
+- 等式是**模型分布下**的期望，DataInf 用**训练数据平均** $$S = (1/n)\sum_i g_i g_i^\top$$ 代替。这一步要求 $$p_{\hat\theta} \approx p_{data}$$，即**必须在收敛点**——early checkpoint 上模型分布与数据分布差得远，等式两边各说各话（对应第 4 节第 1 条边界）。
+- 成立条件清单：① NLL 损失（平方损失无此恒等式；但最小二乘的 Gauss–Newton 近似 $$H \approx J^\top J$$ 是它的非概率版本）；② 收敛点；③ S 满秩——全参空间 rank(S) ≤ n ≪ d 故奇异，**LoRA 小空间是让逆存在的前提**；④ λI 是工程补丁，给"没探索过的方向"一个先验曲率 λ。
+
+**几何解释：** Fisher 是分布空间的度量（θ 动一点，输出分布变化多快），Hessian 是 loss 曲面的曲率。在拟合好的最优点两者重合：loss 弯得厉害的方向正是分布变化快的方向；偏离最优点后分道扬镳。
+
+### Q3: DataInf 的 trick 到底是哪几个？
+
+三块缺一不可：
+
+1. **Fisher 替代**（统计）：$$H \approx S + \lambda I$$，解决"能不能算"——把 LiSSA 几百次 HVP 变成一次 Cholesky。
+2. **LoRA**（结构）：解决"算出来对不对"——小空间里 S 满秩良态，逆存在且闭式可算；全参空间下第一步算出来也是垃圾。
+3. **重排摊销**（工程）：先算 $$v = (S+\lambda I)^{-1} g_{test}$$ 一次，之后每条样本只是一次点积 $$I(z_j) = -v^\top g_j$$——解决"算得够不够快"，是 nightly 扫 50 万条的计算基础（第 3 节 (e)）。
