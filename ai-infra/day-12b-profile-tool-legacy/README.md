@@ -17,7 +17,7 @@
 
 - **排队/预测 save**：Day13 queue p50 0.123s p95 0.385s scaled→真实120s avg_depth 0.21 → 预测准确率85%时 p95 0.385s→0.12s save_ratio 0.688 (-68.8%) [CPU真数，待H100 NCCL 补 gloo 2-rank + 真实120s wait trace + EWMA next 2.098s]，对应 Day08/09 eval瓶颈 sync p50 1.141s p95 3.249s gpu_idle 1.034s占92.85% → async 0.0s省52% total 1.113s→0.527s
 - **热/功耗 save**：Tj_before 90.5°C throttle 2.5% (Day13 5/200 FAIL) → Tj_after 82.49°C throttle 0.83% (Day11) delta -1.67pp [CPU真数，待H100 NCCL 补 nvidia-smi Tj + NVML power trace]，模型 `C_j dTj/dt = P*throt - (Tj-Ths)/Rjh, Rhs(fan)=R0/(fan^0.8+0.15), P_fan 28*flow^3+6, hyst 82/72°C RL侧 0.85/0.35`，TP散热点 Day15 TP4把720W burst→480-520W -28%
-- **COST**：PUE mean 1.2576 p50 1.2381 p95 1.3427 overhead 25.76% (IT 477.4W cooling 123.8W) $/useful before 0.000244 $ /1k useful 0.2438 → after async+TP散热+σ过滤 \$/useful 0.00019 save 22.1% [CPU真数，待H100 NCCL 补 max_memory_allocated]，useful 281/300=93.7% fail 6.33% (timeout7/vcj7/tool3/nccl2) Day12 σ0.045过滤
+- **COST**：PUE mean 1.2576 p50 1.2381 p95 1.3427 overhead 25.76% (IT 477.4W cooling 123.8W) \$/useful before 0.000244 \$ /1k useful 0.2438 → after async+TP散热+σ过滤 \$/useful 0.00019 save 22.1% [CPU真数，待H100 NCCL 补 max_memory_allocated]，useful 281/300=93.7% fail 6.33% (timeout7/vcj7/tool3/nccl2) Day12 σ0.045过滤
 
 => 昨日结论：把FSDP分片、热散打、eval异步压成150字ROI故事，但没证明通信瓶颈在哪、FSDP的AllGather vs ReduceScatter谁更重，面试追问“怎么定位”答不上来。
 

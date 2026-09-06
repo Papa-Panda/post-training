@@ -39,6 +39,7 @@ def _looks_math(inner: str) -> bool:
     s = inner.strip()
     if not s:
         return False
+    s = s.replace("\\$", "")  # escaped \$ is literal text, not a TeX command
     if "\\" in s:  # TeX command: \in \times \mu \%
         return True
     if MATH_CHARS_RE.search(s):  # = < > ^ _ { }
@@ -51,9 +52,11 @@ def _looks_math(inner: str) -> bool:
         return True
     if CJK_RE.search(s):
         return False
-    if re.search(r"[+*/|]", s):
+    if " " in s or "\t" in s:
+        return False  # spaced $...$ with only +*/|- inside is a currency mispair
+    if re.search(r"[+*/|]", s):  # K/V, n/p, (G-1)/G
         return True
-    if re.search(r"[A-Za-z]", s) and "-" in s:
+    if re.search(r"[A-Za-z]", s) and "-" in s:  # p-1, -g (but not 5-10)
         return True
     return False
 

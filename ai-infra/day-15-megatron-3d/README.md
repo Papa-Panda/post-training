@@ -3,7 +3,7 @@
 # Day 15 — Megatron 3D Parallelism: DP / TP / PP 何时切
 
 ## Day 14 Paper3 PUE 真数
-- 真数（CPU gloo 2-rank ok, seed42, n=300）：PUE mean 1.2576 p50 1.2381 p95 1.3427 min 1.1646 max 1.3468 overhead 25.76% (IT 477.4W + cooling 123.8W)， $/useful 0.000244 $ /1k useful 0.2438，useful 281/300=93.7% fail 6.33% (timeout7/vcj7/tool3/nccl2)，Tj_avg 72.4°C Tj_max 92.1°C throttle 3.0%。
+- 真数（CPU gloo 2-rank ok, seed42, n=300）：PUE mean 1.2576 p50 1.2381 p95 1.3427 min 1.1646 max 1.3468 overhead 25.76% (IT 477.4W + cooling 123.8W)， \$/useful 0.000244 \$ /1k useful 0.2438，useful 281/300=93.7% fail 6.33% (timeout7/vcj7/tool3/nccl2)，Tj_avg 72.4°C Tj_max 92.1°C throttle 3.0%。
 - 昨日链路：Day13 SLO1 0.955<0.98 FAIL 但没给出浪费多少钱，Day14 用 facility_cost \$0.0685 vs IT \$0.0545 翻译成 \$；Day12 reward σ 0.045 过滤避免把高不确定当 infra 失败；Day11 Paper2 SSM γ*(ΔT)^2 + COP 二阶 + hyst 0.85/0.35 解释 PUE 尖峰。
 - 遗留坑：单卡显存墙让 7B/13B/70B 无法单纯靠 DP 扩 G 解决，PUE 模型里 IT 功率已含 477W 但没拆 DP AllReduce vs TP AllGather 通信占比。
 

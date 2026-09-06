@@ -17,7 +17,7 @@
 
 ### 真数（CPU，seed42，待H100 NCCL 补深）
 - PUE mean 1.2576 p50 1.2381 p95 1.3427 min 1.1646 max 1.3468 overhead 25.76%（IT 477.4W + cooling 123.8W）
-- $/useful rollout 0.000244 $ /1k useful 0.2438 \$ /1k tokens proxy 0.000116（ $3.2/GPU-hr proxy，facility_cost $ 0.0685）
+- \$/useful rollout 0.000244 \$ /1k useful 0.2438 \$ /1k tokens proxy 0.000116（ \$3.2/GPU-hr proxy，facility_cost \$ 0.0685）
 - useful 281/300=93.7% fail 6.33% (timeout7/vcj7/tool3/nccl2) filtered_high_uncert 0 retry 2.6s idle 9.1s Tj_avg 72.4°C Tj_max 92.1°C throttle 3.0%
 
 ### PUE vs COST 类比图（ASCII / Mermaid 思路）

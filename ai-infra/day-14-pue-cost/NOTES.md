@@ -9,9 +9,9 @@
 - 模型：COP = 5.2 - 0.04*ΔT - 0.002*ΔT^2，P_fan=28*flow^3+6，P_chiller=(P_IT/COP)*1.15 hyst on /0.35 off (0.85/0.35)，P_loss 3% → PUE=(IT+cool)/IT
 
 2. \$/useful rollout 经济性
-- \$IT proxy $3.2/GPU-hr：gpu_sec 49.5596s retry 2.6210s eval_idle 9.1131s total_hour 0.0170260 hr gpu_cost_it $ 0.05448335608808062 facility_cost $0.06851687369688517 (PUE*IT $ )
+- \$IT proxy $3.2/GPU-hr：gpu_sec 49.5596s retry 2.6210s eval_idle 9.1131s total_hour 0.0170260 hr gpu_cost_it $ 0.05448335608808062 facility_cost \$0.06851687369688517 (PUE*IT \$ )
 - useful 281/300=0.9367 fail 19/300=6.333% (timeout7/vcj_parse7/tool_retry3/nccl2) filtered_high_uncert 0 (σ阈0.15, mean σ 0.045 连接Day12)
-- cost_per_useful 0.00024383229073624615 $ /1k useful 0.24383229073624615 $ /1k tokens proxy 0.00011611061463630768 \$ (2.1k tok/rollout)
+- cost_per_useful 0.00024383229073624615 \$ /1k useful 0.24383229073624615 \$ /1k tokens proxy 0.00011611061463630768 \$ (2.1k tok/rollout)
 - [CPU真数，待H100 NCCL 补 tokens/sec 真数 + \$/GPU-hr 计费表 + vLLM 长尾 12-18%]
 
 3. SLO → COST 联动（Day13连接）

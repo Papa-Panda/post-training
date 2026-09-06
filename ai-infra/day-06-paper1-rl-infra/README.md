@@ -16,7 +16,7 @@
 
 3. **成本模型 → \$/有用 rollout 成本模型**
    - Paper1: 成本 = 机型成本 + 功率 * PUE，优化目标是 \$/QPS。
-   - RL: 成本 = 训练 $ + vLLM $ + 失败重试 \$，除以有用 rollout 数 (pass filter)。PUE 建模思路直接套，目标 $/有用 rollout 降 20% = 下一个 $ 200M 故事雏形。
+   - RL: 成本 = 训练 \$ + vLLM \$ + 失败重试 \$，除以有用 rollout 数 (pass filter)。PUE 建模思路直接套，目标 \$ /有用 rollout 降 20% = 下一个 \$ 200M 故事雏形。
    - 类比你 Paper3 PUE modeling，COST = new PUE。
 
 4. **抗抖动 / 冷却 → reward 抖动处理**

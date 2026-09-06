@@ -20,7 +20,7 @@ Date: 2026-08-16 (RL Training / Monetization) — actually 2026-08-20 delivery o
 
 ### 3. COST：PUE→\$/useful翻译成可讲ROI
 - PUE mean 1.2576 p50 1.2381 p95 1.3427 min 1.1646 max 1.3468 overhead 25.76% (IT 477.4W cooling 123.8W Tj_avg 72.4°C Tj_max 92.1°C throttle 3.0%) [CPU真数，待H100 NCCL 补 max_memory_allocated]
-- $/useful before 0.000244 $ /1k useful 0.2438 $/1k tokens proxy 0.000116 useful 281/300=93.7% fail 6.33% —> after async+TP散热点+σ过滤 $ /useful 0.00019 save 22.1% [CPU真数，待H100 NCCL 补 \$3.2/GPU-hr计费表 + 真vLLM 3.4-5k tokens/sec]
+- \$/useful before 0.000244 \$ /1k useful 0.2438 $/1k tokens proxy 0.000116 useful 281/300=93.7% fail 6.33% —> after async+TP散热点+σ过滤 $ /useful 0.00019 save 22.1% [CPU真数，待H100 NCCL 补 \$3.2/GPU-hr计费表 + 真vLLM 3.4-5k tokens/sec]
 - Day12 σ 0.045 ensemble K=5 + |cal-raw| 0.0539 OAS校准位移过滤高不确定rollout不进 useful分母，避免把RM噪声当infra失败扩机柜
 - 映射：每1k有用rollout省 0.0538 \$ proxy → 周3000 rollout省 0.16 \$ proxy (CPU小样本，待H100放大) + GRPO组内N=64优势方差↓ ∝ sqrt(N)*σ
 

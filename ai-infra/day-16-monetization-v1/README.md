@@ -95,7 +95,7 @@ torchrun --nproc_per_node=2 monetization_v1.py
 - **nowcasting burst预测**：Day06 Paper1 burst→rollout泊松过程，EWMA预测下一个rollout多久来，调度eval异步，queue p95 0.385s→0.12s save 68.8%（Day08/09验证）→ 讲成“省120s→12s等待，折算\$/useful”
 - **SSM + fan^3 + hyst热管理**：Day11 Paper2两节点 `C_j dTj/dt = P*throt - (Tj-Ths)/Rjh`，`Rhs(fan)=R0/(fan^0.8+0.15)` 非线性，hyst 82/72°C (RL hyst 0.85/0.35) 把 throttle 2.5%→0.83% —> 面试讲“failing slow不崩但慢30%算fail， checkpoint救不了，必须功率平滑”
 - **FSDP分片峰值控制**：Day02/03/15 (P-b)/G+b 峰值思维，把70B 182GB OOM→25GB，热容救瞬时峰值不超限—>讲成“单机大矩阵乘热点→TP散热点，PP bubble填reward计算，eval async省52%”
-- **PUE→\$/useful翻译**：Day14 PUE 1.2576 overhead 25.76% $/useful 0.000244 $ /1k useful 0.2438 useful 281/300=93.7% fail 6.33% 5类 →讲成“每1k有用rollout省22.1% \$，GRPO组64样本下2% fail可控”
+- **PUE→\$/useful翻译**：Day14 PUE 1.2576 overhead 25.76% \$/useful 0.000244 \$ /1k useful 0.2438 useful 281/300=93.7% fail 6.33% 5类 →讲成“每1k有用rollout省22.1% \$，GRPO组64样本下2% fail可控”
 - STAR 2分钟版草稿（RL infra语言）：
 - S：小集群训练70B RL时Tj 90.5°C throttle 2.5% + queue p95真实120s + 70B OOM fail 6.33% 5类，SLO1<0.98 FAIL
 - T：要把稳定性量化成\$，让面试官听懂省哪笔GPU-hr，不只是技术数
