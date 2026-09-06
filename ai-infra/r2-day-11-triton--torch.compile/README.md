@@ -17,27 +17,27 @@ mask = offs < n                               # 尾部谓词，不是分支
 x = tl.load(x_ptr + offs, mask=mask)          # 一次搬一个 block
 ```
 
-$$\\text{programs} = \\lceil N / BLOCK \\rceil,\\qquad \\text{program } p \\text{ 处理元素 } [p\\cdot BLOCK,\\ (p+1)\\cdot BLOCK)$$
+$$\text{programs} = \lceil N / BLOCK \rceil,\qquad \text{program } p \text{ 处理元素 } [p\cdot BLOCK,\ (p+1)\cdot BLOCK)$$
 
 编译器接管剩下的事：自动做访存合并（coalescing）、把 `tl.max/tl.sum`  lower 成 block 内归约、做 pipeline 与 unroll。你**声明**"一个 block 的数据流"，编译器**决定**"warp 怎么排"。这正是"牺牲细控、换取生产力"的精确含义——也是为什么 Day08 的三版 reduce（atomic → shared-tree → warp-shuffle）在 Triton 里通常只写一种：编译器替你选了等价实现。
 
 ## 2. 可手算例子：fused softmax
 
-$x=[1,2,\\dots,8]$（$N=8$）。Softmax $=\\exp(x-m)/\\sum\\exp(x-m)$，$m=\\max x$。
+$x=[1,2,\dots,8]$（$N=8$）。Softmax $=\exp(x-m)/\sum\exp(x-m)$，$m=\max x$。
 
 **Eager（PyTorch 不 fuse 时的 4 遍）**：rowmax → sub+exp → rowsum → div，每遍都扫一遍 $N$ 个元素：
 
-$$L_{eager}=4N,\\quad S_{eager}=2N,\\quad \\text{payload}=6N\\ \\text{elements}$$
+$$L_{eager}=4N,\quad S_{eager}=2N,\quad \text{payload}=6N\ \text{elements}$$
 
 **Fused（Triton 单 kernel）**：一次 `tl.load`，max/exp/sum/div 全在片上，一次 `tl.store`：
 
-$$L_{fused}=N,\\quad S_{fused}=N,\\quad \\text{payload}=2N\\ \\text{elements}$$
+$$L_{fused}=N,\quad S_{fused}=N,\quad \text{payload}=2N\ \text{elements}$$
 
-$N=8$ 手算：$m=8$，$S=\\sum_{k=0}^{7}e^{-k}=1.5814460128059595$，
+$N=8$ 手算：$m=8$，$S=\sum_{k=0}^{7}e^{-k}=1.5814460128059595$，
 
-$$out_0 = e^{-7}/S \\approx 0.000577,\\qquad out_7 = 1/S \\approx 0.632333$$
+$$out_0 = e^{-7}/S \approx 0.000577,\qquad out_7 = 1/S \approx 0.632333$$
 
-两条路径最大绝对差 $0.00\\times10^{0}$（CPU 双精度，见测试）——fused 是**精确等价**，不是近似。$N=8$ 时流量 $48$ vs $16$ 个元素，省 $3\\times$；这正是"fuse 消灭的是中间量的 HBM 往返"，与 Day10 消灭 $S=QK^T$ 落地是同一笔账。
+两条路径最大绝对差 $0.00\times10^{0}$（CPU 双精度，见测试）——fused 是**精确等价**，不是近似。$N=8$ 时流量 $48$ vs $16$ 个元素，省 $3\times$；这正是"fuse 消灭的是中间量的 HBM 往返"，与 Day10 消灭 $S=QK^T$ 落地是同一笔账。
 
 Program 映射（$BLOCK=4$）：2 个 programs，`pid=0: offs=[0,1,2,3]`，`pid=1: offs=[4,5,6,7]`，mask 全 True；$N=10$ 时第 3 个 program 的 `mask=[True,True,False,False]`——尾部用谓词吞掉，不引入分支。
 
