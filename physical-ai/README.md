@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（14已完成/30总规划）
+├── README.md                # 本路线图（15已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (14/30 - 进行中)
+## 发展路线图 (15/30 - 进行中)
 
-> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day14 π₀.₅ 已完成。Day11–30 主题已锁定，后续严格按表顺延。
+> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day15 Open X-Embodiment / RT-X 已完成。Day11–30 主题已锁定，后续严格按表顺延。
 
 ### 图谱总览
 
@@ -58,7 +58,7 @@ graph TD
 | 12 | day-12-2023-diffusion-policy | Diffusion Policy — visuomotor diffusion + receding-horizon control ✅ 2026-09-02 | S |
 | 13 | day-13-2024-octo | Octo — open generalist robot policy + diffusion readout ✅ 2026-09-03 | S |
 | 14 | day-14-2025-pi05-open-world | π₀.₅ — open-world VLA + knowledge insulation ✅ 2026-09-05 | S |
-| 15 | day-15-2023-open-x-embodiment-rtx | Open X-Embodiment / RT-X — cross-robot data scaling | S |
+| 15 | day-15-2023-open-x-embodiment-rtx | Open X-Embodiment / RT-X — cross-robot data scaling ✅ 2026-09-06 | S |
 | 16 | day-16-2024-droid | DROID — in-the-wild robot manipulation dataset | S |
 | 17 | day-17-2023-bridgedata-v2 | BridgeData V2 — scalable heterogeneous imitation data | A |
 | 18 | day-18-2024-robocasa | RoboCasa — large-scale simulation data for everyday manipulation | A |
@@ -75,7 +75,7 @@ graph TD
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
 
-### Day N 映射表 (14已完成)
+### Day N 映射表 (15已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -93,7 +93,7 @@ graph TD
 | 12 | day-12-2023-diffusion-policy | 在动作序列上做条件 DDPM/DDIM，以 observation/prediction/execution 三个 horizon 连接多峰行为克隆、时间一致性与闭环重规划 | S |
 | 13 | day-13-2024-octo | 25 个 OXE 数据集约 80 万轨迹 + block-masked Transformer + diffusion action chunk；以可插拔 token/readout 接口适配新传感器、动作空间与机器人 | S |
 | 14 | day-14-2025-pi05-open-world | 异构 co-training（多机器人+web+子任务预测+检测）+ knowledge insulation 两阶段配方，首次在未见真实家庭完成长程灵巧操作 | S |
-| 15 | day-15-2023-open-x-embodiment-rtx | 统一 22 种机器人数据 schema，研究跨机器人规模化与 embodiment transfer 的收益边界 | S |
+| 15 | day-15-2023-open-x-embodiment-rtx | 60 数据集 / 22 embodiment / 100万+ 轨迹统一为 RLDS + 7 维末端动作接口；RT-1-X 小域 +50%，RT-2-X emergent skills ~3×（去 Bridge 消融钉死因果） | S |
 | 16 | day-16-2024-droid | 多机构、真实家庭/办公场景的 Franka 数据采集体系，聚焦数据多样性、标准化与分布偏差 | S |
 | 17 | day-17-2023-bridgedata-v2 | 廉价遥操作与异构场景扩展 imitation data，研究组合泛化和 downstream adaptation | A |
 | 18 | day-18-2024-robocasa | 用程序化家庭场景和大规模仿真轨迹扩充 manipulation 数据，连接 Habitat 总览与 sim2real | A |
