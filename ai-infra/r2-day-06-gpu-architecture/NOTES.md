@@ -12,7 +12,7 @@
 
 ## 可手算小例子：为什么 vector add 喂不饱 H100 算力
 
-设 $N=2^{20}=1{,}048{,}576$，计算 FP32 `C[i] = A[i] + B[i]`。
+设 $N=2^{20}=1{,}048{,}576$ ，计算 FP32 `C[i] = A[i] + B[i]`。
 
 ### 1. FLOPs
 
@@ -24,9 +24,9 @@ $$\text{FLOPs}=N=1{,}048{,}576$$
 
 理想化地假设每个元素只读/写一次，FP32 每元素 4 bytes：
 
-- 读 A：$4N$ bytes
-- 读 B：$4N$ bytes
-- 写 C：$4N$ bytes
+- 读 A： $4N$ bytes
+- 读 B： $4N$ bytes
+- 写 C： $4N$ bytes
 
 所以：
 
@@ -42,7 +42,7 @@ $$I=\frac{N}{12N}=\frac{1}{12}\approx0.0833\ \text{FLOP/byte}$$
 
 $$I^*=\frac{67}{3.35}=20\ \text{FLOP/byte}$$
 
-因为 $0.0833\ll20$，这个算子在理想 Roofline 下是 memory-bound。
+因为 $0.0833\ll20$ ，这个算子在理想 Roofline 下是 memory-bound。
 
 ### 5. 理论带宽上界与时间下限
 
@@ -58,7 +58,7 @@ $$t_{min}=\frac{12{,}582{,}912}{3.35\times10^{12}}=3.756\ \mu s$$
 
 $$2\ \text{tiles}\times128\times128\times2\ \text{bytes}=65{,}536\ \text{bytes}=64\ \text{KiB}$$
 
-64 KiB 小于 H100 的 227 KiB/block opt-in 上限，容量上可放下。若改成 $256\times256$：
+64 KiB 小于 H100 的 227 KiB/block opt-in 上限，容量上可放下。若改成 $256\times256$ ：
 
 $$2\times256\times256\times2=262{,}144\ \text{bytes}=256\ \text{KiB}$$
 

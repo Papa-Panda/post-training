@@ -2,23 +2,23 @@
 
 ## 1. Request timeline
 
-For request $i$, record arrival $a_i$, first admission $s_i$, first token $f_i$, final token $c_i$, prompt length $P_i$, and generated length $G_i$.
+For request $i$ , record arrival $a_i$ , first admission $s_i$ , first token $f_i$ , final token $c_i$ , prompt length $P_i$ , and generated length $G_i$ .
 
-- Queue delay: $Q_i = s_i-a_i$.
-- Time to first token: $TTFT_i = f_i-a_i$. This includes queueing, scheduling, and prefill.
+- Queue delay: $Q_i = s_i-a_i$ .
+- Time to first token: $TTFT_i = f_i-a_i$ . This includes queueing, scheduling, and prefill.
 - Inter-token latency (ITL): every gap between adjacent output tokens. Do not infer its tail from a single average.
-- Mean time per output token (TPOT), when $G_i>1$: $$TPOT_i = \frac{c_i-f_i}{G_i-1}$$
+- Mean time per output token (TPOT), when $G_i>1$ : $$TPOT_i = \frac{c_i-f_i}{G_i-1}$$
 - End-to-end latency: $$E2E_i = c_i-a_i$$
 
 The approximation $E2E \approx TTFT+(G-1)TPOT$ is useful only when `TTFT` and `TPOT` come from the same request population. Always publish percentiles with the workload distribution.
 
 ## 2. Queue stability
 
-Let $\lambda$ be the offered request rate and $\mu$ the sustainable completion rate for the exact workload. The utilization shorthand is $\rho=\lambda/\mu$. When sustained $\rho\ge 1$, backlog grows until admission control, timeout, or failure intervenes. Even below one, burstiness and heavy-tailed output lengths can dominate P95/P99.
+Let $\lambda$ be the offered request rate and $\mu$ the sustainable completion rate for the exact workload. The utilization shorthand is $\rho=\lambda/\mu$ . When sustained $\rho\ge 1$ , backlog grows until admission control, timeout, or failure intervenes. Even below one, burstiness and heavy-tailed output lengths can dominate P95/P99.
 
-For a stable measured window, Little's law relates average number in the system $L$, effective throughput $\lambda_{eff}$, and average end-to-end time $W$: $$L = \lambda_{eff} W$$
+For a stable measured window, Little's law relates average number in the system $L$ , effective throughput $\lambda_{eff}$ , and average end-to-end time $W$ : $$L = \lambda_{eff} W$$
 
-Use **completed** request throughput for $\lambda_{eff}$. Plugging offered load into Little's law during overload is a common error because arrivals and completions differ.
+Use **completed** request throughput for $\lambda_{eff}$ . Plugging offered load into Little's law during overload is a common error because arrivals and completions differ.
 
 A rollout engine is a two-phase server:
 
@@ -57,7 +57,7 @@ For group sampling with $n$ candidates per prompt, track prompt groups as well a
 
 ## 4. Cost without invented prices
 
-Given measured accelerator-hours $H$, a user-supplied rate $C$, and $N_{accepted}$ accepted trajectories:
+Given measured accelerator-hours $H$ , a user-supplied rate $C$ , and $N_{accepted}$ accepted trajectories:
 
 $$cost\ per\ accepted\ trajectory = \frac{HC}{N_{accepted}}$$
 

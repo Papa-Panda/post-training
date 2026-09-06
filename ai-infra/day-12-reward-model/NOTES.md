@@ -24,7 +24,7 @@ Bonus:
 
 ## 待H100 NCCL
 - [ ] 真人偏好：ai-data RM pairs / DPO-reward-gap human-RM gap 分布，ECE@10/15，abstain
-- [ ] vLLM 联动：长CoT 500→5000 tok 失败12-18% vs σ 相关性，σ>0.15 过滤省 $/有用 8-12%
+- [ ] vLLM 联动：长CoT 500→5000 tok 失败12-18% vs σ 相关性，σ>0.15 过滤省 \$/有用 8-12%
 - [ ] 显存：RM 7B/13B FSDP max_memory_allocated vs (P-b)/G+b
 - [ ] Thermal：Tj 82.49/67.54°C 时 TPOT变慢 → reward偏低，σ随Tj +3-5°C 增10-15% (需 NVML)
 - [ ] 在线：GRPO 每500 steps 重拟合 a/b，EWMA跟踪σ，hysteresis 防震荡
@@ -42,7 +42,7 @@ Bonus:
 
 ## 一句收敛
 
-“rollout长CoT 12-18% + 热节流0.83% + 标注15% 三噪，ensemble 5得σ≈4.5%，ECE 0.0906→0.0881，|cal-raw| 5.39%当补偿，高σ直接过滤，省 $/有用 8-12%。”
+“rollout长CoT 12-18% + 热节流0.83% + 标注15% 三噪，ensemble 5得σ≈4.5%，ECE 0.0906→0.0881，|cal-raw| 5.39%当补偿，高σ直接过滤，省 \$/有用 8-12%。”
 
 ## 代码
 - `reward_oas_calibration.py` CPU gloo ok，待H100补

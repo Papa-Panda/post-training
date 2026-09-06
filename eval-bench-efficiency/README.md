@@ -18,8 +18,8 @@ eval/
 
 | 路线 | 代表 | 原理 | 优点 | 缺点 |
 |---|---|---|---|---|
-| **IRT 心理测量** | metabench arXiv:2407.12844 | 用 2PL/3PL IRT $P_{ij}=c+(1-c)/(1+e^{-a(\theta-b)})$，信息量 $I(\theta)$ 选高辨识度题 | 可解释能力 $\theta$，点分+能力分，Spearman r=0.94 与总分 | 需 n>5k 模型 item-response 矩阵 |
-| **特征选择回归** | mRMR arXiv:2605.25773 | 把题当特征 $y=w^Tx$, mRMR 最大相关最小冗余选题 + Kernel Ridge | 比 IRT/聚类 稳定跨 seed、同一套题、MAE/RMSE/Spearman/Kendall 更好 | 极穷数据下不如 IRT |
+| **IRT 心理测量** | metabench arXiv:2407.12844 | 用 2PL/3PL IRT $P_{ij}=c+(1-c)/(1+e^{-a(\theta-b)})$ ，信息量 $I(\theta)$ 选高辨识度题 | 可解释能力 $\theta$ ，点分+能力分，Spearman r=0.94 与总分 | 需 n>5k 模型 item-response 矩阵 |
+| **特征选择回归** | mRMR arXiv:2605.25773 | 把题当特征 $y=w^Tx$ , mRMR 最大相关最小冗余选题 + Kernel Ridge | 比 IRT/聚类 稳定跨 seed、同一套题、MAE/RMSE/Spearman/Kendall 更好 | 极穷数据下不如 IRT |
 | **DIoR / 聚类** | HELM Efficient Bench 2308.11696 | 决策影响可靠性 DIoR，看子集排序能否保持 | x100 成本，直观 | 方差大，seed 不稳定 |
 
 > 结论：短验 vs 长验同 GLM-5.2 那篇一样，**任务依赖**。daily RL 用 mRMR 1% 子集，每周全量校准 + metabench 潜变量能力监控。

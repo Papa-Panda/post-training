@@ -19,6 +19,6 @@ print(prof.key_averages.table(sort_by="cpu_time_total"))
 - 注: CPU下 all_gather = memcpy，不能当 NCCL 读 ## 5行 infra note (copy到每日问题库)
 1. 链路：产 X 类 coding 数据 50k → 训 Y 7B
 2. 评测：eval A73%→B78%
-3. 成本：tokens/sec 1.2k, GPU-hour $3.2, 失败率12%
+3. 成本：tokens/sec 1.2k, GPU-hour \$3.2, 失败率12%
 4. 瓶颈：rollout 约占80%墙钟
 5. 动作：FSDP per-block + vLLM rollout 可把7B塞进2×A100省Z小时bad case / 可跑eval

@@ -8,7 +8,7 @@
    用于：clipped surrogate、multiple minibatch epochs、PPO-Clip 与 adaptive-KL 的区分。
 
 2. **GAE** — Schulman et al., *High-Dimensional Continuous Control Using Generalized Advantage Estimation* (2015). [arXiv](https://arxiv.org/abs/1506.02438)
-   用于：TD residual 的 exponentially weighted sum、$\gamma/\lambda$ bias-variance trade-off。
+   用于：TD residual 的 exponentially weighted sum、 $\gamma/\lambda$ bias-variance trade-off。
 
 3. **RLOO for RLHF** — Ahmadian et al., *Back to Basics: Revisiting REINFORCE Style Optimization for Learning from Human Feedback in LLMs* (2024). [arXiv](https://arxiv.org/abs/2402.14740)
    用于：leave-one-out baseline 作为 critic-free alternative。不要与 2019 combinatorial-optimization 文献混引。
@@ -16,7 +16,7 @@
 ## GRPO and reasoning-RL recipes
 
 4. **DeepSeekMath** — Shao et al., *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models* (2024). [arXiv](https://arxiv.org/abs/2402.03300)
-   用于：GRPO 原始 token-level clipped objective、group score baseline、outcome/process supervision、$k_3$ KL estimator。
+   用于：GRPO 原始 token-level clipped objective、group score baseline、outcome/process supervision、 $k_3$ KL estimator。
 
 5. **DeepSeek-R1** — Guo et al., *DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning* (2025). [arXiv](https://arxiv.org/abs/2501.12948)
    用于：大规模 reasoning RL 中使用 GRPO 与 rule-based reward 的公开描述。正文 sequence shorthand 不应覆盖 DeepSeekMath 的 token-level定义。

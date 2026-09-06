@@ -78,7 +78,7 @@
 - **Fixed surface**：语言模型权重；外层 evaluator/utility。
 - **Editable surface**：调用 LM 的 improver/scaffolding code。
 - **Search/evaluation**：对 improver programs 做 empirical meta-utility search，再让 improver 改进自身版本。
-- **Data timing**：LPN downstream utility 对 $M=20$ 个独立 LPN instances 取平均；meta-dataset $D$ 含同一个 $(u,s)$ 的 **5** 个副本；test metautility 另在 $M_{\mathrm{test}}=50$ 个独立 LPN instances 上报告。test instances 用于报告，不是 Self-Harness 式 promotion gate。
+- **Data timing**：LPN downstream utility 对 $M=20$ 个独立 LPN instances 取平均；meta-dataset $D$ 含同一个 \$(u,s)\$ 的 **5** 个副本；test metautility 另在 $M_{\mathrm{test}}=50$ 个独立 LPN instances 上报告。test instances 用于报告，不是 Self-Harness 式 promotion gate。
 - **Boundary**：递归轮次不保证单调改善；论文检查的 unsandboxing code-pattern proxy 为 GPT-4 **0.42%**、GPT-3.5 **0.12%**，只能按此狭窄 proxy 陈述，不等于完整 sandbox escape rate 或安全证明。
 
 ### D.3 Self-Harness
@@ -101,8 +101,8 @@ $$\Delta_{\mathrm{in}}\ge0,\qquad \Delta_{\mathrm{ho}}\ge0,\qquad \max(\Delta_{\
 - **Exact title**：*Agentic Harness Engineering: Observability-Driven Automatic Evolution of Coding-Agent Harnesses*
 - **Status/source**：2026 preprint；[arXiv v4](https://arxiv.org/abs/2604.25850v4) · [official code](https://github.com/china-qijizhifeng/agentic-harness-engineering)
 - **Observability**：component、experience、decision。
-- **Timing**：edit 先 commit；下一轮 rollout 归因上一轮 manifest；不合格则 rollback；另保留 $H_{\mathrm{best}}$。这不是 Self-Harness 的同轮 candidate gate。
-- **Main setup**：GPT-5.4 high；同一批 **89** 个 Terminal-Bench 2 tasks；$k=2$；**10 iterations**；约 **32 小时**。
+- **Timing**：edit 先 commit；下一轮 rollout 归因上一轮 manifest；不合格则 rollback；另保留 $H_{\mathrm{best}}$ 。这不是 Self-Harness 的同轮 candidate gate。
+- **Main setup**：GPT-5.4 high；同一批 **89** 个 Terminal-Bench 2 tasks； $k=2$ ；**10 iterations**；约 **32 小时**。
 - **Reported numbers**：main score **77.0% pass@1**，但不是 held-out。冻结后 SWE-bench transfer **75.6%**，seed **75.2%**；tokens/trial **461k vs 526k**。部分 repository 退化。
 - **Attribution caveat**：regression prediction precision/recall **11.8% / 11.1%**，说明 attribution 仍弱；manifest/rollback 增强审计性，不等于预测可靠。
 
@@ -118,7 +118,7 @@ $$\Delta(f,e)=J_X(f,H_T^{(f,e)})-M_{\mathrm{base}}(f),$$
 $$\Delta_{\mathrm{update}}(e)=\frac1{|F^\star|}\sum_{f\in F^\star}\Delta(f,e),\qquad \Delta_{\mathrm{benefit}}(f)=\max_{e\in E^\star}\Delta(f,e).$$
 
 - **Reported numbers**：best/worst evolver 在任一 benchmark 的最大差距只有 **3.1 points**；无 evolver 三项都最佳。SLR/HFR：Qwen3-32B **0.251/0.142**，Qwen3-235B **0.961/0.350**，Opus 4.6 **0.957/0.757**。
-- **Boundary**：主实验为 in-situ：task 先以 $H_{t-1}$ 评分，再把 trace 用于更新 $H_t$；这避免当前 task 从自己的 evidence 获益，但不等于独立 held-out promotion。
+- **Boundary**：主实验为 in-situ：task 先以 $H_{t-1}$ 评分，再把 trace 用于更新 $H_t$ ；这避免当前 task 从自己的 evidence 获益，但不等于独立 held-out promotion。
 
 ## E. Evolutionary program / agent search
 
@@ -139,7 +139,7 @@ $$\Delta_{\mathrm{update}}(e)=\frac1{|F^\star|}\sum_{f\in F^\star}\Delta(f,e),\q
 - **Fixed surface**：外层 archive/search procedure 不自修改；基础模型权重固定。
 - **Editable surface**：coding-agent harness/codebase；child 从 archive parent 产生。
 - **Reported numbers after 80 iterations**：SWE experimental subset **20.0%→50.0%**；Polyglot 50-task subset **14.0%→38.0%**；full Polyglot **14.2%→30.7%**。
-- **Cost**：单次 SWE run 约两周、约 **US$22,000**。
+- **Cost**：单次 SWE run 约两周、约 **US\$22,000**。
 - **Boundary**：50.0% 不是全 500-task SWE-bench Verified。论文记录 objective hacking：node 114 绕过 detector 获得最高 evaluator score。Sandbox/archive/rollback 不等于完整安全证明。
 
 ## F. Joint harness / weight updates
@@ -160,7 +160,7 @@ $$\Delta_{\mathrm{update}}(e)=\frac1{|F^\star|}\sum_{f\in F^\star}\Delta(f,e),\q
 - **Status/source**：2026 preprint；[arXiv HTML](https://arxiv.org/html/2605.09998)
 - **Harness update**：reset-free acting loop；每 $F$ 步 Refiner 对 system prompt、subagents、skills、memory 做 CRUD。
 - **Co-learning**：每轮 $K=256$ steps；pairwise PRM；frontier teacher relabel；soft SFT；emulator state 不 reset。
-- **Pokémon Emerald / Gemini 3.1 Pro**：from-scratch **100% milestones，US$130 median**；minimalist harness **98%，US$215**。
+- **Pokémon Emerald / Gemini 3.1 Pro**：from-scratch **100% milestones，US\$130 median**；minimalist harness **98%，US\$215**。
 - **Boundary**：弱模型存在 capability floor，self-refinement 可能恶化；未证明 convergence，也没有 matched reset-based baseline。早期 GPP Pokémon completion 是 human-supervised 系统，不能归给 fully automated Continual Harness。论文没有实证给出一个一般 reward-hacking 发现，不能替它添加。
 
 ## G. Benchmark 接口

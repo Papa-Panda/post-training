@@ -41,7 +41,7 @@ $$\text{s.t.}\quad h\models\mathrm{Schema},\quad \mathrm{Cap}(h)\subseteq\Pi,\qu
 
 由于 $h$ 包含字符串、图和代码，目标离散、随机、昂贵且不可微。优化器可能是随机搜索、Bayesian optimization、MCTS、evolutionary search 或 LLM proposer；无论哪种，真正瓶颈常是 evaluator sample complexity。
 
-若一次 candidate evaluation 的方差为 $\sigma^2$，$m$ 次独立 rollout 的均值标准误约为：
+若一次 candidate evaluation 的方差为 $\sigma^2$ ， $m$ 次独立 rollout 的均值标准误约为：
 
 $$\mathrm{SE}(\hat J)=\frac{\sigma}{\sqrt m}.$$
 
@@ -112,7 +112,7 @@ $$\mathcal P_{t+1}=\mathrm{Keep}(\mathcal P_t\cup\{h_c\}),\qquad h_c=h_p\oplus\d
 
 ### Bandit / Bayesian optimization
 
-适合低维连续超参，如 retrieval top-$k$、timeout、fan-out；对任意代码 diff 的 kernel/距离定义困难。
+适合低维连续超参，如 retrieval top- $k$ 、timeout、fan-out；对任意代码 diff 的 kernel/距离定义困难。
 
 ### MCTS
 
@@ -136,9 +136,9 @@ $$\mathcal P_{t+1}=\mathrm{Archive}(\mathcal P_t,h_c,\mathbf y_c).$$
 
 $$H^\star=\arg\max_H\mathbb E_{x,\tau\sim p_M(H,x)}[r(\tau,x)].$$
 
-它的重要贡献是把 prompt、control flow、tools 等放进同一 code search space，并保留 quality/cost Pareto frontier。论文报告：online classification 相对 ACE 增加 $7.7$ accuracy points 且 context tokens 少 $4\times$；200 道未见 IMO-level math problems 上五个模型相对 no retrieval 平均增加 $4.7$ points。
+它的重要贡献是把 prompt、control flow、tools 等放进同一 code search space，并保留 quality/cost Pareto frontier。论文报告：online classification 相对 ACE 增加 \$7.7\$ accuracy points 且 context tokens 少 $4\times$ ；200 道未见 IMO-level math problems 上五个模型相对 no retrieval 平均增加 \$4.7\$ points。
 
-边界同样重要：TerminalBench-2 的 89 tasks 同时用于搜索和最终评估，因此 Opus 4.6 的 $76.4\%$、Haiku 4.5 的 $37.6\%$ 不是干净 held-out generalization。详见 [`papers.md`](papers.md)。
+边界同样重要：TerminalBench-2 的 89 tasks 同时用于搜索和最终评估，因此 Opus 4.6 的 $76.4\%$ 、Haiku 4.5 的 $37.6\%$ 不是干净 held-out generalization。详见 [`papers.md`](papers.md)。
 
 ## 7. AlphaEvolve：程序搜索的可迁移机制
 
@@ -177,15 +177,15 @@ Archive 只解决“保留哪些候选”，不解决“上线哪一个”。部
 
 ## 9. Optimizer overfitting 与 winner's curse
 
-若 $N$ 个真实质量相同的候选分数为 $J+\epsilon_i$：
+若 $N$ 个真实质量相同的候选分数为 $J+\epsilon_i$ ：
 
 $$\mathbb E\left[\max_{1\le i\le N}(J+\epsilon_i)\right]>J.$$
 
 搜索次数越多，最高分越可能只是噪声。缓解：
 
 1. 记录 evaluator query count；
-2. candidate 使用 $D_{\mathrm{search}}$；
-3. promotion 使用隐藏 $D_{\mathrm{ho}}$；
+2. candidate 使用 $D_{\mathrm{search}}$ ；
+3. promotion 使用隐藏 $D_{\mathrm{ho}}$ ；
 4. 最终冻结后只在 $D_{\mathrm{test}}$ 一次评估；
 5. 多 seed、paired comparison、置信区间；
 6. 在新模型/新任务上做 transfer；
@@ -195,11 +195,11 @@ $$\mathbb E\left[\max_{1\le i\le N}(J+\epsilon_i)\right]>J.$$
 
 ## 10. Failure attribution 决定搜索效率
 
-没有 attribution，proposal distribution 接近盲搜。给 trace $\tau$ 和 failure label $y$，attributor 产生 component posterior：
+没有 attribution，proposal distribution 接近盲搜。给 trace $\tau$ 和 failure label $y$ ，attributor 产生 component posterior：
 
 $$p_A(z\mid\tau,y),\qquad z\in\{C,W,K,M,\theta,\mathcal E,V\}.$$
 
-其中 $\mathcal E$ 是外部环境，$V$ 是 verifier。只有 $z\in\{C,W,K,M\}$ 才进入 harness edit；若最大概率是模型能力、环境故障或 verifier bug，应转给相应 owner。
+其中 $\mathcal E$ 是外部环境， $V$ 是 verifier。只有 $z\in\{C,W,K,M\}$ 才进入 harness edit；若最大概率是模型能力、环境故障或 verifier bug，应转给相应 owner。
 
 Proposal acquisition 可综合收益、不确定性和成本：
 
@@ -211,7 +211,7 @@ $$\mathrm{Acq}(\delta)=\mathbb E[\Delta J\mid z,\delta]+\beta\mathrm{Uncertainty
 
 - search space 太宽，候选多数不可执行；
 - proposer 同时读 verifier internals 和 hidden labels；
-- 只报 best-of-$N$，不报 $N$、成本和方差；
+- 只报 best-of- $N$ ，不报 $N$ 、成本和方差；
 - 增加模型能力/预算却记作 harness gain；
 - archive diversity 只按文本差异，不按行为差异；
 - bundle edit 无 ablation，credit assignment 失真；

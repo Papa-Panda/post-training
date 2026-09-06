@@ -14,7 +14,7 @@ ridge point：
 
 $$I^*=\frac{P_{\mathrm{peak}}}{B}.$$
 
-若 $I<I^*$，模型预测 bandwidth-bound；若 $I>I^*$，预测 compute-bound。这里 $Q$ 必须说明是哪一级流量（HBM、L2、shared 或 link），$P/B$ 必须使用同一设备/精度/口径。
+若 $I<I^*$ ，模型预测 bandwidth-bound；若 $I>I^*$ ，预测 compute-bound。这里 $Q$ 必须说明是哪一级流量（HBM、L2、shared 或 link）， $P/B$ 必须使用同一设备/精度/口径。
 
 ## 2. Hierarchical Roofline
 
@@ -42,7 +42,7 @@ $$P\le\min(P_{\mathrm{peak}},B_{\mathrm{HBM}}I_{\mathrm{HBM}},B_{\mathrm{L2}}I_{
 
 | 假设 | 观测 | 候选动作 |
 |---|---|---|
-| HBM bandwidth-bound | 高 DRAM throughput、低 $I$、memory stalls | 合并访问、复用、fusion、压缩 dtype |
+| HBM bandwidth-bound | 高 DRAM throughput、低 $I$ 、memory stalls | 合并访问、复用、fusion、压缩 dtype |
 | compute/Tensor Core-bound | 高 pipe utilization、足够 $I$ | 更好指令/shape、减少多余 FLOPs、负载平衡 |
 | latency-bound | throughput 均不高、dependency stalls、grid 小 | 增加并发/ILP、合并小 kernel、Graph |
 | occupancy/resource-bound | register/shared ceiling、少 active warps | 调 tile/block/stages；防 spill |
@@ -88,14 +88,14 @@ $$\mathrm{MFU}=\frac{F_{\mathrm{model}}/T}{P_{\mathrm{peak}}}.$$
 
 ## 8. 可运行 Roofline 模型
 
-`roofline()` 输入 FLOPs、bytes、peak compute、bandwidth，返回 $I$、ridge、bound 与理想时间。它有意不包含 overlap/cache/launch；作用是验证单位与数量级，并指导下一次测量。
+`roofline()` 输入 FLOPs、bytes、peak compute、bandwidth，返回 $I$ 、ridge、bound 与理想时间。它有意不包含 overlap/cache/launch；作用是验证单位与数量级，并指导下一次测量。
 
 ## 9. 从 Roofline 到 LLM
 
-- 大 GEMM 通过 tiling 提高 $I$，常接近 compute roof；
+- 大 GEMM 通过 tiling 提高 $I$ ，常接近 compute roof；
 - elementwise/norm/embedding 更常被 bytes 限制；
 - decode 中 batch/token 维度小，权重与 KV traffic 摊薄困难；
-- multi-GPU 还要加 network roof：$P\le B_{\mathrm{link}}I_{\mathrm{comm}}$。
+- multi-GPU 还要加 network roof： $P\le B_{\mathrm{link}}I_{\mathrm{comm}}$ 。
 
 下一章将这些信号映射到 Transformer。
 

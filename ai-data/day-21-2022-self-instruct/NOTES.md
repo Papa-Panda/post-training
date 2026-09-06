@@ -27,7 +27,7 @@
 - 补了哪个短板：
   - DEITA/LIMO/s1/LIMR 都假设已有 10万+ 合成候选池，Self-Instruct 补池的来源，175 人工种子即可无中生有 52k，解决 coding 上无 StackOverflow 种子时如何冷启动
   - Phi-1 教科书合成依赖高质量 web+教科书重写，Self-Instruct 不依赖外部语料纯自举，补无高质量教科书时的备选路径，coding 上 OSS-Instruct 即 Self-Instruct 的改良
-  - Qwen2.5 1M SFT / Llama3 多轮RS 依赖大量人工/模型标注，Self-Instruct 提供可复现的 52k 基线成本 < $100 (2022 pricing)，infra 可夜间跑
+  - Qwen2.5 1M SFT / Llama3 多轮RS 依赖大量人工/模型标注，Self-Instruct 提供可复现的 52k 基线成本 < \$100 (2022 pricing)，infra 可夜间跑
   - 之前 20 篇都未讲合成 prompt 模板设计，Self-Instruct 补 Instruction+Input+Output 三段式生成模板、8-shot 种子采样、分类/非分类区分生成，这是 WizardLM/Evol 模板的爹
 
 - 替代/分叉/改进：
@@ -37,7 +37,7 @@
   - 对 Llama3/Qwen2.5 是 **配方组件**：15T/18T 预训练后的 1M SFT 中约 20-30% 为合成指令，来源即 Self-Instruct 变体，质量门禁 (parser+exec) 是 Day16 Qwen-Coder 对 Self-Instruct 的二次洗
 
 - 对之前 Day X 的直接对比：
-  - vs Day06 Phi-1：同合成但源头不同，Phi-1 6B 精筛 web + 1B GPT-3.5 教科书重写质量极高，Self-Instruct 175 人工种子自举质量中但零外部依赖，HumanEval 1.3B Phi-1 50.6% vs Self-Instruct 52k SFT 7B 仅 33% SuperNI，但 Phi-1 成本 $10k+，Self-Instruct $100，coding 上 OSS-Instruct 融合二者：开源种子+自举+exec 验证
+  - vs Day06 Phi-1：同合成但源头不同，Phi-1 6B 精筛 web + 1B GPT-3.5 教科书重写质量极高，Self-Instruct 175 人工种子自举质量中但零外部依赖，HumanEval 1.3B Phi-1 50.6% vs Self-Instruct 52k SFT 7B 仅 33% SuperNI，但 Phi-1 成本 \$10k+，Self-Instruct \$100，coding 上 OSS-Instruct 融合二者：开源种子+自举+exec 验证
   - vs Day12 SuperFiltering：SuperFiltering 用 125M 弱模型 IFD 选 5% 打赢全量，前提池是 Alpaca 52k (Self-Instruct 产物)，Self-Instruct 52k→SuperFiltering 3k 串联时 IFD 分布：弱模型 IFD 高即 Self-Instruct 难例，ROUGE-L 去重 <0.7 的 Self-Instruct 子集 IFD 更高多样更好
   - vs Day17 LIMO / Day18 s1 / Day23 LIMA：LIMO 817、s1 1k、LIMA 1k 都是极精选，Self-Instruct 52k 是其母集，过滤率 52k→1k 约 98% 被丢，LIMO 难度分层 0.8% 阈值对应 Self-Instruct ROUGE-L<0.7 + 人工质量复核，二者过滤哲学一致但 LIMA/LIMO 强调人工质量门禁
   - vs Day20 DEITA：DEITA 复杂度×质量×多样三因子可直接评 Self-Instruct 52k，DEITA scorer 在 Self-Instruct 52k 上 top 6k 的 MT-Bench 7.22 vs 全量 52k 5.1，证明 Self-Instruct 含 80% 低质重复，需二次洗，与 Day16 Qwen-Coder 三级瀑布同理
@@ -60,7 +60,7 @@
 - 对你现在 coding data 工作的 1-2 个直接可试的点：
   - coding 自举：用 175 条 hand-curated code 指令种子 (含 50 条 StackOverflow 高赞问答改写+125 条 text-to-code 模板)，8-shot Self-Instruct 循环让 Qwen2.5-Coder-32B 自生成 10k code 指令，再经 parser+exec 三级瀑布 (Day16) 洗不可编译 40%，得 6k coding Self-Instruct 池，可直接对标 OSS-Instruct 75k 的轻量版
   - 串联 LIMA/LIMO：52k 自生成后用 DEITA 三因子 (复杂度×质量×多样) 二次选 1k，复用 LIMA 1k 高质假说，验证 coding 上 1k 精选是否打赢 52k 全量，今晚先跑 52k→1k 的 Vendi+ROUGE-L 双去重小实验
-- Infra 视角：可扩展性 / 成本 / 评测自动化的启发：Self-Instruct 流水线极轻：175 种子+单 175B 模型 API 52k 次调用，2022 成本 $100，今 Qwen2.5-32B 本地 A100 52k 生成约 2 小时 $20，可嵌 nightly 跑 175→52k→6k 流水线，评测用 SuperNI ROUGE-L + Exec 通过率 + DEITA 三因子作质量门禁，ai-data sheet 自动算有效样本数
+- Infra 视角：可扩展性 / 成本 / 评测自动化的启发：Self-Instruct 流水线极轻：175 种子+单 175B 模型 API 52k 次调用，2022 成本 \$100，今 Qwen2.5-32B 本地 A100 52k 生成约 2 小时 \$20，可嵌 nightly 跑 175→52k→6k 流水线，评测用 SuperNI ROUGE-L + Exec 通过率 + DEITA 三因子作质量门禁，ai-data sheet 自动算有效样本数
 
 ## 疑问 / 下一步
 - 没看懂的 / 想深挖的 1 个问题：Self-Instruct 175 种子是否对 coding 复杂度天花板过低？若换成 80k 开源 code snippet 当种子 (OSS-Instruct 路线)，ROUGE-L 0.7 去重是否仍适用还是需 AST 去重？决定 coding 6k 集用哪种种子源

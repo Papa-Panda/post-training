@@ -17,8 +17,8 @@ Diffusion Policy 把视觉条件机器人策略写成动作序列上的 DDPM：�
 ## 和之前工作的关系
 
 - **接了哪条线：** Day09 建立 VLA 总览，Day11 的 π₀ 再把 VLM 与连续 action chunk 接起来；Day12 回到更纯粹的 visuomotor behavior cloning，隔离出“条件生成式 action head + receding horizon”本身为什么有效。
-- **补了哪个短板：** π₀ 的 flow matching 看起来像一个大模型部件，但 Diffusion Policy 把关键控制接口说得更清楚：observation horizon $T_o$、prediction horizon $T_p$、execution horizon $T_a$ 是三个不同时间尺度，chunk 不能等同于 open-loop 执行完整段。
-- **替代 / 分叉 / 改进：** 它不学习 Day05/06 那样的环境 transition/world model，也没有语言语义或跨 embodiment backbone；它直接学习 $p(A_t\mid O_t)$。因此训练更像监督式行为克隆，代价是继承 demonstration coverage 与 covariate shift 的上限。
+- **补了哪个短板：** π₀ 的 flow matching 看起来像一个大模型部件，但 Diffusion Policy 把关键控制接口说得更清楚：observation horizon $T_o$ 、prediction horizon $T_p$ 、execution horizon $T_a$ 是三个不同时间尺度，chunk 不能等同于 open-loop 执行完整段。
+- **替代 / 分叉 / 改进：** 它不学习 Day05/06 那样的环境 transition/world model，也没有语言语义或跨 embodiment backbone；它直接学习 $p(A_t\mid O_t)$ 。因此训练更像监督式行为克隆，代价是继承 demonstration coverage 与 covariate shift 的上限。
 - **对之前 Day X 的直接对比：** Day11 的 π₀ 用连续时间 flow ODE 从噪声积分到动作，Diffusion Policy 用离散噪声日程和 DDPM/DDIM 反向去噪。二者都联合生成 action chunk，但 Diffusion Policy 每次只执行较短前缀并滚动重规划，闭环接口更显式；π₀ 则用 VLM、大规模跨机器人数据和 action expert 扩展语义与规模。
 
 ## 为什么今天读它
@@ -27,7 +27,7 @@ Diffusion Policy 把视觉条件机器人策略写成动作序列上的 DDPM：�
 
 ## 今天的 3 问
 1. 为什么对多峰示范直接做单步 MSE 会输出“平均但不可执行”的动作，而对整段 $A_t$ 做 conditional diffusion 能在每次 rollout 中选定并坚持一个模式？
-2. $T_p$ 预测得长有利于时间一致性，$T_a$ 执行得短有利于闭环响应；怎样把模型推理延迟、传感器频率和扰动时间尺度共同写成 horizon 选择问题？
+2. $T_p$ 预测得长有利于时间一致性， $T_a$ 执行得短有利于闭环响应；怎样把模型推理延迟、传感器频率和扰动时间尺度共同写成 horizon 选择问题？
 3. 去噪 loss 只保证拟合专家动作分布，不保证动力学可行、安全或稳定；真实部署中应在哪一层加入碰撞约束、延迟补偿、uncertainty gate 与底层反馈控制？
 
 ## 数学视角：POMDP 上的条件轨迹生成 + receding-horizon control
@@ -38,12 +38,12 @@ Diffusion Policy 把视觉条件机器人策略写成动作序列上的 DDPM：�
 
 $$x_{t+1}=f(x_t,a_t,w_t),\qquad o_t=h(x_t,v_t).$$
 
-- $x_t\in\mathbb R^{d_x}$：隐藏物理状态，包括机器人位姿/速度、物体位姿、接触模式、摩擦、液体或柔性物体状态。
-- $a_t\in\mathbb R^{d_a}$：连续控制命令；论文任务从 2-DoF 平面动作到 6/7-DoF 末端位姿或关节/夹爪命令，双臂时维度继续增加。
-- $o_t$：可观测量，通常是多视角 RGB 加 proprioception；图像可写成 $I_t\in\mathbb R^{H\times W\times3}$。
-- $w_t,v_t$：未建模动力学扰动与传感噪声；控制时间 $t$ 是真实环境步，不是 diffusion step。
+- $x_t\in\mathbb R^{d_x}$ ：隐藏物理状态，包括机器人位姿/速度、物体位姿、接触模式、摩擦、液体或柔性物体状态。
+- $a_t\in\mathbb R^{d_a}$ ：连续控制命令；论文任务从 2-DoF 平面动作到 6/7-DoF 末端位姿或关节/夹爪命令，双臂时维度继续增加。
+- $o_t$ ：可观测量，通常是多视角 RGB 加 proprioception；图像可写成 $I_t\in\mathbb R^{H\times W\times3}$ 。
+- $w_t,v_t$ ：未建模动力学扰动与传感噪声；控制时间 $t$ 是真实环境步，不是 diffusion step。
 
-在时刻 $t$，策略输入最近 $T_o$ 步观测
+在时刻 $t$ ，策略输入最近 $T_o$ 步观测
 
 $$O_t=[o_{t-T_o+1},\ldots,o_t],$$
 
@@ -59,15 +59,15 @@ $$A_t^0=[a_t,\ldots,a_{t+T_p-1}]\in\mathbb R^{T_p\times d_a},\qquad \pi_\theta(A
 
 $$A_t^k=\sqrt{\bar\alpha_k}\,A_t^0+\sqrt{1-\bar\alpha_k}\,\epsilon,\qquad \epsilon\sim\mathcal N(0,I_{T_p d_a}).$$
 
-其中 $\alpha_k=1-\beta_k$、$\bar\alpha_k=\prod_{i=1}^{k}\alpha_i$，$\beta_k$ 是 noise schedule。模型接收 $O_t,A_t^k,k$，预测噪声：
+其中 $\alpha_k=1-\beta_k$ 、 $\bar\alpha_k=\prod_{i=1}^{k}\alpha_i$ ， $\beta_k$ 是 noise schedule。模型接收 $O_t,A_t^k,k$ ，预测噪声：
 
 $$\mathcal L_{\mathrm{DP}}(\theta)=\mathbb E_{(O_t,A_t^0)\sim\mathcal D,\,k,\,\epsilon}\left[\left\|\epsilon-\epsilon_\theta(O_t,A_t^k,k)\right\|_2^2\right].$$
 
-- $A_t^k,\epsilon,\epsilon_\theta\in\mathbb R^{T_p\times d_a}$；loss 同时覆盖全部未来步和动作维度。
+- $A_t^k,\epsilon,\epsilon_\theta\in\mathbb R^{T_p\times d_a}$ ；loss 同时覆盖全部未来步和动作维度。
 - $K$ 是训练时的去噪层数。论文真机设置用 $K=100$ 训练、DDIM 10 步推理；这是生成时间尺度，不对应 100 个机器人动作。
 - 论文实测 square cosine noise schedule 最好；它控制模型在不同频率/噪声尺度上学习动作信号的权重。
 
-这也可视为条件 score matching：$-\epsilon_\theta$ 在尺度因子下近似 $\nabla_A\log p(A\mid O)$。推理不是一次回归均值，而是从 $A_t^K\sim\mathcal N(0,I)$ 出发，沿高概率动作流形迭代移动。
+这也可视为条件 score matching： $-\epsilon_\theta$ 在尺度因子下近似 $\nabla_A\log p(A\mid O)$ 。推理不是一次回归均值，而是从 $A_t^K\sim\mathcal N(0,I)$ 出发，沿高概率动作流形迭代移动。
 
 ### 3) Reverse transition 与系统实现
 
@@ -75,7 +75,7 @@ $$\mathcal L_{\mathrm{DP}}(\theta)=\mathbb E_{(O_t,A_t^0)\sim\mathcal D,\,k,\,\e
 
 $$A_t^{k-1}=\alpha_k\left(A_t^k-\gamma_k\epsilon_\theta(O_t,A_t^k,k)+\eta_k\right),\qquad \eta_k\sim\mathcal N(0,\sigma_k^2I).$$
 
-- $\alpha_k,\gamma_k,\sigma_k$ 由 noise schedule 决定；直觉上 $\gamma_k$ 是沿 learned action-score field 的步长，$\eta_k$ 保留采样多样性。
+- $\alpha_k,\gamma_k,\sigma_k$ 由 noise schedule 决定；直觉上 $\gamma_k$ 是沿 learned action-score field 的步长， $\eta_k$ 保留采样多样性。
 - CNN 版本用 1D temporal U-Net/ConvNet 建模动作时间轴，并用 FiLM 注入 observation feature；Transformer 版本让动作 token 因果 self-attend，并对 observation embedding 做 cross-attention。
 - 视觉编码器只对 $O_t$ 算一次，之后 $K$ 次去噪复用条件特征；论文的 end-to-end 版本使用修改的 ResNet-18（Spatial Softmax 保留空间位置、GroupNorm 避免 EMA 与 BatchNorm 冲突）。
 - DDIM 将训练 100 步压到推理 10 步；论文报告 NVIDIA 3080 上约 0.1 s inference latency。真机 Push-T 以 10 Hz 产生 command，再线性插值到 125 Hz 执行。
@@ -88,11 +88,11 @@ $$a_{t:t+T_a-1}\leftarrow A_t^0[0:T_a],\qquad t\leftarrow t+T_a,\qquad O_t\lefta
 
 然后再次采样。需要区分：
 
-- $T_o$：看多少历史，决定部分可观测状态估计能力；
-- $T_p$：预测多长，决定轨迹级时间一致性与隐式计划长度；
-- $T_a$：一次真正执行多少步，决定 feedback bandwidth 与 inference amortization。
+- $T_o$ ：看多少历史，决定部分可观测状态估计能力；
+- $T_p$ ：预测多长，决定轨迹级时间一致性与隐式计划长度；
+- $T_a$ ：一次真正执行多少步，决定 feedback bandwidth 与 inference amortization。
 
-$T_a=1$ 最灵敏但每步都要完成去噪，延迟成本高；$T_a$ 太大则接近 open loop。论文消融中多数任务 $T_a=8$ 最优，并在仿真中维持到 4-step latency 的峰值表现。这与 MPC 相似：每轮优化一段未来控制，但只落地前缀；不同之处是 Diffusion Policy 的目标来自示范分布，而不是显式动力学模型和 cost function。
+$T_a=1$ 最灵敏但每步都要完成去噪，延迟成本高； $T_a$ 太大则接近 open loop。论文消融中多数任务 $T_a=8$ 最优，并在仿真中维持到 4-step latency 的峰值表现。这与 MPC 相似：每轮优化一段未来控制，但只落地前缀；不同之处是 Diffusion Policy 的目标来自示范分布，而不是显式动力学模型和 cost function。
 
 ### 5) 假设与数学没有覆盖的真实误差
 
@@ -117,7 +117,7 @@ $T_a=1$ 最灵敏但每步都要完成去噪，延迟成本高；$T_a$ 太大则
    - verifiable signal 仍是 task success、Push-T target area IoU、sauce coverage 等外部评测；noise-prediction validation loss 不能替代闭环 rollout。
 
 4. **Key Tricks：最值得抄的细节**
-   - **Trick 1 — 三个 horizon 分离：** $T_p$ 负责计划/平滑，$T_a$ 负责闭环带宽，$T_o$ 负责状态估计；论文多数任务的 sweet spot 是执行 8 步再重规划。
+   - **Trick 1 — 三个 horizon 分离：** $T_p$ 负责计划/平滑， $T_a$ 负责闭环带宽， $T_o$ 负责状态估计；论文多数任务的 sweet spot 是执行 8 步再重规划。
    - **Trick 2 — 条件只编码一次：** 不对 observation-action 联合轨迹做 diffusion，而只扩散 action；视觉特征可跨 10 次去噪复用，使实时控制可行。
    - **Trick 3 — position action + receding horizon：** 位置命令降低误差积分，对感知/网络延迟也更鲁棒；命令在 10 Hz 生成、底层插值到 125 Hz。
    - **Trick 4 — Spatial Softmax + GroupNorm：** 从零端到端学 visuomotor feature 时保留图像空间位置，并避开 BatchNorm 与 EMA 的不稳定组合。
@@ -141,7 +141,7 @@ $T_a=1$ 最灵敏但每步都要完成去噪，延迟成本高；$T_a$ 太大则
 ## 疑问 / 下一步
 
 - **没看懂 / 想深挖：** 怎样把固定 $T_a$ 改为 event-triggered replanning？例如接触突变、视觉残差、去噪样本方差或 safety monitor 触发时提前中断 chunk，同时避免频繁重采样造成动作不连续。
-- **如果要复现 / 小规模试，第一个实验做什么？** 跑官方 Push-T low-dim Colab/仓库，以相同 demonstrations 比较 `single-step MSE BC` 与 `Diffusion Policy`；做 $T_a\in\{1,4,8,16\}$、DDIM steps $\in\{2,5,10\}$ 的矩阵，记录 success、轨迹 jerk、p95 inference latency 与受扰后恢复时间。
+- **如果要复现 / 小规模试，第一个实验做什么？** 跑官方 Push-T low-dim Colab/仓库，以相同 demonstrations 比较 `single-step MSE BC` 与 `Diffusion Policy`；做 $T_a\in\{1,4,8,16\}$ 、DDIM steps $\in\{2,5,10\}$ 的矩阵，记录 success、轨迹 jerk、p95 inference latency 与受扰后恢复时间。
 - **下一步：** Day13 读 Octo，观察 diffusion action head 放入 Open X-Embodiment 数据和通用 Transformer policy 后，真正增加的是跨任务/跨机器人 transfer，还是只是模型与数据规模。
 
 ## 原文金句 (1-2句)

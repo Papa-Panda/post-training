@@ -3,7 +3,7 @@
 ## 准确术语
 
 - **Program**：Triton 的执行单元，一个 program 处理一个数据 block（`BLOCK` 个元素）；对应 CUDA 的 thread 处理一个元素。`tl.program_id(axis=0)` 返回当前 program 在 grid 中的编号。
-- **Grid**：`kernel[grid](...)` 的 launch 配置，一维 softmax 用 `(triton.cdiv(n, BLOCK),)`；program 总数 $=\lceil N/BLOCK\rceil$。
+- **Grid**：`kernel[grid](...)` 的 launch 配置，一维 softmax 用 `(triton.cdiv(n, BLOCK),)`；program 总数 $=\lceil N/BLOCK\rceil$ 。
 - **`tl.arange(0, BLOCK)`**：编译期常量向量，生成 `[0..BLOCK)` 的下标；与 `pid*BLOCK` 相加得到本 program 负责的元素下标。
 - **Mask（谓词）**：`mask = offs < n` 传给 `tl.load/tl.store`，越界 lane 不访存。这是谓词化的访存，不是 `if` 分支——语义上"这些 lane 不存在"，而不是"这些 thread 提前返回"。
 - **`tl.constexpr`**：编译期常量（如 `BLOCK`），kernel 针对每个取值重新特化编译；这也是 Triton kernel 对不同 shape 会 recompile 的根因之一。
@@ -17,7 +17,7 @@
 
 Day07/08 教 thread-level："一个 thread 干一件事，同步和访存自己排"。Day10 教 fused 的数学："中间量不落地"。Day11 教 fused 的两种工程写法：
 
-1. **手写 fused（Triton）**：你声明 block 级数据流，编译器排 warp。`softmax_triton_kernel.py` 的 5 行核心（program_id → offs/mask → load → 片上 max/exp/sum → store）就是 Day10 online softmax"单行版本"的工程形态——区别只是 softmax 行内不需要跨 block 的 running $(m,\ell)$。
+1. **手写 fused（Triton）**：你声明 block 级数据流，编译器排 warp。`softmax_triton_kernel.py` 的 5 行核心（program_id → offs/mask → load → 片上 max/exp/sum → store）就是 Day10 online softmax"单行版本"的工程形态——区别只是 softmax 行内不需要跨 block 的 running $(m,\ell)$ 。
 2. **自动 fused（torch.compile）**：你不写 kernel，Dynamo 抓图、Inductor 生成 Triton。代价是**失控感**：graph break、recompile、编译耗时都不在你手里，得用 `fullgraph=True` / profiler 拿回来。
 
 两条路在 Inductor 处汇合：最终跑的都是 Triton。
@@ -49,7 +49,7 @@ tl.store(out_ptr + offs, e / s, mask=mask)# 全行唯一的一次 store（片上
 
 ## 何时不赚（再强调一次）
 
-1. 小 $N$：launch 开销主导；compile 开销要分摊。
+1. 小 $N$ ：launch 开销主导；compile 开销要分摊。
 2. 大 dense GEMM：cuBLAS 已是 SASS 级，手写 Triton 不赚；Triton 甜点是内存 bound 的 fused elementwise/reduction。
 3. 动态 shape + 频繁 recompile：先定 shape（`mark_dynamic` 约束或 pad）。
 4. break 碎片化：fuse 只在 graph 内，先修 break。

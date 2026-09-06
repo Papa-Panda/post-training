@@ -4,7 +4,7 @@
 
 ## 1. 一个透明的有限概念模型
 
-设潜在任务 $c\in\mathcal C$，先验为 $p(c)$。为便于推导，先采用条件独立近似：给定 $c$，演示 $z_i=(x_i,y_i)$ 独立来自 $P_c$。于是：
+设潜在任务 $c\in\mathcal C$ ，先验为 $p(c)$ 。为便于推导，先采用条件独立近似：给定 $c$ ，演示 $z_i=(x_i,y_i)$ 独立来自 $P_c$ 。于是：
 
 $$p(c\mid D_k)=\frac{p(c)\prod_{i=1}^{k}P_c(z_i)}{\sum_{c'\in\mathcal C}p(c')\prod_{i=1}^{k}P_{c'}(z_i)}$$
 
@@ -12,11 +12,11 @@ $$p(c\mid D_k)=\frac{p(c)\prod_{i=1}^{k}P_c(z_i)}{\sum_{c'\in\mathcal C}p(c')\pr
 
 $$p(y_q\mid x_q,D_k)=\sum_{c\in\mathcal C}p(y_q\mid x_q,c)p(c\mid D_k)$$
 
-对真实概念 $c_*$ 与竞争概念 $c$，后验赔率满足精确恒等式：
+对真实概念 $c_*$ 与竞争概念 $c$ ，后验赔率满足精确恒等式：
 
 $$\log\frac{p(c_*\mid D_k)}{p(c\mid D_k)}=\log\frac{p(c_*)}{p(c)}+\sum_{i=1}^{k}\log\frac{P_{c_*}(z_i)}{P_c(z_i)}$$
 
-若 $z_i$ 确实独立来自 $P_{c_*}$，单个证据项的期望为：
+若 $z_i$ 确实独立来自 $P_{c_*}$ ，单个证据项的期望为：
 
 $$\mathbb E_{z\sim P_{c_*}}\left[\log\frac{P_{c_*}(z)}{P_c(z)}\right]=D_{\mathrm{KL}}(P_{c_*}\Vert P_c)$$
 
@@ -34,7 +34,7 @@ Xie et al. 的正式设置不是上面的 IID 分类器，而是具有文档级�
 
 ## 3. 标签噪声：模型取决于假设
 
-若任务 $c$ 规定确定映射 $f_c$，可显式加入噪声通道：
+若任务 $c$ 规定确定映射 $f_c$ ，可显式加入噪声通道：
 
 $$p(y_i\mid x_i,c)=(1-\epsilon){\bf 1}[y_i=f_c(x_i)]+\epsilon\rho(y_i\mid x_i)$$
 

@@ -2,11 +2,11 @@
 
 [← 07 Coding data](07_coding_data.md) · [回到 README](README.md) · [证据账本](references.md)
 
-ICL 把训练成本换成推理期上下文成本。shot 数 $k$ 不是系统变量；真正决定成本的是 token 数 $n$、模型结构、batching、cache 策略和输出长度。
+ICL 把训练成本换成推理期上下文成本。shot 数 $k$ 不是系统变量；真正决定成本的是 token 数 $n$ 、模型结构、batching、cache 策略和输出长度。
 
 ## 1. Prefill 与 decode 分开记账
 
-令层数为 $L$，query heads 为 $H_q$，KV heads 为 $H_{kv}$，head dimension 为 $d_h$，每元素字节数为 $b$，prompt 长度为 $n$。以下均按**单条未 padding 序列**计；batch size 为 $B$ 时再乘 $B$，但实际服务还受 padding、paged allocation 与并行切分影响。
+令层数为 $L$ ，query heads 为 $H_q$ ，KV heads 为 $H_{kv}$ ，head dimension 为 $d_h$ ，每元素字节数为 $b$ ，prompt 长度为 $n$ 。以下均按**单条未 padding 序列**计；batch size 为 $B$ 时再乘 $B$ ，但实际服务还受 padding、paged allocation 与并行切分影响。
 
 密集 attention 的 prefill 算术量随 $n^2$ 增长：
 
@@ -42,7 +42,7 @@ $$M_{\mathrm{KV}}=2L n H_{kv}d_hb$$
 
 固定模型、解码参数、数据 split 与 verifier，交叉以下变量：
 
-- shots：$k\in\{0,1,2,4,8,\ldots\}$，同时记录真实 $n$；
+- shots： $k\in\{0,1,2,4,8,\ldots\}$ ，同时记录真实 $n$ ；
 - selector：random、similarity、coverage、oracle；
 - order：至少多个随机 permutation，加 best/worst order 诊断；
 - labels：correct、shuffled、format-only；
@@ -75,7 +75,7 @@ retry count / tool calls / verifier time
 
 $$D^*=\arg\max_{D\subseteq\mathcal P}\left[\widehat U(D)-\lambda_n n(D)-\lambda_t T(D)-\lambda_m M(D)\right]$$
 
-其中 $\widehat U$ 是 held-out utility estimate，$n,T,M$ 分别为 token、latency、memory。工程上的停止条件可以是：新增 demo 的置信区间内收益不再覆盖其成本，或 negative-transfer rate 超过预设阈值。
+其中 $\widehat U$ 是 held-out utility estimate，\$n,T,M\$ 分别为 token、latency、memory。工程上的停止条件可以是：新增 demo 的置信区间内收益不再覆盖其成本，或 negative-transfer rate 超过预设阈值。
 
 ## 6. 与三条机制的接口
 

@@ -35,7 +35,7 @@ GPU 的核心矛盾长期没有变：晶体管预算有限，怎样让更多能�
 - block slots；
 - 指令发射和各类 execution pipe 的容量。
 
-若 block 使用资源向量 $r_b=(T_b,W_b,R_b,S_b,1)$，SM 上可驻留 block 数的教学上界为：
+若 block 使用资源向量 $r_b=(T_b,W_b,R_b,S_b,1)$ ，SM 上可驻留 block 数的教学上界为：
 
 $$N_{\mathrm{block}}=\min\left(\left\lfloor\frac{T_{\max}}{T_b}\right\rfloor,\left\lfloor\frac{W_{\max}}{W_b}\right\rfloor,\left\lfloor\frac{R_{\max}}{R_b}\right\rfloor,\left\lfloor\frac{S_{\max}}{S_b}\right\rfloor,N_{\max}\right).$$
 
@@ -60,7 +60,7 @@ $$D=A B+C.$$
 
 1. **峰值口径混淆**：dense/sparse、FP32/TF32/FP16/FP8、boost/base clock 不可横比。
 2. **产品形态混淆**：PCIe 与 SXM、不同 HBM 容量版本不是同一规格。
-3. **把峰值当实测**：$P_{\mathrm{achieved}}\le P_{\mathrm{peak}}$，layout、shape、occupancy 和搬运会拉开差距。
+3. **把峰值当实测**： $P_{\mathrm{achieved}}\le P_{\mathrm{peak}}$ ，layout、shape、occupancy 和搬运会拉开差距。
 4. **把硬件特性当透明加速**：架构特定特性常需要新指令、编译 target 和库支持。
 
 ## 6. 对后文的接口

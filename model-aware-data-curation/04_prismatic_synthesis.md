@@ -22,7 +22,7 @@ $$D_t \xrightarrow{\text{gradient map}} \text{sparse regions} \xrightarrow{\text
 
 从 seed pool $D_0$ 开始，每轮：
 
-1. **Cluster**：用 off-the-shelf proxy 计算 loss gradients，随机投影后做 $k$-means；这里用的不是最终 student，也不是 32B/72B teacher，而是单独的 gradient proxy。论文主设置用 **Qwen2.5-0.5B-Instruct**，不做额外 warm-up/微调，对每条 $(x,y)$ 计算全参数归一化 NLL 梯度并投影到 1024 维。论文还对比了 proxy 选择对 G-Vendi 与 OOD 表现相关性的影响：Llama-3.2-1B-Instruct $\rho=0.909$，Qwen2.5-0.5B-Instruct $\rho=0.898$，Qwen2.5-0.5B base $\rho=0.772$，说明 instruction-tuned 明显好于 base，家族差异相对较小；
+1. **Cluster**：用 off-the-shelf proxy 计算 loss gradients，随机投影后做 $k$ -means；这里用的不是最终 student，也不是 32B/72B teacher，而是单独的 gradient proxy。论文主设置用 **Qwen2.5-0.5B-Instruct**，不做额外 warm-up/微调，对每条 \$(x,y)\$ 计算全参数归一化 NLL 梯度并投影到 1024 维。论文还对比了 proxy 选择对 G-Vendi 与 OOD 表现相关性的影响：Llama-3.2-1B-Instruct $\rho=0.909$ ，Qwen2.5-0.5B-Instruct $\rho=0.898$ ，Qwen2.5-0.5B base $\rho=0.772$ ，说明 instruction-tuned 明显好于 base，家族差异相对较小；
 2. **Generate**：从当前池随机抽 few-shot examples，提示 generator 产生新样本；
 3. **Diversify**：只接收落入稀疏梯度簇的候选，再加入池中迭代。
 
@@ -42,14 +42,14 @@ for round_id in range(T):
     D.extend(accepted)
 ```
 
-论文说明示例为保留成员数最少的 top 20% clusters；其 NLI/math 实现动态设 $k=1\%\times |D|$，保留最小的 $k/2$ 个簇。它是 rejection sampling，不是要求 generator 直接反传梯度。
+论文说明示例为保留成员数最少的 top 20% clusters；其 NLI/math 实现动态设 $k=1\%\times |D|$ ，保留最小的 $k/2$ 个簇。它是 rejection sampling，不是要求 generator 直接反传梯度。
 
 ## 3. 已核实的实验数字
 
 来自论文 v2 / NeurIPS 2025：
 
 - 合成 data pool 超过 **3 million samples**，微调 **more than 300 models / training runs**，控制数据规模与质量；
-- G-Vendi 与 unseen OOD 平均表现的 **Spearman $\rho\approx0.9$**，同时报告在 NLI 和数学推理；
+- G-Vendi 与 unseen OOD 平均表现的 **Spearman $\rho\approx0.9$ **，同时报告在 NLI 和数学推理；
 - 梯度随机投影维度实验设为 **1024**，示例 proxy 包括 **0.5B instruction-tuned model**；
 - 最终 **Nemotron-PrismMath 1.0M** problem-solution pairs，**PrismNLI 515K** input-label pairs；
 - PrismMath-7B（32B generator）在论文列出的 7 个挑战 benchmark 中胜过比较对象 R1-Distill-Qwen-7B（其数据由 671B generator 生成）中的 **6/7**；
@@ -74,10 +74,10 @@ coding data 还应加入：parse / compile、unit tests、sandbox execution、ti
 
 $$\mathrm{accept}(z)= \mathbf 1[q(z)=1] \mathbf 1[c(z)\ge\tau_c] \mathbf 1[v(z)\ge\tau_v] \mathbf 1[r(z)\le\tau_r].$$
 
-- $q$：正确性/执行/污染；
-- $c$：稀疏簇或 G-Vendi marginal gain；
-- $v$：与目标失败簇对齐；
-- $r$：与保护能力冲突。
+- $q$ ：正确性/执行/污染；
+- $c$ ：稀疏簇或 G-Vendi marginal gain；
+- $v$ ：与目标失败簇对齐；
+- $r$ ：与保护能力冲突。
 
 这一步是本专题的工程扩展，不冒充 Prismatic 原论文结论。
 

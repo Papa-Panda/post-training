@@ -15,11 +15,11 @@
 
 ## 2. GEMM shape 决定硬件行为
 
-线性层 $Y=XW$：
+线性层 $Y=XW$ ：
 
 $$X\in\mathbb R^{M\times K},\quad W\in\mathbb R^{K\times N},\quad F\approx2MKN.$$
 
-- training/大 batch prefill：$M=B\times S$ 大，权重在多个 tokens 间复用，容易提高 arithmetic intensity；
+- training/大 batch prefill： $M=B\times S$ 大，权重在多个 tokens 间复用，容易提高 arithmetic intensity；
 - autoregressive decode：每步 $M$ 很小，反复读取权重，容易 memory/launch-bound；
 - tensor parallel 把 N/K 切小，单卡 GEMM 可能更 skinny，kernel efficiency 降低且 collective 频率上升。
 
@@ -31,9 +31,9 @@ $$X\in\mathbb R^{M\times K},\quad W\in\mathbb R^{K\times N},\quad F\approx2MKN.$
 
 $$O=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt d}+M\right)V.$$
 
-若显式物化 $S\times S$ score/probability，HBM 流量与空间为 $O(S^2)$。FlashAttention 类算法按 tiles 在线维护 softmax 统计，使 score blocks 留在 on-chip memory，避免完整中间矩阵写回；它仍执行精确 attention（在浮点重排误差意义下），主要收益来自 I/O-aware tiling，而不是少算掉标准 attention 的全部 $QK^\top$ FLOPs。
+若显式物化 $S\times S$ score/probability，HBM 流量与空间为 $O(S^2)$ 。FlashAttention 类算法按 tiles 在线维护 softmax 统计，使 score blocks 留在 on-chip memory，避免完整中间矩阵写回；它仍执行精确 attention（在浮点重排误差意义下），主要收益来自 I/O-aware tiling，而不是少算掉标准 attention 的全部 $QK^\top$ FLOPs。
 
-在线 softmax 对每行维护 running max $m$ 和 normalizer $l$；合并新 block 时重新缩放旧 partial output。这是算法、数值稳定性和 GPU memory hierarchy 的协同设计。
+在线 softmax 对每行维护 running max $m$ 和 normalizer $l$ ；合并新 block 时重新缩放旧 partial output。这是算法、数值稳定性和 GPU memory hierarchy 的协同设计。
 
 ## 4. KV cache 与 decode
 
@@ -41,7 +41,7 @@ $$O=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt d}+M\right)V.$$
 
 $$Q_{\mathrm{KV}}=2B S H e,$$
 
-其中 2 表示 K/V，$B$ 是并发序列，$S$ 是缓存长度，$H$ 是 hidden size，$e$ 是每元素 bytes；若使用 grouped-query/multi-query attention，KV heads 数下降，应按实际 KV dimension 替换 $H$。
+其中 2 表示 K/V， $B$ 是并发序列， $S$ 是缓存长度， $H$ 是 hidden size， $e$ 是每元素 bytes；若使用 grouped-query/multi-query attention，KV heads 数下降，应按实际 KV dimension 替换 $H$ 。
 
 每生成一个 token 要读取历史 KV 的相关部分，因此 decode latency/throughput 对：
 
@@ -70,7 +70,7 @@ $$T_{\mathrm{step}}\approx T_{\mathrm{fwd}}+T_{\mathrm{bwd}}+T_{\mathrm{opt}}+T_
 
 ## 6. Quantization 的性能方程
 
-权重从 $e_1$ bytes 降到 $e_2$ bytes，理论权重流量下降 $e_1/e_2$，但端到端收益取决于：
+权重从 $e_1$ bytes 降到 $e_2$ bytes，理论权重流量下降 $e_1/e_2$ ，但端到端收益取决于：
 
 - 是否有原生低精度 Tensor Core path；
 - dequant scale/zero-point 的 FLOPs 与 bytes；

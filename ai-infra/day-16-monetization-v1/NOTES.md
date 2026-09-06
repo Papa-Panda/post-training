@@ -1,6 +1,6 @@
 # NOTES — Day 16 Monetization Story v1
 
-> Connection to Prev: Day15 Megatron 3D 182GB→TP4+PP2 25GB → Day16 Monetization v1: PUE 1.2576算清$/useful但缺可讲的跨界ROI故事，需要把分片/热散/eval异步压缩成150字；Day14 PUE 1.2576 overhead 25.76% + Day13 Tj 90.5°C throttle 2.5%坑用 $/useful+ jitter/throttle双阈值+TP散热解决。
+> Connection to Prev: Day15 Megatron 3D 182GB→TP4+PP2 25GB → Day16 Monetization v1: PUE 1.2576算清\$/useful但缺可讲的跨界ROI故事，需要把分片/热散/eval异步压缩成150字；Day14 PUE 1.2576 overhead 25.76% + Day13 Tj 90.5°C throttle 2.5%坑用 \$/useful+ jitter/throttle双阈值+TP散热解决。
 
 Date: 2026-08-16 (RL Training / Monetization) — actually 2026-08-20 delivery of Day16
 
@@ -18,11 +18,11 @@ Date: 2026-08-16 (RL Training / Monetization) — actually 2026-08-20 delivery o
 - TP散热点：Day15 TP4把单卡720W burst→480-520W -28%，节流率从2.5%→<1% proxy
 - RL讲法：throttle 1%阈值来源于TPOT +30%后用户误判为差答案，fail-slow也算 SLO FAIL，checkpoint(Day07)救不了 must功率平滑
 
-### 3. COST：PUE→$/useful翻译成可讲ROI
+### 3. COST：PUE→\$/useful翻译成可讲ROI
 - PUE mean 1.2576 p50 1.2381 p95 1.3427 min 1.1646 max 1.3468 overhead 25.76% (IT 477.4W cooling 123.8W Tj_avg 72.4°C Tj_max 92.1°C throttle 3.0%) [CPU真数，待H100 NCCL 补 max_memory_allocated]
-- $/useful before 0.000244 $/1k useful 0.2438 $/1k tokens proxy 0.000116 useful 281/300=93.7% fail 6.33% —> after async+TP散热点+σ过滤 $/useful 0.00019 save 22.1% [CPU真数，待H100 NCCL 补 $3.2/GPU-hr计费表 + 真vLLM 3.4-5k tokens/sec]
+- $/useful before 0.000244 $ /1k useful 0.2438 $/1k tokens proxy 0.000116 useful 281/300=93.7% fail 6.33% —> after async+TP散热点+σ过滤 $ /useful 0.00019 save 22.1% [CPU真数，待H100 NCCL 补 \$3.2/GPU-hr计费表 + 真vLLM 3.4-5k tokens/sec]
 - Day12 σ 0.045 ensemble K=5 + |cal-raw| 0.0539 OAS校准位移过滤高不确定rollout不进 useful分母，避免把RM噪声当infra失败扩机柜
-- 映射：每1k有用rollout省 0.0538 $ proxy → 周3000 rollout省 0.16 $ proxy (CPU小样本，待H100放大) + GRPO组内N=64优势方差↓ ∝ sqrt(N)*σ
+- 映射：每1k有用rollout省 0.0538 \$ proxy → 周3000 rollout省 0.16 \$ proxy (CPU小样本，待H100放大) + GRPO组内N=64优势方差↓ ∝ sqrt(N)*σ
 
 ## 待H100 NCCL
 - [ ] torch.cuda.max_memory_allocated() 真数：7B DP G=2 18GB vs proxy 17.24GB偏差，70B TP4+PP2 25GB vs 25.05GB验证
@@ -32,7 +32,7 @@ Date: 2026-08-16 (RL Training / Monetization) — actually 2026-08-20 delivery o
 - [ ] PP bubble interleaved实测 + eval async填充奖励计算 filler，省gpu_idle 52%再压
 
 ## 一句收敛
-“Day15把70B 182GB切到25GB才让PUE有意义，Day14 1.2576把$/useful算到0.000244但没讲成ROI story，今天把queue 68.8%+thermal 1.67pp+cost 22.1%三真数压成150字跨界叙事，SLO×COST→面试可讲$。”
+“Day15把70B 182GB切到25GB才让PUE有意义，Day14 1.2576把\$/useful算到0.000244但没讲成ROI story，今天把queue 68.8%+thermal 1.67pp+cost 22.1%三真数压成150字跨界叙事，SLO×COST→面试可讲\$。”
 
 ## 代码
 - `monetization_v1.py` CPU单进程 ok（torch缺失 fallback已写，待H100 NCCL补 gloo 2-rank）
@@ -64,4 +64,4 @@ Story v1 (330字):
 | 热节流Tj | 两节点SSM + fan^3 + hyst | Tj 90.5→82.49 throt 2.5→0.83% |
 | eval异步 | sync gpu_idle 92.85%→0% | save 52% gpu_idle |
 | GRPO baseline | 组内64样本相对优势抗抖 | σ 0.045过滤后方差↓ |
-| PUE→COST | cooling overhead → $/useful | 1.2576→0.000244→0.00019 -22% |
+| PUE→COST | cooling overhead → \$/useful | 1.2576→0.000244→0.00019 -22% |

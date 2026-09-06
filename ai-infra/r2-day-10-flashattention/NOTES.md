@@ -2,15 +2,15 @@
 
 ## 准确术语
 
-- **Tiling / blocking**：把 $N$ 维按 $B_r$ （行， $Q$ 侧）与 $B_c$ （列， $K/V$ 侧）切块，使每个 $(i,j)$ 步的工作集塞进 SRAM。
+- **Tiling / blocking**：把 $N$ 维按 $B_r$ （行， $Q$ 侧）与 $B_c$ （列， $K/V$ 侧）切块，使每个 \$(i,j)\$ 步的工作集塞进 SRAM。
 - **SRAM（片上）vs HBM（片外）**：本课沿用论文口径，SRAM 指 SM 可直接用的快速存储（含 shared memory / registers）；HBM 指 GPU 主存。tiling 的目标是最小化 HBM 访存量，不是减少 FLOPs。
 - **Online softmax**：Milakov & Gimelshein (2018) 的分块归一化技巧；FlashAttention 把它用在 $QK^T$ 分块上，使 softmax 不需要看完整行。
 - **Running 统计量**： $m$ （行最大值）、 $\ell$ （running 归一化子和）。 $m$ 保证数值稳定（等价于 stable softmax 先减 max）； $\ell$ 替代"分母"。
-- **Rescale 因子**： $m$ 更新为 $m'$ 时，旧累加量乘 $e^{m-m'}$ 、新 block 乘 $e^{m_j-m'}$ 。这是"分母变了，分子分母同乘"的精确代数，不是近似。
+- **Rescale 因子**： $m$ 更新为 \$m'\$ 时，旧累加量乘 $e^{m-m'}$ 、新 block 乘 $e^{m_j-m'}$ 。这是"分母变了，分子分母同乘"的精确代数，不是近似。
 - **Logsumexp $L=m+\log\ell$ **：每行 softmax 分母的对数；前向结束时写回 HBM（ $O(N)$ ），反向重算 $S_{ij}$ 时用它恢复 $P_{ij}=\exp(S_{ij}-L_i)$ 。
 - **IO-aware**：block 尺寸由 SRAM 容量 $M$ 反推（ $B_r d+2B_c d+B_rB_c+B_r d\le M$ ），而非固定超参数。
 - **Exact（精确）vs approximate（近似）**：FlashAttention 是精确等价于标准 attention 的实现优化；稀疏 attention（如 Longformer）才是近似。面试高频混淆点。
-- **Recomputation（反向重算）**：反向不存 $S/P$ ，用存下的 $L$ 和 $Q,K,V,O,dO$ 逐 block 重算 $S_{ij}$ 求梯度：省 $O(N^2)$ 显存，多一次正向量级的 HBM 遍历。
+- **Recomputation（反向重算）**：反向不存 $S/P$ ，用存下的 $L$ 和 \$Q,K,V,O,dO\$ 逐 block 重算 $S_{ij}$ 求梯度：省 $O(N^2)$ 显存，多一次正向量级的 HBM 遍历。
 - ** $B_r/B_c$ **：行 block 高 / 列 block 宽。 $B_c$ 大 → 外层循环少 → $Q_i/O_i$ 重载次数少； $B_r$ 大 → 内层并行度高。两者都受 SRAM 约束。
 
 ## Connection to Prev 的实质
@@ -30,7 +30,7 @@ Day09 的 tiled GEMM 解决"输入复用"： $A/B$ tile 进 shared memory 被 $T
 
 $$\ell' e^{m'}=\ell e^{m}+\tilde{\ell}_j e^{m_j}=\sum_{t\le j}\sum_{k\in t}e^{S_k}$$
 
-两边除以 $e^{m'}$ 即得 $\ell'=e^{m-m'}\ell+e^{m_j-m'}\tilde{\ell}_j$ ；分子 $O'$ 同理。最终
+两边除以 $e^{m'}$ 即得 $\ell'=e^{m-m'}\ell+e^{m_j-m'}\tilde{\ell}_j$ ；分子 \$O'\$ 同理。最终
 
 $$\frac{O'}{\ell'}=\frac{\sum_k e^{S_k}v_k}{\sum_k e^{S_k}}=\mathrm{softmax}(S)V$$
 
@@ -53,11 +53,11 @@ for j = 1..T_c:                       # 外层：K/V block（每块只加载一�
 收尾：O_i = diag(l_i)^{-1} O_i；L_i = m_i + log(l_i)
 ```
 
-本课 `flash_attention() 即此循环的可执行版本（纯 Python，语义与计数逐行对应）。
+本课 `flash_attention()` 即此循环的可执行版本（纯 Python，语义与计数逐行对应）。
 
 ## 反向传播一句话
 
-前向存 $O(N)$ 的 $L$ ；反向对每个 $(i,j)$ 从 HBM 重载 $Q_i,K_j,V_j,O_i,dO_i,L_i$ ，在 SRAM 里重算 $S_{ij}$ 、 $P_{ij}=\exp(S_{ij}-L_i)$ ，累加 $dQ_i,dK_j,dV_j$ 。论文给出反向同样 $O(N^2d^2/M)$ HBM 访问、 $O(N)$ 额外显存。
+前向存 $O(N)$ 的 $L$ ；反向对每个 \$(i,j)\$ 从 HBM 重载 $Q_i,K_j,V_j,O_i,dO_i,L_i$ ，在 SRAM 里重算 $S_{ij}$ 、 $P_{ij}=\exp(S_{ij}-L_i)$ ，累加 $dQ_i,dK_j,dV_j$ 。论文给出反向同样 $O(N^2d^2/M)$ HBM 访问、 $O(N)$ 额外显存。
 
 ## 何时不赚（再强调一次）
 
@@ -68,4 +68,4 @@ for j = 1..T_c:                       # 外层：K/V block（每块只加载一�
 
 ## 与 Day11/12 的连接
 
-Day11（Triton/`torch.compile）回答"fused kernel 在工程上怎么写"；Day12（Nsight）回答"怎么证明省下的 HBM 真的变成了 wall-time"。本课只负责把数学与流量账算对。
+Day11（Triton/`torch.compile`）回答"fused kernel 在工程上怎么写"；Day12（Nsight）回答"怎么证明省下的 HBM 真的变成了 wall-time"。本课只负责把数学与流量账算对。

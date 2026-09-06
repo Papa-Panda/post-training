@@ -35,13 +35,13 @@ Day07 路线图进入 humanoid whole-body control。H2O 的价值不只是“动
 2. **System / Method**：
    - **Human → robot retargeting**：先优化 SMPL body shape，使 12 个对应关节贴合 H1 形态；再最小化 12 个关节位置差，重点保持 ankles / elbows / wrists 等末端轨迹。
    - **Sim-to-data cleaning**：对约 10k 条 retargeted AMASS motion，训练可访问 778 维全刚体 privileged state、且无 domain randomization 的 imitation policy；把连这个“仿真能力上界”都跟不住的动作判为 embodiment-infeasible，留下约 8.5k 条 clean motions。
-   - **Deployable goal-conditioned policy**：PPO policy 的 proprioception 只用 joint position/velocity、root linear/angular velocity、projected gravity 和上一动作；goal 用 8 个 keypoints（肩、肘、手、踝）的参考位置、tracking error 和参考速度。输出 19 维 joint targets，由 PD controller 转成 torque：$\tau=K_p(a_t-q_t)-K_d\dot q_t$。
+   - **Deployable goal-conditioned policy**：PPO policy 的 proprioception 只用 joint position/velocity、root linear/angular velocity、projected gravity 和上一动作；goal 用 8 个 keypoints（肩、肘、手、踝）的参考位置、tracking error 和参考速度。输出 19 维 joint targets，由 PD controller 转成 torque： $\tau=K_p(a_t-q_t)-K_d\dot q_t$ 。
    - **Deployment**：1080p RGB webcam + HybrIK 3D pose estimator（30 Hz）产生人类目标；H1 内置传感器以 200 Hz 提供其余 proprioception。实验中 root linear velocity 仍由 50 Hz MoCap 提供，这是“单 RGB”叙事之外的重要系统依赖。
 
 3. **Training / Data Details**：
    - 数据来自 AMASS 的约 13k motion sequences；启发式预过滤与 retargeting 后约 10k，再由 privileged imitator 过滤为约 8.5k feasible sequences。
    - Reward = penalty + regularization + task imitation。虽然 observation 只含 8 个目标 keypoints，训练 reward 对全部 joints / bodies 提供 DoF position/velocity、body position/rotation/linear/angular velocity 六类 dense signal。
-   - Sim2Real 随机化覆盖 friction $U(0.2,1.1)$、base CoM offset $U(-0.1,0.1)$ m、link mass $0.7$–$1.3\times$、PD gains $0.75$–$1.25\times$、torque noise、20–60 ms control delay、每 5 s 横向 push 及 flat/rough/low-obstacle terrain。
+   - Sim2Real 随机化覆盖 friction $U(0.2,1.1)$ 、base CoM offset $U(-0.1,0.1)$ m、link mass \$0.7\$– $1.3\times$ 、PD gains \$0.75\$– $1.25\times$ 、torque noise、20–60 ms control delay、每 5 s 横向 push 及 flat/rough/low-obstacle terrain。
    - Early termination：base height < 0.3 m、projected gravity 的 x/y 分量 > 0.7，或平均 link tracking distance > 0.5 m。
    - Verifiable signal：仿真中若任一时刻平均 body distance > 0.5 m，则判 imitation failure；同时报告 global / root-relative MPJPE 与 acceleration / velocity error。
 

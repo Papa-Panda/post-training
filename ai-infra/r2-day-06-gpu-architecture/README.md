@@ -50,8 +50,8 @@ H100 SXM 的 FP32 峰值为 67 TFLOP/s、HBM 峰值带宽为 3.35 TB/s，因此�
 
 $$I^* = \frac{67\times 10^{12}}{3.35\times 10^{12}} = 20\ \text{FLOP/byte}$$
 
-- $I < 20$：理论上先撞带宽屋顶，倾向 memory-bound。
-- $I > 20$：才可能先撞 FP32 算力屋顶；“可能”是因为实际瓶颈还可能来自指令、依赖、occupancy 或访存模式。
+- $I < 20$ ：理论上先撞带宽屋顶，倾向 memory-bound。
+- $I > 20$ ：才可能先撞 FP32 算力屋顶；“可能”是因为实际瓶颈还可能来自指令、依赖、occupancy 或访存模式。
 
 这里的 67 TFLOP/s 与 3.35 TB/s 都是**产品理论峰值**，不是本仓库测得的 benchmark。
 
@@ -71,10 +71,10 @@ python3 -m unittest discover -s ai-infra/r2-day-06-gpu-architecture -p 'test_*.p
 
 默认算例输出的关键结论：
 
-- `C=A+B`，$N=2^{20}$ 个 FP32 元素：1,048,576 FLOPs；读 A、读 B、写 C，共 12,582,912 bytes。
+- `C=A+B`， $N=2^{20}$ 个 FP32 元素：1,048,576 FLOPs；读 A、读 B、写 C，共 12,582,912 bytes。
 - $I=1/12\approx0.0833$ FLOP/byte，远低于 20，故理论分类为 memory-bound。
-- 带宽 roof：$3.35\times(1/12)=0.2792$ TFLOP/s。
-- 仅按峰值 HBM 带宽估计的下限：$12{,}582{,}912/(3.35\times10^{12})\approx3.756\ \mu s$。
+- 带宽 roof： $3.35\times(1/12)=0.2792$ TFLOP/s。
+- 仅按峰值 HBM 带宽估计的下限： $12{,}582{,}912/(3.35\times10^{12})\approx3.756\ \mu s$ 。
 - 两个 $128\times128$ BF16 tile 占 65,536 bytes，低于 227 KiB/block；两个 $256\times256$ tile 占 262,144 bytes，超出上限。
 
 ## 状态

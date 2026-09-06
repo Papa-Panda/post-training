@@ -42,7 +42,7 @@ Lab: `rl-infra/day-08-eval-infra/`
 - `torch.cuda.max_memory_allocated()` / `max_memory_reserved()` 对比 sync vs async 下常驻
 - 真 coding eval：HumanEval 164 题全量 3h 的 P50 / P95 / queue depth 5-7 时的 gpu_hours_wasted
 - ops：`P95 eval latency 8-15min 真值` / `flaky_rate 真值` / `GPU-hours wasted = (1-util)*wall-clock`
-- $/有用 rollout：`$/useful = (train$ + vLLM$ + eval$ + retry$) / passed` 降幅 12-15% 需实测
+- \$/有用 rollout：`$/useful = (train$ + vLLM$ + eval$ + retry$) / passed` 降幅 12-15% 需实测
 
 ## nowcasting → eval 预测 小实操
 
@@ -80,7 +80,7 @@ Output 每行都打印 step 级 queue_depth / pred / latency / idle，尾部汇�
 
 ## 一句话可迁移
 
-eval 瓶颈本质是同步 + 重 + 排队，把 autoscaling 里“稳定负载 vs 波动负载分开调度 + nowcasting 预测 burst” 翻译成“train vs eval 分开 + EWMA 预测 eval 延迟决定 async/skip”，量化看 P95 和 queue_depth，省的是 GPU-hours wasted，算进新的 PUE = $/有用 rollout。
+eval 瓶颈本质是同步 + 重 + 排队，把 autoscaling 里“稳定负载 vs 波动负载分开调度 + nowcasting 预测 burst” 翻译成“train vs eval 分开 + EWMA 预测 eval 延迟决定 async/skip”，量化看 P95 和 queue_depth，省的是 GPU-hours wasted，算进新的 PUE = \$/有用 rollout。
 
 ## Fail-closed
 

@@ -13,7 +13,7 @@
 经典 induction circuit 可分成：
 
 1. **previous-token head**：在位置 $j$ 的 residual stream 写入前一 token $t_{j-1}$ 的信息；
-2. **induction head**：当前位置 $i$ 的 query 与旧位置 $j$ 携带的 $t_{j-1}$ 匹配；若 $t_{j-1}=t_i$，则从位置 $j$ 的 value 复制 $t_j$ 的信息。
+2. **induction head**：当前位置 $i$ 的 query 与旧位置 $j$ 携带的 $t_{j-1}$ 匹配；若 $t_{j-1}=t_i$ ，则从位置 $j$ 的 value 复制 $t_j$ 的信息。
 
 一个理想化 prefix-match score 可写为：
 
@@ -48,7 +48,7 @@ Induction 最直接解释的是 pattern completion / associative retrieval。算
 
 ## 4. Task vectors 与 function vectors 不应混成一个公式
 
-Hendel et al. 把 ICL 看作将示例集 $D_k$ 压缩为 query-agnostic task vector $\tau(D_k)$，再与 query 一起驱动预测：[E-model]
+Hendel et al. 把 ICL 看作将示例集 $D_k$ 压缩为 query-agnostic task vector $\tau(D_k)$ ，再与 query 一起驱动预测：[E-model]
 
 $$\widehat y=f_\theta(x_q;\tau(D_k))$$
 

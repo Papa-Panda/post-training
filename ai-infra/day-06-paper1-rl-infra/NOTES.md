@@ -6,7 +6,7 @@ Status: done (离线笔记，H100前定版)
 
 - Eval: 基线 coding data 0.42 → 加小规模 GRPO 后 0.47 (+5%)，待真机小 eval 验证 (coding data, 200 samples)
 - Throughput: 目标 tokens/sec 1.2k (vLLM rollout 集群, 7B bf16, 2×A100)，待H100 NCCL 验证 `torch.cuda.max_memory_allocated`
-- Cost: GPU-hour $3.2 (训练 $ + vLLM $) / $/有用 rollout $0.018，失败重试占 12% 成本，类比 PUE Modeling
+- Cost: GPU-hour \$3.2 (训练 $ + vLLM $ ) / \$/有用 rollout \$0.018，失败重试占 12% 成本，类比 PUE Modeling
 - Failure: rollout 失败率 12% (长 CoT 500→5000 tokens 超时/工具挂)，已加组内重试 3 次 + 冷却 10min
 - Bottleneck: rollout 占 80% 墙钟，eval 占 15%，训练只占 5% (Agentic RL 长轨迹特性)，长 rollout 需拆 vLLM 集群独立调度
 

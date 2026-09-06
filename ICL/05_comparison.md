@@ -16,7 +16,7 @@
 
 在线性 Gaussian regression 中，三种语言确实可能描述同一个 predictor：Gaussian prior 的 posterior mean 对应 ridge；Transformer 可构造近似 ridge 或迭代优化；激活中必须有组件编码充分统计量并把它作用到 query。
 
-例如，若 $w\sim\mathcal N(0,\lambda^{-1}I)$ 且 $y_i=w^\top x_i+\varepsilon_i$，$\varepsilon_i\sim\mathcal N(0,\sigma^2)$，posterior mean 为：
+例如，若 $w\sim\mathcal N(0,\lambda^{-1}I)$ 且 $y_i=w^\top x_i+\varepsilon_i$ ， $\varepsilon_i\sim\mathcal N(0,\sigma^2)$ ，posterior mean 为：
 
 $$\widehat w=(X^\top X+\lambda\sigma^2 I)^{-1}X^\top y$$
 

@@ -4,7 +4,7 @@ Mapping from FSDP failure modes (NCCL timeout, OOM, deadlock) to vLLM rollout fa
 
 ## 5-way + 2 infra (same as day-07 sim, extended)
 
-| # | Type | Symptom | Root cause | Detect | Mitigate | $ bleed |
+| # | Type | Symptom | Root cause | Detect | Mitigate | \$ bleed |
 |---|------|---------|------------|--------|----------|---------|
 | 1 | `timeout` | wall > SLO 30s P95 | long CoT 5000 decode bound + queue, λ > μ (Little's law) | P95 wall >3×P50 | ↓λ, ↑max_num_seqs, chunked prefill | 40% of fails, dominant long |
 | 2 | `tool_call` | `json parse error`, sandbox returns 500 | code exec timeout, unparsable tool | log `tool_parser` error | retry 3× + cool 10min, sandboxed timeout 15s | 30% |
@@ -36,7 +36,7 @@ Log to `failure_log.json`: `{idx, fail_type, wall, prompt_len, cot_len, free_blo
 
 - Day-07 expected 80% wall-clock rollout (short) → 90% long. Real bottleneck is failure retries, not pure toks/sec.
 - Reusable infra idea: translate datacenter PUE / burst prediction (autoscaling) → predict `queue_depth` burst, async eval, hysteresis retry (Day-06 note).
-- Failure budget: keep ≤15% long CoT, otherwise $/useful rollout doubles.
+- Failure budget: keep ≤15% long CoT, otherwise \$/useful rollout doubles.
 
 ## Checklist before claiming "H100 ready"
 

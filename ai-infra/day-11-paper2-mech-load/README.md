@@ -103,7 +103,7 @@
 
 1. 昨天 Day10 的 vLLM rollout 把墙钟 80% → 90% 的原因说清是 decode 长 + KV 压力，但没回答“为什么跑长就会触发硬件热节流”，今天 Paper2 的机械负载非线性建模补上这一层——Q_IT burst → 筑冷机加机阶梯 → P_mech 突增 → rack T_amb 上升 3-5°C → T_j 从 67°C 平均窜到 82°C 节流，正好是 Day10 失败分类里 OOM/KV 10% 之外的隐性失败源，必须用物理先验才能提前 5-10min 预测，而不是等 Tj 烧到阈值再 throttle。
 2. 前天 Day08/09 eval bottleneck 的 nowcasting EWMA 用最近 N 个 latency 做线性外推，能捕捉 queue depth 堆积，但捕不住“冷机加机延迟 3τ=15min 内 P_mech 飙而 COP 跌”的非线性拐点——Paper2 的 γ*(ΔT)^2 + PLR^2 给 EWMA 加了二次修正，今天代码里 rmse 55.1kW（EWMA lag 在 burst 处必偏大）与 p_mech_std 9.38kW 联动，说明抖动本身可量化，复用到 Day12 reward 校准就是用类似的二次残差去标 OAS 不确定性，区分“正常探索噪声 vs 有害热/功耗抖动”。
-3. Day07 checkpoint 的“存盘如何拼回分片”是 fail-stop 后的恢复，而热节流是 fail-slow——不崩但慢 30%，checkpoint 救不了，必须像 Paper1 的抗抖动 hysteresis 那样在调度层加冷却窗口（T_j 82°C 降频后 10min 内不追回功率），这正是 Paper2 冷机防短循环 hyst_on 0.85 / hyst_off 0.35 的同构，今天 GPU 侧 hyst 82/72°C 的 0.8% throttle_rate 证明窗口有效，待 H100 上补真实 Tj/功率 trace 验证节能是否折算成 $/有用 rollout 降 8-12%。
+3. Day07 checkpoint 的“存盘如何拼回分片”是 fail-stop 后的恢复，而热节流是 fail-slow——不崩但慢 30%，checkpoint 救不了，必须像 Paper1 的抗抖动 hysteresis 那样在调度层加冷却窗口（T_j 82°C 降频后 10min 内不追回功率），这正是 Paper2 冷机防短循环 hyst_on 0.85 / hyst_off 0.35 的同构，今天 GPU 侧 hyst 82/72°C 的 0.8% throttle_rate 证明窗口有效，待 H100 上补真实 Tj/功率 trace 验证节能是否折算成 \$/有用 rollout 降 8-12%。
 
 > 贴到 README 最前 Connection 段：JAX pjit mesh/P(5) 的声明式分片 → checkpoint(7) sharded vs full 是一体两面，P(5) 的“抽象分片怎么声明”在 DCP checkpoint 是“分片怎么拼不回全量也要能重训”；FSDP(2/3) 的 per-block 省峰值 → Paper2(11) 的热容省节流都是“切小块降瞬时峰值”同一思想，block 峰值 (P-b)/G+b 对应热学峰值 lag 3τ 后才现。
 

@@ -12,13 +12,13 @@
 
 $$s_t=(g,w_t,b_t,r_t,m_t,j_t,e_t),$$
 
-- $g$：用户目标、success contract 与不可漂移约束；
-- $w_t$：workflow 节点、依赖和 continuation；
-- $b_t$：剩余 token、时间、工具、金钱和风险预算；
-- $r_t$：当前资源与外部对象的已知版本；
-- $m_t$：memory/artifact references，不是把全部内容复制进 prompt；
-- $j_t$：subagent、异步工具和后台 job 状态；
-- $e_t$：append-only events 与 verifier evidence。
+- $g$ ：用户目标、success contract 与不可漂移约束；
+- $w_t$ ：workflow 节点、依赖和 continuation；
+- $b_t$ ：剩余 token、时间、工具、金钱和风险预算；
+- $r_t$ ：当前资源与外部对象的已知版本；
+- $m_t$ ：memory/artifact references，不是把全部内容复制进 prompt；
+- $j_t$ ：subagent、异步工具和后台 job 状态；
+- $e_t$ ：append-only events 与 verifier evidence。
 
 Context compiler 和模型产生建议动作：
 
@@ -57,12 +57,12 @@ OBSERVE -> COMPILE -> PROPOSE -> AUTHORIZE -> EXECUTE -> COMMIT/VERIFY
 
 $$u_t=(n_t,\xi_t,\iota_t,\chi_t,p_t,d_t),$$
 
-- $n_t$：工具名和版本；
-- $\xi_t$：通过 schema 校验的参数；
-- $\iota_t$：idempotency key；
-- $\chi_t$：risk class；
-- $p_t$：preconditions，例如目标对象版本；
-- $d_t$：deadline/lease。
+- $n_t$ ：工具名和版本；
+- $\xi_t$ ：通过 schema 校验的参数；
+- $\iota_t$ ：idempotency key；
+- $\chi_t$ ：risk class；
+- $p_t$ ：preconditions，例如目标对象版本；
+- $d_t$ ：deadline/lease。
 
 工具按副作用分层：
 
@@ -74,7 +74,7 @@ $$u_t=(n_t,\xi_t,\iota_t,\chi_t,p_t,d_t),$$
 | External send | 发消息、提交表单 | 明确授权、去重、发送后确认 |
 | Irreversible/high-risk | 删除、交易、权限扩大 | 人工审批或禁止自动执行 |
 
-Permission 不应由模型在自然语言里自我声明。令主体 $z$ 对资源 $r$ 的能力集合为 $\mathrm{Cap}(z,r)$，执行条件是：
+Permission 不应由模型在自然语言里自我声明。令主体 $z$ 对资源 $r$ 的能力集合为 $\mathrm{Cap}(z,r)$ ，执行条件是：
 
 $$\mathrm{Allow}(u_t)=\mathbf1[\mathrm{cap}(u_t)\in\mathrm{Cap}(z,r)]\mathbf1[\mathrm{Pre}(u_t,s_t)]\mathbf1[\mathrm{Cost}(u_t)\le b_t].$$
 
@@ -155,7 +155,7 @@ never infer success from missing logs
 
 恢复的核心 invariant：
 
-$$\forall u,\\quad \#\mathrm{CommittedSideEffect}(u)\le1,$$
+$$\forall u,\quad \#\mathrm{CommittedSideEffect}(u)\le1,$$
 
 前提是下游工具支持相同 idempotency key；如果不支持，runtime 只能提供 reconciliation 和人工决策，不能虚构 exactly-once。
 
@@ -165,7 +165,7 @@ $$\forall u,\\quad \#\mathrm{CommittedSideEffect}(u)\le1,$$
 
 $$b_t=(b_t^{\mathrm{tok}},b_t^{\mathrm{tool}},b_t^{\mathrm{wall}},b_t^{\mathrm{money}},b_t^{\mathrm{risk}}).$$
 
-每步消耗向量为 $\Delta b_t^{\mathrm{use}}$：
+每步消耗向量为 $\Delta b_t^{\mathrm{use}}$ ：
 
 $$b_{t+1}=b_t-\Delta b_t^{\mathrm{use}}.$$
 
@@ -184,7 +184,7 @@ $$\mathrm{Stop}(s_t)=V_{\mathrm{done}}(s_t)\lor\mathrm{BudgetExhausted}(b_t)\lor
 
 ## 8. Concurrency：lease、join 与取消
 
-并发 job $j$ 需要 owner、lease、heartbeat 和 terminal state。令 dependency graph 为 $W=(V,E)$，节点只有在所有强依赖提交后才能启动：
+并发 job $j$ 需要 owner、lease、heartbeat 和 terminal state。令 dependency graph 为 $W=(V,E)$ ，节点只有在所有强依赖提交后才能启动：
 
 $$\mathrm{Runnable}(v)=\mathbf1[\forall u:(u,v)\in E,\ \mathrm{state}(u)=\mathrm{COMMITTED}].$$
 

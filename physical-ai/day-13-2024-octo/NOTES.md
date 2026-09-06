@@ -19,7 +19,7 @@ Octo 把 25 个 Open X-Embodiment 数据集中的约 80 万条轨迹统一成“
 - **接了哪条线：** Day09 的 RT-2 / OpenVLA 建立 VLA 总览，Day11 的 π₀ 用 flow matching 生成高频 action chunk，Day12 解释了 Diffusion Policy 的条件动作扩散与 receding horizon；Day13 把 Day12 的 diffusion readout 放进跨数据集、跨 embodiment 的通用 Transformer policy。
 - **补了哪个短板：** Day12 主要证明单任务/单平台 visuomotor diffusion 的控制收益；Octo 进一步解决输入模态、相机数量、任务条件和 action space 不同导致的接口碎片化，并把“可微调”本身当作架构目标。
 - **替代 / 分叉 / 改进：** 相比 Day09 的 action-token VLA，Octo 不把连续动作量化成 token，而保留连续 diffusion head；相比 Day11 的 π₀，Octo 规模更小、语义推理较弱，但代码、checkpoint、数据管线完整开放，且新 observation/action adapter 的边界更清楚。
-- **对之前 Day X 的直接对比：** Day12 的核心是 $p(A_t\mid O_t)$ 的多峰建模；Octo 学的是 $p(A_t\mid O_{t-H_o+1:t},c,d)$，其中 $c$ 是语言或目标图像，$d$ 是隐含在数据集/机器人分布中的 embodiment 与采集域。它没有显式输入完整动力学参数，所谓 cross-embodiment transfer 仍主要来自数据覆盖和 finetuning，而不是一个严格的 embodiment-invariant controller。
+- **对之前 Day X 的直接对比：** Day12 的核心是 $p(A_t\mid O_t)$ 的多峰建模；Octo 学的是 $p(A_t\mid O_{t-H_o+1:t},c,d)$ ，其中 $c$ 是语言或目标图像， $d$ 是隐含在数据集/机器人分布中的 embodiment 与采集域。它没有显式输入完整动力学参数，所谓 cross-embodiment transfer 仍主要来自数据覆盖和 finetuning，而不是一个严格的 embodiment-invariant controller。
 
 ## 为什么今天读它
 
@@ -38,37 +38,37 @@ Day11–14 是 VLA 专题扩展。Octo 是把三个此前分开的部件接成�
 
 $$x_{t+1}=f_d(x_t,a_t,w_t),\qquad o_t=h_d(x_t,v_t),\qquad c\in\{\ell,g\}.$$
 
-- $d\in\{1,\ldots,25\}$：预训练数据集/机器人域；不同 $d$ 对应不同动力学 $f_d$、相机 $h_d$、控制频率和动作标度。
-- $x_t\in\mathbb R^{d_x(d)}$：真实但未完全观测的机器人、物体与接触状态；维度随 embodiment 改变。
-- $o_t$：观测字典，通常含第三人称 RGB、可选腕部 RGB、可选 proprioception。Octo 预训练使用两帧历史 $H_o=2$。
-- $c$：任务条件；$\ell$ 是语言指令，$g$ 是未来目标图像。没有语言标注的数据可用 hindsight goal relabeling 构造 $g$。
-- $a_t\in\mathbb R^{d_a(d)}$：连续控制。预训练数据筛到 delta end-effector control 并对齐夹爪语义；发布配置的共享 action 维度为 7，常见解释为 3 维位置增量、3 维旋转增量和 1 维夹爪命令。下游可把 $d_a$ 换成关节位置或双臂 14 维动作。
-- $w_t,v_t$：未建模动力学扰动与传感噪声。
+- $d\in\{1,\ldots,25\}$ ：预训练数据集/机器人域；不同 $d$ 对应不同动力学 $f_d$ 、相机 $h_d$ 、控制频率和动作标度。
+- $x_t\in\mathbb R^{d_x(d)}$ ：真实但未完全观测的机器人、物体与接触状态；维度随 embodiment 改变。
+- $o_t$ ：观测字典，通常含第三人称 RGB、可选腕部 RGB、可选 proprioception。Octo 预训练使用两帧历史 $H_o=2$ 。
+- $c$ ：任务条件； $\ell$ 是语言指令， $g$ 是未来目标图像。没有语言标注的数据可用 hindsight goal relabeling 构造 $g$ 。
+- $a_t\in\mathbb R^{d_a(d)}$ ：连续控制。预训练数据筛到 delta end-effector control 并对齐夹爪语义；发布配置的共享 action 维度为 7，常见解释为 3 维位置增量、3 维旋转增量和 1 维夹爪命令。下游可把 $d_a$ 换成关节位置或双臂 14 维动作。
+- $w_t,v_t$ ：未建模动力学扰动与传感噪声。
 
-策略不是学习显式 $f_d$，而是在示范混合分布上做条件行为克隆：
+策略不是学习显式 $f_d$ ，而是在示范混合分布上做条件行为克隆：
 
 $$\pi_\theta(A_t\mid O_t,c),\qquad O_t=o_{t-H_o+1:t},\qquad A_t=[a_t,\ldots,a_{t+H_a-1}]\in\mathbb R^{H_a\times d_a}.$$
 
-Octo checkpoint 使用 $H_a=4$ 的 action chunk。部署可执行整段，也可只执行前 $H_e\le H_a$ 步后重新观测；$H_e=1$ 就是最强反馈的 receding-horizon control。真实控制频率因平台而异：论文中的 finetuning 系统约 5–15 Hz，接触丰富任务还由 1 kHz 低层 impedance controller 跟踪高层命令。
+Octo checkpoint 使用 $H_a=4$ 的 action chunk。部署可执行整段，也可只执行前 $H_e\le H_a$ 步后重新观测； $H_e=1$ 就是最强反馈的 receding-horizon control。真实控制频率因平台而异：论文中的 finetuning 系统约 5–15 Hz，接触丰富任务还由 1 kHz 低层 impedance controller 跟踪高层命令。
 
 ### 2) Token interface：把异构输入变成统一序列
 
-模态 tokenizer 将输入映射到共同 embedding 维度 $D$：
+模态 tokenizer 将输入映射到共同 embedding 维度 $D$ ：
 
 $$\mathcal T_\ell=E_\ell(\ell),\qquad \mathcal T_g=E_I(g),\qquad \mathcal T_{o,t}=E_O(o_t),$$
 
 $$E=T_\theta([\mathcal T_c,\mathcal T_{o,t-H_o+1},\ldots,\mathcal T_{o,t},\mathcal T_{R,t}];M)\in\mathbb R^{B\times L\times D}.$$
 
-- $B$ 是 batch size，预训练为 2048；$L$ 是所有 task/observation/readout token 数，随相机和 mask 改变。
-- $D=384$（Octo-Small，27M 参数）或 $768$（Octo-Base，93M 参数），两者都是 12 层 Transformer。
-- 第三人称图像缩放为 $256\times256$，经 $16\times16$ patch 得到 256 个 image tokens；腕部图像为 $128\times128$，得到 64 个 tokens；T5-base 产生 16 个 language tokens。
+- $B$ 是 batch size，预训练为 2048； $L$ 是所有 task/observation/readout token 数，随相机和 mask 改变。
+- $D=384$ （Octo-Small，27M 参数）或 \$768\$（Octo-Base，93M 参数），两者都是 12 层 Transformer。
+- 第三人称图像缩放为 $256\times256$ ，经 $16\times16$ patch 得到 256 个 image tokens；腕部图像为 $128\times128$ ，得到 64 个 tokens；T5-base 产生 16 个 language tokens。
 - $M$ 是 block-wise attention mask：观测 token 只看任务条件和当前/过去时间步；缺失语言、腕部相机等模态被 mask；readout token $\mathcal T_{R,t}$ 可以读取上下文，却不反向污染输入 token。
 
 系统含义是：新相机只需加 tokenizer/position embedding，新动作空间只需加 readout head；主体 Transformer 可继承预训练权重。这里的“通用”首先是接口组合性，不等于任意新形态都可零样本工作。
 
 ### 3) Diffusion action objective
 
-令干净动作块为 $A_t^0\in\mathbb R^{B\times H_a\times d_a}$，噪声步 $k\in\{1,\ldots,K\}$，$K=20$。前向加噪：
+令干净动作块为 $A_t^0\in\mathbb R^{B\times H_a\times d_a}$ ，噪声步 $k\in\{1,\ldots,K\}$ ， $K=20$ 。前向加噪：
 
 $$A_t^k=\sqrt{\bar\alpha_k}A_t^0+\sqrt{1-\bar\alpha_k}\,\epsilon,\qquad \epsilon\sim\mathcal N(0,I).$$
 
@@ -77,7 +77,7 @@ Transformer 的 readout embedding $e_t\in\mathbb R^{B\times D}$ 作为条件，�
 $$\mathcal L_{\text{Octo}}(\theta)=\mathbb E_{d\sim q,\,(O_t,c,A_t^0)\sim\mathcal D_d,\,k,\epsilon}\left[\left\|\epsilon-\epsilon_\theta(A_t^k,e_t,k)\right\|_2^2\right].$$
 
 - $q(d)$ 是人工调过权重的 25 数据集 mixture；更丰富的数据集加权，过度重复的数据集降权。
-- $\epsilon_\theta$ 的输出与 $A_t^k$ 同形状，为 $B\times H_a\times d_a$。
+- $\epsilon_\theta$ 的输出与 $A_t^k$ 同形状，为 $B\times H_a\times d_a$ 。
 - 训练用 cosine noise schedule。微调时仍用同一 objective，并更新全模型；论文报告 full finetuning 优于只冻结/更新部分参数。
 
 推理先对视觉/语言上下文跑一次大 Transformer，再只在小 action head 内做 20 步去噪：
@@ -96,7 +96,7 @@ $$\min_\theta\;\sum_{d=1}^{25}q_d\,\mathbb E_{\tau\sim\mathcal D_d}\left[\mathca
 
 $$\theta^\star=\arg\min_\theta\;\mathbb E_{\tau\sim\mathcal D_{d^\star}}[\mathcal L_{\text{Octo}}(\theta)],\qquad \theta\leftarrow\theta_{\text{pre}}.$$
 
-迁移收益可理解为：backbone 已学到视觉-任务-动作的共享低维结构，下游只需校准新传感器、动作坐标与局部任务分布。但若 $f_{d^\star}$、技能支持集或 observation semantics 超出预训练覆盖，低 loss 并不保证闭环成功。
+迁移收益可理解为：backbone 已学到视觉-任务-动作的共享低维结构，下游只需校准新传感器、动作坐标与局部任务分布。但若 $f_{d^\star}$ 、技能支持集或 observation semantics 超出预训练覆盖，低 loss 并不保证闭环成功。
 
 ### 5) 假设与数学没有覆盖的真实误差
 
@@ -148,7 +148,7 @@ $$\theta^\star=\arg\min_\theta\;\mathbb E_{\tau\sim\mathcal D_{d^\star}}[\mathca
 
 - **没看懂 / 想深挖：** 如果把数据 mixture 权重 $q_d$ 从手调变成基于 gradient conflict、coverage 或 downstream validation 的自适应优化，能否在不增加总轨迹数的情况下改善 novel-scene / novel-skill transfer？这与 model-aware data curation 的 gradient-space 视角可以直接连接。
 - **如果要复现 / 小规模试，第一个实验做什么？** 不直接复现 1.2TB 预训练；先用官方 checkpoint 跑 inference shape smoke test，打印 `observation/task/action` spec，再用一个小 RLDS 数据集做 full 与 head-only finetuning，对比 validation diffusion loss、闭环 success、动作 jerk 和 p95 inference latency。
-- **下一步：** Day14 读 $\pi_{0.5}$，重点看 open-world generalization、co-training 与 knowledge insulation 如何处理 Octo 暴露的新场景/新技能短板。
+- **下一步：** Day14 读 $\pi_{0.5}$ ，重点看 open-world generalization、co-training 与 knowledge insulation 如何处理 Octo 暴露的新场景/新技能短板。
 
 ## 原文金句 (1-2句)
 > “Our evaluation highlights the utility of scale and flexibility: our best models are those trained on the widest data mixtures, with the least restrictive inductive biases, and with policy objectives that can fit the diversity of behaviors in the pretraining data.”
@@ -164,8 +164,8 @@ $$\theta^\star=\arg\min_\theta\;\mathbb E_{\tau\sim\mathcal D_{d^\star}}[\mathca
 
 ## 连接
 - 上一篇: Day12 — Diffusion Policy（条件动作扩散 + receding-horizon control）
-- 下一篇预告: Day14 — $\pi_{0.5}$（open-world VLA + co-training / knowledge insulation）
-- 相关: Day09 RT-2 / OpenVLA；Day11 $\pi_0$；Day15 Open X-Embodiment / RT-X
+- 下一篇预告: Day14 — $\pi_{0.5}$ （open-world VLA + co-training / knowledge insulation）
+- 相关: Day09 RT-2 / OpenVLA；Day11 $\pi_0$ ；Day15 Open X-Embodiment / RT-X
 
 ## 参考链接
 - Paper: https://arxiv.org/abs/2405.12213

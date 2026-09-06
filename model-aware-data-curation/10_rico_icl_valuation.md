@@ -45,7 +45,7 @@ $$\mathrm{global\mbox{-}RICo}(T_j)=\frac1{|D_a|}\sum_{S_i\in D_a}\mathrm{task\mb
 若有 $m$ 条候选和 $n$ 条 assessment samples，直接打分需要 $O(nm)$ 次推理。RICo 的扩展方式是：
 
 1. 只对候选子集计算真实 global-RICo；
-2. 将 top-$K\%$ 标为高贡献数据；
+2. 将 top- $K\%$ 标为高贡献数据；
 3. 用 LoRA 训练轻量 selection classifier；
 4. 对完整候选池做 $O(m)$ 线性扫描。
 
@@ -60,7 +60,7 @@ $$\mathrm{global\mbox{-}RICo}(T_j)=\frac1{|D_a|}\sum_{S_i\in D_a}\mathrm{task\mb
 | Nuggets / ICP | ICL 中的粗粒度比较 | demonstration 是否有帮助 | RICo 最直接的方法前驱 |
 | SuperFiltering / IFD | 样本自身条件难度 | 哪些数据更难、可能更可学 | intrinsic difficulty，不等于 contribution |
 | DEITA | quality × complexity × diversity | 什么样的数据看起来更好 | heuristic 属性，与行为干预互补 |
-| Vendi / G-Vendi / SPICE | 集合覆盖与协调 | top-$k$ 是否重复或互相抵消 | RICo 之后的集合级选择 |
+| Vendi / G-Vendi / SPICE | 集合覆盖与协调 | top- $k$ 是否重复或互相抵消 | RICo 之后的集合级选择 |
 
 一句话：**LESS 更接近真实训练机制但需要梯度；RICo 更轻、更易迁移到黑盒/弱白盒设置，但 ICL→SGD 的代理错配更大。**
 
@@ -78,9 +78,9 @@ $$\mathrm{global\mbox{-}RICo}(T_j)=\frac1{|D_a|}\sum_{S_i\in D_a}\mathrm{task\mb
 
 等长随机 context 主要修正长度效应，不能消除模板、语言、格式、主题和答案风格相似性造成的 PPL 改善。
 
-### 5.4 单样本 top-$k$ 会重复
+### 5.4 单样本 top- $k$ 会重复
 
-RICo 给的是 pointwise value。若高分样本都来自同一种 Python 算法题，top-$k$ 仍可能高度冗余。应在 RICo shortlist 后增加 Vendi / G-Vendi coverage，必要时再加 protected-set conflict gate。
+RICo 给的是 pointwise value。若高分样本都来自同一种 Python 算法题，top- $k$ 仍可能高度冗余。应在 RICo shortlist 后增加 Vendi / G-Vendi coverage，必要时再加 protected-set conflict gate。
 
 ## 6. Coding data 的可证伪实验
 
@@ -91,7 +91,7 @@ RICo 给的是 pointwise value。若高分样本都来自同一种 Python 算法
 3. 从各方法的高/中/低分区间抽样，做多个固定 token-budget 的小规模 SFT；
 4. 在严格去污染的 held-out tasks 上记录 pass-rate delta；
 5. 比较三种 score 与真实 $\Delta\text{pass-rate}$ 的 rank correlation，并按任务桶检查偏差；
-6. 对 RICo top-$k$ 再加入 coverage constraint，测冗余减少是否带来额外收益。
+6. 对 RICo top- $k$ 再加入 coverage constraint，测冗余减少是否带来额外收益。
 
 ```text
 quality / provenance / decontamination gate

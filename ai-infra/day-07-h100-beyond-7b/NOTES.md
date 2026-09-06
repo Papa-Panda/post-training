@@ -18,7 +18,7 @@ Semantic tests verify:
 
 - the default mixed-precision Adam example is 16 bytes/parameter;
 - 7B unsharded state is 112 decimal GB under that assumption;
-- resident state scales as $1/G$;
+- resident state scales as $1/G$ ;
 - removing a master copy changes the accounting to 12 bytes/parameter;
 - largest-unit materialization adds only the non-resident parameter shards;
 - invalid parameter/rank/layer inputs fail.

@@ -20,7 +20,7 @@ Z.ai 的 GLM-5.2 官方发布文说明，long-horizon task 会产生很长 execu
 
 $$A_i^{grp}=\frac{R_i-\bar R}{s_R}$$
 
-compaction 后，一个原始 rollout 可能映射为 $K_i$ 个 trainable segments，每段长度为 $L_{i,k}$。若 $K_i$ 与 $L_{i,k}$ 在 rollouts 间差异很大，就出现三个问题：
+compaction 后，一个原始 rollout 可能映射为 $K_i$ 个 trainable segments，每段长度为 $L_{i,k}$ 。若 $K_i$ 与 $L_{i,k}$ 在 rollouts 间差异很大，就出现三个问题：
 
 1. **comparison unit 不清楚**：是比较原始完整 rollout、segment，还是某个 compaction boundary？
 2. **group cardinality 不齐**：不同 rollout 贡献不同数量的 segments，强行配组会丢数据或重复加权。
@@ -56,7 +56,7 @@ $$\widehat A_t=\sum_{l\ge 0}(\gamma\lambda)^l\left(r_{t+l}^{env}+\gamma V(h_{t+l
 
 在自己的任务上，不先贴算法标签，先做三组测量：
 
-1. **segment heterogeneity**：$K_i$ 分布、$L_{i,k}$ 分布、每个原始 rollout 的总 token 权重；
+1. **segment heterogeneity**： $K_i$ 分布、 $L_{i,k}$ 分布、每个原始 rollout 的总 token 权重；
 2. **critic viability**：按 horizon bucket 的 value error / explained variance，以及 truncation bootstrap 敏感性；
 3. **group viability**：non-degenerate rate、组内 reward dispersion、为凑有效 group 消耗的额外 generated tokens。
 

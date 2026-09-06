@@ -11,7 +11,7 @@
 
 ## Example with explicit assumptions
 
-For $p=8$, $S=1$ decimal GB, $B_{effective}=450$ GB/s one-way, and $\alpha=2\ \mu s$ per step:
+For $p=8$ , $S=1$ decimal GB, $B_{effective}=450$ GB/s one-way, and $\alpha=2\ \mu s$ per step:
 
 $$V=2\frac{7}{8}(1\ \mathrm{GB})=1.75\ \mathrm{GB}.$$
 

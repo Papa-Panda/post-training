@@ -8,14 +8,14 @@
 
 ## 构造 5 步
 
-1. **Collect**: n≈5000+ Models × d 题的 item-wise accuracy 矩阵 $X \in \{0,1\}^{n\times d}$，来源 OpenLLM Leaderboard
+1. **Collect**: n≈5000+ Models × d 题的 item-wise accuracy 矩阵 $X \in \{0,1\}^{n\times d}$ ，来源 OpenLLM Leaderboard
 2. **Variance filter**: 去掉极低方差题 (人人都对/错)
 3. **CV subsample 350**: 每 benchmark 随机抽 350 题做 cross-validated 预筛，保证 domain 覆盖
 4. **IRT fit**: 拟合多种 IRT variants:
-   - 2PL: $P_{ij}= \sigma(a_j(\theta_i-b_j))$, 3PL/4PL 加猜测 $c_j$ 和上界 $d_j$
+   - 2PL: $P_{ij}= \sigma(a_j(\theta_i-b_j))$ , 3PL/4PL 加猜测 $c_j$ 和上界 $d_j$
    - a_j = 辨识度 discrimination, b_j = 难度 difficulty
    - Fisher Information $I_j(\theta)=a_j^2 P_j(1-P_j)/(1-c)$ 在 $\theta$ 附近高的题更 informativo
-5. **Information filtering + GAM**: 按 $I_j(\hat\theta)$ 选 top，留每 benchmark ~100-200 题，总计 858。用 GAM $y = s(\theta)$ 从潜变量重建原始分数，并做 factor analysis 找 single underlying factor $g$.
+5. **Information filtering + GAM**: 按 $I_j(\hat\theta)$ 选 top，留每 benchmark ~100-200 题，总计 858。用 GAM $y = s(\theta)$ 从潜变量重建原始分数，并做 factor analysis 找 single underlying factor $g$ .
 
 ## 结果 (median RMSE)
 
@@ -29,11 +29,11 @@
 | 6 科合成总分 | 858 | **0.58% RMSE** | — |
 | 潜因子 $g$ vs 总分 | 1 维 | **Spearman r=0.94** | — |
 
-> 点分估计 (point scores) 和能力估计 (ability estimator $\hat\theta$) 都提供，$\hat\theta$ 对短子集更鲁棒。
+> 点分估计 (point scores) 和能力估计 (ability estimator $\hat\theta$ ) 都提供， $\hat\theta$ 对短子集更鲁棒。
 
 ## Adaptive Testing 第2版
 
-metabench v2 支持自适应选题：先用难易中等的 seed 题估 $\theta$，再按 $I(\theta)$ 顺序挑下一题，≈20 题内收敛到 within 1% error，适合在线持续监控。
+metabench v2 支持自适应选题：先用难易中等的 seed 题估 $\theta$ ，再按 $I(\theta)$ 顺序挑下一题，≈20 题内收敛到 within 1% error，适合在线持续监控。
 
 ## Hands-on
 

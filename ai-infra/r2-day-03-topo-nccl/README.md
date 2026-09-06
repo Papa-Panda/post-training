@@ -29,12 +29,12 @@ $$T\approx n_{\mathrm{steps}}\alpha+\frac{V}{B_{\mathrm{effective}}}.$$
 - $B_{\mathrm{effective}}$ is effective one-way payload bandwidth under a stated assumption or measurement;
 - protocol overhead, channels, chunking, contention, routing, and overlap are omitted.
 
-For 8 ranks and a 1 GB payload, ring all-reduce sends 1.75 GB per rank in 14 steps. If one explicitly assumes 450 GB/s effective one-way bandwidth and $2\ \mu s$ startup per step, the model gives $3.917$ ms. That is an estimate, not an H100 or NCCL measurement.
+For 8 ranks and a 1 GB payload, ring all-reduce sends 1.75 GB per rank in 14 steps. If one explicitly assumes 450 GB/s effective one-way bandwidth and $2\ \mu s$ startup per step, the model gives \$3.917\$ ms. That is an estimate, not an H100 or NCCL measurement.
 
 ## 2. Units before numbers
 
 - `400 Gb/s` is a bit rate: the decimal line-rate conversion is `50 GB/s` before encoding and protocol overhead.
-- `GB/s` and `GiB/s` differ by a factor of $10^9/2^{30}$.
+- `GB/s` and `GiB/s` differ by a factor of $10^9/2^{30}$ .
 - A vendor's “total” or bidirectional NVLink number must not be inserted as one-way effective ring bandwidth without explaining the conversion.
 - NCCL's algorithm bandwidth and bus bandwidth are reporting conventions; compare like with like.
 

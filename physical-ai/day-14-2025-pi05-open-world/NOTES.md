@@ -35,12 +35,12 @@
 
 ## 数学视角：统一成一个双层时间尺度的条件生成控制问题
 
-把 Day11 的 POMDP 扩展成**分层（options/层次化）POMDP**：观测 $o_t=[I_t,\ell_t,q_t]$ 不变，语言指令 $\ell$ 变成长程任务（如"打扫厨房"），模型内部生成一个慢变量——语义子任务 $s_t$（如"拿起海绵"、"擦桌子"），再由快变量动作块 $A_t$ 落实到关节。
+把 Day11 的 POMDP 扩展成**分层（options/层次化）POMDP**：观测 $o_t=[I_t,\ell_t,q_t]$ 不变，语言指令 $\ell$ 变成长程任务（如"打扫厨房"），模型内部生成一个慢变量——语义子任务 $s_t$ （如"拿起海绵"、"擦桌子"），再由快变量动作块 $A_t$ 落实到关节。
 
 ### 1) State / observation / action / objective
 
-- 慢层 policy：$\pi^H(s_t\mid o_t,\ell)$，输出为**自然语言子任务 token 序列** $s_t=(w_1,\ldots,w_M)$，时间尺度秒级（每个子任务持续数秒到数十秒）。
-- 快层 policy：$\pi^L(A_t\mid o_t,\ell,s_t)$，输出动作块 $A_t\in\mathbb R^{H\times d_a}$（沿用 Day11 的 $H=50$ 块），时间尺度毫秒级，移动操作平台在 20–50 Hz 执行。
+- 慢层 policy： $\pi^H(s_t\mid o_t,\ell)$ ，输出为**自然语言子任务 token 序列** $s_t=(w_1,\ldots,w_M)$ ，时间尺度秒级（每个子任务持续数秒到数十秒）。
+- 快层 policy： $\pi^L(A_t\mid o_t,\ell,s_t)$ ，输出动作块 $A_t\in\mathbb R^{H\times d_a}$ （沿用 Day11 的 $H=50$ 块），时间尺度毫秒级，移动操作平台在 20–50 Hz 执行。
 - 联合行为克隆目标同时匹配两个条件分布：
 
 $$\pi_\theta(s_t,A_t\mid o_t,\ell)\approx p_{\mathcal D}(s_t,A_t\mid o_t,\ell)=p(s_t\mid o_t,\ell)\,p(A_t\mid o_t,\ell,s_t).$$
@@ -53,10 +53,10 @@ $$\pi_\theta(s_t,A_t\mid o_t,\ell)\approx p_{\mathcal D}(s_t,A_t\mid o_t,\ell)=p
 
 $$\mathcal L(\theta)=\sum_{k\in\{robot,subtask,web,det\}} w_k\,\mathcal L_k(\theta).$$
 
-- $\mathcal L_{robot}$：低层动作行为克隆，Day11 的 flow matching loss $\mathcal L_{FM}$（连续动作专家）与 FAST 离散 token 的交叉熵 loss 并存，对应 IV-B 的 discrete & continuous 结合：同一个动作块既被 tokenize 进语言词表参与 VLM 训练，又被 flow expert 拟合为连续分布。
-- $\mathcal L_{subtask}$：给定观测和总任务指令，预测语义子任务的语言建模 loss——$\mathrm{CE}(s_t\mid o_t,\ell)$，标准的 next-token loss。它把"任务分解"变成可学习的显式中间表示。
-- $\mathcal L_{web}$：常规 VLM 任务（caption / VQA）的 LM loss，**绝缘子**的作用：防止大量机器人动作数据把 PaliGemma 的 Internet-scale 语义"灾难性遗忘"掉。这是 knowledge insulation 的第一层含义——配方层面的绝缘，用混合比例而不是冻结参数来保留知识。
-- $\mathcal L_{det}$：目标检测类监督，提供显式的空间 grounding 信号，连接视觉语义和可执行区域。
+- $\mathcal L_{robot}$ ：低层动作行为克隆，Day11 的 flow matching loss $\mathcal L_{FM}$ （连续动作专家）与 FAST 离散 token 的交叉熵 loss 并存，对应 IV-B 的 discrete & continuous 结合：同一个动作块既被 tokenize 进语言词表参与 VLM 训练，又被 flow expert 拟合为连续分布。
+- $\mathcal L_{subtask}$ ：给定观测和总任务指令，预测语义子任务的语言建模 loss—— $\mathrm{CE}(s_t\mid o_t,\ell)$ ，标准的 next-token loss。它把"任务分解"变成可学习的显式中间表示。
+- $\mathcal L_{web}$ ：常规 VLM 任务（caption / VQA）的 LM loss，**绝缘子**的作用：防止大量机器人动作数据把 PaliGemma 的 Internet-scale 语义"灾难性遗忘"掉。这是 knowledge insulation 的第一层含义——配方层面的绝缘，用混合比例而不是冻结参数来保留知识。
+- $\mathcal L_{det}$ ：目标检测类监督，提供显式的空间 grounding 信号，连接视觉语义和可执行区域。
 
 **Hybrid multi-modal examples**：一个训练样本可以同时包含图像观测、语言命令、目标检测框、语义子任务、低层动作——即同一个序列里混排 $\mathcal L_{subtask}$ 和 $\mathcal L_{robot}$ 的监督。这就是为什么一个 backbone 能同时干规划和执行：它不是两个模型，而是一个序列模型在不同 token 位置承担不同角色。
 
@@ -64,14 +64,14 @@ $$\mathcal L(\theta)=\sum_{k\in\{robot,subtask,web,det\}} w_k\,\mathcal L_k(\the
 
 - **Pre-training**：宽混合（上述四类）上训练出通用底座，目标是同时拥有 web 语义、跨 embodiment 运动先验和子任务分解能力。
 - **Post-training**：只在少量高质量 in-domain 数据（目标平台的高质量示范）上微调，沿用 Day11 π₀的思路；post-training 混合刻意**变窄**，只做适配不做重写——这就是阶段层面的绝缘：用数据范围而非参数冻结来隔离"学新本领"和"忘旧知识"。
-- 符号直觉：设预训练后参数为 $\theta_0$，post-training 目标是找 $\Delta\theta$ 使 in-domain 风险最小而 out-of-domain 风险不增；窄混合 + 短训练 + 小学习率就是把 $\|\Delta\theta\|$ 限制在"适配"量级的工程近似。
+- 符号直觉：设预训练后参数为 $\theta_0$ ，post-training 目标是找 $\Delta\theta$ 使 in-domain 风险最小而 out-of-domain 风险不增；窄混合 + 短训练 + 小学习率就是把 $\|\Delta\theta\|$ 限制在"适配"量级的工程近似。
 
 ### 4) 测试时高层推理（high-level inference）
 
-部署时模型先自回归生成子任务 $s_t\sim\pi^H(\cdot\mid o_t,\ell)$，再把 $s_t$ 作为额外条件生成动作块。这带来两个数学效应：
+部署时模型先自回归生成子任务 $s_t\sim\pi^H(\cdot\mid o_t,\ell)$ ，再把 $s_t$ 作为额外条件生成动作块。这带来两个数学效应：
 
-1. **方差分解**：$\mathrm{Var}(A_t\mid o_t,\ell)=\mathbb E_{s_t}[\mathrm{Var}(A_t\mid o_t,\ell,s_t)]+\mathrm{Var}_{s_t}(\mathbb E[A_t\mid o_t,\ell,s_t])$。显式子任务把长程任务的多峰性（先擦桌子还是先收盘子）搬到离散语义空间处理，低层只需拟合"给定子任务"的更单峰的动作分布，flow matching 更容易学准。
-2. **可干预性**：$s_t$ 是人类可读、可检查、可改写的中间变量，长程任务失败时可以定位是"子任务分解错了"还是"执行错了"——这是从黑盒端到端向可调试系统迈的一步。
+1. **方差分解**： $\mathrm{Var}(A_t\mid o_t,\ell)=\mathbb E_{s_t}[\mathrm{Var}(A_t\mid o_t,\ell,s_t)]+\mathrm{Var}_{s_t}(\mathbb E[A_t\mid o_t,\ell,s_t])$ 。显式子任务把长程任务的多峰性（先擦桌子还是先收盘子）搬到离散语义空间处理，低层只需拟合"给定子任务"的更单峰的动作分布，flow matching 更容易学准。
+2. **可干预性**： $s_t$ 是人类可读、可检查、可改写的中间变量，长程任务失败时可以定位是"子任务分解错了"还是"执行错了"——这是从黑盒端到端向可调试系统迈的一步。
 
 代价：慢层推理增加延迟，且子任务预测错误会级联到执行（error compounding），论文 V-E 用消融说明净收益为正。
 
@@ -85,7 +85,7 @@ $$\mathcal L(\theta)=\sum_{k\in\{robot,subtask,web,det\}} w_k\,\mathcal L_k(\the
 
 - 公式假设示范数据里的子任务标注 $s_t$ 是"正确分解"，但人类标注的分解方式本身有偏（不同人分解粒度不同），模型学的是标注者的分解习惯而非最优分解。
 - 混合权重 $w_k$ 是经验调参，没有理论保证最优；web 数据占比过高会稀释动作精度，过低则语义遗忘——这是个没有闭式解的 trade-off。
-- 数学框架不覆盖真实家庭的**长尾物理**：湿滑台面、异形餐具、光照剧变下的感知失效；也不覆盖移动底盘的定位漂移（AMCL 级误差）如何污染 $q_t$。
+- 数学框架不覆盖真实家庭的**长尾物理**：湿滑台面、异形餐具、光照剧变下的感知失效；也不覆盖移动底盘的定位漂移（AMCL 级误差）如何污染 $q_t$ 。
 - "未见过的家"仍是发达国家中产家庭的分布；对极端杂乱、非标准家具的泛化未被评估。
 
 ## 核心

@@ -17,7 +17,7 @@ $$y=\sum_{i=0}^{N-1}x_i$$
 无论并行结构怎样，数学上都需要 $N-1$ 次有效加法，并至少读取 $N$ 个输入。优化的核心不是消灭加法，而是改变汇合位置：
 
 1. **global atomic per element**：每个线程直接 `atomicAdd(output, x[i])`；代码最简单，但对同一个地址有 $N$ 次原子更新。
-2. **shared-memory tree**：每个 block 先在 shared memory 做树形归约，只由 block leader 做一次 global atomic；原子数约为 $\lceil N/T\rceil$。
+2. **shared-memory tree**：每个 block 先在 shared memory 做树形归约，只由 block leader 做一次 global atomic；原子数约为 $\lceil N/T\rceil$ 。
 3. **warp shuffle**：先在各 warp 内通过 `__shfl_down_sync` 在 registers 间交换，再把每个 warp 的一个 partial 写入 shared memory，最后由第一个 warp 收尾；仍是一 block 一次 atomic，但只需一次 block barrier。
 
 这里 $T$ 是 threads per block。原子数与 barrier 数是结构计数，不是性能测量。
@@ -33,7 +33,7 @@ offset=2: lane0 = 6 + (3 + 7) = 16
 offset=1: lane0 = 16 + (2 + 4 + 6 + 8) = 36
 ```
 
-lane 0 最终得到 $36$。对真实 32-lane warp，offset 依次为 $16,8,4,2,1$，关键路径是 5 轮 shuffle-add。
+lane 0 最终得到 \$36\$。对真实 32-lane warp，offset 依次为 \$16,8,4,2,1\$，关键路径是 5 轮 shuffle-add。
 
 再看 $N=64,T=64$ 的结构账：
 
@@ -53,7 +53,7 @@ lane 0 最终得到 $36$。对真实 32-lane warp，offset 依次为 $16,8,4,2,1
 
 ### 3.2 Shared-memory binary tree
 
-一个 block 的 $T$ 个值写进 shared memory，然后 stride 取 $T/2,T/4,\ldots,1$：
+一个 block 的 $T$ 个值写进 shared memory，然后 stride 取 $T/2,T/4,\ldots,1$ ：
 
 $$s_t \leftarrow s_t+s_{t+\text{stride}},\qquad t<\text{stride}$$
 

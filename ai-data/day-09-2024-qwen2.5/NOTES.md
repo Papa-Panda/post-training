@@ -25,7 +25,7 @@
 ## 为什么今天读它
 - coding data：5.5T code 专用数据集构造来自 Qwen2.5-Coder：GitHub 公有库 + web 爬的 code-related texts，file-level + repo-level pretraining，弱模型分类器/ scorer 去低质，FIM 风格、execution 过滤类比 DeepSeek 的 PSM 可直接抄。
 - SFT：1M+ 样本，real-world + synthetic（code-focused LLM 生成），覆盖生成/补全/推理/修复广度，配比 balancing coding/general/math 防止 30% code 掉 MMLU。
-- RL data：多阶段 RL 提升偏好对齐、长文本、多轮 agent/tool use，RM 指导采样/过滤，类似 RLHF 的 reward flywheel，为 Agentic RL Infra 的 $/useful-rollout 提供 data 侧信号。
+- RL data：多阶段 RL 提升偏好对齐、长文本、多轮 agent/tool use，RM 指导采样/过滤，类似 RLHF 的 reward flywheel，为 Agentic RL Infra 的 \$/useful-rollout 提供 data 侧信号。
 
 ## 3 问回顾（Day 9 原题）
 1. Qwen2.5 把 pre-training 从 7T 拉到 18T，具体怎么做 file-level + repo-level code recall 和弱模型分类器过滤低质？和 Llama 3 的 5 级瀑布 + DeepSeek 的 0.90 MinHash 比，去重/质量栅栏有何不同，哪个更省算力？

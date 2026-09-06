@@ -12,21 +12,21 @@
 
 NVLink 是 point-to-point 高速链路；NVSwitch 提供基于 NVLink 的交换结构；NCCL 是选择通信路径和算法的软件库。三者不能互换使用。
 
-## 2. $\alpha$–$\beta$ 模型
+## 2. $\alpha$ – $\beta$ 模型
 
 传输 $n$ bytes 的简化成本：
 
 $$T(n)=\alpha+n\beta,$$
 
-其中 $\alpha$ 是每步 latency，$\beta=1/B$ 是每 byte 时间。真实系统还有协议、chunk、拓扑、并发和 reduction compute。
+其中 $\alpha$ 是每步 latency， $\beta=1/B$ 是每 byte 时间。真实系统还有协议、chunk、拓扑、并发和 reduction compute。
 
 ### Ring all-reduce
 
-reduce-scatter + all-gather，各有 $p-1$ steps，每步约传 $n/p$：
+reduce-scatter + all-gather，各有 $p-1$ steps，每步约传 $n/p$ ：
 
 $$T_{\mathrm{ring}}\approx2(p-1)\alpha+2\frac{p-1}{p}n\beta.$$
 
-优点：大消息时每 rank 的有效发送量趋近 $2n$，带宽利用率高。缺点：steps 随 $p$ 线性增长，小消息 latency 较差。
+优点：大消息时每 rank 的有效发送量趋近 $2n$ ，带宽利用率高。缺点：steps 随 $p$ 线性增长，小消息 latency 较差。
 
 ### Tree all-reduce
 
@@ -95,7 +95,7 @@ $$n^*\approx\frac{p\alpha}{\beta}.$$
 
 ## 8. 可运行模型
 
-`collective_cost()` 提供 ring/tree 的 $\alpha$–$\beta$ 教学模型，并在 tests 中验证 8-rank ring all-reduce 每 rank 单向 wire volume 为 $2(7/8)n$。它不模拟 topology/contention/protocol。
+`collective_cost()` 提供 ring/tree 的 $\alpha$ – $\beta$ 教学模型，并在 tests 中验证 8-rank ring all-reduce 每 rank 单向 wire volume 为 $2(7/8)n$ 。它不模拟 topology/contention/protocol。
 
 ## 导航
 

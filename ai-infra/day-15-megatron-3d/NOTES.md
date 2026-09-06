@@ -52,7 +52,7 @@ CPU单进程跑通：所有上面数字来自 `python3 megatron_3d_sim.py` 实�
 | rollout失败 | oom_kv∈5类，70B OOM→SLO1失败 | 70B G2 oom True |
 
 ## 一句收敛
-“Day14 1.2576把$/useful算清但只在模型能装进显存时有效，70B 182GB→TP4+PP2 25GB是PUE的前提；Day13 Tj 90.5°C 2.5%节流用TP打散bust避免单卡热点，PP bubble 12%用Day08 async逻辑填，checkpoint分片复用Day07。”
+“Day14 1.2576把\$/useful算清但只在模型能装进显存时有效，70B 182GB→TP4+PP2 25GB是PUE的前提；Day13 Tj 90.5°C 2.5%节流用TP打散bust避免单卡热点，PP bubble 12%用Day08 async逻辑填，checkpoint分片复用Day07。”
 
 ## 代码
 - `megatron_3d_sim.py` CPU单进程 ok（torch缺失环境 gloo待补，逻辑已写gloo分支），待H100补 max_memory_allocated + NVML Tj + TP BW

@@ -13,7 +13,7 @@
 
 ## Connection to Prev 的实质
 
-Day06 给了理论 roofline（$I^*=20$ FLOP/byte，vector add 只能摸到带宽屋顶）；Day11 给了 fused 的流量账（$6N\to2N$，theoretical estimate）。Day12 把"理论"和"测量"接起来：
+Day06 给了理论 roofline（ $I^*=20$ FLOP/byte，vector add 只能摸到带宽屋顶）；Day11 给了 fused 的流量账（ $6N\to2N$ ，theoretical estimate）。Day12 把"理论"和"测量"接起来：
 
 1. **Systems 验证 fuse 真生效**：时间线上 kernel 个数从 4 个变成 1 个；`--trace=cuda,nvtx,osrt` 抓一次 train iter，看 GPU busy% 和 gap 归因。
 2. **Compute 验证 bound 判断**：fused kernel 的 SpeedOfLight 应该呈现 memory-bound 形状（DRAM SOL% 高、SM SOL% 低），roofline 点落在带宽屋顶附近——如果 Day06 的模型是对的。
@@ -21,13 +21,13 @@ Day06 给了理论 roofline（$I^*=20$ FLOP/byte，vector add 只能摸到带宽
 
 ## 可手算小例子（N=8 FP32 vector add，H100 SXM）
 
-$bytes=96$，$flops=8$，$AI=1/12\approx0.0833$；$I^*=67/3.35=20$ → memory-bound；
+$bytes=96$ ， $flops=8$ ， $AI=1/12\approx0.0833$ ； $I^*=67/3.35=20$ → memory-bound；
 
 $$P = 0.0833\times3.35 = 0.2792\ \text{TFLOP/s},\quad SOL_{flops}=0.2792/67=0.417\%,\quad t_{min}=96/3.35\times10^{12}\approx28.7\ \text{ps}$$
 
-对照组（compute-bound）：$flops=800$、$bytes=8$ → $AI=100$，$SOL_{flops}=100\%$，$SOL_{bw}=20\%$。两组形状都进了测试（`test_sol_report_vecadd_n8`、`test_compute_bound_contrast`）。
+对照组（compute-bound）： $flops=800$ 、 $bytes=8$ → $AI=100$ ， $SOL_{flops}=100\%$ ， $SOL_{bw}=20\%$ 。两组形状都进了测试（`test_sol_report_vecadd_n8`、`test_compute_bound_contrast`）。
 
-FP16 tensor ridge：$989/3.35\approx295.2$ FLOP/byte——Tensor Core 把 ridge 推高约 15 倍，喂饱它需要多得多的片上复用（呼应 Day06 的 Tensor Core 备注）。
+FP16 tensor ridge： $989/3.35\approx295.2$ FLOP/byte——Tensor Core 把 ridge 推高约 15 倍，喂饱它需要多得多的片上复用（呼应 Day06 的 Tensor Core 备注）。
 
 ## 命令速查（参考，未在本环境执行）
 

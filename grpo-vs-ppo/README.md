@@ -41,7 +41,7 @@ Token ratio uses the behavior snapshot:
 
 $$\rho_{i,t}=\frac{\pi_\theta(y_{i,t}\mid q,y_{i,<t})}{\pi_b(y_{i,t}\mid q,y_{i,<t})}$$
 
-PPO-style clipped token surrogate, with $c(x,l,u)=\min(\max(x,l),u)$:
+PPO-style clipped token surrogate, with $c(x,l,u)=\min(\max(x,l),u)$ :
 
 $$s(\rho,A)=\min(\rho A,c(\rho,1-\epsilon_l,1+\epsilon_h)A)$$
 

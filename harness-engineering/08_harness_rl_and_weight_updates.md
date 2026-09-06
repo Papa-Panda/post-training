@@ -4,17 +4,17 @@
 
 - 核心论文：[SIA](https://arxiv.org/abs/2605.27276v2) · [Continual Harness](https://arxiv.org/abs/2605.09998) · [Harness Updating Is Not Harness Benefit](https://arxiv.org/abs/2605.30621)
 - 相关目录：[`grpo-vs-ppo/`](../grpo-vs-ppo/README.md) · [`vllm-rollout/`](../vllm-rollout/README.md) · [`ai-infra/`](../ai-infra/README.md) · [`model-aware-data-curation/`](../model-aware-data-curation/README.md)
-- 本章目标：明确 harness 如何定义 rollout distribution、credit assignment 和数据 provenance；明确什么时候应该改 $h$、改 $\theta$，或两者都不改。
+- 本章目标：明确 harness 如何定义 rollout distribution、credit assignment 和数据 provenance；明确什么时候应该改 $h$ 、改 $\theta$ ，或两者都不改。
 
 ## 1. Harness 改变 RL 的环境
 
-给定任务 $x$，harness-conditioned rollout：
+给定任务 $x$ ，harness-conditioned rollout：
 
 $$\tau\sim p_{\theta,h}(\tau\mid x)=p(s_0\mid x,h)\prod_{t=0}^{T-1}\pi_\theta(a_t\mid c_t)\,p_h(s_{t+1}\mid s_t,a_t),$$
 
 $$c_t=C_h(s_{\le t},x).$$
 
-这里沿用 README 的约定，把固定 control plane $q$ 从 $p_{\theta,h;q}$ 中省略；改变 permission、budget 或 verifier 也会改变实际轨迹，因此跨实验必须固定并记录 $q$。
+这里沿用 README 的约定，把固定 control plane $q$ 从 $p_{\theta,h;q}$ 中省略；改变 permission、budget 或 verifier 也会改变实际轨迹，因此跨实验必须固定并记录 $q$ 。
 
 因此 harness 同时改变：
 
@@ -44,7 +44,7 @@ per-event observation, proposal, authorized action, result
 terminal reason + reward decomposition
 ```
 
-训练样本不是只有 $(x,y,r)$；至少是：
+训练样本不是只有 \$(x,y,r)\$；至少是：
 
 $$d_i=(x_i,\tau_i,r_i,\theta_i,h_i,q_i,V_i).$$
 
@@ -60,7 +60,7 @@ $$d_i=(x_i,\tau_i,r_i,\theta_i,h_i,q_i,V_i).$$
 | 正确能力但未激活/未坚持 | $h^C/h^W$ 或训练 |
 | 流程、retry、join、tool schema 错 | $h^W/h^K$ |
 | 缺少稳定的新语义/推理能力 | $\theta$ |
-| evaluator/environment 故障 | $V/\mathcal E$，不要改 harness/model |
+| evaluator/environment 故障 | $V/\mathcal E$ ，不要改 harness/model |
 
 冻结模型能力上限：
 
@@ -70,7 +70,7 @@ $$J^\star(\theta)=\max_{h\in\mathcal H}J(\theta,h).$$
 
 ## 4. Harness updating 与 harness benefit
 
-令 solver model 为 $f$、evolver 为 $e$，演化后 harness 为 $H_T^{(f,e)}$。基于 [Harness Updating Is Not Harness Benefit](https://arxiv.org/abs/2605.30621)：
+令 solver model 为 $f$ 、evolver 为 $e$ ，演化后 harness 为 $H_T^{(f,e)}$ 。基于 [Harness Updating Is Not Harness Benefit](https://arxiv.org/abs/2605.30621)：
 
 $$\Delta(f,e)=J_X(f,H_T^{(f,e)})-M_{\mathrm{base}}(f),$$
 
@@ -78,13 +78,13 @@ $$\Delta_{\mathrm{update}}(e)=\frac1{|F^\star|}\sum_{f\in F^\star}\Delta(f,e),$$
 
 $$\Delta_{\mathrm{benefit}}(f)=\max_{e\in E^\star}\Delta(f,e).$$
 
-$\Delta_{\mathrm{update}}(e)$ 衡量 evolver $e$ 产生的 harness updates 在 anchor agents 上带来的平均性能增益；$\Delta_{\mathrm{benefit}}(f)$ 衡量 model $f$ 从 anchor evolvers 中可获得的最大性能增益。两者不是一回事，也不能分别简化成“是否发生修改”和“是否遵循某个绝对最优 harness”。
+$\Delta_{\mathrm{update}}(e)$ 衡量 evolver $e$ 产生的 harness updates 在 anchor agents 上带来的平均性能增益； $\Delta_{\mathrm{benefit}}(f)$ 衡量 model $f$ 从 anchor evolvers 中可获得的最大性能增益。两者不是一回事，也不能分别简化成“是否发生修改”和“是否遵循某个绝对最优 harness”。
 
-论文中 best/worst evolver 在任何 benchmark 的最大差距只有 $3.1$ points，并且不存在一个 evolver 三项都最佳。Activation/adherence proxy：Qwen3-32B 的 SLR/HFR 为 $0.251/0.142$，Qwen3-235B 为 $0.961/0.350$，Opus 4.6 为 $0.957/0.757$。这支持：复杂 harness 是否有效，受 solver 激活和遵循能力制约。
+论文中 best/worst evolver 在任何 benchmark 的最大差距只有 \$3.1\$ points，并且不存在一个 evolver 三项都最佳。Activation/adherence proxy：Qwen3-32B 的 SLR/HFR 为 $0.251/0.142$ ，Qwen3-235B 为 $0.961/0.350$ ，Opus 4.6 为 $0.957/0.757$ 。这支持：复杂 harness 是否有效，受 solver 激活和遵循能力制约。
 
 ## 5. $2\times2$ factorial：分离贡献与 interaction
 
-比较旧/新 model $f_0,f_1$ 与旧/新 harness $h_0,h_1$：
+比较旧/新 model $f_0,f_1$ 与旧/新 harness $h_0,h_1$ ：
 
 |  | $h_0$ | $h_1$ |
 |---|---:|---:|
@@ -103,7 +103,7 @@ Interaction：
 
 $$I_{f,h}=J_{11}-J_{10}-J_{01}+J_{00}.$$
 
-若 $I_{f,h}\gg0$，新模型解锁了新 harness；若 $I_{f,h}<0$，可能新模型不遵循旧 scaffolding、harness 过度约束或训练/部署接口漂移。只报 $J_{11}-J_{00}$ 无法知道收益来自哪里。
+若 $I_{f,h}\gg0$ ，新模型解锁了新 harness；若 $I_{f,h}<0$ ，可能新模型不遵循旧 scaffolding、harness 过度约束或训练/部署接口漂移。只报 $J_{11}-J_{00}$ 无法知道收益来自哪里。
 
 ## 6. Dual-timescale optimization
 
@@ -115,7 +115,7 @@ $$\theta_{t+1}=\theta_t+\beta_t\widehat g_\theta(\theta_t,h_t),\qquad \beta_t\ll
 
 这里 $g_h$ 通常不是可微梯度，而是黑盒 search/evolution 的抽象方向。关键工程规则：
 
-1. 固定 $\theta$，先做 bounded harness exploration；
+1. 固定 $\theta$ ，先做 bounded harness exploration；
 2. harness 进入稳定版本后再收集训练数据；
 3. weight update 后做 $2\times2$ cross-evaluation；
 4. 若模型行为分布改变，重新验证 harness，而不是假定兼容；
@@ -123,11 +123,11 @@ $$\theta_{t+1}=\theta_t+\beta_t\widehat g_\theta(\theta_t,h_t),\qquad \beta_t\ll
 
 ## 7. Off-policy mismatch
 
-训练数据来自旧 pair $(\theta_b,h_b)$，新 policy/harness 是 $(\theta,h)$。重要性比率形式上是：
+训练数据来自旧 pair $(\theta_b,h_b)$ ，新 policy/harness 是 $(\theta,h)$ 。重要性比率形式上是：
 
 $$w(\tau)=\frac{p_{\theta,h}(\tau)}{p_{\theta_b,h_b}(\tau)}.$$
 
-但当 tool schema、workflow 或可达状态改变时，两处分布 support 可能不同，$w$ 不可估或方差极大。常见错误是只计算 token policy ratio：
+但当 tool schema、workflow 或可达状态改变时，两处分布 support 可能不同， $w$ 不可估或方差极大。常见错误是只计算 token policy ratio：
 
 $$\prod_t\frac{\pi_\theta(a_t\mid c_t)}{\pi_{\theta_b}(a_t\mid c_t)},$$
 
@@ -165,9 +165,9 @@ $$d_t^{\mathrm{meta}}\in\{\mathrm{update\_harness},\mathrm{update\_weights},\mat
 
 论文 v2 Table 3：
 
-- LawBench：$13.5\%\to50.0\%\to70.1\%$（base→harness→joint）；joint 比 harness-only 高 $20.1$ points；
-- TriMul reward：$0.105\to0.120\to1.475$；runtime $12{,}483\ \mu s\to1{,}017\ \mu s$；
-- denoising $mse_{\mathrm{norm}}$：$0.048\to0.241\to0.289$。
+- LawBench： $13.5\%\to50.0\%\to70.1\%$ （base→harness→joint）；joint 比 harness-only 高 \$20.1\$ points；
+- TriMul reward： $0.105\to0.120\to1.475$ ；runtime $12{,}483\ \mu s\to1{,}017\ \mu s$ ；
+- denoising $mse_{\mathrm{norm}}$ ： $0.048\to0.241\to0.289$ 。
 
 Weight methods 依任务不同：LawBench PPO+GAE、TriMul entropic advantage weighting、denoising GRPO。论文也明确提出 coupled co-evolution 的 Goodhart 风险：harness 和 model 同时适应 evaluator，可能共同放大 proxy 漏洞。
 
@@ -179,7 +179,7 @@ $$h_{k+1}=\mathrm{Refiner}(h_k,\tau_{kF:(k+1)F}).$$
 
 Co-learning 每轮收集 $K=256$ steps，使用 pairwise PRM、frontier teacher relabel 和 soft SFT，同时 emulator state 不 reset。该设置突出长期状态、行为数据与 harness 演化的耦合。
 
-Pokémon Emerald / Gemini 3.1 Pro 报告 from-scratch $100\%$ milestones、median cost US$130；minimalist harness 为 $98\%$、US$215。边界：较弱模型存在 capability floor，自我精炼可能恶化；论文没有证明 convergence，也没有 matched reset-based baseline。早期 GPP 完成 Pokémon 是 human-supervised 系统，不能归因给 fully automated Continual Harness。
+Pokémon Emerald / Gemini 3.1 Pro 报告 from-scratch $100\%$ milestones、median cost US\$130；minimalist harness 为 $98\%$ 、US\$215。边界：较弱模型存在 capability floor，自我精炼可能恶化；论文没有证明 convergence，也没有 matched reset-based baseline。早期 GPP 完成 Pokémon 是 human-supervised 系统，不能归因给 fully automated Continual Harness。
 
 ## 11. 与 rollout serving / trainer 的接口
 

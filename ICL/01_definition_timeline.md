@@ -4,11 +4,11 @@
 
 ## 1. 最小定义
 
-令模型参数为固定的 $\theta$，演示集合按顺序写成 $D_k=((x_1,y_1),\ldots,(x_k,y_k))$，查询为 $x_q$。ICL 研究的是：
+令模型参数为固定的 $\theta$ ，演示集合按顺序写成 $D_k=((x_1,y_1),\ldots,(x_k,y_k))$ ，查询为 $x_q$ 。ICL 研究的是：
 
 $$p_\theta(y_q\mid D_k,x_q)$$
 
-模型在推理时不改变 $\theta$，但其激活与输出分布随 $D_k$ 改变。需要区分：
+模型在推理时不改变 $\theta$ ，但其激活与输出分布随 $D_k$ 改变。需要区分：
 
 - **zero-shot instruction following**：没有输入输出示例；
 - **few-shot ICL**：上下文中有少量示例；
@@ -20,7 +20,7 @@ $$p_\theta(y_q\mid D_k,x_q)$$
 
 同一个行为“看过示例后答得更好”至少包含三个层次：
 
-1. **统计目标**：模型是否在推断潜在任务 $c$，并近似后验预测？见 [02](02_line_I_bayesian.md)。
+1. **统计目标**：模型是否在推断潜在任务 $c$ ，并近似后验预测？见 [02](02_line_I_bayesian.md)。
 2. **算法实现**：模型是否在激活中实现 GD、ridge、least squares 或别的估计器？见 [03](03_line_II_gd.md)。
 3. **物理机制**：哪些 heads / MLP / residual-stream directions 搬运任务信息，干预它们是否改变输出？见 [04](04_line_III_circuit.md)。
 

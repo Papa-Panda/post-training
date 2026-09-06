@@ -26,7 +26,7 @@ per-sample gradient、proxy model、随机投影和 Fisher information 都已有
 
 ## 2. Fisher/log-det：覆盖新的梯度方向
 
-对已选集合 $S$，定义经验 Fisher 矩阵：
+对已选集合 $S$ ，定义经验 Fisher 矩阵：
 
 $$F_S=\sum_{i\in S}g_i g_i^\top.$$
 
@@ -38,7 +38,7 @@ $$U(S)=\log\det(I+\alpha F_S).$$
 
 $$\Delta_x(S) = \log\left( 1+\alpha g_x^\top (I+\alpha F_S)^{-1}g_x \right).$$
 
-如果 $g_x$ 主要落在当前 Fisher 尚未覆盖的方向，逆矩阵项不会把它压小，$\Delta_x(S)$ 较大；如果它与已选子空间高度重复，增益就会下降。
+如果 $g_x$ 主要落在当前 Fisher 尚未覆盖的方向，逆矩阵项不会把它压小， $\Delta_x(S)$ 较大；如果它与已选子空间高度重复，增益就会下降。
 
 纯 $U(S)$ 是 normalized、monotone、submodular。固定预算 $k$ 下，纯 Fisher greedy 有经典保证：
 
@@ -48,19 +48,19 @@ $$U(S_{\mathrm{greedy}}) \ge \left(1-\frac1e\right)U(S^\star).$$
 
 ## 3. 第一条关键边界：Fisher coverage 对符号不敏感
 
-对任意梯度 $g$：
+对任意梯度 $g$ ：
 
 $$gg^\top=(-g)(-g)^\top.$$
 
-所以给定同一个已选集合，$g$ 和 $-g$ 的 Fisher marginal gain 完全相同：
+所以给定同一个已选集合， $g$ 和 $-g$ 的 Fisher marginal gain 完全相同：
 
 $$\Delta_g(S)=\Delta_{-g}(S).$$
 
 这意味着 Fisher/log-det 能判断“是否带来新的轴或新的 information volume”，却不能判断“这个更新沿该轴向前还是向后”。
 
-例如，若当前集合平均梯度是 $e_1$，候选分别是 $e_1$ 与 $-e_1$：
+例如，若当前集合平均梯度是 $e_1$ ，候选分别是 $e_1$ 与 $-e_1$ ：
 
-- 两者对 Fisher 都贡献 $e_1e_1^\top$；
+- 两者对 Fisher 都贡献 $e_1e_1^\top$ ；
 - 但前者强化当前更新，后者抵消当前更新。
 
 只靠 log-det 无法区分它们。
@@ -85,11 +85,11 @@ $$\mathrm{score}(x\mid S) = \Delta_x(S) - \lambda\,\mathrm{conflict}(x\mid S).$$
 - 二者正交：penalty 为 0；
 - 二者反向：按负 cosine 的强度扣分。
 
-论文默认 $\lambda=0.1$，并报告 $\lambda\in[0.1,0.5]$ 时表现较稳定。SPICE+ 还可用信息增益而非总 score 提前停止：
+论文默认 $\lambda=0.1$ ，并报告 $\lambda\in[0.1,0.5]$ 时表现较稳定。SPICE+ 还可用信息增益而非总 score 提前停止：
 
 $$\Delta_{x_t}(S_{t-1}) \le \omega\Delta_{x_1}(\varnothing),$$
 
-默认 $\omega=0.5$。
+默认 $\omega=0.5$ 。
 
 这解决的是**训练集合内部的更新协调性**：在仍获得信息覆盖的同时，减少下一条数据对当前 aggregate update 的抵消。
 
@@ -181,17 +181,17 @@ $$\mathrm{Isolation}(x) = 1- \max_{y\in D\setminus\{x\}} |\cos(g_x,g_y)|.$$
 
 $$\bar g_S=e_1, \qquad g_{\mathrm{protected}}=-e_1, \qquad g_{\mathrm{target}}=e_1.$$
 
-候选 $x$ 的梯度为 $g_x=e_1$：
+候选 $x$ 的梯度为 $g_x=e_1$ ：
 
-- selected-set conflict $=0$，因为它与 $\bar g_S$ 同向；
-- retention risk $=1$，因为它与 $g_{\mathrm{protected}}$ 完全反向；
-- target alignment $=1$；
+- selected-set conflict $=0$ ，因为它与 $\bar g_S$ 同向；
+- retention risk $=1$ ，因为它与 $g_{\mathrm{protected}}$ 完全反向；
+- target alignment $=1$ ；
 - Fisher coverage marginal gain 取决于当前在 $e_1$ 上已积累多少信息，而不由前三个 cosine 决定。
 
-再看孤立候选 $g_u=e_2$：
+再看孤立候选 $g_u=e_2$ ：
 
 - 对只覆盖 $e_1$ 的集合，它提供很高的方向 novelty；
-- 但对 $g_{\mathrm{target}}=e_1$，target alignment 为 0；
+- 但对 $g_{\mathrm{target}}=e_1$ ，target alignment 为 0；
 - 若它来自错误标签或当前模型无法形成稳定 credit assignment，则“高 diversity”也不等于“可学且有用”。
 
 因此四个信号应保留成分开的 feature、constraint 和 dashboard，而不是压成一个没有语义边界的 cosine score。
@@ -206,7 +206,7 @@ $$\bar g_S=e_1, \qquad g_{\mathrm{protected}}=-e_1, \qquad g_{\mathrm{target}}=e
 
 同 family 的小 proxy 到大 target transfer 较稳定；LLaMA proxy 到 Qwen2-7B 较弱，说明 gradient geometry 不能假定跨 architecture 不变。
 
-数字核查边界：Table 2 把 LLaMA2 平均提升写成 `+1.8`，但表中平均分是 $31.1-30.8=0.3$；`1.8` 是八项 benchmark 差值之和，不是平均提升。
+数字核查边界：Table 2 把 LLaMA2 平均提升写成 `+1.8`，但表中平均分是 $31.1-30.8=0.3$ ；`1.8` 是八项 benchmark 差值之和，不是平均提升。
 
 ## 9. 可运行最小实现
 

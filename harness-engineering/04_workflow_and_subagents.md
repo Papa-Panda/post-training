@@ -12,15 +12,15 @@
 
 $$W_h=(V_h,E_h,\Gamma_h),$$
 
-- $V_h$：model、tool、verifier、human approval、fork/join 等节点；
-- $E_h$：数据依赖和控制依赖；
-- $\Gamma_h$：每个节点的 input/output schema、retry、timeout、permission 和 budget。
+- $V_h$ ：model、tool、verifier、human approval、fork/join 等节点；
+- $E_h$ ：数据依赖和控制依赖；
+- $\Gamma_h$ ：每个节点的 input/output schema、retry、timeout、permission 和 budget。
 
 运行状态不是当前 prompt，而是：
 
 $$w_t=(\sigma_t,\kappa_t,\omega_t),$$
 
-其中 $\sigma_t(v)$ 是节点状态，$\kappa_t$ 是已提交 outputs/artifact refs，$\omega_t$ 是 leases、重试计数和预算预留。
+其中 $\sigma_t(v)$ 是节点状态， $\kappa_t$ 是已提交 outputs/artifact refs， $\omega_t$ 是 leases、重试计数和预算预留。
 
 节点状态机：
 
@@ -37,7 +37,7 @@ RUNNING -> CANCEL_REQUESTED -> DRAINING -> CANCELLED
 
 ## 2. Objective：质量、延迟、成本与风险
 
-对任务 $x$，workflow 产生轨迹 $\tau(W,x)$。目标是向量：
+对任务 $x$ ，workflow 产生轨迹 $\tau(W,x)$ 。目标是向量：
 
 $$\mathbf y(W)=(R(W),-K(W),-L(W),-Q(W)).$$
 
@@ -75,7 +75,7 @@ $$\mathrm{Ready}(v)=\mathbf1[\forall u:(u,v)\in E,\sigma(u)=\mathrm{COMMITTED}]\
 
 ## 4. Subagent 的收益条件
 
-把任务拆为 $q_1,\ldots,q_k$。并行 wall time 理想下界：
+把任务拆为 $q_1,\ldots,q_k$ 。并行 wall time 理想下界：
 
 $$T_{\mathrm{parallel}}\ge\max_iT(q_i)+T_{\mathrm{join}}.$$
 
@@ -118,7 +118,7 @@ Join 必须定义失败容忍：一个 optional agent 超时是否阻塞？parti
 
 ### Structured merge
 
-若输出为 $y_{1:k}$，merge 不应简单拼接：
+若输出为 $y_{1:k}$ ，merge 不应简单拼接：
 
 $$y^\star=\arg\max_{y\in\mathcal M(y_{1:k})}\left[\mathrm{Score}(y)-\alpha\mathrm{Conflict}(y)-\beta\mathrm{Unsupported}(y)-\gamma K(y)\right].$$
 
@@ -164,7 +164,7 @@ sample prior designs
 
 $$W_t=\arg\max_W\left[\hat G(W)+c\sqrt{\frac{\log N}{n_W}}\right].$$
 
-其中 $N$ 是父节点总访问数，$n_W$ 是候选 $W$ 的访问数；具体实现的 score normalization 与 exploration schedule 依论文代码而定。
+其中 $N$ 是父节点总访问数， $n_W$ 是候选 $W$ 的访问数；具体实现的 score normalization 与 exploration schedule 依论文代码而定。
 
 循环：
 
@@ -185,7 +185,7 @@ Workflow scheduler 需要同时考虑 precedence 与资源：
 
 $$\min \mathrm{makespan}(W)\quad\text{s.t.}\quad \sum_{v\in\mathrm{running}}g_v\le G,\ \sum c_v\le B.$$
 
-其中 $g_v$ 是 GPU/worker 占用，$c_v$ 是 token/tool budget。实际策略可使用：
+其中 $g_v$ 是 GPU/worker 占用， $c_v$ 是 token/tool budget。实际策略可使用：
 
 - critical-path priority；
 - memory-aware batching；

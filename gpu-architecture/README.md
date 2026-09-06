@@ -10,10 +10,10 @@
 
 $$T\gtrsim\max\left(\frac{F}{P_{\mathrm{peak}}},\frac{Q_{\mathrm{HBM}}}{B_{\mathrm{HBM}}},\frac{Q_{\mathrm{link}}}{B_{\mathrm{link}}}\right)+T_{\mathrm{launch}}+T_{\mathrm{sync}}+T_{\mathrm{translation}}.$$
 
-- $F$：执行的 FLOPs；
-- $Q_{\mathrm{HBM}}$：HBM 与芯片之间移动的 bytes；
-- $Q_{\mathrm{link}}$：GPU 间或 GPU–host 间移动的 bytes；
-- $P,B$：可达到的计算/带宽上限，而非默认等于宣传峰值；
+- $F$ ：执行的 FLOPs；
+- $Q_{\mathrm{HBM}}$ ：HBM 与芯片之间移动的 bytes；
+- $Q_{\mathrm{link}}$ ：GPU 间或 GPU–host 间移动的 bytes；
+- \$P,B\$：可达到的计算/带宽上限，而非默认等于宣传峰值；
 - launch、同步、page fault/TLB miss 等延迟在小 kernel、decode 和不规则访问中不可忽略。
 
 这条式子不是可直接相加的精确模拟器，而是贯穿专题的诊断骨架。
@@ -69,7 +69,7 @@ python3 -m unittest discover -s gpu-architecture/tests -v
 - 32-byte segment coalescing；
 - registers/shared-memory/thread ceilings 下的 occupancy；
 - 单层 Roofline；
-- ring/tree collective 的 $\alpha$–$\beta$ 教学模型；
+- ring/tree collective 的 $\alpha$ – $\beta$ 教学模型；
 - tiled GEMM 的理想化 HBM traffic；
 - shared-memory bank conflict。
 

@@ -30,8 +30,8 @@ Day07 的 coalescing 解决“32 个 lanes 如何读入”；Day08 的 reduction
 atomicAdd(output, input[index]);
 ```
 
-- 输入读取：$N$ 个 FP32，即理论 payload $4N$ bytes；
-- global atomics：$N$；
+- 输入读取： $N$ 个 FP32，即理论 payload $4N$ bytes；
+- global atomics： $N$ ；
 - shared memory / block barrier：0。
 
 `4N bytes` 只是输入 payload；atomic 是 read-modify-write，其真实 memory traffic 不能只按额外 4 bytes 计算，需 profiler/硬件验证。
@@ -46,19 +46,19 @@ $$T/2+T/4+\cdots+1=T-1$$
 
 $$1+\log_2 T$$
 
-个 block barriers；最后每 block 一个 global atomic。若 $B=\lceil N/T\rceil$：
+个 block barriers；最后每 block 一个 global atomic。若 $B=\lceil N/T\rceil$ ：
 
 $$A_{global}=B$$
 
 ### C. `reduce_warp_shuffle`
 
-1. 每 warp 用 offsets $16,8,4,2,1$ 归约；
+1. 每 warp 用 offsets \$16,8,4,2,1\$ 归约；
 2. 每 warp 仅 lane 0 写一个 shared partial；
 3. 全 block `__syncthreads()` 一次；
 4. 第一个 warp 对这些 partials（其余 lanes 补 0）再做一次 warp reduction；
 5. lane 0 做每 block 一次 global atomic。
 
-若 $T$ 是 32 的倍数，shared writes/block 为 $T/32$，global atomics 仍为 $B$，block barriers 为 $B$（每 block 一次）。
+若 $T$ 是 32 的倍数，shared writes/block 为 $T/32$ ，global atomics 仍为 $B$ ，block barriers 为 $B$ （每 block 一次）。
 
 ## 可手算例子 1：1…8 的 width=8 shuffle
 
@@ -68,11 +68,11 @@ $$[1,2,3,4,5,6,7,8]$$
 
 只跟踪最终有用的 lane 0 路径：
 
-- offset 4：lane 0 得 $1+5=6$；lane 2 得 $3+7=10$；
-- offset 2：lane 0 得 $6+10=16$；lane 1 的对应 subtree 得 $8+12=20$；
-- offset 1：lane 0 得 $16+20=36$。
+- offset 4：lane 0 得 $1+5=6$ ；lane 2 得 $3+7=10$ ；
+- offset 2：lane 0 得 $6+10=16$ ；lane 1 的对应 subtree 得 $8+12=20$ ；
+- offset 1：lane 0 得 $16+20=36$ 。
 
-`reduce_models.py` 的 32-lane版本把缺失的 24 lanes 补 0，实际执行 offsets $16,8,4,2,1$，测试结果同样为 36。
+`reduce_models.py` 的 32-lane版本把缺失的 24 lanes 补 0，实际执行 offsets \$16,8,4,2,1\$，测试结果同样为 36。
 
 ## 可手算例子 2：N=64, T=64
 
@@ -86,7 +86,7 @@ $$A_{global}=64$$
 
 $$32+16+8+4+2+1=63$$
 
-结构计数：1 个 global atomic、64 个初始 shared writes、$1+6=7$ 个 block barriers。
+结构计数：1 个 global atomic、64 个初始 shared writes、 $1+6=7$ 个 block barriers。
 
 ### Warp shuffle
 
@@ -94,13 +94,13 @@ $$32+16+8+4+2+1=63$$
 
 ## 为什么结果正确但最后几 bit 可能不同
 
-对实数加法，$(a+b)+c=a+(b+c)$；但浮点 rounding 使它一般不严格成立。例如：
+对实数加法， $(a+b)+c=a+(b+c)$ ；但浮点 rounding 使它一般不严格成立。例如：
 
 $$a=10^{20},\quad b=-10^{20},\quad c=3.14$$
 
 不同归约顺序可先抵消大数，也可先把小数吸收掉。因此：
 
-- benchmark harness 用全 1 输入，$N=2^{22}$，FP32 可精确表示最终整数；
+- benchmark harness 用全 1 输入， $N=2^{22}$ ，FP32 可精确表示最终整数；
 - 真实训练张量需要按 dtype、规模和误差目标设置 tolerance；
 - 需要 bitwise determinism 时，不能把 nondeterministic atomic order 当作可复现 reduction。
 

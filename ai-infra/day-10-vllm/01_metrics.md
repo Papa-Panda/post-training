@@ -49,7 +49,7 @@ vLLM needs max_num_seqs >= L + buffer (1.3×) => 80
 
 Fail condition: `W` grows with queue → λ_fixed causes L blowup → KV OOM.
 
-## $/useful rollout
+## \$/useful rollout
 Reuse from day-07:
 ```
 cost_per_useful = gpu_hour_price * p95_wall_hours / useful_rollouts

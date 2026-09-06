@@ -47,7 +47,7 @@ Reflexion 属于第一类：语言反馈写入 episodic memory，不更新基础
 
 ## 4. 评测与停止条件
 
-对规则集合 $G$，至少报告：
+对规则集合 $G$ ，至少报告：
 
 $$\Delta\mathrm{Pass}=\mathrm{Pass}(G)-\mathrm{Pass}(\varnothing)$$
 

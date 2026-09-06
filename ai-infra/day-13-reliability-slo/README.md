@@ -89,7 +89,7 @@
 
 2. **Day11 → Day13**：Day11两节点SSM给出 Tj_max 82.49°C throttle 0.83% hyst 82/72°C 物理先验，能提前5-10min预测热，今天把先验用进SLO3——`p_std 9.38kW → GPU σ67W`抖动同源，jitter_ratio 0.15 + throttle 1%双阈值把“fail-slow不崩但慢30%”从 SLO视角定义为不可用，checkpoint(Day07)救不了 fail-slow，必须靠功率平滑+风扇调度，像Paper2冷机防频启 hyst 0.85/0.35一样加冷却窗。
 
-3. **Day10 + Day08/09 → Day13**：Day10 vLLM rollout占 80-90%墙钟、长CoT 8-15k tokens/sec失败12-18% 5类拆分，今天分类进 SLO1的 5桶；Day08/09 eval同步阻塞 p50 1.141s p95 3.249s gpu_idle占92.85% async省52% 的 wait，今天量化成 SLO2 p95 1.2s (真实120s) + queue_avg_depth——现在有3条SLO就能回答“_eval_该异步还是采样”：queue depth>5且P95>阈值 ⇒ 转异步，跟 Paper1把稳定/波动负载分开调度同构，折算 $/有用 rollout降 8-12%。
+3. **Day10 + Day08/09 → Day13**：Day10 vLLM rollout占 80-90%墙钟、长CoT 8-15k tokens/sec失败12-18% 5类拆分，今天分类进 SLO1的 5桶；Day08/09 eval同步阻塞 p50 1.141s p95 3.249s gpu_idle占92.85% async省52% 的 wait，今天量化成 SLO2 p95 1.2s (真实120s) + queue_avg_depth——现在有3条SLO就能回答“_eval_该异步还是采样”：queue depth>5且P95>阈值 ⇒ 转异步，跟 Paper1把稳定/波动负载分开调度同构，折算 \$/有用 rollout降 8-12%。
 
 > 链路完整：FSDP(2)/per-block(3) 省显存峰值 (P-b)/G+b → checkpoint(7) sharded vs full 存盘拼回 → eval(8/9) nowcasting 预测排队 → vLLM(10) rollout失败率5类 → Paper2(11)热SSM预测Tj节流 → Reward(12) ensemble校准过滤 → 今天13 SLO定什么是不可用。下一步14 PUE成本图、15 3D并行决策树、22 vLLM↔FSDP联动都依赖这3阈值判断。
 

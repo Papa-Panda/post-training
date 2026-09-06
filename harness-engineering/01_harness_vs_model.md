@@ -16,28 +16,28 @@ $$h=(h^C,h^W,h^K,h^M),$$
 
 $$q=(V,\Pi,B,L),$$
 
-其中 $V$ 是 verifier，$\Pi$ 是权限策略，$B$ 是资源预算，$L$ 是 append-only audit log。模型参数 $\theta$ 固定，但 runtime 每一步仍由 harness 决定：
+其中 $V$ 是 verifier， $\Pi$ 是权限策略， $B$ 是资源预算， $L$ 是 append-only audit log。模型参数 $\theta$ 固定，但 runtime 每一步仍由 harness 决定：
 
 $$c_t=C_{h^C}(s_t),\qquad a_t\sim\pi_\theta(\cdot\mid c_t),$$
 
 $$u_t=G_{h^W,h^K}(s_t,a_t;\Pi),\qquad s_{t+1}=F_{h^M}(s_t,u_t,o_{t+1}).$$
 
-这里 $a_t$ 是模型建议，$u_t$ 才是经过 schema、permission 和 workflow 约束后的执行动作。相同的 $a_t$ 在不同 harness 下可能被拒绝、改写、拆分、重试或送入不同工具。
+这里 $a_t$ 是模型建议， $u_t$ 才是经过 schema、permission 和 workflow 约束后的执行动作。相同的 $a_t$ 在不同 harness 下可能被拒绝、改写、拆分、重试或送入不同工具。
 
 ## 2. Objective：优化的是诱导轨迹分布
 
-对任务 $x\sim\mathcal D$，完整轨迹记为：
+对任务 $x\sim\mathcal D$ ，完整轨迹记为：
 
 $$\tau=(s_0,c_0,a_0,u_0,o_1,\ldots,s_T).$$
 
-按 README 的统一约定，本章固定外置 control plane $q$，并把 $p_{\theta,h;q}$ 简写为 $p_{\theta,h}$。模型和 harness 共同诱导 $p_{\theta,h}(\tau\mid x)$。系统目标通常是多目标：
+按 README 的统一约定，本章固定外置 control plane $q$ ，并把 $p_{\theta,h;q}$ 简写为 $p_{\theta,h}$ 。模型和 harness 共同诱导 $p_{\theta,h}(\tau\mid x)$ 。系统目标通常是多目标：
 
 $$J_{\boldsymbol\lambda}(\theta,h)=\mathbb E[R(\tau,x)-\lambda_KK(\tau)-\lambda_L\mathrm{Lat}(\tau)-\lambda_QQ(\tau)].$$
 
-- $R$：任务正确性或 verifier reward；
-- $K$：tokens、模型调用、工具/GPU 资源；
-- $\mathrm{Lat}$：wall-clock latency；
-- $Q$：权限、不可逆副作用、维护和回归风险。
+- $R$ ：任务正确性或 verifier reward；
+- $K$ ：tokens、模型调用、工具/GPU 资源；
+- $\mathrm{Lat}$ ：wall-clock latency；
+- $Q$ ：权限、不可逆副作用、维护和回归风险。
 
 固定 harness 的 post-training 是：
 
@@ -61,7 +61,7 @@ $$p_{\theta,h}(u_t\mid s_t)=\sum_{a_t}\pi_\theta(a_t\mid C_{h^C}(s_t))\,G_{h^W,h
 
 Harness 有四个杠杆：
 
-1. **Information**：$C_{h^C}$ 改变模型看到的证据与顺序；
+1. **Information**： $C_{h^C}$ 改变模型看到的证据与顺序；
 2. **Action**：tool schema 和 parser 改变可表示动作；
 3. **Dynamics**：workflow/retry/subagents 改变未来状态转移；
 4. **Selection**：verifier、stop rule 和 archive 改变哪些轨迹被保留。
@@ -100,7 +100,7 @@ $$\mathcal H_C\subset\mathcal H_{C,W}\subset\mathcal H_{C,W,K}.$$
 
 ## 5. Updating 不等于 Benefit
 
-设 solver 为 $f$、evolver 为 $e$，harness update 为：
+设 solver 为 $f$ 、evolver 为 $e$ ，harness update 为：
 
 $$A_t=(f,H_t),\qquad D_t=\{(x,\tau_{t,x},y_{t,x}):x\in X_t\},$$
 
@@ -122,7 +122,7 @@ $$\Delta_{\mathrm{benefit}}(f)=\max_{e\in E^\star}\Delta(f,e).$$
 - **adherence**：调用后是否按协议执行；
 - **execution**：外部工具和环境是否把计划正确落地。
 
-论文在 SWE-bench Verified、MCP-Atlas、SkillsBench 上发现，best/worst evolver 的最大差距只有 $3.1$ 个百分点，且没有一个 evolver三项都最好；solver benefit 则非单调。Qwen3-235B 的 skill-loading rate 为 $0.961$，接近 Opus 4.6 的 $0.957$，但 harness-following rate 为 $0.350$，低于后者的 $0.757$。会写规则不等于会用规则。
+论文在 SWE-bench Verified、MCP-Atlas、SkillsBench 上发现，best/worst evolver 的最大差距只有 \$3.1\$ 个百分点，且没有一个 evolver三项都最好；solver benefit 则非单调。Qwen3-235B 的 skill-loading rate 为 \$0.961\$，接近 Opus 4.6 的 \$0.957\$，但 harness-following rate 为 \$0.350\$，低于后者的 \$0.757\$。会写规则不等于会用规则。
 
 ## 6. 识别 harness 的真实因果增益
 
@@ -141,9 +141,9 @@ $$\Delta_h(f)=J(f,h_1)-J(f,h_0),\qquad \Delta_f(h)=J(f_1,h)-J(f_0,h),$$
 
 $$I_{f,h}=J(f_1,h_1)-J(f_1,h_0)-J(f_0,h_1)+J(f_0,h_0).$$
 
-$I_{f,h}$ 是 interaction。若 $I_{f,h}>0$，强模型更能利用新 harness；若为负，harness 可能只为旧模型补洞，或新模型与旧约束冲突。
+$I_{f,h}$ 是 interaction。若 $I_{f,h}>0$ ，强模型更能利用新 harness；若为负，harness 可能只为旧模型补洞，或新模型与旧约束冲突。
 
-更严格的研究还要固定 decoding、token/tool budget、模型版本、环境镜像和 verifier。否则把更长 context、更高调用次数或更强 judge 混进 $h_1$，就不能把收益归因于结构设计。
+更严格的研究还要固定 decoding、token/tool budget、模型版本、环境镜像和 verifier。否则把更长 context、更高调用次数或更强 judge 混进 $h_1$ ，就不能把收益归因于结构设计。
 
 ## 7. Algorithm：非参数优化循环
 
@@ -164,7 +164,7 @@ until budget exhausted or validation plateaus
 freeze h; evaluate once on D_test
 ```
 
-注意：`propose_bounded_edits` 可以由同一个 frozen model完成，也可以是另一模型、搜索算法或人工；优化的对象仍是外部 $h$，不是 $\theta$。
+注意：`propose_bounded_edits` 可以由同一个 frozen model完成，也可以是另一模型、搜索算法或人工；优化的对象仍是外部 $h$ ，不是 $\theta$ 。
 
 ## 8. Failure modes
 

@@ -25,7 +25,7 @@ Llama 3 已用 15.6T 训到 405B，3.1/3.2 不再加 pretrain tokens量级，而
 ## 为什么今天读它
 - coding data：Llama 3.1 新增code专家后训练集（自带执行环境验证+unit test通过率作filter），tool use / func calling轨迹本质是code+JSON，1B/3B的distill logits在code completion上比纯Causal LM稳，可直接抄到你50万合成池的“可执行过滤+tool轨迹合成”。
 - SFT：展示如何从 Day7 的通用SFT配比 → 后训练6轮迭代，每轮RS挑高RM分样本再DPO，配比按能力维（coding / math / reasoning / long / multilingual / safety）动态调，和你Qwen Day9的1M SFT多阶段RL呼应但更工程化。
-- RL data：多轮DPO的preference pair怎么来（人工→RM→合成→再RM），为什么不用PPO而用DPO+RS（稳定、可扩展），和你Agentic RL Infra的“$/useful-rollout”评估直接相关；1B/3B的量化/剪枝后恢复训练对RL数据噪声更敏感，提供“小模型RL数据要更干净”的反例。
+- RL data：多轮DPO的preference pair怎么来（人工→RM→合成→再RM），为什么不用PPO而用DPO+RS（稳定、可扩展），和你Agentic RL Infra的“\$/useful-rollout”评估直接相关；1B/3B的量化/剪枝后恢复训练对RL数据噪声更敏感，提供“小模型RL数据要更干净”的反例。
 
 ## 今天的 3 问
 1. Llama 3.1/3.2 的后训练为什么从PPO转成“多轮SFT+Rejection Sampling+DPO”循环？6轮迭代里每轮的SFT/RS/DPO数据是怎么分工的（比如tool use、长上下文、多语、安全性各在哪轮加）？和 Day 9 Qwen2.5 的 RM→SFT→新RM→RL self-improvement相比，稳定性/成本trade-off在哪？

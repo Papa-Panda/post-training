@@ -32,7 +32,7 @@ cache 可复用相邻 warp 多取的数据，所以这个模型不是 DRAM 实�
 
 $$\mathrm{bank}(i)=i\bmod32.$$
 
-warp 按列访问 `tile[32][32]` 时，第 $\ell$ lane 的 word index 为 $32\ell+c$，全部落到 bank $c$；padding 为 `tile[32][33]` 后：
+warp 按列访问 `tile[32][32]` 时，第 $\ell$ lane 的 word index 为 $32\ell+c$ ，全部落到 bank $c$ ；padding 为 `tile[32][33]` 后：
 
 $$\mathrm{bank}(33\ell+c)=(\ell+c)\bmod32,$$
 
@@ -64,7 +64,7 @@ Ampere 的 async copy、Hopper 的 TMA/transaction barrier 扩展了可表达的
 
 $$T_{\mathrm{tile}}\approx\max(T_{\mathrm{load}},T_{\mathrm{compute}})$$
 
-而不是串行的 $T_{\mathrm{load}}+T_{\mathrm{compute}}$。要实现重叠，需要足够 stages、正确 barrier、无 buffer hazard，并避免 stages 过多挤占 shared memory。
+而不是串行的 $T_{\mathrm{load}}+T_{\mathrm{compute}}$ 。要实现重叠，需要足够 stages、正确 barrier、无 buffer hazard，并避免 stages 过多挤占 shared memory。
 
 ## 6. AoS/SoA 与 layout
 

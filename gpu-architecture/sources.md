@@ -31,7 +31,7 @@
 
 | 主题 | 来源 | 采用的结论/边界 |
 |---|---|---|
-| Roofline | Williams, Waterman, Patterson, *Roofline: An Insightful Visual Performance Model for Multicore Architectures*, CACM 2009, [DOI](https://doi.org/10.1145/1498765.1498785) | $P\le\min(P_{peak},BI)$；是上界模型而非 cycle simulator |
+| Roofline | Williams, Waterman, Patterson, *Roofline: An Insightful Visual Performance Model for Multicore Architectures*, CACM 2009, [DOI](https://doi.org/10.1145/1498765.1498785) | $P\le\min(P_{peak},BI)$ ；是上界模型而非 cycle simulator |
 | FlashAttention | Dao et al., *FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness*, NeurIPS 2022, [arXiv](https://arxiv.org/abs/2205.14135) | 通过 tiling/online softmax 减少 HBM I/O，不将其误述为近似 attention |
 | Ring all-reduce | Patarasuk & Yuan, *Bandwidth Optimal All-reduce Algorithms for Clusters of Workstations*, JPDC 2009, [DOI](https://doi.org/10.1016/j.jpdc.2009.05.002) | ring reduce-scatter + all-gather 的带宽模型；真实 NCCL 还会按拓扑/协议选择算法 |
 | Systolic arrays | Kung & Leiserson, *Systolic Arrays for VLSI*, 1979, [CMU record](https://www.cs.cmu.edu/~christos/courses/826-resources/PAPERS+BOOK/systolic.pdf) | 数据随规则阵列传播与局部复用的经典模型；不据此断言未公开 Tensor Core 物理实现 |
@@ -68,6 +68,6 @@
 
 1. **硬件规格**必须同时写产品形态、dtype、dense/sparse 与理论/实测口径。
 2. **性能数字**若来自 vendor blog，要保留 workload/config，不外推为普遍倍数。
-3. **教学模型**（32-byte segments、occupancy、$\alpha$–$\beta$、Roofline）明确标为近似。
+3. **教学模型**（32-byte segments、occupancy、 $\alpha$ – $\beta$ 、Roofline）明确标为近似。
 4. **未公开微架构**不从示意图、反汇编或二手文章强推。
 5. **可运行代码**是 CPU analytical model；未声称在 CUDA GPU 上测量。

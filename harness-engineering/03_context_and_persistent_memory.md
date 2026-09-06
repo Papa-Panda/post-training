@@ -25,13 +25,13 @@ $$c_t=C_{h^C}(s_t;B_t^{\mathrm{ctx}}).$$
 
 ## 2. Context selection 是约束优化
 
-候选信息项为 $I_t=\{i_1,\ldots,i_n\}$。每项有 token 成本 $\ell_i$、相关性 $r_i$、可信度 $g_i$、新鲜度 $f_i$、依赖集合 $P_i$。选择集合 $S$：
+候选信息项为 $I_t=\{i_1,\ldots,i_n\}$ 。每项有 token 成本 $\ell_i$ 、相关性 $r_i$ 、可信度 $g_i$ 、新鲜度 $f_i$ 、依赖集合 $P_i$ 。选择集合 $S$ ：
 
 $$S_t^\star=\arg\max_{S\subseteq I_t}\left[\sum_{i\in S}u(i\mid s_t)-\lambda_DD(S)-\lambda_CC(S)\right],$$
 
 $$\text{s.t.}\quad \sum_{i\in S}\ell_i\le B_t^{\mathrm{ctx}},\qquad i\in S\Rightarrow P_i\subseteq S.$$
 
-$D(S)$ 惩罚重复，$C(S)$ 惩罚冲突/过期组合。这个问题类似带依赖的 knapsack；实践中常用分层 quota、MMR、greedy coverage 和 hard priority，而不是求精确最优。
+$D(S)$ 惩罚重复， $C(S)$ 惩罚冲突/过期组合。这个问题类似带依赖的 knapsack；实践中常用分层 quota、MMR、greedy coverage 和 hard priority，而不是求精确最优。
 
 一项合理的 utility 可以写成：
 
@@ -78,7 +78,7 @@ collect references
 
 ## 4. Compression 的信息损失
 
-设原始证据 $E$、摘要 $z=S(E)$、当前决策目标 $Y$。理想摘要希望保留足够信息：
+设原始证据 $E$ 、摘要 $z=S(E)$ 、当前决策目标 $Y$ 。理想摘要希望保留足够信息：
 
 $$I(z;Y)\approx I(E;Y),\qquad |z|\ll|E|.$$
 
@@ -90,7 +90,7 @@ $$I(z;Y)\approx I(E;Y),\qquad |z|\ll|E|.$$
 4. 重要数值/权限/版本不做模糊压缩；
 5. 摘要版本和生成模型写入 metadata。
 
-反复“摘要的摘要”会累积误差。设每轮保真率为 $1-\epsilon$，经过 $k$ 次独立压缩的粗略上界是 $(1-\epsilon)^k$；这不是现实误差模型，但直观说明为什么必须从原证据重建，而不是无限递归摘要。
+反复“摘要的摘要”会累积误差。设每轮保真率为 $1-\epsilon$ ，经过 $k$ 次独立压缩的粗略上界是 $(1-\epsilon)^k$ ；这不是现实误差模型，但直观说明为什么必须从原证据重建，而不是无限递归摘要。
 
 ## 5. ACE：增量 playbook 而非整段重写
 
@@ -125,7 +125,7 @@ ACE 报告的 agent/finance 改善与成本口径见 [`papers.md`](papers.md)；
 
 $$c_s(x)=F_s(x;\mathcal R_s),$$
 
-其中 $\mathcal R_s$ 是 prompts、knowledge bases、code 等资源，$F_s$ 是 retrieve/filter/format/update 算子。形成双层问题：
+其中 $\mathcal R_s$ 是 prompts、knowledge bases、code 等资源， $F_s$ 是 retrieve/filter/format/update 算子。形成双层问题：
 
 $$c_s^\star=\arg\max_{c_s}J_{\mathrm{train}}(c_s;s),$$
 

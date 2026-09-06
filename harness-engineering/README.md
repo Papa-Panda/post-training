@@ -4,15 +4,15 @@
 
 ## 1. 统一问题
 
-给定任务 $x\sim\mathcal D$、冻结参数 $\theta$ 与 harness $h$，runtime 诱导出完整轨迹分布：
+给定任务 $x\sim\mathcal D$ 、冻结参数 $\theta$ 与 harness $h$ ，runtime 诱导出完整轨迹分布：
 
 $$\tau\sim p_{\theta,h;q}(\tau\mid x),\qquad J_q(\theta,h)=\mathbb E[R(\tau,x)-\lambda_KK(\tau)-\lambda_L\mathrm{Lat}(\tau)-\lambda_QQ(\tau)].$$
 
-$R$ 是任务收益，$K$ 是 token/工具/GPU 成本，$\mathrm{Lat}$ 是延迟，$Q$ 是安全或回归风险；$q$ 是固定的外置 control plane。后文在 $q$ 固定时简写为 $p_{\theta,h}$ 和 $J(\theta,h)$。Post-training 主要优化 $\theta$；Harness Engineering 在固定模型下优化外部可执行结构：
+$R$ 是任务收益， $K$ 是 token/工具/GPU 成本， $\mathrm{Lat}$ 是延迟， $Q$ 是安全或回归风险； $q$ 是固定的外置 control plane。后文在 $q$ 固定时简写为 $p_{\theta,h}$ 和 $J(\theta,h)$ 。Post-training 主要优化 $\theta$ ；Harness Engineering 在固定模型下优化外部可执行结构：
 
 $$h^\star(\theta;q)=\arg\max_{h\in\mathcal H}J_q(\theta,h).$$
 
-这是一种**非参数优化**：没有反向传播到模型权重，但会通过改变 prompt、信息、动作空间、控制流、状态和 verifier feedback，改变 $p_{\theta,h;q}(\tau\mid x)$。
+这是一种**非参数优化**：没有反向传播到模型权重，但会通过改变 prompt、信息、动作空间、控制流、状态和 verifier feedback，改变 $p_{\theta,h;q}(\tau\mid x)$ 。
 
 ## 2. 全专题统一符号
 
@@ -32,7 +32,7 @@ $$h^\star(\theta;q)=\arg\max_{h\in\mathcal H}J_q(\theta,h).$$
 | $\tau=(s_0,c_0,a_0,u_0,o_1,\ldots,s_T)$ | 完整可重放轨迹 |
 | $z=A(\tau,V)$ | failure attribution：根因 surface、component 与证据 |
 | $\rho_\phi(\delta\mid h,z)$ | 人工、LLM 或搜索算法诱导的 proposal distribution |
-| $\delta$ | 对可编辑区域的 bounded edit；$h'=h\oplus\delta$ |
+| $\delta$ | 对可编辑区域的 bounded edit； $h'=h\oplus\delta$ |
 | $D_{\mathrm{mine}}$ | 暴露给 proposer、用于找失败的轨迹集 |
 | $D_{\mathrm{in}}$ | 验证目标 failure 是否修复的 held-in 集 |
 | $D_{\mathrm{ho}}$ | 对 proposer 隐藏、可反复用于 promotion 的回归集 |
@@ -55,7 +55,7 @@ Layer K — executable code
   tool implementation / middleware / parser / sandbox / state migration
 ```
 
-形式化状态中单列 $h^M$，因为长期 memory 有独立生命周期；搜索风险分层时把 memory read/write policy 并入 Layer C 的信息管理面。三层包含关系近似为 $\mathcal H_C\subset\mathcal H_{C,W}\subset\mathcal H_{C,W,K}$。空间越大，潜在收益越高，但 credit assignment、搜索成本和权限风险也更高。因此每个 proposal 必须声明 edit surface、证据、预期修复、回归风险和预算变化。
+形式化状态中单列 $h^M$ ，因为长期 memory 有独立生命周期；搜索风险分层时把 memory read/write policy 并入 Layer C 的信息管理面。三层包含关系近似为 $\mathcal H_C\subset\mathcal H_{C,W}\subset\mathcal H_{C,W,K}$ 。空间越大，潜在收益越高，但 credit assignment、搜索成本和权限风险也更高。因此每个 proposal 必须声明 edit surface、证据、预期修复、回归风险和预算变化。
 
 ## 4. 一套完整 control-loop
 
@@ -90,9 +90,9 @@ external q: verifier / permissions / budgets / audit / final test
 
 $$z_t=A(\tau_t,V),\qquad \delta_t\sim \rho_\phi(\delta\mid h_t,z_t),\qquad \tilde h_t=h_t\oplus\delta_t,$$
 
-$$h_{t+1}=\begin{cases}\tilde h_t,&\mathrm{Gate}(h_t,\tilde h_t;q)=1,\\h_t,&\mathrm{otherwise}.\end{cases}$$
+$$h_{t+1}=\begin{cases}\tilde h_t,&\mathrm{Gate}(h_t,\tilde h_t;q)=1,\h_t,&\mathrm{otherwise}.\end{cases}$$
 
-$A$ 做 failure attribution；$\rho_\phi$ 是人工、LLM proposer 或搜索算法诱导的 proposal distribution；`Gate` 在 proposer 外部。**提案、评估、部署是三个权限域，不应由同一个可编辑进程自我声明成功。**
+$A$ 做 failure attribution； $\rho_\phi$ 是人工、LLM proposer 或搜索算法诱导的 proposal distribution；`Gate` 在 proposer 外部。**提案、评估、部署是三个权限域，不应由同一个可编辑进程自我声明成功。**
 
 ## 5. 不是论文堆叠：每篇工作落在哪个环节
 
@@ -116,7 +116,7 @@ $A$ 做 failure attribution；$\rho_\phi$ 是人工、LLM proposer 或搜索算�
 | [`model-aware-data-curation/`](../model-aware-data-curation/README.md) | 训练/评估数据 $\mathcal B$ | failure attribution 决定是否补数据；harness digest 随样本 provenance 保存 |
 | [`grpo-vs-ppo/`](../grpo-vs-ppo/README.md) | policy weights $\theta$ | harness 定义 rollout 分布、工具动作和 reward observation；RL 更新权重 |
 | [`vllm-rollout/`](../vllm-rollout/README.md) | token generation serving | rollout engine 负责吞吐；runtime 负责状态、工具、副作用与终止 |
-| [`ICL/`](../ICL/README.md) | 给定 context 后的预测变化 | ICL 研究 $\pi_\theta(\cdot\mid c)$；本专题研究 $c=C_h(s)$ 如何被构造 |
+| [`ICL/`](../ICL/README.md) | 给定 context 后的预测变化 | ICL 研究 $\pi_\theta(\cdot\mid c)$ ；本专题研究 $c=C_h(s)$ 如何被构造 |
 | `harness-engineering/` | 外部执行机制 $h$ | 端到端 orchestration、evaluation、versioning 与 deployment |
 
 ## 7. 阅读路线

@@ -35,7 +35,7 @@ $$\rho_i^{seq}(\theta)=\prod_{t=1}^{T_i}\rho_{i,t}(\theta)=\exp\left(\sum_{t=1}^
 2. $\pi_{ref}$ 回答“长期锚在哪里？”；KL 防止策略远离初始/阶段参考模型。
 3. $\pi_\theta$ 是正在求梯度的模型。
 
-若 rollout 后只做一次、且更新前 $\theta=b$，则 $\rho_{i,t}=1$。多 epoch 重用该批数据后，$\pi_\theta\neq\pi_b$，ratio 才开始偏离 1。$\pi_b$ 可以只保存 rollout log-probabilities，不一定需要另一份常驻模型；$\pi_{ref}$ 若要精确 KL 则通常需要 reference logits/log-probabilities。
+若 rollout 后只做一次、且更新前 $\theta=b$ ，则 $\rho_{i,t}=1$ 。多 epoch 重用该批数据后， $\pi_\theta\neq\pi_b$ ，ratio 才开始偏离 1。 $\pi_b$ 可以只保存 rollout log-probabilities，不一定需要另一份常驻模型； $\pi_{ref}$ 若要精确 KL 则通常需要 reference logits/log-probabilities。
 
 ## 两种平均方式不是小细节
 

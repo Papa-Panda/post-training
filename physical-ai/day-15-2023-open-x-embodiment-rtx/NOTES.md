@@ -13,7 +13,7 @@
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-15-2023-open-x-embodiment-rtx
 
 ## 一句话总结
-OXE 把机器人学的"数据孤岛"问题变成"格式统一"问题：60 个数据集、22 种 embodiment、100 万+ 轨迹、527 个技能（160,266 个任务）全部转成 RLDS 格式，动作统一到 7 维末端执行器接口（$x,y,z$, roll, pitch, yaw, gripper），然后**不做任何显式的 embodiment-gap 对齐机制**，直接在混合数据上训练 RT-1-X（35M）与 RT-2-X（55B PaLI-X）；3600 次真实机器人评测证明跨机器人**正向迁移真实存在**：小数据域平均 +50%，RT-2-X 在别的机器人数据里的技能上相对 RT-2 提升约 3 倍（emergent skills 27.3% → 75.8%）。
+OXE 把机器人学的"数据孤岛"问题变成"格式统一"问题：60 个数据集、22 种 embodiment、100 万+ 轨迹、527 个技能（160,266 个任务）全部转成 RLDS 格式，动作统一到 7 维末端执行器接口（\$x,y,z\$, roll, pitch, yaw, gripper），然后**不做任何显式的 embodiment-gap 对齐机制**，直接在混合数据上训练 RT-1-X（35M）与 RT-2-X（55B PaLI-X）；3600 次真实机器人评测证明跨机器人**正向迁移真实存在**：小数据域平均 +50%，RT-2-X 在别的机器人数据里的技能上相对 RT-2 提升约 3 倍（emergent skills 27.3% → 75.8%）。
 
 ## 和之前工作的关系
 
@@ -35,39 +35,39 @@ OXE 把机器人学的"数据孤岛"问题变成"格式统一"问题：60 个数
 
 ## 数学视角：多源混合行为克隆 + 共享动作接口的迁移
 
-把 OXE 理解成一个**跨分布的行为克隆混合问题**：$K$ 个数据源（数据集/机器人），每个有自己的观测分布、动作标定和任务集，但共享一个粗粒度的动作接口。统一的数学框架是——
+把 OXE 理解成一个**跨分布的行为克隆混合问题**： $K$ 个数据源（数据集/机器人），每个有自己的观测分布、动作标定和任务集，但共享一个粗粒度的动作接口。统一的数学框架是——
 
 ### 1) State / observation / action / objective
 
-- **Observation**：$o=(I,\ell)$，$I$ 是每个数据集选定的**规范视角**单张 RGB（统一缩放到公共分辨率）+ 语言指令 $\ell$；RT-1 架构用 15 帧历史 $I_{t-14:t}$，RT-2-X 用短历史（2 帧）或单帧。
-- **Action**：规范化的 7 维向量 $a=(dx,dy,dz,droll,dpitch,dyaw,g)\in\mathbb R^7$——末端执行器位姿增量或速率 + 夹爪开合。关键：论文**没有**跨数据集统一坐标系，也**没有**统一"绝对位置 vs 相对增量 vs 速度"的控制语义，每个数据集按自己原来的控制方式解释同一个向量。
-- **对齐算子**（per-dataset $k$）：先归一化 $a^{(k)}_{norm}=(a-\mu_k)/\sigma_k$，再均匀离散化到 256 档：
+- **Observation**： $o=(I,\ell)$ ， $I$ 是每个数据集选定的**规范视角**单张 RGB（统一缩放到公共分辨率）+ 语言指令 $\ell$ ；RT-1 架构用 15 帧历史 $I_{t-14:t}$ ，RT-2-X 用短历史（2 帧）或单帧。
+- **Action**：规范化的 7 维向量 $a=(dx,dy,dz,droll,dpitch,dyaw,g)\in\mathbb R^7$ ——末端执行器位姿增量或速率 + 夹爪开合。关键：论文**没有**跨数据集统一坐标系，也**没有**统一"绝对位置 vs 相对增量 vs 速度"的控制语义，每个数据集按自己原来的控制方式解释同一个向量。
+- **对齐算子**（per-dataset $k$ ）：先归一化 $a^{(k)}_{norm}=(a-\mu_k)/\sigma_k$ ，再均匀离散化到 256 档：
 $$b_j = \Big\lfloor 255\cdot \mathrm{clip}\!\left(\frac{a^{(k)}_{norm,j}-lo}{hi-lo},\,0,\,1\right)\Big\rfloor\in\{0,\dots,255\},\quad j=1..7,$$
 外加第 8 维 episode-termination token。模型在 $8\times 256$ 的离散空间上做分类（RT-1 是 256-way softmax，RT-2 是把 "1 128 91 241 5 101 127" 当文本 token 做 LM loss）。
 - **混合目标**：
 $$\mathcal L(\theta)=\sum_{k=1}^{K} w_k\;\mathbb E_{(o,\ell,b)\sim\mathcal D_k}\big[\mathrm{CE}(\pi_\theta(b\mid o,\ell))\big],$$
-RT-2-X 再加一层 co-fine-tuning：$\mathcal L=\mathcal L_{VLM}(\text{web})+\mathcal L_{robot}$，web 数据与机器人数据比例约 1:1（沿用 RT-2 配方）。
+RT-2-X 再加一层 co-fine-tuning： $\mathcal L=\mathcal L_{VLM}(\text{web})+\mathcal L_{robot}$ ，web 数据与机器人数据比例约 1:1（沿用 RT-2 配方）。
 
 ### 2) 为什么粗对齐还能迁移：task-space 共享结构
 
 直觉：不同机器人的逆运动学 $f_i^{-1}:\text{task-space}\to\text{joint-space}$ 各不相同，但"看到香蕉在碗左边 → 末端向左上方移动"这个**任务空间**的映射 $p^*(b\mid o,\ell)$ 在各 embodiment 间有重叠支撑。粗对齐的有效性说明迁移发生在**语义-任务空间层**，而不是关节动力学层——模型学的是"图像+语言 → 末端运动意图"，各数据集自己的 de-normalize 再把意图翻译成具体关节命令。
 
-符号化一点：设真实条件分布可分解为 $p_k(b\mid o,\ell)=p_{shared}(b\mid o,\ell)\cdot p_{k,calib}(b\mid o,\ell)$，其中共享部分是任务语义、calibration 部分是各机器人的标定/坐标系差异。混合训练让大容量模型先拟合 $p_{shared}$（数据量大、跨域一致），小容量或单域模型则被 $p_{k,calib}$ 的噪声淹没。这就解释了 Q2：
+符号化一点：设真实条件分布可分解为 $p_k(b\mid o,\ell)=p_{shared}(b\mid o,\ell)\cdot p_{k,calib}(b\mid o,\ell)$ ，其中共享部分是任务语义、calibration 部分是各机器人的标定/坐标系差异。混合训练让大容量模型先拟合 $p_{shared}$ （数据量大、跨域一致），小容量或单域模型则被 $p_{k,calib}$ 的噪声淹没。这就解释了 Q2：
 
 ### 3) 容量 vs 混合熵：RT-1-X 的 underfit
 
-小数据域 $k$（如 NYU Door Opening、Kitchen Manipulation）：单域样本 $n_k$ 小，估计方差 $\propto 1/n_k$；混合训练用共享表示做正则，等效样本量放大 → 平均 +50%（5 个小域中 4 个打败原作者的专用方法）。
+小数据域 $k$ （如 NYU Door Opening、Kitchen Manipulation）：单域样本 $n_k$ 小，估计方差 $\propto 1/n_k$ ；混合训练用共享表示做正则，等效样本量放大 → 平均 +50%（5 个小域中 4 个打败原作者的专用方法）。
 
-大域（Bridge、Google Robot 数据）：混合分布的熵 $H(\mathcal D_{mix})\gg H(\mathcal D_k)$，35M 的 RT-1 容量 $C$ 成为瓶颈——bias-variance 分解里 bias 项下不去，表现为 underfit（Bridge：RT-1-X 27% < 单域 RT-1 40%；RT-1 6 技能：73% < 92%）。换 55B 的 RT-2-X 后容量够了，Bridge 上 50% 反超单域 RT-1 的 40%。
+大域（Bridge、Google Robot 数据）：混合分布的熵 $H(\mathcal D_{mix})\gg H(\mathcal D_k)$ ，35M 的 RT-1 容量 $C$ 成为瓶颈——bias-variance 分解里 bias 项下不去，表现为 underfit（Bridge：RT-1-X 27% < 单域 RT-1 40%；RT-1 6 技能：73% < 92%）。换 55B 的 RT-2-X 后容量够了，Bridge 上 50% 反超单域 RT-1 的 40%。
 
-**Scaling 启示**：数据混合的收益是**容量条件**的——先有足够的 $C$ 吸收 $H(\mathcal D_{mix})$，混合才从"噪声"变成"正则"。这也是为什么 RT-X 论文的标题把 Datasets 放在 Models 前面： infra（数据统一）先行，但模型容量必须跟上。
+**Scaling 启示**：数据混合的收益是**容量条件**的——先有足够的 $C$ 吸收 $H(\mathcal D_{mix})$ ，混合才从"噪声"变成"正则"。这也是为什么 RT-X 论文的标题把 Datasets 放在 Models 前面： infra（数据统一）先行，但模型容量必须跟上。
 
 ### 4) Emergent skills：联合分布外推 + 移除式因果归因
 
-定义迁移量 $\Delta = \mathrm{succ}(\text{RT-2-X}) - \mathrm{succ}(\text{RT-2})$，在 Google Robot 上评估、但任务来自 Bridge/WidowX 数据集（RT-2 自己的训练数据里没有这些技能/物体）。这是**联合分布外推**：测试点 $(o,\ell)_{test}$ 在机器人 $i$ 的数据支撑之外、在机器人 $j$ 的数据支撑之内。
+定义迁移量 $\Delta = \mathrm{succ}(\text{RT-2-X}) - \mathrm{succ}(\text{RT-2})$ ，在 Google Robot 上评估、但任务来自 Bridge/WidowX 数据集（RT-2 自己的训练数据里没有这些技能/物体）。这是**联合分布外推**：测试点 $(o,\ell)_{test}$ 在机器人 $i$ 的数据支撑之外、在机器人 $j$ 的数据支撑之内。
 
-- $\Delta$：27.3% → 75.8%，约 **3×**。
-- 反事实消融：训练混合去掉 Bridge 后 $\Delta$ 坍缩到 42.8%——直接把"WidowX 数据 → Google Robot 技能"这条因果链钉死。这是 Q3 的答案：移除式消融 = do-calculus 的工程近似，$P(\text{skill}\mid do(\text{remove Bridge}))$ 显著下降 ⇒ Bridge 数据是涌现技能的因。
+- $\Delta$ ：27.3% → 75.8%，约 **3×**。
+- 反事实消融：训练混合去掉 Bridge 后 $\Delta$ 坍缩到 42.8%——直接把"WidowX 数据 → Google Robot 技能"这条因果链钉死。这是 Q3 的答案：移除式消融 = do-calculus 的工程近似， $P(\text{skill}\mid do(\text{remove Bridge}))$ 显著下降 ⇒ Bridge 数据是涌现技能的因。
 - 配套消融（Table II）：55B vs 5B（75.8% vs 44.4%）说明迁移量随容量单调增；有/无图像历史（44.4% vs 14.5%）说明时序上下文是迁移的载体之一；无 web 预训练从零训（0%）说明 VLM 语义底座不可或缺——和 Day09 RT-2 的结论一致。
 
 ### 5) 和系统实现的对应
@@ -99,7 +99,7 @@ RT-2-X 再加一层 co-fine-tuning：$\mathcal L=\mathcal L_{VLM}(\text{web})+\m
 
 - 方法在 held-out 上是否 transfer？是——emergent skills 本来就是 held-out 技能/物体的跨机器人评测。模型 vs 框架贡献：**框架贡献占绝对主导**（RT-1-X 架构与 RT-1 完全相同，增益全来自数据混合）。
 - 对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：
-  1. Post-training 数据配方的"混合权重设计"优先于模型改动：OXE 证明同样架构换混合就能 +50% / 3×；做 agent/RL infra 时，SFT/RL 数据的来源混合比例是比改 loss 更早锁定的变量。但注意 OXE 没公开 $w_k$——抄作业时要自己设计权重搜索/消融流程，不能抄数字。
+  1. Post-training 数据配方的"混合权重设计"优先于模型改动：OXE 证明同样架构换混合就能 +50% / 3×；做 agent/RL infra 时，SFT/RL 数据的来源混合比例是比改 loss 更早锁定的变量。但注意 OXE 没公开 $w_k$ ——抄作业时要自己设计权重搜索/消融流程，不能抄数字。
   2. "接口统一先于细节对齐"：7 维动作 contract 让 22 种机器人进同一条训练管线；做 agent harness 时，先定义统一的 action/observation schema（tool call 格式、观测序列化），再谈各环境的精细适配——schema 是规模化的前提。
 - Infra 视角：RLDS/tfrecord + TFDS 加载 + 数据集 spreadsheet（citation/元数据）是社区级数据 infra 的范本；3600 次真机评测是 eval infra 的成本标杆（仿真评测再多，真机 gate 省不掉）；"数据集先行、模型跟进"的节奏值得学——OXE 发布时实验只用了 9/22 种 embodiment，但 infra 一次到位，后续 Octo、π₀、DROID 全是它的下游。
 

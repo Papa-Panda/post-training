@@ -14,17 +14,17 @@
 
 ## 核心
 ### 1. Motivation
-Influence Functions 要 $H^{-1}$，贵、不稳、非凸不成立。作者问：既然模型是 SGD 一步步走出来的，能不能直接看路上谁推了谁一把？理想的 influence 应该是整个轨迹上损失下降的累积。
+Influence Functions 要 $H^{-1}$ ，贵、不稳、非凸不成立。作者问：既然模型是 SGD 一步步走出来的，能不能直接看路上谁推了谁一把？理想的 influence 应该是整个轨迹上损失下降的累积。
 
 ### 2. Data Pipeline
-- 训练时存 $K$ 个 checkpoint $\theta_{t_1}... \theta_{t_K}$，学习率 $\eta_t$
-- 对任一训练点 $z$ 和测试点 $z'$：
+- 训练时存 $K$ 个 checkpoint $\theta_{t_1}... \theta_{t_K}$ ，学习率 $\eta_t$
+- 对任一训练点 $z$ 和测试点 \$z'\$：
   $$ TracIn(z,z') = \sum_{t} \eta_t \nabla L(z',\theta_t)^T \nabla L(z,\theta_t) $$
 - 实际用 TracInCP：只用 checkpoint，忽略同一 checkpoint 内不同 step 的差异，batch 内近似
-- Self-influence：$z'=z$ 时，分数越高，模型越靠死记这条点才能记住它
+- Self-influence： $z'=z$ 时，分数越高，模型越靠死记这条点才能记住它
 
 ### 3. Key Tricks (3个最值得抄的)
-1. **不要Hessian，只要点积**：$\eta \nabla_{test}\cdot\nabla_{train}$ 就是 influence。实现上就是两次 backward，算 cosine/dot，比 Influence Functions 快 10-100x
+1. **不要Hessian，只要点积**： $\eta \nabla_{test}\cdot\nabla_{train}$ 就是 influence。实现上就是两次 backward，算 cosine/dot，比 Influence Functions 快 10-100x
 2. **Checkpoint 选择**：论文用最后几个 + 均匀采样，3-5个就够。实践：早期 checkpoint 抓语法/去重噪声，后期 checkpoint 抓语义难例。对 code 建议：epoch 1,2,末尾 各1个，共3个起步
 3. **Self-influence = 脏数据探测器**：把训练集按 self-influence 排序，top 1% 拿去人工看，基本是 mislabeled / 爬到的孤岛代码 / 极长尾 API / 重复但标签矛盾的数据。Google 用这个清 10% 数据不掉点
 
@@ -36,11 +36,11 @@ Influence Functions 要 $H^{-1}$，贵、不稳、非凸不成立。作者问：
 ## 可迁移
 - **对你现在 coding data 工作的 1-2 个直接可试的点：**
   1. **脏数据过滤器 (今晚就能跑)**：用你 1B proxy 训 3 epoch，存 3 个 checkpoint，算所有训练 code 的 self-influence。Top 2% 导出，看是不是过时语言/错的API/从 StackOverflow 拷的带问号的代码。清掉再训 7B，看 HumanEval 有没有稳
-  2. **合成数据价值评估**：合成的 code 不是全留。用 TracIn：对 LiveCodeBench 难例算 $TracIn(合成样本, 难例)$，平均为正才留。比“过得了单元测试就留”更贴近真实 eval
+  2. **合成数据价值评估**：合成的 code 不是全留。用 TracIn：对 LiveCodeBench 难例算 $TracIn(合成样本, 难例)$ ，平均为正才留。比“过得了单元测试就留”更贴近真实 eval
   3. **冗余 prune**：Helpful 的样本彼此梯度余弦相似度高，只留 1 个，呼应你 infra 省钱思维
 
 - **Infra 视角：**
-  - 不用二阶，天然 DDPer-friendly，checkpoint 存量 $K \times P$，可以只存 LoRA 分支梯度来把成本压到 1/100
+  - 不用二阶，天然 DDPer-friendly，checkpoint 存量 $K \times P$ ，可以只存 LoRA 分支梯度来把成本压到 1/100
   - 可扩展到 RL data：RLHF 偏好数据哪条最有用，用 TracIn 对 reward model 难例打分
 
 ## 疑问 / 下一步
@@ -65,11 +65,11 @@ Influence Functions 要 $H^{-1}$，贵、不稳、非凸不成立。作者问：
 
 这篇真正解决的 data 问题是：**能否不做逐点删数重训、也不求 Hessian 逆，而直接从已经发生的训练轨迹中估计“某条训练数据在什么时候、朝哪个方向改变了某个目标样本的 loss”？**
 
-TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改写成“训练过程中，每次用到这条数据时，它给目标 loss 带来了多少局部变化”。因此它衡量的不是数据的静态质量，而是一个依赖 **目标样本、模型状态和训练路径** 的关系量。对目标 $z'$ 为正，表示该训练点在轨迹上总体与降低 $z'$ 的 loss 同向（proponent）；为负则表示总体抬高了 $z'$ 的 loss（opponent）。这使数据审计从只看规则、loss 或 embedding 相似度，推进到“这条数据实际上怎样推动了训练”。
+TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改写成“训练过程中，每次用到这条数据时，它给目标 loss 带来了多少局部变化”。因此它衡量的不是数据的静态质量，而是一个依赖 **目标样本、模型状态和训练路径** 的关系量。对目标 \$z'\$ 为正，表示该训练点在轨迹上总体与降低 \$z'\$ 的 loss 同向（proponent）；为负则表示总体抬高了 \$z'\$ 的 loss（opponent）。这使数据审计从只看规则、loss 或 embedding 相似度，推进到“这条数据实际上怎样推动了训练”。
 
 ### 2. 图谱位置
 
-- **前驱 — Day 02 Influence Functions**：Influence Functions 在终点 $\hat\theta$ 附近用 $-g_{z'}^\top H^{-1}g_z$ 近似 upweight / delete-one 的反事实，优点是问题定义清晰并有曲率校正，代价是依赖局部最优、Hessian 逆与 damping。TracIn 不回答同一个反事实；它沿实际优化路径累计贡献，不要求收敛，也不需要 $H^{-1}$。
+- **前驱 — Day 02 Influence Functions**：Influence Functions 在终点 $\hat\theta$ 附近用 $-g_{z'}^\top H^{-1}g_z$ 近似 upweight / delete-one 的反事实，优点是问题定义清晰并有曲率校正，代价是依赖局部最优、Hessian 逆与 damping。TracIn 不回答同一个反事实；它沿实际优化路径累计贡献，不要求收敛，也不需要 $H^{-1}$ 。
 - **直接对比 Day 02**：若训练集中有十个近重复样本，删除其中一个的局部反事实可能很小，因此 Influence Functions 会认为单个副本不重要；但每个副本都可能在 SGD 中多次提供同向更新，TracIn 会把这些实际推动记录下来。反过来，TracIn 的排名会随训练顺序、checkpoint 与 optimizer 改变，而 Influence Functions 在给定终点与 damping 下更接近“删掉这一点”的问题。
 - **后继 — Day 04 LESS**：LESS 继承“目标梯度与候选梯度对齐”的骨架，但把目的从解释既有训练转为**为目标任务主动选 SFT 数据**，加入 warmup、LoRA 梯度、Adam-aware 更新与随机投影；它是 selection policy，不是忠实重放训练轨迹。
 - **互补 — Day 05 DataInf**：DataInf 保留 Day 02 的曲率校正思路，用 LoRA 梯度和经验 Fisher 近似来降低求逆成本。TracIn 与 DataInf 不是简单的新旧替代：前者强调 path contribution，后者强调 endpoint counterfactual。
@@ -82,7 +82,7 @@ TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改
 
 $$\mathrm{TracIn}_{ideal}(z,z')=\sum_{t:z_t=z}\big[\ell(w_t,z')-\ell(w_{t+1},z')\big].$$
 
-它有一个重要守恒性质：对全部训练点求和，恰好等于目标样本从训练开始到结束的总 loss 降幅。若 SGD 更新为 $w_{t+1}=w_t-\eta_t\nabla\ell(w_t,z_t)$，对目标 loss 作一阶展开：
+它有一个重要守恒性质：对全部训练点求和，恰好等于目标样本从训练开始到结束的总 loss 降幅。若 SGD 更新为 $w_{t+1}=w_t-\eta_t\nabla\ell(w_t,z_t)$ ，对目标 loss 作一阶展开：
 
 $$\ell(w_t,z')-\ell(w_{t+1},z')\approx \eta_t\nabla\ell(w_t,z')^\top\nabla\ell(w_t,z_t).$$
 
@@ -100,7 +100,7 @@ checkpoint 不是越晚越好：早期 loss 剧烈波动，一阶近似可能差
 
 #### 3.3 Self-influence 到底在测什么
 
-令 $z'=z$：
+令 $z'=z$ ：
 
 $$\mathrm{TracInCP}(z,z)=\sum_k\eta_k\|\nabla\ell(w_{t_k},z)\|_2^2\ge 0.$$
 
@@ -120,7 +120,7 @@ $$\mathrm{TracInCP}(z,z)=\sum_k\eta_k\|\nabla\ell(w_{t_k},z)\|_2^2\ge 0.$$
 
 1. **路径依赖，不等于因果删点**：换随机种子、数据顺序、学习率、optimizer 或 checkpoint，轨迹与排名都会变。高 TracIn 表示在这次路径上同向推动，不保证删除/添加后重训得到同等幅度的变化。
 2. **TracInCP 破坏精确守恒**：理想定义按真实 step 记账并可分解总 loss 降幅；checkpoint 版本把区间压成一个参数点，还假设每点每区间访问一次。重复采样、curriculum、动态混合权重或在线 RL 数据分布都会破坏该近似。
-3. **Adam / momentum 不能直接套 SGD 点积**：真实参数更新包含一阶矩、二阶矩、weight decay、裁剪与调度。若仍用 $\eta g_{target}^\top g_{train}$，解释的是原始梯度对齐，不是实际 optimizer update；Day 04 LESS 的 optimizer-aware 设计正是在补这个缺口。
+3. **Adam / momentum 不能直接套 SGD 点积**：真实参数更新包含一阶矩、二阶矩、weight decay、裁剪与调度。若仍用 $\eta g_{target}^\top g_{train}$ ，解释的是原始梯度对齐，不是实际 optimizer update；Day 04 LESS 的 optimizer-aware 设计正是在补这个缺口。
 4. **高 self-influence 会误伤“难但对”的数据**：罕见 Rust unsafe bug、长上下文 repo repair、稀有 API migration 都可能因高 loss / 大梯度进入异常榜。若没有执行正确性、来源和语言覆盖约束，过滤会把长尾能力洗掉。
 5. **长度与 loss-head 混杂**：token-sum loss 让长答案梯度天然更大；token-mean 又可能掩盖关键错误 token。prompt、reasoning、final answer、tests 若混在一个 loss 中，正负贡献还会相互抵消。
 6. **目标集可被污染或过窄**：拿 HumanEval 当唯一 target，会偏向短函数生成并可能奖励近重复泄漏；“帮助 benchmark”不等于帮助真实 coding。目标必须去污染并按 generation、repair、test、语言长尾分 slice。
@@ -133,7 +133,7 @@ $$\mathrm{TracInCP}(z,z)=\sum_k\eta_k\|\nabla\ell(w_{t_k},z)\|_2^2\ge 0.$$
 1. **先做硬门**：沿 Day 01 做 license、secret/PII、exact/MinHash、benchmark contamination 与 sandbox execution；保留 repo、commit、language、task type 元数据。
 2. **建立去污染目标集**：从 code generation、repo bug repair、test generation、SQL/Rust 等长尾各取 50–100 条，分 slice 保留，不合并成单个平均目标。
 3. **训练 proxy 并选 checkpoint**：用与候选池同分布的 0.5B–1B 模型或 LoRA；从“warmup 后稳定下降、最大 loss-decrease、接近收敛前”取 4–8 个 checkpoint，避开初始震荡和完全收敛尾部。对 LoRA/LM head 梯度作固定 1,024–8,192 维随机投影。
-4. **同时算两类分数**：$S_{self}(z)=\sum_k\eta_k\|Pg_z^k\|^2$ 找高梯度异常；$S_s(z)=\sum_k\eta_k\langle Pg_z^k,Pg_{target,s}^k\rangle$ 看对每个能力 slice 的正负影响。另存 gradient norm 与 cosine，避免“只是因为序列长”主导点积。
+4. **同时算两类分数**： $S_{self}(z)=\sum_k\eta_k\|Pg_z^k\|^2$ 找高梯度异常； $S_s(z)=\sum_k\eta_k\langle Pg_z^k,Pg_{target,s}^k\rangle$ 看对每个能力 slice 的正负影响。另存 gradient norm 与 cosine，避免“只是因为序列长”主导点积。
 5. **只 quarantine，不硬删**：优先人工/执行检查“高 self + 多个 slice 稳定负向”的交集，并把错答案、伪通过测试、过时 API、依赖不可复现、benchmark 泄漏、有效长尾分别标注。对 checkpoint / seed 排名不稳定的样本降置信度。
 6. **固定 token budget 验证**：比较随机、规则门、规则门+TracIn quarantine、Day 04 LESS targeted selection 四组；报告 clean pass@1、repo repair、test generation、长尾语言、污染命中率和单位 GPU-hour 收益。只有当删数收益跨 seed 超过置信区间且长尾 slice 不退化，才把 TracIn 从审计队列升级为自动 data gate。
 
@@ -160,7 +160,7 @@ $$\mathrm{TracInCP}(z,z)=\sum_k\eta_k\|\nabla\ell(w_{t_k},z)\|_2^2\ge 0.$$
 
 $$g_z=\nabla_\theta L(z,\theta),\qquad g_*=\nabla_\theta L(z_{\mathrm{target}},\theta),$$
 
-其中 $z$ 是候选训练样本，$z_{\mathrm{target}}$ 是目标/验证样本。SGD 公式中的 $z_t$ 若出现，只表示第 $t$ 个训练 step 采到的数据，不能与 target 混用。
+其中 $z$ 是候选训练样本， $z_{\mathrm{target}}$ 是目标/验证样本。SGD 公式中的 $z_t$ 若出现，只表示第 $t$ 个训练 step 采到的数据，不能与 target 混用。
 
 ### 1. TracIn 来自一步 SGD 的 Taylor 展开
 
@@ -208,7 +208,7 @@ $$S_{\mathrm{IF}}(z,z_*)=g_*^\top H^{-1}g_z.$$
 
 $$H=Q\,\mathrm{diag}(\lambda_i)Q^\top,$$
 
-并把 $g_*,g_z$ 在第 $i$ 个特征方向上的分量记为 $a_i,b_i$，则：
+并把 $g_*,g_z$ 在第 $i$ 个特征方向上的分量记为 $a_i,b_i$ ，则：
 
 $$S_{\mathrm{TracIn}}\propto\sum_i a_i b_i,$$
 
@@ -222,7 +222,7 @@ TracIn 对各方向使用普通点积；Influence 会放大低曲率的平坦方
 
 $$H^{-1}\approx\eta\sum_{j=0}^{\infty}(I-\eta H)^j.$$
 
-右边表示一次参数扰动在后续优化中不断传播、衰减后的累计效果。因此 Influence 可看成局部动力学走到新平衡点后的总响应；TracIn 则在真实训练轨迹上对即时作用取样记账。真实 trajectory 会隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式且精确的 $H^{-1}$。
+右边表示一次参数扰动在后续优化中不断传播、衰减后的累计效果。因此 Influence 可看成局部动力学走到新平衡点后的总响应；TracIn 则在真实训练轨迹上对即时作用取样记账。真实 trajectory 会隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式且精确的 $H^{-1}$ 。
 
 若使用 Adam 或 momentum，更准确的一步 target loss 变化应写成：
 
@@ -236,7 +236,7 @@ $$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z,$$
 
 ### Q：TracIn 的数学怎么做
 
-记号：$z=(x,y)$ 为训练样本，$z_{\text{target}}$ 为目标样本，$z_t$ 为第 $t$ 步实际采到的数据。
+记号： $z=(x,y)$ 为训练样本， $z_{\text{target}}$ 为目标样本， $z_t$ 为第 $t$ 步实际采到的数据。
 
 TracIn 的问题：**在真实的训练路径上，训练样本 $z$ 在哪一步、朝哪个方向改变了目标 loss？**它不问"删掉它会怎样"（那是 Influence 的问题），也不问"文本有多像"（那是 BM25 的问题），而是问训练中**实际发生过什么**。
 
@@ -264,10 +264,10 @@ $$S_{\text{TracInCP}}(z,z)=\sum_k\eta_k\|g(z,\theta_{t_k})\|_2^2\ge 0$$
 
 永远非负，本质是**沿训练路径累计的梯度能量**。错标数据常因长期难拟合而梯度大，排名靠前；但正确的长尾/长 sequence/难题也一样——它是**人工审计优先级**，不是自动删除的判决。
 
-**与 Influence 的数学关系**（呼应本 NOTES"数学补充"第 3 节）：把 $g_*,g_z$ 在 Hessian 特征方向上的分量记为 $a_i,b_i$、曲率为 $\lambda_i$，则
+**与 Influence 的数学关系**（呼应本 NOTES"数学补充"第 3 节）：把 $g_*,g_z$ 在 Hessian 特征方向上的分量记为 $a_i,b_i$ 、曲率为 $\lambda_i$ ，则
 
 $$S_{\text{IF}}=\sum_i\frac{a_i b_i}{\lambda_i},\qquad S_{\text{TracIn}}\propto\sum_i a_i b_i$$
 
-TracIn 对所有方向做普通点积；Influence 用 $1/\lambda_i$ 做曲率校正。Influence 是**一次扰动经未来优化传播后的总效果**，TracIn 是**真实训练路径上的即时记账**（真实 trajectory 隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式精确的 $H^{-1}$）。
+TracIn 对所有方向做普通点积；Influence 用 $1/\lambda_i$ 做曲率校正。Influence 是**一次扰动经未来优化传播后的总效果**，TracIn 是**真实训练路径上的即时记账**（真实 trajectory 隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式精确的 $H^{-1}$ ）。
 
 一句话：**TracIn 是 loss 降幅的训练路径分解；Influence 是删点权重变化的重新优化响应。**

@@ -2,7 +2,7 @@
 
 ## Connection to Prev
 
-r2-Day08 把 reduction 的中间量从 global hotspot 收回到 block/warp；r2-Day09 把同一原则扩展到 $C=AB$：先把 $A/B$ 子块搬进 shared memory，再让一个 tile 内的线程反复复用。**牺牲** shared memory、barrier、边界处理与更复杂布局，**换取**约 $T$ 倍的理想 global-load 降幅和更高算术强度；当矩阵很小/瘦、tile 降低 occupancy、布局导致 bank conflict，或库已能直接调用时，手写 tiled kernel 不赚。
+r2-Day08 把 reduction 的中间量从 global hotspot 收回到 block/warp；r2-Day09 把同一原则扩展到 $C=AB$ ：先把 $A/B$ 子块搬进 shared memory，再让一个 tile 内的线程反复复用。**牺牲** shared memory、barrier、边界处理与更复杂布局，**换取**约 $T$ 倍的理想 global-load 降幅和更高算术强度；当矩阵很小/瘦、tile 降低 occupancy、布局导致 bank conflict，或库已能直接调用时，手写 tiled kernel 不赚。
 
 ## 1. GEMM 的 shape 与工作量
 
@@ -14,7 +14,7 @@ $$A\in\mathbb{R}^{M\times K},\quad B\in\mathbb{R}^{K\times N},\quad C=AB\in\math
 
 $$C_{ij}=\sum_{q=0}^{K-1}A_{iq}B_{qj}$$
 
-共有 $MNK$ 次 multiply-add；按 GEMM 常用口径“一乘一加算 2 FLOPs”，理论工作量为
+共有 \$MNK\$ 次 multiply-add；按 GEMM 常用口径“一乘一加算 2 FLOPs”，理论工作量为
 
 $$F=2MNK\ \text{FLOPs}$$
 
@@ -32,7 +32,7 @@ $$I_{naive}=\frac{2MNK}{4(2MNK+MN)}\ \text{FLOP/byte}$$
 
 ### Shared-memory tile：一个 block 算 $T\times T$ 输出
 
-对整除尺寸，每个 output tile 在每个 $K$-tile 阶段只加载 $T^2$ 个 $A$ 和 $T^2$ 个 $B$ 元素，然后在 block 内复用：
+对整除尺寸，每个 output tile 在每个 $K$ -tile 阶段只加载 $T^2$ 个 $A$ 和 $T^2$ 个 $B$ 元素，然后在 block 内复用：
 
 $$L_{tiled}=\frac{M}{T}\frac{N}{T}\frac{K}{T}(2T^2)=\frac{2MNK}{T}$$
 
@@ -40,21 +40,21 @@ $$L_{tiled}=\frac{M}{T}\frac{N}{T}\frac{K}{T}(2T^2)=\frac{2MNK}{T}$$
 
 $$S_{shared}=2T^2\times 4\ \text{bytes}$$
 
-本课 CUDA 代码取 $T=16$，即 $2\times16^2\times4=2048$ bytes/block。它不是 Tensor Core kernel：每个 thread 仍用 FP32 scalar FMA 累加一个输出。
+本课 CUDA 代码取 $T=16$ ，即 $2\times16^2\times4=2048$ bytes/block。它不是 Tensor Core kernel：每个 thread 仍用 FP32 scalar FMA 累加一个输出。
 
 ## 3. 可手算例子
 
-数值先算 $2\times2$：
+数值先算 $2\times2$ ：
 
 $$A=\begin{bmatrix}1&2\\3&4\end{bmatrix},\quad B=\begin{bmatrix}5&6\\7&8\end{bmatrix}$$
 
 $$C=AB=\begin{bmatrix}1\cdot5+2\cdot7&1\cdot6+2\cdot8\\3\cdot5+4\cdot7&3\cdot6+4\cdot8\end{bmatrix}=\begin{bmatrix}19&22\\43&50\end{bmatrix}$$
 
-再算流量：$M=N=K=4,T=2$。
+再算流量： $M=N=K=4,T=2$ 。
 
-- 工作量：$2MNK=128$ FLOPs；输出 store 为 $MN=16$ 个 scalar。
-- naive：$2MNK=128$ 个 scalar loads，FP32 payload $4(128+16)=576$ bytes，$I=128/576\approx0.222$ FLOP/byte。
-- tiled：$2MNK/T=64$ 个 scalar loads，payload $4(64+16)=320$ bytes，$I=128/320=0.4$ FLOP/byte。
+- 工作量： $2MNK=128$ FLOPs；输出 store 为 $MN=16$ 个 scalar。
+- naive： $2MNK=128$ 个 scalar loads，FP32 payload $4(128+16)=576$ bytes， $I=128/576\approx0.222$ FLOP/byte。
+- tiled： $2MNK/T=64$ 个 scalar loads，payload $4(64+16)=320$ bytes， $I=128/320=0.4$ FLOP/byte。
 
 这只是**无 cache 的 theoretical payload model**；不能写成实际 DRAM bytes、带宽或 speedup。
 
@@ -93,7 +93,7 @@ $$\text{ratio}=\frac{\text{TFLOP/s}_{tiled}}{\text{TFLOP/s}_{cuBLAS}}\ge 0.5$$
 
 ## 状态
 
-- 已验证：Python 语法、8 个 CPU 单元测试、naive/tiled 数值一致、矩形与非整除 edge tile、$4^3,T=2$ 的 FLOPs/traffic/算术强度。
+- 已验证：Python 语法、8 个 CPU 单元测试、naive/tiled 数值一致、矩形与非整除 edge tile、 $4^3,T=2$ 的 FLOPs/traffic/算术强度。
 - **execution not validated on CUDA/H100 / 待H100验证**：环境无 `nvcc`/CUDA GPU/cuBLAS；CUDA 编译、kernel 正确性、CUDA events、Nsight Compute、实际带宽/occupancy/TFLOP/s、以及相对 cuBLAS 50% 目标均未验证。
 - 本课状态保持 `blocked`；没有声称 loss、耗时、带宽、comm%、MFU、设备拓扑或 benchmark speedup。
 

@@ -9,11 +9,11 @@
 
 ## 1. 稳定—可塑性不是附加指标
 
-目标域数据梯度为 $g_d$，保护集梯度为 $g_p$。一步 SGD 后：
+目标域数据梯度为 $g_d$ ，保护集梯度为 $g_p$ 。一步 SGD 后：
 
 $$L_p(\theta-\eta g_d) \approx L_p(\theta)-\eta g_p^\top g_d.$$
 
-若 $g_p^\top g_d<0$，目标域更新会一阶增加保护集损失，即梯度冲突。高 target relevance 并不排除这种冲突。
+若 $g_p^\top g_d<0$ ，目标域更新会一阶增加保护集损失，即梯度冲突。高 target relevance 并不排除这种冲突。
 
 ## 2. GrADS：用梯度统计找“模型需要”的数据
 
@@ -63,7 +63,7 @@ $$\mathrm{risk}_{\mathrm{retain}}(x) = \max\{0,-\cos(g_x,g_{\mathrm{protected}})
 - $\bar g_S$ 由 selector 内生决定，问“会不会抵消当前训练集合”；
 - $g_{\mathrm{protected}}$ 由安全、通用能力或旧任务目标外生定义，问“会不会损害必须保留的能力”。
 
-若 $g_x=\bar g_S=-g_{\mathrm{protected}}$，则 SPICE conflict 为 0，但 retention risk 为 1。集合内部高度协调，完全可能一致地朝损害旧能力的方向更新。因此 SPICE 可作为 optimization-coherence 项，不能代替 held-out retention anchor、回放或安全评估。更完整的 Fisher/sign 分析见 [`09_spice_information_conflict.md`](09_spice_information_conflict.md)。
+若 $g_x=\bar g_S=-g_{\mathrm{protected}}$ ，则 SPICE conflict 为 0，但 retention risk 为 1。集合内部高度协调，完全可能一致地朝损害旧能力的方向更新。因此 SPICE 可作为 optimization-coherence 项，不能代替 held-out retention anchor、回放或安全评估。更完整的 Fisher/sign 分析见 [`09_spice_information_conflict.md`](09_spice_information_conflict.md)。
 
 ## 5. 与 GradAlign 的区别
 

@@ -79,7 +79,7 @@ graph TD
 - **第一层 06-13天 CUDA**：GPU存储 寄存器>ShMem>L1/L2>HBM，coalesced，最朴素Reduce→Shuffle，Tiled GEMM 50% cuBLAS，FlashAttention tiling+online softmax，Triton fused，Nsight System看host拖后+Compute看SOL
 - **第二层 14-19天 分布式**：MHA→MLA省KV，7B FP16 14GB+Adam 56GB单80GB判断，ZeRO三句区分，64卡TP=8机内PP=4 DP=2为何TP不能跨机，BF16指数8位vs 5位，Megatron/DeepSpeed/FSDP一句选型，DCP async ckpt
 - **第三层 21-32天 推理**：Compute vs Memory bound，7B 2*32*32*128*4096*16*2B≈32GB cache，vLLM Paged虚拟页，Static vs Continuous 30%→80%，Shared前缀复用，长prefill分块防拖慢，真机部署对比表，70B 2*A100 140GB→INT4 35GB压法，INT4慢于INT8边界，Spec实习生草稿+主编验证无偏，DistServe/Splitwise网约车分拣，Goodput才等于体验，GenAI-Perf一键6指标，TPOT P95退化5%即block
-- **Portfolio 33-45天 post-training 连接**：RLHF vs GRPO、RM 校准、ToolUse 失败分类、训练→vLLM 流水线、异步评测、$/useful rollout、coding-data flywheel、端到端 demo 与系统设计复盘
+- **Portfolio 33-45天 post-training 连接**：RLHF vs GRPO、RM 校准、ToolUse 失败分类、训练→vLLM 流水线、异步评测、\$/useful rollout、coding-data flywheel、端到端 demo 与系统设计复盘
 
 ---
 
@@ -113,7 +113,7 @@ graph TD
 - 27-29 Spec Decoding + 实测场景
 - 29-31 Disagg + Goodput配比1:3
 - 31-32 Benchmark 6指标+门禁
-- 33-40 RL芯连接：GRPO/RM σ/ECE/ToolUse 5失败/vLLM联动/async eval/$有用/coding flywheel/Star故事
+- 33-40 RL芯连接：GRPO/RM σ/ECE/ToolUse 5失败/vLLM联动/async eval/\$有用/coding flywheel/Star故事
 - 41-45 E2E Demo+系统设计+复盘+最终总结
 
 ---

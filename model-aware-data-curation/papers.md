@@ -6,7 +6,7 @@
 
 | Year | Paper | Role here | Existing note / source |
 |---|---|---|---|
-| 2017 | **Understanding Black-box Predictions via Influence Functions** | $H^{-1}$-corrected attribution | [note](../ai-data/day-02-2017-influence-functions/NOTES.md) · [arXiv](https://arxiv.org/abs/1703.04730) |
+| 2017 | **Understanding Black-box Predictions via Influence Functions** | $H^{-1}$ -corrected attribution | [note](../ai-data/day-02-2017-influence-functions/NOTES.md) · [arXiv](https://arxiv.org/abs/1703.04730) |
 | 2020 | **Estimating Training Data Influence by Tracing Gradient Descent** (TracIn) | checkpoint gradient-dot-product attribution | [note](../ai-data/day-03-2020-tracin/NOTES.md) · [arXiv](https://arxiv.org/abs/2002.08484) |
 | 2024 | **LESS: Selecting Influential Data for Targeted Instruction Tuning** | reusable low-rank, optimizer-aware gradient store; target selection | [note](../ai-data/day-04-2024-less/NOTES.md) · [arXiv](https://arxiv.org/abs/2402.04333) |
 | 2024 | **DataInf: Efficiently Estimating Data Influence in LoRA-tuned LLMs and Diffusion Models** | LoRA/Fisher-efficient influence | [note](../ai-data/day-05-2024-datainf/NOTES.md) · [arXiv](https://arxiv.org/abs/2310.00902) |
@@ -41,11 +41,11 @@ Verified from paper v2 and the official repository:
 - gradient-free instruction-tuning data selection: a candidate is used as an ICL demonstration and valued by its perplexity improvement on an independent assessment set;
 - a semantically meaningless random sequence of the same length is used as the context baseline, and the improvement is normalized by the target sample's base perplexity;
 - task-level contributions are averaged over the assessment set to form global-RICo;
-- direct scoring costs $O(nm)$ inference calls for $n$ assessment samples and $m$ candidates; the paper labels a scored subset, trains a LoRA selection classifier, and scans the full pool in $O(m)$;
+- direct scoring costs $O(nm)$ inference calls for $n$ assessment samples and $m$ candidates; the paper labels a scored subset, trains a LoRA selection classifier, and scans the full pool in $O(m)$ ;
 - the abstract reports that, on LLaMA3.1-8B, 15% RICo-selected data exceeds full-data training by 5.42 average percentage points and exceeds common selection baselines by 2.06 points;
 - selected samples are empirically diverse and tend toward moderate-to-high rather than extreme difficulty.
 
-Boundary: ICL does not reproduce batch SGD dynamics, so RICo is a functional proxy for training contribution, not a causal proof of it. Equal-weight averaging makes the assessment-set composition the operational definition of value; pointwise top-$k$ does not guarantee set-level coverage. The learned classifier adds a second proxy layer and may absorb surface style or source cues.
+Boundary: ICL does not reproduce batch SGD dynamics, so RICo is a functional proxy for training contribution, not a causal proof of it. Equal-weight averaging makes the assessment-set composition the operational definition of value; pointwise top- $k$ does not guarantee set-level coverage. The learned classifier adds a second proxy layer and may absorb surface style or source cues.
 
 ### SPICE (2026, ICLR)
 
@@ -57,12 +57,12 @@ Verified from the ICLR 2026 paper and official repository:
 - selects SFT subsets by combining Fisher/log-det marginal information gain with a negative-cosine penalty against the selected-set mean gradient;
 - pure Fisher/log-det is monotone submodular and supports the classical greedy approximation guarantee;
 - the paper's interaction bound depends on squared gradient inner products, while the implemented conflict penalty is sign-sensitive;
-- supports proxy gradients and SPICE+ early stopping; the paper uses default conflict weight $\lambda=0.1$ and stopping ratio $\omega=0.5$;
+- supports proxy gradients and SPICE+ early stopping; the paper uses default conflict weight $\lambda=0.1$ and stopping ratio $\omega=0.5$ ;
 - training pool is about 97.5K examples from math, code, ShareGPT and Alpaca; fixed-budget experiments select 10%;
 - across 8 benchmarks, Qwen2-7B averages 58.0 versus 56.4 for full-data, while LLaMA2-7B averages 31.1 versus 30.8 for full-data;
 - same-family proxy transfer is substantially more reliable than the reported LLaMA-proxy to Qwen2-7B transfer.
 
-Boundary: SPICE measures gradient-space information coverage and selected-set optimization coherence. Its selected-set conflict is not a protected-set retention objective. The submodular/curvature guarantee for pure Fisher/log-det greedy does not fully establish the actual sign-sensitive penalized score. Table 2 labels the LLaMA2 average improvement as `+1.8`, but the displayed averages differ by $31.1-30.8=0.3$; `1.8` is the sum of the eight per-benchmark differences, not their average.
+Boundary: SPICE measures gradient-space information coverage and selected-set optimization coherence. Its selected-set conflict is not a protected-set retention objective. The submodular/curvature guarantee for pure Fisher/log-det greedy does not fully establish the actual sign-sensitive penalized score. Table 2 labels the LLaMA2 average improvement as `+1.8`, but the displayed averages differ by $31.1-30.8=0.3$ ; `1.8` is the sum of the eight per-benchmark differences, not their average.
 
 ### Prismatic Synthesis / G-Vendi (2025, NeurIPS)
 
@@ -73,10 +73,10 @@ Verified from paper v2:
 
 - empirical analysis spans **more than 300 training runs/models**, with scale and quality controlled;
 - synthetic pool exceeds **3 million samples**;
-- G-Vendi reaches **Spearman $\rho\approx0.9$** with OOD performance on both NLI and math reasoning;
+- G-Vendi reaches **Spearman $\rho\approx0.9$ ** with OOD performance on both NLI and math reasoning;
 - gradient sketch uses Rademacher random projection with $d=1024$ in experiments;
 - proxy is not the final student nor the 32B/72B generator; main setup uses **Qwen2.5-0.5B-Instruct** with off-the-shelf weights and no extra warm-up/fine-tuning; per-sample full-parameter normalized NLL gradient is projected to 1024 dims for G-Vendi and clustering;
-- ablated proxy correlation with OOD: Llama-3.2-1B-Instruct $\rho=0.909$, Qwen2.5-0.5B-Instruct $\rho=0.898$, Qwen2.5-0.5B base $\rho=0.772$, indicating instruction-tuned proxy is substantially better than base while family effect is modest;
+- ablated proxy correlation with OOD: Llama-3.2-1B-Instruct $\rho=0.909$ , Qwen2.5-0.5B-Instruct $\rho=0.898$ , Qwen2.5-0.5B base $\rho=0.772$ , indicating instruction-tuned proxy is substantially better than base while family effect is modest;
 - process: gradient-space clustering → few-shot generation → keep sparse-cluster samples;
 - final datasets: **1.0M** Nemotron-PrismMath pairs and **515K** PrismNLI pairs;
 - PrismMath-7B result is better than R1-Distill-Qwen-7B on **6 of 7** listed benchmarks; PrismNLI improves average OOD accuracy by **8 percentage points** over the best prior mixture in the paper.
@@ -123,10 +123,10 @@ Boundary: recent preprint aimed at non-stationary LLM RL; do not conflate with t
 | TRAK reduces “thousands of models” to “a handful” | verified, exact original wording; no fixed count asserted |
 | RICo uses same-length random context control and reduces distilled full-pool scanning from $O(nm)$ to $O(m)$ | verified |
 | RICo proves ICL contribution equals SGD training contribution | **not claimed** |
-| RICo pointwise top-$k$ guarantees diversity/coverage | **not claimed** |
+| RICo pointwise top- $k$ guarantees diversity/coverage | **not claimed** |
 | Prismatic uses 300+ training runs/models | verified |
 | G-Vendi–OOD Spearman $\rho\approx0.9$ on NLI and math | verified |
-| Gradient proxy is Qwen2.5-0.5B-Instruct (no warm-up) with full-param NLL gradient → 1024-dim Rademacher projection; proxy ablation $\rho=0.909$ / $0.898$ / $0.772$ | verified |
+| Gradient proxy is Qwen2.5-0.5B-Instruct (no warm-up) with full-param NLL gradient → 1024-dim Rademacher projection; proxy ablation $\rho=0.909$ / \$0.898 $ / $ 0.772\$ | verified |
 | Prismatic sparse-gradient-cluster loop | verified |
 | SPICE uses 10% of its roughly 97.5K pool in fixed-budget experiments | verified |
 | Pure Fisher/log-det is sign-blind, while SPICE's practical conflict penalty is sign-sensitive | verified from equations |

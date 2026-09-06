@@ -14,9 +14,9 @@ Transfer to agent:
 ### 1. LM-level
 
 - **Perplexity**: `exp(avg NLL)` — 只能测 fluency
-- **JS Divergence** $D_{JS}(P_{orig} || P_{comp})$: 测压缩后 next-token 分布偏移，来自 [2402.00861] compression as eval
+- **JS Divergence** $D_{JS}(P_{orig} || P_{comp})$ : 测压缩后 next-token 分布偏移，来自 [2402.00861] compression as eval
 
-  公式 $JS = 0.5 KL(P||M)+0.5 KL(Q||M)$，$M=(P+Q)/2$。JS 小 = 压缩保真度好。但仍不 capture artifact loss。
+  公式 $JS = 0.5 KL(P||M)+0.5 KL(Q||M)$ ， $M=(P+Q)/2$ 。JS 小 = 压缩保真度好。但仍不 capture artifact loss。
 
 ### 2. Retrieval-level
 

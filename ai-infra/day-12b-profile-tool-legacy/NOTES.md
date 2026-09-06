@@ -1,6 +1,6 @@
 # NOTES — Day 17 Profile Tool
 
-> Connection to Prev: Day16 Monetization Story v1 → Day17 Profile Tool: ROI故事算清了$/useful但没定位通信是AllReduce还是AllGather热点，需要profiler拆compute vs comm；Day15 Megatron 3D的TP4+PP2决策坑在今天用torch.profiler + gloo all_reduce SUM/2验证 + per-block 32×1.99ms真数解决。
+> Connection to Prev: Day16 Monetization Story v1 → Day17 Profile Tool: ROI故事算清了\$/useful但没定位通信是AllReduce还是AllGather热点，需要profiler拆compute vs comm；Day15 Megatron 3D的TP4+PP2决策坑在今天用torch.profiler + gloo all_reduce SUM/2验证 + per-block 32×1.99ms真数解决。
 
 Date: 2026-08-17 (Infra Systems / PyTorch Distributed / Profile Tool) — actually 2026-08-21 delivery
 
@@ -50,7 +50,7 @@ Bonus (from profile_result.json):
 
 ### 真机待补 3数对照（Day15/Day16 复用）
 - Day15 7B G=2 DP 9.1GB vs TP2 8.62GB train 21.66GB comm 7.6% — profiler应显示 comm 7-8% wall，真机NCCL测
-- Day16 queue p50 0.123 p95 0.385→0.12 save 68.8% + thermal Tj 90.5→82.49 throttle 2.5→0.83 delta 1.67pp + cost PUE 1.2576 $/useful 0.000244→0.00019 save 22.1%
+- Day16 queue p50 0.123 p95 0.385→0.12 save 68.8% + thermal Tj 90.5→82.49 throttle 2.5→0.83 delta 1.67pp + cost PUE 1.2576 \$/useful 0.000244→0.00019 save 22.1%
 - Day03 per-block 32×1.99ms 峰值14.2GB→9.1GB -35% — 今天profiler应把1.99ms拆成compute 1.2ms + comm 0.79ms proxy，待H100验证
 
 ## 待H100 NCCL
@@ -116,4 +116,4 @@ Bonus (from profile_result.json):
 
 ## Connection 一句话（用于 ai_daily.csv Notes）
 
-Day16 Monetization 150字ROI故事省$200M方法论 → Day17 Profile用profiler把AllGather 60% vs ReduceScatter 40%拆开证明切分热点，CPU proxy comm 46.5%真机预期7-15%，per-block 32×1.99ms峰值-35%复用Day03。
+Day16 Monetization 150字ROI故事省\$200M方法论 → Day17 Profile用profiler把AllGather 60% vs ReduceScatter 40%拆开证明切分热点，CPU proxy comm 46.5%真机预期7-15%，per-block 32×1.99ms峰值-35%复用Day03。

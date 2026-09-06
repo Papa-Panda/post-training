@@ -17,7 +17,7 @@
   - crash-epoch1 手动 raise → 重启自动从 epoch0→1 恢复 loss 2.276 valid
 - 待 H100：`torch.cuda.max_memory_allocated()` 对比峰值，DCP 并行写 NVMe throughput, tokens/sec 无影响
 
-**迁移点**：checkpoint 是“预测失败 + 自动读档”，跟你之前做 SLO 压测里“预测瓶颈 + 重试”同构，都是把 MTTR 从小时级压到分钟级，直接折算成 $/GPU-hour。
+**迁移点**：checkpoint 是“预测失败 + 自动读档”，跟你之前做 SLO 压测里“预测瓶颈 + 重试”同构，都是把 MTTR 从小时级压到分钟级，直接折算成 \$/GPU-hour。
 
 ---
 
@@ -42,7 +42,7 @@
 - **点2 sandbox 起停**：每次 eval 起 docker / firecracker，冷启动 5-10s，热启动缓存命中低
 - **点3 同步 HumanEval/MBPP**：小模型改动 0.42→0.47 (+5%) 这种小提升也要跑全量 3h 才能看，block train
 
-=> 结果：eval P95 8-15min，train GPU idle 12-18%，每月浪费 ≈ $(GPU-hour idle)。
+=> 结果：eval P95 8-15min，train GPU idle 12-18%，每月浪费 ≈ \$(GPU-hour idle)。
 
 ### 今晚小专题做啥（30-60min 可跑）
 
@@ -53,7 +53,7 @@
 
 ---
 
-## 三、可迁移链接 — nowcasting & $/有用 rollout
+## 三、可迁移链接 — nowcasting & \$/有用 rollout
 
 **nowcasting 复用 Paper1**：
 - 原：用最近 1-5min QPS + EWMA 预测未来 5-15min burst，提前 10min 预扩容，避免 SLO 跌
@@ -62,9 +62,9 @@
   - 监控指标：`eval_latency_p50`, `queue_depth`, `flaky_rate`, `gpu_idle_seconds`
 
 **COST = new PUE**：
-- PUE 原来：`P_total / P_IT`，目标降 20% = 省 $200M
+- PUE 原来：`P_total / P_IT`，目标降 20% = 省 \$200M
 - RL 新 PUE：`$/有用 rollout = (train$ + vLLM$ + eval$ + 重试$) / 有用rollout数`
-- eval 占 15% 墙钟但 100% 阻塞感知 ⇒ 把 eval 从同步改异步，感知利用率回升 70%，直接折算 $/有用 rollout 降 12-15%
+- eval 占 15% 墙钟但 100% 阻塞感知 ⇒ 把 eval 从同步改异步，感知利用率回升 70%，直接折算 \$/有用 rollout 降 12-15%
 
 **面试一句**：
 > eval 瓶颈不是 eval 本身慢，而是同步 + 重 + 排队，让训练 GPU 空转。破法是 Paper1 的 nowcasting 改成 eval 延迟预测 + 异步/采样/分级，跟 autoscaling 里把稳定负载和波动负载分开调度是一个道理，量化看 P95 和 queue depth，省的是 GPU-hours wasted。

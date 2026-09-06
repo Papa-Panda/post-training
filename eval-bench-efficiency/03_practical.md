@@ -23,7 +23,7 @@
 ##，护栏 Guardrails
 
 1. **Hard subset**: 人工加 20-30 道超难但可验的 coding `hard` (SWE-bench Pro 子集)，mRMR 会倾向简单高方差题，难的要手动保
-2. **Rank correlation monitor**: 每天算 Spearman $\rho$(subset vs weekly full-proxy)，<0.95 报警
+2. **Rank correlation monitor**: 每天算 Spearman $\rho$ (subset vs weekly full-proxy)，<0.95 报警
 3. **Disjoint repeat**: metabench 论文也建议留 repeat 版本避免过拟合到公开子集，Factory 那篇压缩评测同理
 4. **Per-task tracking**: agentic RL 的长 horizon (SWE-Marathon) 别只看平均分，看 per-trajectory artifact_trail 完整度，那是 GLM-5.2 讨论的领域
 

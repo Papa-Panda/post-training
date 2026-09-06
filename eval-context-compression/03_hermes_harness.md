@@ -38,8 +38,8 @@ python evaluator.py --fixture fixtures/swe_long_01.jsonl --probes probes/swe_lon
 ## 成本 & 可复现
 
 - 单 fixture: 1 compress + 30 probes answering + 30 judge = ~61 LLM calls
-- 如果用 gpt-4o-mini / claude-haiku，~$0.30 / fixture
-- Repo 自带 3 fixtures，跑全 $1 以内；scale 到 50 fixtures → $15 左右，CI 友好
+- 如果用 gpt-4o-mini / claude-haiku，~\$0.30 / fixture
+- Repo 自带 3 fixtures，跑全 \$1 以内；scale 到 50 fixtures → \$15 左右，CI 友好
 
 ## Signal 是什么？
 

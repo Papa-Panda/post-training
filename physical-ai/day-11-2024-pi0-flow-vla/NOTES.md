@@ -17,7 +17,7 @@
 ## 和之前工作的关系
 
 - **接了哪条线：** Day09 用 RT-2 / OpenVLA 建立“视觉 + 语言 → 动作”的 VLA 总览；Day11 专门深挖连续动作生成这一分支，回答 action token 在高频、双臂、接触丰富任务上的限制。
-- **补了哪个短板：** Day09 的 OpenVLA 把每个动作维度离散成 token，单帧自回归输出 7D action；π₀ 直接建模条件分布 $p(A_t\mid o_t)$，一次联合生成整段 $H=50$ 的连续动作，因此能表达跨时间、跨关节耦合与多峰策略。
+- **补了哪个短板：** Day09 的 OpenVLA 把每个动作维度离散成 token，单帧自回归输出 7D action；π₀ 直接建模条件分布 $p(A_t\mid o_t)$ ，一次联合生成整段 $H=50$ 的连续动作，因此能表达跨时间、跨关节耦合与多峰策略。
 - **替代 / 分叉 / 改进：** π₀ 不替代 Day07/08 的 torque / locomotion 稳定环，也不显式学习 Day04–06 那种环境 transition model；它是低频语义条件与中频 manipulation command 之间的生成式 policy。真实电机安全、力控和碰撞约束仍由底层 controller 兜底。
 - **对之前 Day X 的直接对比：** RT-2 / OpenVLA 的主轴是“动作即 token”，π₀ 的主轴是“动作块即条件生成轨迹”。前者复用 next-token CE infra；后者用 10 次 flow integration 换取连续精度和 action-chunk 联合建模。
 
@@ -42,10 +42,10 @@ $$x_t=(q_t,\dot q_t,\text{object poses},\text{contact modes},\text{friction},\te
 
 $$o_t=[I_t^1,\ldots,I_t^n,\ell_t,q_t].$$
 
-- $I_t^i\in\mathbb{R}^{h\times w\times 3}$：第 $i$ 个 RGB 相机，论文每个平台用 $n=2$ 或 $3$ 个视角。
-- $\ell_t=(w_1,\ldots,w_L)$：长度为 $L$ 的语言 token 序列，既可以是总任务，也可以是约 2 秒粒度的 segment annotation / 高层子指令。
-- $q_t\in\mathbb{R}^{d_q}$：本体状态，主要是关节角；跨机器人训练时 padding 到最大维度 18，并 mask 不存在的 image slot。
-- 单步动作 $a_t\in\mathbb{R}^{d_a}$，整段动作为 $A_t=[a_t,\ldots,a_{t+H-1}]\in\mathbb{R}^{H\times d_a}$；$H=50$，$d_a$ 随 embodiment 变化并 padding 到统一维度。
+- $I_t^i\in\mathbb{R}^{h\times w\times 3}$ ：第 $i$ 个 RGB 相机，论文每个平台用 $n=2$ 或 \$3\$ 个视角。
+- $\ell_t=(w_1,\ldots,w_L)$ ：长度为 $L$ 的语言 token 序列，既可以是总任务，也可以是约 2 秒粒度的 segment annotation / 高层子指令。
+- $q_t\in\mathbb{R}^{d_q}$ ：本体状态，主要是关节角；跨机器人训练时 padding 到最大维度 18，并 mask 不存在的 image slot。
+- 单步动作 $a_t\in\mathbb{R}^{d_a}$ ，整段动作为 $A_t=[a_t,\ldots,a_{t+H-1}]\in\mathbb{R}^{H\times d_a}$ ； $H=50$ ， $d_a$ 随 embodiment 变化并 padding 到统一维度。
 
 行为克隆目标不是预测一个均值动作，而是学习完整条件分布：
 
@@ -59,15 +59,15 @@ $$\pi_\theta(A_t\mid o_t)\approx p_{\mathcal D}(A_t\mid o_t).$$
 
 $$A_t^{\tau}=(1-\tau)\epsilon+\tau A_t,\qquad \tau\in[0,1].$$
 
-对应的目标速度场为 $u=A_t-\epsilon$（若采用反向时间参数化，符号相反），训练 action expert $v_\theta$：
+对应的目标速度场为 $u=A_t-\epsilon$ （若采用反向时间参数化，符号相反），训练 action expert $v_\theta$ ：
 
 $$\mathcal L_{\mathrm{FM}}(\theta)=\mathbb E_{(o_t,A_t)\sim\mathcal D,\epsilon,\tau}\left[\left\|v_\theta(A_t^\tau,o_t,\tau)-(A_t-\epsilon)\right\|_2^2\right].$$
 
-- $A_t^\tau\in\mathbb R^{H\times d_a}$：第 $\tau$ 个 flow time 的 noisy action chunk；这里的 $\tau$ 是生成积分时间，不是机器人控制时间 $t$。
-- $v_\theta\in\mathbb R^{H\times d_a}$：模型预测的整段动作速度场；所有 $H$ 个 action slots 彼此双向 attention，因此关节与时间步联合建模。
+- $A_t^\tau\in\mathbb R^{H\times d_a}$ ：第 $\tau$ 个 flow time 的 noisy action chunk；这里的 $\tau$ 是生成积分时间，不是机器人控制时间 $t$ 。
+- $v_\theta\in\mathbb R^{H\times d_a}$ ：模型预测的整段动作速度场；所有 $H$ 个 action slots 彼此双向 attention，因此关节与时间步联合建模。
 - 论文对 $\tau$ 使用偏向低 $\tau$ / 高噪声区的 shifted Beta 分布，而不是均匀采样；直觉是给定机器人观测后，“从纯噪声找出合理平均动作”并不容易，应增加这一区域的训练权重。
 
-推理从 $A_t^0\sim\mathcal N(0,I)$ 出发，用 10 步 Euler 积分（$\delta=0.1$）：
+推理从 $A_t^0\sim\mathcal N(0,I)$ 出发，用 10 步 Euler 积分（ $\delta=0.1$ ）：
 
 $$A_t^{\tau+\delta}=A_t^\tau+\delta\,v_\theta(A_t^\tau,o_t,\tau).$$
 

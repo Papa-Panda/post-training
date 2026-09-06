@@ -18,7 +18,7 @@ embedding diversity 衡量表面语义或预训练表示上的差异；model-awa
 
 ## 2. Vendi 的共同数学骨架
 
-给定单位化特征 $u_i$，构造核：
+给定单位化特征 $u_i$ ，构造核：
 
 $$K_{ij}=\frac{u_i^\top u_j}{n},\qquad \sum_j\lambda_j(K)=\mathrm{tr}(K)=1.$$
 
@@ -27,12 +27,12 @@ Vendi Score 是谱分布的有效秩：
 $$\mathrm{VS}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$
 
 - 所有方向完全相同：VS 接近 1；
-- $m$ 个正交且均匀方向：VS 接近 $m$；
+- $m$ 个正交且均匀方向：VS 接近 $m$ ；
 - 它不只是平均 pairwise distance，而是看整个方向谱是否被少数主成分支配。
 
 ## 3. G-Vendi：把特征换成 model-induced gradients
 
-Prismatic Synthesis 定义样本表征。这里用的不是最终 student model，也不是负责生成数据的 32B/72B teacher，而是一个单独的 **gradient proxy model**。论文主设置用 **Qwen2.5-0.5B-Instruct**，直接使用现成权重，**不做额外 warm-up 或微调**。对每条 $(x,y)$ 计算整个 proxy 的归一化 NLL 梯度：
+Prismatic Synthesis 定义样本表征。这里用的不是最终 student model，也不是负责生成数据的 32B/72B teacher，而是一个单独的 **gradient proxy model**。论文主设置用 **Qwen2.5-0.5B-Instruct**，直接使用现成权重，**不做额外 warm-up 或微调**。对每条 \$(x,y)\$ 计算整个 proxy 的归一化 NLL 梯度：
 
 $$g_\theta(x,y)= \frac{-\nabla_\theta\log p_\theta(y\mid x)} {\lVert -\nabla_\theta\log p_\theta(y\mid x)\rVert_2},$$
 
@@ -40,15 +40,15 @@ $$g_\theta(x,y)= \frac{-\nabla_\theta\log p_\theta(y\mid x)} {\lVert -\nabla_\th
 
 $$\tilde g_\theta(x,y)=\Pi^\top g_\theta(x,y),\qquad d\ll |\theta|.$$
 
-对 $G=[\tilde g_1;\ldots;\tilde g_n]$，以 $GG^\top/n$（或当 $n\gg d$ 时等价地使用 $G^\top G/n$ 的非零谱）计算 Vendi：
+对 $G=[\tilde g_1;\ldots;\tilde g_n]$ ，以 $GG^\top/n$ （或当 $n\gg d$ 时等价地使用 $G^\top G/n$ 的非零谱）计算 Vendi：
 
 $$\text{G-Vendi}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$
 
 Proxy 选择的已核实对比（论文报告 G-Vendi 与 OOD 表现的 Spearman 相关性）：
 
-- **Llama-3.2-1B-Instruct**：$\rho=0.909$
-- **Qwen2.5-0.5B-Instruct**：$\rho=0.898$
-- **Qwen2.5-0.5B base**：$\rho=0.772$
+- **Llama-3.2-1B-Instruct**： $\rho=0.909$
+- **Qwen2.5-0.5B-Instruct**： $\rho=0.898$
+- **Qwen2.5-0.5B base**： $\rho=0.772$
 
 说明模型家族影响不算大，但 **instruction-tuned proxy 明显好于 base model**；若 proxy 与最终 student 同模型家族，可能更好。这也解释了论文为何强调无需 in-domain warm-up 的小型 instruction-tuned proxy 也可提供有用梯度几何。
 
@@ -104,7 +104,7 @@ $$z^*=\arg\max_{z\notin S} \left[\alpha v(z)+\beta\Delta\log\mathrm{GV}(z\mid S)
 
 ## 7. 证据边界
 
-Prismatic 报告 G-Vendi 与 OOD performance 的 Spearman $\rho\approx0.9$，且在 NLI 和数学推理上观察到；这是受控数据规模/质量下的秩相关。它不意味着：
+Prismatic 报告 G-Vendi 与 OOD performance 的 Spearman $\rho\approx0.9$ ，且在 NLI 和数学推理上观察到；这是受控数据规模/质量下的秩相关。它不意味着：
 
 - 任意任务都能复现 0.9；
 - 最大化 G-Vendi 必然最大化准确率；

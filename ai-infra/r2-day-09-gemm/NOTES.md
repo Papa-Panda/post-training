@@ -2,10 +2,10 @@
 
 ## 准确术语
 
-- **GEMM (General Matrix Multiply)**：通常指 $C\leftarrow\alpha\,op(A)op(B)+\beta C$；本课自写 kernel 固定为 row-major、$\alpha=1,\beta=0$、不转置的 $C=AB$。
-- **Tile / blocking**：把 $M,N,K$ 三个循环按块组织，使一块输入在更近的 memory hierarchy 中被多次使用。
-- **CTA / thread block tile**：一个 CUDA block 协作计算的输出子矩阵；本课是 $16\times16$。
-- **Register accumulator**：每个 thread 的局部 `acc`；遍历所有 $K$ tiles 后才写 global $C$。
+- **GEMM (General Matrix Multiply)**：通常指 $C\leftarrow\alpha\,op(A)op(B)+\beta C$ ；本课自写 kernel 固定为 row-major、 $\alpha=1,\beta=0$ 、不转置的 $C=AB$ 。
+- **Tile / blocking**：把 \$M,N,K\$ 三个循环按块组织，使一块输入在更近的 memory hierarchy 中被多次使用。
+- **CTA / thread block tile**：一个 CUDA block 协作计算的输出子矩阵；本课是 $16\times16$ 。
+- **Register accumulator**：每个 thread 的局部 `acc`；遍历所有 $K$ tiles 后才写 global $C$ 。
 - **Arithmetic intensity**：算法工作量 FLOPs 除以数据移动 bytes；必须注明在哪一级 memory 与如何计数。本课只给理想 FP32 global payload model，不冒充 DRAM counter。
 - **Tensor Core / MMA**：warp 或 warp-group 协作执行 matrix multiply-accumulate 的专用路径；本课 scalar FP32 kernel 没有使用它。
 - **Epilogue**：把 accumulator 转换/缩放并写回输出的阶段；生产 GEMM 常在这里融合 bias、activation 等操作。
@@ -14,12 +14,12 @@
 
 Day08 reduction 用“global → shared → registers”缩小汇合范围；Day09 GEMM 用同一层级扩大复用范围：
 
-1. naive kernel 的多个输出会反复读取同一个 $A_{iq}$ 或 $B_{qj}$；
+1. naive kernel 的多个输出会反复读取同一个 $A_{iq}$ 或 $B_{qj}$ ；
 2. tiled kernel 让一个 block 协作加载 $A/B$ tiles；
 3. `__syncthreads()` 保证 tile 完整后再消费，也保证下一轮覆盖 shared memory 前上一轮消费已结束；
 4. 每个 thread 把自己的 $C_{ij}$ partial sum 留在 register 中跨越全部 $K$ tiles。
 
-**牺牲**：2 个 block barriers/K-tile、shared memory、边界 zero-padding、布局/occupancy 调优复杂度。**换取**：整除模型下，global scalar loads 从 $2MNK$ 降到 $2MNK/T$。**何时不赚**：固定开销主导的小矩阵、极瘦矩阵、低复用/不规则访问、tile 资源压力压低 occupancy，或 cuBLAS/CUTLASS 已覆盖的标准算子。
+**牺牲**：2 个 block barriers/K-tile、shared memory、边界 zero-padding、布局/occupancy 调优复杂度。**换取**：整除模型下，global scalar loads 从 $2MNK$ 降到 $2MNK/T$ 。**何时不赚**：固定开销主导的小矩阵、极瘦矩阵、低复用/不规则访问、tile 资源压力压低 occupancy，或 cuBLAS/CUTLASS 已覆盖的标准算子。
 
 ## 三重循环与 shape
 
@@ -38,10 +38,10 @@ for i in [0, M):
     C[i,j] = acc
 ```
 
-- 输出元素：$MN$；
-- 每元素：$K$ 次乘法和 $K$ 次累加到 zero-initialized accumulator；
-- conventional count：$2MNK$ FLOPs；
-- 数学上若把第一个 product 直接赋值，可写 $MNK$ multiplies 与 $MN(K-1)$ adds，但 GEMM 性能口径仍通常用 $2MNK$。
+- 输出元素：\$MN\$；
+- 每元素： $K$ 次乘法和 $K$ 次累加到 zero-initialized accumulator；
+- conventional count： $2MNK$ FLOPs；
+- 数学上若把第一个 product 直接赋值，可写 \$MNK\$ multiplies 与 $MN(K-1)$ adds，但 GEMM 性能口径仍通常用 $2MNK$ 。
 
 ## 可手算例子 1：数值正确性
 
@@ -56,7 +56,7 @@ $$A=\begin{bmatrix}1&2\\3&4\end{bmatrix},\quad B=\begin{bmatrix}5&6\\7&8\end{bma
 
 `test_hand_computable_two_by_two` 对 naive、tile=1、tile=2 三条真实执行路径都断言此结果。
 
-## 可手算例子 2：$4\times4,T=2$ 流量
+## 可手算例子 2： $4\times4,T=2$ 流量
 
 共有 $2\times2=4$ 个 output tiles，每个 output tile 遍历 $K/T=2$ 个 K-tiles。每阶段加载：
 
@@ -88,17 +88,17 @@ $$I_{tiled}=\frac{128}{4(64+16)}=0.4\ \text{FLOP/byte}$$
 
 ### `gemm_tiled`
 
-每个 $K$-tile：
+每个 $K$ -tile：
 
 1. 每 thread 各加载一个 $A$ 与一个 $B$ scalar；越界位置写 0；
 2. 第一个 `__syncthreads()` 后，任何 thread 才能读取其他线程发布的 tile 值；
 3. inner loop 使用 shared tiles 更新 register `acc`；
 4. 第二个 `__syncthreads()` 防止下一阶段覆盖仍被其他 warp 消费的 tile；
-5. 所有阶段完成后，in-bounds thread 把真实 accumulator 写回 $C$。
+5. 所有阶段完成后，in-bounds thread 把真实 accumulator 写回 $C$ 。
 
 ### cuBLAS row-major 映射
 
-cuBLAS 原生按 column-major 解释指针。row-major 存储中的 $A$ 可被看成 column-major 的 $A^T$，所以 harness 交换输入顺序并计算：
+cuBLAS 原生按 column-major 解释指针。row-major 存储中的 $A$ 可被看成 column-major 的 $A^T$ ，所以 harness 交换输入顺序并计算：
 
 $$C^T=B^TA^T$$
 
@@ -134,7 +134,7 @@ CUDA kernel 对 $M/N/K$ 非 16 整除时，把 out-of-bounds shared entries 置 
 ## 真机验证协议（尚未执行）
 
 - 记录 GPU 型号、SM、clock/power policy、driver、CUDA/cuBLAS 版本；
-- 固定 $M,N,K$、dtype/layout、tile、warmups=5、repeats=21；
+- 固定 \$M,N,K\$、dtype/layout、tile、warmups=5、repeats=21；
 - 保存完整编译命令与原始 stdout；
 - 分别报告 median kernel ms 与按 $2MNK/t$ 计算的 TFLOP/s；
 - 报告相对 cuBLAS ratio，同时保存 `max_abs_error_vs_cublas`；
@@ -144,7 +144,7 @@ CUDA kernel 对 $M/N/K$ 非 16 整除时，把 out-of-bounds shared entries 置 
 ## 验证状态
 
 - 已执行 `py_compile`、8 个 CPU 单元测试和 CPU report。
-- 已核对 shape：$A[M,K]B[K,N]\to C[M,N]$；CUDA 与 CPU 都支持 rectangular/edge shapes。
+- 已核对 shape： $A[M,K]B[K,N]\to C[M,N]$ ；CUDA 与 CPU 都支持 rectangular/edge shapes。
 - 已核对单位：FP32 scalar 为 4 bytes；CUDA event 为 ms；TFLOP/s 公式分母使用 `ms * 1e9`；FLOPs、loads、stores 为无量纲计数。
 - **execution not validated on CUDA/H100 / 待H100验证**：无 `nvcc`/GPU/cuBLAS，CUDA 编译、性能、Nsight 与 ROADMAP 50% cuBLAS 目标均保持 blocked/todo。
 

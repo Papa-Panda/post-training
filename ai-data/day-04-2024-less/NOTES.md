@@ -152,11 +152,11 @@ LESS 的问题：**让模型用 $z$ 做一次真实更新之后，目标 loss �
 
 $$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z$$
 
-关键改动在 $\Delta\theta_z$ 的写法：TracIn / Influence 用 SGD 更新 $\eta g_z$，但实际训练用 Adam：
+关键改动在 $\Delta\theta_z$ 的写法：TracIn / Influence 用 SGD 更新 $\eta g_z$ ，但实际训练用 Adam：
 
 $$\Delta\theta_z=-\eta\,\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$
 
-其中 $\hat m_z$ 是梯度一阶矩（起平滑作用），$\hat v_z$ 是二阶矩（按方向缩放）。LESS 定义 **Adam-aware 表示**：
+其中 $\hat m_z$ 是梯度一阶矩（起平滑作用）， $\hat v_z$ 是二阶矩（按方向缩放）。LESS 定义 **Adam-aware 表示**：
 
 $$\Gamma(z)=\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$
 
@@ -172,7 +172,7 @@ $$\mathrm{score}(z)=\cos\left(\bar\Gamma_{\mathcal{V}},\ \Gamma(z)\right)$$
 
 为什么必须 warmup：base 模型上所有指令的梯度共享一个巨大的"学 chat 格式"方向，cosine 会坍缩成几乎一样。随机 5% 数据 warmup 把参数推入"格式已学会、推理成分可分"的 basin；同时 warmup 产出 Adam 的 $m/v$ 状态，否则 $\Gamma(z)$ 算不出来。
 
-图谱位置：前驱是 TracIn 的梯度点积思想；改动是把 $\eta g_*^\top g_z$ 换成 $\cos(\bar\Gamma_{\mathcal{V}},\Gamma(z))$；缺口是目标只是一个均值向量——异构多技能目标下均值只指向主导技能，且完全没有 diversity 项（呼应上方"第二轮复习"第 2 点：单均值坍缩 + 无去重）。
+图谱位置：前驱是 TracIn 的梯度点积思想；改动是把 $\eta g_*^\top g_z$ 换成 $\cos(\bar\Gamma_{\mathcal{V}},\Gamma(z))$ ；缺口是目标只是一个均值向量——异构多技能目标下均值只指向主导技能，且完全没有 diversity 项（呼应上方"第二轮复习"第 2 点：单均值坍缩 + 无去重）。
 
 一句话：**LESS = 用 Adam 视角回答 TracIn 的问题，但丢了 magnitude 和 diversity。**
 
@@ -180,14 +180,14 @@ $$\mathrm{score}(z)=\cos\left(\bar\Gamma_{\mathcal{V}},\ \Gamma(z)\right)$$
 
 关键澄清："从 Adam 导出 cosine"其实是**两个独立的决定**。
 
-TracIn 用 $\eta\,g_*^\top g_z$，等于在假设"模型走的是 SGD 更新"；实际走的是 Adam 更新，正确的即时作用应该是：
+TracIn 用 $\eta\,g_*^\top g_z$ ，等于在假设"模型走的是 SGD 更新"；实际走的是 Adam 更新，正确的即时作用应该是：
 
 $$g_*^\top\Delta\theta_z^{\text{Adam}}=-\eta\,g_*^\top\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$
 
 1. **用 Adam 表示代替原始梯度**——这是从优化器真实性来的，是 LESS 的核心改进；
 2. **用 cosine 代替点积**——这是工程取舍，丢掉梯度大小换排名鲁棒性。
 
-一句话：**Adam 解释了为什么用 $\Gamma(z)$，工程鲁棒性解释了为什么用 cosine。**
+一句话：**Adam 解释了为什么用 $\Gamma(z)$ ，工程鲁棒性解释了为什么用 cosine。**
 
 ### Q5："所以并非严格数学，只是一种类比"（确认 + 精确化）
 
@@ -199,10 +199,10 @@ $$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx -\eta\,g_*^\top\frac{\hat m_z}{\
 
 只要 $\hat m_z,\hat v_z$ 是当时真实的 Adam 状态。
 
-第二层就不严格了。LESS 没有直接用这个点积，而是用 $\cos(\bar\Gamma_{\text{target}},\Gamma(z))$；这个改动做了三件事，每件都有代价：
+第二层就不严格了。LESS 没有直接用这个点积，而是用 $\cos(\bar\Gamma_{\text{target}},\Gamma(z))$ ；这个改动做了三件事，每件都有代价：
 
-- **丢掉学习率 $\eta$**：所有样本都乘同一个 $\eta$，不影响排名；
-- **目标梯度 $g_*$ 换成 $\bar\Gamma_{\text{target}}$**：目标也套了 Adam 预处理，但真实的 loss 下降用的是原始 $g_*$，不是预处理后的；
+- **丢掉学习率 $\eta$ **：所有样本都乘同一个 $\eta$ ，不影响排名；
+- **目标梯度 $g_*$ 换成 $\bar\Gamma_{\text{target}}$ **：目标也套了 Adam 预处理，但真实的 loss 下降用的是原始 $g_*$ ，不是预处理后的；
 - **点积换 cosine**：丢掉梯度大小，只留方向。
 
 即：$$g_*^\top\Delta\theta_z\quad\Longrightarrow\quad\cos(\bar\Gamma_{\text{target}},\Gamma(z))$$

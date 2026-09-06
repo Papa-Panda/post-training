@@ -32,7 +32,7 @@ Socratic-SWE 的 2026 预印本给出一个具体实例：从历史 solver trace
 
 ### B. 局部 repair pair
 
-共享同一 prefix，构造失败动作 $a^-$ 与纠正动作 $a^+$：
+共享同一 prefix，构造失败动作 $a^-$ 与纠正动作 $a^+$ ：
 
 $$q=(s,a^+,a^-),\qquad s=(\text{task},\text{history},\text{tool observations})$$
 

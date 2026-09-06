@@ -16,7 +16,7 @@ SIMD 通常是一条显式向量指令操作向量元素；SIMT 让程序员写�
 
 $$\eta_{\mathrm{branch}}\approx\frac{\sum_p n_p I_p}{32\sum_p I_p},$$
 
-其中 $n_p$ 是路径 $p$ 的 active lanes，$I_p$ 是该路径指令数。这个比值只是 lane-utilization 教学量；predication、编译器控制流和 Independent Thread Scheduling 会改变实际时间。
+其中 $n_p$ 是路径 $p$ 的 active lanes， $I_p$ 是该路径指令数。这个比值只是 lane-utilization 教学量；predication、编译器控制流和 Independent Thread Scheduling 会改变实际时间。
 
 ## 3. AMD 对照：概念可迁移，常数不可照搬
 
@@ -38,7 +38,7 @@ GPU 通过切换 ready warps 隐藏等待，但前提是：
 
 ## 5. Occupancy 的资源方程
 
-设 active warps 为 $W_{\mathrm{active}}$，硬件上限为 $W_{\max}$：
+设 active warps 为 $W_{\mathrm{active}}$ ，硬件上限为 $W_{\max}$ ：
 
 $$\mathrm{occupancy}=\frac{W_{\mathrm{active}}}{W_{\max}}.$$
 

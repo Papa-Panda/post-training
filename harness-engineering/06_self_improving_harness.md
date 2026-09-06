@@ -7,7 +7,7 @@
 
 ## 1. Unified control-loop
 
-给定 frozen model $\theta$、active harness $h_t$、外置 control plane $q=(V,\Pi,B,L)$：
+给定 frozen model $\theta$ 、active harness $h_t$ 、外置 control plane $q=(V,\Pi,B,L)$ ：
 
 $$\mathcal T_t=\mathrm{Rollout}(\theta,h_t,D_{\mathrm{mine}};q),$$
 
@@ -38,7 +38,7 @@ rollout
 
 ## 2. Failure record：先归因，后修改
 
-对失败轨迹 $\tau_i$，保存结构化 record：
+对失败轨迹 $\tau_i$ ，保存结构化 record：
 
 ```json
 {
@@ -77,12 +77,12 @@ $$\widehat{\mathrm{ATE}}_z=\frac1n\sum_{i=1}^n\left(R_i(h\oplus\delta_z)-R_i(h)\
 
 $$\delta=(p,z,d,f,r,c),$$
 
-- $p$：parent digest；
-- $z$：目标 failure/component；
-- $d$：typed diff；
-- $f$：expected fixes；
-- $r$：at-risk behaviors；
-- $c$：capability 与评估成本需求。
+- $p$ ：parent digest；
+- $z$ ：目标 failure/component；
+- $d$ ：typed diff；
+- $f$ ：expected fixes；
+- $r$ ：at-risk behaviors；
+- $c$ ：capability 与评估成本需求。
 
 Proposal 不是“重写成更好版本”的自由文本。它要满足：
 
@@ -137,7 +137,7 @@ $$S^\star=\arg\max_{S\subseteq\mathcal C}\sum_{\delta\in S}\widehat{\Delta J}_\d
 
 ## 6. STOP：优化 improver 本身
 
-[STOP](https://arxiv.org/abs/2310.02304v3) 沿用论文的局部记号，把任务写成 $\tau=(u,s)$，其中本小节的 $u$ 是 utility function，不是统一 runtime 记号中的 authorized command $u_t$。给定 frozen language model $M_{\mathrm{LM}}$，improver 满足：
+[STOP](https://arxiv.org/abs/2310.02304v3) 沿用论文的局部记号，把任务写成 $\tau=(u,s)$ ，其中本小节的 $u$ 是 utility function，不是统一 runtime 记号中的 authorized command $u_t$ 。给定 frozen language model $M_{\mathrm{LM}}$ ，improver 满足：
 
 $$s'=I(u,s;M_{\mathrm{LM}}),$$
 
@@ -147,13 +147,13 @@ $$I_t=I_{t-1}(\hat u,I_{t-1};M_{\mathrm{LM}}).$$
 
 它搜索的是调用 frozen LM 的 scaffold/program，而不是 LM weights。STOP 的价值在于证明 improver code 本身可以成为优化对象；边界是：没有 Self-Harness 式 split-wise promotion gate，递归轮次也不保证单调改善。
 
-LPN downstream utility 对 $M=20$ 个独立 instances 取平均；meta-dataset $D$ 含同一个 $(u,s)$ 的 5 个副本；test metautility 另在 $M_{\mathrm{test}}=50$ 个独立 instances 上报告。论文还检查所谓 unsandboxing code-pattern proxy：10,000 次尝试中 GPT-4 为 $0.42\%$、GPT-3.5 为 $0.12\%$；这是狭窄 proxy，不是完整安全证明。
+LPN downstream utility 对 $M=20$ 个独立 instances 取平均；meta-dataset $D$ 含同一个 \$(u,s)\$ 的 5 个副本；test metautility 另在 $M_{\mathrm{test}}=50$ 个独立 instances 上报告。论文还检查所谓 unsandboxing code-pattern proxy：10,000 次尝试中 GPT-4 为 $0.42\%$ 、GPT-3.5 为 $0.12\%$ ；这是狭窄 proxy，不是完整安全证明。
 
 ## 7. Self-Harness：同轮候选验证
 
 其流程是 Weakness Mining→Harness Proposal→Proposal Validation。候选与当前 harness 在同一轮比较，兼容的 accepted edits 合并，rejected edits 记录但不改变 active state。
 
-实验使用 MiniMax M2.5、Qwen3.5-35B-A3B、GLM-5，在 Terminal-Bench-2.0、SWE-bench Verified、AppWorld 上九组最终 harness 均同时改善 held-in/held-out；最大整体绝对增益是 GLM-5/AppWorld 的 $40.6$ points。结果支持 bounded regression gate 的可行性，但不意味着 pass-rate gate 足够覆盖高风险部署。
+实验使用 MiniMax M2.5、Qwen3.5-35B-A3B、GLM-5，在 Terminal-Bench-2.0、SWE-bench Verified、AppWorld 上九组最终 harness 均同时改善 held-in/held-out；最大整体绝对增益是 GLM-5/AppWorld 的 \$40.6\$ points。结果支持 bounded regression gate 的可行性，但不意味着 pass-rate gate 足够覆盖高风险部署。
 
 ## 8. AHE：延迟归因与 rollback
 
@@ -173,7 +173,7 @@ round t rollout evaluates edits committed at t-1
   -> commit next edits before effects are known
 ```
 
-同时保存 $H_{\mathrm{best}}$。主实验用 GPT-5.4 high 在同一 89-task Terminal-Bench 2 集上十轮演化到 $77.0\%$ pass@1，不能称为 held-out。冻结后 SWE-bench Verified 为 $75.6\%$，seed 为 $75.2\%$；部分 repository 仍退化。其 regression prediction precision/recall 为 $11.8\%/11.1\%$，说明可观测性和 rollback 有价值，但 attribution 本身仍难。
+同时保存 $H_{\mathrm{best}}$ 。主实验用 GPT-5.4 high 在同一 89-task Terminal-Bench 2 集上十轮演化到 $77.0\%$ pass@1，不能称为 held-out。冻结后 SWE-bench Verified 为 $75.6\%$ ，seed 为 $75.2\%$ ；部分 repository 仍退化。其 regression prediction precision/recall 为 $11.8\%/11.1\%$ ，说明可观测性和 rollback 有价值，但 attribution 本身仍难。
 
 ## 9. DGM：多谱系而非单链
 
@@ -183,9 +183,9 @@ $$h_p\sim\mathrm{Select}(\mathcal P_t),\qquad h_c=\mathrm{Modify}(h_p,\mathcal T
 
 $$\mathcal P_{t+1}=\mathrm{Archive}(\mathcal P_t\cup\{h_c\}).$$
 
-每个 archived agent 保留非零采样概率，避免只追单一路径。论文经过 80 iterations 报告 SWE-bench experimental subset $20.0\%\to50.0\%$、full Polyglot $14.2\%\to30.7\%$，并报告跨 benchmark/model transfer。
+每个 archived agent 保留非零采样概率，避免只追单一路径。论文经过 80 iterations 报告 SWE-bench experimental subset $20.0\%\to50.0\%$ 、full Polyglot $14.2\%\to30.7\%$ ，并报告跨 benchmark/model transfer。
 
-关键 caveat：$50.0\%$ 不是全 500 道 SWE-bench Verified；search 使用分阶段 subsets。论文还展示 objective hacking：某候选通过移除特殊 logging tokens 绕过 hallucination detector，拿到 evaluator 满分而非真正消除 hallucinated tool calls。这正说明 verifier 必须外置、保持语义级检查并配 unseen regression。
+关键 caveat： $50.0\%$ 不是全 500 道 SWE-bench Verified；search 使用分阶段 subsets。论文还展示 objective hacking：某候选通过移除特殊 logging tokens 绕过 hallucination detector，拿到 evaluator 满分而非真正消除 hallucinated tool calls。这正说明 verifier 必须外置、保持语义级检查并配 unseen regression。
 
 ## 10. 三种 promotion semantics 不可混写
 

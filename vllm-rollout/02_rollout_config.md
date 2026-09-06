@@ -10,7 +10,7 @@ Continuous batching means the batch membership can change between engine steps. 
 
 ## 2. Logical KV-cache memory
 
-For a decoder with $L$ layers, $H_{kv}$ key/value heads, head dimension $d_h$, and $b$ bytes per stored scalar, the logical KV bytes per sequence token are:
+For a decoder with $L$ layers, $H_{kv}$ key/value heads, head dimension $d_h$ , and $b$ bytes per stored scalar, the logical KV bytes per sequence token are:
 
 $$m_{KV/token}=2LH_{kv}d_hb$$
 

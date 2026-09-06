@@ -15,11 +15,11 @@
 
 - 每道题 $j$ 是特征 $x_j \in \{0,1\}^n$ (n 个模型的对错)
 - 总分 $y \in \mathbb{R}^n$ 是目标
-- 选 k 个特征 $S$, $|S|=k$, 回归 $y \approx w^T x_S$
+- 选 k 个特征 $S$ , $|S|=k$ , 回归 $y \approx w^T x_S$
 
 于是：
 
-1. **Kernel Ridge Regression** 代替线性回归：$K(x_i,x_j)=\exp(-\gamma \|x_i-x_j\|^2)$，对非线性交互更强，显著提升现有方法。
+1. **Kernel Ridge Regression** 代替线性回归： $K(x_i,x_j)=\exp(-\gamma \|x_i-x_j\|^2)$ ，对非线性交互更强，显著提升现有方法。
 2. **mRMR (minimum Redundancy Maximum Relevance)** 信息论选题：
 
 $$J(f) = I(f; y) - \frac1{|S|}\sum_{s\in S} I(f; s)$$
@@ -29,7 +29,7 @@ $$J(f) = I(f; y) - \frac1{|S|}\sum_{s\in S} I(f; s)$$
 
 对比结果 (在论文表 2/3)：
 
-- mRMR > IRT/clustering，跨 5 seed **选同一套题**，更稳定，MAE/RMSE/Spearman $\rho$/Kendall $\tau$ 全更好。
+- mRMR > IRT/clustering，跨 5 seed **选同一套题**，更稳定，MAE/RMSE/Spearman $\rho$ /Kendall $\tau$ 全更好。
 - 只有在极穷数据 (<50 models) 时 IRT 略优。
 - 快：无需 EM 迭代拟合 IRT，几十秒出子集。
 

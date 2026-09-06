@@ -4,7 +4,7 @@
 
 **Why this repo exists**
 - RL rollouts dominate wall-clock, not training.
-- 7B is minimal viable (2×80GB), but Staff scope = prove scaling to 13B/30B/70B + quantify $/useful rollout.
+- 7B is minimal viable (2×80GB), but Staff scope = prove scaling to 13B/30B/70B + quantify \$/useful rollout.
 - `vllm_rollout_stress_test.py` in `post-training/rl-infra/day-07` was prototype; here we productize it with sweep + failure taxonomy aligned to FSDP failure taxonomy.
 
 ## Structure

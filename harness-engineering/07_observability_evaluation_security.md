@@ -15,10 +15,10 @@ $$h=(h^C,h^W,h^K,h^M).$$
 
 $$q=(V,\Pi,B,L).$$
 
-- $V$：verifier 和评分逻辑；
-- $\Pi$：permission/capability policy；
-- $B$：token、工具、时间、金钱和风险预算；
-- $L$：append-only trace/audit log。
+- $V$ ：verifier 和评分逻辑；
+- $\Pi$ ：permission/capability policy；
+- $B$ ：token、工具、时间、金钱和风险预算；
+- $L$ ：append-only trace/audit log。
 
 Model、tool、environment 与 evaluator identity 另存于只读 version manifest，并由 $L$ 中的每条事件引用；它不新增可编辑 harness 维度。
 
@@ -61,7 +61,7 @@ benchmark overview
 
 $$H_\delta:\quad \Delta J_{\mathrm{target}}>0,\quad \Delta J_{\mathrm{retain}}\ge0,\quad \Delta K\le B_K,\quad \Delta Q\le B_Q.$$
 
-Manifest 记录 predicted fixes 和 at-risk behaviors；下一轮直接检验。AHE 的 regression prediction precision/recall 只有 $11.8\%/11.1\%$，说明结构化预测仍很难，但至少让失败可归因和 rollback。
+Manifest 记录 predicted fixes 和 at-risk behaviors；下一轮直接检验。AHE 的 regression prediction precision/recall 只有 $11.8\%/11.1\%$ ，说明结构化预测仍很难，但至少让失败可归因和 rollback。
 
 ## 3. 四类数据 split
 
@@ -72,7 +72,7 @@ Manifest 记录 predicted fixes 和 at-risk behaviors；下一轮直接检验。
 | $D_{\mathrm{ho}}$ | labels/traces 隐藏 | promotion 时多次 | 回归门控；实质是 hidden validation |
 | $D_{\mathrm{test}}$ | 否 | 冻结后一次 | 最终泛化报告 |
 
-如果 proposer 根据“candidate 是否通过 $D_{\mathrm{ho}}$”反复调整，哪怕没看到样本内容，也能从一比特反馈逐渐过拟合。因此要记录 query budget，并保留真正未使用的 $D_{\mathrm{test}}$。
+如果 proposer 根据“candidate 是否通过 $D_{\mathrm{ho}}$ ”反复调整，哪怕没看到样本内容，也能从一比特反馈逐渐过拟合。因此要记录 query budget，并保留真正未使用的 $D_{\mathrm{test}}$ 。
 
 ## 4. Deterministic gate 与 stochastic gate
 
@@ -185,7 +185,7 @@ write_sandbox < write_workspace < external_send
 reversible_delete < irreversible_delete
 ```
 
-若 $c_1\preceq c_2$ 表示 $c_2$ 权限更强，则候选需要能力集合 $C(h')$。自动 promotion 的必要条件：
+若 $c_1\preceq c_2$ 表示 $c_2$ 权限更强，则候选需要能力集合 $C(h')$ 。自动 promotion 的必要条件：
 
 $$C(h')\subseteq C_{\mathrm{auto}},$$
 

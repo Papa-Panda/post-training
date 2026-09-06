@@ -35,7 +35,7 @@
 
 **Small Daily Task**: 训练一个简单分类 RM，用 ensemble + Platt 压校准
 
-**Work Connection**: rollout/标注/热三噪 → reward 校准与过滤，省 $/有用 rollout 8-12%
+**Work Connection**: rollout/标注/热三噪 → reward 校准与过滤，省 \$/有用 rollout 8-12%
 
 ### 校准两条线
 

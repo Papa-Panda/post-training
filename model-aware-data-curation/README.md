@@ -20,7 +20,7 @@ select or generate ──► train ──► eval ──► refresh gradient map
 
 ## 八条线，两类模型信号
 
-设候选样本为 $z=(x,y)$，当前代理模型参数为 $\theta$，目标验证集为 $V$：
+设候选样本为 $z=(x,y)$ ，当前代理模型参数为 $\theta$ ，目标验证集为 $V$ ：
 
 $$g_z=-\nabla_\theta\log p_\theta(y\mid x),\qquad \bar g_V=\frac1{|V|}\sum_{v\in V}g_v.$$
 
@@ -68,7 +68,7 @@ python3 -m unittest discover -s model-aware-data-curation/tests -v
 
 ### Phase 2 — 覆盖与生成（Day 3–5）
 
-- 读 `03`：embedding diversity → G-Vendi，proxy 选择（Qwen2.5-0.5B-Instruct 不做 warm-up，1024维投影，$\rho=0.909$/$0.898$/$0.772$）；
+- 读 `03`：embedding diversity → G-Vendi，proxy 选择（Qwen2.5-0.5B-Instruct 不做 warm-up，1024维投影， $\rho=0.909$ /\$0.898 $/$ 0.772\$）；
 - 读 `04`：Prismatic 三步循环，稀疏簇生成与质量门；
 - 读 `09`：SPICE 的 Fisher/log-det coverage + selected-set conflict，以及四种梯度几何的边界；
 - 动手：跑 `code/demo.py` 看 G-Vendi / SPICE / 隔离度计算。
@@ -111,9 +111,9 @@ $$\underbrace{\text{LESS-like target signal}}_{\text{想学什么}} +\underbrace
 ## Verified headline numbers
 
 - **TRAK (ICML 2023)**：原论文措辞是用 *a handful of trained models* 匹配需要 *thousands of models* 的 attribution 方法；没有把 “handful” 固定成一个通用数字。
-- **Prismatic Synthesis (NeurIPS 2025)**：分析覆盖 **over 300 training runs**；G-Vendi 与 OOD 表现的 **Spearman $\rho\approx0.9$** 同时报告于 NLI 和数学推理；论文还构造了超过 300 万条样本的合成池。
+- **Prismatic Synthesis (NeurIPS 2025)**：分析覆盖 **over 300 training runs**；G-Vendi 与 OOD 表现的 **Spearman $\rho\approx0.9$ ** 同时报告于 NLI 和数学推理；论文还构造了超过 300 万条样本的合成池。
 - **Prismatic 生成闭环**：梯度空间聚类 → few-shot 生成 → 只接收稀疏簇样本；论文实例使用最稀疏的簇（示例为 top 20%，具体实现为保留最小的 $k/2$ 个簇）。
 - **SPICE (ICLR 2026)**：从约 97.5K 条训练池选择 10%；Qwen2-7B 平均 58.0、full-data 56.4，LLaMA2-7B 平均 31.1、full-data 30.8。经典 submodular/curvature guarantee 直接对应纯 Fisher/log-det greedy，不完整覆盖加入 sign-sensitive conflict penalty 后的实际 score。
-- **RICo (2025 preprint / AAAI 2026 accepted)**：摘要报告 LLaMA3.1-8B 使用 15% RICo 数据比全量数据平均高 5.42 个百分点；原始 candidate × assessment 评分为 $O(nm)$，蒸馏为轻量 selector 后对全池为 $O(m)$。这不证明 ICL contribution 与真实 SGD contribution 等价。
+- **RICo (2025 preprint / AAAI 2026 accepted)**：摘要报告 LLaMA3.1-8B 使用 15% RICo 数据比全量数据平均高 5.42 个百分点；原始 candidate × assessment 评分为 $O(nm)$ ，蒸馏为轻量 selector 后对全池为 $O(m)$ 。这不证明 ICL contribution 与真实 SGD contribution 等价。
 
 所有数字与出处见 [`papers.md`](papers.md)。

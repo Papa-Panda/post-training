@@ -7,13 +7,13 @@
 - Tags: [data-attribution, influence-functions, lora, efficiency, curation, quality]
 
 ## 一句话总结
-把 Influence Functions 中 $H^{-1}$ 的迭代求解，改成 LoRA 参数上的闭式近似 $(1/n \sum g_i g_i^T + \lambda I)^{-1}$，比 LiSSA/CG 快 1000倍，1秒算一条 influence，专门为 LLM LoRA 微调设计，可直接用于扫脏数据/高影响样本挖掘。
+把 Influence Functions 中 $H^{-1}$ 的迭代求解，改成 LoRA 参数上的闭式近似 $(1/n \sum g_i g_i^T + \lambda I)^{-1}$ ，比 LiSSA/CG 快 1000倍，1秒算一条 influence，专门为 LLM LoRA 微调设计，可直接用于扫脏数据/高影响样本挖掘。
 
 ## 核心
 1.  **Motivation**: Influence 很好但算不动，LLM 上算 $H^{-1}v$ 要 LiSSA 迭代几百次，每次全量 HVP。大模型 + LoRA 场景急需快版。DataInf 盯的就是 LoRA 微调这个常见设定。
 2.  **Data Pipeline**: 
     - 在 LoRA 微调模型上，对每个训练点算 LoRA 梯度 $g_i$
-    - 用经验 Fisher 近似 $H \approx (1/n)\sum g_i g_i^T$，然后 influence Closed-form：$I(z_j, z_{test}) \approx - g_{test}^T (G^T G / n + \lambda I)^{-1} g_j$
+    - 用经验 Fisher 近似 $H \approx (1/n)\sum g_i g_i^T$ ，然后 influence Closed-form： $I(z_j, z_{test}) \approx - g_{test}^T (G^T G / n + \lambda I)^{-1} g_j$
     - 只在低秩 LoRA 维度上求逆，维度几十k不是几十亿，可闭式解
     - 拿 test 点（或 few-shot target 池）批量算，排序找 high influence / mislabeled
 3.  **Key Tricks**: 

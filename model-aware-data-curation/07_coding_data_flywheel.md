@@ -65,7 +65,7 @@ provenance 和 parent IDs 用于发现生成循环中的近重复与污染。
 - efficiency / timeout；
 - repair after feedback。
 
-每簇抽取少量去污染、人工/执行可信的 $V_k$，计算 $\bar g_{V_k}$。候选样本可同时拥有多个 alignment：
+每簇抽取少量去污染、人工/执行可信的 $V_k$ ，计算 $\bar g_{V_k}$ 。候选样本可同时拥有多个 alignment：
 
 $$a_{ik}=\cos(\tilde g_i,\bar g_{V_k}).$$
 

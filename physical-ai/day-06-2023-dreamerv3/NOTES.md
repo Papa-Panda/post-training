@@ -76,7 +76,7 @@ Day06 路线图指定 DreamerV3。它是从“world model 作为可交互生成�
 
 $$s_{t+1}\sim p(s_{t+1}\mid s_t,a_t),\qquad o_t\sim p(o_t\mid s_t),\qquad r_t=r(s_t,a_t).$$
 
-真实状态 $s_t$ 通常不可见，只能看到图像或传感器观察 $o_t$。MuJoCo / Isaac Lab 显式给出近似物理转移；Day04–06 则都从数据学习 transition，但接口不同：
+真实状态 $s_t$ 通常不可见，只能看到图像或传感器观察 $o_t$ 。MuJoCo / Isaac Lab 显式给出近似物理转移；Day04–06 则都从数据学习 transition，但接口不同：
 
 - **Genie 1：** 从无动作标签视频里同时发现 latent action 与视觉动力学。
 - **UniSim：** 给定显式动作和近期画面，生成下一段真实世界视频。
@@ -90,7 +90,7 @@ $$s_{t+1}\sim p(s_{t+1}\mid s_t,a_t),\qquad o_t\sim p(o_t\mid s_t),\qquad r_t=r(
 
 $$z_t=E_{\text{video}}(x_t),\qquad z_t\in\{1,\ldots,K\}^{H'\times W'}.$$
 
-于是视频从 RGB 序列变成 $(z_1,\ldots,z_T)$，dynamics 不必直接回归每个像素。
+于是视频从 RGB 序列变成 $(z_1,\ldots,z_T)$ ，dynamics 不必直接回归每个像素。
 
 #### 2.2 Latent Action Model
 
@@ -126,7 +126,7 @@ UniSim 直接学习：
 
 $$p_\theta(o_{t:t+K}\mid h_{t-1},a_{t-1}),$$
 
-其中 $h_{t-1}$ 是有限近期帧，$a_{t-1}$ 可以是语言、相机运动或低层机器人控制，输出是下一段可变长度视频。
+其中 $h_{t-1}$ 是有限近期帧， $a_{t-1}$ 可以是语言、相机运动或低层机器人控制，输出是下一段可变长度视频。
 
 #### 3.1 异构 action normalization
 
@@ -142,7 +142,7 @@ $$a^{\text{text}},a^{\text{motor}},a^{\text{camera}}\longrightarrow e_a.$$
 
 #### 3.2 Video diffusion
 
-令目标未来视频为 $y_0$，前向过程加入高斯噪声：
+令目标未来视频为 $y_0$ ，前向过程加入高斯噪声：
 
 $$y_\tau=\alpha_\tau y_0+\sigma_\tau\epsilon, \qquad \epsilon\sim\mathcal N(0,I).$$
 
@@ -170,11 +170,11 @@ $$\boxed{\text{显式动作}+\text{近期视频}\rightarrow\text{下一段视觉
 
 ### 4. DreamerV3：RSSM belief state + latent imagination
 
-DreamerV3 使用完整 RL transition $(o_t,a_t,r_t,c_t)$，其中 $c_t$ 表示 episode 是否继续。RSSM 状态为：
+DreamerV3 使用完整 RL transition $(o_t,a_t,r_t,c_t)$ ，其中 $c_t$ 表示 episode 是否继续。RSSM 状态为：
 
 $$m_t=(h_t,z_t),$$
 
-$h_t$ 是确定性 recurrent memory，$z_t$ 是离散随机 latent。
+$h_t$ 是确定性 recurrent memory， $z_t$ 是离散随机 latent。
 
 #### 4.1 真实观察下的 posterior update
 
@@ -206,7 +206,7 @@ $$\mathcal L_{\text{rep}} =\max\{1,D_{KL}[q\Vert\mathrm{sg}(p)]\}.$$
 
 #### 4.3 Imagined actor-critic
 
-从 replay 中的 posterior states 起步，在 prior 内想象 16 步。critic 学 $\lambda$-return：
+从 replay 中的 posterior states 起步，在 prior 内想象 16 步。critic 学 $\lambda$ -return：
 
 $$G_t^\lambda =\hat r_t+\gamma\hat c_t \left[(1-\lambda)V_\psi(m_{t+1})+\lambda G_{t+1}^\lambda\right].$$
 
@@ -218,8 +218,8 @@ $$\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow \text{ima
 
 | 维度 | Genie 1 | UniSim | DreamerV3 |
 |---|---|---|---|
-| 数据 | 无动作标签视频 | 多源图像/视频 + 显式动作 | agent replay：$o,a,r,c$ |
-| 状态 | 离散视觉 tokens + 历史 | 最近视频帧 | RSSM belief $(h,z)$ |
+| 数据 | 无动作标签视频 | 多源图像/视频 + 显式动作 | agent replay：\$o,a,r,c\$ |
+| 状态 | 离散视觉 tokens + 历史 | 最近视频帧 | RSSM belief \$(h,z)\$ |
 | 动作 | 无监督 latent code | 语言、相机、机器人动作 | 环境定义 action |
 | transition | ST Transformer + MaskGIT | video diffusion | recurrent latent prior |
 | 输出 | 下一帧视觉 tokens | 下一段视频 | latent、reward、continue |
@@ -232,8 +232,8 @@ $$\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow \text{ima
 ### 6. 用“机械臂向右推杯子”理解
 
 - **Genie：** 从无标签视频中发现某个 latent code 经常对应“主体向右运动”。但它未必知道这是关节控制，也可能把摄像机运动混进来。
-- **UniSim：** 输入 $a_t=(\Delta x=5\text{cm},\text{gripper closed})$，生成手臂接触杯子、杯子滑动的视频；视觉可能逼真，但加速度未必满足真实摩擦定律。
-- **DreamerV3：** 把手臂、杯子和历史压进 $m_t$，在 latent 中尝试动作序列，依据预测 reward 训练 policy；大多数想象轨迹不需要解码成人能看的视频。
+- **UniSim：** 输入 $a_t=(\Delta x=5\text{cm},\text{gripper closed})$ ，生成手臂接触杯子、杯子滑动的视频；视觉可能逼真，但加速度未必满足真实摩擦定律。
+- **DreamerV3：** 把手臂、杯子和历史压进 $m_t$ ，在 latent 中尝试动作序列，依据预测 reward 训练 policy；大多数想象轨迹不需要解码成人能看的视频。
 
 ### 7. 最深层的差别：三种 information bottleneck
 

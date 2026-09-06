@@ -8,7 +8,7 @@ arXiv: https://arxiv.org/abs/2002.08484 | Blog: https://research.google/blog/tra
 
 ## Why this repo
 
-Influence Functions needs Hessian inverse ($H^{-1}$) - slow and unstable.  
+Influence Functions needs Hessian inverse ( $H^{-1}$ ) - slow and unstable.  
 TracIn replaces it with checkpoint gradient dot products:
 
 ```

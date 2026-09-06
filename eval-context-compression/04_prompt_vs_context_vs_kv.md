@@ -45,7 +45,7 @@ $$M_{t+1} = compress(M_t \cup \Delta_t) ;\; \|M_{t+1} - ideal(M)\| \leq \|M_t - 
 - **Gain**: 能把 `max_num_seqs` 从 32 → 128，大幅提升并发
 - **Failure**: 精度掉 → attention drift → long context 后部 answer 逐渐发散
 
-数学：量化误差 $\|K - \hat K\|_F \leq \epsilon$，但 attention softmax 放大：
+数学：量化误差 $\|K - \hat K\|_F \leq \epsilon$ ，但 attention softmax 放大：
 
 $$|\text{Attn}(Q,K) - \text{Attn}(Q,\hat K)| \leq O(\exp(\epsilon))$$
 

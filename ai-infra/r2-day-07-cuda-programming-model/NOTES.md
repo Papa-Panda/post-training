@@ -57,7 +57,7 @@ C[i] = A[i] + B[i];
 
 ## 可手算小例子 1：launch geometry
 
-$N=1000$，每 block 256 threads：
+$N=1000$ ，每 block 256 threads：
 
 $$B=\left\lceil\frac{N}{256}\right\rceil=\left\lceil3.90625\right\rceil=4$$
 
@@ -71,7 +71,7 @@ $$T_{launched}=4\times256=1024,\qquad T_{inactive}=1024-1000=24$$
 
 ### 对齐连续
 
-lane $\ell$ 访问 byte address $4\ell$，范围 0–127 bytes，覆盖 segment bases：
+lane $\ell$ 访问 byte address $4\ell$ ，范围 0–127 bytes，覆盖 segment bases：
 
 $$\{0,32,64,96\}$$
 
@@ -79,15 +79,15 @@ $$\{0,32,64,96\}$$
 
 ### 错位一个 float
 
-lane $\ell$ 访问 $4(\ell+1)$，范围 4–128 bytes，覆盖：
+lane $\ell$ 访问 $4(\ell+1)$ ，范围 4–128 bytes，覆盖：
 
 $$\{0,32,64,96,128\}$$
 
-共 5 transactions；模型搬运 160 B，效率 $128/160=80\%$。
+共 5 transactions；模型搬运 160 B，效率 $128/160=80\%$ 。
 
 ### stride = 2
 
-lane $\ell$ 访问 $8\ell$，范围 0–248 bytes，覆盖 8 个 32B segments；每个 segment 只用一半的 float words：
+lane $\ell$ 访问 $8\ell$ ，范围 0–248 bytes，覆盖 8 个 32B segments；每个 segment 只用一半的 float words：
 
 $$\text{modeled efficiency}=128/(8\times32)=50\%$$
 
@@ -95,7 +95,7 @@ $$\text{modeled efficiency}=128/(8\times32)=50\%$$
 
 ## 可手算小例子 3：padding 消掉 32-way bank conflict
 
-shared tile 为 row-major FP32 `tile[32][32]`。warp 的 lane $\ell$ 写同一 column 时，word index 为 $32\ell+c$：
+shared tile 为 row-major FP32 `tile[32][32]`。warp 的 lane $\ell$ 写同一 column 时，word index 为 $32\ell+c$ ：
 
 $$\text{bank}(\ell)=(32\ell+c)\bmod32=c$$
 

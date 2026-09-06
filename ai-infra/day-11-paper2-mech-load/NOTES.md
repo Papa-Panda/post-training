@@ -34,7 +34,7 @@ SSM 公式见 README.md，CPU 已跑联动。
   - Tj_avg **67.542** °C — H100 Tj safe 90°C 阈前，burst 时窜升
   - single rank 同样 82.49/67.54，2-rank dist avg throttle 0.00833 一致
 - **throttle_rate**: **0.833%** — 1/120 steps 触发 Tj>82°C 降频 0.68×，对应 rollout 失败率里隐性 0.8% 性能慢
-  - 待 H100：`torch.cuda.max_memory_allocated()` 并采集 `nvidia-smi -q -d TEMPERATURE,PERFORMANCE` 时序，看 Tj>82 时 tokens/sec 掉多少，折算 $/有用 rollout
+  - 待 H100：`torch.cuda.max_memory_allocated()` 并采集 `nvidia-smi -q -d TEMPERATURE,PERFORMANCE` 时序，看 Tj>82 时 tokens/sec 掉多少，折算 \$/有用 rollout
 
 ### 2-rank gloo 聚合演示
 
@@ -72,7 +72,7 @@ SSM 公式见 README.md，CPU 已跑联动。
 
 ## 一句话迁移
 
-> Paper2 机械负载非线性 SSM 的双线性 IT*外温 + 二次换热 + 0.85/0.35 加机 hysteresis，平移成 GPU 两节点 Tj/T_hs SSM + 风扇立方律 R_hs + 82/72°C 节流 hysteresis，CPU 真数 55.13 kW RMSE / 57.87 kW 平均电 / 9.38 kW 抖动STD + Tj 82.49°C 峰值/67.54°C 均值/throt 0.83%，待 H100 NCCL 补真实 Tj/功率 trace，量化成 $/有用 rollout 热损 8-12% 降。
+> Paper2 机械负载非线性 SSM 的双线性 IT*外温 + 二次换热 + 0.85/0.35 加机 hysteresis，平移成 GPU 两节点 Tj/T_hs SSM + 风扇立方律 R_hs + 82/72°C 节流 hysteresis，CPU 真数 55.13 kW RMSE / 57.87 kW 平均电 / 9.38 kW 抖动STD + Tj 82.49°C 峰值/67.54°C 均值/throt 0.83%，待 H100 NCCL 补真实 Tj/功率 trace，量化成 \$/有用 rollout 热损 8-12% 降。
 
 ## Fail-closed
 

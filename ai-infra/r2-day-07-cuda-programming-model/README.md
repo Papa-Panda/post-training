@@ -64,7 +64,7 @@ Warp 7: threads 224–255
 
 同一 warp 的 threads 执行相同指令、处理不同元素。如果同一 warp 内的 threads 走不同控制流路径，就会发生 **warp divergence**：硬件分别执行各条路径，并屏蔽当前路径不活跃的 lanes。分支本身不是问题；同一 warp 内路径不同才是问题。
 
-对 $N=1000$、`blockDim.x=256`：
+对 $N=1000$ 、`blockDim.x=256`：
 
 $$\text{gridDim.x}=\left\lceil\frac{1000}{256}\right\rceil=4$$
 
@@ -88,7 +88,7 @@ compute capability 5.x+ 的 shared memory 有 32 banks，连续 32-bit words 映
 
 $$\text{bank}(w)=w\bmod32$$
 
-若一个 warp 逐行访问 `tile[row][lane]`，lane 0..31 落到 32 个不同 banks。若逐列访问未 padding 的 `tile[lane][column]`，word index 为 $32\cdot lane+column$，所有 lanes 都落到同一个 bank，形成 32-way conflict（同地址 broadcast 例外）。改成 `tile[32][33]` 后：
+若一个 warp 逐行访问 `tile[row][lane]`，lane 0..31 落到 32 个不同 banks。若逐列访问未 padding 的 `tile[lane][column]`，word index 为 $32\cdot lane+column$ ，所有 lanes 都落到同一个 bank，形成 32-way conflict（同地址 broadcast 例外）。改成 `tile[32][33]` 后：
 
 $$\text{bank}(lane)=(33\cdot lane+column)\bmod32=(lane+column)\bmod32$$
 

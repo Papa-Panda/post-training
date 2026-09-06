@@ -67,7 +67,7 @@ $$T_{step}=T_{rollout}+T_{reward}+T_{logp/ref}+T_{actor\ train}+\mathbf 1_{PPO}(
 
 $$N_{completion}=N_qG,\qquad B_{tok}\approx\sum_{q=1}^{N_q}\sum_{i=1}^{G}T_{q,i}$$
 
-增加 $G$ 的收益是更稳定的 within-prompt comparison，成本是 prompt coverage 降低、tail latency 增大、KV cache 增长。应该 sweep $G$，画 **reward/eval gain vs generated tokens**，而不是沿用无来源的固定 group size。
+增加 $G$ 的收益是更稳定的 within-prompt comparison，成本是 prompt coverage 降低、tail latency 增大、KV cache 增长。应该 sweep $G$ ，画 **reward/eval gain vs generated tokens**，而不是沿用无来源的固定 group size。
 
 Prefix/KV reuse 可以降低同 prompt group generation 的 prefill 成本，但 decode 仍近似随总 generated tokens 增长。不同 engine 的 continuous batching、prefix caching 与 memory layout 会改变收益，必须 benchmark 当前版本。
 

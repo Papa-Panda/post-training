@@ -48,7 +48,7 @@ Test at least short/medium/long prompt crossed with short/medium/long output. Us
 
 ### C. Offered-load sweep
 
-For open-loop arrival rate $\lambda$, increase load from clearly idle through saturation. Hold the request distribution fixed. At every point record:
+For open-loop arrival rate $\lambda$ , increase load from clearly idle through saturation. Hold the request distribution fixed. At every point record:
 
 - offered and completed requests/s;
 - prompt and generation tokens/s;

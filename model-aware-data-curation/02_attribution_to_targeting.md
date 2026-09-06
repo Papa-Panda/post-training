@@ -32,9 +32,9 @@ $$L_v(\theta-\eta g_z)\approx L_v(\theta)-\eta g_v^\top g_z.$$
 
 ## 2. TRAK：重要的不是“又一个点积”
 
-TRAK（Tracing with the Randomly-projected After Kernel）将每条样本的梯度/输出敏感度投影为低维特征 $\phi(z)$，再通过线性化后的核矩阵求 attribution。抽象写作：
+TRAK（Tracing with the Randomly-projected After Kernel）将每条样本的梯度/输出敏感度投影为低维特征 $\phi(z)$ ，再通过线性化后的核矩阵求 attribution。抽象写作：
 
-若 $\Phi$ 按行堆叠训练样本特征、$Q=\mathrm{diag}(1-p_i^*)$，一组训练样本对目标 $v$ 的 attribution 向量可抽象写成：
+若 $\Phi$ 按行堆叠训练样本特征、 $Q=\mathrm{diag}(1-p_i^*)$ ，一组训练样本对目标 $v$ 的 attribution 向量可抽象写成：
 
 $$\tau(v,D)=\phi(v)^\top (\Phi^\top\Phi+\lambda I)^{-1}\Phi^\top Q.$$
 
@@ -69,11 +69,11 @@ $$s_i=\frac{\langle P g_i,\ P\bar g_V\rangle} {\|Pg_i\|\,\|P\bar g_V\|}, \qquad 
 - $P$ 可由 LoRA 梯度、随机投影或选定层组成；
 - LESS 强调 Adam-aware 表征和可复用 datastore；
 - DataInf 在 LoRA 设置中近似曲率修正；
-- 不能只取 top-$k$：相似样本会挤占预算，需与 coverage 联合。
+- 不能只取 top- $k$ ：相似样本会挤占预算，需与 coverage 联合。
 
 ## 4. GradAlign：RL 中分数会过期
 
-对第 $t$ 轮候选问题 $p_i$，由 rollout/reward 得到 policy gradient $g^{RL}_{i,t}$；trusted validation set 给出：
+对第 $t$ 轮候选问题 $p_i$ ，由 rollout/reward 得到 policy gradient $g^{RL}_{i,t}$ ；trusted validation set 给出：
 
 $$\bar g^{RL}_{V,t}=\frac1{|V|}\sum_{v\in V}g^{RL}_{v,t}, \qquad a_{i,t}=\cos(g^{RL}_{i,t},\bar g^{RL}_{V,t}).$$
 
@@ -101,7 +101,7 @@ quality gate
 
 归因给“价值”，但不保证“覆盖”；下一章用谱熵补上这一维。
 
-RICo 是这条路线的无梯度分叉：它不比较 $g_z$ 与 $g_V$，而比较真实 demonstration 与等长随机 context 对 assessment PPL 的影响。完整公式、扩展方式和 coding 可证伪实验见 [10 — RICo：用 ICL 干预近似训练数据价值](10_rico_icl_valuation.md)。
+RICo 是这条路线的无梯度分叉：它不比较 $g_z$ 与 $g_V$ ，而比较真实 demonstration 与等长随机 context 对 assessment PPL 的影响。完整公式、扩展方式和 coding 可证伪实验见 [10 — RICo：用 ICL 干预近似训练数据价值](10_rico_icl_valuation.md)。
 
 Proxy 适配差异：**TRAK/TracIn** 若要解释某个具体模型，最好直接用该模型或它的 checkpoints；**LESS/Prismatic/G-Vendi** 更适合小型 instruction-tuned proxy（论文主设置如 Qwen2.5-0.5B-Instruct）；**GradAlign** 最严格，最好用当前或接近当前的 policy 并周期性刷新。太弱的 proxy 只会产生“我什么都不会”的噪声梯度，工程上必须抽样验证 proxy 与目标模型的 ranking 相关性。
 

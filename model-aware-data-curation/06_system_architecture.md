@@ -81,7 +81,7 @@ $$\tilde g_i=\frac{1}{\sqrt d}R^\top g_i, \qquad R_{jk}\in\{-1,+1\}.$$
 
 ### Storage
 
-$n$ 条、$d=1024$、FP16 的向量约占 $2nd$ bytes：100 万条约 2.05 GB（不含 metadata/index），可按 task/date/proxy 分 shard。在线 ANN 检索可使用 cosine index；谱统计使用 $d\times d$ covariance，避免构造 $n\times n$ kernel。
+$n$ 条、 $d=1024$ 、FP16 的向量约占 $2nd$ bytes：100 万条约 2.05 GB（不含 metadata/index），可按 task/date/proxy 分 shard。在线 ANN 检索可使用 cosine index；谱统计使用 $d\times d$ covariance，避免构造 $n\times n$ kernel。
 
 ### Refresh
 

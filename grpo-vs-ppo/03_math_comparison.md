@@ -8,7 +8,7 @@ PPO 与 GRPO 不是“一个有 clip、一个没 clip”。常见实现都使用
 
 $$s(\rho,A)=\min(\rho A,c(\rho,1-\epsilon_l,1+\epsilon_h)A)$$
 
-其中 $c(x,l,u)=\min(\max(x,l),u)$。两者都可写为 masked weighted sum：
+其中 $c(x,l,u)=\min(\max(x,l),u)$ 。两者都可写为 masked weighted sum：
 
 $$J(\theta)=\mathbb E\left[\sum_{i,t}w_{i,t}m_{i,t}s(\rho_{i,t}(\theta),\widehat A_{i,t})\right]-\beta J_{KL}$$
 
@@ -17,7 +17,7 @@ $$J(\theta)=\mathbb E\left[\sum_{i,t}w_{i,t}m_{i,t}s(\rho_{i,t}(\theta),\widehat
 | 轴 | critic PPO | outcome GRPO |
 |---|---|---|
 | rollout | 每 prompt 可一条或多条 | 每 prompt 必须成组 $G>1$ |
-| advantage | $\widehat A_{i,t}^{GAE}$，依赖 $V_\phi$ | $A_i^{grp}$，同 response 广播 |
+| advantage | $\widehat A_{i,t}^{GAE}$ ，依赖 $V_\phi$ | $A_i^{grp}$ ，同 response 广播 |
 | temporal credit | token/state specific；可 bootstrap | terminal outcome 下不区分 token |
 | baseline | learned state value | 同 prompt sampled rewards |
 | extra trainable state | critic parameters + optimizer state | 无 critic；但需要 group rollouts |
@@ -32,7 +32,7 @@ $$\mathbb E_{a\sim\pi}[b(h)\nabla\log\pi(a\mid h)]=b(h)\nabla\sum_a\pi(a\mid h)=
 
 critic 的问题主要是 estimation/optimization burden 与 bootstrap trade-off，而不是“只要 $V$ 不准就必然把 policy gradient 变有偏”。
 
-GRPO 的 group mean 来自同一批 actions。未标准化时 self-inclusion 把期望梯度缩成 $(G-1)/G$；LOO 可修正该 scale。按组 standard deviation 归一化进一步改变 prompt 权重：同样 reward gap 在低 dispersion group 中权重更大。它可稳定 scale，也可造成 question-level difficulty bias。
+GRPO 的 group mean 来自同一批 actions。未标准化时 self-inclusion 把期望梯度缩成 $(G-1)/G$ ；LOO 可修正该 scale。按组 standard deviation 归一化进一步改变 prompt 权重：同样 reward gap 在低 dispersion group 中权重更大。它可稳定 scale，也可造成 question-level difficulty bias。
 
 ## 3. Ratio granularity
 
@@ -55,7 +55,7 @@ $$\rho_i^{geom}=\exp\left(\frac{1}{T_i}\sum_t\log\rho_{i,t}\right)$$
 原笔记给出 `Var(GRPO) proportional to 1/G` 和某个不完整的 GAE 大 O 式；这两句都不足以支持算法比较，现删除。更准确的拆分是：
 
 1. 增大 $G$ 改善同一 prompt reward statistics，但在固定 rollout-token budget 下减少不同 prompts 数量。
-2. group normalization 控制 advantage 尺度，不等于自动把 policy-gradient variance 降为 $1/G$；token score covariance、reward ties、length 与 clipping 都参与。
+2. group normalization 控制 advantage 尺度，不等于自动把 policy-gradient variance 降为 $1/G$ ；token score covariance、reward ties、length 与 clipping 都参与。
 3. critic 可跨 prompts/states 泛化，因此在 critic 可靠时，一个 rollout 也能获得 baseline；但 critic 本身需要训练数据、forward/backward 与 optimizer state。
 4. PPO 和 GRPO 都是 on-policy-ish 方法。对同一 rollout 做更多 optimization epochs 可提高数据复用，却加剧 $\pi_\theta$ 与 $\pi_b$ 的 drift；clipping 不能保证样本始终有效。
 5. dynamic filtering 提高 **训练 batch 的有效 group 比例**，但被过滤的 rollout tokens 已经生成，不能说 generation sample efficiency 免费提升。
