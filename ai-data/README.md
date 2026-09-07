@@ -4,7 +4,7 @@
 > **Scope：只谈数据，不谈算法。** 算法（GRPO/PPO/RLHF、optimizer、TTS解码策略）归 `rl-infra/`、`grpo-vs-ppo/` 轨道。这里只关心：数据怎么来、怎么洗、怎么选、怎么评、怎么量多样性/复杂度。
 > 命名已全量对齐 `rl-infra/day-01-xxx`；30篇主干闭环后继续以 `day-31-xxx` 起做主题延伸，便于 Day N 直连。
 
-## 第二轮深度复习（6/30）
+## 第二轮深度复习（7/30）
 
 > 复习期：2026-09-01 → 2026-09-30；固定按 Day 01 → Day 30，一天一篇，只更新已有 NOTES，不新增论文。
 
@@ -16,6 +16,7 @@
 | 04/30 | 2026-09-04 | 04 | LESS: Selecting Influential Data for Targeted Instruction Tuning | ✅ 完成 |
 | 05/30 | 2026-09-05 | 05 | DataInf: Efficiently Estimating Data Influence in LoRA-tuned LLMs and Diffusion Models | ✅ 完成 |
 | 06/30 | 2026-09-06 | 06 | Textbooks Are All You Need (Phi-1) | ✅ 完成 |
+| 07/30 | 2026-09-07 | 07 | The Llama 3 Herd of Models / 15.6T 预训练数据瀑布 | ✅ 完成 |
 
 ## 结构
 
