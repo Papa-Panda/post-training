@@ -165,3 +165,17 @@ $T_a=1$ 最灵敏但每步都要完成去噪，延迟成本高； $T_a$ 太大�
 - Paper: https://arxiv.org/abs/2303.04137v5
 - Project: http://diffusion-policy.cs.columbia.edu
 - Official code: https://github.com/real-stanford/diffusion_policy
+
+## 问答补充（2026-09-07）
+
+> 以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。
+
+### Day12（Diffusion Policy）有什么用
+
+**问**：day12 有啥用啊？
+
+**答**：它的用处恰恰在于"只会一招"。工厂里的机械臂不需要听懂人话，它需要把同一个零件插一百万次、成功率 99.9%——Diffusion Policy 就是为这种场景生的：小模型、百来条演示就能训、没有 VLM 的包袱，在推、翻、插这类接触丰富的单技能上精度极高。更大的用处是方法论：它发明的"动作 chunk + 生成式建模 + $ T_o/T_p/T_a $ 重规划"这套东西，后来被 Octo、π₀.₅ 全盘吸收。可以说 Day12 是个"零件供应商"——自己不做整车，但发动机技术铺到了全行业。
+
+**符号**： $ T_o $ 观测历史帧数； $ T_p $ 预测 horizon（动作块长度）； $ T_a $ 执行 horizon（执行前 $ T_a $ 步后重观测、重规划）。
+
+**与之前工作的关系**：Day12 是"无语言→单任务"逻辑自洽的代表（对照 Day11"有语言→多任务"）；它的方法论遗产（chunk + 生成式建模 + 三 horizon 重规划）被 Day13 Octo 和 Day14 π₀.₅ 直接继承。

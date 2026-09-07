@@ -103,3 +103,49 @@ RT-2 证明了把连续机器人动作离散成语言 token、再把 web-scale v
 - OpenVLA paper: https://arxiv.org/abs/2406.09246
 - OpenVLA project: https://openvla.github.io/
 - OpenVLA official code: https://github.com/openvla/openvla
+
+## 问答补充（2026-09-07）
+
+> 以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。
+
+### VLA 是类别名，不是具体架构
+
+**问**：VLA 不是一种模型而是模型架构？类似 transformer？
+
+**答**：VLA 更像一个**类别名**，定义的是输入输出契约：图像和语言进来，动作出去，即 $ \pi(A \mid O, \text{language}) $ ，其中 $ A $ 为动作（序列/块）， $ O $ 为观测。凡是满足这个契约的都算 VLA。Transformer 是实现引擎（积木），VLA 是用积木搭出来的车型：RT-2/OpenVLA 用 Transformer 解码器加离散 action token，π₀ 用 VLM 加 flow matching 动作头，Octo 用 Transformer 加 diffusion head——三个都是 VLA，但内部引擎完全不同。反例：Day12 的 Diffusion Policy 连语言输入都不吃，严格讲不算 VLA，只是 action diffusion。这说明语言那个 L 是 VLA 的身份特征：去掉语言，它就退化成纯动作生成模型。
+
+**关联**：Day09（RT-2/OpenVLA）/ Day11（π₀）/ Day12（Diffusion Policy）/ Day13（Octo）。
+
+### VLA 与 transformer 的关系
+
+**问**：VLA 也是 transformer？
+
+**答**：定义上不是必须，现实中几乎全是。VLA 只要求"图像+语言→动作"这个契约（CNN 编码器加 RNN 理论上也算），但 VLA 的价值在于借用预训练 VLM 的语义（知道"杯子"是什么、"放进水槽"意味着什么），而今天好用的 VLM 都是 transformer；连 π₀ 的 flow matching 动作头，前面半个 PaliGemma 也是 transformer。结论：**VLA 名义上是类别，实际上市面上 99% 都是 transformer 实现**。
+
+### Day09 "以什么为条件"：芒果的例子
+
+**问**：Day09 解决的是"以什么为条件"……没看懂。
+
+**答**：假设机器人训练数据里只有"拿苹果"和"拿香蕉"的演示，现在指令是"拿起那个芒果"——纯机器人策略会懵：它这辈子没见过芒果，图像里那坨黄色的东西跟它学过的"抓取目标"对不上号。RT-2 的做法：拿一个在互联网上看过几百万张图片的 VLM（它在网上见过芒果，知道"芒果"长什么样、跟"黄色水果"是什么关系），把机器人动作也变成 token，跟语言放在同一个词表里一起训练。于是模型用它在网上学到的"芒果长这样"的知识，在当前图像里定位芒果，再输出对应的动作 token。**语义知识是从 web 数据里"借"来的，机器人数据只负责教它"看到东西之后手该怎么动"**。这就是"解决语义问题"：之前机器人是文盲，只能认训练里见过的几样东西；RT-2 让它识字了。代价：动作被量化成 256 个 bin、频率只有几 Hz——认得字，不代表手就稳。
+
+### VLM 是什么
+
+**问**：VLM 是啥？
+
+**答**：VLM = Vision-Language Model，视觉语言模型：图片和文字一起吃进去，文字出来（比如给它一张照片问"这是什么"，它回答"一只芒果"）。它在互联网规模的图文对上训练，认识的东西远超任何机器人数据集——这就是 RT-2 要"借"的语义。一句话关系：**VLA = VLM + 动作输出**。RT-2 是把 VLM 的词表扩充了动作 token；π₀ 是拿 PaliGemma 当 VLM 底座再外挂一个动作头。
+
+### t₁..t₇ 不是文字：Day09 的突破点
+
+**问**： $ p(t\mid I,\ell) $ 里 t 是文字？那这不就是一个 VLM 吗？Day09 有啥突破？
+
+**答**：t 不是文字，是**动作 token**：7 维连续动作 $ a=(\Delta x,\Delta y,\Delta z,\Delta r_x,\Delta r_y,\Delta r_z,\text{gripper}) $ 每维切成 256 个 bin，每个 bin 分配一个 token ID， $ t_1 $ 到 $ t_7 $ 就是"这次手该怎么动"的离散编码。公式长得像 VLM 完全是故意的——**突破恰恰是这个表示上的 trick**：把动作塞进 VLM 的词表，让"预测下一个动作 token"和"预测下一个文字 token"变成同一个任务、同一个 transformer、同一套交叉熵 loss。在此之前是两个世界：VLM 认识芒果但手不会动，机器人策略手会动但不认识芒果。RT-2 第一个把它们打通——web 数据教它认识世界，机器人数据教它把"认识"翻译成"动作"，翻译的桥梁就是"动作即 token"。所以 Day09 的突破不是新数学（自回归 CE 都是现成的），而是证明了：**VLM 的语义能力可以通过 token 化迁移到机器人控制上**。
+
+**符号**： $ t $ 动作 token 序列； $ I $ 输入图像； $ \ell $ 语言指令 token； $ a $ 连续动作向量，各分量为末端位姿增量与夹爪开合。
+
+### 目标动作 token 来自哪里
+
+**问**：预测下一个动作 token，那这个目标动作来自于哪里？
+
+**答**：来自人类演示，标准的 behavior cloning。训练数据是人遥操作机器人录下来的：操作员用 VR 手柄或 spacemouse 控制机械臂做"拿杯子"，系统同步记录每一时刻的图像、指令和 7 维连续动作；训练时把这些连续动作按 256 bin 离散化成 token，就成了交叉熵 loss 的 target（模型预测 $ t_3 $ ，target 就是演示里那一刻真实的 $ t_3 $ ）。RT-2 的 co-finetraining 有意思在 target 是两种混在一起的：web 数据的 target 是文字 token（看图说话、问答），机器人数据的 target 是动作 token。同一个 loss 下，模型自己学会了"看到芒果图片时输出描述文字，看到机器人视角+指令时输出动作"。
+
+**与之前工作的关系**：本节 6 问构成 Day09 的"表示"主线——VLA 的契约定义 → 语义从 web 借 → 动作 token 化 → 演示数据即 target；与 Day11/12 的"生成式连续动作"路线形成对照（对照见 README 问答记录）。

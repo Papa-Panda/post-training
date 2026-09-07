@@ -151,3 +151,43 @@ $$A_t^{\tau+\delta}=A_t^\tau+\delta\,v_\theta(A_t^\tau,o_t,\tau).$$
 - Paper: https://arxiv.org/abs/2410.24164
 - Project: https://www.physicalintelligence.company/blog/pi0
 - Official code: https://github.com/Physical-Intelligence/openpi
+
+## 问答补充（2026-09-07）
+
+> 以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。
+
+### Flow Matching 是什么
+
+**问**：flow matching 是啥？
+
+**答**：Flow Matching 就是学一个"把噪声推向数据"的速度场。设真实动作块为 $ A $ ，高斯噪声为 $ \epsilon $ ，画一条直线把它们连起来：
+
+$$A^\tau=(1-\tau)\epsilon+\tau A,\quad \tau\in[0,1].$$
+
+$ \tau=0 $ 时是纯噪声， $ \tau=1 $ 时是真实数据；这条直线上的瞬时速度很简单，就是 $ A-\epsilon $ 。训练让网络 $ v_\theta(A^\tau,o,\tau) $ 去拟合这个速度：
+
+$$\mathcal{L}=\mathbb{E}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$
+
+学好之后，推理时从噪声出发，跟着学到的速度场往前走，解一个常微分方程 $ dA/d\tau=v_\theta $ ，用 Euler 积分 10 步就从噪声走到了一个合法的动作块。跟 Diffusion 的区别：Diffusion 学的是"去噪"，走的是随机的 SDE 路径，有 100 个离散时间步；Flow Matching 学的是"方向"，走的是确定性的直线 ODE，路径更短、更快。π₀ 选它，就是因为要 50Hz 实时控制，10 步生成一个 50 步动作块刚刚好。
+
+**符号**： $ A $ 真实动作块； $ \epsilon $ 高斯噪声； $ \tau $ flow 时间（去噪进行到哪了）； $ o $ 观测（含图像、本体感知、语言）； $ v_\theta $ 速度场网络， $ \theta $ 为参数； $ \mathcal{L} $ 训练 loss 标量。
+
+### 这个 loss 是 tau 的函数吗
+
+**问**：这个 loss 是 tau 的函数吗？
+
+**答**：对一半。训练时每一个样本的误差项是 $ \tau $ 的函数，网络 $ v_\theta $ 也把 $ \tau $ 当输入（它要知道现在噪声有多大、该用多大的速度）。但最终的 loss 是对 $ \tau\sim\text{Uniform}[0,1] $ 取了期望的标量：
+
+$$\mathcal{L}=\mathbb{E}_{\tau,A,\epsilon,o}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$
+
+所以它不是某一个 $ \tau $ 的函数，而是把所有 $ \tau $ 上的误差平均掉了。训练时每次随机采样一个 $ \tau $ 来算，时间长了就相当于把整条路径都学好了。
+
+### 修正：π₀ 有语言输入（澄清前一条回答的表述）
+
+**问**：day12 有道理，day11 不对啊——因为都没有语言输入，怎么做很多活？
+
+**答**：纠正：π₀ 是**有**语言输入的；前一条"一个模型干很多活"的表述没把条件讲全，容易误会。它的观测 $ o $ 本来就是三件套：多视角图像 + 本体感知 $ q_t $ + **语言指令** $ \ell $ ，PaliGemma 那一半就是专门吃"图像+文字"的。所以"干很多活"靠的是语言切换任务：说"擦桌子"它擦桌子，说"叠衣服"它叠衣服，动作头都是同一个 flow 模型。Day12 的 Diffusion Policy 才是真的没有语言——所以它只能死守一个任务。逻辑是：π₀ "有语言→多任务"，DP "无语言→单任务"，各自自洽。
+
+**符号**： $ q_t $ 本体感知（关节角/末端位姿）； $ \ell $ 语言指令。
+
+**与之前工作的关系**：本节 3 问构成 Day11 的"flow 生成"主线——速度场直觉 → loss 对 $ \tau $ 取期望 → 语言条件带来多任务；与 Day12 的"去噪"参数化对照（对照见 README 问答记录），与 Day14 的 flow 低层执行相接。

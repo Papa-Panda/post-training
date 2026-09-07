@@ -171,3 +171,31 @@ $$\theta^\star=\arg\min_\theta\;\mathbb E_{\tau\sim\mathcal D_{d^\star}}[\mathca
 - Paper: https://arxiv.org/abs/2405.12213
 - Project: https://octo-models.github.io/
 - Official code: https://github.com/octo-models/octo
+
+## 问答补充（2026-09-07）
+
+> 以下问答归档自 physical AI side chat（2026-09-06）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。
+
+### Day13 Octo 如何"结合"起来：三层
+
+**问**：仔细讲一下 day 13 如何结合起来的。
+
+**答**：Octo 的"结合"分三层：输入怎么统一、表示怎么共享、动作怎么生成。问题先摆出来：25 个数据集，机器人、相机数量、传感器、动作空间全不一样，直接拼数据会炸——维度对不上、有的缺语言、坐标系也不同。
+
+**第一层：分模态 tokenizer + mask（输入统一）**。图像走 ViT 切 patch tokens，本体感知走 MLP 投成 tokens，语言走 text embedding，目标图像复用图像 tokenizer。某个数据集缺某个模态（比如没有语言、只有一个相机），就在 attention 里把对应位置 mask 掉。含义：不同 embodiment 只是"缺不同的块"，模型结构完全一样——异构被隔离在了输入端。
+
+**第二层：readout token（表示解耦）**。加几个特殊的 readout token，它们的输出 embedding 喂给动作 head。Transformer 只负责"理解"，readout embedding 是 embodiment 无关的瓶颈表示，head 只认这个表示不认机器人。这就是为什么换新机器人 100 条 demo 就能微调：要调的只是"理解→动作"这个薄映射，理解部分是跨身体共享的。
+
+**第三层：加权混合 diffusion（训练与推理）**。
+
+$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$
+
+$ q_d $ 是各域采样权重； $ \mathcal{L}_{\text{diffusion}} $ 和 Day12 同家族（ $ \mathbb{E}\|\epsilon-\epsilon_\theta(O,A^k,k)\|^2 $ ），一次预测 4 步动作块。推理时大 Transformer 只跑 1 次提特征，轻量 MLP head 做 20 步去噪，输出 $ A_t\in\mathbb{R}^{4\times d_a} $ ，执行 1–4 步后重规划。
+
+**串起来**：数据侧是 Day15 OXE 提供的 80 万轨迹（Octo 是 OXE 的下游消费者），Octo 贡献的是"怎么吃进去"——输入端模块化、中间共享表示、输出端小 head。
+
+**天花板（诚实标注）**：新物体约 80%、新场景约 40%、新技能只有约 5%。Imitation 学的是"数据里接下来怎么动"，mixture 没覆盖的技能在 support 之外，长不出来。所以它的真实定位是强初始化，不是万能策略——这点和 Day14 π₀.₅ 想突破的方向正好接上。
+
+**符号**： $ d $ 数据域编号（共 25 个）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ A_t $ 时刻 $ t $ 的动作块， $ d_a $ 为动作维度； $ O $ 观测； $ A^k $ 第 $ k $ 步加噪后的动作轨迹； $ \epsilon_\theta $ 噪声预测网络。
+
+**与之前工作的关系**：Day13 回答"在什么数据上训"（对照 README 问答记录的 2×2）；它的模块化 readout 接口与 Day14 π₀.₅ 的单 backbone hybrid 路线形成"接口即泛化 vs 配方即泛化"的对照（见 README 问答记录）。
