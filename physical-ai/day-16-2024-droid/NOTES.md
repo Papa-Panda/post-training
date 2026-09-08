@@ -117,5 +117,22 @@ $$\mathrm{Cov}_{s\sim\{1..564\}}(B_s,\,A)\approx 0,$$
 - 上一篇: day-15-2023-open-x-embodiment-rtx — OXE 的"跨身体聚合" vs DROID 的"跨场景覆盖"：两种多样性正交，DROID 是 OXE 之后社区补"真实场景分布"那块短板的第一块砖
 - 下一篇预告: day-17-2023-bridgedata-v2 — BridgeData V2：廉价遥操作与异构场景扩展 imitation data，看"低成本采集"这条轴怎么走
 
-## 问答补充
-（本篇暂无用户主动提问；跨篇通识问答见 README「问答记录」。）
+## 问答补充（2026-09-07）
+
+> 以下问答归档自 physical AI side chat（2026-09-07 晚）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。问题起因：Day16 卡片提出"固定硬件 + 场景多样性"路线，用户追问 repo 内哪些工作也是固定硬件。
+
+### repo 里固定硬件的工作
+
+**问**：我是说在 physical ai repo 里面，有哪些工作也是这种固定硬件的？
+
+**答**：按 NOTES 的记录，repo 里固定硬件的就三处：
+
+- **Day09 RT-2**：训在 Google Robot（Everyday Robots 机械臂）数据上，是固定硬件路线的代表——有意思的是同篇的 OpenVLA 恰好是反例，它吃的是 OXE 跨 embodiment 数据。
+- **Day12 Diffusion Policy**：真机实验（Push-T、翻杯子、抹酱等）都是单臂固定平台，不是跨身体——它是"方法论文"，硬件只是实验载体。
+- **Day16 DROID**：把固定硬件推到极致，18 台统一 Franka，把省下来的对齐成本全砸进 564 个真实场景。
+
+其余的都是跨 embodiment：Day11 π₀（7 类机器人配置、1 万+小时）、Day13 Octo（25 个数据集）、Day14 π₀.₅（异构 co-training）、Day15 OXE（22 种身体）。
+
+所以 DROID 在 repo 里其实是个"复古"的选择：回到 RT-1/RT-2 时代固定硬件的老路——一次只扩张一个多样性轴：OXE 是固定场景、扩张身体多样性；DROID 反其道而行，固定身体、扩张场景多样性。
+
+**术语定义**：embodiment = 机器人身体配置（关节数、末端执行器、相机布局）；**固定硬件** = 训练数据全部来自同一种身体，动作接口天然对齐，省下跨身体对齐成本；**跨 embodiment** = 数据来自多种身体，需要统一接口（Octo 的 mask/tokenizer）或数据配方（π₀.₅ 的 heterogeneous co-training）来吃进去。

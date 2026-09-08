@@ -195,3 +195,15 @@ $$\mathcal{L}(\theta)=\sum_{k\in\{\mathrm{robot,subtask,web,det}\}}w_k\mathcal{L
 - $ \mathcal{L}_k $ ：第 $ k $ 种数据上的 loss，比如 robot 上是 flow matching 的速度场 loss，web 上是语言模型的交叉熵。
 
 三个时间尺度串起来： $ \ell $ （分钟级，一句话）→ $ s_t $ （秒级，一句子任务）→ $ A_t $ （毫秒级，50 步连续动作）。
+
+### 追问：π₀.₅ 也是固定硬件吗
+
+**问**：pi 0.5是吗（Day16 讨论中的追问：π₀.₅ 也是固定硬件吗？）
+
+**答**：不是。π₀.₅ 恰恰是跨 embodiment 那一路：它的训练数据是 π₀ 的 10k+ 小时多机器人数据，加上新增的移动操作平台家庭采集，再混 web 和检测数据。它的"泛化"赌的是**数据配方**（异构 co-training），不是固定硬件：
+
+$$\mathcal{L}(\theta)=\sum_{k\in\{\mathrm{robot,subtask,web,det}\}}w_k\mathcal{L}_k(\theta).$$
+
+$ k $ 数据源编号（robot / subtask / web / det 四类）； $ w_k $ 第 $ k $ 类数据的混合权重； $ \mathcal{L}_k $ 第 $ k $ 类数据上的 loss； $ \theta $ 网络权重。
+
+和 Day16 DROID 正好是两个方向：DROID 固定身体、扩张场景多样性；π₀.₅ 拥抱身体异构，靠配方让共享表示自己长出"语义"和"控制"的分工——这正是 README 问答记录里"接口即泛化（Octo）vs 配方即泛化（π₀.₅）"对照的另一面。

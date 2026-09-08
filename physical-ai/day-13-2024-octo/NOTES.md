@@ -199,3 +199,15 @@ $ q_d $ 是各域采样权重； $ \mathcal{L}_{\text{diffusion}} $ 和 Day12 �
 **符号**： $ d $ 数据域编号（共 25 个）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ A_t $ 时刻 $ t $ 的动作块， $ d_a $ 为动作维度； $ O $ 观测； $ A^k $ 第 $ k $ 步加噪后的动作轨迹； $ \epsilon_\theta $ 噪声预测网络。
 
 **与之前工作的关系**：Day13 回答"在什么数据上训"（对照 README 问答记录的 2×2）；它的模块化 readout 接口与 Day14 π₀.₅ 的单 backbone hybrid 路线形成"接口即泛化 vs 配方即泛化"的对照（见 README 问答记录）。
+
+### 追问：Octo 也不是固定硬件吧
+
+**问**：octo也不是吧？（Day16 讨论中的追问：Octo 也不是固定硬件吧？）
+
+**答**：对，Octo 也不是——它恰恰是跨 embodiment 的典型：25 个数据集、约 80 万条轨迹，训练目标里专门有一个机器人域下标 $ d \in \{1,\dots,25\} $ ：
+
+$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$
+
+整个 token/mask/readout 设计就是为了让一个模型吃下多种身体——各模态独立 tokenizer + 缺模态 mask（输入端隔离异构）、readout token（embodiment 无关的瓶颈表示）、加权混合 diffusion head（输出端）。详见本篇"Octo 如何'结合'起来：三层"。
+
+**符号**： $ d $ 数据域编号（共 25 个，对应 25 种机器人身体）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ \theta $ 网络权重； $ \mathcal{L}_{\text{diffusion}} $ diffusion 训练 loss。
