@@ -77,6 +77,60 @@ graph TD
 
 三处改动一句话：文章止于推理部署，我们向后接了 post-training；硬件深挖独立成 track；设施主题明确出界。
 
+### 我们的30天浏览计划：30个主要知识点
+
+文章的完整知识树（200+ 知识点）是"地图全貌"，下面是我们自己的浏览路线：
+每天一个主题，浏览足矣——能用一句话说清它**牺牲什么、换取什么、何时不赚**即可，
+推导和实测细节之后再慢慢学。括号内是文章四层中的位置。
+
+**第零层 · 地基（Day 1–5）**
+
+1. Transformer Decoder 白板（地基）：手绘 $(B,S,D)$ 张量流，hidden 4096、32 层手算总参。
+2. PyTorch 训练循环（地基）：loop state、optimizer、checkpoint 落盘。
+3. 通信拓扑与 NCCL（地基）：NVLink vs PCIe/IB 数量级， $\alpha$ – $\beta$ 模型，ring all-reduce 公式。
+4. DDP（地基）：数据分片、梯度 all-reduce 同步；30 分钟把单卡循环改成 DDP。
+5. JAX Mesh 声明式分片（地基）：pjit/sharding，声明式 vs 命令式。
+
+**第一层 · CUDA 算子（Day 6–12）**
+
+6. GPU 架构与 Roofline（CUDA）：存储层级、HBM 带宽、算术强度 $I=F/Q$ 。
+7. CUDA 编程模型（CUDA）：grid/block/warp，coalescing，bank conflict。
+8. Parallel Reduction（CUDA）：最朴素 → warp shuffle → shared tree。
+9. GEMM Tiling（CUDA）：分块矩阵乘，目标 50% cuBLAS。
+10. FlashAttention（CUDA）：tiling + online softmax，省的是 HBM 读写。
+11. Triton / torch.compile（CUDA）：fused kernel，一句话说清何时不如手写。
+12. Profiling（CUDA）：Nsight Systems/Compute，看 host 拖后与 SOL%。
+
+**第二层 · 分布式训练（Day 13–17）**
+
+13. Attention 变种（分布式）：MHA → MQA/GQA/MLA，省的是 KV cache。
+14. FSDP / ZeRO 显存账（分布式）：7B FP16 14GB + Adam 56GB，ZeRO-2 vs ZeRO-3。
+15. TP / PP / SP（分布式）：64 卡 TP=8 机内、PP=4、DP=2；为何 TP 不跨机。
+16. 混合精度与重计算（分布式）：BF16 指数位 8 vs 5，重计算换显存。
+17. 框架选型与容错（分布式）：Megatron / DeepSpeed / FSDP 一句选型，DCP async ckpt。
+
+**第三层 · 推理部署（Day 18–25）**
+
+18. Prefill vs Decode（推理）：compute bound vs memory bound，TTFT/TPOT。
+19. KV Cache 算账（推理）：7B 模型 32GB 手算，batch 放大。
+20. PagedAttention + Continuous Batching（推理）：虚拟页表，请求拼单。
+21. vLLM / SGLang 实战（推理）：部署对比表，vllm-rollout/ 联动。
+22. 量化决策树（推理）：70B INT4 35GB，何时 INT4 反而慢于 INT8。
+23. Speculative Decoding（推理）：草稿 + 验证，无偏性保证。
+24. Prefill / Decode 解耦 + Goodput（推理）：配比算账。
+25. Benchmark 与回归门禁（推理）：6 个指标，TPOT P95 退化 5% 即 block。
+
+**新增 · post-training 连接（Day 26–30）**
+
+26. GRPO vs PPO 的系统差异（新增）：rollout/buffer 对 infra 的不同要求。
+27. Reward Model 与校准（新增）： $\sigma$ /ECE，reward hacking 的系统视角。
+28. 训练 → 推理联动（新增）：vLLM rollout pipeline，async eval。
+29. 数据飞轮（新增）：coding data flywheel， $\$/\mathrm{useful}$ rollout。
+30. E2E 复盘（新增）：系统设计题，可复现配置与残余风险清单。
+
+完整 200+ 知识点详细树见下方"完整知识地图"一节（待原文提取完成后补入），
+本节 30 个主题即是从中挑出的浏览主干。
+
 ## Core models
 
 ### Communication
