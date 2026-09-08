@@ -18,7 +18,7 @@
   - influence/selection 线：接 Day 4 LESS / Day 5 DataInf / Day 11-13 Superfiltering/LIMR/DPO-gap 的“少即是多”——StarCoder2 证明 pretrain 阶段也可以少即是多，从 900B 原始 The Stack v1 → 600B v2 → 去重后 3T? → 选 700B 高配比 StarCoderData，本质也是 selection。
   - synthetic 线：接 Day 6 Phi-1 (6B 精筛+1B 合成) 的“质量>数量”——StarCoder2 不合成，但用 issue/PR、Jupyter、commit message 构造“天然指令”，是 Phi-1 textbook 合成的真实版 counterpart。
   - pretrain/curation 线：直接对标 Day 7 Llama3 (15.6T 五级瀑布、code 25%) / Day 8 DeepSeek (14.8T MoE激进去重+FIM 10%) / Day 9 Qwen5.5T code file/repo级——补了三家“怎么在 500+ 语言上做许可证/去重/PII/近重过滤”的工程细节短板，是你 50 万 code 合成池上游清洗的教科书。
-- **补了哪个短板**：之前 Day 7-10 都说“重清洗、弱模型过滤”，但没说 code 多语种多/许可证风险/PII/文件级→repo级 packing 怎么做。StarCoder2 补上 600+ 过滤规则、license 检测、Opt-Out、MinHash+Exact+Near-dedup 组合拳、长文件/Secrets 剔除、repo聚合构长上下文——可直接抄到你 50 万池的清洗前处理。
+- **补了哪个短板**：之前 Day 7-10 都说“重清洗、弱模型过滤”，但没说 code 多语种多/许可证风险/PII/文件级→repo级 packing 怎么做。StarCoder2 补上 619 种语言覆盖（"600+"指语言数，不是过滤规则条数，见 Day01 第二轮复习）、license 检测、Opt-Out、MinHash+Exact+Near-dedup 组合拳、长文件/Secrets 剔除、repo聚合构长上下文——可直接抄到你 50 万池的清洗前处理。（2026-09-08 修正初读误植）
 - **替代/分叉/改进**：不是替代 LESS/LIMR，而是它们的 pretrain 地基；是 Phi-1 的分叉（真实 vs 合成），是 Llama3/DeepSeek/Qwen code 配比的开源可复现实现。对于 coding data / SFT / RL 三段，你如果不把上游 code 洗干净，LESS 挑出来的也还是脏。
 
 ## 为什么今天读它

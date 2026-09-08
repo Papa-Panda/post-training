@@ -14,7 +14,7 @@
 2.  **Data Pipeline**: 
     - Warmup: 随机抽 5% 数据把 base (Llama-2) 热一下，让梯度不要是纯噪
     - Gradient Datastore: 只取 LoRA adapter 的梯度，随机投影到 8192 维 (JL引理保点积)，建一次库可复用
-    - Scoring: `score(z)=cos(mean_g_target, g_low(z))`，优化目标是 Adam 修正后的 influence `η * grad_target^T Gamma(z)`，其中 `Gamma = Adam_precond(grad)`
+    - Scoring: `score(z)=cos(mean_g_target, g_low(z))`，优化目标是 Adam 修正后的 influence `η * grad_target^T Gamma(z)`，其中 `Gamma = Adam_precond(grad)`（注：cosine 是独立的工程取舍，不由 Adam-aware 严格推出，见问答补充 Q4–Q5）
     - Select: 取分数最高的 5% (≈13k) 去做 instruction tuning
 3.  **Key Tricks**: 
     - 优化器感知: 不是 SGD 点积，用 Adam 的 m/v 修正后的梯度
