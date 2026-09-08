@@ -43,27 +43,160 @@ The full intended sequence is in [`ROADMAP_45D.md`](ROADMAP_45D.md). It is a cur
 > 说明：已按原文（最后编辑 2026-06-08）逐条核对；下方"完整知识地图"为原文知识条目转录，
 > 讲解文字略去，详见原文。
 
+> 读图：每个节点 = 原文的一个知识点（名称已缩短）；**绿色节点**纳入我们 30 天浏览计划，
+> Dn = 第 n 天（见下节）；白色节点 = 原文有、未排入 30 天（如编程语言、TVM/XLA）。
+> 推荐资料与检验标准不在图中，见下方文字版。
+
 ```mermaid
 graph TD
-    subgraph article["草帽路飞《AI Infra学习路线》· 四层"]
-        A0["第零层 · 地基<br/>编程语言 / 数学 / Transformer / PyTorch / 通信拓扑"]
-        A1["第一层 · CUDA 算子<br/>GPU 架构 / CUDA / Reduce-GEMM-Softmax / FlashAttention 系 / AI 编译器"]
-        A2["第二层 · 分布式训练<br/>Attention-MoE / DDP-FSDP / TP-PP-SP / ZeRO / 混合精度 / 框架"]
-        A3["第三层 · 推理部署<br/>KV Cache / PagedAttention / vLLM / 量化 / Spec / 解耦 / Benchmark / 决策树"]
-        A0 --> A1 --> A2 --> A3
+    subgraph L0["第零层 · 前置知识"]
+        subgraph g0a["编程语言"]
+            py["Python"]
+            cpp["C/C++"]
+            linux["Linux"]
+        end
+        subgraph g0b["数学基础"]
+            linalg["线性代数<br/>D1"]
+            prob["概率统计<br/>D1"]
+            calc["微积分<br/>D1"]
+        end
+        subgraph g0c["Transformer"]
+            sa["Self-Attention<br/>D1"]
+            ffn["FFN<br/>D1"]
+            rope["位置编码<br/>D1"]
+            ln["LayerNorm<br/>D1"]
+            fwd["完整前向<br/>D1"]
+        end
+        subgraph g0d["PyTorch"]
+            pt_t["Tensor/autograd<br/>D2"]
+            pt_loop["训练循环<br/>D2"]
+            pt_ckpt["checkpoint<br/>D2"]
+            pt_dbg["profiler 调试<br/>D2"]
+        end
+        subgraph g0e["通信拓扑"]
+            nvlink["NVLink<br/>D3"]
+            ib["IB/RoCE<br/>D3"]
+            coll["集合通信原语<br/>D3"]
+            nccl["NCCL<br/>D3"]
+        end
     end
-    subgraph ours["我们的 roadmap · 对应与改动"]
-        R0["r2-day-01~05<br/>transformer → loop → topo → DDP → JAX mesh"]
-        R1["r2-day-06~12 ＋ gpu-architecture/<br/>roofline → CUDA → reduce → GEMM → FlashAttention → profiling"]
-        R2["r2-day-13~19<br/>FSDP-ZeRO → TP-PP-SP → 混合精度 → 选型 → DCP"]
-        R3["r2-day-20~32 ＋ vllm-rollout/<br/>KV cache → paged → vLLM → 量化 → spec → 解耦 → benchmark 门禁"]
-        R4["Day 33~45 · 新增<br/>post-training 连接：GRPO / RM / ToolUse / async eval / E2E 复盘"]
-        R0 --> R1 --> R2 --> R3 --> R4
+    subgraph L1["第一层 · CUDA 编程与算子优化"]
+        subgraph g1a["GPU 硬件架构"]
+            sm["SM/Tensor Core<br/>D6"]
+            gpuhw["A100/H100/H200<br/>D6"]
+            memwall["Memory Wall<br/>D6"]
+            memhier["存储层次<br/>D6"]
+        end
+        subgraph g1b["CUDA 编程基础"]
+            cudagrid["Grid/Block/Thread<br/>D7"]
+            cudamem["内存模型<br/>D7"]
+            warp["Warp/合并访问<br/>D7"]
+            memint["访存决定速度<br/>D7"]
+        end
+        subgraph g1c["常见算子"]
+            reduce["Reduce<br/>D8"]
+            gemm["GEMM<br/>D9"]
+            softmax["Softmax<br/>D10"]
+            fusion["算子融合<br/>D11"]
+        end
+        subgraph g1d["Attention 算子"]
+            fa12["FlashAttention 1/2<br/>D10"]
+            fa3["FlashAttention-3<br/>D10"]
+            fdec["Flash-Decoding<br/>D10"]
+            finfer["FlashInfer<br/>D10"]
+            pakern["PagedAttn Kernel<br/>D10"]
+        end
+        subgraph g1e["AI 编译器"]
+            triton["Triton<br/>D11"]
+            tvm["TVM/XLA"]
+            tcompile["torch.compile<br/>D11"]
+        end
     end
-    A0 -. 对应 .-> R0
-    A1 -. 对应 .-> R1
-    A2 -. 对应 .-> R2
-    A3 -. 对应 .-> R3
+    subgraph L2["第二层 · 分布式训练"]
+        subgraph g2a["架构演进"]
+            attnvar["MHA/MQA/GQA/MLA<br/>D13"]
+            moe["MoE<br/>D13"]
+        end
+        subgraph g2b["数据并行"]
+            dp["DP<br/>D4"]
+            ddp["DDP<br/>D4"]
+            fsdp["FSDP<br/>D14"]
+        end
+        subgraph g2c["3D 并行"]
+            tp["TP<br/>D15"]
+            pp["PP<br/>D15"]
+            sp["SP<br/>D15"]
+        end
+        subgraph g2d["显存优化"]
+            zero["ZeRO-1/2/3<br/>D14"]
+            mixp["混合精度<br/>D16"]
+            gacc["梯度累积<br/>D16"]
+            recomp["重计算<br/>D16"]
+        end
+        subgraph g2e["训练框架"]
+            megatron["Megatron-LM<br/>D17"]
+            deepspeed["DeepSpeed<br/>D17"]
+            fsdpfr["PyTorch FSDP<br/>D17"]
+        end
+    end
+    subgraph L3["第三层 · 推理与部署"]
+        subgraph g3a["推理基础"]
+            predec["Prefill/Decode<br/>D18"]
+            kvcache["KV Cache<br/>D19"]
+            metrics["TTFT/TPOT<br/>D18"]
+        end
+        subgraph g3b["推理引擎"]
+            paged["PagedAttention<br/>D20"]
+            cbatch["Continuous Batching<br/>D20"]
+            prefixc["Prefix Cache<br/>D20"]
+            chunked["Chunked Prefill<br/>D20"]
+            vllm["vLLM<br/>D21"]
+            sglang["SGLang<br/>D21"]
+            trtllm["TensorRT-LLM<br/>D21"]
+        end
+        subgraph g3c["量化"]
+            w8a8["W8A8<br/>D22"]
+            int4["INT4/GPTQ/AWQ<br/>D22"]
+            kvq["KV 量化<br/>D22"]
+            fp8["FP8<br/>D22"]
+            qtree["量化决策树<br/>D22"]
+        end
+        subgraph g3d["Speculative Decoding"]
+            spec["Spec Sampling<br/>D23"]
+            medusa["Medusa<br/>D23"]
+            eagle["EAGLE-2<br/>D23"]
+            blkver["Block 验证<br/>D23"]
+        end
+        subgraph g3e["P/D 解耦"]
+            distserve["DistServe<br/>D24"]
+            splitwise["Splitwise<br/>D24"]
+            taichi["TaiChi<br/>D24"]
+            goodput["Goodput<br/>D24"]
+        end
+        subgraph g3f["Benchmark"]
+            bmetrics["指标体系<br/>D25"]
+            tprof["torch.profiler<br/>D25"]
+            nsight["Nsight<br/>D25"]
+            gperf["GenAI-Perf<br/>D25"]
+            mlperf["MLPerf<br/>D25"]
+            reggate["回归门禁<br/>D25"]
+        end
+        subgraph g3g["选型"]
+            dtree["优化决策树<br/>D22-25"]
+        end
+    end
+    nccl --> sm
+    tcompile --> attnvar
+    fsdpfr --> predec
+    classDef day fill:#d9ead3,stroke:#38761d;
+    class linalg,prob,calc,sa,ffn,rope,ln,fwd day;
+    class pt_t,pt_loop,pt_ckpt,pt_dbg,nvlink,ib,coll,nccl day;
+    class sm,gpuhw,memwall,memhier,cudagrid,cudamem,warp,memint day;
+    class reduce,gemm,softmax,fusion,fa12,fa3,fdec,finfer,pakern,triton,tcompile day;
+    class attnvar,moe,dp,ddp,fsdp,tp,pp,sp,zero,mixp,gacc,recomp,megatron,deepspeed,fsdpfr day;
+    class predec,kvcache,metrics,paged,cbatch,prefixc,chunked,vllm,sglang,trtllm day;
+    class w8a8,int4,kvq,fp8,qtree,spec,medusa,eagle,blkver day;
+    class distserve,splitwise,taichi,goodput,bmetrics,tprof,nsight,gperf,mlperf,reggate,dtree day;
 ```
 
 | 文章的层 | 文章覆盖（原文） | 我们的对应 | 差异 |
