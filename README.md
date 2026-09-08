@@ -27,49 +27,6 @@ The repository favors a consistent progression:
 | [Evaluation: benchmark efficiency](eval-bench-efficiency/README.md) | Can a smaller benchmark preserve ranking and decision quality? | IRT/mRMR methods and practical checks |
 | [Evaluation index](eval/README.md) | Where are the evaluation subtracks? | Navigation only |
 
-## Knowledge map: 草帽路飞路线 vs. 我们的 roadmap
-
-`ai-infra` 的 45 天路线以草帽路飞《[AI Infra学习路线](https://zhuanlan.zhihu.com/p/2021970155182326008)》为骨架
-（转述见 [ai-infra/ROADMAP_45D.md](ai-infra/ROADMAP_45D.md)）。贯穿两者的组织问题是同一个：
-**计算 / 通信 / 显存**的不可能三角，每项技术都问：牺牲什么、换取什么、何时不赚。
-
-> 说明：知乎本次拒绝了直接抓取，左侧"文章"一栏依据 ROADMAP_45D.md 中对原文四层结构的转述整理；
-> 若与原文有出入请指出，我来修正。
-
-```mermaid
-graph TD
-    subgraph article["草帽路飞《AI Infra学习路线》· 四层"]
-        A0["第零层 · 地基<br/>Transformer / PyTorch 循环 / 通信拓扑 / DDP / JAX"]
-        A1["第一层 · CUDA 算子<br/>GPU 架构 / CUDA / Reduce / GEMM / FlashAttention / Triton / Profiling"]
-        A2["第二层 · 分布式训练<br/>注意力变种 / FSDP-ZeRO / TP-PP-SP / 混合精度 / 框架选型 / Checkpoint"]
-        A3["第三层 · 推理部署<br/>Prefill-Decode / KV Cache / PagedAttention / vLLM / 量化 / Spec 解码 / 解耦 / Benchmark"]
-        A0 --> A1 --> A2 --> A3
-    end
-    subgraph ours["我们的 roadmap · 对应与改动"]
-        R0["r2-day-01~05<br/>transformer → loop → topo → DDP → JAX mesh"]
-        R1["r2-day-06~12 ＋ gpu-architecture/<br/>roofline → CUDA → reduce → GEMM → FlashAttention → profiling"]
-        R2["r2-day-13~19<br/>FSDP-ZeRO → TP-PP-SP → 混合精度 → 选型 → DCP"]
-        R3["r2-day-20~32 ＋ vllm-rollout/<br/>KV cache → paged → vLLM → 量化 → spec → 解耦 → benchmark 门禁"]
-        R4["Day 33~45 · 新增<br/>post-training 连接：GRPO / RM / ToolUse / async eval / E2E 复盘"]
-        R0 --> R1 --> R2 --> R3 --> R4
-    end
-    A0 -. 对应 .-> R0
-    A1 -. 对应 .-> R1
-    A2 -. 对应 .-> R2
-    A3 -. 对应 .-> R3
-```
-
-| 文章的层 | 文章覆盖（据 ROADMAP 转述） | 我们的对应 | 差异 |
-|---|---|---|---|
-| 第零层 · 地基 | Transformer 白板、PyTorch 循环、通信拓扑、DDP、JAX 声明式 | r2-day-01~05 | 基本对齐：够用即可 |
-| 第一层 · CUDA 算子 | GPU 架构、CUDA、Reduce、GEMM Tiling、FlashAttention、Triton、Profiling | r2-day-06~12 ＋ `gpu-architecture/` 独立 track | 硬件与 kernel 深挖拆成独立 track，`ai-infra` 只保留系统视角的成本模型 |
-| 第二层 · 分布式训练 | 注意力变种、FSDP/ZeRO、TP/PP/SP、混合精度/重计算、框架选型、Checkpoint | r2-day-13~19 | 对齐；`day-15-megatron-3d` 等旧实验保留为历史 |
-| 第三层 · 推理部署 | Prefill/Decode、KV Cache、PagedAttention、vLLM、量化、Spec 解码、解耦、Benchmark | r2-day-20~32 ＋ `vllm-rollout/` | 对齐；我们加了回归门禁（eval/reliability） |
-| （文章无） | — | Day 33~45 post-training 连接层 | **新增**：GRPO vs PPO、RM 校准、ToolUse、vLLM 联动、async eval、coding flywheel、E2E |
-| （文章无） | — | side tracks：`day-11-paper2-mech-load`、`day-14-pue-cost` | **降级**：设施/热/负载预测标为非核心；文章主干本来就不含这类主题 |
-
-三处改动一句话：文章止于推理部署，我们向后接了 post-training；硬件深挖独立成 track；设施主题明确出界。
-
 ## Topic boundaries
 
 - **`ai-infra/** is the training/inference systems spine: DDP, FSDP, sharding, collectives, checkpointing, rollout serving, and performance models.
