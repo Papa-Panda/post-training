@@ -87,7 +87,7 @@ graph TD
 
 **第零层 · 地基（Day 1–5）**
 
-1. Transformer Decoder 白板（地基）：手绘 $(B,S,D)$ 张量流，hidden 4096、32 层手算总参。
+1. Transformer Decoder 白板（地基）：手绘 (B, S, D) 张量流，hidden 4096、32 层手算总参。
 2. PyTorch 训练循环（地基）：loop state、optimizer、checkpoint 落盘。
 3. 通信拓扑与 NCCL（地基）：NVLink vs PCIe/IB 数量级， $\alpha$ – $\beta$ 模型，ring all-reduce 公式。
 4. DDP（地基）：数据分片、梯度 all-reduce 同步；30 分钟把单卡循环改成 DDP。
