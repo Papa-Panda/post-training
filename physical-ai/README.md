@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（17已完成/30总规划）
+├── README.md                # 本路线图（18已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,7 +16,7 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (17/30 - 进行中)
+## 发展路线图 (18/30 - 进行中)
 
 > 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day17 BridgeData V2 已完成。Day11–30 主题已锁定，后续严格按表顺延。
 
@@ -61,7 +61,7 @@ graph TD
 | 15 | day-15-2023-open-x-embodiment-rtx | Open X-Embodiment / RT-X — cross-robot data scaling ✅ 2026-09-06 | S |
 | 16 | day-16-2024-droid | DROID — in-the-wild robot manipulation dataset ✅ 2026-09-07 | S |
 | 17 | day-17-2023-bridgedata-v2 | BridgeData V2 — scalable heterogeneous imitation data ✅ 2026-09-08 | A |
-| 18 | day-18-2024-robocasa | RoboCasa — large-scale simulation data for everyday manipulation | A |
+| 18 | day-18-2024-robocasa | RoboCasa — large-scale simulation data for everyday manipulation ✅ 2026-09-09 | A |
 | 19 | day-19-2017-ppo-robotics | PPO for Robotics — clipped policy optimization and rollout systems | S |
 | 20 | day-20-2023-rlpd | RLPD — sample-efficient real-world robot RL with prior data | S |
 | 21 | day-21-2019-domain-randomization | Domain Randomization — visual/dynamics randomization for sim2real | S |
@@ -75,7 +75,7 @@ graph TD
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
 
-### Day N 映射表 (17已完成)
+### Day N 映射表 (18已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -96,7 +96,7 @@ graph TD
 | 15 | day-15-2023-open-x-embodiment-rtx | 60 数据集 / 22 embodiment / 100万+ 轨迹统一为 RLDS + 7 维末端动作接口；RT-1-X 小域 +50%，RT-2-X emergent skills ~3×（去 Bridge 消融钉死因果） | S |
 | 16 | day-16-2024-droid | 18 台统一 Franka、50 采集员、52 栋建筑 564 真实场景采 76k 轨迹（350h/86任务）；本域小数据 + DROID co-train diffusion policy，6 任务 × 4 地点平均 +20%，场景覆盖即泛化增益 | S |
 | 17 | day-17-2023-bridgedata-v2 | WidowX 250 廉价臂 60,096 轨迹 / 24 环境 / 13 技能，全部带语言标注；同一套数据跑通 GCBC / D-GCBC / ACT / CRL / LCBC / RT-1 六种 offline 方法；技能多样性 13 vs 3 在等量数据下未见 pick-and-place 0.30→0.65 | A |
-| 18 | day-18-2024-robocasa | 用程序化家庭场景和大规模仿真轨迹扩充 manipulation 数据，连接 Habitat 总览与 sim2real | A |
+| 18 | day-18-2024-robocasa | MimicGen 的 SE(3) 搬运把 1,250 条人类演示放大到 100K+ 轨迹；BC-Transformer 28.8% → 47.6% 单调 scaling；真机 co-train seen 13.6% → 24.4%（+79% 相对），unseen 2.6% → 9.3%；合成是覆盖四轴的 reality 端 | A |
 | 19 | day-19-2017-ppo-robotics | 从 clipped surrogate、GAE 到并行 rollout，建立 robot policy optimization 的 actor-critic 基线 | S |
 | 20 | day-20-2023-rlpd | 把离线先验数据与在线交互混合，提升真实机器人 RL 的样本效率与稳定性 | S |
 | 21 | day-21-2019-domain-randomization | 对视觉、动力学、延迟和接触参数随机化，使策略对真实参数后验保持鲁棒 | S |
