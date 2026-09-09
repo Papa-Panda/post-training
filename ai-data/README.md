@@ -18,6 +18,7 @@
 | 06/30 | 2026-09-06 | 06 | Textbooks Are All You Need (Phi-1) | ✅ 完成 |
 | 07/30 | 2026-09-07 | 07 | The Llama 3 Herd of Models / 15.6T 预训练数据瀑布 | ✅ 完成 |
 | 08/30 | 2026-09-08 | 08 | DeepSeek-V3 Technical Report / 14.8T MoE 数据配方 | ✅ 完成 |
+| 09/30 | 2026-09-09 | 09 | Qwen2.5 Technical Report / 18T→1M SFT→多阶段RL 飞轮 | ✅ 完成 |
 
 ## 结构
 
