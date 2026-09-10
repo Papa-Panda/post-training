@@ -19,6 +19,7 @@
 | 07/30 | 2026-09-07 | 07 | The Llama 3 Herd of Models / 15.6T 预训练数据瀑布 | ✅ 完成 |
 | 08/30 | 2026-09-08 | 08 | DeepSeek-V3 Technical Report / 14.8T MoE 数据配方 | ✅ 完成 |
 | 09/30 | 2026-09-09 | 09 | Qwen2.5 Technical Report / 18T→1M SFT→多阶段RL 飞轮 | ✅ 完成 |
+| 10/30 | 2026-09-10 | 10 | Llama 3.1 / 3.2 后训练数据引擎 / 多轮RS+DPO / 1B-3B蒸馏 | ✅ 完成 |
 
 ## 结构
 
