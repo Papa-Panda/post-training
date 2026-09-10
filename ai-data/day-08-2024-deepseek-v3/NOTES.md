@@ -125,3 +125,33 @@ DeepSeek-V3 真正解决的 data 问题不是"怎么训 MoE"，而是：**MoE �
 
 **论文原文**：https://arxiv.org/abs/2412.19437
 **GitHub NOTES**：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/NOTES.md
+
+## 问答补充（2026-09-08）
+
+> 来自 `ai data` side chat 用户主动问答（2026-09-08 10:26 PDT），归档时精简整理；答案保留原符号定义与结论。
+
+**问题（用户）**：Aux-loss-free 啥意思？
+
+**核心答案**：
+
+先定义符号。MoE 有 $E$ 个 expert，一批 $T$ 个 token。门控网络给 token $t$ 对 expert $i$ 打亲和分 $a_{t,i}$ ，每个 token 选 top- $K$ 个 expert。
+
+**问题**：训练初期路由会坍缩——少数几个 expert 被所有 token 选中，其他 expert 饿死。负载记 $f_i$ = 分到 expert $i$ 的 token 比例，理想是 $f_i \approx K/E$ 。
+
+**传统解法（aux loss）**：在总 loss 里加一项负载均衡惩罚，最常见的是：
+
+$$L_{\mathrm{aux}} = \alpha \cdot E \sum_{i=1}^{E} f_i \cdot P_i$$
+
+其中 $P_i$ 是 expert $i$ 的平均路由概率。 $f_i \cdot P_i$ 在均匀分布时最小，失衡时变大，所以最小化它能把负载拉平。代价是：**这项 loss 的梯度和主 LM loss 的梯度打架**——模型要在"预测准"和"负载平"之间妥协， $\alpha$ 选不好两头受损。
+
+**Aux-loss-free（DeepSeek-V2 首创，V3 沿用）**：loss 里**完全没有**这一项。做法是给每个 expert 加一个偏置 $b_i$ ，加在亲和分上再做 top- $K$ ：
+
+$$\mathrm{选中的\ expert} = \mathrm{topK}_i(a_{t,i} + b_i)$$
+
+$b_i$ **不走梯度**，而是走一个控制回路（像恒温器）：统计最近 expert $i$ 的实际负载，超载就调小 $b_i$ ，空闲就调大 $b_i$ 。负载均衡从"优化问题"变成了"反馈控制问题"，主 loss 的梯度干干净净。
+
+V3 论文 §4.2 给的具体数字：前 14.3T tokens， $b_i$ 更新速度 0.001；最后 500B tokens 更新速度设为 **0（冻结）**。另外留了一个权重仅 0.0001 的 sequence-level balance loss 做兜底——"just to avoid extreme imbalance within any single sequence"，防止单个序列内出现极端失衡。
+
+为什么这事值得在数据视角下单拎出来：bias 控制回路是**跟着数据分布学**的——数据里 code 多，code 擅长的 expert 的 $b_i$ 就被调到合适位置。一旦最后 500B 把 $b_i$ 冻结，而此时换入分布不同的 annealing 数据（比如突然加了很多数学），token 的路由分布变了，expert 负载失衡，但**没有任何机制能把它拉回来**（loss 里没有 aux loss，bias 也不更新了）。所以 aux-loss-free 把"负载均衡"这个职责在训练末期**移交给了数据管线**：annealing 窗口的数据域分布必须和之前保持兼容，否则 expert 直接失衡。这就是"架构-数据耦合"最锋利的一个实例。
+
+**关联**：Day 08 DeepSeek-V3 §4.2（aux-loss-free 负载均衡）；与第二轮复习（2026-09-08）思考题 (b)"冻结的路由与换挡的数据"直接呼应——本问答是该思考题的前置机制解释。

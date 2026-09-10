@@ -224,3 +224,63 @@ graph TD
 - 讨论：在 Hatch `ai data` thread
 - GitHub树：https://github.com/Papa-Panda/post-training/tree/master/ai-data
 - Sheet：`ai data` tab 日更
+
+## 问答记录
+
+> 来自 `ai data` side chat 的用户主动问答归档：跨多篇或不归属单篇的问答记在这里；可归属单篇 Day 的记在对应 `NOTES.md` 末尾的"问答补充"小节。问答原文精简整理，保留关键公式、推导链条与结论；原有内容只追加、不改动。
+
+### 2026-09-09 — 评估器三臂实验与"自我参照"RM 的系统性跑偏（跨 Day07 / Day09 / Day04）
+
+**问题（用户，10:32 PDT）**：Llama 3：评估器=下游分数（外部锚点）；Qwen2.5：评估器=模型自己的偏好（自我参照）；LESS：评估器=目标梯度（任务参照）。这个实验很好设计啊——用评估器筛选数据然后跑训练、看 eval 提升多少。在什么条件下"自我参照"的 RM 会系统性跑偏？validation eval dataset 完全正交、评估器太弱、gradient 用的模型太弱，都有可能系统性跑偏。
+
+**核心答案**：三臂共享同一个候选池、同一个 50k 预算，各自用评估器做分配决策，然后在同一个小 proxy 上训、同一套 held-out 评测上看 delta。但"好设计"的魔鬼在：**ground truth 的定义会不会让某条臂不战而胜**。裁判用 proxy 训完看 HumanEval 涨多少 → Llama 3 那条臂（annealing 本来就是直接测 HumanEval delta）带答案进考场；裁判用人工偏好 → RM 臂天然占优。公平设计必须声明：裁判和三条臂的参照系都不重合——比如裁判是"全新任务簇上的 few-shot 泛化"，三臂只在旧任务上做决策；比的是"便宜信号的外推能力"而非"谁离裁判更近"。另有关键约束：验证用的训练必须是 **proxy 级**（小模型、少 token），否则为验证"便宜评估器"付了"昂贵训练"的全款，实验本身失去意义。
+
+跑偏情形（记真实目标为 $R^*$ ，不可直接观测；RM 为 $R_\theta$ ；RM 训练数据为 $D_{RM}$ ）：
+
+1. **eval 与训练目标正交**： $R_\theta$ 只在 $D_{RM}$ 的支撑集 $\mathrm{supp}(D_{RM})$ 上被训练去逼近 $R^*$ ；正交的 eval 维度落在支撑集之外，RM 打分是纯外推——跑偏是数学上**预期内**的。纠正方向不是"换更强的 RM"，而是把正交维度的数据补进 $D_{RM}$ ，扩大支撑集。
+2. **评估器太弱**：逼近误差里的 bias 项，不是 variance。弱 RM 表达能力不够，学不会真正的 $R^*$ （比如 1B 的 RM 验证不了数学推理链），于是锁死在**伪相关特征**上：长度、格式、语气的自信程度。这就是 Goodhart 在这里的形态——"当一个有偏的度量变成目标，偏差会被系统性放大"。与情形一的区别：情形一是"没见过"，情形二是"见过但学不会，只好学歪的"。
+3. **梯度来自太弱的模型（LESS 那条臂的版本）**：LESS 的 score 本质是 $\cos(\Gamma(z), \bar{\Gamma}_{tgt})$ ，其中 $\Gamma$ 是 Adam 感知的投影梯度特征。influence 理论的一阶近似只在 $\theta$ 的局部成立——弱模型的梯度是在**错误的切空间**里算的影响力：弱模型还没学会的特征方向，在它的梯度里根本不存在，所以它选出的数据是对"弱模型有用"的数据，不是对最终强模型有用的数据。形式化地说： $\nabla_\theta \ell$ 在 $\theta_{weak}$ 和 $\theta_{strong}$ 处指向不同的函数空间方向，cosine 相似度量的参照系整个错了。
+4. **闭环迭代放大**（Qwen 飞轮里最危险的）：RM 选数据 → 新模型在 RM 高分区里采样 → 下一轮 RM 的训练数据分布向高分区收缩 → RM 的支撑集越来越窄 → 打分越来越自信、越来越偏。这和 model collapse 是同一数学结构（在自己输出上迭代训练），只是发生在"偏好"维度而非"文本"维度。
+
+**刹车条件（可执行，不用"人工抽检"糊弄）**：每轮记录 $\Delta R_\theta$ （RM 自评分数变化）和 $\Delta A$ （Llama 3 式外部锚点指标变化，RM 永远见不到、也永远不参与选择）。触发条件：**连续两轮 $\mathrm{sign}(\Delta R_\theta) \neq \mathrm{sign}(\Delta A)$ ** ，或在 fresh 样本上 $\mathrm{corr}(R_\theta, A)$ 跌破阈值（比如 0.3）。触发后不停训，而是取"RM 打分高但锚点指标差"的分歧 slice——这是信息量最大的 slice，主动学习里最值得标注的部分——重新人工标注，刷新 $D_{RM}$ ，再开下一轮。这正是 Qwen §4.2 把"白盒信号能评的"切去 offline 的深层原因：**白盒信号就是给自举飞轮配的外部锚点**。
+
+**关联**：Day 07 Llama 3（annealing 下游分数评估）、Day 09 Qwen2.5（§4.2 白盒/黑盒分诊、多轮 RS+DPO 飞轮）、Day 04 LESS（目标梯度选择）。
+
+### 2026-09-09 — SFT-vs-RL 的数据量之争：范畴错误（跨 Day09 / Day15）
+
+**问题（用户，11:21 PDT）**：SFT-vs-RL 的数据量之争有啥好争的？共识应该是 SFT 的训练数据量小很多而且多了也没用；两者的训练目标完全不是一回事：大 SFT + RM 管 instruction following、safety、小冷启动；纯 RL 管推理性质强的 coding + math。
+
+**核心答案**：(b) 与其说是"量之争"，不如说是个范畴错误——问题本身问错了维度。两条机制钉死：
+
+**第一条：SFT 对推理不是"没用"，是和 RL 互斥。** SFT 的信号是 dense-but-capped：cross-entropy 把策略分布压到 demonstration 的几个 mode 上，输出熵坍缩；而 RL 恰恰需要熵来做探索——策略得先"敢"输出不同的推理链，verifiable reward 才能从中挑出好的。所以 SFT 在推理管线里的正确剂量是"刚好把格式固定"（把策略搬进正确的 basin），再多就是给 RL 挖坑：熵被杀死了，RL 无处探索。R1 的 <10k 冷启动就是这个最小剂量的实验测定值。而 Qwen 的 1M 根本不是用来教推理的——它是 dense 信号去覆盖九轴行为空间（长文本、结构化、多语、system prompt），行为覆盖本来就需要量。两边说的"量"不是同一个东西。
+
+**第二条：分家的真正变量是 reward 可验证性，不是任务名字。** 推理类任务有白盒 verifier（单测、答案匹配）→ 信号稀疏但**无上界**（RL 可以超越 demonstrator，这就是 "SFT memorizes, RL generalizes" 的机制）；instruction following / safety / style 没有便宜 verifier → 只能靠 dense 演示（SFT）或学出来的 RM（而 RM 本身又是贵的人类偏好数据训出来的）。所以"数据量问题"是"评估器可靠性问题"的下游——这和 Qwen §4.2 的 offline / online 切分是同一条线，只是换了个说法。
+
+**可证伪的预测**（"中间路线两头不靠"的形式化）：固定 RL 预算，扫 SFT 量，最终效果应该是**倒 U 型**——太少，格式没固定，RL 把样本浪费在学格式上；太多，熵坍缩，RL 探索不动；sweet spot 就是 R1 的冷启动点。100k SFT 恰好落在"够杀死熵、不够覆盖行为"的死亡谷里。
+
+**历史注脚**："共识"是 R1 之后才有的共识。Qwen2.5 是 2024-12，R1 是 2025-01——在 R1 之前没人知道纯 RL 能把推理 elic 出来，默认答案就是堆 SFT。所以 (b) 真正值得问的不是"选哪边"，而是"为什么是 R1 而不是更早"：答案是可验证奖励的规模化 + GRPO 把 RL 的样本效率推过了实用线，数据路线的分叉点从来都是 infra / 信号成本决定的。
+
+**关联**：Day 09 Qwen2.5（1M+ SFT → offline DPO → online GRPO）、Day 15 DeepSeek-R1（小冷启动 + 纯 RL）。
+
+### 2026-09-09 — 仓库级 agent：Qwen 式还是 R1 式？（跨 Day09 / Day15 / Day29）
+
+**问题（用户，11:23 PDT）**：对自己的 coding 数据工作：如果目标是"仓库级 agent 能力"（SWE-bench 类），选 Qwen 式还是 R1 式？啥叫仓库级 agent？如果是说出厂就有推理能力，当然是 R1。
+
+**核心答案**：
+
+**定义**：仓库级 agent 和 HumanEval 那种"给函数签名、补全函数体"完全不是一个物种。仓库级 = 以**整个代码仓库为环境**的任务：输入是一个真实的 GitHub issue（"点击 X 按钮报 500 错误"），agent 要自己读仓库结构、定位相关文件、写复现脚本、改多处代码、跑测试套件、根据报错迭代——几十到上百步的工具调用（读文件、跑 shell、跑测试），最后用仓库自带的测试集判定：FAIL_TO_PASS 测例变绿且 PASS_TO_PASS 没变红。SWE-bench 就是这个范式的标准考场。
+
+**拆解**：仓库级 agent = **推理引擎 + 长程行为**，而这两半要的数据不一样。
+
+- **推理那半，确实选 R1 式。** 仓库级任务有白盒 outcome reward（测试集通过/不通过），这是 R1 范式的直接平移：outcome 可验证 → 小冷启动 + RL，SFT 只给最小剂量固定格式。
+- **但行为那半，纯 R1 走不动，原因叫 credit assignment。** 数学题的 trajectory 是几百 token，batch 里总有一定比例做对，reward 不至于全零；仓库级任务的 trajectory 是 50~100 步工具调用，cold policy 的成功率接近零——RL 拿到的全是零信号，学不动。所以必须先有一步 Qwen 式的 dense 信号：**在 expert agent trajectories 上做小量 SFT（behavior cloning）**，教工具调用格式、ReAct 循环、"先复现再修"的仓库导航规范。这正是 SFT 把策略"搬进 basin"——只不过这里的 basin 是"能跑出非零成功率的 agent 行为空间"。
+
+**三段管线**（正好对应 Qwen §4.2 的分诊哲学）：
+
+1. **SFT（小，约 10k 条 expert trajectory）**：只教格式——工具调用语法、多轮观察-行动循环、长上下文里不丢 issue 描述（这是 Qwen SFT 九轴里 long-gen 那条轴的活）。
+2. **RL（主干，R1 式）**：容器化仓库环境里 rollout，outcome reward = 测试集翻转，GRPO 每 issue 采多条 trajectory。
+3. **把稀疏 reward 变稠（仓库级特有的）**：中间可验证里程碑当 process reward——复现脚本跑通、单个 FAIL_TO_PASS 翻绿，都给分。这是"白盒信号能评的走白盒"那句话在长程任务上的实例化。
+
+一句话：选 R1 式当主干，但"仓库级"这个定语强制你在 R1 前面加一段 Qwen 式的前置——不是因为推理需要 SFT，而是因为 **100 步的稀疏奖励下，RL 需要 SFT 先把它送进 reward 非零的区域**。
+
+**关联**：Day 09 Qwen2.5（§4.2 分诊、SFT 九轴）、Day 15 DeepSeek-R1（纯 RL）、Day 29 SWE-Gym（仓库级可执行环境与 agent 轨迹数据）。
