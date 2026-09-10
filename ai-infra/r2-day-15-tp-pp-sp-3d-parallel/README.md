@@ -137,9 +137,9 @@ forward 做 **reduce-scatter**、backward 做 **all-gather**，
 
 ## 验证状态
 
-- 本地： `python3 -m unittest discover` ，14/14 CPU 测试通过
+- 本地： `python3 -m unittest discover` ，20/20 CPU 测试通过
   （topology/坐标互逆/三组 group 成员/64 卡节点映射/ring 流量公式与 r2-Day03 一致/
-  TP 手算 $117.4\ \text{MB}$ 与 $469.7\ \text{MB}$ /bubble $3/11$ /P2P $134.2\ \text{MB}$ ）。
+  TP 手算 $117.4\ \text{MB}$ 与 $469.8\ \text{MB}$ /bubble $3/11$ /P2P $134.2\ \text{MB}$ ）。
 - `tools/check_repo.py` 对新目录检查通过；新文件无雇主标识（grep 验证）。
 - 未验证：无 PyTorch/NCCL/CUDA/H100， $37.6\ \text{GB}$ / $41.8\ \text{ms}$ /
   $0.75\ \text{s}$ 均为理论估计（theoretical estimate），非实测 benchmark；
