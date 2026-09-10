@@ -284,3 +284,33 @@ graph TD
 一句话：选 R1 式当主干，但"仓库级"这个定语强制你在 R1 前面加一段 Qwen 式的前置——不是因为推理需要 SFT，而是因为 **100 步的稀疏奖励下，RL 需要 SFT 先把它送进 reward 非零的区域**。
 
 **关联**：Day 09 Qwen2.5（§4.2 分诊、SFT 九轴）、Day 15 DeepSeek-R1（纯 RL）、Day 29 SWE-Gym（仓库级可执行环境与 agent 轨迹数据）。
+
+### 2026-09-10 — 思考题 (b)：tool use vs 数学推理的路线分野 + 仓库级 agent 三路分诊（跨 Day10 / Day13 / Day15 / Day29）
+
+**问题（用户，11:20 PDT）**：b1/ tool use 不需要强推理，匹配比较多；b2/ 三路分诊不知道，你讲讲。
+
+**核心答案**：
+
+**b1 的机制翻译**：GRPO 的组相对优势 $\hat A_i = \frac{r_i - \text{mean}(\mathbf r)}{\text{std}(\mathbf r)}$ 能提供学习信号，当且仅当 $\text{std}(\mathbf r)$ 显著大于 0——组内得有方差。全对/全错则 $\hat A_i = 0/0$ ，无梯度方向（这就是 R1 系按难度过滤 prompt、只留"将信将疑"中间地带的原因）。tool use 的行为空间小（意图→API 签名映射 + slot filling）， $K\in[10,30]$ 的 offline 采样基本枚举完候选，execution 一跑对错立分，方差天然存在——**它的学习信号不需要在线探索来制造**，所以 Llama 纯 offline 成立。数学推理链长，正确 trajectory 在当前策略下是稀有事件，offline 采 $G$ 条大概率全错 → $\text{std}(\mathbf r)\approx 0$ → GRPO 断粮；online RL 的作用是让策略在训练中自己动起来，把 group 分布推回可学习区。§4.3.1 "405B 自举失效"是同一机制的 offline 版证据：采样分布锁死在生成器能力内、无外部信息注入；打破它需要外部真值（tool use 的 execution）或让 reward 在线带策略发现超典型采样更好的 trajectory（数学）。
+
+**b2 三路分诊**（每路只写准入/退出，不写固定配比）：
+
+- **Route A 纯 offline（SFT+RS+DPO）**：准入 = 短程行为 + 候选空间小到 offline $K$ 采样可覆盖 + 信号可白盒验证（tool-call JSON 格式、单函数生成、复现脚本模板）。退出 = 连续两轮边际增益 < 1pt 或 RS 良品率 > 90%。
+- **Route B offline DPO → online GRPO**：准入 = 中程任务（5–20 步）+ 可验证 outcome + pilot 显示已进 basin（非零成功率）但 offline 增益见顶（debug 小循环；reward 按测试翻转数，中间里程碑稠密化）。退出 = 组内 $\text{std}(\mathbf r)\to 0$ 或边际增益 < 阈值；成功率长期为 0 则**退回** Route A 补 SFT。
+- **Route C 极小冷启动 + 纯 RL**：准入 = 长程（50+ 步）+ 稀疏 outcome reward + 需超越示范分布的探索（完整 SWE-bench 任务）；冷启动只给格式（约 10k trajectories），不给"怎么做对"的示范。退出 = 同 Route B 的方差/边际准则；连续 $N$ 轮零增长先查 reward 稀疏度（加白盒里程碑），不加 SFT。
+- **为什么"固定量 SFT + 一轮 RL"两头不靠**：对 Route A 的任务 RL 纯属加戏；对 Route C 的任务固定量 SFT（如 100k）最可能落入"够杀死熵、不够覆盖行为"的死亡谷假说区间（熵被压低锁死探索），一轮 RL 又不够推出 frontier。根本错误是把 SFT/RL 当可加配料，而它们是有依赖的阶段（同 (a)② 的依赖图）；真正的控制变量是 basin 距离，即 (a)③ 的控制器（ $p_{\text{SFT}}$ 、 $q_{\text{DPO}}$ 、pilot 成功率）。
+
+**关联**：Day 10（§4.3.1 自举失效）、Day 13（DPO-Gap）、Day 15（R1 纯 RL）、Day 29（SWE-Gym 仓库级环境）。
+
+### 2026-09-10 — LIMR vs LIMA："少即是多"在 SFT 与 RL 阶段的两副面孔（跨 Day11 / Day23）
+
+**问题（用户，11:55 PDT）**：讲讲 limr lima 两个在干嘛。
+
+**核心答案**：
+
+- **LIMA（Day 23，Zhou et al.，arXiv 2305.11206）**：对齐阶段极简主义。命题 = Superficial Alignment Hypothesis：预训练学完能力，对齐只教"助手口吻 + 指令格式"（低维风格问题）。做法：StackExchange/wikiHow/Reddit 人工精选 1,000 条，三标准——来源质量、回答风格统一、任务多样性 + 去重；LLaMA-65B 纯 SFT，人类评估与大几个量级的 RLHF 模型有来有回。边界：证明"对齐可以很薄"，不是"学习可以很薄"；"Superficial"修饰的是对齐，不是能力。
+- **LIMR（Day 11，Li et al.，arXiv 2502.11886，"Less is More for RL Scaling"）**：RL 阶段极简主义。动机：SFT 的少即是多（LIMO/s1）在 7B RL 上拉胯，精选标准不能跨阶段照搬。三步：① 不蒸馏、直接从 base 起 RL（避 teacher 天花板，R1 式冷启动哲学）；② 全量 8,523 题跑 RL，记录每题学习轨迹；③ LIM 按"轨迹对齐度"留 1,389 道重训。结果：AIME24 +16.7%，MATH500 超 LIMO 13% / 超 s1 22.2%。LIM 重构（NOTES 原文未记公式，属重构）：记 $R_t$ 为第 $t$ 步全局平均 reward， $r_i(t)$ 为第 $i$ 题同期 reward， $\text{LIM}_i = \text{corr}_t(r_i(t), R_t)$ ——留"自身进步曲线与全局变强共振"的题，而非"最难的题"。
+- **分野**：LIMA 的评估器是人工策展（信人的判断，选输入质量）；LIMR 的评估器是 rollout 轨迹（不信主观难度，只信测出的 impact，选对学习过程的贡献）。一个是 curation，一个是 valuation。"少即是多"成立的条件从来不是"数据少"，而是**选择标准与学习阶段对齐**。
+- **边界**：LIMR 是先付全款再精选（跑完 8,523 题 RL 才知道留哪 1,389），是第二轮提纯法；且战场是数学，搬到 coding/SWE-bench 前需验证轨迹对齐在长程稀疏 reward 下是否仍灵。
+
+**关联**：Day 11（LIMR）、Day 23（LIMA）、Day 17（LIMO）、Day 18（s1）、Day 20（DEITA 三因子）。
