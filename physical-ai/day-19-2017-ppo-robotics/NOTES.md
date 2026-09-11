@@ -151,3 +151,69 @@ on-policy rollout   →  advantage 加权 PG + clip     Day19 PPO（本篇）
 ## 连接
 - 上一篇: [day-18-2024-robocasa](../day-18-2024-robocasa/NOTES.md) — RoboCasa：仿真数据规模化的"数据端"
 - 下一篇预告: [day-20-2023-rlpd](../day-20-2023-rlpd) — RLPD：把离线先验数据混进在线 RL，回答"PPO 的 on-policy 数据能不能和示范数据一起吃"
+
+## 问答补充（2026-09-10）
+
+> 以下 4 组问答来自 2026-09-10 当晚用户对 Day19 PPO 卡片（batch 复用 / asymmetric actor-critic / locomotion-manipulation 边界 / PPO 跨域）的追问。用户原文按大意精简归档，核心答案保留公式与符号定义。
+
+### Q1：PPO 把同一批 rollout 复用多个 epoch 训，为什么概率比不会失控？
+
+**问题大意**：普通 policy gradient 如果同一批数据训好几轮，新/旧动作概率比 $r_t(\theta)$ 会一路跑偏、把训练搞崩；用户指出 PPO 靠 clip 把这个兜住了。
+
+**核心答案**：PPO 的目标是 clipped surrogate：
+
+$$L^{CLIP}(\theta)=\hat{\mathbb{E}}_t\left[\min\left(r_t(\theta)\hat{A}_t,\ \text{clip}(r_t(\theta),1-\epsilon,1+\epsilon)\hat{A}_t\right)\right]$$
+
+**字母表**：
+
+- $r_t(\theta)=\pi_\theta(a_t\mid s_t)/\pi_{\theta_{\text{old}}}(a_t\mid s_t)$：新策略相对旧策略的动作概率比（importance-sampling ratio）；旧策略 $\pi_{\theta_{\text{old}}}$ 是采这批数据的那个策略。
+- $\hat{A}_t$：GAE 估计的 advantage（本 NOTES §数学视角）。
+- $\epsilon$：clip 半径，常取 $0.1$–$0.3$；$\text{clip}(r,1-\epsilon,1+\epsilon)$ 把 $r$ 钳在 $[1-\epsilon,1+\epsilon]$ 里。
+- **多 epoch 复用**：同一批 rollout 数据上做 $K$ 个 epoch 的 minibatch 更新；每一轮 $\theta$ 都在变，所以 $r_t(\theta)$ 逐渐偏离 1。
+
+**为什么普通 PG 会崩**：无 clip 时目标是 $\hat{\mathbb{E}}_t[r_t(\theta)\hat{A}_t]$。重复 epoch 里 $\theta$ 每轮都朝 advantage 方向走，$r_t(\theta)$ 可以单调变大（$\hat{A}_t>0$ 的样本被反复加码），策略一步迈太大 → 训练发散。
+
+**asymmetric clip 的机制**（非对称体现在 $\min$ 操作里）：
+
+- $\hat{A}_t>0$（好动作）：$r_t$ 超过 $1+\epsilon$ 后，$\min$ 取的是被 clip 的那一项，梯度归零——"已经够好了，别再加码"；但如果更新方向错了（$r_t<1$，好动作概率反而下降），$\min$ 取 $r_t\hat{A}_t$，梯度保留，把概率纠回来。
+- $\hat{A}_t<0$（坏动作）：对称地，$r_t$ 降到 $1-\epsilon$ 以下后梯度归零；但如果 $r_t>1$（坏动作概率反而上升），$\min$ 取 $r_t\hat{A}_t$，梯度保留，压回去。
+
+一句话：clip 让"已经充分的好/坏更新自己停下来"，但"走错方向的纠正梯度"永远保留——这就是 asymmetric 的含义，也是 batch 多 epoch 复用不崩的数学原因。
+
+**和之前工作的关系**：这是本 NOTES §数学视角 clipped surrogate 的展开；和 ai-infra `grpo-vs-ppo` 里 RLHF 的 PPO-clip 是同一个公式——GRPO 只是把 $\hat{A}_t$ 换成组内归一化 reward，clip 的思想不变。
+
+### Q2：asymmetric actor-critic 是因为环境噪声大、actor 需要稳定吗？
+
+**问题大意**：用户最初猜测 asymmetric actor-critic 的动机是"环境更嘈杂、actor 需要稳定"。
+
+**核心答案**：不是。环境噪声不是重点，关键是**部署约束的不对称**：
+
+- critic 可以用仿真器里的 privileged state $s_t$（真实关节力矩、接触状态、地面摩擦系数……），actor 只能用真机上实际可观测的 $o_t$（IMU、关节编码器）。
+- **数学位置**：把 $V_\phi$ 的输入从 $o_t$ 换成 $s_t\supset o_t$，即 $V_\phi(s_t)$ 而 $\pi_\theta(a_t\mid o_t)$（本 NOTES §数学视角已有这句）。
+- 为什么有效：critic 的任务是估计 value/advantage $\hat{A}_t$，输入越全、方差越小，actor 的策略梯度就越稳。PPO 的 actor 和 critic 是**两个独立网络、只通过 $\hat{A}_t$ 耦合**，所以 critic 看 privileged 信息不会污染 actor 的部署约束——这种解耦是 PPO 设计里天然留出的"后门"，locomotion 社区把它变成了标配。
+- 部署时 critic 直接扔掉，只留 actor。
+
+**和之前工作的关系**：呼应 Day07 (H2O) / Day08 (Humanoid-Gym) 的工程实践——"训练用仿真特权信息、部署只用本体感知"。
+
+### Q3：manipulation 的探索空间比 locomotion 大/贵得多，所以 RL 做不动？
+
+**问题大意**：用户指出 manipulation 的 rollout 和探索空间比 locomotion 大得多、也贵得多。
+
+**核心答案**：对。这正是实践中 **RL vs BC 的边界**：
+
+- **locomotion**：reward 稠密可算（速度跟踪、姿态、能耗项），仿真 reset 便宜（Isaac/MuJoCo 并行几千 env），随机探索能踩出 reward 信号 → on-policy RL (PPO) 占优。
+- **manipulation**：reward 稀疏难写（"把杯子放进柜子"的成功信号只有 0/1），接触丰富的任务随机探索成功概率接近 0（$p_{\text{random success}}\approx 0$）→ RL 采不到梯度，**behavior cloning**（拟合演示分布）占主导。Day11–14 的 VLA 路线全是 BC / Diffusion / Flow 头，正是这个原因。
+- 工程直觉：探索空间"小/便宜"→ 纯在线 RL；"大/贵" → 先 BC 起步（或 Day20 RLPD 那种离线+在线混合）。
+
+**和之前工作的关系**：这是本 NOTES §统一框架图"BC vs RL 两条正交轴"的实例化，也是 Day12 Diffusion Policy 路线选择的底层理由。
+
+### Q4：机器人 PPO 和 LLM post-training 的 PPO/GRPO，是同一套东西吗？
+
+**问题大意**：用户观察到这场讨论说明 RL 技术在多个领域通用，问机器人 PPO 和 LLM 侧 PPO/GRPO 的关系。
+
+**核心答案**：核心数学同一套，工程约束不同。
+
+- **相同**：advantage $\hat{A}_t$（GAE）↔ GRPO 的组内归一化 reward；ratio $r_t(\theta)$ + clip 的 trust-region 式控制；多 epoch batch 复用。
+- **不同**：① rollout 来源——机器人是仿真器 env step，LLM 是模型自采样 token；② reward 构造——机器人是 hand-shaped dense reward + curriculum，LLM 是 verifier/RM 稀疏 reward；③ 失败成本——机器人真机摔了是硬件钱，LLM 采样错了是算力钱。
+
+**和之前工作的关系**：呼应本 NOTES §可迁移 "RLHF 的 PPO/GRPO 是同一条血统"。
