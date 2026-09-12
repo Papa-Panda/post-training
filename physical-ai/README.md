@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（20已完成/30总规划）
+├── README.md                # 本路线图（21已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (20/30 - 进行中)
+## 发展路线图 (21/30 - 进行中)
 
-> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day20 RLPD 已完成。Day11–30 主题已锁定，后续严格按表顺延。
+> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day21 Domain Randomization / ADR 已完成。Day11–30 主题已锁定，后续严格按表顺延。
 
 ### 图谱总览
 
@@ -64,7 +64,7 @@ graph TD
 | 18 | day-18-2024-robocasa | RoboCasa — large-scale simulation data for everyday manipulation ✅ 2026-09-09 | A |
 | 19 | day-19-2017-ppo-robotics | PPO for Robotics — clipped policy optimization and rollout systems ✅ 2026-09-10 | S |
 | 20 | day-20-2023-rlpd | RLPD — sample-efficient real-world robot RL with prior data ✅ 2026-09-11 | S |
-| 21 | day-21-2019-domain-randomization | Domain Randomization — visual/dynamics randomization for sim2real | S |
+| 21 | day-21-2019-domain-randomization | Domain Randomization — visual/dynamics randomization for sim2real ✅ 2026-09-12 | S |
 | 22 | day-22-2021-rma | RMA — rapid motor adaptation under latent dynamics | S |
 | 23 | day-23-2019-residual-rl | Residual RL — combine classical control priors with learned correction | A |
 | 24 | day-24-sim2real-system-identification | System Identification + Sim2Real Evaluation — calibrate and gate transfer | A |
@@ -75,7 +75,7 @@ graph TD
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
 
-### Day N 映射表 (20已完成)
+### Day N 映射表 (21已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -100,6 +100,7 @@ graph TD
 | 19 | day-19-2017-ppo-robotics | PPO clipped surrogate + GAE：ratio-clip 把信任域写进目标函数，实现同批数据多 epoch 复用；GPU 向量化 rollout（legged_gym/rsl_rl）让 ANYmal 平地 <4 分钟、崎岖地形 20 分钟单卡收敛；补完 Day07/08 的算法黑盒，确立 BC-MLE vs on-policy-RL 两条正交轴 | S |
 | 19 | day-19-2017-ppo-robotics | 从 clipped surrogate、GAE 到并行 rollout，建立 robot policy optimization 的 actor-critic 基线 | S |
 | 20 | day-20-2023-rlpd | SAC 三件套（50/50 对称采样 + LayerNorm critic + UTD 20 + Q 集成）把离线数据常驻 replay 在线训，无需悲观预训练；D4RL/Adroit/AntMaze/V-D4RL 平均 2.5× 领先，是 Days 15–18 离线数据资产通向真机在线 RL 的 canonical 配方；与 Day19 PPO 构成"交互便宜 vs 交互昂贵"的对偶 | S |
+| 21 | day-21-2019-domain-randomization | Tobin 2017 视觉 DR 起源 + OpenAI ADR（边界扩张、熵单调递增的自动课程）：$J_{\text{DR}}(\theta)=\mathbb{E}_{\xi\sim p_\phi}[J(\theta;\xi)]$，transfer 判据 $\xi_{\text{real}}\in\text{support}(p_\phi)$；LSTM 隐式在线辨识涌现 meta-learning；纯仿真五指手真机解魔方 60%（极限打乱 20%）；与 Day20 RLPD 构成"世界覆盖 vs 数据覆盖"的对偶 | S |
 | 21 | day-21-2019-domain-randomization | 对视觉、动力学、延迟和接触参数随机化，使策略对真实参数后验保持鲁棒 | S |
 | 22 | day-22-2021-rma | base policy + adaptation module 从近期 history 在线推断 latent dynamics，快速适应地形与载荷 | S |
 | 23 | day-23-2019-residual-rl | 在模型控制器动作上学习 residual，以先验稳定性缩小探索空间并保留可解释接口 | A |
