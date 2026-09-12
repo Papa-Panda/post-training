@@ -228,3 +228,23 @@ $$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_
 对比着看就有意思了：RT 系列是固定硬件 + 实验室/办公室，Bridge 是固定硬件 + 便宜 + 玩具厨房，DROID 是固定硬件 + 贵臂 + 真实世界 564 个场景。三者都是"一次只扩张一个多样性轴"，DROID 只是把场景轴推到了极致。
 
 **关联**：repo 内固定硬件三处（Day09 RT-2 / Day12 Diffusion Policy / Day16 DROID）见 day-16 NOTES「问答补充（2026-09-07）」；Day13 Octo、Day14 π₀.₅ 是跨 embodiment 反例（同见各自 NOTES 问答补充）。
+
+### World Labs Atlas 与 roadmap 的关系（2026-09-12）
+
+**问**：Li Fei-Fei 做的 Atlas 和我们的 roadmap 是什么关系？是在射程外吗？
+
+**答**：**不在射程外，正中靶心**——Atlas 正好落在 Day27（Cosmos）的射程内，是那一主题的"新一代对照组"。
+
+**Atlas 是什么**（World Labs，Fei-Fei Li，2026-09-01 发布）：官方口号是 "the world's first multimodal world model that generates image and video frames with pixel-perfect camera control and reconstructs them in 3D"。技术上是个 omni-model，从 scratch 在 text/image/video/3D 上训练，所有输入锚定到精确 3D 相机位姿（"spatial context"）；能从 2–3 张照片重建真实场景、生成最长 1 分钟 1440p 视频，输出显式 3D（point clouds、3D Gaussian splats）。核心创新：**第一次把"像素重建"和"像素生成"统一到一个以 viewpoint 为锚的模型里**。
+
+**它在 roadmap 谱系里的位置**：
+
+- **Day04 Genie → Day27 Cosmos → Atlas**，同一条线："生成式世界模型"。Genie 是从无标签视频学 latent action 的可交互世界（学术起点）；Cosmos 是 NVIDIA 的世界基础模型工业版（Day27 的主角）；Atlas 是 2026 年 9 月的最新一代——比 Cosmos 多了**几何持久性**（"preserve the place behind the clip"，回到同一位置几何和光照还在）和显式 3D 输出。
+- **Day06 DreamerV3 是另一条线**：Dreamer 是 latent dynamics model，用来在隐空间里"**想**"（planning/imagination）；Atlas/Genie/Cosmos 是 generative world model，用来"**造**"（data/simulation）。想 vs 造，别混。
+- **和 Day30 数据飞轮直接相关**：Atlas 的官方定位之一是 real-to-sim for robotics——手机拍 24 帧视频，重建出"仿真机器人移动时会看到的 RGB 和 depth 观测"。这正是 Day27 one-liner 写的"以世界基础模型生成/筛选 Physical AI 训练数据"。
+
+**最值得在 Day27 追问的差距**：Day27 的任务本来就是"评估视频 realism 与 action-grounded usefulness 的差距"——Atlas 是检验这个差距的最新试金石。它比 Cosmos 更接近 useful（显式 3D、有 depth、能进仿真管线），但硬标准还没达到：需要的是 "a 3D environment that is interactable, that has collisions, physics, and dynamics to train and evaluate robots"。好看、可走进去不等于有物理、有接触动力学，更不等于策略在里面训完能 transfer。这个"realism → usefulness"的断层，就是 Day27 那天要解剖 Atlas 的刀。
+
+**排期建议**：不用单独开 Day。今天 Day20，Day27 读 Cosmos 时把 Atlas 作为对照写进"和之前工作的关系"小节即可——符合"不提前做脱离路线的单点深挖"的规则。
+
+**关联**：Day04（Genie）/ Day06（DreamerV3）/ Day27（Cosmos，待读）/ Day30（数据飞轮）；本问答由 2026-09-11 当晚 side chat 用户提问整理。
