@@ -143,9 +143,13 @@ pass@k 直接当代理 = 只用 $k=0$ 处单点值 $r_i^0$ 代替整条曲线：
 
 $s_i$ 是在 $\pi_{\text{old}}$ （筛选轮的策略）下算的，记 $s_i(\pi)$ 。能力跃迁后反事实轨迹改变，偏差双向：上端——对 $\pi_{\text{old}}$ 是 frontier 的题，对 $\pi_{\text{new}}$ 已 trivial，集合整体偏易，reward 方差与非零 advantage 被稀释；下端——对 $\pi_{\text{old}}$ 全零被扔掉的题里，对 $\pi_{\text{new}}$ 可解锁的部分被永久排除。更深一层：参照系 $r_{\text{avg}}^k$ 本身是旧 run 的群体平均，新模型下整体上移，"与平均轨迹对齐"的相对标准整个变了——偏差不只是"题变简单"，而是**坐标系变了**。这是 offline 选择的分布偏移，也是 Day02"同一数据的价值随 target 变化"的回声。在线 LIM 的动机正在这里：分数必须跟着模型一起长。
 
-*② $\theta_{\text{drop}}$ 与 $\theta_{\text{add}}$ 。*
+*② $\theta_{\text{drop}}$ 与 $\theta_{\text{add}}$ （2026-09-11 修订：原"调高 $\theta_{\text{drop}}$ 做偏差修正"版有误，见下）。*
 
-标准 hysteresis 要求 $\theta_{\text{drop}}<\theta_{\text{add}}$ （Schmitt trigger，死区防抖）。rolling 窗口带来滞后：真实可学性下降时，窗口里残留旧的高奖励 epoch， $\hat{s}_i(t)$ 虚高；故 $\theta_{\text{drop}}$ 应比 naive 取值更高（仍低于 $\theta_{\text{add}}$ ——如 $\theta_{\text{add}}=0.6$ 沿用论文， $\theta_{\text{drop}}$ 取 0.55 而非 0.5）。数学上是偏差修正： $\hat{s}_i(t)=\text{真实值}+\text{滞后偏差}$ （下降期偏差为正），提高淘汰线抵消上偏。关于"避免频繁出入"：PPO 本来就吃非平稳数据，换题不影响收敛——hysteresis 不是为 PPO 稳定性准备的，而是防两种纯浪费：其一，同一题在阈值附近反复"入选攒 rolling 统计→淘汰清零"，一次横跳废掉一个窗口的预热成本；其二，让课程分布变化平滑、可诊断。纯收敛角度，确实可以不要。
+标准 hysteresis 要求 $\theta_{\text{drop}}<\theta_{\text{add}}$ （Schmitt trigger，死区防抖）。原先"rolling 滞后→调高 $\theta_{\text{drop}}$ 抵消上偏"的推理有一个根本缺陷：滞后偏差是**每题不同**的。设第 $i$ 题真实可学性以斜率 $m_i$ 衰减，窗口 $W$ 的均值估计偏差为 $b_i\approx m_i\cdot W/2$ ——方向恒为正（衰减期窗口均值恒大于当前值，这是数学），但大小取决于该题自己的衰减斜率。统一上移 $\theta_{\text{drop}}$ 等于假设所有题的 $b_i$ 相等：慢衰减的题（ $b_i$ 小）在还可学时就被提前踢掉（false drop），断崖题（ $b_i$ 大）则修正不足、照样晚踢。方向修对了，大小一刀切，专伤还有残余学习信号的慢衰减题。
+
+反过来，" $\theta_{\text{drop}}$ 取低更 robust"是在 $b_i$ 未知时拒绝做没把握的修正（minimax 意义下 robust），代价是把"方向已知"的免费信息也扔掉、所有衰减题系统性晚踢。决策论对"方向已知、大小未知"的标准答案是**衰减修正**：方向照修但只修一小部分；更干净的是把修正从阈值搬到 estimator——缩短 $W$ 、给 recent epoch 加权，让 $b_i$ 自己变小。**滞后是估计问题，不是判决问题**。最终处方： $\theta_{\text{drop}}$ 取低（保死区、防抖、零误伤），滞后用 estimator 修；硬要动阈值，最多小幅上移并明说代价（用少量 false drop 换 timeliness）。
+
+关于"避免频繁出入"：PPO 本来就吃非平稳数据，换题不影响收敛——hysteresis 不是为 PPO 稳定性准备的，而是防两种纯浪费：其一，同一题在阈值附近反复"入选攒 rolling 统计→淘汰清零"，一次横跳废掉一个窗口的预热成本；其二，让课程分布变化平滑、可诊断。纯收敛角度，确实可以不要。
 
 *③ Fig 3b = Response Length。*
 
