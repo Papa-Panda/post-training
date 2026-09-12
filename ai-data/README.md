@@ -21,6 +21,7 @@
 | 09/30 | 2026-09-09 | 09 | Qwen2.5 Technical Report / 18T→1M SFT→多阶段RL 飞轮 | ✅ 完成 |
 | 10/30 | 2026-09-10 | 10 | Llama 3.1 / 3.2 后训练数据引擎 / 多轮RS+DPO / 1B-3B蒸馏 | ✅ 完成 |
 | 11/30 | 2026-09-11 | 11 | LIMR: Less is More for RL Scaling / 学习轨迹对齐选 1,389 题 | ✅ 完成 |
+| 12/30 | 2026-09-12 | 12 | SuperFiltering: Weak-to-Strong Data Filtering / 124M 算 IFD 筛 5% 打赢全量 | ✅ 完成 |
 
 ## 结构
 
