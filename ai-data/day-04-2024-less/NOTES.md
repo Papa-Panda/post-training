@@ -29,8 +29,8 @@
 - Infra 视角：gradient datastore 建一次多任务复用，成本 O(N) 建库后每次选数据都是 O(N) cosine，适合 fly-wheels；可扩展到 RLHF 数据筛选。
 
 ## 疑问 / 下一步
-- 如果 target 是 code generation 而不是推理，few-shot 靶子要怎么写才能让梯度更准？是不是要用 execution trace 而不是最终答案？
-- 小 proxy 太弱时 transfer 失效的临界点在哪？对 coding 1B proxy 够吗？
+- 如果 target 是 code generation 而不是推理，few-shot 靶子要怎么写才能让梯度更准？是不是要用 execution trace 而不是最终答案？（2026-09-11 已在下方"问答补充" Q6 中回答：trace 做增广 + rejection sampling 做等价类降噪）
+- 小 proxy 太弱时 transfer 失效的临界点在哪？对 coding 1B proxy 够吗？（2026-09-11 已在下方"问答补充" Q7 中回答：临界点是靶子是否落在 proxy 的 ZPD 内，即 $\text{pass@k} > 0$ ）
 
 ## 原文金句 (1-2句)
 > Instruction tuning on a LESS-selected 5% of the data can often outperform training on the full dataset. — and the selected data is highly transferable across models.
@@ -210,3 +210,47 @@ $$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx -\eta\,g_*^\top\frac{\hat m_z}{\
 中间是一个"去掉大小、只看对齐"的类比跳跃，**不是等价变换**。LESS 的价值在于把 TracIn 的 SGD 近似换成了更接近训练现实的 Adam 视角；但若把它当成严格的反事实数学，就走远了。
 
 **知识图谱关系**：Q3–Q5 共同构成了"LESS 计分规则的完整推导链条"，上接本 NOTES"核心 §2 Data Pipeline（Adam 修正后的 influence）"与"第二轮复习 §1 核心命题"，下接 Day 19 Vendi / Day 24 D4 的"单均值 + 无 diversity"缺口讨论。Q1–Q2 澄清了 BM25 的准确位置：LESS 实验的文本相似度对照基线（与 random、DSIR、RDS 并列），非 30 篇阅读路线成员。
+
+## 问答补充（2026-09-11）
+
+本节收录 2026-09-11 晚侧聊中的用户问答，问题来自上方"疑问 / 下一步"的两个开放问题。不改动上方既有内容。
+
+### Q6：code generation 的 target 靶子怎么写（execution trace + rejection sampling）
+
+用户在初读疑问的基础上进一步提出：code generation 搜索空间更大，few-shot 靶子应该用 rejection sampling。
+
+**（a）execution trace：不是"代替"最终答案，是"增广"——原因在 token 级。**
+
+自回归 LM 的 loss 按 token 分解： $L(z) = -\sum_t \log p_\theta(y_t \mid x, y_{<t})$ ，梯度是各 token 项之和。若靶子只有 (problem → 最终代码)，token 大头是 surface（变量名、缩进、样板代码），于是 $g_{\mathcal{V}} \approx$ surface 方向 + 微弱的 skill 分量；cosine 检索选回"长得像"而非"思路像"（呼应 §4.1 "同格式不是同技能"）。code 的 surface 自由度远大于数学推理，伪相关更严重。
+
+加上 execution trace（推理过程、循环不变量、中间状态，序列化为 token），等于在梯度求和中加入大量"推理 token"项，抬高 skill 分量的占比。记 $g_{\mathcal{V}} = s + n$ ，trace 增大 $\|s\| / \|n\|$ ，cosine 才能量到技能方向。关键不是 trace 的梯度"更对"，而是 trace 改变了梯度中 skill 成分的占比。
+
+两个 caveat：① trace 本身有 surface（英文措辞），且应是因果的推理（导出代码的思考），不是事后解释；② 严格意义的 execution trace（程序状态随时间变化）必须序列化成 token 才能进入 LM loss（如 scratchpad 式"第 3 次循环后 x=5"）。
+
+**（b）rejection sampling："搜索空间更大"的数学形式是等价类上的方差缩减。**
+
+固定一道题 $p$ ，正确程序构成等价类 $\mathcal{C}_p$ 。手写靶子是从中抽一个样本 $c$ ，其梯度混入大量任意选择分量（变量名、for vs while），对技能是纯噪声。Rejection sampling（每题采样 $M$ 个，留 $K$ 个通过 hidden tests 的）再平均：
+
+$$\bar{\Gamma}_p = \frac{1}{K}\sum_{k=1}^K \Gamma(c_k)$$
+
+任意选择分量在样本间近似独立→平均后衰减；被问题强制的结构分量（必须用哈希表计数、必须处理空输入）在所有样本中同向→保留。"搜索空间更大" ⟺ $|\mathcal{C}_p|$ 巨大 ⟺ 单样本是类方向的极噪估计 ⟺ 必须多采样平均。数学题 $|\mathcal{C}_p| \approx 1$ ，few-shot 够用；code 不行——这正是用户直觉的形式化。
+
+三个坑：① 别从 warmup 模型自己采样——自采样+拒绝等于模型的舒适区，靶子指向"已会的东西"，选回"更多已会的数据"，与最近发展区反向；应从更强模型采样（或高温多样化），让靶子指在 frontier 稍外侧（同构于 Day11 LIMO/s1 的蒸馏逻辑）。② 测试只验正确性、不验推理质量——留下的可能是碰巧通过的 brute-force，梯度指向"暴力方向"（同构于 LIMR §4.3 的 outcome-only 盲区）；需加质量过滤（强模型做 judge，或偏好短/地道的实现）。③ 与（a）合流：让 sampler 直接输出 (trace, code) 对，按"code 通过 tests"拒绝采样，得到验证过的 (trace → code) 靶子。
+
+实操配方：每道靶题 → 强模型高温采样 $M$ 个 (trace, code) → 留 $K$ 个通过 tests 的 → 可选质量过滤 → 全部取 $\Gamma$ 平均；技能异构时先聚类、每簇一个均值（单均值坍缩在 code 上更致命，呼应 §6 思考题）。
+
+一句话：trace 解决"梯度里 skill 占比太低"（加信号），rejection sampling 解决"单样本是等价类的噪声估计"（降噪）；二者正交，合用最好。
+
+### Q7：小 proxy transfer 失效的临界点——"够得着"，不是"稳定答对"
+
+用户判断"小 proxy 得足够强，得到正解"；精确化后：准确的线不是"稳定答对"，而是"够得着"，即 $\text{pass@k} > 0$ 。
+
+**失效机制**： $\Gamma(v)$ 的方向取决于正确解 $y$ 与 proxy 分布 $\pi(\cdot \mid x)$ 的相对位置。若 $y$ 在可达分布之外（ $\text{pass@k} \approx 0$ ）， $\nabla \log \pi(y \mid x)$ 指向"变成一个完全不同的模型"，方向被最大尺度的缺陷主导（泛泛的"先学会语法"），而非目标技能；且所有候选的"鸿沟方向"彼此相似 → cosine 在候选间坍缩 → 排名近似噪声。这与 no-warmup 坍缩同构，但 warmup 修不好：那是位置问题（参数还在格式 basin），这是容量问题（弱 proxy 没有"推理 basin"可进）。
+
+**反直觉的一半**：proxy 太强也坏。若在靶子上 $\text{pass@1} \approx 1$ 、loss $\approx 0$ ，梯度趋于 0，Adam 归一化 $\hat{m}/\sqrt{\hat{v}}$ 退化为小量比值，方向被残余的个别难 token 主导 → 噪声。因此 sweet spot 是 $0 < \text{pass@k} < 1$ ：靶子落在 proxy 自己的最近发展区（ZPD）内——ZPD 概念在 Day11 用于数据选择，这里平移到 proxy 选择。
+
+**临界点不是模型大小，是 (proxy, target) 的关系**：靶集 $\mathcal{V}$ 是否落在 proxy 的 ZPD 内。可操作的 pilot test（跑完整 LESS 前先做）：① 可达性门槛：proxy 在靶难度上测 $\text{pass@k}$ （ $k=10$ 或 $50$ ）； $\approx 0$ 直接判死刑， $\approx 1$ 则信号太弱。② 排名相关性：在 1–2k 候选子集上分别用小 proxy 与 7B 参考算 LESS 分数，看 Spearman 相关性；显著低则梯度几何对不上，transfer 不可信。
+
+**对 coding 1B 的判断**：取决于靶难度。HumanEval-easy 级（基础函数合成），1B code 模型通常 $\text{pass@k} > 0$ ，错误是技能相关的 → 可能够，应用上述测试验证而非直接否定；LiveCodeBench-hard / 竞赛级 $\text{pass@k} \approx 0$ ，正确解在其可达分布外 → 不够。经验法则（待验证的 heuristic，非定理）：proxy 在靶难度上最好有 20%+ 的 $\text{pass@k}$ ；选 proxy 不是越大越好，是选"刚好够得着靶子"的那个。
+
+**知识图谱关系**：Q6 承接 §4.1"target 锚点误设"与 §6 思考题（单均值 + 无 diversity 缺口），并把 Day11 的 outcome-only 盲区与"蒸馏 frontier 数据"逻辑复用到 target 构造；Q7 把 Day11 的 ZPD 从数据选择平移到 proxy 选择，并给出 transfer 可信度的可操作检验。
