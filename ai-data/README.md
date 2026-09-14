@@ -4,7 +4,7 @@
 > **Scope：只谈数据，不谈算法。** 算法（GRPO/PPO/RLHF、optimizer、TTS解码策略）归 `rl-infra/`、`grpo-vs-ppo/` 轨道。这里只关心：数据怎么来、怎么洗、怎么选、怎么评、怎么量多样性/复杂度。
 > 命名已全量对齐 `rl-infra/day-01-xxx`；30篇主干闭环后继续以 `day-31-xxx` 起做主题延伸，便于 Day N 直连。
 
-## 第二轮深度复习（13/30）
+## 第二轮深度复习（14/30）
 
 > 复习期：2026-09-01 → 2026-09-30；固定按 Day 01 → Day 30，一天一篇，只更新已有 NOTES，不新增论文。
 
@@ -23,6 +23,7 @@
 | 11/30 | 2026-09-11 | 11 | LIMR: Less is More for RL Scaling / 学习轨迹对齐选 1,389 题 | ✅ 完成 |
 | 12/30 | 2026-09-12 | 12 | SuperFiltering: Weak-to-Strong Data Filtering / 124M 算 IFD 筛 5% 打赢全量 | ✅ 完成 |
 | 13/30 | 2026-09-13 | 13 | DPO-Gap: 隐式奖励差选难偏好对 / 留 10% 打赢全量 | ✅ 完成 |
+| 14/30 | 2026-09-14 | 14 | StarCoder2 / The Stack v2: 900B+ 门禁代码底座 / 容量匹配配比 / repo-context | ✅ 完成 |
 
 ## 结构
 
