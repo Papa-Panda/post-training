@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（22已完成/30总规划）
+├── README.md                # 本路线图（23已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (22/30 - 进行中)
+## 发展路线图 (23/30 - 进行中)
 
-> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day22 RMA 已完成。Day11–30 主题已锁定，后续严格按表顺延。
+> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day23 Residual RL 已完成。Day11–30 主题已锁定，后续严格按表顺延。
 
 ### 图谱总览
 
@@ -66,7 +66,7 @@ graph TD
 | 20 | day-20-2023-rlpd | RLPD — sample-efficient real-world robot RL with prior data ✅ 2026-09-11 | S |
 | 21 | day-21-2019-domain-randomization | Domain Randomization — visual/dynamics randomization for sim2real ✅ 2026-09-12 | S |
 | 22 | day-22-2021-rma | RMA — rapid motor adaptation under latent dynamics ✅ 2026-09-13 | S |
-| 23 | day-23-2019-residual-rl | Residual RL — combine classical control priors with learned correction | A |
+| 23 | day-23-2019-residual-rl | Residual RL — combine classical control priors with learned correction ✅ 2026-09-14 | A |
 | 24 | day-24-sim2real-system-identification | System Identification + Sim2Real Evaluation — calibrate and gate transfer | A |
 | 25 | day-25-2022-gato | Gato — one generalist policy across modalities and embodiments | A |
 | 26 | day-26-2025-groot-n1 | GR00T N1 — humanoid foundation model and dual-system reasoning/control | S |
@@ -75,7 +75,7 @@ graph TD
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
 
-### Day N 映射表 (22已完成)
+### Day N 映射表 (23已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
