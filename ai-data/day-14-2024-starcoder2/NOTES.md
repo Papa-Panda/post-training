@@ -125,6 +125,8 @@ $$D_{train} = G_{mix} \circ G_{optout} \circ G_{risk} \circ G_{contam} \circ G_{
 >
 > (b) **静态门禁的盲区有多大**。StarCoder2 证明了"干净"但没证明"能跑"（exec pass 率未报告），Qwen 的 exec 门禁又只覆盖可运行片段。设计实验：从 the-stack-v2-train-smol 随机抽 10 万文件跑 exec，得 pass 率 $p$。① 若 $p<40\%$，说明什么（门禁的"质量"定义与可执行性正交——写出这个正交性的形式化：静态门禁的通过事件 $S$ 与 exec 通过事件 $E$ 的互信息 $I(S;E)$ 接近 0 意味着什么）？② 不跑全量 exec，如何估计全池的 $p$？给出按（语言 × 文件长度 × 来源）分层的抽样估计公式，并说明每层的样本量怎么定（提示：Neyman 分配，用层内方差）；③ 对 exec-fail 的文件，parser 挂（语法错）vs import 缺失（环境错）——哪类该踢、哪类该留？用"对 SFT 的信息价值"论证（提示：import 缺失的代码仍保留 API 调用模式的知识）。
 
+相关讨论（Gemini 网页版，2026-09-14）：https://gemini.google.com/app/b980730adb955e95
+
 ---
 
 论文原文：https://arxiv.org/abs/2402.19173
