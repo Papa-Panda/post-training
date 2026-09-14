@@ -107,7 +107,7 @@ $$\text{IFD}(y_i|x_i)=\frac{\text{PPL}(y_i|x_i)}{\text{PPL}(y_i)}$$
 ### 问答补充（2026-09-14）
 
 **来源**：用户与 Gemini 网页版（Johnny G 账号）的三问讨论 ＋ 本 chat 内"这个信号是 delta of length？"追问，整理归档于思考题下方。
-原对话：https://gemini.google.com/app/6065a67c63786b1a（需登录查看）
+相关讨论（Gemini 网页版，2026-09-14）：https://gemini.google.com/app/6065a67c63786b1a
 性质：探索性讨论记录，非核验结论。其中引用的论文事实数字已对照 Day11 NOTES 核验：LIMR AIME24 32.5（持平全量 RL）、LIMO/s1 数据 SFT 到 7B 上 AIME24 都是 15.8、三档规则奖励 $r_i^k \in \{1, -0.5, -1\}$ （1=答案正确，-0.5=答案错但格式对，-1=格式错），均一致。
 注：用户在对话中途（约 10:24–10:27）改写过 Q3 的首问，以下按定稿版归档；Turn 5 的条件熵公式在原页面 KaTeX 渲染截断，此处按标准定义补写。
 
