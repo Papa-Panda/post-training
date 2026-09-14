@@ -103,3 +103,56 @@ $$\text{IFD}(y_i|x_i)=\frac{\text{PPL}(y_i|x_i)}{\text{PPL}(y_i)}$$
 > (b) 如果把 SuperFiltering 的 IFD top 5% 选集直接拿去做 Day15 R1 范式的 RL cold-start，你预测会发生什么？用 LIMR 的"轨迹对齐"语言解释：IFD 高尾部里哪一类样本的 $r_i^k$ 轨迹会是长期 near-zero，哪一类会是快涨？为什么静态 IFD 分辨不出这两类？
 > 
 > (c) 设计一个实验，区分"IFD 高但 RL 里学不动"和"IFD 高且 RL 里学得动"的两类样本：只允许用一个小 proxy 模型跑一轮短 RL（不能跑全量），你会记录什么信号？这个信号和 LIM 的 $r_i^k$ 序列是什么关系？
+
+### 问答补充（2026-09-14）
+
+**来源**：用户与 Gemini 网页版（Johnny G 账号）的三问讨论 ＋ 本 chat 内"这个信号是 delta of length？"追问，整理归档于思考题下方。
+原对话：https://gemini.google.com/app/6065a67c63786b1a（需登录查看）
+性质：探索性讨论记录，非核验结论。其中引用的论文事实数字已对照 Day11 NOTES 核验：LIMR AIME24 32.5（持平全量 RL）、LIMO/s1 数据 SFT 到 7B 上 AIME24 都是 15.8、三档规则奖励 $r_i^k \in \{1, -0.5, -1\}$ （1=答案正确，-0.5=答案错但格式对，-1=格式错），均一致。
+注：用户在对话中途（约 10:24–10:27）改写过 Q3 的首问，以下按定稿版归档；Turn 5 的条件熵公式在原页面 KaTeX 渲染截断，此处按标准定义补写。
+
+**Q1（对应思考题 a）：选择信号可迁移性的成立条件**
+
+用户原问："a/ less superfiltering 都是使用ppl /gradient 而且算出来的应该是相对排序 这个信号在proxy和真实模型中可以迁移 而且微调的模型足够强大 而LIMO 7B模型失败是因为模型本身能力不足够了"
+
+Gemini 核心回答（提炼）：
+- 三层硬约束：SuperFiltering/LESS 选的是"相对几何"（IFD 相对比值 / 梯度余弦方向），输出 item-level 序数信号，回答"训哪道题"，模型仍在自己分布流域内做 cross-entropy 更新；LIMO/s1 选的是"绝对轨迹"（32B/70B teacher 的超长 CoT），SFT 是逐 token 硬拟合 $P(y_t \mid x, y_{<t})$ ，7B 容量撑不起 teacher 的隐空间推理跃迁，变成背诵表面 pattern、破坏自身先验（AIME24 跌破 base）。
+- 成立的两个必要条件：① 任务落在 target 的最近发展区（ZPD），即 target 对样本有非零但未饱和的梯度；超吸收极限的题（如 7B 面对 Olympiad 极难长推理）任何 proxy 的"重要"信号都无效甚至有害（LIMR 长期 near-zero 噪声）。② 优化目标与解耦：迁移"训什么"（What to learn）＋ 让 target 用适合自己容量的方式学（如 LIMR 让 7B 自己跑 RL 探索自己的 CoT），信号有效；把选择信号与 teacher 输出序列强制绑定为监督标签（How to learn），弱模型死于容量竞争与分布外强推。
+- 判定句：SuperFiltering/LESS 证明的是"问题价值的序数信号跨模型可迁移"；LIMO/s1 在 7B 上拉胯不是题选错了，而是"强模型的推理 token 分布无法直接作为弱模型的 SFT 监督信号"。
+- 红队：(a) LESS/SuperFiltering 的 target 多是 LLaMA2-7B/13B 做通用 instruction tuning，解空间平滑容错率高；搬到 AIME/Codeforces Hard，弱 proxy（124M）在极限推理上可能无几何辨识度，"可迁移"可能是通用 NLP 平滑表征下的假象。(b) 把 LIMO 失败全归咎于"7B 容量不够"有归因漏洞：1k 样本 × 8k–16k context 梯度步数极少，可能未收敛或超参按 32B 配的，忽视了极小样本长上下文 SFT 的超参敏感性与过拟合伪相关。
+
+Q1b（用户没看懂"解耦"，Gemini 展开）：大白话是"出一道好题" vs "背大神的草稿纸"。解耦＝只给题目 $x$ ，RL 目标 $\max E_{y \sim \pi_\theta}[R(x,y)]$ 让 7B 走自己参数分布能支撑的路径（5 步笨办法做出题也算，强化的是 7B 自己的思考回路）；强行绑定＝SFT 最小化 $-\sum_t \log P_{7B}(y_t^{\text{teacher}} \mid x, y_{<t}^{\text{teacher}})$ ，每个 token 强行预测 teacher 的下一个词，格式学会了、逻辑碎了。红队：(a) "解耦后 RL 就能吃下难例"过度乐观——真超边界的题 outcome reward 恒 0，拿不到正梯度，退化为 LIMR 的长期 near-zero 噪声题；(b) CoT 蒸馏在简单/中等难度（GSM8K、常规代码修复）恰是业内最通用高性价比的手段，LIMO/s1 崩盘的诱因是 AIME 逻辑深度与 7B 容量的断崖，不是"SFT 绑定 How"在所有场景都不成立。
+
+**Q2（对应思考题 b）：IFD top 5% 直接做 R1 范式 RL cold-start**
+
+用户原问："首先取决于5%是否是ZPD？我们选出了最难的5% 直接做RL可能未必能探索出来 用LIMR的轨迹对齐 哪一类样本 不太清楚"
+
+Gemini 核心回答（提炼）：
+- 预测：大概率遭遇探索坍缩（cold-start collapse）——top 5% 严重偏离 base 的 ZPD。
+- IFD 高尾部分裂为两类：① 深渊题（需复杂长程引理的 AIME/奥赛真难题、超长多分支算法题）： $r_i^k \in \{-1, -0.5\}$ 长期趴底线，pass@k 恒为 0，无 +1 正向 reward，梯度被格式惩罚淹没，LIM 分子 $\lVert \mathbf{r}_i - \mathbf{r}_{\text{avg}} \rVert^2$ 极大， $s_i \ll 0$ ，纯负增益噪声源。② 快涨题（指令约束极密/要求繁琐、但核心逻辑在 base 覆盖内，如多重格式约束、长 context 信息抽取）：第 0 步 $PPL(y|x)$ 很大，一旦某 rollout 满足规则拿 +1， $r_i^k$ 极短几个 epoch 内从负值直线冲到接近 1。
+- 为什么静态 IFD 分辨不出这两类：IFD 度量的是"条件熵的相对落差"而非"解空间连通性"；它只在 $w_0$ 上对已有 teacher 文本算一次 token-level cross-entropy，回答不了反事实问题——"让模型自己 sample，t 步内探索到有效正例的概率是 0 还是 0.05？"深渊题和繁琐题被打包进同一个 top 5%。
+- 红队：(a) 若 base 已有长 CoT 反思能力（如 R1-Zero）或采样数 $G \ge 64$ 极大，"学不动"的极难题未必 pass@k 恒为 0，一次 aha moment 的梯度泛化推动力可能远大于平庸题；(b) MATH/CodeContests 这类数学代码语料几乎没有"多重格式繁杂指令"，域内高 IFD 成因基本被"数学逻辑推理深度"主导，"约束题 vs 逻辑题"的分流可能脱离基准现实分布，更可能是"预训练是否见过同构变体（pretrain recall）"而非任务类型差异——这正是 LIMR 批判 SuperFiltering 静态信号"盲选"的核心逻辑。
+
+**Q3（对应思考题 c）：小 proxy 短 RL 探测信号设计**
+
+用户原问（定稿版）："这是接着上面的b的回答 我会记录 1/ 序列长短 学得懂的序列长度一定高 （2/ pass@K K很大 后者一定正 但这是显然的）"
+
+Gemini 核心回答（提炼）：
+- 实验记录三个组合信号（单看绝对长度易撞车——格式崩溃/死循环 repetitive tokens 也会让序列暴涨）：
+  - 信号 A（有效推理长度增长率）： $\Delta L_i = \bar{L}_i(K_0) - \bar{L}_i(0)$ ，只统计规则惩罚约束下的有效格式内长度，排除 pure repetitive/格式错的 invalid rollout。学得动的在试错中拉长 CoT 搜索；真学不动的早期迅速放弃/短错，或陷入乱码被 rule reward 截断。
+  - 信号 B（非零 reward 探索触达率）：每题每 epoch 采样 $M$ 条（如 16/32），学得动 $\iff$ $\exists k \le K_0$ 使 $\max_m R(y_m) = 1$ （pass@M > 0）；学不动 $\iff$ 全窗口 $\forall k, m$ 有 $R_{i,m}^k \in \{-0.5, -1\}$ 。
+  - 信号 C（reward 方差）： $Var_m(R_{i,m}^k)$ 。全 -0.5 或全 -1 则方差为 0、Advantage 为 0，策略梯度无法更新；一旦单条拿 +1，方差突增，产生 policy gradient 驱动力。
+- 与 LIM 的 $r_i^k$ 的关系：短 RL 信号是 LIM 轨迹在时域前部的"前截断与局部导数"——观测早期窗口 $k \in [1, K_0]$ 的局部子序列 $\mathbf{r}_{i,\text{proxy}}^{1:K_0}$ 及其一阶差分 $\text{Slope}_i \approx (r_{i,\text{proxy}}^{K_0} - r_{i,\text{proxy}}^0)/K_0$ 。映射：短 RL 内 $\text{Slope}_i > 0$ （哪怕从 -0.8 爬到 -0.2）→ 全量训练大概率演变为与 $r_{\text{avg}}$ 平行爬升 → LIM 高分（ $s_i \in [0.6, 1.0]$ ）；短 RL 内 $r_{i,\text{proxy}}^k$ 恒负且斜率 $\le 0$ → 外推为长期 near-zero → $s_i \ll 0$ 。
+- 红队：(a) "学得懂的长度一定高"有伪相关漏洞——小 proxy 短 RL 的长序列易受 length hack 污染，弱模型面对高 IFD 难题可能退化出"无限自我反思循环"（infinite reflection loop），无意义长文本是局部最优的胡言乱语，不是学会长推理；(b) 短 RL 系统性漏掉 late blooming 真难题——需多步能力迁移、后期才发生 grokking/相变的题在短窗口内 $r_i^k$ 同样贴地为 0，用贪心局部斜率做门禁会误杀最具泛化价值的深层推理题。
+
+Q3b（熵→长度机制）。用户原问："不对吧？B & C 不是显然的吗？A大概接近我思考的 但没有和上面的对应起来 长度大量增加应该是在尝试不同的output（因为entropy高所以可以尝试）"
+
+Gemini 核心回答（提炼）：
+- 因果链闭合：把"模型在努力"翻译成 policy 输出熵与解空间采样。学得动的前提是分支未坍缩——面对 ZPD 内题目，token-level 条件熵 $H(\pi_\theta(\cdot \mid x, y_{<t}))$ 保持健康未坍缩，softmax 平缓，模型在用有效高熵空间尝试不同解题路径 → 长度拉伸；学不动则长度贴地（快速放弃/短错），或长度爆炸但熵 $\approx 0$ （陷入确定性死循环复读）。
+- 与 LIM 的关系：LIM 是静态后验分数 $s_i = 1 - \sum_k (r_i^k - r_{\text{avg}}^k)^2 / \sum_k (1 - r_{\text{avg}}^k)^2$ ，完全依赖 outcome reward 序列；但短 RL 阶段 $r_i^k$ 前期可能全是 -0.5，奖励空间区分度极低。"长且高熵尝试" $\implies$ 触发非零 Advantage 的概率 $P(\exists y, R=1) > 0$ ——短 RL 窗口内见到此行为，外推到全量训练后序 epoch（ $k > K_0$ ）， $r_i^k$ 发生相变转折、爬升贴合 $r_{\text{avg}}^k$ ，最终映射为 LIM 合格分（ $s_i \ge 0.6$ ）；反之注定长期 near-zero。
+- 红队：(a) 高熵拉长未必通向正解——只在模型的"语义吸引子"处于解空间邻域内成立；1B–3B 极小 proxy 面对奥数/超难代码时，高熵往往是"完全迷失"（complete confusion），在语法树上无约束随机游走，是表征崩坏前兆；(b) "尝试期"可能贯穿几十个 epoch，只跑 1–2 轮短 RL 时，"正在尝试的高价值题"与"纯发散的胡话题"在长度/熵指标上完全重叠，无法低成本准确二分。
+
+**Q4（本 chat 追问，2026-09-14）：这个信号是 delta of length？**
+
+回答要点：主信号仍是 $r_i^k$ 本身（短 proxy run 上的 LIM 输入）， $\Delta L$ 的正确定位是零 reward 尾部的 tiebreaker，不是 LIM 的替代品——短窗口里难样本 reward 全零，LIM 不可识别（Day11 proxy 讨论的 blind spot：slow-unlock 与 never-learn 在全零 probe 下同构），而 length 是"reward 为零时仍有读数"的连续信号。三个 caveat：① 两阶段混淆——Fig 3b 先降后升是总体曲线，前段降是 verbosity pruning，短 run 若只覆盖下降段则 $\Delta L$ 符号无判别力，用前先看 proxy 总体 length 曲线过没过拐点；② length 可被 hack—— $\Delta L > 0$ 且 $\Delta r = 0$ 是可疑的（DAPO 要 clip 的东西），必须和 reward 联合读；③ 因果箭头没证明——Day11 已把 Fig 3b 措辞降级， $\Delta L$ 只能当相关性读数。二维判决：r 快涨 → 学得动；r 全零 + length 持续坍缩 → 学不动；r 全零 + length 降后回升 → 候选 late bloomer，不下结论。
+串联注：Q3b 里用户提出的"熵高→尝试不同 output→长度拉伸"正是比裸 $\Delta L$ 更干净的因果链——熵是"尝试"的直接读数，长度只是它的显性表现；但两者共享同一个混淆（发散型高熵 vs 探索型高熵），见 Q3b 红队 (a)。
