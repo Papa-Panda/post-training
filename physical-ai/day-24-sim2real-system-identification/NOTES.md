@@ -55,6 +55,7 @@ Roadmap 给 Day24 的任务是"用参数辨识、sim2sim、hardware-in-the-loop 
 - $\pi_\theta(a\mid o)$ ：内层 PPO 策略； $D(\tau^{\text{sim}},\{\tau^{\text{real}}_m\})$ ：行为差异代价， $m=1..M$ 为少量真机参考轨迹。
 
 ### 1. 外层目标：分布辨识 = 最小化期望行为差异
+
 $$\min_{\phi}\; J_{\text{ID}}(\phi)=\mathbb{E}_{\xi\sim p_\phi}\Big[\mathbb{E}_{\tau\sim p_{\pi_\theta}(\cdot\mid\xi)}\big[D(\tau;\{\tau^{\text{real}}_m\})\big]\Big].$$
 直觉：**找一个仿真参数分布，使得当前策略在它下面跑出的行为，平均而言最像真机**。注意内层期望依赖 $\pi_\theta$ ——策略变了，"像不像"的标准就变了，这就是必须交错优化的数学原因（3 问之 3）。
 
@@ -68,6 +69,7 @@ $$p^*(\xi)\propto p_{\text{old}}(\xi)\,\exp\!\big(R(\xi)/\eta\big),\qquad w_i\pr
 - **时间尺度**：内层 PPO 是快循环（成千上万仿真 episode），外层 REPS 是慢循环（每次只用几条真机轨迹更新一次分布）。
 
 ### 3. 行为差异 $D$ ：观测空间加权 L1+L2
+
 $$D(\xi)=\frac{1}{M}\sum_{m=1}^{M}\sum_{t=0}^{T}\Big(w_1\big\Vert o^{\text{sim}}_t(\xi)-o^{\text{real}}_{m,t}\big\Vert_1+w_2\big\Vert o^{\text{sim}}_t(\xi)-o^{\text{real}}_{m,t}\big\Vert_2^2\Big).$$
 只比较**观测**轨迹，不碰隐藏物理量——这是"行为匹配"绕开参数不可辨识（3 问之 2）的操作化：接触任务里摩擦 $\mu$ 和接触阻尼 $c$ 的多种组合能产生几乎相同的末端轨迹，辨识真值是病态问题；但只要观测行为对得上，策略 transfer 就成立。**代价**：匹配的是"在当前策略下"的行为——换一个探索区域完全不同的策略，之前匹配好的分布可能失效（外层与内层耦合的另一面）。
 

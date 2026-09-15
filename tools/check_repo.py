@@ -189,12 +189,28 @@ def check_markdown(path: Path) -> list[str]:
     if "\\[" in text or "\\]" in text:
         errors.append(f"{relative}: use one-line $$...$$ display math")
 
+    in_fence = False
+    prev_stripped = ""
     for line_no, line in enumerate(text.splitlines(), 1):
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_fence = not in_fence
         delimiters = line.count("$$")
         if delimiters % 2:
             errors.append(
                 f"{relative}:{line_no}: display math must open and close on one line"
             )
+        if (
+            not in_fence
+            and stripped.startswith("$$")
+            and prev_stripped.startswith("#")
+        ):
+            errors.append(
+                f"{relative}:{line_no}: display math `$$...$$` placed directly "
+                f"after a heading does not render on GitHub; put a blank line "
+                f"between the heading and the math block"
+            )
+        prev_stripped = stripped
     if text.count("$$") % 2:
         errors.append(f"{relative}: unpaired $$ delimiter")
 
