@@ -104,7 +104,7 @@ graph TD
 | 21 | day-21-2019-domain-randomization | 对视觉、动力学、延迟和接触参数随机化，使策略对真实参数后验保持鲁棒 | S |
 | 22 | day-22-2021-rma | 两阶段 privileged learning：PPO 开天眼训 $\pi(a_t\mid x_t,a_{t-1},z_t)$（$z_t=\mu(e_t)$ 为 17 维环境参数的低维指纹），$\varphi$ 从 50 步本体感知历史监督回归 $\hat z_t$；部署 10Hz 辨识 + 100Hz 控制双频异步；Unitree A1 零真机微调，沙地/泥地/高草/土堆零失败、下楼梯 70%；与 Day21 ADR+LSTM 构成"隐式 vs 显式在线辨识"对照 | S |
 | 23 | day-23-2019-residual-rl | 在模型控制器动作上学习 residual，以先验稳定性缩小探索空间并保留可解释接口 | A |
-| 24 | day-24-sim2real-system-identification | SimOpt 双循环：内层 PPO + 外层 REPS 以真机行为残差更新仿真参数分布 $ p_\phi(\xi) $ ；与 sim2sim / HIL 探针 / 分桶指标拼成 sim2real release gate 四件套 ✅ 2026-09-15 | A |
+| 24 | day-24-sim2real-system-identification | SimOpt 双循环：内层 PPO + 外层 REPS 以真机行为残差更新仿真参数分布 $p_\phi(\xi)$ ；与 sim2sim / HIL 探针 / 分桶指标拼成 sim2real release gate 四件套 ✅ 2026-09-15 | A |
 | 25 | day-25-2022-gato | 统一 observation/action token 序列展示 generalist agent 范式，同时检视跨任务容量与控制精度限制 | A |
 | 26 | day-26-2025-groot-n1 | 双系统 VLM reasoning + diffusion control 面向 humanoid，多 embodiment 数据与部署栈联合设计 | S |
 | 27 | day-27-2025-cosmos-world-foundation | 以世界基础模型生成/筛选 Physical AI 训练数据，评估视频 realism 与 action-grounded usefulness 的差距 | A |

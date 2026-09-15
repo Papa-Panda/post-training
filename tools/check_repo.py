@@ -4,9 +4,11 @@
 Checks documentation contracts that are easy to regress in review:
 - GitHub display math stays on one line and avoids unsupported forms;
 - GitHub inline math renders: no doubled backslashes in prose, every
-  prose `$` is either valid `$...$` math (whitespace-separated from
-  adjacent text so GitHub parses it as a math node, especially next to
-  CJK) or an escaped `\$` literal (currency must never be a bare `$`);
+  prose `$` is either valid `$...$` math or an escaped `\$` literal
+  (currency must never be a bare `$`); valid math is whitespace-separated
+  from adjacent text (especially next to CJK) AND has no whitespace
+  immediately inside the delimiters -- GitHub applies emphasis-style
+  flanking rules, so `$ x $` / `$$ x $$` never become math nodes;
 - local Markdown links resolve;
 - Markdown contains no control characters;
 - Python sources parse without importing optional ML dependencies.
@@ -30,6 +32,7 @@ CONTROL_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 FENCE_RE = re.compile(r"(```.*?```)", re.S)
 CODE_SPAN_RE = re.compile(r"(`+)(.+?)\1")
 DOLLAR_RE = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)")
+DOLLAR2_RE = re.compile(r"(?<!\$)\$\$(?!\$)")
 BS_RE = re.compile(r"\\\\([a-zA-Z])")
 MATH_CHARS_RE = re.compile(r"[=<>^_{}]")
 CJK_RE = re.compile(r"[一-鿿　-〿＀-￯]")
@@ -91,6 +94,45 @@ def _fix_prose_line(line: str) -> str:
     return "".join(out)
 
 
+def _tighten_prose_line(seg: str) -> str:
+    """Strip whitespace immediately inside `$...$` / `$$...$$` delimiters.
+
+    GitHub applies emphasis-style flanking rules to math delimiters: an
+    opening `$` may not be followed by whitespace and a closing `$` may
+    not be preceded by whitespace, so `$ x $` never renders (the dollars
+    leak through as literal text). The fix keeps the OUTER separation
+    (`, $x$ ,`) and only hugs the delimiters to the content.
+    """
+    out: list[str] = []
+    pos = 0
+    n = len(seg)
+    while pos < n:
+        m2 = DOLLAR2_RE.search(seg, pos)
+        m1 = DOLLAR_RE.search(seg, pos)
+        if m2 and m1:
+            m, rx = (m2, DOLLAR2_RE) if m2.start() < m1.start() else (m1, DOLLAR_RE)
+        elif m2:
+            m, rx = m2, DOLLAR2_RE
+        elif m1:
+            m, rx = m1, DOLLAR_RE
+        else:
+            out.append(seg[pos:])
+            break
+        mc = rx.search(seg, m.end())
+        out.append(seg[pos : m.start()])
+        if not mc:
+            out.append(seg[m.start() :])
+            break
+        inner = seg[m.end() : mc.start()]
+        stripped = inner.strip(" \t")
+        if stripped and inner != stripped and _looks_math(inner):
+            out.append(seg[m.start() : m.end()] + stripped + seg[mc.start() : mc.end()])
+        else:
+            out.append(seg[m.start() : mc.end()])
+        pos = mc.end()
+    return "".join(out)
+
+
 def _check_inline_math(relative: Path, text: str) -> list[str]:
     """Every prose `$` must be valid math or an escaped `\\$` literal."""
     errors: list[str] = []
@@ -113,6 +155,14 @@ def _check_inline_math(relative: Path, text: str) -> list[str]:
                 errors.append(
                     f"{relative}:{line_no}: inline math must be `$...$` "
                     f"separated from text, or escape currency as `\\$`: "
+                    f"{line.strip()[:110]}"
+                )
+                break
+            if _tighten_prose_line(seg) != seg:
+                errors.append(
+                    f"{relative}:{line_no}: inline math must hug its "
+                    f"delimiters (`$ x $` never renders on GitHub; write "
+                    f"`$x$`, keep the outer spacing): "
                     f"{line.strip()[:110]}"
                 )
                 break
