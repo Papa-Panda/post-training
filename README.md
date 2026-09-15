@@ -18,6 +18,7 @@ The repository favors a consistent progression:
 | [GPU architecture](gpu-architecture/README.md) | Which hardware and kernel mechanisms create those costs? | SIMT → memory → GEMM → collectives → profiling |
 | [PPO vs. GRPO](grpo-vs-ppo/README.md) | How do the objectives and training-system requirements differ? | Objective derivations before infra trade-offs |
 | [Post-training frameworks](post-training-framework/README.md) | How do rollout, reward, buffers, learners, placement, and policy versions form one correct system? | Unified dataflow → sync/async → framework selection |
+| [Reasoning trace analysis](reasoning-trace-analysis/README.md) | What is inside a chain-of-thought trace, which parts are waste, and how are intermediate steps scored? | Structure → efficiency → process supervision |
 | [vLLM rollout](vllm-rollout/README.md) | How should rollout serving be measured and stress-tested? | TTFT/TPOT metrics → configuration → failures |
 | [Model-aware data curation](model-aware-data-curation/README.md) | Which examples move the current model toward a target while preserving coverage and safety? | Attribution → gradient coverage → closed-loop selection |
 | [AI data reading track](ai-data/README.md) | What do the major data-selection, synthesis, and filtering papers contribute? | Paper index and reading log |
@@ -36,6 +37,7 @@ The repository favors a consistent progression:
 - **`ai-data/** is a paper-reading corpus. **`model-aware-data-curation/** is a cross-paper synthesis and runnable model-in-the-loop selection system.
 - **`ICL/** studies behavior induced by context. **`harness-engineering/** studies the executable system that constructs context, calls tools, manages state, and promotes changes.
 - **`grpo-vs-ppo/** owns optimization-objective comparisons; infrastructure tracks discuss only their systems consequences.
+- **`reasoning-trace-analysis/** dissects reasoning traces as behavior: trace structure, overthinking/efficiency, and process supervision (PRM). It defers faithfulness and does not own RL dataflow or serving.
 - **`eval-*** tracks own measurement methodology and should not be treated as training or serving implementations.
 
 ## Repository status
@@ -64,6 +66,7 @@ python3 -m unittest discover -s post-training-framework/tests -v
 python3 -m unittest discover -s model-aware-data-curation/tests -v
 python3 -m unittest discover -s harness-engineering/tests -v
 python3 -m unittest discover -s gpu-architecture/tests -v
+python3 -m pytest reasoning-trace-analysis/tests -q
 python3 -m unittest discover -s ai-infra/day-07-h100-beyond-7b -p 'test_*.py' -v
 python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v
 python3 -m unittest discover -s ai-infra/r2-day-04-ddp -p 'test_*.py' -v
