@@ -203,16 +203,34 @@ def check_markdown(path: Path) -> list[str]:
         if (
             not in_fence
             and stripped.startswith("$$")
-            and prev_stripped.startswith("#")
+            and len(stripped) > 2
         ):
-            errors.append(
-                f"{relative}:{line_no}: display math `$$...$$` placed directly "
-                f"after a heading does not render on GitHub; put a blank line "
-                f"between the heading and the math block"
-            )
+            # Display math must be its own paragraph: GitHub does not
+            # recognize `$$...$$` when the line shares a paragraph with
+            # adjacent text (verified: a `$$` line directly followed by a
+            # text line renders as raw LaTeX with `_` parsed as emphasis).
+            if prev_stripped != "":
+                errors.append(
+                    f"{relative}:{line_no}: display math `$$...$$` must be its "
+                    f"own paragraph; put a blank line before it"
+                )
         prev_stripped = stripped
     if text.count("$$") % 2:
         errors.append(f"{relative}: unpaired $$ delimiter")
+
+    lines = text.splitlines()
+    in_fence2 = False
+    for idx, line in enumerate(lines):
+        s = line.strip()
+        if s.startswith("```"):
+            in_fence2 = not in_fence2
+        if not in_fence2 and s.startswith("$$") and len(s) > 2:
+            nxt = lines[idx + 1].strip() if idx + 1 < len(lines) else ""
+            if nxt != "":
+                errors.append(
+                    f"{relative}:{idx + 1}: display math `$$...$$` must be its "
+                    f"own paragraph; put a blank line after it"
+                )
 
     errors.extend(_check_inline_math(relative, text))
 
