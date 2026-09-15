@@ -146,3 +146,11 @@ $$\pi_\theta(s)\;\approx\;-b\;+\;\text{feedback correction}(s_m,s_o).$$
 
 ## 问答补充
 （本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）
+
+### 2026-09-14：Day23 NOTES 在 GitHub 上公式渲染失效
+
+**问题原文**（用户，2026-09-14 18:40 PDT）："[Day23 NOTES 链接] 这里面有很多数学公式 format 完全不对 没有渲染好"
+
+**核心答案**：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 `（ $\pi_H$ ）` 里的 `（$\pi_H$）`、`$s_m$，`。GitHub 的渲染规则是行内 `$...$` 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，`$$...$$` 独立公式块本来就是好的未动。`tools/check_repo.py` lint 门过，Day23 零新增问题。commit `f297c17`，已 push。
+
+**关联**：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。
