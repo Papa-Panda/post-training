@@ -33,6 +33,8 @@ Roadmap Day23 的标题就是它。这是"控制理论 × 深度 RL"结合最干
 2. 为什么 residual 结构能"undo"一个有偏的 $\pi_H$ 、理论上仍收敛到最优策略，而 BC 预训练再 finetune 的路线做不到？（提示：加法永远在线 vs 初始化继承偏置；finetune 还会 catastrophic forgetting 掉演示先验。）
 3. $r_t=f(s_m)+g(s_o)$ 的"几何/接触"分解什么时候失效？（提示：当修正 $s_o$ 必须违背 $f$ 时——比如为了扶正 block 必须先偏离几何目标—— $\pi_\theta$ 被迫和 $\pi_H$ 打架，"小残差"的高效论证就塌了。Block insertion 恰好可分： $\pi_H$ 管"走到缝隙"， $\pi_\theta$ 只管"轻推不倒"。）
 
+相关讨论（Gemini 网页版，2026-09-14）：https://gemini.google.com/app/1db272bf9b7e80f2
+
 ## 核心
 1. **Motivation**: 工厂里的机器人做重复任务，缺的是对不确定性的适应力。经典反馈控制（PID、computed torque）跟轨迹很高效，但一碰到**接触和摩擦**就脆——接触参数辨识极难，调参成本"可能和机器人硬件本身相当"（论文原话）。纯 RL 能处理接触，但从零学：① 真机交互贵且初期不安全；② block insertion 这种任务随机探索几乎撞不到成功。Residual RL 的赌注：**任务里"能被经典控制高效解决的部分"和"必须靠交互学的部分"是可分的**——前者用先验免费吃掉，RL 只学后者。
 2. **System / Method**: 核心方程（论文式 5）：
