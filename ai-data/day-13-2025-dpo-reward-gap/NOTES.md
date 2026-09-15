@@ -106,6 +106,8 @@ $$ \nabla_\theta \mathcal{L}_{\text{pair}} = -\,\sigma(-g)\,\nabla_\theta g,\qqu
 >
 > (c) **噪声富集的定量**。设池子标签噪声率为 $ \epsilon $ （chosen/rejected 标反或无差异），噪声 pair 的 gap 分布集中在 0 附近（方差 $ \sigma_n^2 $ ），干净难例的 gap 分布均值为 $ \mu_c>0 $ 。Day 13 留最小 10% gap：① 定性推导保留集里的有效噪声率 $ \epsilon' $ 与 $ \epsilon $ 的关系（是放大还是稀释，取决于什么）；② 不用人标，给出一个**可计算**的"噪声角污染度" proxy——coding 场景用 execution（写出公式），通用场景用"同一 prompt 多采样的一致性"（写出公式）；③ 基于 (c)② 的 proxy，写出 $ g_{\min} $ 的选择规则（不许回答"调参试出来"，要写出用 proxy 分布定阈值的规则）。
 
+相关讨论（Gemini 网页版，2026-09-14）：https://gemini.google.com/app/debdc4a65f36cd4c
+
 ---
 
 论文原文：https://arxiv.org/abs/2508.04149
