@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free structural quality gate for the whole repository.
+r"""Dependency-free structural quality gate for the whole repository.
 
 Checks documentation contracts that are easy to regress in review:
 - GitHub display math stays on one line and avoids unsupported forms;
