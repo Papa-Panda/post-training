@@ -320,3 +320,22 @@ graph TD
 - **边界**：LIMR 是先付全款再精选（跑完 8,523 题 RL 才知道留哪 1,389），是第二轮提纯法；且战场是数学，搬到 coding/SWE-bench 前需验证轨迹对齐在长程稀疏 reward 下是否仍灵。
 
 **关联**：Day 11（LIMR）、Day 23（LIMA）、Day 17（LIMO）、Day 18（s1）、Day 20（DEITA 三因子）。
+
+### 2026-09-15 — 业界如何理解 reasoning 的 trace：reasoning trace analysis 四条线
+
+**问题（用户，10:14 PDT）**：有趣啊 现在业界如何理解reasoning的trace？感觉这也是一个领域？（之前完全没有想过可以深入理解）
+
+**核心答案**：是的，这两年确实热起来的一块，大概叫 reasoning trace analysis / CoT interpretability，业界理解 trace 有四条线：
+
+1. **结构解剖：trace 里到底装了什么。** R1 论文自己开了个头——self-reflection、verification、backtracking 这些"认知行为"分类。现在有人往下钻，比如 "Think Deep, Not Just Long" 说别看裸长度，看 deep-thinking tokens（深层预测发生显著修正的 token），这个比例和准确率正相关，比长度靠谱得多。trace 不是均匀的"思考"，里面有真干活的部分和灌水的部分。
+2. **忠实性（faithfulness）：trace 说的是真话吗？** 最大也最扎心的一条线：越来越多的证据表明，模型的最终答案常常并不真的依赖它写出来的中间步骤——trace 很多时候是装饰性的。Anthropic "Reasoning Models Don't Always Say What They Think" 讲的就是这个：模型会为了 reward 走捷径，但 trace 里编一个漂亮故事。现在有 FaithCoT-Bench 专门测这个，也有人试着用因果重要性（FRIT）去训练更忠实的 trace。
+3. **长度与效率：overthinking。** 长 ≠ 好已经是共识。ICLR 2026 的 DiffAdapt 有个漂亮发现：trace 的 token 熵呈 U 型——简单题熵也高（瞎想）、中等题熵最低、难题熵高（真不确定），简单到中等熵降 22–25%。另一篇从 self-doubt 角度量化：模型答对之后还在反复 re-verify，"wait、let me double-check" 这类 hedging 就是元认知死循环的信号；好玩的是 batch prompting 能把推理 token 压掉 76% 还不掉点，而直接喊"想短点"没用。
+4. **过程监督（PRM）：把 trace 切开打分。** OpenAI "Let's Verify Step by Step" 那条线：不只看最终答案，给中间每一步打分。这要求先理解 trace 的结构——哪一步是 planning、哪一步是计算、哪一步是回溯。
+
+**核心 tension**：trace 到底是"行为"还是"证据"？RL 把 trace 当行为优化（只奖答案，trace 是副产品——这就是 R1-Zero 中英混杂的原因）；人类把 trace 当证据读（审计、debug）。两者的 gap 就是 faithfulness 问题的根源。
+
+**与用户已有直觉的连接**：用户其实已经一只脚踩进来——Day15 思考题 (a) 的"失败位置分布的 JS 散度"就是标准的 trace 分析手法；用户自己提的"熵高 → 尝试不同 output → 长度拉伸"链条，和 DiffAdapt 的 U 型熵是同一个直觉：熵才是"在想"的直接读数，长度只是它的影子。
+
+**后续（会话中已执行）**：以此为起点新建仓库级专题 `reasoning-trace-analysis/`（8 章：trace 的数学对象、R1 认知行为原文、deep-thinking token、U 型熵与 DiffAdapt 路由、self-doubt/hedging、batch prompting、PRM、trace 阅读指南；附 numpy 可运行 `trace_lab.py` + 16 pytest；faithfulness 线暂缓为入口 stub），commit 89c8c9f。专题 README 明确框架 tension：trace as RL-optimized behavior vs human-read evidence。
+
+**关联**：Day 15（R1 trace 认知行为）、Day 11（LIMR 轨迹对齐筛选）、专题 `reasoning-trace-analysis/`。
