@@ -114,6 +114,8 @@ Day 16 真正解决的 data 问题，不是"code 数据不够多"，而是：**�
 >
 > (b) **从"样本可执行"到"任务可验证"的升级路线**。Qwen 的 sandbox 验证"代码片段能跑"，SWE-Gym 验证"issue 被修好"。设计一条数据管线，把 Qwen 式 exec 过滤的输出（带 $\text{pass\_rate}$ 的 self-contained 样本池）升级为 SWE-Gym 式任务池：① 哪些 Qwen 样本天然可升级（有明确输入输出、可构造 FAIL_TO_PASS）？② 对不可升级的样本，能否用"issue 合成"（从 commit/PR 反推任务描述——Day14 的 PR/Commit 数据正好是原料）批量制造仓库级任务？③ 写出质量门禁：合成任务的 verifier 可信度如何评估（测试翻转率？人工抽检率？），以及当 verifier 不可信时 RL 会学到什么（呼应 Day15 §4.5：verifier 的盲区 = RL 的精确攻击面；执行过滤的 Goodhart 在这里会以"刷合成测试"的形式复活）。
 
+思考题答案（Gemini 网页版，2026-09-16）：https://gemini.google.com/app/ec4cc52e59c2a854
+
 ---
 
 论文原文：https://arxiv.org/abs/2409.12186
