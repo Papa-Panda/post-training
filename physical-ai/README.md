@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（24已完成/30总规划）
+├── README.md                # 本路线图（26已完成/30总规划）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,7 +16,7 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (24/30 - 进行中)
+## 发展路线图 (26/30 - 进行中)
 
 > 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day24 SimOpt（系统辨识 + Sim2Real 评估）已完成。Day11–30 主题已锁定，后续严格按表顺延。
 
@@ -69,13 +69,13 @@ graph TD
 | 23 | day-23-2019-residual-rl | Residual RL — combine classical control priors with learned correction ✅ 2026-09-14 | A |
 | 24 | day-24-sim2real-system-identification | SimOpt — 系统辨识 + Sim2Real 评估（REPS 行为匹配校准分布） ✅ 2026-09-15 | A |
 | 25 | day-25-2022-gato | Gato — one generalist policy across modalities and embodiments ✅ 2026-09-16 | A |
-| 26 | day-26-2025-groot-n1 | GR00T N1 — humanoid foundation model and dual-system reasoning/control | S |
+| 26 | day-26-2025-groot-n1 | GR00T N1 — humanoid foundation model and dual-system reasoning/control ✅ 2026-09-17 | S |
 | 27 | day-27-2025-cosmos-world-foundation | Cosmos — world foundation models for Physical AI data generation | A |
 | 28 | day-28-maniskill-robosuite-eval | ManiSkill / robosuite — reproducible manipulation benchmarks | A |
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
 
-### Day N 映射表 (25已完成)
+### Day N 映射表 (26已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -106,7 +106,7 @@ graph TD
 | 23 | day-23-2019-residual-rl | 在模型控制器动作上学习 residual，以先验稳定性缩小探索空间并保留可解释接口 | A |
 | 24 | day-24-sim2real-system-identification | SimOpt 双循环：内层 PPO + 外层 REPS 以真机行为残差更新仿真参数分布 $p_\phi(\xi)$ ；与 sim2sim / HIL 探针 / 分桶指标拼成 sim2real release gate 四件套 ✅ 2026-09-15 | A |
 | 25 | day-25-2022-gato | 统一 observation/action token 序列展示 generalist agent 范式，同时检视跨任务容量与控制精度限制 ✅ 2026-09-16 | A |
-| 26 | day-26-2025-groot-n1 | 双系统 VLM reasoning + diffusion control 面向 humanoid，多 embodiment 数据与部署栈联合设计 | S |
+| 26 | day-26-2025-groot-n1 | 双系统 VLM reasoning + diffusion control 面向 humanoid，多 embodiment 数据与部署栈联合设计 ✅ 2026-09-17 | S |
 | 27 | day-27-2025-cosmos-world-foundation | 以世界基础模型生成/筛选 Physical AI 训练数据，评估视频 realism 与 action-grounded usefulness 的差距 | A |
 | 28 | day-28-maniskill-robosuite-eval | 统一任务、资产、传感器和成功判据，建立算法与系统的可复现实验矩阵 | A |
 | 29 | day-29-safe-robot-learning | 约束 MDP、control barrier function、shield 和 runtime monitor 共同覆盖训练与部署安全 | S |
