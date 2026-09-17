@@ -68,14 +68,14 @@ graph TD
 | 22 | day-22-2021-rma | RMA — rapid motor adaptation under latent dynamics ✅ 2026-09-13 | S |
 | 23 | day-23-2019-residual-rl | Residual RL — combine classical control priors with learned correction ✅ 2026-09-14 | A |
 | 24 | day-24-sim2real-system-identification | SimOpt — 系统辨识 + Sim2Real 评估（REPS 行为匹配校准分布） ✅ 2026-09-15 | A |
-| 25 | day-25-2022-gato | Gato — one generalist policy across modalities and embodiments | A |
+| 25 | day-25-2022-gato | Gato — one generalist policy across modalities and embodiments ✅ 2026-09-16 | A |
 | 26 | day-26-2025-groot-n1 | GR00T N1 — humanoid foundation model and dual-system reasoning/control | S |
 | 27 | day-27-2025-cosmos-world-foundation | Cosmos — world foundation models for Physical AI data generation | A |
 | 28 | day-28-maniskill-robosuite-eval | ManiSkill / robosuite — reproducible manipulation benchmarks | A |
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
 
-### Day N 映射表 (24已完成)
+### Day N 映射表 (25已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -105,7 +105,7 @@ graph TD
 | 22 | day-22-2021-rma | 两阶段 privileged learning：PPO 开天眼训 $\pi(a_t\mid x_t,a_{t-1},z_t)$（$z_t=\mu(e_t)$ 为 17 维环境参数的低维指纹），$\varphi$ 从 50 步本体感知历史监督回归 $\hat z_t$；部署 10Hz 辨识 + 100Hz 控制双频异步；Unitree A1 零真机微调，沙地/泥地/高草/土堆零失败、下楼梯 70%；与 Day21 ADR+LSTM 构成"隐式 vs 显式在线辨识"对照 | S |
 | 23 | day-23-2019-residual-rl | 在模型控制器动作上学习 residual，以先验稳定性缩小探索空间并保留可解释接口 | A |
 | 24 | day-24-sim2real-system-identification | SimOpt 双循环：内层 PPO + 外层 REPS 以真机行为残差更新仿真参数分布 $p_\phi(\xi)$ ；与 sim2sim / HIL 探针 / 分桶指标拼成 sim2real release gate 四件套 ✅ 2026-09-15 | A |
-| 25 | day-25-2022-gato | 统一 observation/action token 序列展示 generalist agent 范式，同时检视跨任务容量与控制精度限制 | A |
+| 25 | day-25-2022-gato | 统一 observation/action token 序列展示 generalist agent 范式，同时检视跨任务容量与控制精度限制 ✅ 2026-09-16 | A |
 | 26 | day-26-2025-groot-n1 | 双系统 VLM reasoning + diffusion control 面向 humanoid，多 embodiment 数据与部署栈联合设计 | S |
 | 27 | day-27-2025-cosmos-world-foundation | 以世界基础模型生成/筛选 Physical AI 训练数据，评估视频 realism 与 action-grounded usefulness 的差距 | A |
 | 28 | day-28-maniskill-robosuite-eval | 统一任务、资产、传感器和成功判据，建立算法与系统的可复现实验矩阵 | A |
