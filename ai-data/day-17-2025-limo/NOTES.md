@@ -131,6 +131,8 @@ R1 建立了一个刻板印象：SFT = memorization（dense-but-capped，把分�
 >
 > (b) **"启发式 vs 梯度"的 head-to-head**。同一候选池，三臂各选 817：A = LIMO 难度 × 多样启发式；B = Day04 LESS 式目标梯度相似（以 AIME/MATH 为目标任务， $\cos(\Gamma(z), \bar{\Gamma}_{tgt})$ ）；C = 随机 817。同基座训练比 delta。判据：若 A > B → 推理任务上"强模型失败率"是比"梯度相似"更便宜有效的代理（呼应 9/9 Q&A 情形三：梯度代理的参照系在弱/错切空间里整体跑偏）；若 B > A → LIMO 的启发式仍有算法化空间，LESS 值得在 reasoning 上重做。关键控制：LESS 的目标梯度**来自哪个模型**？若用 7B 算梯度、选给 32B 训，是否复现"错误切空间"跑偏——这正是 9/9 情形三的实验版，顺手把那个思想实验落地了。
 
+思考题答案（Gemini 网页版，2026-09-17）：https://gemini.google.com/app/ad3a87f1e79a51af
+
 论文原文：https://arxiv.org/abs/2502.03387
 
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-17-2025-limo/NOTES.md
