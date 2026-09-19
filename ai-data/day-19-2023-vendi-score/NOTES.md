@@ -73,3 +73,71 @@
 
 > 自动化：reading-log 已追加 / commit 待推 / ai data sheet 待同步
 
+
+## 第二轮复习（2026-09-19）
+
+> 本轮复核：arXiv:2210.02410（v2，2023-07-02 修订；ICML 2023）摘要逐项核验 + 开源评审版 Theorem 3.1（Vendi Score 四条性质）全文核对。修正初读 NOTES 六处：① "重复敏感"方向写反：定理 3.1(2) identical elements 说的是**合并全同样本不改变 VS**（probability-weighted 形式）——Vendi 对重复是"不膨胀计数"，不是"对重复敏感"；② "证明唯有同时满足…"：论文只证明 VS 满足四条性质，没有唯一性 claim，"唯有"二字论文没有；③ 下游数字虚构：原文是生成模型/数据集诊断论文，**零训练实验**，"ImageNet-C +5%"、"coding Vendi-max 1k 打赢 random 10k"、"LESS×Vendi +3% HumanEval"、"s1 59k→1k 保留 Vendi 80%"、"DEITA 保留 Vendi 88%"、"10k→1k 性能保留 95%+"在原文中都不存在，一律划掉；④ "greedy max Vendi 等价于 max det"：DPP 的 $\log\det$ 与 Vendi 特征值熵是两个不同的谱目标，论文没提 greedy 算法，更无等价性；⑤ 遗漏 q 阶推广 $VS_q$ （q=0→rank、q=1→Vendi、q=∞→ $1/\lambda_{\max}$ ），这是对数据工作最有用的旋钮；⑥ "Vendi 对 embedding 不敏感 125M 即可"、" $\lambda<10^{-3}$ 截断"等工程数字原文没有。初读疑问中"cos kernel 在 algo 与 system design 上是否可区分"是个真问题，保留并深化为 §4.1。
+
+### 1. 核心命题
+
+Vendi 真正解决的 data 问题：**多样性没有公理化的度量**。baseline 们各坏一种：avg pairwise similarity 被样本数绑架（加一堆近重复，平均值几乎不动，n 却涨了）；distinct-n / self-BLEU 对长度敏感、不是真度量；IS/FID 把质量和多样性混在一起；分子领域的 uniqueness/novelty 只数"是否见过"，不度量分布形状。Vendi 的动作是把生态学（effective number of species / Hill numbers）与量子统计（von Neumann 熵）的现成答案搬进 ML：**多样性 = 有效不同元素数 = 相似 kernel 归一化特征值谱的 Shannon 熵的指数**。
+
+关键定性：这是一篇**评估/诊断**论文，不是选数据论文。它的实验是：分子生成（修 GuacaMol 的 uniqueness/novelty 短板）、图像生成（StackGAN）、文本解码算法（证实 sampling > greedy/beam 的已知结论）、GAN mode collapse（连"抓住所有 mode"的 GAN 都比原数据集更多样性缺失——揭示的是 mode *内*多样性）、benchmark 数据集诊断。**"1k 多样集打赢 10k 冗余集"不是论文的 claim**，是我们在 Day17/18 语境下给它的外推定位（"少即是多背后的数学标尺"这个定性可以保留，但必须注明是外推，不是原文结果）。
+
+### 2. 图谱位置
+
+- **前驱（图外）**：生态学 Hill numbers / Jost 2006（有效物种数；论文摘要明说 connects ideas from ecology）；量子统计 von Neumann 熵（把归一化 kernel 当 density matrix，特征值熵即 von Neumann 熵）；ML 内被它替代的度量：avg pairwise sim、distinct-n、self-BLEU、GuacaMol uniqueness/novelty。
+- **直接对比 Day24 D4（重点）**：**标尺 vs 流程**。Vendi 只给度量： $O(n^2)$ 建 kernel + $O(n^3)$ 特征分解，不告诉你删哪些样本，论文里没有任何选择算法——"会量多样性，但不会规模化选数"（Day24 NOTES 原话）。D4 给两步可执行流程：SemDeDup（k-means 去语义近重复）+ prototype-based diversification（砍过密原型），能跑预训练规模，精确告诉你删谁——但全程没有写下任何标量目标函数。两者互补的精确表述：D4 第一步 ≈ 在优化 identical-elements 那一侧（把重复合并掉），第二步 ≈ 把特征谱压平；但 D4 从没证明自己在优化什么。可执行的组合：**用 Vendi 当 D4 的审计器**——diversification 前后各算一次 VS，看有效多样性真涨了还是只换了簇的计数；再用 q 阶 VS 看 D4 有没有顺手砍掉稀有尾部（见 §6b 实验）。
+- **vs Day18 s1**：s1 的 embedding cos<0.8 是"去重规则"，Vendi 是"多样性定义"。硬阈值的两个毛病 Vendi 恰好点名：① 0.8 拍脑袋，无公理支撑；② pairwise 阈值不满足 partitioning——删一个样本会改变其他样本对的去留判定（非单调），而 Vendi 的 partitioning 性质（ $VS(S_1,\dots,S_m)=\exp(H(p_1,\dots,p_m))\prod_{i=1}^m VS(S_i)^{p_i}$ ）恰好回答"子集多样性能否分块独立算再合并"。
+- **vs Day20 DEITA**：DEITA 的 embedding 近邻去重是 max-VS 的工程贪心近似（无特征分解， $O(n\log n)$ ）；但 DEITA 把 diversity 只列为三因子之一——因为 VS 不管质量不管难度（见 §4.4），"多样性好"≠"数据好"。
+- **后继（图外，待读）**：DPP 家族是谱表亲（ $\log\det$ vs 特征值熵，同"谱散度"不同目标）；2026 年搜索到的 "How Much Is a Dataset Worth? Scaling Laws, the Vendi Score, and Matrix Spectral Functions" 把 Vendi 接到 scaling law 与数据集估值、做了 ImageNet 子集实验——列为后继，未细读不展开。
+
+### 3. 机制深挖
+
+**(a) 定义与谱直觉。** 样本 $x_1,\dots,x_n$ ，相似函数 $k$ 满足 $k(x,x)=1$ 且 kernel 矩阵 PSD。定义归一化 kernel $K_{ij}=k(x_i,x_j)/n$ ，则 $\mathrm{tr}(K)=\sum_i K_{ii}=1$ ，特征值 $\lambda_1,\dots,\lambda_n$ 自动构成概率分布。 $VS_k=\exp(-\sum_i\lambda_i\log\lambda_i)$ 。
+
+最有用的特例：取单位范数 embedding + cosine 相似，则 $K=XX^T/n$ ，其非零特征值等于数据协方差 $X^TX/n$ 的 PCA 谱。于是 **Vendi = 数据集协方差"有效秩"的 Shannon 版本**：谱平 → $VS\approx n$ ；谱塌到单个特征值 → $VS=1$ 。"多样性"在这里被翻译成"数据在表示空间里占了几个有效维度"——这句话是后面所有边界讨论的起点。
+
+**(b) 四条性质的机制含义（Theorem 3.1）。**
+
+1. Effective number：全异（ $k(x_i,x_j)=0$ ， $i\ne j$ ）→ $VS=n$ ；全同 → $VS=1$ 。给出解释标尺：" $VS=m$ ≈ 和 $m$ 个全异元素一样多样"。
+2. Identical elements：probability-weighted 形式下，把两个全同样本合并（ $p'_i=p_i+p_j$ ， $p'_j=0$ ）VS 不变。机制含义：**Vendi 是分布的度量，不是样本的度量**——加 1000 个副本不增加多样性。这正是它修 avg-pairwise-sim 的地方：pairwise 平均会被重复样本的数量绑架，Vendi 不会。
+3. Partitioning：跨子集零相似时， $VS(S_1,\dots,S_m)=\exp(H(p_1,\dots,p_m))\prod_{i=1}^m VS(S_i)^{p_i}$ ， $p_i=|S_i|/\sum_j|S_j|$ 。不是简单加权平均——多出来的 $\exp(H(p))$ 项是"子集间分布"的贡献。实操含义：分域配额式 curation（s1 的 MSC 50 域、LIMO 的领域均衡）可以用这个公式做**分块审计**：先各算各域的 VS，再用公式合并，定位是哪个域在拖累整体。
+4. Symmetry：与样本顺序无关——度量的是集合，不是序列。
+
+**(c) q 阶旋钮（初读遗漏，论文有）。** $VS_q=\exp(\frac{1}{1-q}\log\sum_i\bar\lambda_i^q)$ ：q=0 → rank（数非零特征值，对稀有特征最敏感——长尾猎手）；q=1 → 标准 Vendi；q=∞ → $1/\lambda_{\max}$ （只看最大簇——塌缩检测器，专抓"一个 dominant mode 吃掉一切"）。数据工作的直接用法：选数据保长尾用低 q 审计，查头部失衡用高 q。Pasarkar & Dieng 2024 的解读：q 控制对稀有 vs 常见特征的敏感度。
+
+**(d) "kernel 即定义"。** 摘要原话：VS takes a similarity function as input, enabling the user to specify any desired form of diversity。**多样性没有无条件的定义，k 就是定义本身。** 机制推论：换 k = 换问题。用 CodeBERT-cos 算出的 VS 高，只说明"表示散"，不说明"功能散"——这是 §4.1 和 §5 双 kernel 设计的理论依据。
+
+**(e) 与 DPP 的谱亲缘（初读"等价于 max det"划掉）。** DPP 优化 $\log\det(K_S)$ ，Vendi 优化特征值熵——都是"让谱散开"的谱目标，但**目标函数不同**，论文没提任何 greedy 算法，更无等价性。只能说：DEITA/D4 的启发式去重是这一谱家族的工程近似。
+
+### 4. 边界与反例
+
+1. **kernel 盲区**：cos-embedding 下，同一算法题的 100 种正确解法可能彼此很近（VS 低估功能多样），100 个同模板换数字的题可能很散（VS 高估）。反例：两个共享大量 boilerplate 但功能迥异的程序会被判相似——"表示多样 ≠ 功能多样"，而 Vendi 本身不负责区分。
+2. **PSD 约束**：相似矩阵非 PSD → 负特征值 → 熵无定义 → VS 失效。连对称矩阵都不保证 PSD（后续文献明确讨论过这点）。实操要么用真 kernel（RBF、归一化 embedding 的 cos），要么 clip 负特征值——后者扭曲度量且无论文内误差界。
+3. **size-coupled**： $VS\le n$ ，不同大小集合的 VS 不可直接比。"1k 打赢 10k"若拿 VS 当论据是范畴错误； $VS/n$ 可比，但论文主要用 raw VS。
+4. **只管散，不管好**：100 条各不相同但全错的解，VS 很高——多样性 ⊥ 质量 ⊥ 难度。这是 DEITA 必须三因子的原因，也是 Vendi 不能单独当 selection objective 的根本理由。
+5. **成本**： $O(n^2)$ kernel + $O(n^3)$ 特征分解；10k 单机可算，100k+ 得 Nyström/采样近似，近似误差传到 VS 上没有论文内保证。
+6. **证据没证明什么**：原文零训练实验——没证明"VS 高的训练集 → 下游性能好"；greedy max-VS 当选择目标是外推，无收敛/泛化保证。初读的六个下游数字（见本节 §头）全部划掉。
+
+### 5. 迁移到 coding / post-training data
+
+**可执行的映射："双 kernel Vendi 审计 + 行为 kernel 贪心选 1k coding 冷启动"（2 周可跑通）**
+
+1. 大池：exec 过滤后的 10k coding SFT 候选（抄 Day16：parser + 执行验证门）。
+2. 双 kernel： $k_{\text{text}}$ = CodeBERT/StarEncoder 归一化 embedding 的 cosine（表示相似）； $k_{\text{exec}}$ = 固定 hidden-test 电池上的通过/失败向量做 RBF（功能相似）。两个 kernel 下各算 $VS_q$ （q=0/1/∞）——两个 VS 的 gap 就是"表示多样但功能单一"的量化值。
+3. 选择：先过 exec 质量门（hidden tests 全过），再在 $k_{\text{exec}}$ 下贪心 max 边际 VS 选 1k——**功能多样优先**，不是文本多样。
+4. 审计：报告 VS、 $VS/n$ 、q 谱的选前/选后；硬性门禁：q=0 的 VS 不得下降（稀有技能保住，防 D4 式砍尾）。
+5. 验收：与 s1 式 cos<0.8 规则、DEITA 近邻去重同基座对比 HumanEval/MBPP + 仓库任务 slice。可证伪预测： $k_{\text{exec}}$ 版在 OOD 仓库任务上 ≥ $k_{\text{text}}$ 版；若不成立，则"kernel 即定义"在 coding 上不敏感，cos 够用——这本身也是个有价值的否定结果。
+
+### 6. 今天的一道思考题
+
+> 综合 **Day19（Vendi）、Day24（D4）、Day20（DEITA）**：
+>
+> (a) **"kernel 即定义"的证伪实验**。同一 10k coding 候选池（先过 exec 质量门）， $k_{\text{text}}$ （CodeBERT cos）与 $k_{\text{exec}}$ （hidden-test 通过向量 RBF）各 greedy 选 1k。同基座 SFT，比 HumanEval/MBPP（分布内）与 SWE-bench-lite slice（分布外）。判据：若两者打平 → 表示多样 ≈ 功能多样，cos kernel 够用，Vendi 的 kernel 选择不敏感；若 $k_{\text{exec}}$ 版在分布外显著更好 → "什么算多样"的定义权在 kernel，Vendi 只负责度量不负责定义——那所有用 embedding cos 算多样性的工作（s1 的去重、DEITA 的近邻、D4 的 SemDeDup）都在度量一个可能错的"多样"。追问：q 阶怎么选？q=0（rank，长尾敏感）选出的 1k vs q=∞（ $1/\lambda_{\max}$ ，头部敏感）选出的 1k，哪个在长尾仓库任务上更好？把 Vendi 的 q 旋钮和 D4 "保长尾"的目标放进同一个实验对质。
+>
+> (b) **Vendi 审计 D4**。取 D4 管线（SemDeDup → prototype diversification）的前/中/后三个快照，算 VS 三件套（VS、 $VS/n$ 、q=0/1/∞ 谱）。可证伪判据：若 diversification 后 VS 上升但 q=0 的 VS 下降 → D4 在压平头部的同时砍了稀有尾部，"保覆盖"不成立，prototype 步的阈值要回退；若 q=0 不降反升 → D4 的"去重+保多样"自洽，Vendi 从此可作 D4 的 nightly 质量门禁。追问：partitioning 公式允许分域独立算 VS 再精确合并——能否用它给 D4 的每个语义簇设"簇内 VS 下限"，把全局启发式变成逐簇可验证的约束？
+
+论文原文：https://arxiv.org/abs/2210.02410
+
+GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/NOTES.md

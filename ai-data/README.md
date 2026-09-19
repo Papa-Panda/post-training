@@ -4,7 +4,7 @@
 > **Scope：只谈数据，不谈算法。** 算法（GRPO/PPO/RLHF、optimizer、TTS解码策略）归 `rl-infra/`、`grpo-vs-ppo/` 轨道。这里只关心：数据怎么来、怎么洗、怎么选、怎么评、怎么量多样性/复杂度。
 > 命名已全量对齐 `rl-infra/day-01-xxx`；30篇主干闭环后继续以 `day-31-xxx` 起做主题延伸，便于 Day N 直连。
 
-## 第二轮深度复习（18/30）
+## 第二轮深度复习（19/30）
 
 > 复习期：2026-09-01 → 2026-09-30；固定按 Day 01 → Day 30，一天一篇，只更新已有 NOTES，不新增论文。
 
@@ -28,6 +28,7 @@
 | 16/30 | 2026-09-16 | 16 | Qwen2.5-Coder / 5.2T 执行过滤分诊 / sandbox+checklist | ✅ 完成 |
 | 17/30 | 2026-09-17 | 17 | LIMO: Less is More for Reasoning / 817 条认知模板 | ✅ 完成 |
 | 18/30 | 2026-09-18 | 18 | s1: Simple test-time scaling / 1k 长链 + budget forcing TTS | ✅ 完成 |
+| 19/30 | 2026-09-19 | 19 | Vendi Score / kernel 特征值熵多样性度量（标尺非流程；q 阶旋钮；kernel 即定义） | ✅ 完成 |
 
 ## 结构
 
