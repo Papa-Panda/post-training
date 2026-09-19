@@ -134,6 +134,8 @@ s1 真正解决的 data 问题，不是"推理数据要多少"，而是把"推�
 >
 > (b) **"难"的自我参照实验**。s1 用 Qwen2.5-7B/32B 双失败定义难（同家族、自参照）；LIMO 用 7B 粗筛 + R1 级异家族多采样（跨家族）；LESS 用目标梯度（任务参照）。同一 59k 候选池，三臂各筛 1k：A = s1 式同家族双失败；B = LIMO 式异家族失败率；C = LESS 式目标梯度相似（目标任务 = AIME/MATH）。同基座 SFT 比 delta。判据：若 B > A → "难"需要跨家族验证，同家族双失败筛出的是家族共享盲区（呼应 9/9 Q&A 情形二：自我参照评估器的系统性跑偏）；若 C 最优 → 推理任务上梯度代理仍有效，s1/LIMO 的启发式有算法化空间。关键控制：LESS 的目标梯度来自 7B 还是 32B？若用 7B 梯度选给 32B 训，是否复现"错误切空间"跑偏——把 9/9 情形三的思想实验和 s1 的难度定义放在同一个实验里对质。
 
+思考题答案（Gemini 网页版，2026-09-19）：https://gemini.google.com/app/d7b79aa9541e966a
+
 论文原文：https://arxiv.org/abs/2501.19393
 
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-18-2025-s1/NOTES.md
