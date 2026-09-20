@@ -127,6 +127,8 @@
 - **(a) 贪心 vs 全局**：DEITA 的多样性步骤是"分数优先的贪心最近邻去重"，Day19 Vendi 是谱熵全局度量。设计：同一 300K 池，先按 $s$ 排序取 top 30k，再用 Vendi 最大化从中选 6k（全局优化），vs DEITA 原生贪心 6k，同基座 SFT 比 MT-Bench。判据：若 Vendi 版显著更好 → DEITA 的多样性步骤是次优近似，有算法化升级空间；若持平 → 分数优先贪心已是工程最优点。
 - **(b) "质量"的目标依赖**：LESS（Day04）的质量是目标任务梯度参照，DEITA 的 $q$ 是通用质量。设计：同一候选池，A = DEITA 6k，B = LESS（目标=AIME/MATH）6k，C = A∩B 交集；双评 MT-Bench（通用）+ MATH（专用）。判据：若 B 在 MATH 上大胜但在 MT-Bench 上输给 A → "质量"的定义依赖目标任务，DEITA 的通用 $q$ 在专用任务上是错的切空间（呼应 9/9 Q&A 情形三）；若 C 双赢 → 通用 × 专用的交集才是真"好数据"，配方可合并。
 
+相关讨论（Gemini 网页版，2026-09-20）：https://gemini.google.com/app/f615e5f9debd80bf
+
 论文原文：https://arxiv.org/abs/2312.15685
 
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md
