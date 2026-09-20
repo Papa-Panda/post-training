@@ -37,6 +37,8 @@ Roadmap Day26–30 是"Physical AGI 落地工程"：Day26 的 GR00T N1 是这个
 2. Flow-matching 损失（式 1）里，LAPA latent action 和真实机器人动作是**同一套 $V_\theta$ 参数、按 embodiment 分头训练**的。VQ-VAE 从视频帧对 $(x_t, x_{t+H})$ 提取的连续 latent embedding，真的是"动作"吗？它在物理上对应什么（跨 embodiment 的运动方向先验），又在什么情况下会误导 DiT？
 3. 神经轨迹（neural trajectories）用视频生成模型把 88 小时真机遥操作放大到 827 小时（~10x），IDM 标注伪动作后 1:1 co-train——**视频模型的幻觉（物体消失/物理不自洽）会不会污染 policy？** 论文用 MLLM 当 judge 过滤+重打标，这个"模型审模型"的数据闭环的失败模式是什么？
 
+相关讨论（Gemini 网页版，2026-09-19）：https://gemini.google.com/app/ee2b6d0b878b1530
+
 ## 核心
 
 ### 1. Motivation
