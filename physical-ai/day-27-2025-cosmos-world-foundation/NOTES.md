@@ -39,6 +39,8 @@ Roadmap Day27 的官方主题就是"以世界基础模型生成/筛选 Physical 
 2. Cosmos-Transfer1 的自适应时空控制：同一视频里 segmentation / depth / edge / vis 可以按区域、按时刻加不同权重——这对 sim2real 意味着什么？Day21 的 ADR 是"手工随机化物理参数分布"，Transfer 是"保留模拟几何、用真实感重绘纹理"。控制权重 $w_m(x,t)$ 目前是手工旋钮，能不能从真机数据里学出来（呼应 Day24 SimOpt 的"有锚辨识"思想）？
 3. 论文 Sec 2.1 末尾诚实声明：五个用途（policy 评估/初始化/训练/planning-MPC/合成数据）"没有实证结果"。从视频 realism（FVD/PSNR 好看）到 policy 提升之间，缺一个什么样的评测协议？action-conditioned rollout 的 counterfactual 一致性该怎么量？（直接引出 Day28 评测主题。）
 
+相关讨论（Gemini 网页版，2026-09-20）：https://gemini.google.com/app/1df85d2f6b415328
+
 ## 核心
 
 ### 1. Motivation
