@@ -75,3 +75,58 @@
 
 > 自动化：reading-log 已追加 / commit 待推 / ai data sheet 待同步
 
+
+---
+
+## 第二轮复习（2026-09-20）
+
+> 本轮核验：arXiv:2312.15685 v2（2024-04-16）+ ar5iv 全文 §2–§3、Table 2/3/5/6/7。初读 NOTES 有四处事实错误，本轮已修正（见下）。
+
+### 元信息修正
+
+- 初读 NOTES 写 "Virginia Tech, Salesforce AI Research" 是错的。论文实际单位：上海科技大学、北京邮电大学、美团、阿里巴巴、香港科技大学（WL/WZ 访学 HKUST 期间完成）。
+- 初读四处修正：① "IFEval 保持"——论文评测只有 MT-Bench、AlpacaEval、Open LLM Leaderboard（ARC/HellaSwag/MMLU/TruthfulQA）+ 附录 D 人工评测，**无 IFEval**；② "6k coding 子集 HumanEval 28%→35%"——论文无此实验，是初读臆造，删除；③ 去重阈值 "cos>0.9"——正文只写 Repr Filter 最近邻距离门禁，未披露具体数值，不写死；④ scorer 标注用的是 ChatGPT（gpt-3.5-turbo-0613）在小种子集上打分、再蒸馏出自己的 scorer，不是 "Qwen1.5-72B-like"。
+
+### 一句话总结
+
+在两个对比鲜明的数据池（300K 高质 $X_{sota}$ / 100K 低质冗余 $X_{base}$ ）上做受控单维消融，证明对齐数据的"好"可分解为**复杂度 × 质量 × 多样性**三维；配方 $s = c \times q$ 排序 + embedding 最近邻贪心去重，6K 数据在 LLaMA-1/2-13B 与 Mistral-7B 三条基座上打赢 10 倍以上数据量的 SOTA；并发现 scaling 非单调——"好数据"的占比是有限的。
+
+### 和之前工作的关系
+
+- **前驱**：LIMA（Table 5 里 1K 人工精选只有 4.29/41.98%，证明人工品味在复杂池上不如自动三因子）；WizardLM Evol-Instruct（复杂度进化方法直接借自 Xu et al. 2023）；TAGLM（Repr Filter 多样性贪心出自此处）；Alpagasus（同样 ChatGPT 打分选数据，6.46 vs 5.61，赢在演化式细粒度打分 + 三因子）。
+- **vs Day04 LESS**：LESS 的梯度相似是"目标任务参照"的影响度量，DEITA 的 $q$ 是通用质量、 $c$ 是通用复杂度——互补而非替代。DEITA 的两池对照（ $X_{sota}$ vs $X_{base}$ ）补了关键一块：质量维度在低质池上方差更大，这解释了为什么 targeted 方法在低质池上更吃香。
+- **vs Day12 SuperFiltering**：同为"小模型自动选"，SuperFiltering 用 125M 算 IFD 单维选 5%，DEITA 用 13B 双 scorer 打双维分再乘积。Table 2 消融：IFD 在低质池上崩到 2.46（困惑度类指标把"难"和"烂"混为一谈），Evol Complexity 稳在 5.57——**显式解耦 c 和 q 是 DEITA 对 IFD 的真正改进**。
+- **vs Day17/18（LIMO/s1）**：同 less-is-more 家族，DEITA 是"工程化收束"——把人工过滤和启发式三滤变成可打分、可自动化的 $c \times q$ + 去重。代价：scorer 要蒸馏 ChatGPT，s1 的双失败过滤只用开源小模型，成本结构不同。
+- **vs Day19 Vendi**：Vendi 给多样性的公理化定义，DEITA 的 Repr Filter 贪心是其工程近似；反过来 Vendi 可用来审计 DEITA 子集的多样性保留率。
+
+### 核心
+
+1. **Motivation**：SFT 默认"越多越好"，但池子越大，简单/重复/低质占比越高；少即是多已被验证但缺统一、可自动化的"好"定义。DEITA 把问题形式化为：在数据预算 $m$ 下选子集 $S^{(m)}_{\pi}$ 最大化对齐性能 $Q$ （公式 1）。
+2. **Evol Complexity**：对单样本做 Evol-Instruct 式多级演化（加深/加广/具体化/加约束/加推理），用 ChatGPT 给同一系列变体排序打分，小种子集上蒸馏出自己的 complexity scorer。关键洞察：**演化产生的是"有序"的复杂度序列**，scorer 学的是相对排序而非绝对分——这就是它比直接打分（Table 2：5.16 vs 6.27）强的来源。
+3. **Evol Quality**：同理，对 response 做质量演化提升，打分蒸馏出 quality scorer。低质池 $X_{base}$ 上质量维度的方差效应更大（6.19→5.67 vs 随机 4.93）。
+4. **融合**： $s = c \times q$ ，乘积而非加权——任一维接近 0 则整体淘汰，AND 语义；多轮对话按 turn 求和。
+5. **多样性**：按 $s$ 降序贪心遍历，已选集 embedding 最近邻距离门禁（Repr Filter），太近的丢弃。 $O(n \log n)$ 级，无需聚类。
+6. **结果**：Deita-Mistral-7B_6K = 7.22 MT-Bench / 80.78% AlpacaEval；10K = 7.32/81.67；+DPO（10K UltraFeedback 对）= **7.55/90.06%**。三条基座一致打赢同基座 10× 数据 SOTA；Open LLM Leaderboard 上 6K/10K 在各基座都是 SFT 模型里平均分最高。
+7. **最反直觉的发现**：scaling 非单调—— $X_{sota}$ 300K 全量并不比 3K 精选好（100× 数据约简可比），加数据到一定量后性能**下降**。对齐不是数据越多越好，而是"好数据的浓度"问题。
+
+### 边界
+
+1. 乘积的 AND 语义是双刃剑：高质量但简单的指令（c 低 q 高）被系统性淘汰——对齐真的不需要简单样本吗？论文没测；radar 图显示增益集中在 coding/math/reasoning，恰是高 c 域。
+2. Scorer 的蒸馏天花板：c/q scorer 蒸馏自 ChatGPT 的小种子打分——"复杂度观"是 ChatGPT 的复杂度观，不是客观的。换更强标注者是否改变排序？未测。
+3. Repr Filter 的 embedding 多样 ≠ 功能多样：同一语义不同措辞的样本可能被过度去重——和 Day19 "kernel 即定义"是同一个坑。
+4. 非单调 scaling 只有现象、无归因：为什么加数据会**降**性能？是低质样本负迁移，还是 SFT dense 信号稀释（同 Day18 s1 的"毒性稀释"）？论文没做归因实验。
+5. DPO 那 10K 对是 Zephyr 的 UltraFeedback 子集随机抽的，不是 DEITA 选的——7.55/90.06% 里 DPO 数据的贡献没被消融。
+
+### 迁移到 coding
+
+- 直接可抄的配方：coding SFT 候选池（如 exec 过滤后的池）上，c = 复杂度（CF rating / AST depth / cyclomatic 演化打分），q = 质量（编译通过 + hidden tests 通过率 + 可读性打分）， $s = c \times q$ 排序，CodeBERT embedding 最近邻去重。DEITA 的教训：**质量维度在低质池上方差最大**——coding 合成数据恰是低质高方差池，q scorer 的投入产出比最高。
+- 可跑的验证：同一 10k coding 候选池，三臂各选 2k：A = DEITA 式 $c \times q$ + 去重；B = 只按 q；C = 只按 c；同基座 SFT 比 HumanEval/MBPP。DEITA Table 2/3 预测 A > B > C 且低质池上 gap 更大——若 coding 上复现，则"乘积 AND 语义"在 code 上成立。
+
+### 思考题（综合 Day20 / Day19 / Day04）
+
+- **(a) 贪心 vs 全局**：DEITA 的多样性步骤是"分数优先的贪心最近邻去重"，Day19 Vendi 是谱熵全局度量。设计：同一 300K 池，先按 $s$ 排序取 top 30k，再用 Vendi 最大化从中选 6k（全局优化），vs DEITA 原生贪心 6k，同基座 SFT 比 MT-Bench。判据：若 Vendi 版显著更好 → DEITA 的多样性步骤是次优近似，有算法化升级空间；若持平 → 分数优先贪心已是工程最优点。
+- **(b) "质量"的目标依赖**：LESS（Day04）的质量是目标任务梯度参照，DEITA 的 $q$ 是通用质量。设计：同一候选池，A = DEITA 6k，B = LESS（目标=AIME/MATH）6k，C = A∩B 交集；双评 MT-Bench（通用）+ MATH（专用）。判据：若 B 在 MATH 上大胜但在 MT-Bench 上输给 A → "质量"的定义依赖目标任务，DEITA 的通用 $q$ 在专用任务上是错的切空间（呼应 9/9 Q&A 情形三）；若 C 双赢 → 通用 × 专用的交集才是真"好数据"，配方可合并。
+
+论文原文：https://arxiv.org/abs/2312.15685
+
+GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md
