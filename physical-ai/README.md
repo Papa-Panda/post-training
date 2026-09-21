@@ -73,9 +73,9 @@ graph TD
 | 27 | day-27-2025-cosmos-world-foundation | Cosmos — world foundation models for Physical AI data generation ✅ 2026-09-18 | A |
 | 28 | day-28-maniskill-robosuite-eval | ManiSkill3 / robosuite — reproducible manipulation benchmarks ✅ 2026-09-19 | A |
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors ✅ 2026-09-20 | S |
-| 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis | S |
+| 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis ✅ 2026-09-21 | S |
 
-### Day N 映射表 (29已完成)
+### Day N 映射表 (30已完成)
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
@@ -112,7 +112,7 @@ graph TD
 | 28 | day-28-maniskill-robosuite-eval | robosuite（MuJoCo 模块化：robot×arena×object×controller 正交组合）定义评测合同；ManiSkill3（SAPIEN 并行渲染 + PhysX GPU + 异构仿真）30,000+ FPS、2–3× 省显存、12 类任务域/20+ embodiment；demo 管线复用 Day20 RLPD/RFCL 在线 IL；评测=固定测度 $p_\phi$ 下的 $J(\pi)$ 二项估计，吞吐决定 $N$ 与统计精度 ✅ 2026-09-19 | A |
 | 29 | day-29-safe-robot-learning | 安全四层栈：CMDP 期望约束（Lagrangian/CPO）→ CBF 前向不变证书（QP 安全滤波器）→ Shield 最小干预修正（LTL 合成）→ RTA 运行时仲裁（Simplex/monitor+备份控制器）；证书与策略解耦、事后加装；期望可平均、逐点不可平均 ✅ 2026-09-20 | S |
 | 29 | day-29-safe-robot-learning | 约束 MDP、control barrier function、shield 和 runtime monitor 共同覆盖训练与部署安全 | S |
-| 30 | day-30-physical-ai-eval-data-flywheel | 汇总 state/action/latency/safety 指标，设计 failure → triage → recollect/resimulate → retrain → gated deploy 闭环 | S |
+| 30 | day-30-physical-ai-eval-data-flywheel | 汇总 state/action/latency/safety 指标，设计 failure → triage → recollect/resimulate → retrain → gated deploy 闭环 ✅ 2026-09-21 | S |
 
 ---
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai
