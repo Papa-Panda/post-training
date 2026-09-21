@@ -126,6 +126,8 @@
 - **(a) 生成器能力 vs 进化补偿**：固定 175 种子，三臂：A = 原生 Self-Instruct 52K；B = A 经一轮 Evol-Instruct 式 in-depth 进化；C = 换更强生成器（32B vs 7B）直接自举。评：Evol-Complexity scorer 分布 + SuperNI/MT-Bench。判据：若 B≈C → 复杂度瓶颈可用进化补偿，与生成器解耦；若 C≫B → 进化补不上能力天花板，种子 / 生成器才是第一变量。
 - **(b) 词法去重 vs 语义去重**：同一 52K 自举池，A = ROUGE-L<0.7 去重；B = SemDeDup 语义去重（cos>0.9）；C = 双重。看有效样本数、Vendi 多样性、下游分数。判据：若 B 下游显著更好 → 词法去重误杀语义新样本；若持平 → 指令域内词法≈语义，0.7 阈值是工程最优点。
 
+相关讨论（Gemini 网页版，2026-09-21）：https://gemini.google.com/app/7fb9bc28b9820578
+
 论文原文：https://arxiv.org/abs/2212.10560
 
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/NOTES.md
