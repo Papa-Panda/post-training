@@ -8,7 +8,7 @@
 
 ```
 physical-ai/
-├── README.md                # 本路线图（29已完成/30总规划）
+├── README.md                # 本路线图（30已完成/30总规划，已闭环）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
 └── day-01-xxx/              # 每篇一个文件夹
@@ -16,9 +16,9 @@ physical-ai/
     └── assets/
 ```
 
-## 发展路线图 (29/30 - 进行中)
+## 发展路线图 (30/30 - 闭环完成)
 
-> 总计 **30篇** 即闭环。Day01–10 已完成总览脚手架，Day11 起按专题顺序扩展；当前 Day29 Safe Robot Learning（安全四层栈：CMDP / CBF / Shield / Runtime Monitor）已完成。Day11–30 主题已锁定，后续严格按表顺延。
+> 总计 **30篇** 已闭环。Day01–10 总览脚手架，Day11–30 专题扩展；当前 Day30 Physical AI Eval + Data Flywheel（评测四轴：state / action / latency / safety + failure → triage → recollect / resimulate → retrain → gated deploy 数据飞轮）已完成，30 天路线收官。
 
 ### 图谱总览
 
