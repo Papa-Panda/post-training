@@ -76,3 +76,57 @@
 
 > 自动化：reading-log 已追加 / commit 待推 / ai data sheet 待同步
 
+## 第二轮复习（2026-09-21）
+
+> 本轮核验：arXiv:2212.10560 v2（2023-05-25）+ ar5iv 全文 §2–§4、Table 1。初读 NOTES 有几处表述偏差，本轮已修正（见下）。
+
+### 元信息修正
+
+- 8-shot 构成：每次从任务池采样 6 条人工种子 + 2 条历史自生成指令（促进多样性），初读只写"8-shot 随机种子 prompt"，补全。
+- 分类任务实例生成用 **output-first**（先生成类别标签、再按标签条件生成输入），解决 input-first 的类别偏置（如语法纠错任务只会生成正确语法输入）；非分类任务用 input-first。初读"分类任务同时生成 Input+Output"表述含糊，修正。
+- 平均指令长度 15.9 词（正文 Table 1），不是初读写的 12 词。
+- SuperNI 提升：论文口径是相对 vanilla GPT-3 的 **+33.1%**，不是初读写的"44.1%→56.7% 绝对 +12.6"（ROUGE-L 绝对值在论文中无出处，改用论文口径）。
+- 人工评：252 条专家手写新指令、四级打分制（附录 B，两位指令作者盲评），GPT3_Self-Inst 超所有公开指令数据集、仅落后 InstructGPT-001 5 个百分点（绝对）。
+
+### 一句话总结
+
+用 175 条人工种子把 LLM 变成自己的数据工厂：8-shot 自举生成指令 → 分类识别 → input/output-first 双路实例生成 → ROUGE-L<0.7 去重，52,445 条指令让 vanilla GPT-3 在 SuperNI 上相对提升 +33.1%、人工新任务评测逼近 InstructGPT-001——**证明"指令数据"这个最依赖人工的环节可以被模型自举取代**。这是合成数据范式的奠基事件，也是"选 vs 造"分水岭上"造"侧的起点。
+
+### 和之前工作的关系
+
+- **前驱**：FLAN（人工 15M 标注范式）、SuperNI（评测锚点）。Self-Instruct 是对"人工标注是唯一来源"假设的第一次正面击破。
+- **vs Day22 Evol-Instruct**：直接的"被改进"关系。Self-Instruct 生成器被自身能力封顶——指令平均 15.9 词、简单任务为主；Evol-Instruct 用 In-depth/Breadth 等 5 级进化算子把"简单"递归改写为"复杂"，是同一 bootstrap 循环上的复杂度补丁。对比判据：ROUGE-L 分布与复杂度 scorer 分数。
+- **vs Day20 DEITA**：造与选的互补。DEITA 的 6K 在低质池上证明合成池含大量低质/重复——Self-Instruct 52K 按同样逻辑约含 ~80% 可丢弃样本。链条：175→52K（造）→ DEITA 三因子→6K（选）→ LIMO/s1 1K（精选），即"造-选-精"三级漏斗。
+- **vs Day23 LIMA**：同一条"种子哲学"——LIMA 的 1K 人工精选 ≈ Self-Instruct 175 种子的放大版，都相信"好格式 + 好来源"胜过规模。LIMA 是人工策展的极致，Self-Instruct 是自动自举的极致，同属 less-is-more 上游。
+- **vs Day27 OSS-Instruct**：code 域的改良版。OSS-Instruct 把种子从"175 人工指令"换成"80K 开源代码片段"——本质是 Self-Instruct 循环 + 真实代码锚定，解决自举数据脱离真实分布的问题。种子来源（人工 vs 真实代码）决定合成数据的"真实性天花板"。
+- **vs Day15 R1**：R1 的 <10K 冷启动合成是 Self-Instruct 的现代极简版——更强模型、更少种子、verifiable reward 替代人工质检。
+
+### 核心
+
+1. **Motivation**：2022 年 instruction tuning 依赖 FLAN 式人工标注（15M 级），成本高、任务分布偏向流行 NLP 任务、多样性/创造力受限；小模型无法自举。
+2. **四步管线**：① 指令生成：8-shot（6 人工 + 2 历史自生成）prompt 生成新指令；② 分类识别：12 分类 + 19 非分类 few-shot 判定指令是否为分类任务（输出空间有限者）；③ 实例生成：分类任务 output-first（先定标签、再按标签生成输入，防标签偏置），非分类任务 input-first；④ 过滤：ROUGE-L<0.7 去重、关键词黑名单（image/picture/graph）、精确重复 / 同输入异输出实例丢弃、长度启发式。
+3. **关键洞察**：种子只是"格式触发器"——模型预训练里已编码任务模式的分布，175 条种子定义的是输出格式和任务形状，而非知识本身。这是"造"能成立的深层原因：**自举不是无中生有，是把隐式知识显式化**。
+4. **结果**：52,445 指令（11,584 分类 / 40,861 非分类）+ 82,439 实例；SuperNI 上 +33.1%（相对 vanilla GPT-3），与 InstructGPT-001 相当；252 条新指令人工评超所有公开数据集，仅落后 InstructGPT-001 5 个百分点。
+
+### 边界
+
+1. **能力天花板**：模型只能生成它能理解的任务——自举数据的复杂度被生成器能力封顶，平均 15.9 词、简单任务为主。这是 Day22 Evol-Instruct 存在的理由。
+2. **ROUGE-L 去重是词法代理**：同义改写漏过（假多样性），措辞相似但任务不同可能被误杀；Day24 SemDeDup 是语义版答案。
+3. **输出正确性无验证**：实例的 output 由同一模型生成，无 exec / 人工校验——分类任务的"正确标签"可能是错的，这是合成数据最危险的静默错误源；Day16 Qwen-Coder 的 exec 三级瀑布是 code 域的补救。
+4. **只做了一轮自举**：多轮在自己输出上迭代会走向 model collapse；论文止步于一轮，迭代自举的稳定性未被证明。
+5. **论文没证明的**：175 是最优种子数吗？换更强生成器提升是否线性？52K 里有效样本占比多少？（DEITA 事后回答了最后一个：约 20% 是真金。）
+
+### 迁移到 coding
+
+- 可执行的 coding 自举管线：175 条手写 code 种子（50 条 StackOverflow 高赞改写 + 125 条 text-to-code 模板，分类 / 非分类分池）→ 8-shot 自举 10K code 指令 → parser+exec 三级瀑布洗掉约 40% 不可编译样本 → DEITA 式 $s = c \times q$ 二次选 1K（ $c$ = CF rating / 圈复杂度， $q$ = 测试通过率）→ 验证 LIMA 式"1K 打赢全量"在 code 上是否成立。
+- 若真实代码种子可用，直接走 OSS-Instruct 路线（80K 开源 snippet 当种子）：种子真实性决定合成分布与真实分布的 KL 距离，这是 Self-Instruct 最该被改进的一环。
+
+### 思考题（综合 Day21 / Day22 / Day24）
+
+- **(a) 生成器能力 vs 进化补偿**：固定 175 种子，三臂：A = 原生 Self-Instruct 52K；B = A 经一轮 Evol-Instruct 式 in-depth 进化；C = 换更强生成器（32B vs 7B）直接自举。评：Evol-Complexity scorer 分布 + SuperNI/MT-Bench。判据：若 B≈C → 复杂度瓶颈可用进化补偿，与生成器解耦；若 C≫B → 进化补不上能力天花板，种子 / 生成器才是第一变量。
+- **(b) 词法去重 vs 语义去重**：同一 52K 自举池，A = ROUGE-L<0.7 去重；B = SemDeDup 语义去重（cos>0.9）；C = 双重。看有效样本数、Vendi 多样性、下游分数。判据：若 B 下游显著更好 → 词法去重误杀语义新样本；若持平 → 指令域内词法≈语义，0.7 阈值是工程最优点。
+
+论文原文：https://arxiv.org/abs/2212.10560
+
+GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/NOTES.md
+
