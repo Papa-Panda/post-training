@@ -4,29 +4,29 @@
 > Scope：Physical AI 全链路，不谈纯 LLM data curation（那是 ai-data）。
 > 命名对齐 `ai-data/day-01-xxx`，`physical-ai/day-01-xxx` ~ `day-30-xxx`，便于 Day N 直连。
 
-## 第二轮深度复习（1/30）
+## 第二轮深度复习（1/34）
 
-> 复习期：2026-09-22 → 2026-10-21；固定按 Day 01 → Day 30，一天一篇，只更新已有 NOTES，不新增论文。复习重点不是重述摘要，而是 30 天全路线在手边后重建知识结构、画出跨 Day 连接。
+> 复习期：2026-09-22 → 2026-10-29；2026-09-23 → 2026-09-26 先插播 Day31–34 四篇最新进展（World Labs Atlas / GPT-6 Astra / Figure AI / Physical Intelligence π0.7），复习从 2026-09-27 恢复（02/34），一天一篇，只更新已有 NOTES，不新增论文。复习重点不是重述摘要，而是 34 天全路线在手边后重建知识结构、画出跨 Day 连接。
 
 | Review | Date | Day | 主题 | Status |
 |---:|---|---:|---|---|
-| 01/30 | 2026-09-22 | 01 | Meta ARI / MSL / Robotics Studio — 修正 Pinto 背景误读（Fauna→Amazon，非 PI）；补 e-Flesh / seed 轮 / capex 同日上调 | ✅ 完成 |
+| 01/34 | 2026-09-22 | 01 | Meta ARI / MSL / Robotics Studio — 修正 Pinto 背景误读（Fauna→Amazon，非 PI）；补 e-Flesh / seed 轮 / capex 同日上调 | ✅ 完成 |
 
 ## 结构
 
 ```
 physical-ai/
-├── README.md                # 本路线图（30已完成/30总规划，已闭环）
+├── README.md                # 本路线图（34 天：30 闭环 + 4 最新进展）
 ├── PAPER_TEMPLATE.md
 ├── reading-log.csv          # 快速索引
-└── day-01-xxx/              # 每篇一个文件夹
+└── day-01-xxx/ ~ day-34-xxx/  # 每篇一个文件夹
     ├── NOTES.md             # 必须含「和之前工作的关系」
     └── assets/
 ```
 
-## 发展路线图 (30/30 - 闭环完成)
+## 发展路线图（34 天：30 闭环 + 4 最新进展）
 
-> 总计 **30篇** 已闭环。Day01–10 总览脚手架，Day11–30 专题扩展；当前 Day30 Physical AI Eval + Data Flywheel（评测四轴：state / action / latency / safety + failure → triage → recollect / resimulate → retrain → gated deploy 数据飞轮）已完成，30 天路线收官。
+> 总计 **34 天**：Day01–30 已闭环（2026-08-23 → 2026-09-21）；Day31–34 为 2026-09-23 → 2026-09-26 新增四篇最新进展（李昊建议）。Day01–10 总览脚手架，Day11–30 专题扩展，Day31–34 把路线图从"闭环"变成"活地图"。当前 Day30 Physical AI Eval + Data Flywheel（评测四轴：state / action / latency / safety + failure → triage → recollect / resimulate → retrain → gated deploy 数据飞轮）已完成，30 天主路线收官。
 
 ### 图谱总览
 
@@ -41,6 +41,7 @@ graph TD
   G --> H[Day15-18 Robot Data / Benchmark expansion]
   H --> I[Day19-24 RL for Robotics / Sim2Real]
   I --> J[Day25-30 Physical AGI / Eval / Safety]
+  J --> K[Day31-34 最新进展: Atlas / GPT-6 Astra / Figure AI / pi0.7]
   style A fill:#ffd700
   style B fill:#ffd700
   style C fill:#ffd700
@@ -48,7 +49,7 @@ graph TD
   style E fill:#ffd700
 ```
 
-### 30天闭环计划
+### 34 天计划（30 闭环 + 4 最新进展）
 
 | Day | Folder | 标题 | Tier |
 |-----|--------|------|------|
@@ -82,8 +83,12 @@ graph TD
 | 28 | day-28-maniskill-robosuite-eval | ManiSkill3 / robosuite — reproducible manipulation benchmarks ✅ 2026-09-19 | A |
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors ✅ 2026-09-20 | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis ✅ 2026-09-21 | S |
+| 31 | day-31-2026-worldlabs-atlas | World Labs Atlas — 首个从零训练的多模态世界模型（2026-09-01 发布）⏳ 2026-09-23 | S |
+| 32 | day-32-2026-gpt6-astra | OpenAI GPT-6 Astra — computer-use 旗舰，"AGI era"（2026-09-03 发布）⏳ 2026-09-24 | S |
+| 33 | day-33-2026-figure-ai-helix25 | Figure AI — Helix 2.5 陌生家庭 56% + Nscale $3.5B 算力 + Index 数据众包 ⏳ 2026-09-25 | S |
+| 34 | day-34-2026-pi07 | Physical Intelligence π0.7 — 组合泛化，做没教过的任务（2026-04-16 发布）⏳ 2026-09-26 | S |
 
-### Day N 映射表 (30已完成)
+### Day N 映射表（34 天）
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
