@@ -160,3 +160,5 @@ Meta 2026-05-01 收购 20 人 ARI 并入 MSL，不是买产品而是买 "robotic
 - en.sedaily（2026-05-04）：https://en.sedaily.com/news/2026/05/04/meta-acquires-robotics-startup-enters-humanoid-race
 
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/NOTES.md
+
+相关讨论（Gemini 网页版，2026-09-22）：https://gemini.google.com/app/6ddbd577e468f338
