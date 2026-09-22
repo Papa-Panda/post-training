@@ -54,3 +54,61 @@ Self-Instruct 给了 coding SFT / RL 冷启动的“造池”起点，但真实 
 - 全程只写数据：synthetic / complexity / curation / quality / diversity / execution-filter；算法只一句带过
 
 > 自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步
+## 第二轮复习（2026-09-22）
+
+> 本轮核验：arXiv:2304.12244 v2/v3 全文（§2 Evol-Instruct、§4.2 实验细节）+ 多方独立转录交叉核对。初读 NOTES 基本是骨架（多处"待读后填写"），关键数字有一处实质性误读，本轮已修正并补齐数据事实。
+
+### 元信息修正
+
+- **70K 误读修正**：初读写"约 70K 条复杂 SFT 数据"是错的。论文是 52K Alpaca 种子经 4 轮演化得到 **250K** 指令；70K 是为了与 Vicuna 的 70K 真实用户数据（ShareGPT）公平对比而从中采样的子集。reading-log 与 README 映射表中的"约70K"表述同步修正。
+- **6 个演化 prompt**：每轮每条指令从 5 个 in-depth（增加约束 / 深化 / 具体化 / 增加推理步骤 / 复杂化输入）+ 1 个 in-breadth 中等概率随机选一个，不是初读猜的"5 级固定流水线"。
+- **复杂度增量约束**：每次演化只"a bit harder"，新增词数限制在 10–20 词——这是防止一步跳到不可解任务的显式护栏。
+- **回应质量混杂已控制**：基线 Alpaca 的 Davinci-003 回答被替换为 ChatGPT 回答后再对比，说明论文意识到了"指令变难"与"回答变好"的混杂，并做了对照。
+- **训练配置**：LLaMA 7B，Adam lr $2\times10^{-5}$ ，8×V100 + DeepSpeed Zero-3，70 小时，3 epoch；API 总调用量 $52 \times 4 \times 3 = 624\text{K}$ 次（演化 / 淘汰 / 生成回答各一次）。
+- Venue：ICLR 2024。
+
+### 一句话总结
+
+把"复杂度"从事后打分变成生成阶段的可控算子：52K Alpaca 种子（本身已是 Self-Instruct 从 175 条人工种子自举而来）经 4 轮 In-depth / In-breadth 演化 + Elimination Evolving 淘汰失败样本，得到 250K 难度梯度可控的指令；70K 子集训出的 WizardLM 在多项评测上超越同等规模的人类数据模型 Vicuna——**证明 SFT 效果的第一变量是指令复杂度分布，而非"是否人类写"**。这是"造"侧从"扩规模"到"控难度"的转折点。
+
+### 和之前工作的关系
+
+- **vs Day21 Self-Instruct（直接前驱 / 被改进）**：链条是 175 人工种子 → Self-Instruct 自举 → 52K Alpaca → Evol-Instruct 演化 → 250K，三级远离人工标注。Self-Instruct 解决"无中生有"，Evol-Instruct 解决"有而不难"——自举数据的复杂度被生成器能力封顶（指令短、任务简单），演化是给这个天花板打的补丁。但注意代价：每级都继承并放大上一级的分布偏置。
+- **vs Day20 DEITA（造↔量闭环）**：Evol-Instruct 把复杂度"做"出来，DEITA 把 Evol-Instruct 的演化序列反向蒸馏成 Evol-Complexity scorer 把复杂度"量"出来。"造→量→选"闭环：175→52K（造）→250K（控难造）→ DEITA 三因子→6K（选）。DEITA Table 2 的教训（IFD 把"难"和"烂"混为一谈，Evol-Complexity 稳住）反过来证明：演化产生的有序复杂度序列是比直接打分更可靠的复杂度定义。
+- **vs Day27 OSS-Instruct（正交轴）**：合成数据分布 = 来源分布 $P(\text{source})$ × 条件难度分布 $P(\text{difficulty}\mid\text{source})$ 。Evol-Instruct 只动后者（固定 Alpaca 种子，改难度），OSS-Instruct 只动前者（换 80K 真实代码片段当种子，改来源）。两条轴正交，可串联：先用 OSS-Instruct 定来源，再用 Evol-Instruct 拉难度。
+- **vs Day24 D4/SemDeDup（缺失的去重）**：4 轮演化每条种子长出一条演化链，近重复必然累积；论文只有 Elimination Evolving（淘汰失败样本），没有语义去重。250K 里"真多样 vs 啰嗦近重复"的比例论文没回答——Day24 的语义去重是这条线的天然补丁。
+- **vs Day12 SuperFiltering（弱模型能否审进化数据）**：Evol-Instruct 用强模型（ChatGPT）既当生成器又当淘汰裁判；SuperFiltering 证明 124M 弱模型算 IFD 就能筛 7B 的数据。开放问题：弱模型能否审出"演化失败"（不可解 / 伪复杂）？若能，演化管线的成本可降一个量级。
+
+### 核心
+
+1. **Motivation**：2023 年初的指令数据两极分化——Alpaca（52K，自举，偏简单）vs Vicuna（70K，真实用户，难但有人工参与）。论文要回答：去掉人工后，能否用纯机器方法造出比人类数据更难的指令？更深层的命题是 SFT 的 scaling law 到底 scale 的是什么：是条数，还是复杂度？
+2. **Data Pipeline**：52K Alpaca 种子 → 4 轮演化（每轮每条指令等概率抽 1 个演化 prompt；in-depth 五选一改写加难，in-breadth 基于原指令造新任务扩覆盖）→ Elimination Evolving（LLM 裁判淘汰演化失败/不可解样本）→ ChatGPT 重生成全部回答（temp 1，top-p 0.9，max 2048 tokens）→ 250K → 采样 70K 子集训 LLaMA → WizardEval（人工构造的难度均衡新测试集）评测。
+3. **关键机制深挖**：
+   - **复杂度即算子**：5 个 in-depth prompt 是零样本的（无需 in-context 示例），说明"加难"本身可被 prompt 编程化——这是后来 DEITA 能把演化蒸馏成 scorer 的前提。
+   - **渐进约束的数学意义**：每轮只允许 +10–20 词、"a bit harder"，是在做复杂度空间里的**小步随机游走**而非跳跃；大步长会直接掉进不可解区域（Elimination 也救不回来，因为裁判和生成器是同一个模型、共享盲区）。
+   - **无课程表**：6 个 prompt 等概率随机选，4 轮下来是固定混合分布，不是 easy→hard 的课程。论文证明了"难样本的存在"重要，但没证明"难度的编排"重要——课程学习这块是留白。
+   - **回答重生成的双重作用**：ChatGPT 重写回答既是质量统一，也是把"指令-回答"对齐到同一模型的风格分布——这正是后来 LIMA 强调的"风格统一"的机器版。
+4. **Results（数据口径）**：250K 演化指令；70K 子集训 LLaMA-13B，在代码、数学、GPT-4 评测与人工评测上显著超 Alpaca 与 Vicuna；核心结论是"指令复杂度对 SFT 效果至关重要"（preliminary investigation 级别，论文自称初步探索）。
+
+### 边界
+
+1. **裁判与运动员同一人**：演化、淘汰、回答生成全是 ChatGPT。Elimination Evolving 淘汰的是"ChatGPT 认为失败"的样本，系统性盲区（比如某类推理它自己就不擅长）会被完整继承——这是合成数据自举的通用原罪，Day21 的"输出正确性无验证"在这里换了个马甲。
+2. **70K 采样的选择偏置**：为公平对比 Vicuna 而采样 70K，但采样策略论文未细说；若采样偏向高复杂度，结论"演化数据 > 人类数据"部分来自采样策略而非演化本身。
+3. **复杂度 = 词数代理的污染**：+10–20 词的硬约束把"难"和"长"绑在一起。啰嗦的简单题可能被误判为复杂——5 个算子里"具体化/复杂化输入"最容易产生这种伪复杂。
+4. **没做多轮迭代稳定性**：4 轮演化后停，没有回答"第 8 轮会不会 collapse"。与 Day21"只做了一轮自举"的警告同构，只是阈值更高。
+5. **论文没证明的**：复杂度提升的边际收益曲线（250K 是否过饱和？）、in-breadth 对多样性的真实贡献（vs 简单重采样）、演化数据在 RL 阶段是否同样有效（全文只在 SFT 验证）。
+
+### 迁移到 coding / post-training data
+
+- **可执行的 coding 演化管线**（今晚可开工）：取 OSS-Instruct 75K（或 Code Alpaca）当种子池 → 定义 code 版 in-depth 四算子：加边界条件 / 加多文件依赖 / 加性能约束 / 要求测试用例 → 2 轮演化（强模型生成）→ **淘汰裁判换成客观门禁**：parser + 编译 + 单元测试三级（Day16），不可编译/测试全挂的直接淘汰，替代论文的 LLM 自裁判——这是对"裁判运动员同一人"最直接的修复 → DEITA 式 $s = c \times q$ 打分（ $c$ 用 Evol-Complexity code 版， $q$ 用测试通过率）→ 按难度分层采样定版。关键设计决策：**coding 域的 Elimination 不该用 LLM，而该用执行器**——执行器没有"觉得难"的偏置，只有"跑不跑得过"的事实。
+- **给 post-training 的教训**：SFT 数据设计的第一变量是难度分布的形状，不是条数；先做难度审计（Evol-Complexity 打分看分布），再决定是"演化加难"还是"换源重造"。
+
+### 思考题（综合 Day22 / Day20 / Day24 / Day16）
+
+- **(a) 演化复杂度 vs 有效多样性**：取 Evol-Instruct 式 250K 演化池，三臂各取 70K：A = 随机采样；B = DEITA 式 $s = c \times q$ 取 top；C = 先 SemDeDup 语义去重（cos>0.9）再随机取。评：Evol-Complexity 分布、Vendi 多样性、下游分数。判据：若 B≈C 且都显著>A → 复杂度选择与去重殊途同归，演化的"难" mostly 是真金；若 C>B → 演化制造了大量啰嗦近重复，"复杂度上升"部分是词数幻觉，DEITA 的 $c$ 分被长度污染了。
+- **(b) 客观淘汰 vs LLM 淘汰**：同一批 code in-depth 演化样本，A = ChatGPT 当 Elimination 裁判；B = parser+编译+单元测试三级客观淘汰。看两点：① 下游 HumanEval/SWE-bench 分数；② B 误杀 / A 漏杀的样本里，"测试难写但任务有价值"的难样本占比。判据：若 B 下游赢但误杀率高 → 客观门禁系统性偏向"易验证任务"，coding 数据会被执行器反向选择成"短算法题"，这正是 Day27 疑问的定量版；此时正确做法是淘汰分级：编译失败直接杀，测试难写但语义合理的进人工/强模型复审池。
+
+论文原文：https://arxiv.org/abs/2304.12244
+
+GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-22-2023-evol-instruct/NOTES.md
+
