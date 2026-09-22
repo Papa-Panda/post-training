@@ -64,7 +64,7 @@ Self-Instruct 给了 coding SFT / RL 冷启动的“造池”起点，但真实 
 - **6 个演化 prompt**：每轮每条指令从 5 个 in-depth（增加约束 / 深化 / 具体化 / 增加推理步骤 / 复杂化输入）+ 1 个 in-breadth 中等概率随机选一个，不是初读猜的"5 级固定流水线"。
 - **复杂度增量约束**：每次演化只"a bit harder"，新增词数限制在 10–20 词——这是防止一步跳到不可解任务的显式护栏。
 - **回应质量混杂已控制**：基线 Alpaca 的 Davinci-003 回答被替换为 ChatGPT 回答后再对比，说明论文意识到了"指令变难"与"回答变好"的混杂，并做了对照。
-- **训练配置**：LLaMA 7B，Adam lr $2\times10^{-5}$ ，8×V100 + DeepSpeed Zero-3，70 小时，3 epoch；API 总调用量 $52 \times 4 \times 3 = 624\text{K}$ 次（演化 / 淘汰 / 生成回答各一次）。
+- **训练配置**：v2 预印本 LLaMA 7B，Adam lr $2\times10^{-5}$ ，8×V100 + DeepSpeed Zero-3，70 小时，3 epoch；ICLR 2024 正式版（v3）换 LLaMA-13B，8×V100，140 小时；API 总调用量 $52 \times 4 \times 3 = 624\text{K}$ 次（演化 / 淘汰 / 生成回答各一次）。
 - Venue：ICLR 2024。
 
 ### 一句话总结
@@ -88,7 +88,7 @@ Self-Instruct 给了 coding SFT / RL 冷启动的“造池”起点，但真实 
    - **渐进约束的数学意义**：每轮只允许 +10–20 词、"a bit harder"，是在做复杂度空间里的**小步随机游走**而非跳跃；大步长会直接掉进不可解区域（Elimination 也救不回来，因为裁判和生成器是同一个模型、共享盲区）。
    - **无课程表**：6 个 prompt 等概率随机选，4 轮下来是固定混合分布，不是 easy→hard 的课程。论文证明了"难样本的存在"重要，但没证明"难度的编排"重要——课程学习这块是留白。
    - **回答重生成的双重作用**：ChatGPT 重写回答既是质量统一，也是把"指令-回答"对齐到同一模型的风格分布——这正是后来 LIMA 强调的"风格统一"的机器版。
-4. **Results（数据口径）**：250K 演化指令；70K 子集训 LLaMA-13B，在代码、数学、GPT-4 评测与人工评测上显著超 Alpaca 与 Vicuna；核心结论是"指令复杂度对 SFT 效果至关重要"（preliminary investigation 级别，论文自称初步探索）。
+4. **Results（数据口径，ICLR 2024 正式版）**：250K 演化指令；70K 子集训 LLaMA-13B，在代码、数学、GPT-4 评测与人工评测上显著超 Alpaca 与 Vicuna；核心结论是"指令复杂度对 SFT 效果至关重要"（preliminary investigation 级别，论文自称初步探索）。
 
 ### 边界
 
