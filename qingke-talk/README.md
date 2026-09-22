@@ -16,6 +16,7 @@
 
 | 期号 | 标题 | 状态 |
 |---:|---|---|
+| 154 | Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe | ✅ 要点已提炼 |
 | 155 | SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战 | ✅ 要点已提炼 |
 
 ## 建议补看（RL infra 主线相关，往期）
