@@ -83,7 +83,7 @@ graph TD
 | 28 | day-28-maniskill-robosuite-eval | ManiSkill3 / robosuite — reproducible manipulation benchmarks ✅ 2026-09-19 | A |
 | 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors ✅ 2026-09-20 | S |
 | 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis ✅ 2026-09-21 | S |
-| 31 | day-31-2026-worldlabs-atlas | World Labs Atlas — 首个从零训练的多模态世界模型（2026-09-01 发布）⏳ 2026-09-23 | S |
+| 31 | day-31-2026-worldlabs-atlas | World Labs Atlas — 首个从零训练的多模态世界模型（2026-09-01 发布）✅ 2026-09-23 | S |
 | 32 | day-32-2026-gpt6-astra | OpenAI GPT-6 Astra — computer-use 旗舰，"AGI era"（2026-09-03 发布）⏳ 2026-09-24 | S |
 | 33 | day-33-2026-figure-ai-helix25 | Figure AI — Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包 ⏳ 2026-09-25 | S |
 | 34 | day-34-2026-pi07 | Physical Intelligence π0.7 — 组合泛化，做没教过的任务（2026-04-16 发布）⏳ 2026-09-26 | S |
