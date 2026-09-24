@@ -4,7 +4,7 @@
 > **Scope：只谈数据，不谈算法。** 算法（GRPO/PPO/RLHF、optimizer、TTS解码策略）归 `rl-infra/`、`grpo-vs-ppo/` 轨道。这里只关心：数据怎么来、怎么洗、怎么选、怎么评、怎么量多样性/复杂度。
 > 命名已全量对齐 `rl-infra/day-01-xxx`；30篇主干闭环后继续以 `day-31-xxx` 起做主题延伸，便于 Day N 直连。
 
-## 第二轮深度复习（23/30）
+## 第二轮深度复习（24/30）
 
 > 复习期：2026-09-01 → 2026-09-30；固定按 Day 01 → Day 30，一天一篇，只更新已有 NOTES，不新增论文。
 
@@ -33,6 +33,7 @@
 | 22/30 | 2026-09-22 | 22 | WizardLM / Evol-Instruct / 52K→250K 复杂度演化（70K 子集对 Vicuna；修正初读 70K 误读） | ✅ 完成 |
 | 21/30 | 2026-09-21 | 21 | Self-Instruct: 175 种子→52K bootstrap 合成指令源头（output-first 分类实例；ROUGE-L<0.7 去重；+33.1% SuperNI） | ✅ 完成 |
 | 23/30 | 2026-09-23 | 23 | LIMA: Less Is More for Alignment / 1k 高质策展（社区 750+手写 250；风格统一+τ=3 多样性；§5 消融：多样性/质量有效、数量 16 倍 plateau；打赢 52K Alpaca-65B） | ✅ 完成 |
+| 24/30 | 2026-09-24 | 24 | D4 / SemDeDup：语义近重复去除+原型式多样化剪枝（ $R = R_{dedup} \times R_{proto}$ ；OPT-125M 表示；20% 效率增益/16 任务最高 +2%；智能重复打赢基线） | ✅ 完成 |
 
 ## RL data 补充（Day 32+，第一轮）
 
