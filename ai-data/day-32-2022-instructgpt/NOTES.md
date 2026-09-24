@@ -20,13 +20,13 @@ RLHF 数据管线的正典：40 名筛选过的 contractor 产出三层数据—
    - RM 训练把每条 prompt 的 $\binom{K}{2}$ 个组合对当**单个 batch 元素**：每个 completion 只需一次 forward pass，且不再过拟合（朴素打散 shuffle 一遍就过拟合，因为每个 completion 被用 $K-1$ 次梯度更新）；
    - RM 只用 6B（175B RM 训练不稳定，不适合当 value function），并归一化使 demonstration 均值 reward 为 0；
    - RM loss（Eq 1）：
-   
-   $$\operatorname{loss}(\theta) = -\frac{1}{\binom{K}{2}} \mathbb{E}_{(x,y_w,y_l)\sim D}\left[\log\sigma\left(r_\theta(x,y_w) - r_\theta(x,y_l)\right)\right]$$
-   
-   - PPO 加 per-token KL 惩罚锚定 SFT；PPO-ptx 再混入预训练梯度（Eq 2，$\gamma \geq 20$ 在 1.3B 上修复 DROP/SQuAD 回退），用 8 倍于 RL episode 数的预训练样本；
-   
-   $$\operatorname{objective}(\phi) = \mathbb{E}_{(x,y)\sim D_{\pi_\phi^{RL}}}\left[r_\theta(x,y) - \beta\log\left(\pi_\phi^{RL}(y|x)/\pi^{SFT}(y|x)\right)\right] + \gamma\,\mathbb{E}_{x\sim D_{pretrain}}\left[\log \pi_\phi^{RL}(x)\right]$$
-   
+
+   $$\mathrm{loss}(\theta) = -\frac{1}{\binom{K}{2}} \mathbb{E}_{(x,y_w,y_l)\sim D}\left[\log\sigma\left(r_\theta(x,y_w) - r_\theta(x,y_l)\right)\right]$$
+
+   - PPO 加 per-token KL 惩罚锚定 SFT；PPO-ptx 再混入预训练梯度（Eq 2， $\gamma \geq 20$ 在 1.3B 上修复 DROP/SQuAD 回退），用 8 倍于 RL episode 数的预训练样本；
+
+   $$\mathrm{objective}(\phi) = \mathbb{E}_{(x,y)\sim D_{\pi_\phi^{RL}}}\left[r_\theta(x,y) - \beta\log\left(\pi_\phi^{RL}(y|x)/\pi^{SFT}(y|x)\right)\right] + \gamma\,\mathbb{E}_{x\sim D_{pretrain}}\left[\log \pi_\phi^{RL}(x)\right]$$
+
    - labeler 协议本身就是数据资产：40 名 contractor 经 screening（敏感言论 flag 一致性、排序一致性 75% cutoff、demonstration 6/7 分）+ onboarding + 详细指令 + 共享答疑群；标注者间一致性 72.6±1.5%；
    - 标注指令写死 trade-off 规则：通常 harmless + truthful > helpful，除非 (a) helpful 明显更强、(b) truthful/harmless 只略差、(c) 非高风险域；终极标尺是"customer assistant 你更想收到哪个输出"。
 4. **Results**: 175B InstructGPT vs 175B GPT-3 偏好率 85±3%，vs few-shot GPT-3 71±4%；TruthfulQA 真实有用回答 ~2 倍；闭域幻觉率 21% vs 41%；被要求礼貌时毒性输出 -25%；bias（Winogender/CrowS-Pairs）无改善；PPO 有 alignment tax（SQuAD/DROP/HellaSwag/翻译回退），PPO-ptx 大幅缓解——单纯加大 KL 系数修不好；FLAN/T0 微调版在 API 分布上不如 SFT 基线（InstructGPT 对其 head-to-head 78±4% / 79±4%）。
