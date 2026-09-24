@@ -42,7 +42,7 @@
 | Day | Paper | Status |
 |---:|---|---|
 | 31 | DoReMi（此前误加保留，不计入本系列） | — |
-| 32 | InstructGPT / RLHF 数据管线正典（labeler 指令 + 偏好对 + RM 数据） | ⬜ 待读 |
+| 32 | InstructGPT / RLHF 数据管线正典（labeler 指令 + 偏好对 + RM 数据） | ✅ 2026-09-24 |
 | 33 | STaR / rationalization 自举推理数据 | ⬜ 待读 |
 | 34 | Constitutional AI / RLAIF 源头（原则→critique→revision） | ⬜ 待读 |
 | 35 | Let's Verify Step by Step / PRM 800K step-level 标签 | ⬜ 待读 |
