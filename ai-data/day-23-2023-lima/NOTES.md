@@ -116,6 +116,8 @@
 - **(a) 风格统一 vs 过程质量的归因**：LIMA 说"回答风格统一"是关键（表面），LIMO/s1 说"过程完备/自我修正"是关键（行为）。设计 2×2：同一题池，{风格统一，风格杂} × {过程好（含检查/回溯/修正），过程灌水}，四组各 250 条，同基座 SFT，比下游 delta。可证伪判据：若"风格杂 + 过程好" ≈ "双好" >> "风格统一 + 过程差" → s1/LIMO 赢，LIMA 的风格统一只是"过程脚手架"的廉价代理；若"风格统一"主效应显著 → 对齐阶段格式信号独立有效，LIMA 的假说在过程质量之外还有残差解释力。追问：论文 §2.2 声称 acknowledgment+answer 结构"helps form chain of thought"，但从没消融过它 —— 把这一结构单独拿掉看 delta，是补上论文自己欠的实验。
 - **(b) 对齐数据的最小剂量 × 容量**：LIMA 脚注 5（7B 上 1k 不稳定、至少 2k）× LIMR §3.3（7B 上 s1/LIMO 1k 模板 AIME 15.8 失效）× 主结果都在 32B/65B。实验：基座 {7B, 32B, 65B} × 数据量 {1k, 2k, 4k, 8k} × {LIMA 式策展，随机}，画对齐质量（人工偏好 / ChatGPT Likert）曲线。判据：若"最小稳定剂量"随容量单调下降 → "少即是多"必须写成容量函数 $N_{min}(C)$ ，1k 不是常数；若某容量下策展 8k 仍不敌随机 8k → 策展标准与该容量错配（呼应 LIMR 的"选择标准与阶段对齐"，这里是与容量对齐）。这是把三篇的容量 caveat 合成一个可测函数的实验。
 
+相关讨论（Gemini 网页版，2026-09-23）：https://gemini.google.com/app/d5cc4082a2de4320
+
 论文原文：https://arxiv.org/abs/2305.11206
 
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-23-2023-lima/NOTES.md
