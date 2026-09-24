@@ -47,6 +47,8 @@
 | 35 | Let's Verify Step by Step / PRM 800K step-level 标签 | ⬜ 待读 |
 | 36 | RLAIF vs. RLHF / AI 反馈偏好数据 recipe（ICML 2024） | ⬜ 待读 |
 | 37 | DAPO / RL 训练期数据工程（dynamic sampling + overlong shaping） | ⬜ 待读 |
+| 38 | Tülu 3 / 开源 post-training 全配方（SFT + DPO + RLVR） | ⬜ 待读 |
+| 39 | Kimi k1.5 / long-CoT RL 数据（long2short） | ⬜ 待读 |
 
 ## 结构
 
