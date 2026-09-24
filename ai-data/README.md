@@ -34,6 +34,20 @@
 | 21/30 | 2026-09-21 | 21 | Self-Instruct: 175 种子→52K bootstrap 合成指令源头（output-first 分类实例；ROUGE-L<0.7 去重；+33.1% SuperNI） | ✅ 完成 |
 | 23/30 | 2026-09-23 | 23 | LIMA: Less Is More for Alignment / 1k 高质策展（社区 750+手写 250；风格统一+τ=3 多样性；§5 消融：多样性/质量有效、数量 16 倍 plateau；打赢 52K Alpaca-65B） | ✅ 完成 |
 
+## RL data 补充（Day 32+，第一轮）
+
+> 2026-09-23 新增：主干 30 篇偏 SFT/curation，RL data 覆盖不足，单开补充系列。第一轮精读，一天一篇。
+
+| Day | Paper | Status |
+|---:|---|---|
+| 31 | DoReMi（此前误加保留，不计入本系列） | — |
+| 32 | InstructGPT / RLHF 数据管线正典（labeler 指令 + 偏好对 + RM 数据） | ⬜ 待读 |
+| 33 | STaR / rationalization 自举推理数据 | ⬜ 待读 |
+| 34 | Constitutional AI / RLAIF 源头（原则→critique→revision） | ⬜ 待读 |
+| 35 | Let's Verify Step by Step / PRM 800K step-level 标签 | ⬜ 待读 |
+| 36 | RLAIF vs. RLHF / AI 反馈偏好数据 recipe（ICML 2024） | ⬜ 待读 |
+| 37 | DAPO / RL 训练期数据工程（dynamic sampling + overlong shaping） | ⬜ 待读 |
+
 ## 结构
 
 ```
