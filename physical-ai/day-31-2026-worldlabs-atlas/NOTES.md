@@ -32,6 +32,8 @@ Atlas 是 World Labs 2026-09-01 发布的 omni 世界模型：从零预训练、
 2. **「重建」和「生成」的统一，在数学上到底统一了什么？** 同一个条件分布 $p_\theta(\cdot\mid\mathrm{context})$ ，输入 1 张图时先验主导（生成/想象）、输入 100+ 张时似然主导（重建/忠实）——"the more it sees, the less it imagines" 有没有可计算的形态？条件熵 $H(\hat{W}\mid I_{1:N})$ 随 $N$ 如何衰减？这是今天数学视角的核心。
 3. **real-to-sim 的证据链缺了哪一环？** 官方展示了「手机视频 → 3D 重建 → 机器人视角 RGB + depth 渲染」（官方 blog Robotics Simulation 小节，24 帧手机视频重建大场景），但**没有展示**：在这个重建世界里训出的策略，放到真机上成功率多少（sim2real transfer 数字）。没有这一环，Atlas 只是 Day27 差距的「更接近」，不是「跨过」。Day33 / Day34 的策略侧数字会是很好的对照。
 
+相关讨论（Gemini 网页版，2026-09-23）：https://gemini.google.com/app/fd3e80b9edb0f25f
+
 ## 核心
 
 ### 1. Motivation：为什么相机几何必须是一等输入
