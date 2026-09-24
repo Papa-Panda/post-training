@@ -99,3 +99,5 @@ D4 的真正洞察不是"去重+多样化"的字面拼接，而是**重复会劫
 ### 思考题
 - **(a) 综合 Day24 + Day19**：D4 声称 diversification 却从未报告 Vendi。设计一个 200 GPU-hour 内可跑的验证：固定 $R = 0.25$ ，比较 D4 精选子集 vs 同比例随机子集——用同一 kernel 算双方的 Vendi Score，再各训一个 1B 模型（10B tokens）看下游 delta。若出现"Vendi 更高但下游不涨"，说明了多样性度量与下游之间的什么关系？进一步：你能构造一个 Vendi 极高但训练有害的子集吗？（提示：往池子里掺与任务正交的噪声域。）
 - **(b) 综合 Day24 + Day30**：同一套"embedding 近邻"机器，D4 用来删训练集内重复，Day30 用来检 train–eval 泄漏。假设你的语义去重阈值 $\epsilon_{dedup}$ 设得比防污染阈值 $\epsilon_{decon}$ 更激进，会观测到什么后果？——与 HumanEval 语义相近但合法的训练样本被成片删掉，表现为"去污染分数虚高"：防漏指标变好不是因为模型更干净，而是训练分布被掏空了一块。请设计一个对照实验，区分"真干净"与"分布被掏空"。（提示：固定评测集，比较激进/保守两档 $\epsilon_{dedup}$ 下，被删样本中"与 benchmark 近邻" vs "与 benchmark 远但高质量"的比例，以及两档的下游 delta。）
+
+相关讨论（Gemini 网页版，2026-09-24）：https://gemini.google.com/app/b10432c02e770db5
