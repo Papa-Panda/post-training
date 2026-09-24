@@ -363,3 +363,26 @@ graph TD
 **后续（会话中已执行）**：以此为起点新建仓库级专题 `reasoning-trace-analysis/`（8 章：trace 的数学对象、R1 认知行为原文、deep-thinking token、U 型熵与 DiffAdapt 路由、self-doubt/hedging、batch prompting、PRM、trace 阅读指南；附 numpy 可运行 `trace_lab.py` + 16 pytest；faithfulness 线暂缓为入口 stub），commit 89c8c9f。专题 README 明确框架 tension：trace as RL-optimized behavior vs human-read evidence。
 
 **关联**：Day 15（R1 trace 认知行为）、Day 11（LIMR 轨迹对齐筛选）、专题 `reasoning-trace-analysis/`。
+
+### 2026-09-23 — 主干 RL data 覆盖审计 + RL 补充系列立项（Day32–39；跨全系列）
+
+**问题（用户，19:42 PDT）**：整个系列下来，感觉讲 RL data 的不是很多？
+
+**核心答案**：感觉是对的。翻了一遍 31 行的 reading list，纯讲 RL data 的不到 10 篇，而且大多只是"沾了 RL 的边"：明确算 RL data 的只有 Day11 LIMR（1,389 难例打赢 RL 全量）、DPO implicit reward gap（挑难 pair）、Day15 DeepSeek-R1（cold-start 数据 vs 纯 RL）、Day28 Open-Reasoner-Zero、Day29 SWE-Gym（trajectory + verifier）、UltraFeedback（偏好数据），再加 Qwen2.5 / Qwen2.5-Coder / Llama 3.1 报告里的一节——加起来也只是点状覆盖。原因在命题本身：系列是 data-centric 的 SFT/curation 轴（归因 Influence/TracIn/DataInf、选择 LESS/DEITA/Superfiltering/D4/SemDeDup、质量 Phi-1/Llama3/DeepSeek-V3 管线、合成 Self-Instruct/Evol-Instruct/Magicoder、少即是多 LIMA/LIMR/s1/LIMO）；reward/verifier 数据、trajectory 收集、RLHF 偏好对构造、on-policy 数据飞轮这些是另一个子领域，被天然排除了一半。但这跟转型目标是反的：RL 侧的数据（verifiable data、execution filtering、轨迹筛选）正好是 infra 和数据的交界，对 post-training / agentic RL infra 转型最直接有用。
+
+**问题（用户，19:52 PDT）**：我觉得应该直接在这里面加一些 RL data 补充，你觉得有哪些重要的论文需要加进来？
+
+**核心答案**：候选 8 篇，按子主题排序：
+
+- **Verifier / 过程监督数据（RL data 的核心）**：Let's Verify Step by Step（OpenAI 2023）——PRM 训练数据的开山，800K step-level 标签、process supervision 在数学推理上打赢 outcome supervision；STaR（Zelikman 2022）——rationalization 自举推理数据，SFT 和 RL 数据之间的桥。
+- **偏好数据规模化**：RLAIF（Lee et al. 2023）——AI feedback 做偏好数据的完整 recipe；Constitutional AI（Bai et al. 2022）——RLAIF 的源头，原则→critique→revision 的数据管线；InstructGPT（Ouyang 2022）——RLHF 数据管线的正典，labeler 指令怎么写本身就是数据工作。
+- **RL 训练期的数据工程**：DAPO（ByteDance 2025）——dynamic sampling、overlong filtering，RL 阶段"什么数据进 rollout"的实战；Tülu 3（AllenAI）——开源 post-training 全配方，RL 数据（RLOO/DPO）部分写得最细的之一。
+- **Long-CoT RL 数据**：Kimi k1.5 报告——long-CoT 的 RL 数据构造。
+
+推荐：先加前 6 篇（verifier + 偏好 + InstructGPT）作为"RL data"这个概念的地基；DAPO/Tülu 3/Kimi 是第二批，更偏工程。**用户决策（会话中已执行）**：直接在主干加、Day31+ 往后排、一天一篇、暂时不做第二轮复习。执行中发现 Day31 已被之前误加的 DoReMi 占用（保留不动），系列从 Day32 起排；骨架 + reading-log + README 表格进 repo（commit 7e704fa），日程由 cron `daily-ai-data-rl-supplement` 承接（10-01 起一天一篇）。
+
+**问题（用户，20:00 PDT）**：DAPO/Tülu 3/Kimi 是第二批，更偏工程。还有 SWE-Gym、Open-Reasoner-Zero、DeepSeek-R1 这些呢？你自己上面说的。
+
+**核心答案**：三个点一个个说：(1) 这三篇已经在主干里读过了（Day29 / Day28 / Day15），不用加。它们是用户已有的 RL data 底子，新系列补的是它们的空白：DeepSeek-R1 给了冷启动 + 纯 RL 的范式，DAPO 是把这个范式在数据工程上做扎实（dynamic sampling、overlong 处理）；SWE-Gym 是 trajectory 数据，Let's Verify 是 verifier 数据，正好配成一对。(2) **DAPO 位置的实质性修正**：助手承认前后不一致（先说"DAPO 是第二批"，转头又把它塞进第一批）——实话是列完 8 篇之后觉得 DAPO 最有用，因为 RL 训练期"什么数据进 rollout"是最贴 infra 转型的，就自作主张提前进了第一批。**机制注**：这是 batch 划分标准的一次实例——划分的变量不是"工程 vs 理论"，而是"离 post-training / agentic RL infra 的数据决策面有多近"。按这个变量，Tülu 3 和 Kimi k1.5 留在第二批（Day38 / Day39），Tülu 先（开源配方最全）、Kimi 后（long-CoT RL 数据）；用户确认"要"后骨架已建（commit b429d10），日程顺延至 10-08。
+
+**关联**：Day15 DeepSeek-R1、Day28 Open-Reasoner-Zero、Day29 SWE-Gym（主干已有 RL data 底子）；Day32–39 RL 补充系列（第一轮 Day32–37：InstructGPT / STaR / Constitutional AI / Let's Verify / RLAIF / DAPO；第二批 Day38–39：Tülu 3 / Kimi k1.5）。
