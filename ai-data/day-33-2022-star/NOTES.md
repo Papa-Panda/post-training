@@ -45,3 +45,5 @@
 ## 思考题
 1. coding 里"单测通过但推理过程胡扯"的样本怎么筛？STaR 的答案级过滤够吗，还是需要 Day35 的 step-level（PRM）信号？
 2. rationalization 的 hint 法（把正确答案塞进 prompt）在开放域/无标准答案任务上还成立吗——和 Day32 labeler 手写 demonstration 的成本边界在哪？
+
+相关讨论（Gemini 网页版，2026-09-25）：https://gemini.google.com/app/94ddf894506e0a29
