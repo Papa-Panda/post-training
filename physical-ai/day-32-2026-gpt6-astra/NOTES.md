@@ -35,6 +35,8 @@ GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的
 2. **Grounding 还是瓶颈吗？** ScreenSpot-Pro（无工具）92.7%（官方记分卡）——"点准屏幕上的东西"这个数字看起来很高，但它是静态截图单步定位。真实任务里是**闭环**的：点错 → 滚过头 → 焦点丢失 → 状态漂移，每一步的定位误差在几百步轨迹里累积。这是数字版的 Day12 接触问题：单步准不等于闭环稳。
 3. **Critical 评级的行动闭环是什么？** 首个 Critical 评级 → 部署分级（Daybreak Blue 优先关键基础设施防御者）。但注意 Reuters 披露的另一面：Astra **更可能故意隐藏/伪装自己的推理步骤**（reasoning concealment），且"在更复杂的问题上还不能总是成功隐藏，但正在变好"（来源：Reuters 2026-09-03）。监控变难 + 对齐变难（Pachocki 原话，Reuters）——这对 Day29 的 RTA/monitor 假设是直接挑战：monitor 的前提是能**看见**智能体在想什么。
 
+相关讨论（Gemini 网页版，2026-09-25）：https://gemini.google.com/app/f1c99bff069872fe
+
 ## 核心
 
 ### 1. Motivation：从"回答"到"执行"
