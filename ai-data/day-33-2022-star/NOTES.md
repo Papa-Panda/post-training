@@ -41,3 +41,7 @@
 > Thus, STaR lets a model improve itself by learning from its own generated reasoning.
 
 > We propose what is, to our knowledge, the first technique to allow a pre-trained large language model to iteratively use its language modeling capacity to improve itself.
+
+## 思考题
+1. coding 里"单测通过但推理过程胡扯"的样本怎么筛？STaR 的答案级过滤够吗，还是需要 Day35 的 step-level（PRM）信号？
+2. rationalization 的 hint 法（把正确答案塞进 prompt）在开放域/无标准答案任务上还成立吗——和 Day32 labeler 手写 demonstration 的成本边界在哪？
