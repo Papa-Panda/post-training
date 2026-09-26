@@ -87,6 +87,12 @@ Figure Helix 2.5（2026-09-17）：一台 Figure 03 人形机器人，用**同�
 6. **数据飞轮的"两条时钟"**：The Weighted Average 的提醒——Index 采集速率涨 16.7%（公司自报）和 Nscale 第一批 GPU 2027 下半年才上线，数据和算力是两条时钟。post-training 规划 infra 时也要分开建模：数据管线 throughput 和算力交付时间表是独立的约束。
 7. **"买数据 crap"的教训**：Adcock 说外部供应商的数据质量不行、被迫自建（Humanoids Daily）。映射：post-training 的数据采购——vendor 数据的"传感器对齐"（格式/分布/标注质量与你的模型匹配度）比"小时数"重要；先小批量验证迁移效果再 scale 采购。
 
+## 思考题
+
+1. **语义标注值多少？**（综合 Day33 / Day32）Astra 的观测有 DOM 树这种免费语义标注，Helix 只有纯像素 + 本体感知——两条线都停在"一半多一点"（72.6% vs 56%），但难度结构不同。设计对照实验：如果给 Helix 加上预先建好的房间语义地图 / 物体 6D 位姿（数字身体的"免费午餐"），56% 能涨多少？反过来，把 Astra 的 DOM 拿掉只给纯像素，72.6% 会掉多少？这个双向消融能量化"语义标注"这个结构差异到底值多少个点——也是给 Day31 Atlas 这类"造世界供料"路线的定价问题。
+2. **从 56% 到 90% 的算术**（综合 Day33 / Day12 / Day28）：Figure 只给了 loss 的 scaling law，没给 $L\mapsto p_{\mathrm{success}}$ 的映射。设单步错误率 $\epsilon$ ， $T$ 步任务成功率约 $(1-\epsilon)^T$ 。若 Index 数据翻倍把 $\epsilon$ 降低 10%，铺床（67%）和收拾玩具（40%）的成功率分别涨多少？反推两类任务的"有效步数" $T$ ——收拾玩具的 $T$ 为什么更大（13–15 个玩具全部进篮子 = 串行长程）？这条算术能判断"100x 数据"到底是可靠性方案还是成本黑洞。
+3. **安全分级会不会成为新的藏数字的地方**（综合 Day33 / Day29 / Day32）：Figure 把 safety intervention 直接记为失败——诚实。但 Day32 的 Astra 把能力按身份分级（Daybreak），Day29 的安全栈是同一模型加装证书。设想同一台 Figure 03：房主身份给全能力、访客身份给受限能力——这时报的 56% 还有意义吗？ $\pi_{\mathrm{deploy}}(a\mid o,\mathrm{identity})$ 让"成功率"变成身份的条件分布。post-training 的 agent 评测如果也引入能力分级，评测合同（Day28）要怎么改写才能不被分级口径稀释？
+
 ## 疑问
 
 - 没看懂的 1 个问题：Index 预训练的**目标函数**到底是什么？官方 scaling law 只提了 action-prediction loss，但人类视频没有机器人 action label——"action-prediction"的监督信号从哪来（hand pose 估计？latent action？视频生成辅助目标？）？这是整个路线的技术黑箱，官方没给。
