@@ -93,6 +93,12 @@ $$\ell \xrightarrow{\;\pi^H\;} s \xrightarrow{\;g_\psi\;} \hat{I}_{\text{goal}} 
 6. **评测设计抄作业**：UR5e 折衣的对照组是"专家人类同样 zero-shot"——人类基线 + 零数据声明，这是 Day28 评测合同精神的好实例。post-training 的 agent 评测可以抄：**人类专家在同样信息下的表现**是最诚实的基线之一。
 7. **世界模型的两种职业**：Day27 Cosmos（造数据）vs π0.7 $g_\psi$ （产 subgoal 做在线 steering）。post-training 里"世界模型/模拟器"也有两份工作：离线生成训练数据 vs 在线做规划/验证——立项时先想清楚雇它干哪份。
 
+## 思考题
+
+1. **任务原子的审计协议**（综合 Day34 / Day28）：官方承认"难以确切判定哪些任务真正 unseen"，The Decoder 质疑 DROID 里有结构接近的 air fryer 视频。如果任务空间的原子是"物体×技能"的笛卡尔积，那么"组合泛化" = 已见原子的新排列。设计审计实验：先枚举训练数据的技能原子集合，度量 $\ell_{\text{new}}$ 与原子集合的最小编辑距离，看成功率是否随"原子距离"单调下降——如果下降，组合泛化是真的；如果不下降，"emergent"只是修辞。这是给 Day28 评测合同补一个"泛化声明的审计协议"，post-training 做 benchmark 声明 zero-shot 时照抄。
+2. **Steering 的双刃剑**（综合 Day34 / Day29 / Day32）：π0.7 的可转向性 = 条件变量可替换（coaching 换掉 $s$ 的来源，行为跟着变）。但能被语言转向去做没教过的任务，也能被转向去做不该做的事——prompt 注入的物理版，报告未讨论。如果把 steering 接口开放， $\pi_{\mathrm{deploy}}(a\mid o,\mathrm{identity})$ （Day32 的分级思想）怎么做？Figure 把 safety intervention 记为失败（Day33），PI 把 mistake 标签当训练信号——当"犯过的错"变成可被 steer 的条件时，安全评测要怎么设计才不被 steering 本身绕过？
+3. **通用 vs 专用的组织账**（综合 Day34 / Day30）：π0.7 追平 RL specialist（归一化吞吐 >1.0），代价是 metadata 标注（speed/quality/mistake）+ 14B 世界模型 + coaching 数据。算一笔账：训 $N$ 个 RL specialist 的总成本（每个都要 sim + RL infra）vs 训 1 个 π0.7 + 持续的 steering 标注成本——交叉点在哪？post-training 的直接映射："一个大模型 + prompt/adapter" vs "多任务多模型"的争论，机器人侧已经用自家数据投了一票给前者，但票价是标注——你 org 里标注预算和算力预算的比例，决定了你该抄哪条路线。
+
 ## 疑问
 
 - 没看懂的 1 个问题：subgoal 图像 $g_\psi$ 对最终成功率的**独立贡献**是多少？报告有三件套系统，但没提取到"去掉世界模型只留语言 subtask"的消融——不知道 14B 图像生成是雪中送炭还是锦上添花。
