@@ -1,5 +1,7 @@
 # Day 11 NOTES — Paper2 机械负载 → GPU 热/功耗
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-11-paper2-mech-load/index.html
+
 Date: 2026-08-11 08:22 PDT (manual today run 2026-08-15,补)  
 Status: done (CPU gloo 验证逻辑，待 H100 NCCL 真机验证 thermal + RAPL + max_memory_allocated)  
 Lab: `rl-infra/day-11-paper2-mech-load/`  
@@ -79,3 +81,6 @@ SSM 公式见 README.md，CPU 已跑联动。
 - 没编 H100 数，所有 CUDA/Tj 真传感器读数标 **待H100 NCCL**
 - EWMA 55kW RMSE 是 CPU 缩放 IT load 300-500kW 带 burst 随机，非数据中心真机实测，提醒需 Paper2 真 log 回放
 - Tj 82.49°C 是 CPU 热容模型估，非 nvidia-smi 真值，需 H100 长 CoT 5000 tok rollout 实跑温升
+
+<!-- viz:stats: 55.129kW EWMA RMSE | 57.867kW P_mech 均值 | 82.49°C Tj_max | 0.833% throttle 率 -->
+<!-- viz:flow: 建模两节点 Tj/T_hs → 信号 P_gpu + T_amb + fan → 决策提前 5min 加 fan/降 batch → 验证 \$/thermal_waste -->

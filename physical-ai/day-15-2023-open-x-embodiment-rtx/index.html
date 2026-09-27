@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -79,23 +114,15 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：多源混合行为克隆 + 共享动作接口的迁移</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
-<blockquote>
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-15-2023-open-x-embodiment-rtx/index.html</p>
 <p>Open X-Embodiment Collaboration（Google DeepMind 牵头，21 institutions），arXiv 2310.08864（2023-10-13，ICRA 2024）。机器人学的"ImageNet 时刻"宣言：把 34 个实验室的 60 个数据集、22 种机器人、100 万+ 轨迹统一成 RLDS schema，用一个 7 维末端执行器动作接口做粗对齐，训练跨机器人通用策略 RT-X。</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Open X-Embodiment: Robotic Learning Datasets and RT-X Models</li>
-<li>Authors / Org: Open X-Embodiment Collaboration（Quan Vuong, Brian Ichter, Chelsea Finn, Sergey Levine 等 290+ 作者）/ Google DeepMind 牵头 + 21 institutions（Stanford、UC Berkeley、CMU、Meta AI、TRI、NVIDIA、KAIST、东京大学、清华、上海交大等）</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/2310.08864 ；项目页 https://robotics-transformer-x.github.io/ ；代码/数据 https://github.com/google-deepmind/open_x_embodiment</li>
-<li>Date read: 2026-09-06</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">open-x-embodiment</span><span class="tag">rtx</span><span class="tag">cross-embodiment</span><span class="tag">robot-data</span><span class="tag">data-mixture</span><span class="tag">behavior-cloning</span><span class="tag">emergent-skills</span><span class="tag">rlds</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-15-2023-open-x-embodiment-rtx</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-15-2023-open-x-embodiment-rtx</li>
-</ul>
+<dl class="meta-grid"><dt>Title</dt><dd>Open X-Embodiment: Robotic Learning Datasets and RT-X Models</dd><dt>Authors / Org</dt><dd>Open X-Embodiment Collaboration（Quan Vuong, Brian Ichter, Chelsea Finn, Sergey Levine 等 290+ 作者）/ Google DeepMind 牵头 + 21 institutions（Stanford、UC Berkeley、CMU、Meta AI、TRI、NVIDIA、KAIST、东京大学、清华、上海交大等）</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/2310.08864">https://arxiv.org/abs/2310.08864</a> ；项目页 <a href="https://robotics-transformer-x.github.io/">https://robotics-transformer-x.github.io/</a> ；代码/数据 <a href="https://github.com/google-deepmind/open_x_embodiment">https://github.com/google-deepmind/open_x_embodiment</a></dd><dt>Date read</dt><dd>2026-09-06</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-15-2023-open-x-embodiment-rtx</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-15-2023-open-x-embodiment-rtx">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-15-2023-open-x-embodiment-rtx</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">open-x-embodiment</span><span class="tag">rtx</span><span class="tag">cross-embodiment</span><span class="tag">robot-data</span><span class="tag">data-mixture</span><span class="tag">behavior-cloning</span><span class="tag">emergent-skills</span><span class="tag">rlds</span></div></dd></dl>
 </section>
-<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">55B</div><div class="l">PaLI-X</div></div></div>
 <p>OXE 把机器人学的"数据孤岛"问题变成"格式统一"问题：60 个数据集、22 种 embodiment、100 万+ 轨迹、527 个技能（160,266 个任务）全部转成 RLDS 格式，动作统一到 7 维末端执行器接口（\$x,y,z\$, roll, pitch, yaw, gripper），然后<strong>不做任何显式的 embodiment-gap 对齐机制</strong>，直接在混合数据上训练 RT-1-X（35M）与 RT-2-X（55B PaLI-X）；3600 次真实机器人评测证明跨机器人<strong>正向迁移真实存在</strong>：小数据域平均 +50%，RT-2-X 在别的机器人数据里的技能上相对 RT-2 提升约 3 倍（emergent skills 27.3% → 75.8%）。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
@@ -162,7 +189,7 @@ RT-2-X 再加一层 co-fine-tuning： $\mathcal L=\mathcal L_{VLM}(\text{web})+\
 <li>评测全是短时程桌面操作（short-horizon manipulation），长程/移动操作/全身控制不在 OXE 的验证范围内——Day14 π₀.₅的"未见家庭长程任务"正是 OXE 没覆盖的下一棒。</li>
 </ul>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">去 Bridge 掉到</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">42.8%</div></div><div class="barrow"><div class="barlabel">无历史帧掉到</div><div class="bartrack"><div class="barfill" style="width:33.9%"></div></div><div class="barval">14.5%</div></div><div class="barrow"><div class="barlabel">无 web 预训练从零训</div><div class="bartrack"><div class="barfill" style="width:3.0%"></div></div><div class="barval">0%</div></div></div>
 <ol>
 <li><strong>Motivation</strong>: 每个实验室各自为政训 per-robot 策略，数据孤岛；NLP/CV 靠 web-scale 数据 consolidation 出通用底座，机器人没有 web 可爬。问题：22 种机器人、60 个数据集能不能拼成一个可用的跨机器人预训练底座？和 Physical AGI 的关系：这是"foundation model for robots"的数据地基宣言。</li>
 <li><strong>System / Method</strong>: RLDS schema 统一 60 数据集（tfrecord + 规范视角 + 统一分辨率 + 7 维末端动作 + per-dataset 归一化 + 256-bin 离散化）；RT-1-X（35M，15 帧历史，纯机器人数据混合）与 RT-2-X（55B PaLI-X，web:robot ≈ 1:1 co-fine-tuning）；推理 3–10 Hz，RT-1 本地 / RT-2 云端。</li>
@@ -190,7 +217,7 @@ RT-2-X 再加一层 co-fine-tuning： $\mathcal L=\mathcal L_{VLM}(\text{web})+\
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"We assemble a dataset from 22 different robots collected through a collaboration between 21 institutions, demonstrating 527 skills (160266 tasks)."（摘要原文）
 "RT-2-X outperforms RT-2 by ~3×, suggesting that incorporating data from other robots into the training improves the range of tasks that can be performed even by a robot that already has large amounts of data available."（V-B 原文）</p>
 </blockquote>
@@ -207,8 +234,9 @@ RT-2-X 再加一层 co-fine-tuning： $\mathcal L=\mathcal L_{VLM}(\text{web})+\
 <ul>
 <li>上一篇: day-14-2025-pi05-open-world — π₀.₅的异构 co-training 配方，其"移除式成分消融"的方法论源头正是 OXE 的去 Bridge 实验</li>
 <li>下一篇预告: day-16-2024-droid — DROID：多机构真实家庭/办公场景的 Franka 数据采集体系，看 OXE 之后社区如何继续补"数据多样性"这块短板</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-15-2023-open-x-embodiment-rtx/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">75.8%</div><div class="l">→42.8% 去掉 Bridge 数据 emergent skills</div></div><div class="stat"><div class="v">27.3%</div><div class="l">→75.8% Δ 约 3×</div></div><div class="stat"><div class="v">50%</div><div class="l">小域平均提升</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-15-2023-open-x-embodiment-rtx/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -219,6 +247,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
-  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted}
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,35 +113,75 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">术语（准确定义）</a><a href="#sec-2">公式核对（与 r2-Day03/Day14/Day15/Day16 一致性）</a><a href="#sec-3">与上一课的连接</a><a href="#sec-4">下一课预告</a><a href="#sec-5">讨论难点（供 ai chat）</a></nav>
   </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-17-framework-selection/index.html</p>
+</blockquote>
+</section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>术语（准确定义）</h2>
 <ul>
-<li><strong>FSDP（Fully Sharded Data Parallel）</strong>：PyTorch 对 ZeRO-3 的原生实现。核心机制：flat parameter（把多层参数拍平成一维大 tensor 再切分，减少all-gather 碎片）+ <code>reshard_after_forward</code>（forward 用完参数分片立即释放，backward 再 gather）。效果：显存峰值低；代价：每层 forward/backward各一次 all-gather，通信 ≈ 1.5× DDP。</li>
-<li><strong>ZeRO stage</strong>：ZeRO-1 只切 optimizer states；ZeRO-2 加切 grads；ZeRO-3 连 params 也切。FSDP 默认即 ZeRO-3 语义；DeepSpeed 允许按 stage选，config 里一行切换。</li>
-<li><strong>reshard_after_forward</strong>：FSDP 的标志性 trade——"用完即还"。对比 Megatron TP 的"常驻分片"：TP 分片一直在显存里（通信模式固定），FSDP 分片用完就扔（显存峰值低，但 gather 更频繁）。这是讨论难点的题眼。</li>
-<li><strong>3D 并行</strong>：TP（张量内切，通信密集限机内）× PP（层间切，有 bubble$ (p-1)/(m+p-1) $ ）× DP（数据并行）。Megatron-LM 是 3D 的生产样板；FSDP/DeepSpeed 本质是 DP 的显存优化版（ZeRO），不是 3D。</li>
-<li><strong>1-bit Adam / ZeRO-Offload</strong>：DeepSpeed 大礼包里的两件：前者把 optimizer 通信压缩（误差补偿），后者把 optimizer states / params卸载到 CPU/NVMe（PCIe 带宽换显存）。本课只记名字，数学在选型时知道"有这个选项"即可。</li>
-<li><strong>代码侵入（code intrusion）</strong>：从现有训练脚本切到某框架要改多少行。排序（低→高）：DeepSpeed config（一行）≈ FSDP <code>fully_shard</code> 包裹&lt; Megatron（按 3D 重组模型与脚本）。</li>
+<li><strong>FSDP（Fully Sharded Data Parallel）</strong>：PyTorch 对 ZeRO-3 的原生实现。
+  核心机制：flat parameter（把多层参数拍平成一维大 tensor 再切分，减少
+  all-gather 碎片）+ <code>reshard_after_forward</code>（forward 用完参数分片立即释放，
+  backward 再 gather）。效果：显存峰值低；代价：每层 forward/backward
+  各一次 all-gather，通信 ≈ 1.5× DDP。</li>
+<li><strong>ZeRO stage</strong>：ZeRO-1 只切 optimizer states；ZeRO-2 加切 grads；
+  ZeRO-3 连 params 也切。FSDP 默认即 ZeRO-3 语义；DeepSpeed 允许按 stage
+  选，config 里一行切换。</li>
+<li><strong>reshard_after_forward</strong>：FSDP 的标志性 trade——"用完即还"。
+  对比 Megatron TP 的"常驻分片"：TP 分片一直在显存里（通信模式固定），
+  FSDP 分片用完就扔（显存峰值低，但 gather 更频繁）。这是讨论难点的题眼。</li>
+<li><strong>3D 并行</strong>：TP（张量内切，通信密集限机内）× PP（层间切，有 bubble
+  $ (p-1)/(m+p-1) $ ）× DP（数据并行）。Megatron-LM 是 3D 的生产样板；
+  FSDP/DeepSpeed 本质是 DP 的显存优化版（ZeRO），不是 3D。</li>
+<li><strong>1-bit Adam / ZeRO-Offload</strong>：DeepSpeed 大礼包里的两件：
+  前者把 optimizer 通信压缩（误差补偿），后者把 optimizer states / params
+  卸载到 CPU/NVMe（PCIe 带宽换显存）。本课只记名字，数学在选型时知道
+  "有这个选项"即可。</li>
+<li><strong>代码侵入（code intrusion）</strong>：从现有训练脚本切到某框架要改多少行。
+  排序（低→高）：DeepSpeed config（一行）≈ FSDP <code>fully_shard</code> 包裹
+  &lt; Megatron（按 3D 重组模型与脚本）。</li>
 </ul>
 </section>
 <section class="sec" id="sec-2"><h2><span class="n">2</span>公式核对（与 r2-Day03/Day14/Day15/Day16 一致性）</h2>
 <ul>
-<li>ring all-reduce $ 2(N-1)/N \times $ payload：r2-Day03 公式，本课<code>ring_allreduce_bytes</code> 原样复用。DDP grad 通信 24.5GB（ $2\times 7/8 \times 14$ ）与 Day14 的 DDP 口径一致。</li>
-<li>FSDP 1.5× 系数：r2-Day14 的 toy（P=100, N=4）已验证ZeRO-3 通信 = 1.5 × DDP。本课 toy 用同一 P/N，450B = 1.5 × 300B，系数咬合。</li>
-<li>7B 台账 14/14/56 = 84GB：r2-Day14 的 ledger 原样引用；r2-Day16 的 AMP 台账 112GB 是另一口径（fp32 master + fp16 param），本课用 fp16 param + fp32 opt 的 12B/param 口径，README 已声明，不要与 Day16 的 16B/param 混用。</li>
-<li>Megatron 每层 4 次 all-reduce：r2-Day15 口径（forward 2 + backward 2），117.4MB/次、80 层 37.6GB/step 直接引用 Day15，不在本课重算。</li>
-<li>TP 的"只认机内带宽"：r2-Day15 的 NVLink 41.8ms vs IB 0.75s（18×），是本课讨论难点的定价依据。</li>
+<li>ring all-reduce $ 2(N-1)/N \times $ payload：r2-Day03 公式，本课
+  <code>ring_allreduce_bytes</code> 原样复用。DDP grad 通信 24.5GB
+  （ $2\times 7/8 \times 14$ ）与 Day14 的 DDP 口径一致。</li>
+<li>FSDP 1.5× 系数：r2-Day14 的 toy（P=100, N=4）已验证
+  ZeRO-3 通信 = 1.5 × DDP。本课 toy 用同一 P/N，450B = 1.5 × 300B，
+  系数咬合。</li>
+<li>7B 台账 14/14/56 = 84GB：r2-Day14 的 ledger 原样引用；
+  r2-Day16 的 AMP 台账 112GB 是另一口径（fp32 master + fp16 param），
+  本课用 fp16 param + fp32 opt 的 12B/param 口径，README 已声明，
+  不要与 Day16 的 16B/param 混用。</li>
+<li>Megatron 每层 4 次 all-reduce：r2-Day15 口径（forward 2 + backward 2），
+  117.4MB/次、80 层 37.6GB/step 直接引用 Day15，不在本课重算。</li>
+<li>TP 的"只认机内带宽"：r2-Day15 的 NVLink 41.8ms vs IB 0.75s（18×），
+  是本课讨论难点的定价依据。</li>
 </ul>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>与上一课的连接</h2>
-<p>r2-Day16 回答"每卡手里的张量还能怎么压"（精度/累积/重计算，不换并行结构）。r2-Day17 回答"压完之后跑在哪个框架上"：框架 = 并行语义 + 代码侵入形态的打包。FSDP 恰好是 Day14 ZeRO-3 的生产形态；Megatron 恰好是 Day153D 并行的生产形态；DeepSpeed 是"不想改代码也想吃 ZeRO 红利"的形态。三课的台账互相咬合：Day14 算出台账，Day16 压出台账，Day17 把台账装进框架——选型三问本质是在问"你愿意为什么付迁移成本"。</p>
+<p>r2-Day16 回答"每卡手里的张量还能怎么压"（精度/累积/重计算，不换并行结构）。
+r2-Day17 回答"压完之后跑在哪个框架上"：框架 = 并行语义 + 代码侵入形态
+的打包。FSDP 恰好是 Day14 ZeRO-3 的生产形态；Megatron 恰好是 Day15
+3D 并行的生产形态；DeepSpeed 是"不想改代码也想吃 ZeRO 红利"的形态。
+三课的台账互相咬合：Day14 算出台账，Day16 压出台账，Day17 把台账
+装进框架——选型三问本质是在问"你愿意为什么付迁移成本"。</p>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>下一课预告</h2>
-<p>r2-Day18：Checkpoint &amp; Recovery（DCP）。框架选好、训起来之后，下一个工程问题是"挂了怎么恢复"：full rank0 gather vs sharded DCPper-rank，含 optimizer + epoch + rng。r2-Day16 的 checkpoint（存 activation）和 Day18 的 checkpoint（存训练状态）名字一样、对象完全不同，注意区分。</p>
+<p>r2-Day18：Checkpoint &amp; Recovery（DCP）。框架选好、训起来之后，
+下一个工程问题是"挂了怎么恢复"：full rank0 gather vs sharded DCP
+per-rank，含 optimizer + epoch + rng。r2-Day16 的 checkpoint（存 activation）
+和 Day18 的 checkpoint（存训练状态）名字一样、对象完全不同，注意区分。</p>
 </section>
-<section class="sec sec-qa" id="sec-5"><h2><span class="n">5</span>讨论难点（供 ai chat）</h2>
-<p>FSDP 的 reshard_after_forward（用完即释放、显存峰值低、通信 1.5×）vs Megatron TP 分片常驻（通信模式固定 4 次/layer、要求机内 NVLink）：如果只有跨机 IB（无 NVLink）的 8 卡环境跑 7B，你选 FSDP 还是 TP=8？为什么？提示：用 r2-Day15 的 18× 带宽比给两种方案的通信定价。</p>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-17-framework-selection/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>讨论难点（供 ai chat）</h2>
+<p>FSDP 的 reshard_after_forward（用完即释放、显存峰值低、通信 1.5×）
+vs Megatron TP 分片常驻（通信模式固定 4 次/layer、要求机内 NVLink）：
+如果只有跨机 IB（无 NVLink）的 8 卡环境跑 7B，你选 FSDP 还是 TP=8？
+为什么？提示：用 r2-Day15 的 18× 带宽比给两种方案的通信定价。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">7B</div><div class="l">台账 14/14/56=84GB</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-17-framework-selection/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -117,6 +192,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

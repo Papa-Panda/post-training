@@ -1,5 +1,7 @@
 # Day 22 — RMA：Rapid Motor Adaptation for Legged Robots
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/index.html
+
 ## 元信息
 - Title: RMA: Rapid Motor Adaptation for Legged Robots
 - Authors / Org: Ashish Kumar, Zipeng Fu, Deepak Pathak, Jitendra Malik（UC Berkeley；RSS 2021）
@@ -206,3 +208,6 @@ $$\mathcal{L}(\varphi) = \mathbb{E}_{(h_t, z_t) \sim \mathcal{D}(\varphi)}[\|\va
 **与 Day21 的关系**：Day21 ADR 里 LSTM 的 hidden state $m_t$ 干的正是这件事——inference 时更新的条件变量。RMA 只是把它从黑盒 hidden state 里拎出来，变成可监督、可可视化的显式向量 $\hat z_t$ 。隐式 → 显式，这就是 Day21 到 Day22 的那条线。
 
 **三条 sim2real 路线齐了**：Day20 RLPD（真机学，权重更新）、Day21 ADR（仿真做宽，隐式适应）、Day22 RMA（仿真做宽 + 显式辨识，条件变量更新）。
+
+<!-- viz:vs: RMA | 真机权重 frozen; 适应=在线更新条件变量 ẑ_t; 辨而不学 || RLPD | 真机在线更新权重; 学 -->
+<!-- viz:vs: ADR | 隐式适应; 世界做宽 || RMA | 显式辨识; DR 做宽 + 在线辨识多一层保险 -->

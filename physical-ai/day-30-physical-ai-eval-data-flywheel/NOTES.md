@@ -1,5 +1,7 @@
 # Day 30 — Physical AI Eval + Data Flywheel：评测合同 × 安全红线 × 数据飞轮（30 天收官）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-30-physical-ai-eval-data-flywheel/index.html
+
 ## 元信息
 - Title: Physical AI Eval + Data Flywheel — end-to-end synthesis（收官日，无单篇论文）
 - Authors / Org: —
@@ -101,3 +103,6 @@ $$G(\pi)=\big[\hat{p}_{\mathrm{low}}(\pi)\ge p_{\min}\big]\;\land\;\big[n_{\math
 ## 连接
 - 上一篇：Day 29 — Safe Robot Learning（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-29-safe-robot-learning）
 - 这是 30 天路线的最后一篇：30/30 收官 🎉
+
+<!-- viz:flow: gated deploy → failure → triage → recollect/resimulate → retrain → gated deploy -->
+<!-- viz:vs: Day28 评测 | 静态合同; 固定测度二项估计 || Day30 飞轮 | 转速表; 测度随部署分布漂移演进 -->

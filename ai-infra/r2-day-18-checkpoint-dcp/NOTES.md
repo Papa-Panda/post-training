@@ -1,5 +1,7 @@
 # r2-Day18 NOTES — 术语、公式核对与上一课/下一课链接
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-18-checkpoint-dcp/index.html
+
 ## 术语（准确定义）
 
 - **checkpoint（训练状态快照）**：params + optimizer states + step/epoch +
@@ -74,3 +76,6 @@ r2-Day19：复盘周。第二层（分布式 14–18 天）收官：
    缩到 ~63 s——存档从"半小时一次的慎重决定"变成"每分钟一次的常规操作"。）
 2. 如果这次训练总时长只有 2 h，同步方案还值得开 checkpoint 吗？
    若 $M=100$ h 呢？（提示：先算 $τ^*$ ，再问 $T$ 和 $τ^*$ 谁大。）
+
+<!-- viz:stats: 70GB = 7e9×10B | per-rank 1.09375GB=70/64 | 不含 grads 差 2 B/param -->
+<!-- viz:vs: checkpoint 10 B/param | params 14GB + opt 56GB; 不含 grads || model states 12 B/param | 含 grads; 84GB -->

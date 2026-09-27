@@ -1,5 +1,7 @@
 # 2026-08-09 Day 08 NOTES — Eval infra 为什么是瓶颈
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-08-eval-infra/index.html
+
 Date: 2026-08-09 19:26 PDT (America/Los_Angeles)  
 Status: done (CPU gloo 验证逻辑，待 H100 NCCL 真机验证 eval P95 / QPS / GPU 空转美元)  
 Lab: `rl-infra/day-08-eval-infra/`  
@@ -87,3 +89,6 @@ eval 瓶颈本质是同步 + 重 + 排队，把 autoscaling 里“稳定负载 v
 - 没编 H100 数，所有 GPU 数字明确标 “待H100 NCCL”
 - flaky_rate 33.3% 是本次 seed 42 的 CPU 模拟随机，不是真机实测，需大样本统计
 - tokens/sec 1.2k 占位符不沿用，本 day 不提 tokens/sec，专注 eval latency / queue / idle
+
+<!-- viz:vs: Sync eval | 训练 GPU 100% 被 block; total_wall 1.113s; bottleneck 92.85% || Async eval | rank0 不等 eval; total_wall 0.527s; 省 52% wall-clock -->
+<!-- viz:stats: 1.141s p50 | 3.249s p95 | 33.3% flaky 率 | 1.034s gpu_idle -->

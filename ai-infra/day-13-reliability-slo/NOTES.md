@@ -1,5 +1,7 @@
 # Day 13 NOTES — Reliability / SLO
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-13-reliability-slo/index.html
+
 > Connection to Prev: Day12 σ 0.045 + |cal-raw| 0.0539 → Day13 SLO1 success_rate≥0.98 5类失败桶；Day11 Tj_max 82.49°C throttle 0.83% → SLO3 power_jitter 0.15 + throttle 1%；Day08/09 p50 1.141s p95 3.249s gpu_idle 92.85% async省52% → SLO2 p95 1.2s scaled。
 
 Date: 2026-08-13 (Infra Systems / Cluster Reliability SLO)
@@ -43,3 +45,5 @@ Date: 2026-08-13 (Infra Systems / Cluster Reliability SLO)
 
 ## 代码
 - `slo_sim.py` CPU gloo ok，待H100补 max_memory_allocated + nvidia-smi + RAPL + 真vLLM失败率
+
+<!-- viz:stats: 0.955 SLO1 成功率 (阈值 0.98 未达标) | 0.385s SLO2 queue p95 通过 -->

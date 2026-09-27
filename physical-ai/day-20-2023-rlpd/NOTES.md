@@ -1,5 +1,7 @@
 # Day 20 — RLPD: Efficient Online Reinforcement Learning with Offline Data
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-20-2023-rlpd/index.html
+
 ## 元信息
 - Title: Efficient Online Reinforcement Learning with Offline Data (RLPD — Reinforcement Learning with Prior Data)
 - Authors / Org: Philip J. Ball*, Laura Smith*, Ilya Kostrikov* (共同一作), Sergey Levine / UC Berkeley
@@ -251,3 +253,5 @@ $$ |Q(s, a)| \le \|w\| \cdot \|z\| + |b| \le \|w\| \cdot C\sqrt{d} + |b| $$
 一句话：悲观初始化是给"永远不能上路的人"准备的拐杖；RLPD 发现你本来就能上路，拐杖可以扔了，护栏留下。
 
 **关联**：Day19（PPO：on-policy 端，"仿真无限便宜"时的 RL 解法；Day20 是其对偶）；本 NOTES §数学视角（SAC 基座公式、对称采样、LayerNorm+ensemble 治价值发散）。
+
+<!-- viz:vs: 离线 RL 方法 | 需专门算法吃 Bridge 数据 || RLPD | plain SAC + 配方; 50/50 对称采样; 在线超越 -->

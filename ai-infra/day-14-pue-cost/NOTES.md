@@ -1,5 +1,7 @@
 # NOTES — Day 14 Paper3 PUE → \$/useful rollout
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-14-pue-cost/index.html
+
 ## 3 个 CPU 真数（待H100 NCCL 补 max_memory_allocated + nvidia-smi Tj + RAPL）
 
 1. PUE 建模
@@ -33,3 +35,5 @@
 
 ### Connection 一句版
 Day13 SLO 没算钱导致无法决策是否扩容，Day14 用 PUE 1.2576 把 retry+idle+cooling 转成 \$/useful 0.000244，区分噪声 vs 真失败。
+
+<!-- viz:stats: 1.258 PUE 均值 | 25.76% overhead | 93.67% useful (281/300) -->

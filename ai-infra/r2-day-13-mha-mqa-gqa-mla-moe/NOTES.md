@@ -1,5 +1,7 @@
 # r2-Day13 NOTES — Attention 变种的数学与账本
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/index.html
+
 记号与 README §0 同一份，这里不重定义，只推导。
 
 ## 1. MHA → MQA → GQA：KV head 共享是一条连续谱
@@ -115,3 +117,6 @@ $$y_t = \sum_{i \in \text{topk}(\ell_t)} w_{t,i}\, E_i(h_t), \quad w_t = \text{s
 - → Day15（TP/PP/SP）：GQA 的 KV head 数决定 TP 切分的粒度；
   MLA 的吸收与 TP 切分互相作用；MoE 引入 expert parallelism（第 4 种并行维）。
 - → Day 20–21（KV Cache）：今天的账本是那两课 $32\ \text{GB}$ 手算的前置。
+
+<!-- viz:stats: 5% 预训练算量 GQA uptraining | 56.9× MLA 压缩 | 32GB KV cache 手算前置 -->
+<!-- viz:vs: MHA cache | 2×128×128=32768 维 || MLA cache | 只存 c_t^KV 512 维; 压缩 56.9× -->

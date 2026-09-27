@@ -1,5 +1,7 @@
 # Day 04 — Genie: Generative Interactive Environments (World Model)
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-04-2024-genie-world-model/index.html
+
 > Day 04 of physical-ai track, following Day03 Isaac Lab. First World Model entry.
 
 ## 元信息
@@ -99,3 +101,6 @@ World Model 是 Physical AI 的另一半，Meta MSL 要做 personal superintelli
 - Wiki: https://en.wikipedia.org/wiki/Genie_(world_model)
 - Genie 3 TC: https://techcrunch.com/2025/08/05/deepmind-thinks-genie-3-world-model-presents-stepping-stone-towards-agi/
 - Engadget Genie 2: https://www.engadget.com/ai/google-deepminds-genie-2-can-generate-interactive-3d-worlds-200708207.html
+
+<!-- viz:vs: Isaac Lab | 准确但贵、需建模; physics-correct filter || Genie | 便宜可无限生成; 物理一致性弱; 生成 diverse edge cases -->
+<!-- viz:stats: 记忆 1s → 10-20s → 1min | 720p 24fps -->

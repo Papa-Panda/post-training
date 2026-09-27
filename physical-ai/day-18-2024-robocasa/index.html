@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -79,21 +114,13 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：MimicGen 的 SE(3) 搬运 × 合成数据的支撑扩张 × sim2real 的 gap 分解</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充（2026-09-09）</a></nav>
   </details>
   <section class="sec" id="sec-0">
-<blockquote>
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-18-2024-robocasa/index.html</p>
 <p>Soroush Nasiriany、Abhiram Maddukuri（共同一作）、Lance Zhang（共同一作）、Adeet Parikh、Aaron Lo、Abhishek Joshi、Ajay Mandlekar、Yuke Zhu / UT Austin + NVIDIA Research，arXiv 2406.02523（RSS 2024）。数据三角的"合成边"：120 个程序化厨房场景、2,500+ 物体（153 类别）、25 原子任务 + 75 个 LLM 建议的复合任务；4 个操作员用 SpaceMouse 采 1,250 条人类演示，经 MimicGen 放大到 100K+ 轨迹；BC-Transformer 多任务从 28.8%（Human-50）涨到 47.6%（Generated 全集）；真机上小数据 + 仿真 co-train 把 seen 物体成功率从 13.6% 拉到 24.4%。</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: RoboCasa: Large-Scale Simulation of Everyday Tasks for Generalist Robots</li>
-<li>Authors / Org: Soroush Nasiriany、Abhiram Maddukuri（equal）、Lance Zhang（equal）、Adeet Parikh、Aaron Lo、Abhishek Joshi、Ajay Mandlekar、Yuke Zhu / The University of Texas at Austin、NVIDIA Research</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/2406.02523 ；项目页 https://robocasa.ai （视频、文档、数据集）；官方代码 https://github.com/robocasa/robocasa （MIT，基于 robosuite/MuJoCo；资产约 5GB，需 <code>download_kitchen_assets.py</code>）</li>
-<li>Date read: 2026-09-09</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">robocasa</span><span class="tag">robot-data</span><span class="tag">simulation</span><span class="tag">sim2real</span><span class="tag">mimicgen</span><span class="tag">behavior-cloning</span><span class="tag">generative-ai</span><span class="tag">kitchen-manipulation</span><span class="tag">cross-embodiment</span><span class="tag">mobile-manipulation</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-18-2024-robocasa</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-18-2024-robocasa</li>
-</ul>
+<dl class="meta-grid"><dt>Title</dt><dd>RoboCasa: Large-Scale Simulation of Everyday Tasks for Generalist Robots</dd><dt>Authors / Org</dt><dd>Soroush Nasiriany、Abhiram Maddukuri（equal）、Lance Zhang（equal）、Adeet Parikh、Aaron Lo、Abhishek Joshi、Ajay Mandlekar、Yuke Zhu / The University of Texas at Austin、NVIDIA Research</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/2406.02523">https://arxiv.org/abs/2406.02523</a> ；项目页 <a href="https://robocasa.ai">https://robocasa.ai</a> （视频、文档、数据集）；官方代码 <a href="https://github.com/robocasa/robocasa">https://github.com/robocasa/robocasa</a> （MIT，基于 robosuite/MuJoCo；资产约 5GB，需 <code>download_kitchen_assets.py</code>）</dd><dt>Date read</dt><dd>2026-09-09</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-18-2024-robocasa</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-18-2024-robocasa">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-18-2024-robocasa</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">robocasa</span><span class="tag">robot-data</span><span class="tag">simulation</span><span class="tag">sim2real</span><span class="tag">mimicgen</span><span class="tag">behavior-cloning</span><span class="tag">generative-ai</span><span class="tag">kitchen-manipulation</span><span class="tag">cross-embodiment</span><span class="tag">mobile-manipulation</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>RoboCasa 把"机器人数据规模化"的第四条路做成了可复现的配方：仿真不是拿来做 RL 训练的，而是拿来做<strong>数据工厂</strong>的——用程序化厨房（layout × style 组合出 120 场景）、生成式 AI 三件套（text-to-3D 物体、text-to-image 纹理、LLM 建议任务）和 MimicGen 的 object-centric 轨迹搬运，把 4 个人采的 1,250 条演示放大 80 倍成 100K+ 轨迹；证明三件事：合成数据在原子任务上打出清晰的 scaling 曲线（28.8% → 47.6%）、原子技能预训练能撬动复合任务的微调（5 个任务里 4 个从零到非零）、仿真数据 co-train 能实质提升真机部署（seen +79% 相对增益）——sim2real 在这里不是 zero-shot 的信仰，而是 co-training 的工程。</p>
@@ -178,7 +205,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>LLM 任务设计的生态统计假设没被验证</strong>："LLM 捕捉人类行为的生态统计"是个漂亮的直觉，但 75 个复合任务里"偶尔有不合直觉的任务逻辑"（论文自认）——任务质量的上界还是人工。</li>
 </ul>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">复合任务微调后最好</div><div class="bartrack"><div class="barfill" style="width:15.2%"></div></div><div class="barval">12%</div></div><div class="barrow"><div class="barlabel">真机 seen 物体</div><div class="bartrack"><div class="barfill" style="width:17.2%"></div></div><div class="barval">13.6%</div></div><div class="barrow"><div class="barlabel">（相对</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">79%</div></div><div class="barrow"><div class="barlabel">unseen</div><div class="bartrack"><div class="barfill" style="width:3.3%"></div></div><div class="barval">2.6%</div></div></div>
 <ol>
 <li><strong>Motivation</strong>: CV/NLP 靠大数据 + 大模型拿到泛化，机器人学想抄但真实数据采集贵到不现实（Day16 DROID：52 栋建筑、50 个采集员）。问题：能不能用<strong>仿真当数据工厂</strong>，把"场景 × 任务 × 数据"三件事一起规模化？和 Physical AGI 的关系：这是数据飞轮里"合成数据"那一环的奠基配方——如果仿真数据能用，机器人学的 scaling 定律就有了燃料。</li>
 <li><strong>System / Method</strong>: robosuite（MuJoCo）后端 + 120 程序化厨房（layout × style）+ 2,500+ 物体（text-to-3D 为主）+ text-to-image 纹理 + LLM 建议的 75 复合任务；100 任务 = 25 原子（8 大 sensorimotor 技能）+ 75 复合；跨 embodiment（移动单臂、humanoid、带臂四足）；Omni-Frankie（Franka Panda + Omron 基座）为主力评测身体。</li>
@@ -206,7 +233,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"We advocate using realistic physical simulation as a means to scale environments, tasks, and datasets for robot learning methods."（abstract 原文——整篇论文一句话的 thesis）</p>
 </blockquote>
 </section>
@@ -224,7 +251,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-09）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下 2 组问答来自 2026-09-09 当晚用户对 Day18 RoboCasa 卡片（MimicGen 搬运公式）的追问，原样归档。</p>
 </blockquote>
 <h3>Q1：RoboCasa 是数学论文吗？</h3>
@@ -254,8 +281,10 @@ pre code{background:none;padding:0;color:inherit}
 2. <strong>插入任务（peg-in-hole）——"运动学等变 ⇒ 成功等变"这一步先破</strong>。插入的成功不只看几何相对位姿，还看接触动力学：摩擦、几毫米的对准；刚体搬运只保证了几何对应，毫米级误差在变换和重播中被放大，直接卡住。这也是论文评测里 insertion 最难的原因（见本 NOTES §核心第 5 点）。
 3. <strong>遮挡/新障碍物——第二步"搬运"的隐含假设先破</strong>。 $\Delta T$ 里只有杯子的位姿、<strong>没有障碍物</strong>；新场景多了个挡路的东西，搬过去的轨迹直接穿模——这就是论文承认的"残留碰撞"的来源。</p>
 <p><strong>顺带</strong>：移动底盘的导航任务 MimicGen 直接<strong>不支持</strong>——基座轨迹没法锚定到某个物体上，"object-centric"这个前提就不成立。</p>
-<p><strong>和之前工作的关系</strong>：三处失效正是本 NOTES §6"假设与数学没有覆盖的真实误差"第一条（ $\Delta T$ 是纯几何操作）的具体展开；铰链/插入的边界也反衬 Day12 Diffusion Policy 的路线——接触丰富的任务不靠刚体搬运，而靠扩散模型直接拟合多模态接触行为分布。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-18-2024-robocasa/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>和之前工作的关系</strong>：三处失效正是本 NOTES §6"假设与数学没有覆盖的真实误差"第一条（ $\Delta T$ 是纯几何操作）的具体展开；铰链/插入的边界也反衬 Day12 Diffusion Policy 的路线——接触丰富的任务不靠刚体搬运，而靠扩散模型直接拟合多模态接触行为分布。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">120</div><div class="l">程序化厨房 × 生成纹理</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Bridge</h4><ul><li>真实廉价臂扩张 skill 轴</li></ul></div><div class="vscol vs-b"><h4>RoboCasa</h4><ul><li>仿真扩张 scene × object 轴</li><li>MimicGen 程序化放大</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-18-2024-robocasa/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -266,6 +295,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

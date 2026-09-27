@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>r2-Day11 Triton 与 torch.compile</title>
+<title>NOTES — r2-Day11 Triton 与 torch.compile</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,17 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
-
-.sec-qa ol.qa-sub{list-style:decimal;padding-left:24px}
-.sec-qa ol.qa-sub>li{background:none;border:none;border-radius:0;padding:0 0 0 4px;
-  margin-bottom:8px;position:static}
-.sec-qa ol.qa-sub>li::before{content:none}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -76,14 +106,19 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-infra · R2-Day11</span>
-    <h1>r2-Day11 Triton 与 torch.compile</h1>
-    <p class="sub">fused kernel 的两种工程写法：手写 Triton 与 torch.compile（Dynamo 抓图 + Inductor 生成 Triton）<br>完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <h1>NOTES — r2-Day11 Triton 与 torch.compile</h1>
+    <p class="sub">fused kernel 的两种工程写法：手写 Triton 与 torch.compile（Dynamo 抓图 + Inductor 生成 Triton）完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">准确术语</a><a href="#sec-2">Connection to Prev 的实质</a><a href="#sec-3">Kernel 逐行注释（`softmax_triton_kernel.py`）</a><a href="#sec-4">Graph Break 实例（`split_graphs` 模型）</a><a href="#sec-5">何时不赚（再强调一次）</a><a href="#sec-6">与 Day12 的连接</a></nav>
+    <nav><a href="#sec-1">准确术语</a><a href="#sec-2">Connection to Prev 的实质</a><a href="#sec-3">Kernel 逐行注释（softmax_triton_kernel.py）</a><a href="#sec-4">Graph Break 实例（split_graphs 模型）</a><a href="#sec-5">何时不赚（再强调一次）</a><a href="#sec-6">与 Day12 的连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-11-triton--torch.compile/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
 <ul>
 <li><strong>Program</strong>：Triton 的执行单元，一个 program 处理一个数据 block（<code>BLOCK</code> 个元素）；对应 CUDA 的 thread 处理一个元素。<code>tl.program_id(axis=0)</code> 返回当前 program 在 grid 中的编号。</li>
 <li><strong>Grid</strong>：<code>kernel[grid](...)</code> 的 launch 配置，一维 softmax 用 <code>(triton.cdiv(n, BLOCK),)</code>；program 总数 $=\lceil N/BLOCK\rceil$ 。</li>
@@ -96,14 +131,16 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Guard / recompile</strong>：Dynamo 对 tensor 的 shape/stride 等做假设（guard），假设失效即 recompile；动态 shape 频繁变化时编译开销吃掉 fuse 收益。</li>
 <li><strong>Fusion（融合）</strong>：把多个访存遍合并成一个 kernel，消灭的是中间结果的 HBM 往返，不是 FLOPs。本课 $6N\to2N$ 与 Day10 消灭 $S=QK^T$ 落地是同一类账。</li>
 </ul>
-</section><section class="sec" id="sec-2"><h2><span class="n">2</span>Connection to Prev 的实质</h2>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Connection to Prev 的实质</h2>
 <p>Day07/08 教 thread-level："一个 thread 干一件事，同步和访存自己排"。Day10 教 fused 的数学："中间量不落地"。Day11 教 fused 的两种工程写法：</p>
 <ol>
 <li><strong>手写 fused（Triton）</strong>：你声明 block 级数据流，编译器排 warp。<code>softmax_triton_kernel.py</code> 的 5 行核心（program_id → offs/mask → load → 片上 max/exp/sum → store）就是 Day10 online softmax"单行版本"的工程形态——区别只是 softmax 行内不需要跨 block 的 running $(m,\ell)$ 。</li>
 <li><strong>自动 fused（torch.compile）</strong>：你不写 kernel，Dynamo 抓图、Inductor 生成 Triton。代价是<strong>失控感</strong>：graph break、recompile、编译耗时都不在你手里，得用 <code>fullgraph=True</code> / profiler 拿回来。</li>
 </ol>
 <p>两条路在 Inductor 处汇合：最终跑的都是 Triton。</p>
-</section><section class="sec" id="sec-3"><h2><span class="n">3</span>Kernel 逐行注释（`softmax_triton_kernel.py`）</h2>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>Kernel 逐行注释（<code>softmax_triton_kernel.py</code>）</h2>
 <pre><code class="language-python">pid  = tl.program_id(axis=0)              # 本 program 是 grid 里第几个
 offs = pid * BLOCK + tl.arange(0, BLOCK)  # 本 block 的 N 个元素下标（编译期向量）
 mask = offs &lt; n                           # 尾部谓词：越界 lane 不访存
@@ -114,23 +151,26 @@ s = tl.sum(e, axis=0)                     # 片上归约：分母
 tl.store(out_ptr + offs, e / s, mask=mask)# 全行唯一的一次 store（片上→HBM）
 </code></pre>
 <p>对比 CUDA thread-level（Day07 vector-add）：那里每个 thread 自己算 <code>tid</code>、自己 <code>if (tid &lt; n)</code>、访存合并靠"连续 thread 访问连续地址"的人工保证；这里 program 一次声明一个 block，coalescing/pipeline 由编译器保证。</p>
-</section><section class="sec" id="sec-4"><h2><span class="n">4</span>Graph Break 实例（`split_graphs` 模型）</h2>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>Graph Break 实例（<code>split_graphs</code> 模型）</h2>
 <pre><code class="language-text">输入 trace: [matmul, add, BREAK(tensor.item() 强制同步), relu, mul,
              BREAK(data-dependent python if), softmax]
 输出 graphs: [[matmul, add], [relu, mul], [softmax]]
 </code></pre>
 <p>工程 checklist：<code>torch.compile(model, fullgraph=True)</code> 先跑通（break 会直接抛错逼你修），再用 profiler 看 Inductor 是否真把 softmax 融了——这是 Day12 的活。</p>
-</section><section class="sec" id="sec-5"><h2><span class="n">5</span>何时不赚（再强调一次）</h2>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>何时不赚（再强调一次）</h2>
 <ol>
 <li>小 $N$ ：launch 开销主导；compile 开销要分摊。</li>
 <li>大 dense GEMM：cuBLAS 已是 SASS 级，手写 Triton 不赚；Triton 甜点是内存 bound 的 fused elementwise/reduction。</li>
 <li>动态 shape + 频繁 recompile：先定 shape（<code>mark_dynamic</code> 约束或 pad）。</li>
 <li>break 碎片化：fuse 只在 graph 内，先修 break。</li>
 </ol>
-</section><section class="sec" id="sec-6"><h2><span class="n">6</span>与 Day12 的连接</h2>
-<p>Day12（Nsight）回答"怎么证明省下的 HBM 真的变成了 wall-time"：Nsight Systems 看 kernel 个数是否从 4 个变成 1 个、host 端是否有 compile/recompile gap；Nsight Compute 看 fused kernel 的 memory throughput 是否顶到 HBM 屋顶。流量模型 $6N\to2N$ 只是理论估计，profiler 才是尺子。</p>
 </section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-11-triton--torch.compile/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>与 Day12 的连接</h2>
+<p>Day12（Nsight）回答"怎么证明省下的 HBM 真的变成了 wall-time"：Nsight Systems 看 kernel 个数是否从 4 个变成 1 个、host 端是否有 compile/recompile gap；Nsight Compute 看 fused kernel 的 memory throughput 是否顶到 HBM 屋顶。流量模型 $6N\to2N$ 只是理论估计，profiler 才是尺子。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>CUDA thread</h4><ul><li>每个 thread 自己算 tid</li><li>if(tid&lt;n)</li><li>合并靠人工保证</li></ul></div><div class="vscol vs-b"><h4>Triton program</h4><ul><li>一个 program 处理一个 block</li><li>mask 谓词化</li><li>编译器保证合并</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-11-triton--torch.compile/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -141,6 +181,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

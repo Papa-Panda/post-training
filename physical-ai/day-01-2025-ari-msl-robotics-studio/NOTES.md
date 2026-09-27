@@ -1,5 +1,7 @@
 # Day 01 — Meta ARI / MSL / Robotics Studio: Physical AGI via Humanoid
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/index.html
+
 > 自动生成骨架 2026-08-23，基于 PAPER_TEMPLATE.md，Physical AI 战略起点；非 paper 而是 org / acquisition 解析。
 
 ## 元信息
@@ -162,3 +164,6 @@ Meta 2026-05-01 收购 20 人 ARI 并入 MSL，不是买产品而是买 "robotic
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/NOTES.md
 
 相关讨论（Gemini 网页版，2026-09-22）：https://gemini.google.com/app/6ddbd577e468f338
+
+<!-- viz:vs: Tesla/SpaceX 路径 | 硬件驱动 || Meta 路径 | data/ecosystem 驱动 + human experience scaling; infra 复用现有 compute/data -->
+<!-- viz:flow: 定方向 humanoid 为什么是 now → ARI/MSL 分工 → Isaac Lab 建仿真锚点 → World Model 扩数据 -->

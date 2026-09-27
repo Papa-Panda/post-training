@@ -1,5 +1,7 @@
 # Day17 — BridgeData V2：廉价遥操作的 imitation data 规模化
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-17-2023-bridgedata-v2/index.html
+
 > Homer Walke、Kevin Black 等 / UC Berkeley、Stanford、Google DeepMind、CMU，arXiv 2308.12952（CoRL 2023）。数据三角的"廉价采集"边：用约 \$4,000 的公开 WidowX 250 廉价臂 + VR 遥操作，在 24 个玩具厨房/桌面环境按"每场景多任务可行"协议采集 60,096 条轨迹（50,365 条人工演示 + 9,731 条脚本化 pick-and-place），全部带事后众包语言标注；同一套数据跑通 6 种 offline 方法，钉死"技能多样性"这条覆盖轴。
 
 ## 元信息
@@ -200,3 +202,5 @@ $$=H(c \mid o)-H(c \mid a,o)$$
 **为什么要"数据量相当"**：如果直接拿"60k 多样数据 vs 10k 单一数据"比，涨点分不清是数据多了还是种类多了。把 $N$ 钉死、多样性作为唯一变量，超 2 倍的增益就只能归因于**多样性本身**——这是 Day15（OXE 没公开混合权重）和 Day16（DROID 没做等量消融）都没做干净的事。
 
 **直觉**：sweeping 并没有"教会" pick-and-place 扫地，而是 13 个技能合起来把共享视觉-运动表征的训练支撑铺得更宽，未见任务的观测落进了已见支撑里——"支撑扩张 > 单点加密"在 skill 轴上的版本。
+
+<!-- viz:stats: 0.49 RT-1 vs 0.23 LCBC | 4000美元 廉价硬件 -->

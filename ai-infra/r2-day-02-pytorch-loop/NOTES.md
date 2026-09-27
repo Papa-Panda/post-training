@@ -1,5 +1,7 @@
 # NOTES - r2-Day02 PyTorch 基础
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-02-pytorch-loop/index.html
+
 CPU proxy，待H100 NCCL验证
 
 - single-GPU time: 2.31s CPU proxy (mnist 1 epoch batch32)
@@ -12,3 +14,6 @@ CPU proxy，待H100 NCCL验证
 - torch.cuda.max_memory_allocated 真数
 - torch.profiler CUDA trace AllGather 60% vs ReduceScatter 40%
 - NCCL BW topo -m NVLink 900GB/s vs PCIe 64GB/s
+
+<!-- viz:stats: 900GB/s NVLink | 64GB/s PCIe -->
+<!-- viz:stats: 35% comm 开销 CPU proxy -->

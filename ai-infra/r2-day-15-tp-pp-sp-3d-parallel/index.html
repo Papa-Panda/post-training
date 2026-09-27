@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
-  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted}
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,39 +113,64 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">术语（准确定义）</a><a href="#sec-2">公式核对（与 r2-Day03/Day14 一致性）</a><a href="#sec-3">DeepSpeed Ulysses vs Megatron SP（对比，鸟瞰级）</a><a href="#sec-4">与上一课的连接</a><a href="#sec-5">下一课预告</a></nav>
   </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/index.html</p>
+</blockquote>
+</section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>术语（准确定义）</h2>
 <ul>
-<li><strong>Tensor Parallelism (TP)</strong>：把单个 GEMM 的权重矩阵按输入/输出维度切分到 $T$ 个 rank。列并行（split 输出维）后接行并行（split 输入维），中间只需要一次同步：列并行的输出是分片的，直接喂给行并行做局部乘加，最后一次 all-reduce 求和。</li>
-<li><strong>Pipeline Parallelism (PP)</strong>：把 $L$ 层按深度切成 $P$ 个 stage，$m$ 个 microbatch 流水通过。stage 之间只传激活（forward）与激活梯度（backward）。</li>
-<li><strong>Data Parallelism (DP)</strong>：r2-Day04 的 DDP / r2-Day14 的 ZeRO 维度——每个 <code>(t,p)</code>位置复制一份数据分片，梯度做 all-reduce（或 ZeRO 切分）。</li>
-<li><strong>Sequence Parallelism (SP)</strong>：沿序列维 $S$ 切分 activation；活在 TP 域内部，把 attention 尾部的 all-reduce 换成 reduce-scatter（forward）/ all-gather（backward）。</li>
+<li><strong>Tensor Parallelism (TP)</strong>：把单个 GEMM 的权重矩阵按输入/输出维度切分到 $T$ 个 rank。
+  列并行（split 输出维）后接行并行（split 输入维），中间只需要一次同步：
+  列并行的输出是分片的，直接喂给行并行做局部乘加，最后一次 all-reduce 求和。</li>
+<li><strong>Pipeline Parallelism (PP)</strong>：把 $L$ 层按深度切成 $P$ 个 stage，
+  $m$ 个 microbatch 流水通过。stage 之间只传激活（forward）与激活梯度（backward）。</li>
+<li><strong>Data Parallelism (DP)</strong>：r2-Day04 的 DDP / r2-Day14 的 ZeRO 维度——每个 <code>(t,p)</code>
+  位置复制一份数据分片，梯度做 all-reduce（或 ZeRO 切分）。</li>
+<li><strong>Sequence Parallelism (SP)</strong>：沿序列维 $S$ 切分 activation；活在 TP 域内部，
+  把 attention 尾部的 all-reduce 换成 reduce-scatter（forward）/ all-gather（backward）。</li>
 <li><strong>Microbatch</strong>：一个全局 batch 切成 $m$ 份，逐份过 pipeline； $m \gg P$ 是 PP 的生命线。</li>
 <li><strong>Bubble</strong>：pipeline 排空/注水阶段的空闲，占比 $(p-1)/(m+p-1)$ （GPipe 调度）。</li>
-<li><strong>1F1B (one-forward-one-backward)</strong>：每个 stage 交替做 1 个 forward 和 1 个 backward，在飞的 microbatch 数从 $m$ 降到约 $p$ ，激活内存大减，bubble 公式不变。</li>
-<li><strong>Interleaved 1F1B</strong>：每个 rank 再虚拟切成 $v$ 个小 stage，bubble 近似降为$(p-1)/(m\cdot v + p - 1)$ ，代价是点对点通信次数 $\times v$ 。</li>
+<li><strong>1F1B (one-forward-one-backward)</strong>：每个 stage 交替做 1 个 forward 和 1 个 backward，
+  在飞的 microbatch 数从 $m$ 降到约 $p$ ，激活内存大减，bubble 公式不变。</li>
+<li><strong>Interleaved 1F1B</strong>：每个 rank 再虚拟切成 $v$ 个小 stage，bubble 近似降为
+  $(p-1)/(m\cdot v + p - 1)$ ，代价是点对点通信次数 $\times v$ 。</li>
 </ul>
 </section>
 <section class="sec" id="sec-2"><h2><span class="n">2</span>公式核对（与 r2-Day03/Day14 一致性）</h2>
 <ul>
-<li>ring all-reduce 单 rank 流量 $= 2(N-1)/N\cdot M$ ：与 r2-Day03 的$2(N-1)/N\times$ 数据量同一公式，本课代码 <code>allreduce_ring_bytes</code> 直接复用该口径。</li>
-<li>TP 每层每 microbatch 4 次 all-reduce：forward（attn out-proj、mlp fc2）2 次 + backward 2 次。注意 backward 的 reduce 对象是输入梯度 <code>dX</code> ，payload 同样是 $b\cdot S\cdot H$ 个元素——不是梯度 <code>dW</code> （ <code>dW</code> 是局部算好、只在 DP 维同步的）。</li>
-<li>PP 点对点量：每边界每 microbatch forward 传激活 $b\cdot S\cdot H$ 元素 + backward 传梯度$b\cdot S\cdot H$ 元素，共 $2\cdot b\cdot S\cdot H\cdot 2\ \text{B}$ 。</li>
+<li>ring all-reduce 单 rank 流量 $= 2(N-1)/N\cdot M$ ：与 r2-Day03 的
+  $2(N-1)/N\times$ 数据量同一公式，本课代码 <code>allreduce_ring_bytes</code> 直接复用该口径。</li>
+<li>TP 每层每 microbatch 4 次 all-reduce：forward（attn out-proj、mlp fc2）
+  2 次 + backward 2 次。注意 backward 的 reduce 对象是输入梯度 <code>dX</code> ，
+  payload 同样是 $b\cdot S\cdot H$ 个元素——不是梯度 <code>dW</code> （ <code>dW</code> 是局部算好、
+  只在 DP 维同步的）。</li>
+<li>PP 点对点量：每边界每 microbatch forward 传激活 $b\cdot S\cdot H$ 元素 + backward 传梯度
+  $b\cdot S\cdot H$ 元素，共 $2\cdot b\cdot S\cdot H\cdot 2\ \text{B}$ 。</li>
 <li>DP 维的梯度同步量走 r2-Day14 的 ZeRO 口径（本课不重复）。</li>
 </ul>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>DeepSpeed Ulysses vs Megatron SP（对比，鸟瞰级）</h2>
 <ul>
 <li>Megatron SP：沿 $S$ 切，attention 内部用 reduce-scatter/all-gather 保持分片。</li>
-<li>Ulysses：沿 <strong>head 维</strong> 做 all-to-all，把"按 head 分片"转成"按 seq 分片"再算 attention。通信量都是 $O(b\cdot S\cdot H)$ 量级，实现位置不同；Ulysses 对 GQA/MQA 更友好（head 数少时 Megatron 式按 head 切会切不动——r2-Day13 的 GQA 在这里回响）。</li>
+<li>Ulysses：沿 <strong>head 维</strong> 做 all-to-all，把"按 head 分片"转成"按 seq 分片"再算 attention。
+  通信量都是 $O(b\cdot S\cdot H)$ 量级，实现位置不同；Ulysses 对 GQA/MQA 更友好
+  （head 数少时 Megatron 式按 head 切会切不动——r2-Day13 的 GQA 在这里回响）。</li>
 </ul>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>与上一课的连接</h2>
-<p>r2-Day14 回答"model states 太大怎么办"（切 optimizer/grad/param，通信换显存）。r2-Day15 回答"模型本体太大怎么办"（切张量/层/序列）。两者正交且常叠加：64 卡例子中 DP=2 那一维内部，完全可以再套 ZeRO-1 切 optimizer states（这就是 DeepSpeed / FSDP + TP/PP 混用的现实形态，r2-Day17 选型课展开）。</p>
+<p>r2-Day14 回答"model states 太大怎么办"（切 optimizer/grad/param，通信换显存）。
+r2-Day15 回答"模型本体太大怎么办"（切张量/层/序列）。两者正交且常叠加：
+64 卡例子中 DP=2 那一维内部，完全可以再套 ZeRO-1 切 optimizer states
+（这就是 DeepSpeed / FSDP + TP/PP 混用的现实形态，r2-Day17 选型课展开）。</p>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>下一课预告</h2>
-<p>r2-Day16：混合精度（BF16 为什么指数位 8 位、尾数 7 位就够）/ 梯度累积 /Activation Checkpointing——用<strong>计算</strong>换显存的第三条路，与 Day14（通信换显存）、Day15（切模型换规模）形成完整的不可能三角。</p>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p>r2-Day16：混合精度（BF16 为什么指数位 8 位、尾数 7 位就够）/ 梯度累积 /
+Activation Checkpointing——用<strong>计算</strong>换显存的第三条路，
+与 Day14（通信换显存）、Day15（切模型换规模）形成完整的不可能三角。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">4</div><div class="l">次 all-reduce 每层每 microbatch TP</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">列并行切输出维</div><div class="farrow">→</div><div class="fnode">行并行切输入维</div><div class="farrow">→</div><div class="fnode">一次 all-reduce 求和</div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -121,6 +181,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

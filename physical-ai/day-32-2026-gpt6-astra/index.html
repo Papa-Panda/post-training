@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与&quot;AGI era&quot;（最新进展 2/4）</title>
+<title>Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与"AGI era"（最新进展 2/4）</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,28 +106,20 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">physical-ai · Day 32 · 最新进展</span>
-    <h1>Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与&quot;AGI era&quot;（最新进展 2/4）</h1>
+    <h1>Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与"AGI era"（最新进展 2/4）</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">疑问</a><a href="#sec-9">下一步</a><a href="#sec-10">速查表</a><a href="#sec-11">连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: GPT-6 Astra: A new generation of intelligence</li>
-<li>Authors / Org: OpenAI（2026-09-03 发布；发布前 9-01 有"Path to Astra"预热 post，来源：FourWeekMBA）</li>
-<li>Link / 官方公告：https://openai.com/index/gpt-6-astra/（官方公告页）</li>
-<li>官方 X 公告：@OpenAI（2026-09-03）："This is GPT-6 Astra. Anything you can do on a computer, Astra can do for you. Fast."（来源：aistify 转述 X 帖）</li>
-<li>独立评测参考：ARC Prize 独立结果 https://arcprize.org/blog/astra（来源：wayintoai 笔记引用；独立于 OpenAI 官方数字）</li>
-<li>安全细节：首席科学家 Jakub Pachocki 同步发布 "An Alien Mind" 博客（来源：bizscoreai 转述）</li>
-<li>Date read: 2026-09-24</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">computer-use</span><span class="tag">agentic-ai</span><span class="tag">vla</span><span class="tag">digital-agent</span><span class="tag">eval</span><span class="tag">safety</span><span class="tag">deployment-gating</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-32-2026-gpt6-astra</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-32-2026-gpt6-astra</li>
-<li>范围说明：这是路线里<strong>破例的横向对照</strong>——agentic computer-use 不在原 30 天 Physical AI 范围内（humanoid / world model / sim2real / 控制 / RL for robotics / VLA / 数据飞轮 / 安全与评测），但 Astra 是"数字世界里的具身智能"：观测=屏幕像素、动作=键鼠坐标、环境=真实操作系统。它是 VLA 路线的数字孪生对照组，也是 Day29 安全栈和 Day30 数据飞轮在数字域的最新实例。</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>GPT-6 Astra: A new generation of intelligence</dd><dt>Authors / Org</dt><dd>OpenAI（2026-09-03 发布；发布前 9-01 有"Path to Astra"预热 post，来源：FourWeekMBA）</dd><dt>Link / 官方公告</dt><dd><a href="https://openai.com/index/gpt-6-astra/（官方公告页）">https://openai.com/index/gpt-6-astra/（官方公告页）</a></dd><dt>官方 X 公告</dt><dd>@OpenAI（2026-09-03）："This is GPT-6 Astra. Anything you can do on a computer, Astra can do for you. Fast."（来源：aistify 转述 X 帖）</dd><dt>独立评测参考</dt><dd>ARC Prize 独立结果 <a href="https://arcprize.org/blog/astra（来源：wayintoai">https://arcprize.org/blog/astra（来源：wayintoai</a> 笔记引用；独立于 OpenAI 官方数字）</dd><dt>安全细节</dt><dd>首席科学家 Jakub Pachocki 同步发布 "An Alien Mind" 博客（来源：bizscoreai 转述）</dd><dt>Date read</dt><dd>2026-09-24</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-32-2026-gpt6-astra</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-32-2026-gpt6-astra">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-32-2026-gpt6-astra</a></dd><dt>范围说明</dt><dd>这是路线里<strong>破例的横向对照</strong>——agentic computer-use 不在原 30 天 Physical AI 范围内（humanoid / world model / sim2real / 控制 / RL for robotics / VLA / 数据飞轮 / 安全与评测），但 Astra 是"数字世界里的具身智能"：观测=屏幕像素、动作=键鼠坐标、环境=真实操作系统。它是 VLA 路线的数字孪生对照组，也是 Day29 安全栈和 Day30 数据飞轮在数字域的最新实例。</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">computer-use</span><span class="tag">agentic-ai</span><span class="tag">vla</span><span class="tag">digital-agent</span><span class="tag">eval</span><span class="tag">safety</span><span class="tag">deployment-gating</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的 frontier 模型：用标准键鼠/屏幕接口直接操作系统、浏览器和桌面软件完成多步工作；官方自报 OSWorld 2.0（离线子集）72.6% 对前代 GPT-5.6 Sol 的 65.7%、任务耗时约 40 分钟对 75 分钟；它是 OpenAI 历史上首个在自家 Preparedness Framework 下达到 Critical 网络安全评级的模型——评测中发现了 2 个此前未知的漏洞并已向厂商披露。发布以 gated 的 Daybreak / Daybreak Blue 项目分批 rollout，高级网络安全能力按身份分级开放。所有基准数字均为公司自报（除 ARC-AGI-3 有 ARC Prize 独立结果可对照），这是今天最硬的边界。</p>
@@ -341,8 +368,10 @@ pre code{background:none;padding:0;color:inherit}
 <ul>
 <li>上一篇：Day 31 — World Labs Atlas（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas）</li>
 <li>下一篇预告：Day 33 — Figure AI（Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包；2026-09-25）</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">92.7%</div><div class="l">ScreenSpot-Pro</div></div><div class="stat"><div class="v">1.9</div><div class="l">倍 Mind2Web 比 GPT-5.6 快</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>π₀</h4><ul><li>50 步连续动作 chunk</li><li>毫秒级控制</li></ul></div><div class="vscol vs-b"><h4>Astra</h4><ul><li>分钟级任务几百步 UI 动作</li><li>控制频率差 3–4 数量级</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -353,6 +382,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

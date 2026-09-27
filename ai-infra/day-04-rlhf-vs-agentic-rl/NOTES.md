@@ -1,5 +1,7 @@
 # Day 4 - Done (补)
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-04-rlhf-vs-agentic-rl/index.html
+
 Date: 2026-08-05 08:49 PDT (补 08-06)
 Status: done (离线笔记，待真机验证不影响 infra 链路)
 
@@ -19,3 +21,6 @@ Status: done (离线笔记，待真机验证不影响 infra 链路)
 - 相对打分 = OAS 校准压方差
 
 Code: 笔记为主，无需跑通，概念对齐即可。
+
+<!-- viz:vs: RLHF/PPO | 先训 RM 再 PPO 优化; 重、稳定难 || GRPO | 组内 rollout 相对打分; 省 critic; 适合 Agentic 长 CoT + 工具 -->
+<!-- viz:stats: 500→5000 tokens 长 rollout | 80% 墙钟占比 -->

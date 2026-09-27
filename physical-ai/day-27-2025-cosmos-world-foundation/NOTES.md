@@ -1,5 +1,7 @@
 # Day 27 — Cosmos：世界基础模型平台（World Foundation Models for Physical AI）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-27-2025-cosmos-world-foundation/index.html
+
 ## 元信息
 - Title: Cosmos World Foundation Model Platform for Physical AI
 - Authors / Org: NVIDIA（Niket Agarwal, Arslan Ali, …, Sanja Fidler, Dieter Fox, Ming-Yu Liu 等；完整贡献名单见论文附录 A）
@@ -134,3 +136,6 @@ $x_{\text{sim}}$ 为模拟渲染， $C_m$ 为各控制模态（seg/depth/edge/vi
 ## 连接
 - 上一篇: Day 26 — GR00T N1（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-26-2025-groot-n1）
 - 下一篇预告: Day 28 — ManiSkill / robosuite 评测基准（统一任务、资产、传感器和成功判据，建立算法与系统的可复现实验矩阵——正好回答今天第 3 问：WFM 的"usefulness"该怎么量）
+
+<!-- viz:stats: 20M 小时视频 → 约 100M clip | VLM 每 256 帧一个 caption -->
+<!-- viz:vs: Gato | 在世界里行动; 世界+动作统一 token 流 || Cosmos | 造世界; 只建模 p(x_{t+1}|x_{0:t},c_t) 不输出动作 -->

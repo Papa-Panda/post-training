@@ -1,5 +1,7 @@
 # 2026-08-06 JAX pjit - done
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-05-jax-pjit/index.html
+
 CPU run after JAX 0.11.0 installed:
 - devices=[CpuDevice(id=0)] count=1, mesh axis='data' size=1
 - pjit A(8,4) @ B(4,2) -> C(8,2), C[0]=[4. 4.] ok
@@ -8,3 +10,5 @@ CPU run after JAX 0.11.0 installed:
 fallback 时模拟：shard 0 (4,4)->(4,2) shard 1 (4,4)->(4,2)
 
 Conclusion: JAX pjit 逻辑通了，真分片待多卡 H100。
+
+<!-- viz:flow: 定义 mesh axis=data → pjit 声明 P(data,None) 行切 → 编译器自动插入通信 -->

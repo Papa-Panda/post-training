@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>r2-Day07 CUDA 编程模型与访存映射</title>
+<title>NOTES — r2-Day07 CUDA 编程模型与访存映射</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -76,9 +111,14 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">准确术语</a><a href="#sec-2">核心心智模型：SM、block、warp、thread</a><a href="#sec-3">SM 与 block 不是一一对应</a><a href="#sec-4">Warp 是 32 个 threads 的执行组</a><a href="#sec-5">可手算小例子 1：launch geometry</a><a href="#sec-6">可手算小例子 2：一个 warp 访问几个 32B segments</a><a href="#sec-7">对齐连续</a><a href="#sec-8">错位一个 float</a><a href="#sec-9">stride = 2</a><a href="#sec-10">可手算小例子 3：padding 消掉 32-way bank conflict</a><a href="#sec-11">示例代码如何对应每一步</a><a href="#sec-12">讨论难点</a><a href="#sec-13">验证状态</a><a href="#sec-14">原始 / 官方来源</a></nav>
+    <nav><a href="#sec-1">准确术语</a><a href="#sec-2">核心心智模型：SM、block、warp、thread</a><a href="#sec-3">可手算小例子 1：launch geometry</a><a href="#sec-4">可手算小例子 2：一个 warp 访问几个 32B segments</a><a href="#sec-5">可手算小例子 3：padding 消掉 32-way bank conflict</a><a href="#sec-6">示例代码如何对应每一步</a><a href="#sec-7">讨论难点</a><a href="#sec-8">验证状态</a><a href="#sec-9">原始 / 官方来源</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-07-cuda-programming-model/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
 <ul>
 <li><strong>Grid</strong>：一次 kernel launch 创建的全部 thread blocks。</li>
 <li><strong>Thread block</strong>：可在同一 SM 上驻留并通过 shared memory / block barrier 协作的一组线程；不同 blocks 不能依赖普通 <code>__syncthreads()</code> 互相同步。</li>
@@ -89,70 +129,91 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-2"><h2><span class="n">2</span>核心心智模型：SM、block、warp、thread</h2>
-</section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>SM 与 block 不是一一对应</h2>
+<h3>SM 与 block 不是一一对应</h3>
 <ul>
 <li>一个 block 只能驻留在一个 SM，不能跨 SM 拆分，也不会执行到一半迁移到另一个 SM；</li>
 <li>一个 SM 通常可以同时驻留多个 blocks，并在这些 blocks 的 ready warps 之间调度；</li>
 <li>放不下的 blocks 等待已有 blocks 完成，形成一轮一轮的 execution waves；</li>
 <li>每 SM 的 resident block 数由 thread、warp、register、shared-memory 和硬件 block 上限共同决定。</li>
 </ul>
-$$B_{resident}=\min\left(B_{hw},\left\lfloor\frac{T_{SM}}{T_{block}}\right\rfloor,\left\lfloor\frac{W_{SM}}{W_{block}}\right\rfloor,\left\lfloor\frac{R_{SM}}{R_{block}}\right\rfloor,\left\lfloor\frac{S_{SM}}{S_{block}}\right\rfloor\right)$$
+<p>$$B_{resident}=\min\left(B_{hw},\left\lfloor\frac{T_{SM}}{T_{block}}\right\rfloor,\left\lfloor\frac{W_{SM}}{W_{block}}\right\rfloor,\left\lfloor\frac{R_{SM}}{R_{block}}\right\rfloor,\left\lfloor\frac{S_{SM}}{S_{block}}\right\rfloor\right)$$</p>
 <p>H100 每个 SM 最多 64 resident warps。若暂时只看 warp 上限：</p>
 <table>
-<tr><th>threads/block</th><th>warps/block</th><th>warp 上限给出的 blocks/SM 上界</th></tr>
-<tr><td>128</td><td>4</td><td>16</td></tr>
-<tr><td>256</td><td>8</td><td>8</td></tr>
-<tr><td>512</td><td>16</td><td>4</td></tr>
-<tr><td>1024</td><td>32</td><td>2</td></tr>
+<thead>
+<tr>
+<th style="text-align: right;">threads/block</th>
+<th style="text-align: right;">warps/block</th>
+<th style="text-align: right;">warp 上限给出的 blocks/SM 上界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">128</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">16</td>
+</tr>
+<tr>
+<td style="text-align: right;">256</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr>
+<td style="text-align: right;">512</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: right;">1024</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
 </table>
 <p>这是资源上界，不是实测 occupancy；registers 和 shared memory 可能让实际 resident blocks 更少。</p>
-</section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>Warp 是 32 个 threads 的执行组</h2>
+<h3>Warp 是 32 个 threads 的执行组</h3>
 <p><code>blockDim.x=256</code> 时：</p>
-<pre><code>Warp 0: thread 0–31
+<pre><code class="language-text">Warp 0: thread 0–31
 Warp 1: thread 32–63
 ...
-Warp 7: thread 224–255</code></pre>
+Warp 7: thread 224–255
+</code></pre>
 <p>所以该 block 有 $256/32=8$ warps。若 block 有 100 threads，则创建 $\lceil100/32\rceil=4$ warps，最后一个 warp 只有 4 个有效 lanes。</p>
 <p>warp 是执行调度单位，不意味着 32 个 threads 共享一个逻辑线程：每个 thread 仍有自己的 index、register state 和输入/输出地址。对于：</p>
-<pre><code>int i = blockIdx.x * blockDim.x + threadIdx.x;
-C[i] = A[i] + B[i];</code></pre>
+<pre><code class="language-cuda">int i = blockIdx.x * blockDim.x + threadIdx.x;
+C[i] = A[i] + B[i];
+</code></pre>
 <p>一个 warp 的 32 个 threads 执行同一条 add 指令，但计算 32 个不同的 <code>i</code>。</p>
 <p>若同一 warp 内偶数 lanes 走路径 A、奇数 lanes 走路径 B，硬件需要分别执行两条路径并 mask 掉另一半 lanes，这叫 warp divergence。若整个 warp 一起选择同一路径，则没有 intra-warp divergence。</p>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>可手算小例子 1：launch geometry</h2>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>可手算小例子 1：launch geometry</h2>
 <p>$N=1000$ ，每 block 256 threads：</p>
-$$B=\left\lceil\frac{N}{256}\right\rceil=\left\lceil3.90625\right\rceil=4$$
-$$T_{launched}=4\times256=1024,\qquad T_{inactive}=1024-1000=24$$
+<p>$$B=\left\lceil\frac{N}{256}\right\rceil=\left\lceil3.90625\right\rceil=4$$</p>
+<p>$$T_{launched}=4\times256=1024,\qquad T_{inactive}=1024-1000=24$$</p>
 <p>所以 <code>i = blockIdx.x * blockDim.x + threadIdx.x</code> 后必须有 <code>if (i &lt; N)</code>。CPU 模型实际得到 <code>blocks=4</code>、<code>launched_threads=1024</code>、<code>inactive_threads=24</code>。</p>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>可手算小例子 2：一个 warp 访问几个 32B segments</h2>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>可手算小例子 2：一个 warp 访问几个 32B segments</h2>
 <p>假设 base address 32-byte aligned，每 lane 读一个 FP32。</p>
-</section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>对齐连续</h2>
+<h3>对齐连续</h3>
 <p>lane $\ell$ 访问 byte address $4\ell$ ，范围 0–127 bytes，覆盖 segment bases：</p>
-$$\{0,32,64,96\}$$
+<p>$$\{0,32,64,96\}$$</p>
 <p>共 4 transactions；请求 128 B，模型搬运 128 B，效率 100%。</p>
-</section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>错位一个 float</h2>
+<h3>错位一个 float</h3>
 <p>lane $\ell$ 访问 $4(\ell+1)$ ，范围 4–128 bytes，覆盖：</p>
-$$\{0,32,64,96,128\}$$
+<p>$$\{0,32,64,96,128\}$$</p>
 <p>共 5 transactions；模型搬运 160 B，效率 $128/160=80\%$ 。</p>
-</section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>stride = 2</h2>
+<h3>stride = 2</h3>
 <p>lane $\ell$ 访问 $8\ell$ ，范围 0–248 bytes，覆盖 8 个 32B segments；每个 segment 只用一半的 float words：</p>
-$$\text{modeled efficiency}=128/(8\times32)=50\%$$
+<p>$$\text{modeled efficiency}=128/(8\times32)=50\%$$</p>
 <p>这些数字与官方 Best Practices Guide 的 CC 6.0+ 简化规则一致，但仍是理论 transaction model。真机 cache reuse 可能减轻错位访问损失。</p>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>可手算小例子 3：padding 消掉 32-way bank conflict</h2>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可手算小例子 3：padding 消掉 32-way bank conflict</h2>
 <p>shared tile 为 row-major FP32 <code>tile[32][32]</code>。warp 的 lane $\ell$ 写同一 column 时，word index 为 $32\ell+c$ ：</p>
-$$\text{bank}(\ell)=(32\ell+c)\bmod32=c$$
+<p>$$\text{bank}(\ell)=(32\ell+c)\bmod32=c$$</p>
 <p>32 lanes 命中 1 个 bank，即 32-way conflict。改成 <code>tile[32][33]</code>：</p>
-$$\text{bank}(\ell)=(33\ell+c)\bmod32=(\ell+c)\bmod32$$
+<p>$$\text{bank}(\ell)=(33\ell+c)\bmod32=(\ell+c)\bmod32$$</p>
 <p>32 lanes 命中 32 个不同 banks。CPU 模型已实际枚举 bank IDs 并测试 <code>distinct_banks: 1 -&gt; 32</code>。</p>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>示例代码如何对应每一步</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>示例代码如何对应每一步</h2>
 <ol>
 <li><code>launch_geometry()</code> 真正计算 blocks、发出线程数和 guarded tail；</li>
 <li><code>warp_float_addresses()</code> 真正构造 32 个 lane byte addresses；</li>
@@ -161,19 +222,16 @@ $$\text{bank}(\ell)=(33\ell+c)\bmod32=(\ell+c)\bmod32$$
 <li><code>vector_add.cu</code> 的 block size 真正参与 launch，stride 真正参与 array indexing；每个 case 都执行 kernel、结果校验和 CUDA-event timing，不存在只定义不用的参数。</li>
 </ol>
 </section>
-<section class="sec sec-qa" id="sec-12"><h2><span class="n">12</span>讨论难点</h2>
-<ol>
-<li>为什么把 <code>blockDim.x</code> 从 256 改成 1024，不能推出 kernel 更快？请同时解释：
+<section class="sec" id="sec-7"><h2><span class="n">7</span>讨论难点</h2>
+<p>为什么把 <code>blockDim.x</code> 从 256 改成 1024，不能推出 kernel 更快？请同时解释：</p>
 <ul>
 <li>warp 数量只是 launch 形状，active warps 还受 registers/thread 与 shared memory/block 限制；</li>
 <li>大 block 可能减少每 SM 可同时驻留的 blocks；</li>
 <li>coalescing 由一个 warp 内地址模式决定，不由 block 越大自动改善；</li>
 <li>更高 occupancy 可能隐藏延迟，但若触发 register spill 或增加同步，并不一定提高性能。</li>
 </ul>
-</li>
-</ol>
 </section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>验证状态</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>验证状态</h2>
 <ul>
 <li>已执行 <code>py_compile</code>、8 个 CPU 单元测试和纯 Python 报告。</li>
 <li>已核对 shape/index：1D kernel 的 logical index 与 stride 都参与真实地址计算，tail 有边界保护。</li>
@@ -181,14 +239,15 @@ $$\text{bank}(\ell)=(33\ell+c)\bmod32=(\ell+c)\bmod32$$
 <li><strong>execution not validated on CUDA/H100 / 待H100验证</strong>：未编译 <code>vector_add.cu</code>，未运行 CUDA kernel / Nsight；没有生成或声称任何实测 latency、bandwidth、occupancy、bank-conflict、comm% 或 MFU。</li>
 </ul>
 </section>
-<section class="sec" id="sec-14"><h2><span class="n">14</span>原始 / 官方来源</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原始 / 官方来源</h2>
 <ol>
-<li>NVIDIA CUDA Programming Guide: <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html">https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html</a></li>
-<li>NVIDIA CUDA C++ Best Practices Guide: <a href="https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html">https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html</a></li>
-<li>NVIDIA Nsight Compute Occupancy Calculator: <a href="https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#occupancy-calculator">https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#occupancy-calculator</a></li>
+<li>NVIDIA CUDA Programming Guide: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html</li>
+<li>NVIDIA CUDA C++ Best Practices Guide: https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html</li>
+<li>NVIDIA Nsight Compute Occupancy Calculator: https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#occupancy-calculator</li>
 </ol>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-07-cuda-programming-model/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">4</div><div class="l">transactions 合并访问</div></div><div class="stat"><div class="v">128B</div><div class="l">请求搬运一致</div></div><div class="stat"><div class="v">100%</div><div class="l">效率</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>合并访问</h4><ul><li>4 transactions</li><li>128B/128B</li><li>效率 100%</li></ul></div><div class="vscol vs-b"><h4>跨步访问</h4><ul><li>8 个 32B segments</li><li>每 segment 只用一半</li><li>效率减半</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-07-cuda-programming-model/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -199,6 +258,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

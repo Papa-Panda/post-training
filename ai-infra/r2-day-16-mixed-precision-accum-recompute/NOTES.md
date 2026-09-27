@@ -1,5 +1,7 @@
 # r2-Day16 NOTES — 术语、公式核对与上一课/下一课链接
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-16-mixed-precision-accum-recompute/index.html
+
 ## 术语（准确定义）
 
 - **bfloat16**：1 符号位 + 8 指数位 + 7 显式尾数位。就是 FP32 砍掉低 16 位尾数，
@@ -62,3 +64,6 @@ activation checkpoint 三件套——Day14 切 model states，Day16 压 activati
 r2-Day17：选型课。把 Day14（ZeRO）、Day15（TP/PP/SP）、Day16
 （AMP/累积/checkpoint）拼成一张决策表：什么规模用什么组合、
 通信/计算/显存三者的预算怎么分、DeepSpeed / FSDP + TP/PP 混用的现实形态。
+
+<!-- viz:stats: 7B 混合精度 16 B/param → 112GB | bf16 1+8+7 位 | k=√L 最优重算 2√L·A -->
+<!-- viz:vs: 84GB 口径 | 12 B/param; ZeRO 切分账本 || 112GB 口径 | 16 B/param; fp32 master + fp16 param; AMP 账本 -->

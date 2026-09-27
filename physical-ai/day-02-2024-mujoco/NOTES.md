@@ -1,5 +1,7 @@
 # Day 02 — MuJoCo: Multi-Joint dynamics with Contact
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/index.html
+
 > Day 02 of ai-physical track, following Day01 ARI/MSL. Focus on fast & accurate contact simulation for robotics.
 
 ## 元信息
@@ -165,3 +167,6 @@ MuJoCo 把摩擦接触从 NP-hard 的互补问题变成凸优化：soft + convex
 - GPU 路径确定性实测（第三方测试文档）：https://github.com/omnilink-tech/omnisim/blob/HEAD/docs/developer/simulator-comparison.md
 
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md
+
+<!-- viz:vs: MuJoCo | 轻、快、接触准; 渲染弱; MJX 加 GPU || Isaac Sim | GPU photoreal USD PhysX; 重、贵、需建模 -->
+<!-- viz:flow: MJCF 定义 humanoid → forward dynamics + contact → RL policy 输出 torque → reward → 并行采样百万步 -->

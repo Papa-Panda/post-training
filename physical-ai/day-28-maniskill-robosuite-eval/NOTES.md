@@ -1,5 +1,7 @@
 # Day 28 — ManiSkill3 / robosuite：可复现评测基准（Reproducible Manipulation Benchmarks）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/index.html
+
 ## 元信息
 - Title: ManiSkill3: GPU Parallelized Robotics Simulation and Rendering for Generalizable Embodied AI（主）+ robosuite: A Modular Simulation Framework and Benchmark for Robot Learning（对照）
 - Authors / Org: ManiSkill3 — Stone Tao, Fanbo Xiang, Arth Shukla, Yuzhe Qin, Xander Hinrichsen, Xiaodi Yuan, Chen Bao, Xinsong Lin, Yulin Liu, Tse-kai Chan, Yuan Gao, Xuanlin Li, Tongzhou Mu, Nan Xiao, Arnav Gurha, Viswesh Nagaswamy Rajesh, Yong Woo Choi, Yen-Ru Chen, Zhiao Huang, Roberto Calandra, Rui Chen, Shan Luo, Hao Su（UCSD / Hillbot，另有 CMU、TU Dresden、清华、King's College London）；robosuite — Yuke Zhu, Josiah Wong, Ajay Mandlekar, Roberto Martín-Martín, Abhishek Joshi, Kevin Lin, Abhiram Maddukuri, Soroush Nasiriany, Yifeng Zhu（robosuite.ai）
@@ -125,3 +127,6 @@ $J=0.5$ 时要分辨 5 个点的提升需要 $N\approx 1500$ ； $J=0.9$ 时分�
 
 ## 问答补充
 （本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）
+
+<!-- viz:stats: 128×128 单相机 | 仿真 120Hz 控制 60Hz | 显存 3.5GB vs 14.1GB -->
+<!-- viz:vs: MuJoCo CPU 栈 | 模块化标准; 无并行渲染 || ManiSkill3 | GPU 并行渲染; visual RL 几分钟 vs 几小时 -->

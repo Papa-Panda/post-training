@@ -1,5 +1,7 @@
 # Day 12 — Diffusion Policy：条件动作扩散与 receding-horizon 视觉控制
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/index.html
+
 ## 元信息
 - Title: Diffusion Policy: Visuomotor Policy Learning via Action Diffusion
 - Authors / Org: Cheng Chi, Siyuan Feng, Yilun Du, Zhenjia Xu, Eric Cousineau, Benjamin Burchfiel, Shuran Song / Columbia University, Toyota Research Institute, MIT（RSS 2023）
@@ -179,3 +181,6 @@ $T_a=1$ 最灵敏但每步都要完成去噪，延迟成本高； $T_a$ 太大�
 **符号**： $ T_o $ 观测历史帧数； $ T_p $ 预测 horizon（动作块长度）； $ T_a $ 执行 horizon（执行前 $ T_a $ 步后重观测、重规划）。
 
 **与之前工作的关系**：Day12 是"无语言→单任务"逻辑自洽的代表（对照 Day11"有语言→多任务"）；它的方法论遗产（chunk + 生成式建模 + 三 horizon 重规划）被 Day13 Octo 和 Day14 π₀.₅ 直接继承。
+
+<!-- viz:stats: 15 任务平均提升 46.9% | DDIM 100 步压到 10 步 | 0.1s 推理延迟 -->
+<!-- viz:flow: 高斯噪声 → 迭代去噪出动作序列 → 执行前 Ta 步 → 观察重规划 -->

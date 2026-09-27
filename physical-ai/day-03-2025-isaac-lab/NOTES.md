@@ -1,5 +1,7 @@
 # Day 03 — Isaac Lab / Isaac Sim：USD + PhysX + Sim2Real 基座
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-03-2025-isaac-lab/index.html
+
 > Day 03 of physical-ai track, following Day02 MuJoCo. Focus on how OpenUSD, PhysX, RTX rendering, GPU-resident tensors, and domain randomization form a scalable robot-learning stack.
 
 ## 元信息
@@ -112,3 +114,6 @@ Day03 路线图指定 Isaac Lab / Isaac Sim。它位于 Physical AI 软件栈中
 - NVIDIA Research: https://research.nvidia.com/publication/2025-09_isaac-lab-gpu-accelerated-simulation-framework-multi-modal-robot-learning
 - Code: https://github.com/isaac-sim/IsaacLab
 - Reference architecture: https://isaac-sim.github.io/IsaacLab/v2.1.0/source/refs/reference_architecture/index.html
+
+<!-- viz:stats: 8× RTX Pro 6000 | 16,384 env | DextrAH teacher 超 0.9M FPS | Franka cabinet 超 1.6M FPS -->
+<!-- viz:vs: Direct workflow | 单卡平均快 3.53% || Manager-based | reward/termination 独立配置; 牺牲吞吐换复现与 ablation -->

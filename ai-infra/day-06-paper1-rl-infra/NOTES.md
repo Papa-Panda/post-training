@@ -1,5 +1,7 @@
 # Day 6 NOTES - 2026-08-07 08:20 PDT
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-06-paper1-rl-infra/index.html
+
 Status: done (离线笔记，H100前定版)
 
 ## infra note 5行版 (待H100验证)
@@ -17,3 +19,7 @@ Status: done (离线笔记，H100前定版)
 - GPU 计时 / power smoothing 认知补齐，放 5 条后。
 
 Code: 笔记为主，无需跑通。
+
+<!-- viz:stats: coding 基线 0.42 → GRPO 后 0.47 | 提升 +5% | 200 samples 小 eval -->
+<!-- viz:bars: rollout 80% | eval 15% | 训练 5% -->
+<!-- viz:stats: 3.2美元 GPU-hour | 0.018美元 每有用 rollout | 12% 成本被失败重试占据 | 12% rollout 失败率 -->

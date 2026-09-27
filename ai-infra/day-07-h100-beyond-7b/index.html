@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 7 — Large-model FSDP Capacity Planning（审计修正版）</title>
+<title>NOTES — Large-model FSDP Capacity Planning</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,18 +106,23 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-infra · Day 7（H100 beyond 7B）</span>
-    <h1>Day 7 — Large-model FSDP Capacity Planning（审计修正版）</h1>
+    <h1>NOTES — Large-model FSDP Capacity Planning</h1>
     <p class="sub">审计修正：删掉所有未实测的吞吐 / 失败率 / 通信占比数字，只保留无依赖字节记账模型 M_resident = P(b_p+b_g+b_o+b_m)/G 这一显存下界。</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">Audit correction</a><a href="#sec-3">Retained result</a><a href="#sec-4">Removed artifacts</a></nav>
+    <nav><a href="#sec-1">Audit correction</a><a href="#sec-2">Retained result</a><a href="#sec-3">Removed artifacts</a></nav>
   </details>
-<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<p>NOTES — Large-model FSDP Capacity Planning</p></section>
-<section class="sec" id="sec-2"><h2><span class="n">2</span>Audit correction</h2>
-<p>The earlier version presented unmeasured throughput, failure-rate, communication-percentage, and fit ranges beside analytical values. It also described a script as &ldquo;ready for H100,&rdquo; although selecting <code>--model 7b/13b/70b</code> instantiated the nominal full-size proxy and the activation-checkpoint flag was unused.</p><p>Those claims were removed rather than relabeled as predictions.</p></section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>Retained result</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-h100-beyond-7b/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>Audit correction</h2>
+<p>The earlier version presented unmeasured throughput, failure-rate, communication-percentage, and fit ranges beside analytical values. It also described a script as “ready for H100,” although selecting <code>--model 7b/13b/70b</code> instantiated the nominal full-size proxy and the activation-checkpoint flag was unused.</p>
+<p>Those claims were removed rather than relabeled as predictions.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Retained result</h2>
 <p>The retained tool is a dependency-free byte-accounting model with explicit state precision:</p>
 <p>$$M_{resident}=P(b_p+b_g+b_o+b_m)/G.$$</p>
 <p>It adds only the missing parameter shards for the largest materialized wrapped unit. The output calls itself a lower bound and lists omitted memory categories.</p>
@@ -90,19 +130,21 @@ pre code{background:none;padding:0;color:inherit}
 <ul>
 <li>the default mixed-precision Adam example is 16 bytes/parameter;</li>
 <li>7B unsharded state is 112 decimal GB under that assumption;</li>
-<li>resident state scales as $1/G$;</li>
+<li>resident state scales as $1/G$ ;</li>
 <li>removing a master copy changes the accounting to 12 bytes/parameter;</li>
 <li>largest-unit materialization adds only the non-resident parameter shards;</li>
 <li>invalid parameter/rank/layer inputs fail.</li>
-</ul></section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>Removed artifacts</h2>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>Removed artifacts</h2>
 <ul>
 <li><code>README.md.tmp</code>: tracked placeholder with no technical content;</li>
 <li>local <code>vllm_rollout_stress_test.py</code>: byte-identical duplicate of the copy under <code>day-10-vllm/code/</code>;</li>
 <li>the synthetic evaluation delta and all unmeasured H100 throughput/failure distributions.</li>
 </ul>
-<p>The historical <code>infra_note_latest.md</code> now contains a deprecation notice rather than a second source of estimates.</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-h100-beyond-7b/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p>The historical <code>infra_note_latest.md</code> now contains a deprecation notice rather than a second source of estimates.</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">16</div><div class="l">bytes/parameter 混合精度 Adam</div></div><div class="stat"><div class="v">7B</div><div class="l">unsharded 112GB</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-h100-beyond-7b/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -113,6 +155,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

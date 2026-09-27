@@ -1,5 +1,7 @@
 # NOTES — r2-Day12 Profiling（Nsight 双剑）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-12-profiling/index.html
+
 ## 准确术语
 
 - **Nsight Systems（`nsys`）**：全系统性能分析。采集时间线：CUDA API 调用、kernel launch 与执行、H2D / D2H memcpy、NCCL collective、OS runtime、NVTX 标记区间。回答"时间去哪了"。tracing 开销相对低，是 profiling 的第一站。
@@ -54,3 +56,6 @@ ncu --set full -o kernel_full ./app   # 全量深挖，只打热点 kernel
 ## 与 Day13 的连接
 
 Day13（Attention 变种 MHA/MQA/GQA/MLA/MoE）："省 KV" 的 claim 最终也要过这一关——Systems 看 decode 阶段的 GPU busy%（memory-bound 的 decode 是否被 KV 搬运拖住），Compute 看 attention kernel 的 DRAM SOL% 是否随 KV 缩小而下降。profiler 是尺子，架构是被量的对象。
+
+<!-- viz:vs: Memory-bound 例 | AI=0.0833; I*=20; 卡在带宽 || Compute-bound 对照 | AI=100; SOL_flops 100% -->
+<!-- viz:stats: 96 bytes / 8 flops → AI=1/12 | 800 flops / 8 bytes → AI=100 对照组 -->

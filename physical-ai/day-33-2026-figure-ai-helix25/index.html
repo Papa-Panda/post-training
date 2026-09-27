@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,22 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">思考题</a><a href="#sec-9">疑问</a><a href="#sec-10">下一步</a><a href="#sec-11">速查表</a><a href="#sec-12">连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Helix 2.5: Zero-Shot 30-Home Generalization</li>
-<li>Authors / Org: Figure AI（创始人兼 CEO Brett Adcock）</li>
-<li>官方公告：Figure, "Helix 2.5: Zero-Shot 30-Home Generalization"（2026-09-17 发布；官方声明经 roboticfirms 转录核验——官方原文页未直接抓取，口径以多家媒体一致转述为准）</li>
-<li>Adcock X（2026-09-17）："We rented 30 homes in the Bay Area and are doing tasks without any new training"（StartupFortune 转述）</li>
-<li>配套发布 A：Figure Index 公开（2026-08-25；此前 4 个月 stealth，代号 Project Go-Big）</li>
-<li>配套发布 B：Figure × Nscale 战略合作（2026-09-03；Nscale 官方新闻稿，经 Reuters / Bloomberg 同日 corroborated——Techtimes 转述）</li>
-<li>独立报道：TechRepublic（2026-09-21）、Sebertech（2026-09-18）、Biped.News、Unite.AI、Humanoids Daily（Adcock 9-17 RoboStrategy livestream 访谈）、TechTimes、The Weighted Average（算力协议限定词分析）</li>
-<li>Date read: 2026-09-25</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">humanoid</span><span class="tag">helix</span><span class="tag">index</span><span class="tag">data-flywheel</span><span class="tag">generalization</span><span class="tag">scaling-law</span><span class="tag">compute</span><span class="tag">eval</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-33-2026-figure-ai-helix25</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-33-2026-figure-ai-helix25</li>
-<li>范围说明：Helix 2.5 是路线 VLA / humanoid 主线的最新进展；Index 数据众包与 Nscale 算力协议是 Day30 数据飞轮的产业实例，一并记录。但<strong>融资/估值/算力协议不算技术证据</strong>——本 NOTES 把公司 PR 口径与独立评测分开标注，每个关键数字标注来源。</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-33-2026-figure-ai-helix25/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Helix 2.5: Zero-Shot 30-Home Generalization</dd><dt>Authors / Org</dt><dd>Figure AI（创始人兼 CEO Brett Adcock）</dd><dt>官方公告</dt><dd>Figure, "Helix 2.5: Zero-Shot 30-Home Generalization"（2026-09-17 发布；官方声明经 roboticfirms 转录核验——官方原文页未直接抓取，口径以多家媒体一致转述为准）</dd><dt>Adcock X（2026-09-17）</dt><dd>"We rented 30 homes in the Bay Area and are doing tasks without any new training"（StartupFortune 转述）</dd><dt>配套发布 A</dt><dd>Figure Index 公开（2026-08-25；此前 4 个月 stealth，代号 Project Go-Big）</dd><dt>配套发布 B</dt><dd>Figure × Nscale 战略合作（2026-09-03；Nscale 官方新闻稿，经 Reuters / Bloomberg 同日 corroborated——Techtimes 转述）</dd><dt>独立报道</dt><dd>TechRepublic（2026-09-21）、Sebertech（2026-09-18）、Biped.News、Unite.AI、Humanoids Daily（Adcock 9-17 RoboStrategy livestream 访谈）、TechTimes、The Weighted Average（算力协议限定词分析）</dd><dt>Date read</dt><dd>2026-09-25</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-33-2026-figure-ai-helix25</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-33-2026-figure-ai-helix25">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-33-2026-figure-ai-helix25</a></dd><dt>范围说明</dt><dd>Helix 2.5 是路线 VLA / humanoid 主线的最新进展；Index 数据众包与 Nscale 算力协议是 Day30 数据飞轮的产业实例，一并记录。但<strong>融资/估值/算力协议不算技术证据</strong>——本 NOTES 把公司 PR 口径与独立评测分开标注，每个关键数字标注来源。</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">humanoid</span><span class="tag">helix</span><span class="tag">index</span><span class="tag">data-flywheel</span><span class="tag">generalization</span><span class="tag">scaling-law</span><span class="tag">compute</span><span class="tag">eval</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>Figure Helix 2.5（2026-09-17）：一台 Figure 03 人形机器人，用<strong>同一份冻结 checkpoint</strong>走进 30 间从未采集过数据的 Bay Area 陌生家庭，做三件长程家务（铺床、叠毛巾、收拾客厅玩具），420 次试验成功 237 次（56%）；同一架构、同一任务数据、从零训练的对照策略只有 9%——唯一的变量是是否经过 Index 人类行为数据预训练。<strong>全部数字是公司自报、公司自己跑的评测，没有独立复核</strong>，这是今天最硬的边界。</p>
@@ -120,7 +146,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Baseline 的 8.3% vs 9%，以及 30 间房的代表性。</strong> Humanoids Daily 指出 Figure 官方图表显示 baseline 是 35/420 ≈ 8.3%，而官方文字写 9%（Sebertech）——小口径出入，但说明"公司自报"的颗粒度。再往深：30 间全是 Bay Area 租的房子，户型、家具风格、光照的分布 $\mu$ 有多窄？一个东京/上海老破小里的机器人会怎样？这是 Day28"测度透明度"问题的活实例。</li>
 </ol>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">造机器</div><div class="farrow">→</div><div class="fnode">做自主</div><div class="farrow">→</div><div class="fnode">扩智能</div><div class="farrow">→</div><div class="fnode">扩生产</div></div><div class="viz viz-bars"><div class="barrow"><div class="barlabel">，唯一变量是有无 Index 预训练</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">56%</div></div><div class="barrow"><div class="barlabel">这个单变量对照才是公告的技术心脏，不</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">56%</div></div></div>
 <h3>1. Motivation：四章路线里的"扩智能"</h3>
 <ul>
 <li>Adcock 在 9-17 RoboStrategy livestream 提出四章路线：造机器 → 做自主 → 扩智能 → 扩生产；前两章靠工程突破，后两章靠资本加速；Figure 自认处在"扩智能"章的开头（Humanoids Daily 转述——这是他自己的定位，不是独立里程碑）。</li>
@@ -357,8 +383,10 @@ pre code{background:none;padding:0;color:inherit}
 <ul>
 <li>上一篇：Day 32 — OpenAI GPT-6 Astra（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-32-2026-gpt6-astra）</li>
 <li>下一篇预告：Day 34 — Physical Intelligence π0.7（组合泛化；2026-09-26）</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-33-2026-figure-ai-helix25/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Cosmos</h4><ul><li>造数据</li><li>世界模型生成合成数据喂策略</li></ul></div><div class="vscol vs-b"><h4>Figure Index</h4><ul><li>收数据</li><li>众包真人视频 35 分钟/秒</li></ul></div></div>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">9%</div><div class="l">同任务从零训练</div></div><div class="stat"><div class="v">8.3%</div><div class="l">图表口径</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-33-2026-figure-ai-helix25/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -369,6 +397,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

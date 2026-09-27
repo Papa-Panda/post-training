@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>r2-Day03 Topology and Collectives</title>
+<title>NOTES — r2-Day03 Topology and Collectives</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,7 +113,12 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">Corrected mental model</a><a href="#sec-2">Example with explicit assumptions</a><a href="#sec-3">Validation record</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>Corrected mental model</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>Corrected mental model</h2>
 <ul>
 <li>Separate logical payload, per-rank algorithm traffic, link-rate units, and measured effective bandwidth.</li>
 <li>For ring all-reduce, per-rank sent bytes are $2(p-1)S/p$ and the ring has $2(p-1)$ modeled steps.</li>
@@ -90,13 +130,14 @@ pre code{background:none;padding:0;color:inherit}
 </section>
 <section class="sec" id="sec-2"><h2><span class="n">2</span>Example with explicit assumptions</h2>
 <p>For $p=8$ , $S=1$ decimal GB, $B_{effective}=450$ GB/s one-way, and $\alpha=2\ \mu s$ per step:</p>
-$$V=2\frac{7}{8}(1\ \mathrm{GB})=1.75\ \mathrm{GB}.$$
-$$T\approx14(2\ \mu s)+\frac{1.75\ \mathrm{GB}}{450\ \mathrm{GB/s}}=3.917\ \mathrm{ms}.$$
+<p>$$V=2\frac{7}{8}(1\ \mathrm{GB})=1.75\ \mathrm{GB}.$$</p>
+<p>$$T\approx14(2\ \mu s)+\frac{1.75\ \mathrm{GB}}{450\ \mathrm{GB/s}}=3.917\ \mathrm{ms}.$$</p>
 <p>The 450 GB/s value is an illustrative assumption chosen to avoid treating a 900 GB/s bidirectional headline as one-way payload bandwidth. It is not a benchmark result.</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>Validation record</h2>
-<pre><code>python3 ai-infra/r2-day-03-topo-nccl/topo_demo.py
-python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v</code></pre>
+<pre><code class="language-bash">python3 ai-infra/r2-day-03-topo-nccl/topo_demo.py
+python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v
+</code></pre>
 <p>CPU tests cover formulas and semantics only. Hardware follow-up must record:</p>
 <ul>
 <li>GPU/NIC topology and affinity;</li>
@@ -105,11 +146,9 @@ python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v</
 <li>algorithm bandwidth versus bus-bandwidth reporting;</li>
 <li>overlap measured inside the actual training step.</li>
 </ul>
-<blockquote>
 <p>No H100, NCCL, NVLink, PCIe, or InfiniBand performance is claimed by this lesson.</p>
-</blockquote>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>400 Gb/s 线速</h4><ul><li>十进制换算 50 GB/s</li><li>协议开销后有效载荷更低</li></ul></div><div class="vscol vs-b"><h4>450 GB/s 示意值</h4><ul><li>为避免把 900 GB/s 双向当单向</li><li>非 benchmark</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -120,6 +159,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

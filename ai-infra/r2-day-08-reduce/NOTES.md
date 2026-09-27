@@ -1,5 +1,7 @@
 # NOTES — r2-Day08 Parallel Reduce 三连
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-08-reduce/index.html
+
 ## 准确术语
 
 - **Reduction / fold**：用 associative binary operator 把一列输入组合成一个 aggregate。整数加法满足结合律；IEEE-754 浮点加法只近似满足，因此并行树改变顺序时结果末位可变。
@@ -157,3 +159,6 @@ $$a=10^{20},\quad b=-10^{20},\quad c=3.14$$
 1. NVIDIA CUDA C++ Programming Guide: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html
 2. NVIDIA CUDA C++ Best Practices Guide: https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html
 3. NVIDIA CUB `BlockReduce`: https://nvidia.github.io/cccl/unstable/cub/api/classcub_1_1BlockReduce.html
+
+<!-- viz:flow: grid-wide 原子热点 → block-local 树归约 → warp-local lane 交换 -->
+<!-- viz:stats: 4 bytes 每 FP32 元素 | 4N bytes 理论输入 payload -->

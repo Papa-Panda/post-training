@@ -1,5 +1,7 @@
 # Day16 — DROID: in-the-wild 大规模机器人操作数据集
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-16-2024-droid/index.html
+
 > Alexander Khazatsky*, Karl Pertsch*（project co-leads）等 / Stanford、UC Berkeley 等 13 所机构，arXiv 2403.12945（2024-03-19；RSS 2024）。机器人数据论文的"田野调查"路线：不追求实验室内的轨迹条数，而追求**场景覆盖**——18 台统一 Franka 硬件栈、50 个采集员、12 个月、在 52 栋建筑的 564 个真实场景（家庭/办公室/实验室）里采集 76k 条轨迹 / 350 小时，全部 CC-BY 4.0 开源。
 
 ## 元信息
@@ -136,3 +138,6 @@ $$\mathrm{Cov}_{s\sim\{1..564\}}(B_s,\,A)\approx 0,$$
 所以 DROID 在 repo 里其实是个"复古"的选择：回到 RT-1/RT-2 时代固定硬件的老路——一次只扩张一个多样性轴：OXE 是固定场景、扩张身体多样性；DROID 反其道而行，固定身体、扩张场景多样性。
 
 **术语定义**：embodiment = 机器人身体配置（关节数、末端执行器、相机布局）；**固定硬件** = 训练数据全部来自同一种身体，动作接口天然对齐，省下跨身体对齐成本；**跨 embodiment** = 数据来自多种身体，需要统一接口（Octo 的 mask/tokenizer）或数据配方（π₀.₅ 的 heterogeneous co-training）来吃进去。
+
+<!-- viz:stats: 564 个场景 | 平均每场景约 135 条轨迹 | 算法固定 +20% 全归因于数据 -->
+<!-- viz:vs: 固定身体扩场景 | DROID; 干净动作接口 || 固定场景扩身体 | OXE; 22 种身体 -->

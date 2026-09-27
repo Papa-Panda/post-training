@@ -1,5 +1,7 @@
 # Day 07 — H2O: Learning Human-to-Humanoid Real-Time Whole-Body Teleoperation
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-07-2024-h2o-whole-body-control/index.html
+
 ## 元信息
 - Title: Learning Human-to-Humanoid Real-Time Whole-Body Teleoperation (H2O)
 - Authors / Org: Tairan He, Zhengyi Luo, Wenli Xiao, Chong Zhang, Kris Kitani, Changliu Liu, Guanya Shi / Carnegie Mellon University
@@ -82,3 +84,7 @@ Day07 路线图进入 humanoid whole-body control。H2O 的价值不只是“动
 ## 连接
 - 上一篇: Day06 — DreamerV3（latent RSSM + imagined actor-critic）
 - 下一篇预告: Day08 — Humanoid Locomotion（robust locomotion / terrain / command tracking）
+
+<!-- viz:stats: 72.5% tracking 成功率 | 67.9% 不做 sim-to-data | 53.2% reduced goal -->
+<!-- viz:flow: 人体目标 → SMPL 重定向 12 关节 → 仿真 RL → 真机 PD 控制 -->
+<!-- viz:bars: 数据 0.1% 52.0% | 1% 58.8% | 10% 61.3% | 100% 72.5% -->

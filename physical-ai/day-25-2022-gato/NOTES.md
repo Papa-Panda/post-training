@@ -1,5 +1,7 @@
 # Day 25 — Gato：一个网络，604 个任务 — generalist agent 的范式宣言
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-25-2022-gato/index.html
+
 ## 元信息
 - Title: A Generalist Agent（Gato）
 - Authors / Org: Scott Reed, Konrad Zolna, Emilio Parisotto 等（DeepMind；TMLR 2022）
@@ -112,3 +114,6 @@ $$a_t\sim p_\theta(\cdot\mid P,h_t),\qquad \hat a_t = F^{-1}(\mathrm{dequantize}
 ## 连接
 - 上一篇: day-24-sim2real-system-identification（SimOpt：分布辨识校准 sim2real）
 - 下一篇预告: day-26-2025-groot-n1（GR00T N1：humanoid foundation model，双系统 reasoning + diffusion control——看 generalist 范式在 humanoid 上的下一站）
+
+<!-- viz:stats: 604 任务混合 | 1024-bin 离散 BC -->
+<!-- viz:vs: Gato | 604 任务混合学跨域共享 || RT-2 | Gato token 哲学 + web-scale 语义迁移 -->

@@ -1,5 +1,7 @@
 # Day 26 — GR00T N1：双系统人形基础模型 + 数据金字塔
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/index.html
+
 ## 元信息
 - Title: GR00T N1: An Open Foundation Model for Generalist Humanoid Robots
 - Authors / Org: NVIDIA（App. A 完整作者列表；GTC 2025 发布）
@@ -118,3 +120,6 @@ $$\mathcal{L}_{fm}(\theta) = \mathbb{E}_{\tau}\left[\lVert V_{\theta}(\phi_t, A_
 ## 连接
 - 上一篇: Day 25 — Gato（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-25-2022-gato）
 - 下一篇预告: Day 27 — Cosmos 世界基础模型（用世界模型生成/筛选 Physical AI 训练数据——正是今天"神经轨迹"这条线的 foundation-model 版本）
+
+<!-- viz:stats: 2.2B 总参数 | VLM 1.34B | DexMimicGen 780K 轨迹 -->
+<!-- viz:vs: RT-2/OpenVLA | 离散 action token || GR00T N1 | VLM 只推理 System 2; 动作一律连续生成 -->

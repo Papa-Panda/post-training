@@ -1,5 +1,7 @@
 # NOTES — r2-Day04 DDP
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-04-ddp/index.html
+
 ## Audit corrections
 
 - Dataset generation now uses one deterministic seed on every rank before `DistributedSampler`; the previous rank-dependent seed created different datasets.
@@ -14,3 +16,5 @@
 Seven dependency-free tests cover sampler ownership and padding, averaged-gradient semantics, replicated parameter updates, ring traffic, and invalid inputs.
 
 PyTorch is not installed in the audit environment, so the two-process integration path was syntax-checked but not executed. No GPU performance claim follows from the pure-Python tests.
+
+<!-- viz:flow: 确定性 seed 生成数据 → DistributedSampler 分片 → 梯度平均同步 → rank0 写 ckpt → barrier 后 teardown -->

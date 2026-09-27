@@ -1,5 +1,7 @@
 # r2-Day14 NOTES — FSDP/ZeRO：用通信换显存
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-14-fsdp-zero/index.html
+
 > 符号约定与 README §0 一致： $P$ 参数量， $N$ rank 数，
 > $b_p/b_g/b_o$ 参数/梯度/优化器状态的每参数字节数，
 > $M$ 一次 collective 的 payload 字节数。GB 为十进制。
@@ -79,3 +81,5 @@ roadmap 的 $84\ \text{GB}$ 口径把它折掉了（ $12\ \text{B/param}$ ）。
   （flat_param、per-block wrap、prefetch 的工程实现）
 - PyTorch FSDP 文档：<https://pytorch.org/docs/stable/fsdp.html>
 - DeepSpeed ZeRO 教程：<https://www.deepspeed.ai/tutorials/zero/>
+
+<!-- viz:vs: DDP | 每 rank 存全量参数 || ZeRO/FSDP | 切分参数梯度优化器; 用通信换显存; 两种口径都装不进单张 80GB -->

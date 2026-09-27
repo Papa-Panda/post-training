@@ -1,5 +1,7 @@
 # Day 08 — Humanoid-Gym：Humanoid Locomotion 的 Zero-Shot Sim2Real
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-08-2024-humanoid-gym-locomotion/index.html
+
 ## 元信息
 - Title: Humanoid-Gym: Reinforcement Learning for Humanoid Robot with Zero-Shot Sim2Real Transfer
 - Authors / Org: Xinyang Gu, Yen-Jen Wang, Jianyu Chen / RobotEra, Shanghai Qi Zhi Institute, Tsinghua University
@@ -95,3 +97,6 @@ Humanoid-Gym 用 Isaac Gym 中的 8192 个并行环境训练 100 Hz 的 humanoid
 ## 参考链接
 - Paper: https://arxiv.org/abs/2404.05695
 - Code: https://github.com/ahucc/humanoid-gym
+
+<!-- viz:stats: policy 100 Hz | 底层 PD 1000 Hz | 8192 并行环境 | episode 2400 steps -->
+<!-- viz:flow: Isaac Gym 训练吞吐 → MuJoCo sim2sim gate 查过拟合 → 真机 zero-shot -->

@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>r2-Day12 Profiling（Nsight 双剑）</title>
+<title>NOTES — r2-Day12 Profiling（Nsight 双剑）</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,17 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
-
-.sec-qa ol.qa-sub{list-style:decimal;padding-left:24px}
-.sec-qa ol.qa-sub>li{background:none;border:none;border-radius:0;padding:0 0 0 4px;
-  margin-bottom:8px;position:static}
-.sec-qa ol.qa-sub>li::before{content:none}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -76,14 +106,19 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-infra · R2-Day12</span>
-    <h1>r2-Day12 Profiling（Nsight 双剑）</h1>
-    <p class="sub">Nsight 双剑：Systems 回答「时间去哪了」，Compute 回答「这个 kernel 为什么慢」—— SOL% 与 roofline 是检验理论的测量<br>完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <h1>NOTES — r2-Day12 Profiling（Nsight 双剑）</h1>
+    <p class="sub">Nsight 双剑：Systems 回答「时间去哪了」，Compute 回答「这个 kernel 为什么慢」—— SOL% 与 roofline 是检验理论的测量完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">准确术语</a><a href="#sec-2">Connection to Prev 的实质</a><a href="#sec-3">可手算小例子（N=8 FP32 vector add，H100 SXM）</a><a href="#sec-4">命令速查（参考，未在本环境执行）</a><a href="#sec-5">何时不赚（再强调一次）</a><a href="#sec-6">与 Day13 的连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-12-profiling/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
 <ul>
 <li><strong>Nsight Systems（<code>nsys</code>）</strong>：全系统性能分析。采集时间线：CUDA API 调用、kernel launch 与执行、H2D / D2H memcpy、NCCL collective、OS runtime、NVTX 标记区间。回答"时间去哪了"。tracing 开销相对低，是 profiling 的第一站。</li>
 <li><strong>Nsight Compute（<code>ncu</code>）</strong>：kernel 级 profiler。对<strong>单个</strong> kernel 做 kernel replay（为采 counter 把同一个 kernel 跑很多遍，每遍采一组 counter），输出 HW PM counter 的 section。回答"这个 kernel 为什么慢"。开销大、扰动 timing——它的耗时数字<strong>不能</strong>当 wall-time 用。</li>
@@ -94,19 +129,22 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Tracing overhead / perturbation（扰动）</strong>：测量改变被测对象。Systems 加 API 拦截开销，ncu replay 改变缓存状态。所以：先 Systems 后 Compute；正确性没跑通之前不 profile。</li>
 <li><strong>Arithmetic intensity / ridge point / roofline</strong>：Day06 术语复用——是<strong>模型预测</strong>，不是测量。SOL% 才是检验模型的测量。</li>
 </ul>
-</section><section class="sec" id="sec-2"><h2><span class="n">2</span>Connection to Prev 的实质</h2>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Connection to Prev 的实质</h2>
 <p>Day06 给了理论 roofline（ $I^*=20$ FLOP/byte，vector add 只能摸到带宽屋顶）；Day11 给了 fused 的流量账（ $6N\to2N$ ，theoretical estimate）。Day12 把"理论"和"测量"接起来：</p>
 <ol>
 <li><strong>Systems 验证 fuse 真生效</strong>：时间线上 kernel 个数从 4 个变成 1 个；<code>--trace=cuda,nvtx,osrt</code> 抓一次 train iter，看 GPU busy% 和 gap 归因。</li>
 <li><strong>Compute 验证 bound 判断</strong>：fused kernel 的 SpeedOfLight 应该呈现 memory-bound 形状（DRAM SOL% 高、SM SOL% 低），roofline 点落在带宽屋顶附近——如果 Day06 的模型是对的。</li>
 <li>顺序不能反：全系统问题（dataloader、NCCL、launch 开销）先用 Systems 看，ncu 只打 Systems 定位到的热点 kernel。</li>
 </ol>
-</section><section class="sec" id="sec-3"><h2><span class="n">3</span>可手算小例子（N=8 FP32 vector add，H100 SXM）</h2>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>可手算小例子（N=8 FP32 vector add，H100 SXM）</h2>
 <p>$bytes=96$ ， $flops=8$ ， $AI=1/12\approx0.0833$ ； $I^*=67/3.35=20$ → memory-bound；</p>
 <p>$$P = 0.0833\times3.35 = 0.2792\ \text{TFLOP/s},\quad SOL_{flops}=0.2792/67=0.417\%,\quad t_{min}=96/3.35\times10^{12}\approx28.7\ \text{ps}$$</p>
 <p>对照组（compute-bound）： $flops=800$ 、 $bytes=8$ → $AI=100$ ， $SOL_{flops}=100\%$ ， $SOL_{bw}=20\%$ 。两组形状都进了测试（<code>test_sol_report_vecadd_n8</code>、<code>test_compute_bound_contrast</code>）。</p>
 <p>FP16 tensor ridge： $989/3.35\approx295.2$ FLOP/byte——Tensor Core 把 ridge 推高约 15 倍，喂饱它需要多得多的片上复用（呼应 Day06 的 Tensor Core 备注）。</p>
-</section><section class="sec" id="sec-4"><h2><span class="n">4</span>命令速查（参考，未在本环境执行）</h2>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>命令速查（参考，未在本环境执行）</h2>
 <pre><code class="language-bash"># Systems：先看时间线（全系统，低开销先行）
 nsys profile -o train_iter --trace=cuda,nvtx,osrt --force-overwrite=true ./train.py
 # 用 nsys-ui 打开 train_iter.nsys-rep：看 GPU busy%、kernel 个数、gap 归因
@@ -116,7 +154,8 @@ ncu --set detailed --section SpeedOfLight --section SpeedOfLight_RooflineChart -
 ncu --set full -o kernel_full ./app   # 全量深挖，只打热点 kernel
 </code></pre>
 <p>本课 <code>nsys_ncu_recipes.py</code> 把上面三条存成了 argv 构造器 + <code>tools_present()</code> 探针；测试断言了 argv 内容与本环境双工具缺失。<strong>命令本身 execution not validated / 待H100验证。</strong></p>
-</section><section class="sec" id="sec-5"><h2><span class="n">5</span>何时不赚（再强调一次）</h2>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>何时不赚（再强调一次）</h2>
 <ol>
 <li>正确性没跑通就 profile——量的都是错的东西。</li>
 <li>只看 SOL% 不看端到端——热点 kernel 的 DRAM 100% 可能只占 step 的 1%。</li>
@@ -124,10 +163,12 @@ ncu --set full -o kernel_full ./app   # 全量深挖，只打热点 kernel
 <li>profile 一次下结论——时钟/缓存/系统噪声都会抖，看分布。</li>
 <li>拿 ncu 去查全系统问题——dataloader 慢、NCCL hang 是 Systems 的活。</li>
 </ol>
-</section><section class="sec" id="sec-6"><h2><span class="n">6</span>与 Day13 的连接</h2>
-<p>Day13（Attention 变种 MHA/MQA/GQA/MLA/MoE）："省 KV" 的 claim 最终也要过这一关——Systems 看 decode 阶段的 GPU busy%（memory-bound 的 decode 是否被 KV 搬运拖住），Compute 看 attention kernel 的 DRAM SOL% 是否随 KV 缩小而下降。profiler 是尺子，架构是被量的对象。</p>
 </section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-12-profiling/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>与 Day13 的连接</h2>
+<p>Day13（Attention 变种 MHA/MQA/GQA/MLA/MoE）："省 KV" 的 claim 最终也要过这一关——Systems 看 decode 阶段的 GPU busy%（memory-bound 的 decode 是否被 KV 搬运拖住），Compute 看 attention kernel 的 DRAM SOL% 是否随 KV 缩小而下降。profiler 是尺子，架构是被量的对象。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Memory-bound 例</h4><ul><li>AI=0.0833</li><li>I*=20</li><li>卡在带宽</li></ul></div><div class="vscol vs-b"><h4>Compute-bound 对照</h4><ul><li>AI=100</li><li>SOL_flops 100%</li></ul></div></div>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">96</div><div class="l">bytes / 8 flops → AI=1/12</div></div><div class="stat"><div class="v">800</div><div class="l">flops / 8 bytes → AI=100 对照组</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-12-profiling/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -138,6 +179,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

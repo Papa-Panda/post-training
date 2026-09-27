@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>r2-Day13 Attention 变种的数学与账本</title>
+<title>r2-Day13 NOTES — Attention 变种的数学与账本</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,17 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
-
-.sec-qa ol.qa-sub{list-style:decimal;padding-left:24px}
-.sec-qa ol.qa-sub>li{background:none;border:none;border-radius:0;padding:0 0 0 4px;
-  margin-bottom:8px;position:static}
-.sec-qa ol.qa-sub>li::before{content:none}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -76,16 +106,20 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-infra · R2-Day13</span>
-    <h1>r2-Day13 Attention 变种的数学与账本</h1>
-    <p class="sub">MHA→MQA→GQA 的 KV head 共享连续谱、MLA 低秩压缩与吸收恒等式、MoE 的 FLOPs / 参数 / 通信账本<br>完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <h1>r2-Day13 NOTES — Attention 变种的数学与账本</h1>
+    <p class="sub">MHA→MQA→GQA 的 KV head 共享连续谱、MLA 低秩压缩与吸收恒等式、MoE 的 FLOPs / 参数 / 通信账本完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">1. MHA → MQA → GQA：KV head 共享是一条连续谱</a><a href="#sec-2">2. MLA：低秩联合压缩 + 吸收恒等式</a><a href="#sec-3">3. MoE：FLOPs/token 不涨，参数涨 $E$ 倍</a><a href="#sec-4">4. 术语表（准确术语）</a><a href="#sec-5">5. 与前后课程的连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/index.html</p>
+</blockquote>
 <p>记号与 README §0 同一份，这里不重定义，只推导。</p>
-</section><section class="sec" id="sec-1"><h2><span class="n">1</span>1. MHA → MQA → GQA：KV head 共享是一条连续谱</h2>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. MHA → MQA → GQA：KV head 共享是一条连续谱</h2>
 <p>标准 MHA 的第 $l$ 层： $h_q$ 个 head，每个 head 有独立的
  $W^Q_h, W^K_h, W^V_h \in \mathbb{R}^{d_{model} \times d}$ 。
 decode 时第 $t$ 步，新 token 的 $q_{t,h}$ 要和<strong>全部</strong> $S$ 个历史 token 的
@@ -109,7 +143,8 @@ decode 时第 $t$ 步，新 token 的 $q_{t,h}$ 要和<strong>全部</strong> $S
 <li>把已有的 MHA checkpoint 做 mean-pool（组内 K/V 投影矩阵取平均）再 uptraining
   （约 5% 预训练算量），得到的 GQA 质量接近 MHA、速度接近 MQA。</li>
 </ul>
-</section><section class="sec" id="sec-2"><h2><span class="n">2</span>2. MLA：低秩联合压缩 + 吸收恒等式</h2>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. MLA：低秩联合压缩 + 吸收恒等式</h2>
 <p>DeepSeek-V2（arXiv:2405.04434）提出的 Multi-Head Latent Attention。
 核心假设：<strong>所有 head 的 K、V 联合起来是低秩的</strong>，可以先压缩再重建。</p>
 <p>对第 $t$ 个 token（ $h_t \in \mathbb{R}^{1 \times d_{model}}$ 为层输入）：</p>
@@ -135,7 +170,8 @@ decode 时第 $t$ 步，新 token 的 $q_{t,h}$ 要和<strong>全部</strong> $S
 <p><strong>与 TP 的耦合</strong>（Day15 预告）：吸收后 K 的 head 结构不再显式存在，
 朴素的"按 head 切 TP"会破坏吸收恒等式；MLA 推理的并行切分需要与标准 MHA
 不同的处理。这是"架构决定并行策略"（ai_daily.csv 原话）的实例。</p>
-</section><section class="sec" id="sec-3"><h2><span class="n">3</span>3. MoE：FLOPs/token 不涨，参数涨 $E$ 倍</h2>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. MoE：FLOPs/token 不涨，参数涨 $E$ 倍</h2>
 <p>每层 FFN 换成 $E$ 个专家 $E_1 \dots E_E$ + router。
 第 $t$ 个 token：router 给出 logits $\ell_t \in \mathbb{R}^E$ ，
 取 top-k，下发的权重为 top-k logits 的 softmax 重归一：</p>
@@ -154,7 +190,8 @@ decode 时第 $t$ 步，新 token 的 $q_{t,h}$ 要和<strong>全部</strong> $S
   auxiliary-loss-free bias 策略，arXiv:2412.19437）来处理。
   drop token =  silent 的质量损失，这是 MoE 账本里最容易漏的一行。</li>
 </ul>
-</section><section class="sec" id="sec-4"><h2><span class="n">4</span>4. 术语表（准确术语）</h2>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. 术语表（准确术语）</h2>
 <ul>
 <li><strong>KV head</strong>：产生 K/V 的 head；MHA 里 $h_{kv} = h_q$ ，MQA 里 $h_{kv} = 1$ 。</li>
 <li><strong>Group（GQA）</strong>：共享一对 KV 的 query head 集合；Llama-2-70B 的 GQA-8
@@ -166,7 +203,8 @@ decode 时第 $t$ 步，新 token 的 $q_{t,h}$ 要和<strong>全部</strong> $S
   代价是 all-to-all。</li>
 <li><strong>Capacity factor / token dropping</strong>：专家容量上限与溢出 token 的丢弃策略。</li>
 </ul>
-</section><section class="sec" id="sec-5"><h2><span class="n">5</span>5. 与前后课程的连接</h2>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. 与前后课程的连接</h2>
 <ul>
 <li>← Day10（FlashAttention）：FlashAttention 省的是<strong>一次</strong> attention 的 HBM 流量；
   今天省的是<strong>跨 decode 步</strong>的 KV 流量。两者正交，可叠加。</li>
@@ -179,8 +217,9 @@ decode 时第 $t$ 步，新 token 的 $q_{t,h}$ 要和<strong>全部</strong> $S
   MLA 的吸收与 TP 切分互相作用；MoE 引入 expert parallelism（第 4 种并行维）。</li>
 <li>→ Day 20–21（KV Cache）：今天的账本是那两课 $32\ \text{GB}$ 手算的前置。</li>
 </ul>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">5%</div><div class="l">预训练算量 GQA uptraining</div></div><div class="stat"><div class="v">56.9×</div><div class="l">MLA 压缩</div></div><div class="stat"><div class="v">32</div><div class="l">GB KV cache 手算前置</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>MHA cache</h4><ul><li>2×128×128=32768 维</li></ul></div><div class="vscol vs-b"><h4>MLA cache</h4><ul><li>只存 c_t^KV 512 维</li><li>压缩 56.9×</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -191,6 +230,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

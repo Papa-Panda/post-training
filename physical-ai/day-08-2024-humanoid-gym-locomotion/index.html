@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,17 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Humanoid-Gym: Reinforcement Learning for Humanoid Robot with Zero-Shot Sim2Real Transfer</li>
-<li>Authors / Org: Xinyang Gu, Yen-Jen Wang, Jianyu Chen / RobotEra, Shanghai Qi Zhi Institute, Tsinghua University</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/2404.05695</li>
-<li>Date read: 2026-08-29</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">humanoid</span><span class="tag">locomotion</span><span class="tag">reinforcement-learning</span><span class="tag">sim2sim</span><span class="tag">sim2real</span><span class="tag">isaac-gym</span><span class="tag">mujoco</span><span class="tag">domain-randomization</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-08-2024-humanoid-gym-locomotion</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-08-2024-humanoid-gym-locomotion</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-08-2024-humanoid-gym-locomotion/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Humanoid-Gym: Reinforcement Learning for Humanoid Robot with Zero-Shot Sim2Real Transfer</dd><dt>Authors / Org</dt><dd>Xinyang Gu, Yen-Jen Wang, Jianyu Chen / RobotEra, Shanghai Qi Zhi Institute, Tsinghua University</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/2404.05695">https://arxiv.org/abs/2404.05695</a></dd><dt>Date read</dt><dd>2026-08-29</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-08-2024-humanoid-gym-locomotion</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-08-2024-humanoid-gym-locomotion">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-08-2024-humanoid-gym-locomotion</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">humanoid</span><span class="tag">locomotion</span><span class="tag">reinforcement-learning</span><span class="tag">sim2sim</span><span class="tag">sim2real</span><span class="tag">isaac-gym</span><span class="tag">mujoco</span><span class="tag">domain-randomization</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>Humanoid-Gym 用 Isaac Gym 中的 8192 个并行环境训练 100 Hz 的 humanoid velocity-command policy，再把同一策略放进经真机轨迹校准的 MuJoCo 做 cross-simulator gate，并通过 asymmetric actor-critic、15 帧历史、周期 gait prior 和覆盖传感器/时延/动力学的 domain randomization，在 1.2 m XBot-S 与 1.65 m XBot-L 上展示 zero-shot sim-to-real 行走。</p>
@@ -173,7 +204,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>“Humanoid-Gym also integrates a sim-to-sim framework from Isaac Gym to MuJoCo that allows users to verify the trained policies in different physical simulations to ensure the robustness and generalization of the policies.”</p>
 <p>“Our control policy operates at a high frequency of 100Hz, providing enhanced granularity and precision beyond standard RL locomotion approaches. The internal PD controller runs at an even higher frequency of 1000Hz.”</p>
 </blockquote>
@@ -198,8 +229,10 @@ pre code{background:none;padding:0;color:inherit}
 <ul>
 <li>Paper: https://arxiv.org/abs/2404.05695</li>
 <li>Code: https://github.com/ahucc/humanoid-gym</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-08-2024-humanoid-gym-locomotion/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">8192</div><div class="l">并行环境</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">Isaac Gym 训练吞吐</div><div class="farrow">→</div><div class="fnode">MuJoCo sim2sim gate 查过拟合</div><div class="farrow">→</div><div class="fnode">真机 zero-shot</div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-08-2024-humanoid-gym-locomotion/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -210,6 +243,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

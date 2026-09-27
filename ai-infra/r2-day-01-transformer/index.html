@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>r2-Day01 — Transformer 地基</title>
+<title>NOTES - r2-Day01 Transformer</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,51 +106,54 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-infra · r2-Day 1</span>
-    <h1>r2-Day01 — Transformer 地基</h1>
+    <h1>NOTES - r2-Day01 Transformer</h1>
     <p class="sub">第二轮地基：Attention O(N²) 是 FlashAttention 的动机、FFN 参数大头、RoPE 外推、Pre-Norm 更稳；前向 FLOPs = 2·N·D + 2·L·D²·d_model。</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">地基 4 点</a><a href="#sec-3">补充：Forward FLOPs per trajectory（2026-08-26 补）</a><a href="#sec-4">Paper 来源（2026-08-27 补）</a></nav>
+    <nav><a href="#sec-1">补充：Forward FLOPs per trajectory 2·N·D + 2·L·D²·d_model 来源（2026-08-26 补）</a><a href="#sec-2">Paper 来源（2026-08-27 补）</a></nav>
   </details>
-<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<p>NOTES - r2-Day01 Transformer；第二轮 Day1 地基，粗略理解即可</p></section>
-<section class="sec" id="sec-2"><h2><span class="n">2</span>地基 4 点</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-01-transformer/index.html</p>
+</blockquote>
+<p>第二轮 Day1 地基，粗略理解即可</p>
 <ul>
-<li>Attention $O(N^2)$ 是后续 FlashAttention/量化/解耦的动机</li>
+<li>Attention O(N²) 是后续 FlashAttention/量化/解耦的动机</li>
 <li>FFN 参数大头，GQA/MLA 省KV不省FFN</li>
 <li>RoPE 相对位置，支持外推</li>
 <li>Pre-Norm 训练更稳，梯度直通</li>
 </ul>
-<p>待H100：无，此日纯理论</p></section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>补充：Forward FLOPs per trajectory（2026-08-26 补）</h2>
-<h3>1. 2·N·D 线性层部分</h3>
-<ul>
-<li>N 参数量，D trajectory token数</li>
-<li>y=xW，x D×d_in，W d_in×d_out，FLOPs 2·D·d_in·d_out，2=1乘+1加</li>
-<li>累加所有 QKV/out/FFN 线性层 = 总线性参数 N，每token用一次 → 2ND</li>
-<li>即 Chinchilla forward每token 2N</li>
-</ul>
-<h3>2. 2·L·D²·d_model Attention二次项</h3>
-<ul>
-<li>L层，每层两次激活×激活（不含参，不在N里）</li>
-<li>QKᵀ：D×d_model × d_model×D → D×D，2·D²·d_model</li>
-<li>Attn·V：D×D × D×d_model → 2·D²·d_model</li>
-<li>合计 4·L·D²·d_model，乘加算1 FLOP时简写 2·L·D²·d_model</li>
-<li>D²特性：trajectory一长就爆，长rollout RL瓶颈</li>
-</ul>
+<p>待H100：无，此日纯理论</p>
+<hr />
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>补充：Forward FLOPs per trajectory 2·N·D + 2·L·D²·d_model 来源（2026-08-26 补）</h2>
+<p><strong>1. 2·N·D 线性层部分</strong>
+- N 参数量，D trajectory token数
+- y=xW，x D×d_in，W d_in×d_out，FLOPs 2·D·d_in·d_out，2=1乘+1加
+- 累加所有 QKV/out/FFN 线性层 = 总线性参数 N，每token用一次 → 2ND
+- 即 Chinchilla forward每token 2N</p>
+<p><strong>2. 2·L·D²·d_model Attention二次项</strong>
+- L层，每层两次激活×激活（不含参，不在N里）
+- QKᵀ：D×d_model × d_model×D → D×D，2·D²·d_model
+- Attn·V：D×D × D×d_model → 2·D²·d_model
+- 合计 4·L·D²·d_model，乘加算1 FLOP时简写 2·L·D²·d_model
+- D²特性：trajectory一长就爆，长rollout RL瓶颈</p>
 <p>总前向 = 线性主导 + 注意力二次项，backward≈2×forward。</p>
-<p>$$\text{Forward FLOPs} = 2\cdot N\cdot D + 2\cdot L\cdot D^2\cdot d_{\mathrm{model}}$$</p></section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>Paper 来源（2026-08-27 补）</h2>
+<hr />
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Paper 来源（2026-08-27 补）</h2>
 <ul>
-<li>Attention Is All You Need (Vaswani et al., NeurIPS 2017): <a href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a> - 提出 $QK^\top/\sqrt{d_k}$ → softmax → PV，Multi-Head，Positional Encoding，Encoder-Decoder</li>
-<li>The Illustrated Transformer (Jay Alammar): <a href="https://jalammar.github.io/illustrated-transformer/">https://jalammar.github.io/illustrated-transformer/</a> - 图解 Decoder Block 维度流 (B,S,D) 前向</li>
-<li>RoPE (Su et al., 2021): <a href="https://arxiv.org/abs/2104.09864">https://arxiv.org/abs/2104.09864</a> - 相对位置旋转编码，支持外推</li>
-<li>Pre-Norm vs Post-Norm (Xiong et al., 2020): <a href="https://arxiv.org/abs/2002.04745">https://arxiv.org/abs/2002.04745</a> - 为何大模型用Pre-Norm更稳</li>
-<li>Chinchilla Scaling (Hoffmann et al., 2022): <a href="https://arxiv.org/abs/2203.15556">https://arxiv.org/abs/2203.15556</a> - forward 2ND，6ND total，MFU定义来源</li>
-<li>LLaMA Architecture (Touvron et al., 2023): <a href="https://arxiv.org/abs/2302.13971">https://arxiv.org/abs/2302.13971</a> - SwiGLU FFN 11008，RMSNorm，RoPE实例</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-01-transformer/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<li>Attention Is All You Need (Vaswani et al., NeurIPS 2017): https://arxiv.org/abs/1706.03762 - 提出 QKᵀ/√d_k → softmax → PV，Multi-Head，Positional Encoding，Encoder-Decoder</li>
+<li>The Illustrated Transformer (Jay Alammar): https://jalammar.github.io/illustrated-transformer/ - 图解 Decoder Block 维度流 (B,S,D) 前向</li>
+<li>RoPE (Su et al., 2021): https://arxiv.org/abs/2104.09864 - 相对位置旋转编码，支持外推</li>
+<li>Pre-Norm vs Post-Norm (Xiong et al., 2020): https://arxiv.org/abs/2002.04745 - 为何大模型用Pre-Norm更稳</li>
+<li>Chinchilla Scaling (Hoffmann et al., 2022): https://arxiv.org/abs/2203.15556 - forward 2ND，6ND total，MFU定义来源</li>
+<li>LLaMA Architecture (Touvron et al., 2023): https://arxiv.org/abs/2302.13971 - SwiGLU FFN 11008，RMSNorm，RoPE实例</li>
+</ul>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">2</div><div class="l">ND 每 token FLOPs</div></div><div class="stat"><div class="v">2</div><div class="l">·D²·d_model QKᵀ 单项</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Post-Norm</h4><ul><li>原始 Transformer 用法</li><li>深层训练不稳</li></ul></div><div class="vscol vs-b"><h4>Pre-Norm</h4><ul><li>大模型主流</li><li>训练更稳</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-01-transformer/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -126,6 +164,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

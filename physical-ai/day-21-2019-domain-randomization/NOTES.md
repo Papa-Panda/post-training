@@ -1,5 +1,7 @@
 # Day 21 — Domain Randomization / ADR：Solving Rubik's Cube with a Robot Hand
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/index.html
+
 ## 元信息
 - Title: Solving Rubik's Cube with a Robot Hand（Automatic Domain Randomization，ADR）
 - Authors / Org: OpenAI（Ilge Akkaya*, Marcin Andrychowicz*, Maciek Chociej*, Mateusz Litwin*, Bob McGrew*, Arthur Petron*, Alex Paino*, Matthias Plappert*, Glenn Powell*, Raphael Ribas*, Jonas Schneider*, Nikolas Tezak*, Jerry Tworek*, Peter Welinder*, Lilian Weng*, Qiming Yuan*, Wojciech Zaremba*, Lei Zhang*；作者按字母序，引用请用 OpenAI et al.）
@@ -196,3 +198,6 @@ LSTM 干的事： $m_t = f_\theta(m_{t-1}, o_t, a_{t-1})$ ，把历史压缩成�
 - **结构都不对**（揉面团、线缆、流体——仿真器原理性建模不了）→ 做宽也盖不住 → 别仿真，直接 RLPD 真机学。
 
 接触复杂度高的两种去向正好说明这点：灵巧手魔方 → ADR（大力出奇迹）；揉面团 → 真机 RLPD。另外两条路线可以叠：Isaac Lab 里训 locomotion 就是"DR 先做宽 + 真机 RLPD 微调"的组合拳，Day07/08 的 H1 都是这个配方——三选一是伪命题，成年人全都要，只是比例问题。
+
+<!-- viz:vs: PPO | 优化一个 MDP; trust region 管策略别走太远 || ADR | 优化 MDP 分布; 边界扩张管世界别太窄 -->
+<!-- viz:flow: ξ_real ∈ support(p_φ) → 期望/鲁棒优化 → 真机可用 -->

@@ -1,5 +1,7 @@
 # Day 13 — Octo：开放通用机器人策略与可插拔 diffusion readout
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-13-2024-octo/index.html
+
 ## 元信息
 - Title: Octo: An Open-Source Generalist Robot Policy
 - Authors / Org: Octo Model Team / UC Berkeley, Stanford University, Carnegie Mellon University, Google DeepMind（RSS 2024）
@@ -211,3 +213,6 @@ $$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_
 整个 token/mask/readout 设计就是为了让一个模型吃下多种身体——各模态独立 tokenizer + 缺模态 mask（输入端隔离异构）、readout token（embodiment 无关的瓶颈表示）、加权混合 diffusion head（输出端）。详见本篇"Octo 如何'结合'起来：三层"。
 
 **符号**： $ d $ 数据域编号（共 25 个，对应 25 种机器人身体）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ \theta $ 网络权重； $ \mathcal{L}_{\text{diffusion}} $ diffusion 训练 loss。
+
+<!-- viz:stats: 27M Octo-Small | 93M Octo-Base | 2048 batch TPUv4-128 300k steps 约 14 小时 -->
+<!-- viz:bars: diffusion head 83% | MSE 35% | 离散 CE 18% -->

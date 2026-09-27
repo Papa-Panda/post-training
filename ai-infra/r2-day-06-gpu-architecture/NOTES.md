@@ -1,5 +1,7 @@
 # NOTES — r2-Day06 GPU 架构与 HBM Memory Wall
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-06-gpu-architecture/index.html
+
 ## 准确术语
 
 - **SM (Streaming Multiprocessor)**：warp 调度与执行的基本硬件单元。
@@ -97,3 +99,5 @@ $$2\times256\times256\times2=262{,}144\ \text{bytes}=256\ \text{KiB}$$
 4. NVIDIA H200 technical post: https://developer.nvidia.com/blog/nvidia-h200-tensor-core-gpus-and-nvidia-tensorrt-llm-set-mlperf-llm-inference-records/
 5. CUDA C++ Best Practices Guide: https://docs.nvidia.com/cuda/archive/12.1.0/cuda-c-best-practices-guide/index.html
 6. NVIDIA H100 architecture whitepaper: https://nvdam.widen.net/content/tdwwiwotwr/original/gtc22-whitepaper-hopper.pdf
+
+<!-- viz:stats: 1935GB/s A100 PCIe | 2039GB/s A100 SXM | 3.35TB/s H100 | 4.8TB/s H200 -->

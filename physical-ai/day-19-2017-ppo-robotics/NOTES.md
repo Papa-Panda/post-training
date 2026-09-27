@@ -1,5 +1,7 @@
 # Day 19 — PPO for Robotics: clipped policy optimization 与 GPU 向量化 rollout 系统
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/index.html
+
 ## 元信息
 - Title: Proximal Policy Optimization Algorithms（主论文）+ Legged-Gym / RSL-RL（robotics rollout 系统）
 - Authors / Org: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov — OpenAI（2017，主论文）；Nikita Rudin, David Hoeller, Philipp Reist, Marco Hutter — Robotic Systems Lab, ETH Zurich & NVIDIA（legged_gym, CoRL 2021）；rsl_rl 维护 Mayank Mittal / Clemens Schwarke — ETH Zurich RSL & NVIDIA
@@ -217,3 +219,5 @@ $$L^{CLIP}(\theta)=\hat{\mathbb{E}}_t\left[\min\left(r_t(\theta)\hat{A}_t,\ \tex
 - **不同**：① rollout 来源——机器人是仿真器 env step，LLM 是模型自采样 token；② reward 构造——机器人是 hand-shaped dense reward + curriculum，LLM 是 verifier/RM 稀疏 reward；③ 失败成本——机器人真机摔了是硬件钱，LLM 采样错了是算力钱。
 
 **和之前工作的关系**：呼应本 NOTES §可迁移 "RLHF 的 PPO/GRPO 是同一条血统"。
+
+<!-- viz:vs: DreamerV3 | actor 在想象的 latent rollout 里更新 || PPO | model-free; 真实仿真环境 on-policy 更新; 似然比 r_t(θ) 裁剪 -->

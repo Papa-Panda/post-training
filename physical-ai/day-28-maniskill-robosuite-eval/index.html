@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,20 +113,15 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">问答补充</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: ManiSkill3: GPU Parallelized Robotics Simulation and Rendering for Generalizable Embodied AI（主）+ robosuite: A Modular Simulation Framework and Benchmark for Robot Learning（对照）</li>
-<li>Authors / Org: ManiSkill3 — Stone Tao, Fanbo Xiang, Arth Shukla, Yuzhe Qin, Xander Hinrichsen, Xiaodi Yuan, Chen Bao, Xinsong Lin, Yulin Liu, Tse-kai Chan, Yuan Gao, Xuanlin Li, Tongzhou Mu, Nan Xiao, Arnav Gurha, Viswesh Nagaswamy Rajesh, Yong Woo Choi, Yen-Ru Chen, Zhiao Huang, Roberto Calandra, Rui Chen, Shan Luo, Hao Su（UCSD / Hillbot，另有 CMU、TU Dresden、清华、King's College London）；robosuite — Yuke Zhu, Josiah Wong, Ajay Mandlekar, Roberto Martín-Martín, Abhishek Joshi, Kevin Lin, Abhiram Maddukuri, Soroush Nasiriany, Yifeng Zhu（robosuite.ai）</li>
-<li>Link / arXiv: ManiSkill3 — https://arxiv.org/abs/2410.00425（v2；2024-10-01）；robosuite — http://arxiv.org/abs/2009.12293v3（v3 2025-01-18；v1 2020-09-25，v2 2022-11-15）</li>
-<li>官方项目页：ManiSkill3 — maniskill.ai（文档 maniskill.readthedocs.io，Apache-2.0 开源）；robosuite — robosuite.ai（姐妹项目 robomimic，见 https://arise-initiative.github.io/robomimic-web/）</li>
-<li>Date read: 2026-09-19</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">benchmark</span><span class="tag">maniskill</span><span class="tag">robosuite</span><span class="tag">gpu-simulation</span><span class="tag">sim2real</span><span class="tag">reproducibility</span><span class="tag">evaluation</span><span class="tag">sapien</span><span class="tag">mujoco</span><span class="tag">physx</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-28-maniskill-robosuite-eval</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-28-maniskill-robosuite-eval</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/index.html</p>
+</blockquote>
 </section>
-<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>ManiSkill3: GPU Parallelized Robotics Simulation and Rendering for Generalizable Embodied AI（主）+ robosuite: A Modular Simulation Framework and Benchmark for Robot Learning（对照）</dd><dt>Authors / Org</dt><dd>ManiSkill3 — Stone Tao, Fanbo Xiang, Arth Shukla, Yuzhe Qin, Xander Hinrichsen, Xiaodi Yuan, Chen Bao, Xinsong Lin, Yulin Liu, Tse-kai Chan, Yuan Gao, Xuanlin Li, Tongzhou Mu, Nan Xiao, Arnav Gurha, Viswesh Nagaswamy Rajesh, Yong Woo Choi, Yen-Ru Chen, Zhiao Huang, Roberto Calandra, Rui Chen, Shan Luo, Hao Su（UCSD / Hillbot，另有 CMU、TU Dresden、清华、King's College London）；robosuite — Yuke Zhu, Josiah Wong, Ajay Mandlekar, Roberto Martín-Martín, Abhishek Joshi, Kevin Lin, Abhiram Maddukuri, Soroush Nasiriany, Yifeng Zhu（robosuite.ai）</dd><dt>Link / arXiv</dt><dd>ManiSkill3 — <a href="https://arxiv.org/abs/2410.00425（v2；2024-10-01）；robosuite">https://arxiv.org/abs/2410.00425（v2；2024-10-01）；robosuite</a> — <a href="http://arxiv.org/abs/2009.12293v3（v3">http://arxiv.org/abs/2009.12293v3（v3</a> 2025-01-18；v1 2020-09-25，v2 2022-11-15）</dd><dt>官方项目页</dt><dd>ManiSkill3 — maniskill.ai（文档 maniskill.readthedocs.io，Apache-2.0 开源）；robosuite — robosuite.ai（姐妹项目 robomimic，见 <a href="https://arise-initiative.github.io/robomimic-web/）">https://arise-initiative.github.io/robomimic-web/）</a></dd><dt>Date read</dt><dd>2026-09-19</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-28-maniskill-robosuite-eval</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-28-maniskill-robosuite-eval">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-28-maniskill-robosuite-eval</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">benchmark</span><span class="tag">maniskill</span><span class="tag">robosuite</span><span class="tag">gpu-simulation</span><span class="tag">sim2real</span><span class="tag">reproducibility</span><span class="tag">evaluation</span><span class="tag">sapien</span><span class="tag">mujoco</span><span class="tag">physx</span></div></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">2020,M</div><div class="l">uJoCo CPU 时代的模块化</div></div><div class="stat"><div class="v">3×</div><div class="l">更少显存</div></div></div>
 <p>Day28 是 Physical AGI 块里的<strong>评测基准日</strong>：robosuite（2020, MuJoCo CPU 时代的模块化标准：robot × arena × object × controller 正交组合、标准化任务 + RL 基线结果）定义了"可复现"的合同，ManiSkill3（2024, GPU 时代的开源答案：SAPIEN 并行渲染 + PhysX GPU 仿真 + 异构仿真）把这个合同搬到 GPU 上——30,000+ FPS sim+render、2–3× 更少显存、12 类任务域 / 20+ embodiment / 数百万 demo 帧 / RL 与 LfD 全套基线；它直接回答了 Day27 的第三问（评测协议缺失），并把 Day30 数据飞轮的"gate"落到可执行的统计协议上。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
@@ -116,7 +146,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Benchmark 的覆盖 vs 可比 trade-off</strong>：robosuite 的"模块化"（robot × arena × object × controller 正交组合，组合爆炸）vs ManiSkill3 的"12 类任务模板"（固定协议、模板可扩展）。评测设计上，覆盖广度（能测的组合越多越好）和可比性（所有人测的是同一份试卷）如何取舍？为什么 ManiSkill3 选择"多做模板、少做穷举"（论文明说核心不是每个类别建很多环境，而是建很多用户可扩展的模板）？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">采集</div><div class="farrow">→</div><div class="fnode">回放</div><div class="farrow">→</div><div class="fnode">利用 demo 数据学习</div></div>
 <h3>1. Motivation</h3>
 <ul>
 <li>机器人学不像 vision/language，没有好的数据集可训（论文原话："there are still no good datasets for robotic manipulation"）。两条路：真机遥操作采集（贵、慢、成功率低）或真机 RL（setup 贵、reward/reset 难）。</li>
@@ -190,7 +220,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"Simulation has enabled unprecedented compute-scalable approaches to robot learning."（摘要首句——整个 Day28 的合法性来源：仿真让机器人学习第一次有了"算力可扩展"的入场券。）
 "Tasks that used to take hours to train can now take minutes."（贡献①——visual RL 的 wall-clock 从小时到分钟，这是 benchmark 能跑出统计显著性的物质基础。）</p>
 </blockquote>
@@ -209,8 +239,10 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-12"><h2><span class="n">12</span>问答补充</h2>
-<p>（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p>（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">128×</div><div class="l">128 单相机</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>MuJoCo CPU 栈</h4><ul><li>模块化标准</li><li>无并行渲染</li></ul></div><div class="vscol vs-b"><h4>ManiSkill3</h4><ul><li>GPU 并行渲染</li><li>visual RL 几分钟 vs 几小时</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -221,6 +253,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

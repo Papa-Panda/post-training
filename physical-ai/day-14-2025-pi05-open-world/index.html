@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -79,21 +114,13 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：统一成一个双层时间尺度的条件生成控制问题</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充（2026-09-07）</a></nav>
   </details>
   <section class="sec" id="sec-0">
-<blockquote>
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/index.html</p>
 <p>Physical Intelligence, arXiv 2504.16054 (2025-04-22). π₀的开放世界续作：异构 co-training + 高层语义子任务预测 + knowledge insulation，在未见过的真实家庭做长程灵巧操作。</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: π₀.₅: a Vision-Language-Action Model with Open-World Generalization</li>
-<li>Authors / Org: Physical Intelligence (Kevin Black, Noah Brown, Danny Driess, Chelsea Finn, Karol Hausman, Brian Ichter, Sergey Levine, Karl Pertsch 等 35 人)</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/2504.16054 （2025-04-22）；项目页 https://www.pi.website/blog/pi05；代码 https://github.com/Physical-Intelligence/openpi</li>
-<li>Date read: 2026-09-05</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">open-world-generalization</span><span class="tag">pi05</span><span class="tag">co-training</span><span class="tag">flow-matching</span><span class="tag">fast-tokenization</span><span class="tag">subtask-prediction</span><span class="tag">mobile-manipulation</span><span class="tag">knowledge-insulation</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-14-2025-pi05-open-world</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-14-2025-pi05-open-world</li>
-</ul>
+<dl class="meta-grid"><dt>Title</dt><dd>π₀.₅: a Vision-Language-Action Model with Open-World Generalization</dd><dt>Authors / Org</dt><dd>Physical Intelligence (Kevin Black, Noah Brown, Danny Driess, Chelsea Finn, Karol Hausman, Brian Ichter, Sergey Levine, Karl Pertsch 等 35 人)</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/2504.16054">https://arxiv.org/abs/2504.16054</a> （2025-04-22）；项目页 <a href="https://www.pi.website/blog/pi05；代码">https://www.pi.website/blog/pi05；代码</a> <a href="https://github.com/Physical-Intelligence/openpi">https://github.com/Physical-Intelligence/openpi</a></dd><dt>Date read</dt><dd>2026-09-05</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-14-2025-pi05-open-world</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-14-2025-pi05-open-world">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-14-2025-pi05-open-world</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">open-world-generalization</span><span class="tag">pi05</span><span class="tag">co-training</span><span class="tag">flow-matching</span><span class="tag">fast-tokenization</span><span class="tag">subtask-prediction</span><span class="tag">mobile-manipulation</span><span class="tag">knowledge-insulation</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>π₀.₅ 在 π₀ 的 VLM + flow-matching action expert 基础上，用<strong>异构 co-training</strong>（多机器人数据 + web/VLM 数据 + 高层语义子任务预测 + 目标检测 + hybrid 多模态样本）加<strong>两阶段 knowledge insulation</strong> 训练 recipe，首次让端到端 VLA 在<strong>完全没见过的真实家庭</strong>里完成长时程灵巧任务（clean kitchen / bedroom），并在测试时显式做高层子任务推理。</p>
@@ -194,7 +221,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"We describe π₀.₅, a new model based on π₀ that uses co-training on heterogeneous tasks to enable broad generalization."
 "we demonstrate for the first time that an end-to-end learning-enabled robotic system can perform long-horizon and dexterous manipulation skills, such as cleaning a kitchen or bedroom, in entirely new homes."（摘要原文）</p>
 </blockquote>
@@ -214,7 +241,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-07）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下问答归档自 physical AI side chat（2026-09-06）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
 </blockquote>
 <h3>Day14 π₀.₅：把"想"和"做"分开</h3>
@@ -268,8 +295,10 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>答</strong>：不是。π₀.₅ 恰恰是跨 embodiment 那一路：它的训练数据是 π₀ 的 10k+ 小时多机器人数据，加上新增的移动操作平台家庭采集，再混 web 和检测数据。它的"泛化"赌的是<strong>数据配方</strong>（异构 co-training），不是固定硬件：</p>
 <p>$$\mathcal{L}(\theta)=\sum_{k\in\{\mathrm{robot,subtask,web,det}\}}w_k\mathcal{L}_k(\theta).$$</p>
 <p>$ k $ 数据源编号（robot / subtask / web / det 四类）； $ w_k $ 第 $ k $ 类数据的混合权重； $ \mathcal{L}_k $ 第 $ k $ 类数据上的 loss； $ \theta $ 网络权重。</p>
-<p>和 Day16 DROID 正好是两个方向：DROID 固定身体、扩张场景多样性；π₀.₅ 拥抱身体异构，靠配方让共享表示自己长出"语义"和"控制"的分工——这正是 README 问答记录里"接口即泛化（Octo）vs 配方即泛化（π₀.₅）"对照的另一面。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p>和 Day16 DROID 正好是两个方向：DROID 固定身体、扩张场景多样性；π₀.₅ 拥抱身体异构，靠配方让共享表示自己长出"语义"和"控制"的分工——这正是 README 问答记录里"接口即泛化（Octo）vs 配方即泛化（π₀.₅）"对照的另一面。</p>
+<div class="viz viz-flow flow"><div class="fnode">高层语义子任务重规划</div><div class="farrow">→</div><div class="fnode">action chunk</div><div class="farrow">→</div><div class="fnode">执行短前缀</div><div class="farrow">→</div><div class="fnode">双层闭环</div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Day09-13</h4><ul><li>训练分布内桌案任务泛化</li></ul></div><div class="vscol vs-b"><h4>π₀.₅</h4><ul><li>4 个未见真实家庭</li><li>核心变量是训练混合配方</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -280,6 +309,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

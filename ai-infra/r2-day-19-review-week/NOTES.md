@@ -1,5 +1,7 @@
 # r2-Day19 NOTES — 术语、公式核对与上一课/下一课链接
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-19-review-week/index.html
+
 ## 术语（准确定义）
 
 - **复盘周**：路线图"19 复盘周"的落地。第二层（分布式训练 14–18 天）
@@ -85,3 +87,6 @@ r2-Day20–21：TTFT/TPOT & KV Cache 32GB 手算。第三层（推理部署）
    MLA 动的是 KV 表示；推理侧 KV cache：7B 风格 128k 上下文
    64 GiB → 4.5 GiB，14.2×。Day13 省的是 decode 的账，
    不是训练的账——两层账本不要串。）
+
+<!-- viz:stats: 84GB 12 B/param | 112GB 16 B/param | 70GB 10 B/param -->
+<!-- viz:vs: MTTR | checkpoint 把恢复从 O(重训) 降到 O(恢复) || MTBF | 可靠性; 降故障频率 -->

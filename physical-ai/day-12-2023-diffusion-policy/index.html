@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,18 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：POMDP 上的条件轨迹生成 + receding-horizon control</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a><a href="#sec-14">问答补充（2026-09-07）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Diffusion Policy: Visuomotor Policy Learning via Action Diffusion</li>
-<li>Authors / Org: Cheng Chi, Siyuan Feng, Yilun Du, Zhenjia Xu, Eric Cousineau, Benjamin Burchfiel, Shuran Song / Columbia University, Toyota Research Institute, MIT（RSS 2023）</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/2303.04137v5 / http://diffusion-policy.cs.columbia.edu</li>
-<li>Official code: https://github.com/real-stanford/diffusion_policy</li>
-<li>Date read: 2026-09-02</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">visuomotor-policy</span><span class="tag">diffusion</span><span class="tag">behavior-cloning</span><span class="tag">action-chunking</span><span class="tag">receding-horizon-control</span><span class="tag">robot-manipulation</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-12-2023-diffusion-policy</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-12-2023-diffusion-policy</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Diffusion Policy: Visuomotor Policy Learning via Action Diffusion</dd><dt>Authors / Org</dt><dd>Cheng Chi, Siyuan Feng, Yilun Du, Zhenjia Xu, Eric Cousineau, Benjamin Burchfiel, Shuran Song / Columbia University, Toyota Research Institute, MIT（RSS 2023）</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/2303.04137v5">https://arxiv.org/abs/2303.04137v5</a> / <a href="http://diffusion-policy.cs.columbia.edu">http://diffusion-policy.cs.columbia.edu</a></dd><dt>Official code</dt><dd><a href="https://github.com/real-stanford/diffusion_policy">https://github.com/real-stanford/diffusion_policy</a></dd><dt>Date read</dt><dd>2026-09-02</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-12-2023-diffusion-policy</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-12-2023-diffusion-policy">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-12-2023-diffusion-policy</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">visuomotor-policy</span><span class="tag">diffusion</span><span class="tag">behavior-cloning</span><span class="tag">action-chunking</span><span class="tag">receding-horizon-control</span><span class="tag">robot-manipulation</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>Diffusion Policy 把视觉条件机器人策略写成动作序列上的 DDPM：从高斯噪声迭代去噪出一段连续控制命令，只执行前 $T_a$ 步再观察并重规划；这同时保留示范中的多峰行为、整段动作的时间一致性和闭环纠错能力，在 IJRR 扩展版覆盖的 15 个仿真与真机任务上相对既有方法平均提升 46.9%。</p>
@@ -222,7 +252,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>“Diffusion policy refines noise into actions via a learned gradient field. This formulation provides stable training, allows the learned policy to accurately model multimodal action distributions, and accommodates high-dimensional action sequences.”</p>
 <p>“This design allows the policy to continuously replan its action in a closed-loop manner while maintaining temporal action consistency — achieving a balance between long-horizon planning and responsiveness.”</p>
 </blockquote>
@@ -251,15 +281,17 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-07）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。</p>
 </blockquote>
 <h3>Day12（Diffusion Policy）有什么用</h3>
 <p><strong>问</strong>：day12 有啥用啊？</p>
 <p><strong>答</strong>：它的用处恰恰在于"只会一招"。工厂里的机械臂不需要听懂人话，它需要把同一个零件插一百万次、成功率 99.9%——Diffusion Policy 就是为这种场景生的：小模型、百来条演示就能训、没有 VLM 的包袱，在推、翻、插这类接触丰富的单技能上精度极高。更大的用处是方法论：它发明的"动作 chunk + 生成式建模 + $ T_o/T_p/T_a $ 重规划"这套东西，后来被 Octo、π₀.₅ 全盘吸收。可以说 Day12 是个"零件供应商"——自己不做整车，但发动机技术铺到了全行业。</p>
 <p><strong>符号</strong>： $ T_o $ 观测历史帧数； $ T_p $ 预测 horizon（动作块长度）； $ T_a $ 执行 horizon（执行前 $ T_a $ 步后重观测、重规划）。</p>
-<p><strong>与之前工作的关系</strong>：Day12 是"无语言→单任务"逻辑自洽的代表（对照 Day11"有语言→多任务"）；它的方法论遗产（chunk + 生成式建模 + 三 horizon 重规划）被 Day13 Octo 和 Day14 π₀.₅ 直接继承。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>与之前工作的关系</strong>：Day12 是"无语言→单任务"逻辑自洽的代表（对照 Day11"有语言→多任务"）；它的方法论遗产（chunk + 生成式建模 + 三 horizon 重规划）被 Day13 Octo 和 Day14 π₀.₅ 直接继承。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">15</div><div class="l">任务平均提升 46.9%</div></div><div class="stat"><div class="v">0.1</div><div class="l">s 推理延迟</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">高斯噪声</div><div class="farrow">→</div><div class="fnode">迭代去噪出动作序列</div><div class="farrow">→</div><div class="fnode">执行前 Ta 步</div><div class="farrow">→</div><div class="fnode">观察重规划</div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -270,6 +302,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

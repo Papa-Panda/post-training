@@ -1,5 +1,7 @@
 # NOTES — r2-Day03 Topology and Collectives
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/index.html
+
 ## Corrected mental model
 
 - Separate logical payload, per-rank algorithm traffic, link-rate units, and measured effective bandwidth.
@@ -35,3 +37,5 @@ CPU tests cover formulas and semantics only. Hardware follow-up must record:
 - overlap measured inside the actual training step.
 
 No H100, NCCL, NVLink, PCIe, or InfiniBand performance is claimed by this lesson.
+
+<!-- viz:vs: 400 Gb/s 线速 | 十进制换算 50 GB/s; 协议开销后有效载荷更低 || 450 GB/s 示意值 | 为避免把 900 GB/s 双向当单向; 非 benchmark -->

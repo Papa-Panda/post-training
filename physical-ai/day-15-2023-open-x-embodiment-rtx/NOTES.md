@@ -1,5 +1,7 @@
 # Day15 — Open X-Embodiment / RT-X: 跨机器人数据规模化
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-15-2023-open-x-embodiment-rtx/index.html
+
 > Open X-Embodiment Collaboration（Google DeepMind 牵头，21 institutions），arXiv 2310.08864（2023-10-13，ICRA 2024）。机器人学的"ImageNet 时刻"宣言：把 34 个实验室的 60 个数据集、22 种机器人、100 万+ 轨迹统一成 RLDS schema，用一个 7 维末端执行器动作接口做粗对齐，训练跨机器人通用策略 RT-X。
 
 ## 元信息
@@ -121,3 +123,5 @@ RT-2-X 再加一层 co-fine-tuning： $\mathcal L=\mathcal L_{VLM}(\text{web})+\
 ## 连接
 - 上一篇: day-14-2025-pi05-open-world — π₀.₅的异构 co-training 配方，其"移除式成分消融"的方法论源头正是 OXE 的去 Bridge 实验
 - 下一篇预告: day-16-2024-droid — DROID：多机构真实家庭/办公场景的 Franka 数据采集体系，看 OXE 之后社区如何继续补"数据多样性"这块短板
+
+<!-- viz:stats: 75.8%→42.8% 去掉 Bridge 数据 emergent skills | 27.3%→75.8% Δ 约 3× | 50% 小域平均提升 -->

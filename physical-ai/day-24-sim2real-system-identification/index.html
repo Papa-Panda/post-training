@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,19 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">附：Sim2Real Release Gate（本篇校准器 + Day08 评估门的完整流程）</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a><a href="#sec-14">问答补充</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Closing the Sim-to-Real Loop: Adapting Simulation Randomization with Real World Experience（SimOpt）</li>
-<li>Authors / Org: Yevgen Chebotar（USC）, Ankur Handa, Viktor Makoviychuk, Miles Macklin, Jan Issac, Nathan Ratliff, Dieter Fox（NVIDIA / Univ. of Copenhagen / Univ. of Washington；ICRA 2019）</li>
-<li>Link / arXiv: https://arxiv.org/abs/1810.05687（v1 2018-10-12，v4 2019-03-05；ICRA 2019 接收）</li>
-<li>项目页（含实验视频）: https://sites.google.com/view/simopt</li>
-<li>Official code: 论文未附公开实现仓库（诚实标注）；核心算法是标准组件组合（PPO + REPS + 加权 MLE），可复写</li>
-<li>Date read: 2026-09-15</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">simopt</span><span class="tag">system-identification</span><span class="tag">domain-randomization</span><span class="tag">sim2real</span><span class="tag">reps</span><span class="tag">ppo</span><span class="tag">behavior-matching</span><span class="tag">real2sim</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-24-sim2real-system-identification</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-24-sim2real-system-identification</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-24-sim2real-system-identification/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Closing the Sim-to-Real Loop: Adapting Simulation Randomization with Real World Experience（SimOpt）</dd><dt>Authors / Org</dt><dd>Yevgen Chebotar（USC）, Ankur Handa, Viktor Makoviychuk, Miles Macklin, Jan Issac, Nathan Ratliff, Dieter Fox（NVIDIA / Univ. of Copenhagen / Univ. of Washington；ICRA 2019）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/1810.05687（v1">https://arxiv.org/abs/1810.05687（v1</a> 2018-10-12，v4 2019-03-05；ICRA 2019 接收）</dd><dt>项目页（含实验视频）</dt><dd><a href="https://sites.google.com/view/simopt">https://sites.google.com/view/simopt</a></dd><dt>Official code</dt><dd>论文未附公开实现仓库（诚实标注）；核心算法是标准组件组合（PPO + REPS + 加权 MLE），可复写</dd><dt>Date read</dt><dd>2026-09-15</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-24-sim2real-system-identification</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-24-sim2real-system-identification">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-24-sim2real-system-identification</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">simopt</span><span class="tag">system-identification</span><span class="tag">domain-randomization</span><span class="tag">sim2real</span><span class="tag">reps</span><span class="tag">ppo</span><span class="tag">behavior-matching</span><span class="tag">real2sim</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>Day21 的 DR 把随机化分布当<strong>手工/启发式超参</strong>调，SimOpt 把它当<strong>可辨识的对象</strong>：用少量真机 rollout 作为锚点，把"仿真参数分布 $p_\phi(\xi)$ "和"策略 $\pi_\theta$ "放进一个<strong>闭环双循环</strong>里交错优化——内层 PPO 在当前分布上训策略，外层 REPS 以"仿真轨迹 vs 真机轨迹的行为差异"为代价更新分布参数；在 swing-peg-in-hole 和开抽屉两个真机任务上，用 a few 真机轨迹就实现了可靠迁移，且迁移到<strong>不同机器人</strong>上仍然成立。</p>
@@ -190,7 +219,7 @@ SimOpt 的位置：<strong>真机预算在"几条轨迹"量级时的最优解</s
 </ul>
 </section>
 <section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"Rather than manually tuning the randomization of simulations, we adapt the simulation parameter distribution using a few real world roll-outs interleaved with policy training."
 "We are able to change the distribution of simulations to improve the policy transfer by matching the policy behavior in simulation and the real world."</p>
 </blockquote>
@@ -214,8 +243,9 @@ SimOpt 的位置：<strong>真机预算在"几条轨迹"量级时的最优解</s
 <h3>2026-09-15：Day24 NOTES 的 <code>$$...$$</code> 块在 GitHub 上仍显示裸 LaTeX</h3>
 <p><strong>问题原文</strong>（用户，2026-09-15 16:17 PDT）："[Day24 NOTES 链接] 数学符号又没修理好 1/修一下 2/你的prompt是不是出问题了？修理下 之后 查看下其他类似的scheduledjob也修理"</p>
 <p><strong>核心答案</strong>（side chat 内的诊断 + 修复）：第一轮只修了行内公式 <code>$ x $</code> 的内侧空格，没有修到根上。真凶是 Day24 的 <code>$$...$$</code> 块与相邻文字挤在同一个段落里：GitHub 的 markdown 层根本不把它识别为公式，块内的 <code>_</code> 被解析成 <code>&lt;em&gt;</code> 斜体，整块显示成裸 LaTeX。之前猜的"标题后必须空行"也被证伪——对照检查了 Day20 和 ai-data Day13 的单行 <code>$$...$$</code> 块渲染正常，说明根因是"块公式必须独占段落"。验证方法：curl GitHub blob 页 HTML，先确认 currentOid 与推送的 commit 一致（排除缓存），再从 GitHub 自己的渲染标记（<code>&lt;math-renderer class="js-inline-math"&gt;</code>）看它到底认了哪些块——认出的块带 math-renderer 标记，没认出的直接看源码 <code>&lt;p&gt;</code>。修复：所有 <code>$$` 块前后各加空行独占段落；`tools/check_repo.py` gate 强制三条规则（行内公式外侧空格、`$` 内侧紧贴、`$$</code> 块独占段落）；四个会写公式的 cron prompt 全部补上新规则并要求提交前跑 lint 门。commit <code>80df815</code>（另有 <code>f896397</code> 消掉 check_repo.py 的 SyntaxWarning），已 push。</p>
-<p><strong>关联</strong>：这是 AGENTS.md 里那条"块公式必须独占段落"规则的实战来源——旧的"标题后空行"理论被自己的验证数据推翻并修正，调试方法论见该条目。与 2026-09-14 的 Day23 行内公式事件（day-23-2019-residual-rl/NOTES.md 问答补充）是同一主题的连续两天抓包；两次合起来形成了仓库现行的三条数学排版规则。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-24-sim2real-system-identification/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>关联</strong>：这是 AGENTS.md 里那条"块公式必须独占段落"规则的实战来源——旧的"标题后空行"理论被自己的验证数据推翻并修正，调试方法论见该条目。与 2026-09-14 的 Day23 行内公式事件（day-23-2019-residual-rl/NOTES.md 问答补充）是同一主题的连续两天抓包；两次合起来形成了仓库现行的三条数学排版规则。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>ADR</h4><ul><li>成功率驱动分布扩张</li><li>世界只会变宽</li></ul></div><div class="vscol vs-b"><h4>SimOpt</h4><ul><li>轨迹差异驱动分布校准</li><li>世界可向真值收缩</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-24-sim2real-system-identification/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -226,6 +256,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

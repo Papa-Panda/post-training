@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,21 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">疑问</a><a href="#sec-9">下一步</a><a href="#sec-10">速查表</a><a href="#sec-11">连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Atlas: A World Model for Spatial Intelligence</li>
-<li>Authors / Org: World Labs 团队（创始人 Fei-Fei Li；公司 2024-02 创立）</li>
-<li>Link / Blog: https://www.worldlabs.ai/blog/atlas（官方博客，2026-09-01 发布）</li>
-<li>官方 X 公告：https://x.com/theworldlabs/status/2094839756329041984（2026-09-01）</li>
-<li>发布视频：https://www.youtube.com/watch?v=hzvXRHBInx0</li>
-<li>Date read: 2026-09-23</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">world-model</span><span class="tag">atlas</span><span class="tag">spatial-intelligence</span><span class="tag">camera-control</span><span class="tag">real-to-sim</span><span class="tag">3d-reconstruction</span><span class="tag">video-generation</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-31-2026-worldlabs-atlas</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas</li>
-<li>前传：本路线 README「World Labs Atlas 与 roadmap 的关系（2026-09-12）」问答——当时结论是 Atlas 落在 Day27（Cosmos）射程内、不必单独开 Day；2026-09-22 用户采纳李昊建议把路线扩到 34 天，Atlas 成为 Day31 最新进展第一篇</li>
-<li>非技术背景（仅记录，不作技术证据）：公司累计融资约 \$1.23B（含 Autodesk \$200M 战略投资，NVIDIA / AMD / Fidelity 参投），报道估值约 \$5B（来源：ainvest / bestaitoolfinder 转述，PR 口径，未独立核实）；产品线 Marble 2025-11 发布、World API 2026-01 上线、2026-07 收购 SceniX（机器人空间智能方向）（来源：cryptobriefing 整理）</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-31-2026-worldlabs-atlas/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Atlas: A World Model for Spatial Intelligence</dd><dt>Authors / Org</dt><dd>World Labs 团队（创始人 Fei-Fei Li；公司 2024-02 创立）</dd><dt>Link / Blog</dt><dd><a href="https://www.worldlabs.ai/blog/atlas（官方博客，2026-09-01">https://www.worldlabs.ai/blog/atlas（官方博客，2026-09-01</a> 发布）</dd><dt>官方 X 公告</dt><dd><a href="https://x.com/theworldlabs/status/2094839756329041984（2026-09-01）">https://x.com/theworldlabs/status/2094839756329041984（2026-09-01）</a></dd><dt>发布视频</dt><dd><a href="https://www.youtube.com/watch?v=hzvXRHBInx0">https://www.youtube.com/watch?v=hzvXRHBInx0</a></dd><dt>Date read</dt><dd>2026-09-23</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-31-2026-worldlabs-atlas</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas</a></dd><dt>前传</dt><dd>本路线 README「World Labs Atlas 与 roadmap 的关系（2026-09-12）」问答——当时结论是 Atlas 落在 Day27（Cosmos）射程内、不必单独开 Day；2026-09-22 用户采纳李昊建议把路线扩到 34 天，Atlas 成为 Day31 最新进展第一篇</dd><dt>非技术背景（仅记录，不作技术证据）</dt><dd>公司累计融资约 \$1.23B（含 Autodesk \$200M 战略投资，NVIDIA / AMD / Fidelity 参投），报道估值约 \$5B（来源：ainvest / bestaitoolfinder 转述，PR 口径，未独立核实）；产品线 Marble 2025-11 发布、World API 2026-01 上线、2026-07 收购 SceniX（机器人空间智能方向）（来源：cryptobriefing 整理）</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">world-model</span><span class="tag">atlas</span><span class="tag">spatial-intelligence</span><span class="tag">camera-control</span><span class="tag">real-to-sim</span><span class="tag">3d-reconstruction</span><span class="tag">video-generation</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>Atlas 是 World Labs 2026-09-01 发布的 omni 世界模型：从零预训练、原生处理 text / image / video / 3D，以相机位姿为一等输入，把「像素重建」与「像素生成」统一到 viewpoint 锚定的 spatial context 里；能输出最长 1 分钟 1440p 相机可控视频、2–3 张照片的显式 3D 重建（point cloud / 3D Gaussian splat）、以及手机视频驱动的 real-to-sim 机器人仿真数据。但它目前是面向 select partners 的 early access 公告：无公开论文、无权重、无公开 API、无独立第三方复现——所有性能数字均为公司自报，这是今天最硬的边界。</p>
@@ -287,8 +314,10 @@ pre code{background:none;padding:0;color:inherit}
 <li>上一篇：Day 30 — Physical AI Eval + Data Flywheel（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-30-physical-ai-eval-data-flywheel）</li>
 <li>前传：README「World Labs Atlas 与 roadmap 的关系（2026-09-12）」问答——Atlas 落在 Day27 射程内的"新一代对照组"</li>
 <li>下一篇预告：Day 32 — OpenAI GPT-6 Astra（2026-09-03 发布，computer-use 旗舰，"AGI era"；2026-09-24）</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-31-2026-worldlabs-atlas/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Cosmos</h4><ul><li>视频生成当数据引擎</li><li>Transfer 可控重绘</li></ul></div><div class="vscol vs-b"><h4>Atlas</h4><ul><li>3D 一致的世界当数据引擎</li><li>几何持久性</li><li>closed + early access</li></ul></div></div>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">6</div><div class="l">张参考图 + 手工相机路径</div></div><div class="stat"><div class="v">1</div><div class="l">分钟 1440p 最长视频</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-31-2026-worldlabs-atlas/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -299,6 +328,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

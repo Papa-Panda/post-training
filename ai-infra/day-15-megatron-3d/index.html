@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 15 — Megatron 3D Parallelism</title>
+<title>NOTES — Day 15 Megatron 3D Parallelism</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,19 +106,21 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-infra · Day 15</span>
-    <h1>Day 15 — Megatron 3D Parallelism</h1>
+    <h1>NOTES — Day 15 Megatron 3D Parallelism</h1>
     <p class="sub">70B 单卡 182GB OOM → TP4+PP2 切到 25GB 才让 PUE 有意义；G=2 无解、G=8 唯一可行；PP bubble 12% 用 eval async 填。</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">3个CPU真数（待H100 NCCL 补 max_memory_allocated + nvidia-smi Tj + TP AllReduce BW）</a><a href="#sec-3">待H100 NCCL</a><a href="#sec-4">映射表（RL only，禁止金融类比）</a><a href="#sec-5">一句收敛</a><a href="#sec-6">代码</a><a href="#sec-7">原始输出存档</a></nav>
+    <nav><a href="#sec-1">3个CPU真数（待H100 NCCL 补 max_memory_allocated + nvidia-smi Tj + TP AllReduce BW）</a><a href="#sec-2">待H100 NCCL</a><a href="#sec-3">映射表（RL only，禁止金融类比）</a><a href="#sec-4">一句收敛</a><a href="#sec-5">代码</a></nav>
   </details>
-<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Date: 2026-08-15 (Infra Systems / Megatron 3D Parallelism) actually 2026-08-19 delivery of Day15</li>
-</ul>
-<blockquote><p>Connection to Prev: Day14 Paper3 PUE拆解 1.2576 → Day15 3D Parallelism 单卡182GB OOM需TP4+PP2切到25GB才能跑，PUE优化前置条件；Day13 Tj_max 90.5°C throttle 2.5% 用 TP scatter把720W burst打到520W；Day08/09 async 52%省为PP bubble填充提供位置。</p></blockquote></section>
-<section class="sec" id="sec-2"><h2><span class="n">2</span>3个CPU真数（待H100 NCCL 补 max_memory_allocated + nvidia-smi Tj + TP AllReduce BW）</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-15-megatron-3d/index.html</p>
+<p>Connection to Prev: Day14 Paper3 PUE拆解 1.2576 → Day15 3D Parallelism 单卡182GB OOM需TP4+PP2切到25GB才能跑，PUE优化前置条件；Day13 Tj_max 90.5°C throttle 2.5% 用 TP scatter把720W burst打到520W；Day08/09 async 52%省为PP bubble填充提供位置。</p>
+</blockquote>
+<p>Date: 2026-08-15 (Infra Systems / Megatron 3D Parallelism) actually 2026-08-19 delivery of Day15</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>3个CPU真数（待H100 NCCL 补 max_memory_allocated + nvidia-smi Tj + TP AllReduce BW）</h2>
 <h3>1. 单卡 baseline OOM 风险（bf16 2 bytes/param + act）</h3>
 <ul>
 <li>7B: param 14.0GB + act 4.2GB = 18.2GB infer / train 43.3GB (含 opt shard) → G=1可跑 &lt;56GB阈值 [CPU真数]</li>
@@ -92,24 +129,18 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 <h3>2. G=2/4/8 决策树真数（CPU proxy, torch missing故 gloo逻辑验证待补）</h3>
 <ul>
-<li>G=2:
-  <ul>
-    <li>7B DP/FSDP 9.1GB infer proxy vs TP2 8.62GB infer train 21.66GB comm 7.6% → 选 DP最简，通信少，复用Day02 FSDP</li>
-    <li>13B DP 33.8GB/2=16.9GB仍高 vs TP2 16.01GB train 40.22GB comm 8.6% → 选 TP2，避免单层大GEMM</li>
-    <li>70B DP 91GB OOM / TP2 86GB OOM (per code) → G=2无解，需≥8，映射Day13 SLO fail中 oom_kv桶</li>
-  </ul></li>
-<li>G=4:
-  <ul>
-    <li>7B DP only 7.46GB train 13.98GB comm 4.4% → DP足够</li>
-    <li>13B TP2+PP2 9.30GB infer 21.41GB train bubble 12% comm 11.1% → 选 TP+PP，bubble可用eval async填（Day08 52%省）</li>
-    <li>70B TP4 43.1GB infer 108.29GB train 24.8% comm OOM True → 仍需PP</li>
-  </ul></li>
-<li>G=8 (最终解):
-  <ul>
-    <li>7B DP 5.83GB/9.09GB 最优</li>
-    <li>13B TP4+PP2 4.65GB/10.71GB comm 17.5% bubble12% → deep&gt;40层切PP收益</li>
-    <li>70B TP4+PP2 25.05GB infer 57.64GB train bubble12% comm27.3% → 唯一可行，bubble用interleaved压到 &lt;15%再用Day12 reward σ过滤填空</li>
-  </ul></li>
+<li>G=2:</li>
+<li>7B DP/FSDP 9.1GB infer proxy vs TP2 8.62GB infer train 21.66GB comm 7.6% → 选 DP最简，通信少，复用Day02 FSDP</li>
+<li>13B DP 33.8GB/2=16.9GB仍高 vs TP2 16.01GB train 40.22GB comm 8.6% → 选 TP2，避免单层大GEMM</li>
+<li>70B DP 91GB OOM / TP2 86GB OOM (per code) → G=2无解，需≥8，映射Day13 SLO fail中 oom_kv桶</li>
+<li>G=4:</li>
+<li>7B DP only 7.46GB train 13.98GB comm 4.4% → DP足够</li>
+<li>13B TP2+PP2 9.30GB infer 21.41GB train bubble 12% comm 11.1% → 选 TP+PP，bubble可用eval async填（Day08 52%省）</li>
+<li>70B TP4 43.1GB infer 108.29GB train 24.8% comm OOM True → 仍需PP</li>
+<li>G=8 (最终解):</li>
+<li>7B DP 5.83GB/9.09GB 最优</li>
+<li>13B TP4+PP2 4.65GB/10.71GB comm 17.5% bubble12% → deep&gt;40层切PP收益</li>
+<li>70B TP4+PP2 25.05GB infer 57.64GB train bubble12% comm27.3% → 唯一可行，bubble用interleaved压到 &lt;15%再用Day12 reward σ过滤填空</li>
 </ul>
 <p>CPU单进程跑通：所有上面数字来自 <code>python3 megatron_3d_sim.py</code> 实际输出（见下），待H100 NCCL 补真显存峰值。</p>
 <h3>3. 通信/热/PP bubble proxy（CPU估算，待H100 NCCL补带宽真数）</h3>
@@ -118,34 +149,70 @@ pre code{background:none;padding:0;color:inherit}
 <li>TP AllGather per layer 2×hidden: TP=2 comm 7.6%, TP=4 comm 17-27% → 大模型TP&gt;4后边际递减，触发Tj 90°C风险</li>
 <li>PP bubble (PP-1)/m m=8 micro-batch: PP2=12%, PP4=37%（未interleaved）→ interleaved (PP-1)/(2m)=6-18% + eval async填（Day08/09 52%省逻辑）</li>
 <li>热散：TP把720W单卡burst → TP4每卡~480-520W（-28%），映射Day11 fan^3 28*flow^3 + hyst 82/72°C，节流率从2.5%→&lt;1%（待nvidia-smi Tj验证）</li>
-</ul></section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>待H100 NCCL</h2>
+</ul>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>待H100 NCCL</h2>
 <ul>
-<li>torch.cuda.max_memory_allocated() 真数：7B DP G=2 18GB vs proxy 17.24GB偏差，13B TP2 16GB vs proxy 16.01GB，70B TP4+PP2 25GB vs 25.05GB + nvidia-smi Tj</li>
-<li>TP AllReduce带宽：NVLink 600GB/s实测DP AllReduce 7B 1.2GB耗时 ~5ms vs proxy 7.6% wall，评估是否卡TTFT</li>
-<li>PP bubble实测：Megatron-LM interleaved schedule PP=2/4 bubble 12%→6% vs async reward compute填充，TTFT/TPOT联动</li>
-<li>vLLM TPOT overlay：TP=2时 TPOT +15% vs DP only，但TTFT-20ms因切分后单卡QKVO变小，验证GRPO组内N=64 advantage是否受TP引入噪声影响σ&lt;0.05</li>
-<li>Checkpoint sharded vs full：TP rank shard save/restore对应Day07 per-block + Day05 pjit mesh/P，验证70B TP4 PP2 save耗时12ms→全量gather 200ms</li>
-</ul></section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>映射表（RL only，禁止金融类比）</h2>
+<li>[ ] torch.cuda.max_memory_allocated() 真数：7B DP G=2 18GB vs proxy 17.24GB偏差，13B TP2 16GB vs proxy 16.01GB，70B TP4+PP2 25GB vs 25.05GB + nvidia-smi Tj</li>
+<li>[ ] TP AllReduce带宽：NVLink 600GB/s实测DP AllReduce 7B 1.2GB耗时 ~5ms vs proxy 7.6% wall，评估是否卡TTFT</li>
+<li>[ ] PP bubble实测：Megatron-LM interleaved schedule PP=2/4 bubble 12%→6% vs async reward compute填充，TTFT/TPOT联动</li>
+<li>[ ] vLLM TPOT overlay：TP=2时 TPOT +15% vs DP only，但TTFT-20ms因切分后单卡QKVO变小，验证GRPO组内N=64 advantage是否受TP引入噪声影响σ&lt;0.05</li>
+<li>[ ] Checkpoint sharded vs full：TP rank shard save/restore对应Day07 per-block + Day05 pjit mesh/P，验证70B TP4 PP2 save耗时12ms→全量gather 200ms</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>映射表（RL only，禁止金融类比）</h2>
 <table>
-<tr><th>概念</th><th>RL集群</th><th>本code proxy</th></tr>
-<tr><td>DP</td><td>数据并行，AllReduce梯度，显存/G</td><td>7B G=4 7.46GB</td></tr>
-<tr><td>TP</td><td>张量并行，AllGather切片GEMM，散热</td><td>13B TP2 16GB散720W→520W</td></tr>
-<tr><td>PP</td><td>流水并行，bubble (PP-1)/m，interleaved压，eval async填</td><td>PP2 bubble12%→6%</td></tr>
-<tr><td>FSDP分片</td><td>ZeRO1 param/optimizer分片，Day02→03 per-block</td><td>DP/FSDP G=8 5.8GB</td></tr>
-<tr><td>vLLM TTFT/TPOT</td><td>TP切分TTFT↓但ALLGather TPOT↑</td><td>TP2 TTFT-20ms TPOT+15%</td></tr>
-<tr><td>rollout失败</td><td>oom_kv∈5类，70B OOM→SLO1失败</td><td>70B G2 oom True</td></tr>
-</table></section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>一句收敛</h2>
-<blockquote><p>&ldquo;Day14 1.2576把\$/useful算清但只在模型能装进显存时有效，70B 182GB→TP4+PP2 25GB是PUE的前提；Day13 Tj 90.5°C 2.5%节流用TP打散bust避免单卡热点，PP bubble 12%用Day08 async逻辑填，checkpoint分片复用Day07。&rdquo;</p></blockquote></section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>代码</h2>
+<thead>
+<tr>
+<th>概念</th>
+<th>RL集群</th>
+<th>本code proxy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DP</td>
+<td>数据并行，AllReduce梯度，显存/G</td>
+<td>7B G=4 7.46GB</td>
+</tr>
+<tr>
+<td>TP</td>
+<td>张量并行，AllGather切片GEMM，散热</td>
+<td>13B TP2 16GB散720W→520W</td>
+</tr>
+<tr>
+<td>PP</td>
+<td>流水并行，bubble (PP-1)/m，interleaved压，eval async填</td>
+<td>PP2 bubble12%→6%</td>
+</tr>
+<tr>
+<td>FSDP分片</td>
+<td>ZeRO1 param/optimizer分片，Day02→03 per-block</td>
+<td>DP/FSDP G=8 5.8GB</td>
+</tr>
+<tr>
+<td>vLLM TTFT/TPOT</td>
+<td>TP切小QKVO TTFT↓但ALLGather TPOT↑</td>
+<td>TP2 TTFT-20ms TPOT+15%</td>
+</tr>
+<tr>
+<td>rollout失败</td>
+<td>oom_kv∈5类，70B OOM→SLO1失败</td>
+<td>70B G2 oom True</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>一句收敛</h2>
+<p>“Day14 1.2576把\$/useful算清但只在模型能装进显存时有效，70B 182GB→TP4+PP2 25GB是PUE的前提；Day13 Tj 90.5°C 2.5%节流用TP打散bust避免单卡热点，PP bubble 12%用Day08 async逻辑填，checkpoint分片复用Day07。”</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>代码</h2>
 <ul>
 <li><code>megatron_3d_sim.py</code> CPU单进程 ok（torch缺失环境 gloo待补，逻辑已写gloo分支），待H100补 max_memory_allocated + NVML Tj + TP BW</li>
-<li>GitHub: <a href="https://github.com/Papa-Panda/post-training/tree/master/rl-infra/day-15-megatron-3d">https://github.com/Papa-Panda/post-training/tree/master/rl-infra/day-15-megatron-3d</a></li>
-<li>本次真数来源：python3 megatron_3d_sim.py 输出见下（单rank真数），gloo 2-rank sim待 torch环境补跑已写all_reduce分支</li>
-</ul></section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>原始输出存档</h2>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/rl-infra/day-15-megatron-3d</li>
+<li>本次真数来源：python3 megatron_3d_sim.py 输出见上（单rank真数），gloo 2-rank sim待 torch环境补跑已写all_reduce分支</li>
+</ul>
+<h3>原始输出存档</h3>
 <pre><code>[Rank 0/1] Day15 Megatron 3D Parallelism CPU proxy (待H100 NCCL 补 max_memory_allocated)
 Model 7B G=1 -&gt; DP/FSDP only (G=1) sufficient - perGPU infer 17.2GB | infer 17.24GB train 43.32GB comm 4.4% oom=False
 Model 7B G=2 -&gt; TP=2+DP (G=2) - scatter GEMM 7B, Tj Scatter, comm 7.6% | infer 8.62GB train 21.66GB comm 7.6% oom=False
@@ -158,8 +225,11 @@ Model 13B G=8 -&gt; TP=4+PP=2+DP rem (G=8) - bubble 12%, infer 4.7GB train 10.7G
 Model 70B G=1 -&gt; DP/FSDP only (G=1) sufficient - perGPU infer 172.4GB | infer 172.39GB train 433.16GB comm 15.2% oom=True
 Model 70B G=2 -&gt; TP=2+DP (G=2) - scatter GEMM 70B, Tj Scatter, comm 18.4% | infer 86.19GB train 216.58GB comm 18.4% oom=True
 Model 70B G=4 -&gt; TP=4+DP (G=4) - scatter GEMM 70B, Tj Scatter, comm 24.8% | infer 43.10GB train 108.29GB comm 24.8% oom=True
-Model 70B G=8 -&gt; TP=4+PP=2+DP rem (G=8) - bubble 12%, infer 25.0GB train 57.6GB | infer 25.05GB train 57.64GB comm 27.3% oom=False</code></pre></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-15-megatron-3d/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+Model 70B G=8 -&gt; TP=4+PP=2+DP rem (G=8) - bubble 12%, infer 25.0GB train 57.6GB | infer 25.05GB train 57.64GB comm 27.3% oom=False
+</code></pre>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">7B</div><div class="l">推理 18.2GB 训练 43.3GB</div></div><div class="stat"><div class="v">13B</div><div class="l">推理 33.8GB 训练 80.4GB 临界</div></div><div class="stat"><div class="v">70B</div><div class="l">推理 182GB 训练 433GB 必须切分</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>7B 选 DP</h4><ul><li>最简通信少</li></ul></div><div class="vscol vs-b"><h4>13B 选 TP2</h4><ul><li>避免单层大 GEMM</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-15-megatron-3d/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -170,6 +240,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

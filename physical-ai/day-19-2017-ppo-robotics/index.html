@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,17 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充（2026-09-10）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Proximal Policy Optimization Algorithms（主论文）+ Legged-Gym / RSL-RL（robotics rollout 系统）</li>
-<li>Authors / Org: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov — OpenAI（2017，主论文）；Nikita Rudin, David Hoeller, Philipp Reist, Marco Hutter — Robotic Systems Lab, ETH Zurich &amp; NVIDIA（legged_gym, CoRL 2021）；rsl_rl 维护 Mayank Mittal / Clemens Schwarke — ETH Zurich RSL &amp; NVIDIA</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/1707.06347 ｜ https://leggedrobotics.github.io/legged_gym/ ｜ https://arxiv.org/abs/2109.11978</li>
-<li>Date read: 2026-09-10</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">ppo</span><span class="tag">reinforcement-learning</span><span class="tag">actor-critic</span><span class="tag">rollout</span><span class="tag">legged-gym</span><span class="tag">rsl-rl</span><span class="tag">sim2real</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-19-2017-ppo-robotics</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-19-2017-ppo-robotics</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Proximal Policy Optimization Algorithms（主论文）+ Legged-Gym / RSL-RL（robotics rollout 系统）</dd><dt>Authors / Org</dt><dd>John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov — OpenAI（2017，主论文）；Nikita Rudin, David Hoeller, Philipp Reist, Marco Hutter — Robotic Systems Lab, ETH Zurich &amp; NVIDIA（legged_gym, CoRL 2021）；rsl_rl 维护 Mayank Mittal / Clemens Schwarke — ETH Zurich RSL &amp; NVIDIA</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/1707.06347">https://arxiv.org/abs/1707.06347</a> ｜ <a href="https://leggedrobotics.github.io/legged_gym/">https://leggedrobotics.github.io/legged_gym/</a> ｜ <a href="https://arxiv.org/abs/2109.11978">https://arxiv.org/abs/2109.11978</a></dd><dt>Date read</dt><dd>2026-09-10</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-19-2017-ppo-robotics</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-19-2017-ppo-robotics">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-19-2017-ppo-robotics</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">ppo</span><span class="tag">reinforcement-learning</span><span class="tag">actor-critic</span><span class="tag">rollout</span><span class="tag">legged-gym</span><span class="tag">rsl-rl</span><span class="tag">sim2real</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>PPO 用 <strong>clipped surrogate objective + GAE</strong> 把 policy gradient 的更新锁进信任域内，实现"采一次数据、做多个 epoch minibatch 更新"的稳定 on-policy 训练；而 legged_gym / rsl_rl 把 <strong>环境搬进 GPU</strong>（数千并行 env、数据不出显存），让这套算法在单卡上分钟级训出可零样本迁移的腿式机器人行走策略——它是 Day07/08 背后一直在用的算法，今天才正式讲透。</p>
@@ -124,7 +155,7 @@ pre code{background:none;padding:0;color:inherit}
 </ol>
 </section>
 <section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
-<blockquote>
+<blockquote class="pq">
 <p>先统一符号（全文通用）：$s_t$ 真实状态，$o_t$ 观测（机器人能看到的），$a_t$ 动作，$r_t$ 标量奖励，$\theta$ 策略网络参数，$\phi$ value 网络参数，$\pi_\theta(a\mid s)$ 策略（给定状态输出动作分布），$V_\phi(s)$ 状态价值估计，$\gamma\in(0,1)$ 折扣因子，$\tau=(s_0,a_0,r_0,\dots)$ 一条轨迹。</p>
 </blockquote>
 <h3>1. 目标：从"学示范"到"学 reward"</h3>
@@ -176,12 +207,13 @@ $$L^{\text{CLIP}}(\theta)=\hat{\mathbb{E}}_t\left[\min\Big(r_t(\theta)\hat{A}_t,
 | minibatch | batch/$M$ | $M$ 个 minibatch × $K$ epochs（如 $K=5$）复用同一批数据 |</p>
 <p><strong>时间尺度</strong>：仿真 dt≈1–2ms → 控制 50Hz（每 20ms 输出一次 $a_t$）→ 每次 collect 约 $T=24$ 步 ≈ 0.5 秒 sim 时间/env → 1000–2000 次 PPO iteration ≈ 20–40M env steps → <strong>wall-clock 分钟级</strong>（单卡；吞吐 &gt;100k steps/s 为社区复述数，论文/项目页确认的是"平地 &lt;4 分钟、崎岖地形 20 分钟"）。</p>
 <h3>5. 统一框架：一张图看懂 BC / Actor-Critic / PPO</h3>
-<p><code>数据从哪来                    学什么                          代表
+<pre><code>数据从哪来                    学什么                          代表
 ─────────────────────────────────────────────────────────────────
 固定示范 D（死的）   →  最大似然拟合 p(A|O,c)        Day09–14 VLA（BC）
 想象的 latent       →  value 梯度更新 actor          Day06 DreamerV3
 on-policy rollout   →  advantage 加权 PG + clip     Day19 PPO（本篇）
-                      （活的，当前策略自己采）</code></p>
+                      （活的，当前策略自己采）
+</code></pre>
 <p>三条正交轴：<strong>① 数据来源</strong>（示范 / 想象 / 在线交互）、<strong>② 动作表示</strong>（离散 token / flow 场 / diffusion 去噪器 / 高斯 $\mu,\sigma$）、<strong>③ 训练原则</strong>（MLE / value-gradient / clipped-PG）。Day11–14 固定了①=示范、换②；Day06 换①=想象；今天换①=在线交互 + ③=clipped surrogate。<strong>PPO 的数学（ratio-clip）与动作表示无关</strong>——它既可以训高斯策略（locomotion），也可以训 diffusion/flow 头（RL 微调 VLA 的新兴方向）。</p>
 <p><strong>Asymmetric actor-critic 的数学位置</strong>（回答 Q2）：把 $V_\phi$ 的输入从 $o_t$ 换成 privileged $s_t\supset o_t$，即 $V_\phi(s_t)$ 而 $\pi_\theta(a_t\mid o_t)$。PPO 的 actor 和 critic 是<strong>两个独立网络、只通过 $\hat{A}_t$ 耦合</strong>，所以 critic 看什么不影响 actor 的部署约束——这种解耦是 PPO 设计里天然留出的"后门"，locomotion 社区把它变成了标配。</p>
 <h3>6. 数学没覆盖的东西（诚实清单）</h3>
@@ -208,7 +240,7 @@ on-policy rollout   →  advantage 加权 PG + clip     Day19 PPO（本篇）
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"Our experiments test PPO on a collection of benchmark tasks, including simulated robotic locomotion and Atari game playing, and we show that PPO outperforms other online policy gradient methods, and overall strikes a favorable balance between sample complexity, simplicity, and wall-time." —— PPO 论文摘要（arXiv:1707.06347，逐字引用）</p>
 </blockquote>
 </section>
@@ -226,7 +258,7 @@ on-policy rollout   →  advantage 加权 PG + clip     Day19 PPO（本篇）
 </ul>
 </section>
 <section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-10）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下 4 组问答来自 2026-09-10 当晚用户对 Day19 PPO 卡片（batch 复用 / asymmetric actor-critic / locomotion-manipulation 边界 / PPO 跨域）的追问。用户原文按大意精简归档，核心答案保留公式与符号定义。</p>
 </blockquote>
 <h3>Q1：PPO 把同一批 rollout 复用多个 epoch 训，为什么概率比不会失控？</h3>
@@ -274,8 +306,9 @@ on-policy rollout   →  advantage 加权 PG + clip     Day19 PPO（本篇）
 <li><strong>相同</strong>：advantage $\hat{A}_t$（GAE）↔ GRPO 的组内归一化 reward；ratio $r_t(\theta)$ + clip 的 trust-region 式控制；多 epoch batch 复用。</li>
 <li><strong>不同</strong>：① rollout 来源——机器人是仿真器 env step，LLM 是模型自采样 token；② reward 构造——机器人是 hand-shaped dense reward + curriculum，LLM 是 verifier/RM 稀疏 reward；③ 失败成本——机器人真机摔了是硬件钱，LLM 采样错了是算力钱。</li>
 </ul>
-<p><strong>和之前工作的关系</strong>：呼应本 NOTES §可迁移 "RLHF 的 PPO/GRPO 是同一条血统"。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>和之前工作的关系</strong>：呼应本 NOTES §可迁移 "RLHF 的 PPO/GRPO 是同一条血统"。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>DreamerV3</h4><ul><li>actor 在想象的 latent rollout 里更新</li></ul></div><div class="vscol vs-b"><h4>PPO</h4><ul><li>model-free</li><li>真实仿真环境 on-policy 更新</li><li>似然比 r_t(θ) 裁剪</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -286,6 +319,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

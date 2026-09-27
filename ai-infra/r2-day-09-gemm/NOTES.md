@@ -1,5 +1,7 @@
 # NOTES — r2-Day09 GEMM Tiling
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-09-gemm/index.html
+
 ## 准确术语
 
 - **GEMM (General Matrix Multiply)**：通常指 $C\leftarrow\alpha\,op(A)op(B)+\beta C$ ；本课自写 kernel 固定为 row-major、 $\alpha=1,\beta=0$ 、不转置的 $C=AB$ 。
@@ -153,3 +155,6 @@ CUDA kernel 对 $M/N/K$ 非 16 整除时，把 out-of-bounds shared entries 置 
 1. NVIDIA CUDA C++ Best Practices Guide — Shared Memory in Matrix Multiplication: https://docs.nvidia.com/cuda/archive/12.1.0/cuda-c-best-practices-guide/index.html
 2. NVIDIA cuBLAS documentation — GEMM and `cublasSgemm`: https://docs.nvidia.com/cuda/archive/12.1.0/cublas/index.html
 3. NVIDIA CUTLASS — Efficient GEMM in CUDA: https://docs.nvidia.com/cutlass/4.3.2/media/docs/cpp/efficient_gemm.html
+
+<!-- viz:stats: 16 倍 theoretical global loads 下降 | 50% cuBLAS 目标 -->
+<!-- viz:vs: 理论访存 | 降 16 倍 || 实测性能 | 不保证比 naive 快; 需 profiler 验证 -->

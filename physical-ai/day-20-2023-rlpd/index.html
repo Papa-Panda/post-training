@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,18 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充</a><a href="#sec-14">问答补充（2026-09-12）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Efficient Online Reinforcement Learning with Offline Data (RLPD — Reinforcement Learning with Prior Data)</li>
-<li>Authors / Org: Philip J. Ball<em>, Laura Smith</em>, Ilya Kostrikov* (共同一作), Sergey Levine / UC Berkeley</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/2302.02948 (ICML 2023, v4 2023-05-31)</li>
-<li>Date read: 2026-09-11</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">rlpd</span><span class="tag">offline-to-online</span><span class="tag">reinforcement-learning</span><span class="tag">actor-critic</span><span class="tag">sac</span><span class="tag">sample-efficiency</span><span class="tag">real-world-rl</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-20-2023-rlpd</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-20-2023-rlpd</li>
-<li>Official code: https://github.com/ikostrikov/rlpd</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-20-2023-rlpd/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Efficient Online Reinforcement Learning with Offline Data (RLPD — Reinforcement Learning with Prior Data)</dd><dt>Authors / Org</dt><dd>Philip J. Ball<em>, Laura Smith</em>, Ilya Kostrikov* (共同一作), Sergey Levine / UC Berkeley</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/2302.02948">https://arxiv.org/abs/2302.02948</a> (ICML 2023, v4 2023-05-31)</dd><dt>Date read</dt><dd>2026-09-11</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-20-2023-rlpd</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-20-2023-rlpd">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-20-2023-rlpd</a></dd><dt>Official code</dt><dd><a href="https://github.com/ikostrikov/rlpd">https://github.com/ikostrikov/rlpd</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">rlpd</span><span class="tag">offline-to-online</span><span class="tag">reinforcement-learning</span><span class="tag">actor-critic</span><span class="tag">sac</span><span class="tag">sample-efficiency</span><span class="tag">real-world-rl</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>真机上每一步交互都贵（时间/安全/硬件磨损），而离线机器人数据相对便宜——RLPD 问：<strong>能不能不碰复杂的离线 RL 算法，直接用现成的 off-policy 方法（SAC），把离线数据灌进 replay buffer 里在线训？</strong> 答案是"可以，但需要三个最小却关键的改动"：<strong>50/50 对称采样（离线/在线各半）+ critic 加 LayerNorm + 高 UTD（20）配合 Q 集成</strong>；这套 recipe 在 D4RL / Adroit / AntMaze / V-D4RL 上平均 <strong>2.5×</strong> 领先现有 offline-to-online 方法，且零额外计算开销。它是 Day15–18 那些离线机器人数据集（OXE / DROID / BridgeData）通向<strong>真机在线 RL</strong> 的 canonical 桥梁。</p>
@@ -130,7 +160,7 @@ pre code{background:none;padding:0;color:inherit}
 </ol>
 </section>
 <section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
-<blockquote>
+<blockquote class="pq">
 <p>符号统一（全文通用）：$s$ 状态，$a$ 动作，$r(s,a)$ 标量奖励，$\gamma\in(0,1)$ 折扣因子，$\pi_\theta(a\mid s)$ 随机策略，$Q_\phi(s,a)$ critic（价值网络），$\bar Q$ 为 target 网络（慢更新），$\mathcal{D}_{\text{off}}$ 离线数据集（来自行为策略 $\mu_1,\dots,\mu_k$，可能是专家也可能是次优），$\mathcal{D}_{\text{on}}$ 在线 replay buffer（当前及历史 $\pi_\theta$ 采集），$\alpha&gt;0$ 为 SAC 的熵温度系数，$B$ 为 minibatch 大小，$u$ 为 UTD（update-to-data ratio）。</p>
 </blockquote>
 <h3>1. 基座：SAC 的熵正则 Bellman 备份</h3>
@@ -223,7 +253,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"can we simply apply existing off-policy methods to leverage offline data when learning online? … we demonstrate that the answer is yes; however, a set of minimal but important changes to existing off-policy RL algorithms are required to achieve reliable performance."（摘要）
 "correct application of these simple recommendations can provide a 2.5× improvement over existing approaches across a diverse set of competitive benchmarks, with no additional computational overhead."（摘要）</p>
 </blockquote>
@@ -245,7 +275,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>（本日暂无用户追问；Day19 的 follow-up 问答已归档于 day-19 NOTES / README 问答记录。）</p>
 </section>
 <section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-12）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下 4 组问答来自 2026-09-11 当晚（PDT）用户对 Day20 RLPD 卡片的追问：SAC 基座是什么、"离线数据 + 高 UTD" 为什么必然发散、三个 recipe 各自解决什么（LayerNorm 的数学）、"先 IQL/CQL 离线预训练再在线微调" vs RLPD（悲观初始化的在线坍缩）。用户原文按大意精简归档，核心答案保留公式与符号定义。</p>
 </blockquote>
 <h3>Q1：SAC 是啥？</h3>
@@ -321,8 +351,9 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 <p><strong>所以为什么敢说"不需要复杂的离线 RL 算法"</strong>：不是说它数学上证明了悲观主义无用，而是实验事实——在 offline-to-online 这个设定下，<strong>在线数据本身就是最好的"保守主义"</strong>：真实回报对 $ Q $ 外推的纠正，又及时又准确，比任何人工惩罚项都强。论文的论点是工程性的"少即是多"：既然 50/50 + LayerNorm + ensemble 这三块"护栏"已经够让 plain SAC 在在线设定下不翻车，离线 RL 的复杂性就是<strong>不必要的</strong>——留着它，你付的是"坍缩税"，得到的是零。</p>
 <p>一句话：悲观初始化是给"永远不能上路的人"准备的拐杖；RLPD 发现你本来就能上路，拐杖可以扔了，护栏留下。</p>
-<p><strong>关联</strong>：Day19（PPO：on-policy 端，"仿真无限便宜"时的 RL 解法；Day20 是其对偶）；本 NOTES §数学视角（SAC 基座公式、对称采样、LayerNorm+ensemble 治价值发散）。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-20-2023-rlpd/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>关联</strong>：Day19（PPO：on-policy 端，"仿真无限便宜"时的 RL 解法；Day20 是其对偶）；本 NOTES §数学视角（SAC 基座公式、对称采样、LayerNorm+ensemble 治价值发散）。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>离线 RL 方法</h4><ul><li>需专门算法吃 Bridge 数据</li></ul></div><div class="vscol vs-b"><h4>RLPD</h4><ul><li>plain SAC + 配方</li><li>50/50 对称采样</li><li>在线超越</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-20-2023-rlpd/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -333,6 +364,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

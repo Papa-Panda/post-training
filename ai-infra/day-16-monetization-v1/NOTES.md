@@ -1,5 +1,7 @@
 # NOTES — Day 16 Monetization Story v1
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-16-monetization-v1/index.html
+
 > Connection to Prev: Day15 Megatron 3D 182GB→TP4+PP2 25GB → Day16 Monetization v1: PUE 1.2576算清\$/useful但缺可讲的跨界ROI故事，需要把分片/热散/eval异步压缩成150字；Day14 PUE 1.2576 overhead 25.76% + Day13 Tj 90.5°C throttle 2.5%坑用 \$/useful+ jitter/throttle双阈值+TP散热解决。
 
 Date: 2026-08-16 (RL Training / Monetization) — actually 2026-08-20 delivery of Day16
@@ -65,3 +67,5 @@ Story v1 (330字):
 | eval异步 | sync gpu_idle 92.85%→0% | save 52% gpu_idle |
 | GRPO baseline | 组内64样本相对优势抗抖 | σ 0.045过滤后方差↓ |
 | PUE→COST | cooling overhead → \$/useful | 1.2576→0.000244→0.00019 -22% |
+
+<!-- viz:stats: 85% 预测准确率 → p95 0.385s→0.12s 降 68.8% | 90.5→82.49°C Tj | 2.5%→0.83% throttle -->

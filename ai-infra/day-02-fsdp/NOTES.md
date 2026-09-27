@@ -1,5 +1,7 @@
 # Day 2 - FSDP intro - Done
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-02-fsdp/index.html
+
 Date: 2026-08-03 19:07 PDT
 Status: done
 Mode: CPU gloo 2-rank (CUDA N/A, api ok)
@@ -22,3 +24,6 @@ Mode: CPU gloo 2-rank (CUDA N/A, api ok)
 - per-block: sweet spot, comm overlaps compute, bandwidth efficient
 
 Next: Day3 Coding Data flywheel diagram.
+
+<!-- viz:vs: DDP | 显存常驻 P; 每个 rank 存全量参数 || FSDP G=2 | 显存常驻 P/2 + buffer; 省约 50% 参数显存 -->
+<!-- viz:flow: per-layer 太细延迟受限 → per-block 甜点通信计算重叠 → per-model 太粗峰值回 DDP -->

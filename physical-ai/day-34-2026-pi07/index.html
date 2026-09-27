@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,23 +113,15 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">思考题</a><a href="#sec-9">疑问</a><a href="#sec-10">下一步</a><a href="#sec-11">速查表</a><a href="#sec-12">连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: π0.7: a Steerable Generalist Robotic Foundation Model with Emergent Capabilities</li>
-<li>Authors / Org: Physical Intelligence（约 100 人，含 Sergey Levine、Chelsea Finn、Karol Hausman 等）</li>
-<li>官方 Blog：<a href="https://www.pi.website/blog/pi07">A Steerable Model with Emergent Capabilities</a>（2026-04-16 发布；联系邮箱 research@physicalintelligence.company）</li>
-<li>官方技术报告 PDF：https://www.pi.website/download/pi07.pdf （blog 页"Paper"链接）</li>
-<li>独立报道：TechCrunch（Brian Heater，2026-04-16；"if the findings hold up" 保留）| The Decoder（数据污染质疑 + "不具备 reasoning" 视角）| TechDogs（发布日期/组合泛化口径确认）</li>
-<li>抓取盲区：官方 X 帖子 URL、官方 YouTube π0.7 专属视频 URL 未抓取到（demo 视频嵌在 blog 页内）；Fig. 6/9 部分柱状图精确数值未提取，只确认文字结论；π0.7 <strong>权重未开源</strong>（openpi 只有 π0 / π0-FAST / π0.5）</li>
-<li>Date read: 2026-09-26</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">pi07</span><span class="tag">compositional-generalization</span><span class="tag">steerable</span><span class="tag">metadata</span><span class="tag">flow-matching</span><span class="tag">cross-embodiment</span><span class="tag">instruction-following</span><span class="tag">world-model</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-34-2026-pi07</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-34-2026-pi07</li>
-<li>范围说明：π0.7 是路线 VLA 主线的最新进展，Day11 π₀ / Day14 π₀.₅ 的直接续集。以下所有数字均为<strong>公司自报、公司自己跑的评测</strong>，无独立复核——这是今天最硬的边界。官方承认"难以确切判定哪些任务真正 unseen"（Discussion 原文口径）。</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-34-2026-pi07/index.html</p>
+</blockquote>
 </section>
-<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>π0.7: a Steerable Generalist Robotic Foundation Model with Emergent Capabilities</dd><dt>Authors / Org</dt><dd>Physical Intelligence（约 100 人，含 Sergey Levine、Chelsea Finn、Karol Hausman 等）</dd><dt>官方 Blog</dt><dd><a href="<a href="https://www.pi.website/blog/pi07">https://www.pi.website/blog/pi07</a>">A Steerable Model with Emergent Capabilities</a>（2026-04-16 发布；联系邮箱 research@physicalintelligence.company）</dd><dt>官方技术报告 PDF</dt><dd><a href="https://www.pi.website/download/pi07.pdf">https://www.pi.website/download/pi07.pdf</a> （blog 页"Paper"链接）</dd><dt>独立报道</dt><dd>TechCrunch（Brian Heater，2026-04-16；"if the findings hold up" 保留）| The Decoder（数据污染质疑 + "不具备 reasoning" 视角）| TechDogs（发布日期/组合泛化口径确认）</dd><dt>抓取盲区</dt><dd>官方 X 帖子 URL、官方 YouTube π0.7 专属视频 URL 未抓取到（demo 视频嵌在 blog 页内）；Fig. 6/9 部分柱状图精确数值未提取，只确认文字结论；π0.7 <strong>权重未开源</strong>（openpi 只有 π0 / π0-FAST / π0.5）</dd><dt>Date read</dt><dd>2026-09-26</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-34-2026-pi07</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-34-2026-pi07">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-34-2026-pi07</a></dd><dt>范围说明</dt><dd>π0.7 是路线 VLA 主线的最新进展，Day11 π₀ / Day14 π₀.₅ 的直接续集。以下所有数字均为<strong>公司自报、公司自己跑的评测</strong>，无独立复核——这是今天最硬的边界。官方承认"难以确切判定哪些任务真正 unseen"（Discussion 原文口径）。</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">pi07</span><span class="tag">compositional-generalization</span><span class="tag">steerable</span><span class="tag">metadata</span><span class="tag">flow-matching</span><span class="tag">cross-embodiment</span><span class="tag">instruction-following</span><span class="tag">world-model</span></div></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">5B</div><div class="l">参数</div></div></div>
 <p>π0.7（2026-04-16，约 5B 参数）：在 π₀.₅ 的 co-training + knowledge insulation 配方上加了一套<strong>可转向（steerable）条件机制</strong>——subtask 语言 + subgoal 图像 + episode metadata（速度/质量/失误标签）+ control mode，训练时 15% 丢弃 metadata、subgoal 只加 25% batch——让单个通用模型<strong>追平甚至超过为每个任务单独 RL 训练的 specialist</strong>（洗衣折叠/盒子组装吞吐量归一化 &gt;1.0），在从未见过的双臂 UR5e 上折 T 恤达到专家人类 teleop 的水平（成功率 80% vs 80.6%），并通过语言 coaching 让模型学会训练中没出现过的任务组合（air fryer 煮红薯），coaching 数据再微调 high-level 策略即全自主执行、零 teleop 数据。官方自称"emergent capabilities"，The Decoder 反驳"不具备 reasoning，只是 hint"——把"组合泛化"读成"大规模 remix"是今天的读法选择。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
@@ -120,7 +147,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Steerability 的代价谁付？</strong> speed/quality/mistake 标签是额外的人工标注（类似 RLHF 的标注成本），subgoal 图像要训一个 14B 世界模型。π0.7 的"通用"是<strong>用标注换来的</strong>——和 Day16 DROID"裸 teleop 数据"的哲学正好相反。问题：如果标注预算砍掉一半，60–80% 的 unseen 成功率掉多少？官方没给这条消融。</li>
 </ol>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">语言子任务</div><div class="farrow">→</div><div class="fnode">图像 subgoal</div><div class="farrow">→</div><div class="fnode">动作</div></div>
 <h3>1. Motivation：通用模型打不过 specialist 的尴尬</h3>
 <ul>
 <li>背景：π*0.6（RECAP）证明了每个任务单独做 RL 能训出很强的 specialist，但"一任务一模型"不是产品。π0.5 的 open-world 泛化解决的是"去哪做"，没解决"做什么"——没教过的任务还是不会。</li>
@@ -358,8 +385,10 @@ pre code{background:none;padding:0;color:inherit}
 <ul>
 <li>上一篇：Day 33 — Figure AI Helix 2.5（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-33-2026-figure-ai-helix25）</li>
 <li>下一篇预告：第二轮复习 02/34（2026-09-27 起，一天一篇，只更新已有 NOTES）</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-34-2026-pi07/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">5B</div><div class="l">约 = 4B VLM + 860M action expert</div></div><div class="stat"><div class="v">80%</div><div class="l">UR5e 折衣 vs 人类 80.6%</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>世界模型做数据工厂</h4><ul><li>Day27 Cosmos 离线造数据</li></ul></div><div class="vscol vs-b"><h4>世界模型做在线 steer</h4><ul><li>π0.7 用 subgoal 图像 steer 策略</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-34-2026-pi07/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -370,6 +399,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

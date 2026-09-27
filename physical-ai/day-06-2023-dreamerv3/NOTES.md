@@ -1,5 +1,7 @@
 # Day 06 — DreamerV3：Mastering Diverse Domains through World Models
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-06-2023-dreamerv3/index.html
+
 > Day 06 of physical-ai track, following Day05 UniSim. Focus on compact latent dynamics, imagined actor-critic training, scale-robust objectives, and what is still missing for real-robot sim2real.
 
 ## 元信息
@@ -287,3 +289,6 @@ $$\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow \text{ima
 ## 参考链接
 - Paper (arXiv): https://arxiv.org/abs/2301.04104v2
 - Nature: https://doi.org/10.1038/s41586-025-08744-2
+
+<!-- viz:flow: 学预测环境的 world model → 模型内大量想象未来 → actor-critic 在想象里更新 -->
+<!-- viz:stats: 1M steps Control Suite | 200M frames Atari | 50M ProcGen -->

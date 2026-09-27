@@ -1,5 +1,7 @@
 # Day 11 — π₀：用 flow matching 生成高频连续动作块的 VLA
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/index.html
+
 ## 元信息
 - Title: π₀: A Vision-Language-Action Flow Model for General Robot Control
 - Authors / Org: Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, Szymon Jakubczak, Tim Jones, Liyiming Ke, Sergey Levine, Adrian Li-Bell, Mohith Mothukuri, Suraj Nair, Karl Pertsch, Lucy Xiaoyang Shi, James Tanner, Quan Vuong, Anna Walling, Haohuan Wang, Ury Zhilinsky / Physical Intelligence
@@ -191,3 +193,6 @@ $$\mathcal{L}=\mathbb{E}_{\tau,A,\epsilon,o}\|v_\theta(A^\tau,o,\tau)-(A-\epsilo
 **符号**： $ q_t $ 本体感知（关节角/末端位姿）； $ \ell $ 语言指令。
 
 **与之前工作的关系**：本节 3 问构成 Day11 的"flow 生成"主线——速度场直觉 → loss 对 $ \tau $ 取期望 → 语言条件带来多任务；与 Day12 的"去噪"参数化对照（对照见 README 问答记录），与 Day14 的 flow 低层执行相接。
+
+<!-- viz:vs: RT-2/OpenVLA | 动作即 token; 复用 next-token CE infra || π₀ | 动作块即条件生成轨迹; 10 次 flow integration 换连续精度 -->
+<!-- viz:stats: H=50 预测 horizon | 20Hz 每 0.8s 执行 16 步 | 50Hz 每 0.5s 执行 25 步 -->

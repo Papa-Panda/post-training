@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -79,21 +114,13 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：分布覆盖 × 混合权重——in-the-wild 数据为什么能提高泛化</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充（2026-09-07）</a></nav>
   </details>
   <section class="sec" id="sec-0">
-<blockquote>
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-16-2024-droid/index.html</p>
 <p>Alexander Khazatsky<em>, Karl Pertsch</em>（project co-leads）等 / Stanford、UC Berkeley 等 13 所机构，arXiv 2403.12945（2024-03-19；RSS 2024）。机器人数据论文的"田野调查"路线：不追求实验室内的轨迹条数，而追求<strong>场景覆盖</strong>——18 台统一 Franka 硬件栈、50 个采集员、12 个月、在 52 栋建筑的 564 个真实场景（家庭/办公室/实验室）里采集 76k 条轨迹 / 350 小时，全部 CC-BY 4.0 开源。</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: DROID: A Large-Scale In-The-Wild Robot Manipulation Dataset</li>
-<li>Authors / Org: Alexander Khazatsky<em>, Karl Pertsch</em>（co-leads，对应 alexkhaz@stanford.edu / pertsch@berkeley.edu），Jitendra Malik、Roberto Martín-Martín、Subramanian Ramamoorthy、Dorsa Sadigh、Shuran Song、Jiajun Wu、Yuke Zhu、Thomas Kollar、Sergey Levine、Chelsea Finn 等 / Stanford、UC Berkeley、CMU 等 13 所机构（北美/亚洲/欧洲）</li>
-<li>Link / arXiv / Blog: https://export.arxiv.org/abs/2403.12945 ；项目页 https://droid-dataset.github.io （含数据集可视化、训练代码、预训练 checkpoint、硬件复现指南）</li>
-<li>Date read: 2026-09-07</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">droid</span><span class="tag">robot-data</span><span class="tag">in-the-wild</span><span class="tag">diffusion-policy</span><span class="tag">data-diversity</span><span class="tag">co-training</span><span class="tag">scene-coverage</span><span class="tag">franka</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-16-2024-droid</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-16-2024-droid</li>
-</ul>
+<dl class="meta-grid"><dt>Title</dt><dd>DROID: A Large-Scale In-The-Wild Robot Manipulation Dataset</dd><dt>Authors / Org</dt><dd>Alexander Khazatsky<em>, Karl Pertsch</em>（co-leads，对应 alexkhaz@stanford.edu / pertsch@berkeley.edu），Jitendra Malik、Roberto Martín-Martín、Subramanian Ramamoorthy、Dorsa Sadigh、Shuran Song、Jiajun Wu、Yuke Zhu、Thomas Kollar、Sergey Levine、Chelsea Finn 等 / Stanford、UC Berkeley、CMU 等 13 所机构（北美/亚洲/欧洲）</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://export.arxiv.org/abs/2403.12945">https://export.arxiv.org/abs/2403.12945</a> ；项目页 <a href="https://droid-dataset.github.io">https://droid-dataset.github.io</a> （含数据集可视化、训练代码、预训练 checkpoint、硬件复现指南）</dd><dt>Date read</dt><dd>2026-09-07</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-16-2024-droid</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-16-2024-droid">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-16-2024-droid</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">droid</span><span class="tag">robot-data</span><span class="tag">in-the-wild</span><span class="tag">diffusion-policy</span><span class="tag">data-diversity</span><span class="tag">co-training</span><span class="tag">scene-coverage</span><span class="tag">franka</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>DROID 把"机器人数据规模化"从 OXE 的<strong>跨身体聚合</strong>转向<strong>跨场景覆盖</strong>：18 台统一 Franka 硬件、50 个采集员在 52 栋建筑的 564 个真实场景采集 76k 条轨迹（350 小时、86 个任务），每条带 3 路同步 RGB + 深度 + 相机标定 + 语言标注；用 diffusion policy 做 co-training（少量本域数据 + DROID），在 6 个任务 × 4 个地点（实验室→办公室→真实家庭）的评测里，相对已有大规模机器人数据集的 SOTA 做法平均提升约 <strong>20%</strong>——证明<strong>场景多样性本身就是可量化的泛化增益</strong>。</p>
@@ -158,7 +185,7 @@ $$\mathrm{Cov}_{s\sim\{1..564\}}(B_s,\,A)\approx 0,$$
 <li>长尾的另一面：平均每场景 135 条轨迹里，86 个任务的分布也不均匀——稀有任务的 per-task 样本可能不足以支撑可靠的条件分布估计。</li>
 </ul>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">lab</div><div class="farrow">→</div><div class="fnode">office</div><div class="farrow">→</div><div class="fnode">真实家庭</div></div>
 <ol>
 <li><strong>Motivation</strong>: 最通用的机器人策略仍训在少数实验室环境里，场景/任务多样性不足；采集真实场景数据有物流、安全、人力成本三重门槛。问题：能不能组织一次跨机构的分布式采集，把"真实世界"本身变成数据集？和 Physical AGI 的关系：这是"数据飞轮"里最贵的一环——真实世界交互数据的规模化采集方法论。</li>
 <li><strong>System / Method</strong>: 统一 Franka 硬件栈 + 开源复现指南；50 采集员 × 18 台机器人 × 13 机构 × 12 个月；每条轨迹 3 路同步 RGB + 深度 + 相机外参 + 语言标注；场景去重与类型分类保证 564 场景真实不同；策略端零创新——全部实验用 Day12 diffusion policy，数据是唯一变量。</li>
@@ -186,7 +213,7 @@ $$\mathrm{Cov}_{s\sim\{1..564\}}(B_s,\,A)\approx 0,$$
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"We introduce DROID (Distributed Robot Interaction Dataset), an "in-the-wild" robot manipulation dataset with 76k trajectories or 350 hours of interaction data, collected across 564 scenes, 86 tasks, and 52 buildings over the course of 12 months."（arXiv 页 Fig.1 caption 原文）
 "we find that DROID boosts policy performance, robustness and generalizability by 20% on average over state-of-the-art approaches that leverage existing large-scale robot manipulation datasets"（arXiv HTML v2 实验结论原文）</p>
 </blockquote>
@@ -206,7 +233,7 @@ $$\mathrm{Cov}_{s\sim\{1..564\}}(B_s,\,A)\approx 0,$$
 </ul>
 </section>
 <section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-07）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下问答归档自 physical AI side chat（2026-09-07 晚）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。问题起因：Day16 卡片提出"固定硬件 + 场景多样性"路线，用户追问 repo 内哪些工作也是固定硬件。</p>
 </blockquote>
 <h3>repo 里固定硬件的工作</h3>
@@ -219,8 +246,10 @@ $$\mathrm{Cov}_{s\sim\{1..564\}}(B_s,\,A)\approx 0,$$
 </ul>
 <p>其余的都是跨 embodiment：Day11 π₀（7 类机器人配置、1 万+小时）、Day13 Octo（25 个数据集）、Day14 π₀.₅（异构 co-training）、Day15 OXE（22 种身体）。</p>
 <p>所以 DROID 在 repo 里其实是个"复古"的选择：回到 RT-1/RT-2 时代固定硬件的老路——一次只扩张一个多样性轴：OXE 是固定场景、扩张身体多样性；DROID 反其道而行，固定身体、扩张场景多样性。</p>
-<p><strong>术语定义</strong>：embodiment = 机器人身体配置（关节数、末端执行器、相机布局）；<strong>固定硬件</strong> = 训练数据全部来自同一种身体，动作接口天然对齐，省下跨身体对齐成本；<strong>跨 embodiment</strong> = 数据来自多种身体，需要统一接口（Octo 的 mask/tokenizer）或数据配方（π₀.₅ 的 heterogeneous co-training）来吃进去。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-16-2024-droid/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>术语定义</strong>：embodiment = 机器人身体配置（关节数、末端执行器、相机布局）；<strong>固定硬件</strong> = 训练数据全部来自同一种身体，动作接口天然对齐，省下跨身体对齐成本；<strong>跨 embodiment</strong> = 数据来自多种身体，需要统一接口（Octo 的 mask/tokenizer）或数据配方（π₀.₅ 的 heterogeneous co-training）来吃进去。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">564</div><div class="l">场景</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>固定身体扩场景</h4><ul><li>DROID</li><li>干净动作接口</li></ul></div><div class="vscol vs-b"><h4>固定场景扩身体</h4><ul><li>OXE</li><li>22 种身体</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-16-2024-droid/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -231,6 +260,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

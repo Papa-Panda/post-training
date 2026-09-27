@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -79,21 +114,13 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a><a href="#sec-13">第二轮复习（2026-09-27）</a></nav>
   </details>
   <section class="sec" id="sec-0">
-<blockquote>
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/index.html</p>
 <p>Day 02 of ai-physical track, following Day01 ARI/MSL. Focus on fast &amp; accurate contact simulation for robotics.</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: MuJoCo — Multi-Joint dynamics with Contact</li>
-<li>Authors / Org: Roboti LLC (Emanuel Todorov) → Google DeepMind (acquired Oct 2021, open-sourced May 2022)</li>
-<li>Link / Docs: https://mujoco.org/ / https://github.com/google-deepmind/mujoco / https://deepmind.google/blog/opening-up-a-physics-simulator-for-robotics/</li>
-<li>Date read: 2026-08-23</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">mujoco</span><span class="tag">sim2real</span><span class="tag">contact-model</span><span class="tag">humanoid</span><span class="tag">control</span><span class="tag">rl-robotics</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-02-2024-mujoco</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-physical/day-02-2024-mujoco</li>
-</ul>
+<dl class="meta-grid"><dt>Title</dt><dd>MuJoCo — Multi-Joint dynamics with Contact</dd><dt>Authors / Org</dt><dd>Roboti LLC (Emanuel Todorov) → Google DeepMind (acquired Oct 2021, open-sourced May 2022)</dd><dt>Link / Docs</dt><dd><a href="https://mujoco.org/">https://mujoco.org/</a> / <a href="https://github.com/google-deepmind/mujoco">https://github.com/google-deepmind/mujoco</a> / <a href="https://deepmind.google/blog/opening-up-a-physics-simulator-for-robotics/">https://deepmind.google/blog/opening-up-a-physics-simulator-for-robotics/</a></dd><dt>Date read</dt><dd>2026-08-23</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-02-2024-mujoco</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/ai-physical/day-02-2024-mujoco">https://github.com/Papa-Panda/post-training/tree/master/ai-physical/day-02-2024-mujoco</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">mujoco</span><span class="tag">sim2real</span><span class="tag">contact-model</span><span class="tag">humanoid</span><span class="tag">control</span><span class="tag">rl-robotics</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>MuJoCo 是 DeepMind 主力物理引擎，C/C++ 核心 + MJCF XML 建模，以 rich-yet-efficient 的接触模型著称，追求 fast and accurate 的平衡，已从单机 CPU 扩展到 MuJoCo XLA (MJX) 在 TPU/GPU 上每秒百万步，是人形机器人控制与 RL 采样的轻量基座。</p>
@@ -178,7 +205,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"The rich-yet-efficient contact model of the MuJoCo physics simulator has made it a leading choice by robotics researchers" — DeepMind Blog 2021</p>
 <p>"MuJoCo stands for Multi-Joint dynamics with Contact. It is a general purpose physics engine that aims to facilitate research and development in robotics, biomechanics, graphics and animation, machine learning" — MuJoCo Docs</p>
 </blockquote>
@@ -206,7 +233,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-13"><h2><span class="n">13</span>第二轮复习（2026-09-27）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>本轮核验：MuJoCo 主线已到 3.10.0（2026-07，mujoco-mjx 同版内部 vendored MJWarp）；3.8.0 changelog（2026-04-24）确认 multiccd 默认开启、flex 软体多单元支持。MuJoCo Warp（DeepMind + NVIDIA，NVIDIA Warp 实现）仍处 Beta，已并入 MJX 发行、无独立 wheel，并被 NVIDIA Newton physics 收为 8 种可插拔 solver 之一（第三方 intel 文档）。初读 NOTES 的技术事实无硬伤，补三处版本/生态演进 + 一处官方表述精确化。</p>
 </blockquote>
 <h3>元信息修正</h3>
@@ -267,8 +294,10 @@ pre code{background:none;padding:0;color:inherit}
 - MJWarp README（Beta 状态，DeepMind + NVIDIA 维护；fork 镜像，内容与官方一致）：https://github.com/kxqovwcmq-lgtm/mujoco_warp
 - Newton / Isaac Sim 6.0 solver 对比（第三方 intel 文档）：https://github.com/redhat-et/physical-ai-platform-intel/blob/HEAD/deliverables/intel/project-comparisons/simulation-engines.md
 - GPU 路径确定性实测（第三方测试文档）：https://github.com/omnilink-tech/omnisim/blob/HEAD/docs/developer/simulator-comparison.md</p>
-<p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>MuJoCo</h4><ul><li>轻、快、接触准</li><li>渲染弱</li><li>MJX 加 GPU</li></ul></div><div class="vscol vs-b"><h4>Isaac Sim</h4><ul><li>GPU photoreal USD PhysX</li><li>重、贵、需建模</li></ul></div></div>
+<div class="viz viz-flow flow"><div class="fnode">MJCF 定义 humanoid</div><div class="farrow">→</div><div class="fnode">forward dynamics + contact</div><div class="farrow">→</div><div class="fnode">RL policy 输出 torque</div><div class="farrow">→</div><div class="fnode">reward</div><div class="farrow">→</div><div class="fnode">并行采样百万步</div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -279,6 +308,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

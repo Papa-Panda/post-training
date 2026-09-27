@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,18 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Residual Reinforcement Learning for Robot Control</li>
-<li>Authors / Org: Tobias Johannink<em>, Shikhar Bahl</em>, Ashvin Nair<em>（</em>共同一作）, Jianlan Luo, Avinash Kumar, Matthias Loskyll, Juan Aparicio Ojea, Eugen Solowjow, Sergey Levine（Siemens Corporation / UC Berkeley / Hamburg University of Technology；ICRA 2019）</li>
-<li>Link / arXiv: https://arxiv.org/abs/1812.03201（2018-12-07 v1，v2 2018-12-18；ICRA 2019 接收）/ 项目页（含视频）residualrl.github.io（论文内提及）</li>
-<li>Official code: 论文未提供官方实现仓库（诚实标注）；底层 TD3 用的是 rlkit 的公开实现，residual 框架本身与 RL 算法解耦</li>
-<li>Date read: 2026-09-14</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">residual-rl</span><span class="tag">robot-control</span><span class="tag">classical-control</span><span class="tag">feedback-control</span><span class="tag">actor-critic</span><span class="tag">td3</span><span class="tag">sim2real</span><span class="tag">contact-rich-manipulation</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-23-2019-residual-rl</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-23-2019-residual-rl</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Residual Reinforcement Learning for Robot Control</dd><dt>Authors / Org</dt><dd>Tobias Johannink<em>, Shikhar Bahl</em>, Ashvin Nair<em>（</em>共同一作）, Jianlan Luo, Avinash Kumar, Matthias Loskyll, Juan Aparicio Ojea, Eugen Solowjow, Sergey Levine（Siemens Corporation / UC Berkeley / Hamburg University of Technology；ICRA 2019）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/1812.03201（2018-12-07">https://arxiv.org/abs/1812.03201（2018-12-07</a> v1，v2 2018-12-18；ICRA 2019 接收）/ 项目页（含视频）residualrl.github.io（论文内提及）</dd><dt>Official code</dt><dd>论文未提供官方实现仓库（诚实标注）；底层 TD3 用的是 rlkit 的公开实现，residual 框架本身与 RL 算法解耦</dd><dt>Date read</dt><dd>2026-09-14</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-23-2019-residual-rl</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-23-2019-residual-rl">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-23-2019-residual-rl</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">residual-rl</span><span class="tag">robot-control</span><span class="tag">classical-control</span><span class="tag">feedback-control</span><span class="tag">actor-critic</span><span class="tag">td3</span><span class="tag">sim2real</span><span class="tag">contact-rich-manipulation</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>真机学接触任务太贵、纯 RL 从零学太慢太危险——Residual RL 把控制问题拆成两半：<strong>经典反馈控制器</strong> $\pi_H$ 管"几何部分"（走到哪、跟轨迹，刚体动力学先验足够），<strong>TD3 学的残差策略</strong> $\pi_\theta$ 只管"接触部分"（推 block 不推倒、补偿摩擦），最终执行 $u=\pi_H+\pi_\theta$ 叠加；Sawyer 7 自由度臂在 <strong>真机上只用约 8000 步（3 小时）</strong> 学会把 block 插进两个会倒的立块之间——同样条件下手写控制器在 block 被转 ±20° 时成功率 2/20，residual RL 15/20。</p>
@@ -138,7 +168,7 @@ pre code{background:none;padding:0;color:inherit}
 </ol>
 </section>
 <section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
-<blockquote>
+<blockquote class="pq">
 <p>符号统一： $s_t=(s_{m,t},s_{o,t})$ ， $s_m$ 全驱动机器人状态， $s_o$ 欠驱动物体状态； $u_t$ 控制输入； $\pi_H$ 手写控制器（ $s_m\mapsto u$ ）； $\pi_\theta$ 残差策略（ $(s_m,s_o)\mapsto u_{\text{res}}$ ）； $u'_t=u_{\text{res},t}+\pi_H(s_t)$ 实际执行； $r_t=f(s_m)+g(s_o)$ ； $B(s_m,s_o)$ 未知接触耦合矩阵； $\gamma$ 折扣因子。</p>
 </blockquote>
 <h3>1. 先验已知的世界： $A,C$ vs 未知的 $B$</h3>
@@ -229,7 +259,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"The final control policy is a superposition of both control signals."（摘要）
 "We believe this approach can accelerate learning of many tasks, especially those where the control problem can be solved in large part by prior knowledge but requires some model-free reasoning to solve perfectly."（Discussion）</p>
 </blockquote>
@@ -252,8 +282,10 @@ pre code{background:none;padding:0;color:inherit}
 <h3>2026-09-14：Day23 NOTES 在 GitHub 上公式渲染失效</h3>
 <p><strong>问题原文</strong>（用户，2026-09-14 18:40 PDT）："[Day23 NOTES 链接] 这里面有很多数学公式 format 完全不对 没有渲染好"</p>
 <p><strong>核心答案</strong>：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 <code>（ $\pi_H$ ）</code> 里的 <code>（$\pi_H$）</code>、<code>$s_m$，</code>。GitHub 的渲染规则是行内 <code>$...$</code> 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，<code>$$...$$</code> 独立公式块本来就是好的未动。<code>tools/check_repo.py</code> lint 门过，Day23 零新增问题。commit <code>f297c17</code>，已 push。</p>
-<p><strong>关联</strong>：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>关联</strong>：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">8000</div><div class="l">步 ≈ 3 小时 从零真机收敛</div></div><div class="stat"><div class="v">1000</div><div class="l">步内 sim 初始化后即解</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RMA</h4><ul><li>辨而不学</li></ul></div><div class="vscol vs-b"><h4>Residual RL</h4><ul><li>带着镣铐学</li><li>u=π_H+π_θ</li><li>加法永远在线可 undo 有偏先验</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -264,6 +296,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

@@ -1,5 +1,7 @@
 # Day 31 — World Labs Atlas：首个从零训练的多模态世界模型（最新进展 1/4）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-31-2026-worldlabs-atlas/index.html
+
 ## 元信息
 - Title: Atlas: A World Model for Spatial Intelligence
 - Authors / Org: World Labs 团队（创始人 Fei-Fei Li；公司 2024-02 创立）
@@ -125,3 +127,6 @@ $N$ 很小时先验 $p(W)$ 主导——生成、想象； $N$ 增大时似然主
 - 上一篇：Day 30 — Physical AI Eval + Data Flywheel（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-30-physical-ai-eval-data-flywheel）
 - 前传：README「World Labs Atlas 与 roadmap 的关系（2026-09-12）」问答——Atlas 落在 Day27 射程内的"新一代对照组"
 - 下一篇预告：Day 32 — OpenAI GPT-6 Astra（2026-09-03 发布，computer-use 旗舰，"AGI era"；2026-09-24）
+
+<!-- viz:vs: Cosmos | 视频生成当数据引擎; Transfer 可控重绘 || Atlas | 3D 一致的世界当数据引擎; 几何持久性; closed + early access -->
+<!-- viz:stats: 6 张参考图 + 手工相机路径 | 1 分钟 1440p 最长视频 | 几何一致 -->

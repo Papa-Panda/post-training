@@ -1,5 +1,7 @@
 # Day 33 — Figure AI Helix 2.5：30 间陌生家庭的 56%（最新进展 3/4）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-33-2026-figure-ai-helix25/index.html
+
 ## 元信息
 - Title: Helix 2.5: Zero-Shot 30-Home Generalization
 - Authors / Org: Figure AI（创始人兼 CEO Brett Adcock）
@@ -142,3 +144,6 @@ Figure Helix 2.5（2026-09-17）：一台 Figure 03 人形机器人，用**同�
 ## 连接
 - 上一篇：Day 32 — OpenAI GPT-6 Astra（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-32-2026-gpt6-astra）
 - 下一篇预告：Day 34 — Physical Intelligence π0.7（组合泛化；2026-09-26）
+
+<!-- viz:vs: Cosmos | 造数据; 世界模型生成合成数据喂策略 || Figure Index | 收数据; 众包真人视频 35 分钟/秒 -->
+<!-- viz:stats: 9% 同任务从零训练 | 8.3% 图表口径 -->

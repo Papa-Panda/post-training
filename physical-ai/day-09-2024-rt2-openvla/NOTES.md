@@ -1,5 +1,7 @@
 # Day 09 — RT-2 / OpenVLA：把动作变成 token 的 Vision-Language-Action 路线
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-09-2024-rt2-openvla/index.html
+
 ## 元信息
 - Title: RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control / OpenVLA: An Open-Source Vision-Language-Action Model
 - Authors / Org: Anthony Brohan et al. / Google DeepMind；Moo Jin Kim, Karl Pertsch, Siddharth Karamcheti et al. / Stanford University, UC Berkeley, Toyota Research Institute, Google DeepMind, Physical Intelligence, MIT
@@ -149,3 +151,6 @@ RT-2 证明了把连续机器人动作离散成语言 token、再把 web-scale v
 **答**：来自人类演示，标准的 behavior cloning。训练数据是人遥操作机器人录下来的：操作员用 VR 手柄或 spacemouse 控制机械臂做"拿杯子"，系统同步记录每一时刻的图像、指令和 7 维连续动作；训练时把这些连续动作按 256 bin 离散化成 token，就成了交叉熵 loss 的 target（模型预测 $ t_3 $ ，target 就是演示里那一刻真实的 $ t_3 $ ）。RT-2 的 co-finetraining 有意思在 target 是两种混在一起的：web 数据的 target 是文字 token（看图说话、问答），机器人数据的 target 是动作 token。同一个 loss 下，模型自己学会了"看到芒果图片时输出描述文字，看到机器人视角+指令时输出动作"。
 
 **与之前工作的关系**：本节 6 问构成 Day09 的"表示"主线——VLA 的契约定义 → 语义从 web 借 → 动作 token 化 → 演示数据即 target；与 Day11/12 的"生成式连续动作"路线形成对照（对照见 README 问答记录）。
+
+<!-- viz:stats: 7B Prismatic backbone | DINOv2+SigLIP 双编码器 | 7D 相对动作输出 -->
+<!-- viz:vs: RT-2 | fine-tune 混入 web data; generalization 好 || robot-only FT | 困难概念上落后 -->

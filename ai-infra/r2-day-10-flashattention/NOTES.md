@@ -1,5 +1,7 @@
 # NOTES — r2-Day10 FlashAttention
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-10-flashattention/index.html
+
 ## 准确术语
 
 - **Tiling / blocking**：把 $N$ 维按 $B_r$ （行， $Q$ 侧）与 $B_c$ （列， $K/V$ 侧）切块，使每个 \$(i,j)\$ 步的工作集塞进 SRAM。
@@ -69,3 +71,6 @@ for j = 1..T_c:                       # 外层：K/V block（每块只加载一�
 ## 与 Day11/12 的连接
 
 Day11（Triton/`torch.compile`）回答"fused kernel 在工程上怎么写"；Day12（Nsight）回答"怎么证明省下的 HBM 真的变成了 wall-time"。本课只负责把数学与流量账算对。
+
+<!-- viz:vs: FlashAttention | 精确等价标准 attention; 省 O(N²) 显存; 多一次 HBM 遍历 || 稀疏 attention | 近似方法; 如 Longformer -->
+<!-- viz:flow: 分块载入 SRAM → 片上算 softmax 片段 → 累加进 O_i → 丢弃 S_ij -->

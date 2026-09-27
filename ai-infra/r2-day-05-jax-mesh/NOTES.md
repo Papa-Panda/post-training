@@ -1,5 +1,7 @@
 # NOTES - r2-Day05 JAX Mesh/pjit
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-05-jax-mesh/index.html
+
 CPU proxy，待H100验证
 
 - Mesh: 逻辑设备网格，如 8卡 2x4，轴 x=data y=model
@@ -18,3 +20,5 @@ CPU proxy：
 - 8卡 `mesh = Mesh(np.array(jax.devices()).reshape(2,4), ('data','model'))`
 - `pjit(lambda x,y: x@y, in_shardings=(P('data',None), P(None,'model')), out_shardings=P('data','model'))`
 - 真机 Sharding可视化 `jax.debug.visualize_sharding`
+
+<!-- viz:vs: PyTorch DDP | 2-rank 3.12s; 手写通信逻辑 || JAX pjit | 声明式分片; 0 行通信代码; 编译器管通信 -->

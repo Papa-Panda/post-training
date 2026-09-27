@@ -1,5 +1,7 @@
 # NOTES — r2-Day11 Triton 与 torch.compile
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-11-triton--torch.compile/index.html
+
 ## 准确术语
 
 - **Program**：Triton 的执行单元，一个 program 处理一个数据 block（`BLOCK` 个元素）；对应 CUDA 的 thread 处理一个元素。`tl.program_id(axis=0)` 返回当前 program 在 grid 中的编号。
@@ -57,3 +59,5 @@ tl.store(out_ptr + offs, e / s, mask=mask)# 全行唯一的一次 store（片上
 ## 与 Day12 的连接
 
 Day12（Nsight）回答"怎么证明省下的 HBM 真的变成了 wall-time"：Nsight Systems 看 kernel 个数是否从 4 个变成 1 个、host 端是否有 compile/recompile gap；Nsight Compute 看 fused kernel 的 memory throughput 是否顶到 HBM 屋顶。流量模型 $6N\to2N$ 只是理论估计，profiler 才是尺子。
+
+<!-- viz:vs: CUDA thread | 每个 thread 自己算 tid; if(tid<n); 合并靠人工保证 || Triton program | 一个 program 处理一个 block; mask 谓词化; 编译器保证合并 -->

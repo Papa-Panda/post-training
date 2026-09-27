@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,22 +113,15 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: GR00T N1: An Open Foundation Model for Generalist Humanoid Robots</li>
-<li>Authors / Org: NVIDIA（App. A 完整作者列表；GTC 2025 发布）</li>
-<li>Link / arXiv: https://arxiv.org/abs/2503.14734（v1 2025-03-18；v2 含修订）</li>
-<li>官方页面：https://research.nvidia.com/publication/2025-03_nvidia-isaac-gr00t-n1-open-foundation-model-humanoid-robots</li>
-<li>Official code: https://github.com/NVIDIA/Isaac-GR00T（Apache 2.0，模型 / 代码 / 数据 / 评测基准全部开源）</li>
-<li>模型权重：https://huggingface.co/nvidia/GR00T-N1-2B（GR00T-N1-2B：2.2B 总参数，其中 VLM 1.34B）</li>
-<li>Date read: 2026-09-17</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">groot-n1</span><span class="tag">humanoid</span><span class="tag">vla</span><span class="tag">dual-system</span><span class="tag">flow-matching</span><span class="tag">diffusion-transformer</span><span class="tag">data-pyramid</span><span class="tag">sim2real</span><span class="tag">cross-embodiment</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-26-2025-groot-n1</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-26-2025-groot-n1</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/index.html</p>
+</blockquote>
 </section>
-<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>GR00T N1: An Open Foundation Model for Generalist Humanoid Robots</dd><dt>Authors / Org</dt><dd>NVIDIA（App. A 完整作者列表；GTC 2025 发布）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2503.14734（v1">https://arxiv.org/abs/2503.14734（v1</a> 2025-03-18；v2 含修订）</dd><dt>官方页面</dt><dd><a href="https://research.nvidia.com/publication/2025-03_nvidia-isaac-gr00t-n1-open-foundation-model-humanoid-robots">https://research.nvidia.com/publication/2025-03_nvidia-isaac-gr00t-n1-open-foundation-model-humanoid-robots</a></dd><dt>Official code</dt><dd><a href="https://github.com/NVIDIA/Isaac-GR00T（Apache">https://github.com/NVIDIA/Isaac-GR00T（Apache</a> 2.0，模型 / 代码 / 数据 / 评测基准全部开源）</dd><dt>模型权重</dt><dd><a href="https://huggingface.co/nvidia/GR00T-N1-2B（GR00T-N1-2B：2.2B">https://huggingface.co/nvidia/GR00T-N1-2B（GR00T-N1-2B：2.2B</a> 总参数，其中 VLM 1.34B）</dd><dt>Date read</dt><dd>2026-09-17</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-26-2025-groot-n1</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-26-2025-groot-n1">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-26-2025-groot-n1</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">groot-n1</span><span class="tag">humanoid</span><span class="tag">vla</span><span class="tag">dual-system</span><span class="tag">flow-matching</span><span class="tag">diffusion-transformer</span><span class="tag">data-pyramid</span><span class="tag">sim2real</span><span class="tag">cross-embodiment</span></div></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">780K</div><div class="l">仿真轨迹</div></div></div>
 <p>GR00T N1 是 NVIDIA GTC 2025 开源的<strong>首个人形机器人 foundation model</strong>：Kahneman 双系统架构——慢思考的预训练 VLM（Eagle-2，System 2，10Hz）负责理解场景和语言目标，快思考的 Diffusion Transformer（System 1，120Hz）用 flow matching 生成高频闭环动作 chunk；训练上最大的创新不是模型而是<strong>数据金字塔</strong>（web/人类视频垫底 → 仿真+神经生成数据在中 → 真机轨迹封顶，780K 条仿真轨迹 11 小时生成，等价 9 个月人工遥操作），真机 GR-1 双臂语言条件任务上以高数据效率超越 SOTA 模仿学习基线——它把"数据从哪来"这个 Physical AI 最大的 infra 问题，做成了一个可工程化的回答。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
@@ -193,7 +221,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句</h2>
-<blockquote>
+<blockquote class="pq">
 <p>However, unlike the digital realms of words and pixels, no Internet of humanoid robot datasets exists for large-scale pre-training.
 （不像文字和像素的数字世界，不存在可供大规模预训练的人形机器人数据集互联网——这句话是整篇论文、也是数据金字塔的全部动机。）</p>
 </blockquote>
@@ -209,8 +237,10 @@ pre code{background:none;padding:0;color:inherit}
 <ul>
 <li>上一篇: Day 25 — Gato（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-25-2022-gato）</li>
 <li>下一篇预告: Day 27 — Cosmos 世界基础模型（用世界模型生成/筛选 Physical AI 训练数据——正是今天"神经轨迹"这条线的 foundation-model 版本）</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">2.2B</div><div class="l">总参数</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RT-2/OpenVLA</h4><ul><li>离散 action token</li></ul></div><div class="vscol vs-b"><h4>GR00T N1</h4><ul><li>VLM 只推理 System 2</li><li>动作一律连续生成</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -221,6 +251,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

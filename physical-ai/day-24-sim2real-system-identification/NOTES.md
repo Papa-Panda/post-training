@@ -1,5 +1,7 @@
 # Day 24 — 系统辨识 + Sim2Real 评估：SimOpt — Closing the Sim-to-Real Loop
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-24-sim2real-system-identification/index.html
+
 ## 元信息
 - Title: Closing the Sim-to-Real Loop: Adapting Simulation Randomization with Real World Experience（SimOpt）
 - Authors / Org: Yevgen Chebotar（USC）, Ankur Handa, Viktor Makoviychuk, Miles Macklin, Jan Issac, Nathan Ratliff, Dieter Fox（NVIDIA / Univ. of Copenhagen / Univ. of Washington；ICRA 2019）
@@ -139,3 +141,5 @@ SimOpt 只解决了"calibrate"；roadmap 要求的 gate 需要四件套拼齐：
 **核心答案**（side chat 内的诊断 + 修复）：第一轮只修了行内公式 `$ x $` 的内侧空格，没有修到根上。真凶是 Day24 的 `$$...$$` 块与相邻文字挤在同一个段落里：GitHub 的 markdown 层根本不把它识别为公式，块内的 `_` 被解析成 `<em>` 斜体，整块显示成裸 LaTeX。之前猜的"标题后必须空行"也被证伪——对照检查了 Day20 和 ai-data Day13 的单行 `$$...$$` 块渲染正常，说明根因是"块公式必须独占段落"。验证方法：curl GitHub blob 页 HTML，先确认 currentOid 与推送的 commit 一致（排除缓存），再从 GitHub 自己的渲染标记（`<math-renderer class="js-inline-math">`）看它到底认了哪些块——认出的块带 math-renderer 标记，没认出的直接看源码 `<p>`。修复：所有 `$$` 块前后各加空行独占段落；`tools/check_repo.py` gate 强制三条规则（行内公式外侧空格、`$` 内侧紧贴、`$$` 块独占段落）；四个会写公式的 cron prompt 全部补上新规则并要求提交前跑 lint 门。commit `80df815`（另有 `f896397` 消掉 check_repo.py 的 SyntaxWarning），已 push。
 
 **关联**：这是 AGENTS.md 里那条"块公式必须独占段落"规则的实战来源——旧的"标题后空行"理论被自己的验证数据推翻并修正，调试方法论见该条目。与 2026-09-14 的 Day23 行内公式事件（day-23-2019-residual-rl/NOTES.md 问答补充）是同一主题的连续两天抓包；两次合起来形成了仓库现行的三条数学排版规则。
+
+<!-- viz:vs: ADR | 成功率驱动分布扩张; 世界只会变宽 || SimOpt | 轨迹差异驱动分布校准; 世界可向真值收缩 -->

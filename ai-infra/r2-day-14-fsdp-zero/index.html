@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
-  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted}
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -76,54 +111,90 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">术语辨析（准确说法）</a><a href="#sec-2">$1.5\times$ 的推导（手算）</a><a href="#sec-3">为什么 ZeRO-1 的通信"不多花钱"</a><a href="#sec-4">mixed precision 的 $16\ \text{B/param}$ 从哪来</a><a href="#sec-5">与前后课程的连接</a><a href="#sec-6">来源</a></nav>
+    <nav><a href="#sec-1">1. 术语辨析（准确说法）</a><a href="#sec-2">2. $1.5\times$ 的推导（手算）</a><a href="#sec-3">3. 为什么 ZeRO-1 的通信"不多花钱"</a><a href="#sec-4">4. mixed precision 的 $16\ \text{B/param}$ 从哪来</a><a href="#sec-5">5. 与前后课程的连接</a><a href="#sec-6">6. 来源</a></nav>
   </details>
-<section class="sec" id="sec-0">
-<blockquote>
-<p>符号约定与 README §0 一致： $P$ 参数量， $N$ rank 数，$b_p/b_g/b_o$ 参数/梯度/优化器状态的每参数字节数，$M$ 一次 collective 的 payload 字节数。GB 为十进制。</p>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-14-fsdp-zero/index.html</p>
+<p>符号约定与 README §0 一致： $P$ 参数量， $N$ rank 数，
+$b_p/b_g/b_o$ 参数/梯度/优化器状态的每参数字节数，
+$M$ 一次 collective 的 payload 字节数。GB 为十进制。</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-1"><h2><span class="n">1</span>术语辨析（准确说法）</h2>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. 术语辨析（准确说法）</h2>
 <ul>
-<li><strong>model states</strong>：训练时必须存的三样——参数（params）、梯度（grads）、优化器状态（optimizer states，如 Adam 的 m/v）。ZeRO 切的就是这三样，<strong>不切 activations</strong>（那是重计算 r2-Day16 的活）。</li>
-<li><strong>ZeRO（Zero Redundancy Optimizer）</strong>：DeepSpeed 的数据并行显存优化，三个阶段渐进切分。stage 数字越大，切得越多、通信越多。</li>
-<li><strong>ZeRO-1</strong>：只切 optimizer states。梯度做 reduce-scatter（每卡只拿到自己那 $1/N$ 的求和梯度）→ 本地更新自己分片的优化器状态 → all-gather更新后的参数。通信量与 DDP 的 all-reduce 相等。</li>
-<li><strong>ZeRO-2</strong>：在 ZeRO-1 基础上再切梯度（梯度 reduce-scatter 后<strong>不再</strong>all-gather 回全量，直接保留分片）。通信量仍与 DDP 相等。</li>
-<li><strong>ZeRO-3</strong>：再切参数。forward/backward 前 all-gather 凑出全量参数，用完即释放（只保留 $1/N$ 分片）。通信量是 DDP 的 $1.5\times$ 。</li>
-<li><strong>FSDP（Fully Sharded Data Parallel）</strong>：PyTorch 原生的 ZeRO-3 风格实现。<code>FULL_SHARD</code> ≈ ZeRO-3；<code>SHARD_GRAD_OP</code> ≈ ZeRO-2（切梯度+优化器状态，参数不切）；<code>HYBRID_SHARD</code> = 组内 FULL_SHARD、组间复制（机内切分、机间 DDP，省跨机 all-gather）。</li>
-<li><strong>flat_param</strong>：FSDP 把一个 wrap 单元（如一个 transformer block）的所有参数展平成一维再切分——切分粒度是"单元"不是"张量"，减少小消息数量。</li>
-<li><strong>prefetch / limit_all_gathers</strong>：下一个 block 的 all-gather 与当前 block的计算 overlap；同时限制飞行中的 all-gather 数量，防止 prefetch 的瞬时 buffer 吃掉省下来的显存。</li>
+<li><strong>model states</strong>：训练时必须存的三样——参数（params）、梯度（grads）、
+  优化器状态（optimizer states，如 Adam 的 m/v）。ZeRO 切的就是这三样，
+  <strong>不切 activations</strong>（那是重计算 r2-Day16 的活）。</li>
+<li><strong>ZeRO（Zero Redundancy Optimizer）</strong>：DeepSpeed 的数据并行显存优化，
+  三个阶段渐进切分。stage 数字越大，切得越多、通信越多。</li>
+<li><strong>ZeRO-1</strong>：只切 optimizer states。梯度做 reduce-scatter（每卡只拿到
+  自己那 $1/N$ 的求和梯度）→ 本地更新自己分片的优化器状态 → all-gather
+  更新后的参数。通信量与 DDP 的 all-reduce 相等。</li>
+<li><strong>ZeRO-2</strong>：在 ZeRO-1 基础上再切梯度（梯度 reduce-scatter 后<strong>不再</strong>
+  all-gather 回全量，直接保留分片）。通信量仍与 DDP 相等。</li>
+<li><strong>ZeRO-3</strong>：再切参数。forward/backward 前 all-gather 凑出全量参数，
+  用完即释放（只保留 $1/N$ 分片）。通信量是 DDP 的 $1.5\times$ 。</li>
+<li><strong>FSDP（Fully Sharded Data Parallel）</strong>：PyTorch 原生的 ZeRO-3 风格实现。
+  <code>FULL_SHARD</code> ≈ ZeRO-3；<code>SHARD_GRAD_OP</code> ≈ ZeRO-2（切梯度+优化器状态，
+  参数不切）；<code>HYBRID_SHARD</code> = 组内 FULL_SHARD、组间复制（机内切分、
+  机间 DDP，省跨机 all-gather）。</li>
+<li><strong>flat_param</strong>：FSDP 把一个 wrap 单元（如一个 transformer block）的所有参数
+  展平成一维再切分——切分粒度是"单元"不是"张量"，减少小消息数量。</li>
+<li><strong>prefetch / limit_all_gathers</strong>：下一个 block 的 all-gather 与当前 block
+  的计算 overlap；同时限制飞行中的 all-gather 数量，防止 prefetch 的
+  瞬时 buffer 吃掉省下来的显存。</li>
 </ul>
 </section>
-<section class="sec" id="sec-2"><h2><span class="n">2</span>$1.5\times$ 的推导（手算）</h2>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. $1.5\times$ 的推导（手算）</h2>
 <p>DDP 每步：all-reduce 梯度，ring 公式 $2(N-1)/N \times M_g$ 。</p>
-<p>ZeRO-3 每步（ $M_p$ 参数字节， $M_g$ 梯度字节，通常 $M_p = M_g$ ）：$$2 \times \frac{N-1}{N} M_p \;\;(\text{两次 all-gather}) \;+\; \frac{N-1}{N} M_g \;\;(\text{一次 reduce-scatter})$$</p>
-<p>$M_p = M_g = M$ 时 $= 3(N-1)/N \times M = 1.5 \times [2(N-1)/N \times M]$ 。这就是 ZeRO 论文的原话：ZeRO-3 的通信量是数据并行的 $1.5\times$ 。toy 数值（README 例 B）：DDP $600\ \text{B}$ ，ZeRO-3 $900\ \text{B}$ 。</p>
+<p>ZeRO-3 每步（ $M_p$ 参数字节， $M_g$ 梯度字节，通常 $M_p = M_g$ ）：
+$$2 \times \frac{N-1}{N} M_p \;\;(\text{两次 all-gather}) \;+\; \frac{N-1}{N} M_g \;\;(\text{一次 reduce-scatter})$$</p>
+<p>$M_p = M_g = M$ 时 $= 3(N-1)/N \times M = 1.5 \times [2(N-1)/N \times M]$ 。
+这就是 ZeRO 论文的原话：ZeRO-3 的通信量是数据并行的 $1.5\times$ 。
+toy 数值（README 例 B）：DDP $600\ \text{B}$ ，ZeRO-3 $900\ \text{B}$ 。</p>
 </section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>为什么 ZeRO-1 的通信"不多花钱"</h2>
-<p>DDP 的 all-reduce = reduce-scatter + all-gather（ring 实现里本来就是两阶段）。ZeRO-1 把"all-reduce 梯度"拆成"reduce-scatter 梯度（求和分片）+all-gather 参数（更新后广播）"——总量都是 $2(N-1)/N \times M$ ，只是把一次 all-gather 从"梯度"换成了"参数"。所以 ZeRO-1/2 相对 DDP是<strong>纯赚显存、不加通信</strong>；贵的是 ZeRO-3 那两次参数 all-gather。</p>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 为什么 ZeRO-1 的通信"不多花钱"</h2>
+<p>DDP 的 all-reduce = reduce-scatter + all-gather（ring 实现里本来就是两阶段）。
+ZeRO-1 把"all-reduce 梯度"拆成"reduce-scatter 梯度（求和分片）+
+all-gather 参数（更新后广播）"——总量都是 $2(N-1)/N \times M$ ，
+只是把一次 all-gather 从"梯度"换成了"参数"。所以 ZeRO-1/2 相对 DDP
+是<strong>纯赚显存、不加通信</strong>；贵的是 ZeRO-3 那两次参数 all-gather。</p>
 </section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>mixed precision 的 $16\ \text{B/param}$ 从哪来</h2>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. mixed precision 的 $16\ \text{B/param}$ 从哪来</h2>
 <p>$$2\ (\text{fp16 参数}) + 2\ (\text{fp16 梯度}) + 4\ (\text{fp32 master}) + 4\ (\text{fp32 m}) + 4\ (\text{fp32 v}) = 16$$</p>
-<p>fp32 master 的存在是因为：fp16 的精度不够做 $lr \times grad$ 这种小更新累加，更新必须在 fp32 里做，再 cast 回 fp16。这 $4\ \text{B}$ 是"精度税"，roadmap 的 $84\ \text{GB}$ 口径把它折掉了（ $12\ \text{B/param}$ ）。两种口径结论一致：都装不进单张 80GB。</p>
+<p>fp32 master 的存在是因为：fp16 的精度不够做 $lr \times grad$ 这种小更新累加，
+更新必须在 fp32 里做，再 cast 回 fp16。这 $4\ \text{B}$ 是"精度税"，
+roadmap 的 $84\ \text{GB}$ 口径把它折掉了（ $12\ \text{B/param}$ ）。
+两种口径结论一致：都装不进单张 80GB。</p>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>与前后课程的连接</h2>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. 与前后课程的连接</h2>
 <ul>
-<li><strong>承 Day13</strong>：Day13 省的是推理侧 decode 的 KV cache；Day14 省的是训练侧的model states。两边都在做同一件事：把"不得不存的东西"切小/压小，代价分别是"换一套数学"和"多一次通信"。</li>
-<li><strong>启 Day15（TP/PP/SP）</strong>：ZeRO/FSDP 是"数据并行内部"的切分；当 $N$ 继续放大、通信盖不住时，就要把模型本身按张量/流水线切开——那是 Day15 的 3D 并行。</li>
-<li><strong>启 Day16（混合精度/重计算）</strong>：ZeRO 不碰 activations；长序列训练的activation 显存墙靠 activation checkpointing（用计算换显存，与今天"用通信换显存"对称）解决。</li>
+<li><strong>承 Day13</strong>：Day13 省的是推理侧 decode 的 KV cache；Day14 省的是训练侧的
+  model states。两边都在做同一件事：把"不得不存的东西"切小/压小，
+  代价分别是"换一套数学"和"多一次通信"。</li>
+<li><strong>启 Day15（TP/PP/SP）</strong>：ZeRO/FSDP 是"数据并行内部"的切分；当 $N$ 继续放大、
+  通信盖不住时，就要把模型本身按张量/流水线切开——那是 Day15 的 3D 并行。</li>
+<li><strong>启 Day16（混合精度/重计算）</strong>：ZeRO 不碰 activations；长序列训练的
+  activation 显存墙靠 activation checkpointing（用计算换显存，
+  与今天"用通信换显存"对称）解决。</li>
 </ul>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>来源</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. 来源</h2>
 <ul>
-<li>Rajbhandari et al., "ZeRO: Memory Optimizations Toward Training TrillionParameter Models", <a href="https://arxiv.org/abs/1910.02054">https://arxiv.org/abs/1910.02054</a>（三阶段定义与$1.5\times$ 通信结论的原始出处）</li>
-<li>Rajbhandari et al., "ZeRO-Offload", <a href="https://arxiv.org/abs/2101.06840">https://arxiv.org/abs/2101.06840</a>；"ZeRO-Infinity", <a href="https://arxiv.org/abs/2104.07857">https://arxiv.org/abs/2104.07857</a>（把 states 进一步offload 到 CPU/NVMe，本课未展开）</li>
-<li>Zhao et al., "PyTorch FSDP", <a href="https://arxiv.org/abs/2304.11277">https://arxiv.org/abs/2304.11277</a>（flat_param、per-block wrap、prefetch 的工程实现）</li>
+<li>Rajbhandari et al., "ZeRO: Memory Optimizations Toward Training Trillion
+  Parameter Models", <a href="https://arxiv.org/abs/1910.02054">https://arxiv.org/abs/1910.02054</a>（三阶段定义与
+  $1.5\times$ 通信结论的原始出处）</li>
+<li>Rajbhandari et al., "ZeRO-Offload", <a href="https://arxiv.org/abs/2101.06840">https://arxiv.org/abs/2101.06840</a>；
+  "ZeRO-Infinity", <a href="https://arxiv.org/abs/2104.07857">https://arxiv.org/abs/2104.07857</a>（把 states 进一步
+  offload 到 CPU/NVMe，本课未展开）</li>
+<li>Zhao et al., "PyTorch FSDP", <a href="https://arxiv.org/abs/2304.11277">https://arxiv.org/abs/2304.11277</a>
+  （flat_param、per-block wrap、prefetch 的工程实现）</li>
 <li>PyTorch FSDP 文档：<a href="https://pytorch.org/docs/stable/fsdp.html">https://pytorch.org/docs/stable/fsdp.html</a></li>
 <li>DeepSpeed ZeRO 教程：<a href="https://www.deepspeed.ai/tutorials/zero/">https://www.deepspeed.ai/tutorials/zero/</a></li>
 </ul>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-14-fsdp-zero/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>DDP</h4><ul><li>每 rank 存全量参数</li></ul></div><div class="vscol vs-b"><h4>ZeRO/FSDP</h4><ul><li>切分参数梯度优化器</li><li>用通信换显存</li><li>两种口径都装不进单张 80GB</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-14-fsdp-zero/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -134,6 +205,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

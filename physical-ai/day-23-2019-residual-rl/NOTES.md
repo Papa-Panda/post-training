@@ -1,5 +1,7 @@
 # Day 23 — Residual RL：Residual Reinforcement Learning for Robot Control
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/index.html
+
 ## 元信息
 - Title: Residual Reinforcement Learning for Robot Control
 - Authors / Org: Tobias Johannink*, Shikhar Bahl*, Ashvin Nair*（*共同一作）, Jianlan Luo, Avinash Kumar, Matthias Loskyll, Juan Aparicio Ojea, Eugen Solowjow, Sergey Levine（Siemens Corporation / UC Berkeley / Hamburg University of Technology；ICRA 2019）
@@ -154,3 +156,6 @@ $$\pi_\theta(s)\;\approx\;-b\;+\;\text{feedback correction}(s_m,s_o).$$
 **核心答案**：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 `（ $\pi_H$ ）` 里的 `（$\pi_H$）`、`$s_m$，`。GitHub 的渲染规则是行内 `$...$` 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，`$$...$$` 独立公式块本来就是好的未动。`tools/check_repo.py` lint 门过，Day23 零新增问题。commit `f297c17`，已 push。
 
 **关联**：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。
+
+<!-- viz:stats: 8000 步 ≈ 3 小时 从零真机收敛 | 1000 步内 sim 初始化后即解 -->
+<!-- viz:vs: RMA | 辨而不学 || Residual RL | 带着镣铐学; u=π_H+π_θ; 加法永远在线可 undo 有偏先验 -->

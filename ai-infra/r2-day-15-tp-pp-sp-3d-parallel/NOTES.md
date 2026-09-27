@@ -1,5 +1,7 @@
 # r2-Day15 NOTES — 术语、公式核对与上一课/下一课链接
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/index.html
+
 ## 术语（准确定义）
 
 - **Tensor Parallelism (TP)**：把单个 GEMM 的权重矩阵按输入/输出维度切分到 $T$ 个 rank。
@@ -49,3 +51,6 @@ r2-Day15 回答"模型本体太大怎么办"（切张量/层/序列）。两者�
 r2-Day16：混合精度（BF16 为什么指数位 8 位、尾数 7 位就够）/ 梯度累积 /
 Activation Checkpointing——用**计算**换显存的第三条路，
 与 Day14（通信换显存）、Day15（切模型换规模）形成完整的不可能三角。
+
+<!-- viz:stats: 4 次 all-reduce 每层每 microbatch TP -->
+<!-- viz:flow: 列并行切输出维 → 行并行切输入维 → 一次 all-reduce 求和 -->

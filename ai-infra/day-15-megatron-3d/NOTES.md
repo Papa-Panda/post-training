@@ -1,5 +1,7 @@
 # NOTES — Day 15 Megatron 3D Parallelism
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-15-megatron-3d/index.html
+
 > Connection to Prev: Day14 Paper3 PUE拆解 1.2576 → Day15 3D Parallelism 单卡182GB OOM需TP4+PP2切到25GB才能跑，PUE优化前置条件；Day13 Tj_max 90.5°C throttle 2.5% 用 TP scatter把720W burst打到520W；Day08/09 async 52%省为PP bubble填充提供位置。
 
 Date: 2026-08-15 (Infra Systems / Megatron 3D Parallelism) actually 2026-08-19 delivery of Day15
@@ -75,3 +77,6 @@ Model 70B G=2 -> TP=2+DP (G=2) - scatter GEMM 70B, Tj Scatter, comm 18.4% | infe
 Model 70B G=4 -> TP=4+DP (G=4) - scatter GEMM 70B, Tj Scatter, comm 24.8% | infer 43.10GB train 108.29GB comm 24.8% oom=True
 Model 70B G=8 -> TP=4+PP=2+DP rem (G=8) - bubble 12%, infer 25.0GB train 57.6GB | infer 25.05GB train 57.64GB comm 27.3% oom=False
 ```
+
+<!-- viz:stats: 7B 推理 18.2GB 训练 43.3GB | 13B 推理 33.8GB 训练 80.4GB 临界 | 70B 推理 182GB 训练 433GB 必须切分 -->
+<!-- viz:vs: 7B 选 DP | 最简通信少 || 13B 选 TP2 | 避免单层大 GEMM || 70B | G=2 无解需 ≥8 卡 -->

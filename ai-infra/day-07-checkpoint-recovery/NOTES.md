@@ -1,5 +1,7 @@
 # Day 7 NOTES - 2026-08-08 14:30 PDT (补)
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-checkpoint-recovery/index.html
+
 Date: 2026-08-08 14:30 PDT (补 08-11)
 Status: done (CPU gloo 验证逻辑，待 H100 NCCL 验证 peak mem + DCP throughput)
 
@@ -37,3 +39,7 @@ torchrun --nproc_per_node=2 fsdp_day7_checkpoint.py
 ```
 
 待真机：补 `torch.cuda.max_memory_allocated` 对比，DCP 并行写测 `tokens/sec` 无影响
+
+<!-- viz:vs: Full checkpoint | model.state_dict() 自动 gather 成 full; rank0 写; 恢复简单 || Sharded DCP | 每卡写自己分片; 并行快; 需拼分片恢复 -->
+<!-- viz:flow: 启动找最新 ckpt → load_state_dict + optimizer + epoch → sampler.set_epoch → 从 epoch 1 继续 -->
+<!-- viz:stats: 2.31 epoch 0 loss | 2.14 epoch 1 loss | 12ms ckpt 写耗时 rank0 -->

@@ -1,5 +1,7 @@
 # NOTES — r2-Day07 CUDA 编程模型与访存映射
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-07-cuda-programming-model/index.html
+
 ## 准确术语
 
 - **Grid**：一次 kernel launch 创建的全部 thread blocks。
@@ -134,3 +136,6 @@ $$\text{bank}(\ell)=(33\ell+c)\bmod32=(\ell+c)\bmod32$$
 1. NVIDIA CUDA Programming Guide: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html
 2. NVIDIA CUDA C++ Best Practices Guide: https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html
 3. NVIDIA Nsight Compute Occupancy Calculator: https://docs.nvidia.com/nsight-compute/NsightCompute/index.html#occupancy-calculator
+
+<!-- viz:stats: 4 transactions 合并访问 | 128B 请求搬运一致 | 100% 效率 -->
+<!-- viz:vs: 合并访问 | 4 transactions; 128B/128B; 效率 100% || 跨步访问 | 8 个 32B segments; 每 segment 只用一半; 效率减半 -->

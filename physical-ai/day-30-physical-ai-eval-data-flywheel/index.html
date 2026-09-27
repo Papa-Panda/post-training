@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,19 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">今晚产出</a><a href="#sec-10">连接</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Physical AI Eval + Data Flywheel — end-to-end synthesis（收官日，无单篇论文）</li>
-<li>Authors / Org: —</li>
-<li>Link / arXiv: 本日为 30 天路线收官综述；锚点材料见 Day28（ManiSkill3 / robosuite）与 Day29（Brunke et al. 安全综述）</li>
-<li>锚点论文：ManiSkill3 — https://arxiv.org/abs/2410.00425；Safe Learning in Robotics 综述 — https://arxiv.org/abs/2108.06266</li>
-<li>锚点代码：ManiSkill — https://github.com/haosulab/ManiSkill；safe-control-gym — https://github.com/utiasDSL/safe-control-gym</li>
-<li>Date read: 2026-09-21</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">evaluation</span><span class="tag">data-flywheel</span><span class="tag">release-gate</span><span class="tag">deployment</span><span class="tag">synthesis</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-30-physical-ai-eval-data-flywheel</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-30-physical-ai-eval-data-flywheel</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-30-physical-ai-eval-data-flywheel/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Physical AI Eval + Data Flywheel — end-to-end synthesis（收官日，无单篇论文）</dd><dt>Authors / Org</dt><dd>—</dd><dt>Link / arXiv</dt><dd>本日为 30 天路线收官综述；锚点材料见 Day28（ManiSkill3 / robosuite）与 Day29（Brunke et al. 安全综述）</dd><dt>锚点论文</dt><dd>ManiSkill3 — <a href="https://arxiv.org/abs/2410.00425；Safe">https://arxiv.org/abs/2410.00425；Safe</a> Learning in Robotics 综述 — <a href="https://arxiv.org/abs/2108.06266">https://arxiv.org/abs/2108.06266</a></dd><dt>锚点代码</dt><dd>ManiSkill — <a href="https://github.com/haosulab/ManiSkill；safe-control-gym">https://github.com/haosulab/ManiSkill；safe-control-gym</a> — <a href="https://github.com/utiasDSL/safe-control-gym">https://github.com/utiasDSL/safe-control-gym</a></dd><dt>Date read</dt><dd>2026-09-21</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-30-physical-ai-eval-data-flywheel</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-30-physical-ai-eval-data-flywheel">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-30-physical-ai-eval-data-flywheel</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">evaluation</span><span class="tag">data-flywheel</span><span class="tag">release-gate</span><span class="tag">deployment</span><span class="tag">synthesis</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>Day30 是收官日：把 30 天从"点"连成"线"——Day28 的评测合同给出 release 的<strong>测量尺</strong>，Day29 的安全栈给出 release 的<strong>红线</strong>，Day30 把两者焊进一条生产闭环：failure → triage → recollect / resimulate → retrain → gated deploy；eval 不是终点，是数据飞轮的转速表；飞轮转起来，Day01–29 的每一项技术才有复利。</p>
@@ -116,7 +145,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>飞轮的闭环稳定性</strong>：部署 → 数据回流 → 模型变强 → 部署更广 → 遇到更难的分布 → 更多失败数据……这是正反馈。它什么时候收敛、什么时候发散（比如模型变强后接更难的任务，<strong>观测成功率反而下降</strong>——"越强越敢，越敢越难"）？怎么设计让飞轮"向上收敛"的阻尼？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">数据</div><div class="farrow">→</div><div class="fnode">模型</div><div class="farrow">→</div><div class="fnode">部署</div><div class="farrow">→</div><div class="fnode">数据，复利增长</div></div>
 <h3>1. Motivation</h3>
 <ul>
 <li>前 29 天解决"怎么训出一个能用的 policy"，Day30 回答"怎么让它在生产里一直变好、且不出事"。生产系统的三个敌人：</li>
@@ -186,8 +215,10 @@ pre code{background:none;padding:0;color:inherit}
 <ul>
 <li>上一篇：Day 29 — Safe Robot Learning（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-29-safe-robot-learning）</li>
 <li>这是 30 天路线的最后一篇：30/30 收官 🎉</li>
-</ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-30-physical-ai-eval-data-flywheel/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</ul>
+<div class="viz viz-flow flow"><div class="fnode">gated deploy</div><div class="farrow">→</div><div class="fnode">failure</div><div class="farrow">→</div><div class="fnode">triage</div><div class="farrow">→</div><div class="fnode">recollect/resimulate</div><div class="farrow">→</div><div class="fnode">retrain</div><div class="farrow">→</div><div class="fnode">gated deploy</div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Day28 评测</h4><ul><li>静态合同</li><li>固定测度二项估计</li></ul></div><div class="vscol vs-b"><h4>Day30 飞轮</h4><ul><li>转速表</li><li>测度随部署分布漂移演进</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-30-physical-ai-eval-data-flywheel/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -198,6 +229,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

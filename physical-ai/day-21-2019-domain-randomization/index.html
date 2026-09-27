@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 21 — Domain Randomization / ADR：Solving Rubik&#x27;s Cube with a Robot Hand</title>
+<title>Day 21 — Domain Randomization / ADR：Solving Rubik's Cube with a Robot Hand</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,25 +106,20 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">physical-ai · Day 21</span>
-    <h1>Day 21 — Domain Randomization / ADR：Solving Rubik&#x27;s Cube with a Robot Hand</h1>
+    <h1>Day 21 — Domain Randomization / ADR：Solving Rubik's Cube with a Robot Hand</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充</a><a href="#sec-14">问答补充（2026-09-13）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Solving Rubik's Cube with a Robot Hand（Automatic Domain Randomization，ADR）</li>
-<li>Authors / Org: OpenAI（Ilge Akkaya<em>, Marcin Andrychowicz</em>, Maciek Chociej<em>, Mateusz Litwin</em>, Bob McGrew<em>, Arthur Petron</em>, Alex Paino<em>, Matthias Plappert</em>, Glenn Powell<em>, Raphael Ribas</em>, Jonas Schneider<em>, Nikolas Tezak</em>, Jerry Tworek<em>, Peter Welinder</em>, Lilian Weng<em>, Qiming Yuan</em>, Wojciech Zaremba<em>, Lei Zhang</em>；作者按字母序，引用请用 OpenAI et al.）</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/1910.07113（2019-10-17 preprint）/ 官方博客 http://openai.com/index/solving-rubiks-cube/</li>
-<li>Date read: 2026-09-12</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">domain-randomization</span><span class="tag">adr</span><span class="tag">sim2real</span><span class="tag">dexterous-manipulation</span><span class="tag">ppo</span><span class="tag">meta-learning</span><span class="tag">rubiks-cube</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-21-2019-domain-randomization</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-21-2019-domain-randomization</li>
-<li>Official code: 训练系统<strong>无官方开源</strong>（同 2018 Dactyl 一样）；环境层面的 Shadow hand 可参考 openai/robogym，但不含 ADR 训练管线——卡片里只给论文 + 官方博客链接，诚实标注。</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Solving Rubik's Cube with a Robot Hand（Automatic Domain Randomization，ADR）</dd><dt>Authors / Org</dt><dd>OpenAI（Ilge Akkaya<em>, Marcin Andrychowicz</em>, Maciek Chociej<em>, Mateusz Litwin</em>, Bob McGrew<em>, Arthur Petron</em>, Alex Paino<em>, Matthias Plappert</em>, Glenn Powell<em>, Raphael Ribas</em>, Jonas Schneider<em>, Nikolas Tezak</em>, Jerry Tworek<em>, Peter Welinder</em>, Lilian Weng<em>, Qiming Yuan</em>, Wojciech Zaremba<em>, Lei Zhang</em>；作者按字母序，引用请用 OpenAI et al.）</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/1910.07113（2019-10-17">https://arxiv.org/abs/1910.07113（2019-10-17</a> preprint）/ 官方博客 <a href="http://openai.com/index/solving-rubiks-cube/">http://openai.com/index/solving-rubiks-cube/</a></dd><dt>Date read</dt><dd>2026-09-12</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-21-2019-domain-randomization</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-21-2019-domain-randomization">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-21-2019-domain-randomization</a></dd><dt>Official code</dt><dd>训练系统<strong>无官方开源</strong>（同 2018 Dactyl 一样）；环境层面的 Shadow hand 可参考 openai/robogym，但不含 ADR 训练管线——卡片里只给论文 + 官方博客链接，诚实标注。</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">domain-randomization</span><span class="tag">adr</span><span class="tag">sim2real</span><span class="tag">dexterous-manipulation</span><span class="tag">ppo</span><span class="tag">meta-learning</span><span class="tag">rubiks-cube</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>真机数据太贵、接触动力学（摩擦/弹性/延迟）又测不准——DR 的赌注是"<strong>别试图把仿真做准，把仿真做宽</strong>"：在随机化的环境参数分布 $p_\phi(\xi)$ 上训策略，只要真实世界落在分布的支撑集里，transfer 自然发生。Tobin 2017 证明了视觉 DR 可行（纯仿真 RGB 训物体检测器转真机抓取）；OpenAI 把它推到动力学 DR（2018 Dactyl 方块重定向），再用 <strong>ADR（Automatic Domain Randomization）</strong> 解决"手工调随机化范围"这个工程瓶颈——随机化分布的边界按策略在边界上的表现<strong>自动扩张</strong>，熵单调递增，形成"难度永远递增"的自动 curriculum。最终：<strong>纯仿真训练的五指灵巧手在真机上解魔方，完整打乱 60% 成功率、极限打乱 20%</strong>，且戴橡胶手套、绑住手指、被长颈鹿玩偶捅都不崩——鲁棒性不是调出来的，是分布"吃"出来的。</p>
@@ -119,7 +149,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>DR 和 RLPD 是两条相反的路——什么时候该"把仿真做宽"（DR），什么时候该"直接在真机上学"（RLPD）？（提示：交互成本 × 仿真可信度 × 接触复杂度，三轴决策。）</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">表现高于阈值</div><div class="farrow">→</div><div class="fnode">向外扩张边界；低于阈值</div><div class="farrow">→</div><div class="fnode">收缩</div></div>
 <ol>
 <li><strong>Motivation</strong>: sim2real 的核心障碍是 <strong>reality gap</strong>：仿真器的接触动力学（摩擦、弹性、延迟、柔性）和真实世界永远对不准，而真机数据贵（时间/安全/硬件磨损）。两条经典出路——system identification（把仿真调准，Day24 主题）和 domain adaptation（用真机数据对齐）——都要真机数据。DR 问了一个反直觉的问题：<strong>能不能不做准、只做宽？</strong> Tobin 2017（IROS）先证明了视觉侧可行：纯仿真随机纹理/光照/相机位姿训出的物体检测器，直接转真机抓取。OpenAI 2018（Dactyl 方块重定向）证明了动力学侧可行：摩擦/质量/外观/延迟全随机化，Shadow hand 真机 vision-based 重定向成功。但手工 DR 有个致命工程痛点：<strong>随机化范围是人拍的</strong>——太窄，真机掉出去；太宽，策略学不出来（hedging 吃掉所有性能）。ADR 就是为杀掉这个"人拍参数"而生的。</li>
 <li><strong>System / Method</strong>: 系统 = <strong>ADR（环境分布生成器）+ 分布式 PPO（OpenAI Five 同款栈）+ LSTM memory policy + vision pose estimator + Kociemba 子目标分解 + 为 ML 定制的硬件平台</strong>。</li>
@@ -134,7 +164,7 @@ pre code{background:none;padding:0;color:inherit}
 </ol>
 </section>
 <section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
-<blockquote>
+<blockquote class="pq">
 <p>符号统一：$\xi \in \Xi$ 环境参数向量（摩擦系数、质量、延迟、纹理、光照……每个维度一个物理/视觉量）；$p_\phi(\xi)$ 参数为 $\phi$ 的随机化分布（ADR 里 $\phi = \{(lo_i, hi_i)\}_{i=1}^d$）；$p_\xi(s'\mid s,a)$、$p_\xi(o\mid s)$ 为参数 $\xi$ 下的转移/观测模型；$\pi_\theta(a\mid o, m)$ 为带 memory $m$ 的策略；$\xi_{\text{real}}$ 真实世界的（未知）参数；$J(\theta; \xi)$ 为固定 $\xi$ 下的期望回报。</p>
 </blockquote>
 <h3>1. DR 的目标函数：从"一个 MDP"到"MDP 分布"</h3>
@@ -238,7 +268,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"We demonstrate that models trained only in simulation can be used to solve a manipulation problem of unprecedented complexity on a real robot. This is made possible by two key components: a novel algorithm, which we call automatic domain randomization (ADR) and a robot platform built for machine learning."（摘要）
 "ADR automatically generates a distribution over randomized environments of ever-increasing difficulty."（摘要）</p>
 </blockquote>
@@ -260,7 +290,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>（本日暂无用户追问。）</p>
 </section>
 <section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-13）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下 3 组问答来自 2026-09-13 上午用户对 Day21 DR/ADR 卡片的追问（quiz 三题），原样归档。</p>
 </blockquote>
 <h3>Q1：DR 的数学是"鲁棒优化"还是"贝叶斯平均"？transfer 的精确条件是什么？</h3>
@@ -289,8 +319,10 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>结构对、参数错</strong>（MuJoCo 的接触模型 OK，只是摩擦/质量测不准）→ DR，把参数做宽盖住真相；</li>
 <li><strong>结构都不对</strong>（揉面团、线缆、流体——仿真器原理性建模不了）→ 做宽也盖不住 → 别仿真，直接 RLPD 真机学。</li>
 </ul>
-<p>接触复杂度高的两种去向正好说明这点：灵巧手魔方 → ADR（大力出奇迹）；揉面团 → 真机 RLPD。另外两条路线可以叠：Isaac Lab 里训 locomotion 就是"DR 先做宽 + 真机 RLPD 微调"的组合拳，Day07/08 的 H1 都是这个配方——三选一是伪命题，成年人全都要，只是比例问题。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p>接触复杂度高的两种去向正好说明这点：灵巧手魔方 → ADR（大力出奇迹）；揉面团 → 真机 RLPD。另外两条路线可以叠：Isaac Lab 里训 locomotion 就是"DR 先做宽 + 真机 RLPD 微调"的组合拳，Day07/08 的 H1 都是这个配方——三选一是伪命题，成年人全都要，只是比例问题。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>PPO</h4><ul><li>优化一个 MDP</li><li>trust region 管策略别走太远</li></ul></div><div class="vscol vs-b"><h4>ADR</h4><ul><li>优化 MDP 分布</li><li>边界扩张管世界别太窄</li></ul></div></div>
+<div class="viz viz-flow flow"><div class="fnode">ξ_real ∈ support(p_φ)</div><div class="farrow">→</div><div class="fnode">期望/鲁棒优化</div><div class="farrow">→</div><div class="fnode">真机可用</div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -301,6 +333,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

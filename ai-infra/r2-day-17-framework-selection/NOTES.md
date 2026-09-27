@@ -1,5 +1,7 @@
 # r2-Day17 NOTES — 术语、公式核对与上一课/下一课链接
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-17-framework-selection/index.html
+
 ## 术语（准确定义）
 
 - **FSDP（Fully Sharded Data Parallel）**：PyTorch 对 ZeRO-3 的原生实现。
@@ -63,3 +65,5 @@ FSDP 的 reshard_after_forward（用完即释放、显存峰值低、通信 1.5�
 vs Megatron TP 分片常驻（通信模式固定 4 次/layer、要求机内 NVLink）：
 如果只有跨机 IB（无 NVLink）的 8 卡环境跑 7B，你选 FSDP 还是 TP=8？
 为什么？提示：用 r2-Day15 的 18× 带宽比给两种方案的通信定价。
+
+<!-- viz:stats: DDP grad 通信 24.5GB | 7B 台账 14/14/56=84GB | TP 80 层 37.6GB/step -->

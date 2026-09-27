@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,18 +113,13 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充（2026-09-13）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: RMA: Rapid Motor Adaptation for Legged Robots</li>
-<li>Authors / Org: Ashish Kumar, Zipeng Fu, Deepak Pathak, Jitendra Malik（UC Berkeley；RSS 2021）</li>
-<li>Link / arXiv: https://arxiv.org/abs/2107.04034（2021-07 preprint；RSS 2021 报告）/ 项目页（含视频）https://ashish-kmr.github.io/rma-legged-robots/</li>
-<li>Official code: 本次运行未检索到可直接验证的官方仓库 URL，不臆测拼接；实现细节与视频以作者项目页为准（诚实标注）</li>
-<li>Date read: 2026-09-13</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">rma</span><span class="tag">legged-robots</span><span class="tag">quadruped</span><span class="tag">motor-adaptation</span><span class="tag">privileged-learning</span><span class="tag">sim2real</span><span class="tag">unitree-a1</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-22-2021-rma</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-22-2021-rma</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>RMA: Rapid Motor Adaptation for Legged Robots</dd><dt>Authors / Org</dt><dd>Ashish Kumar, Zipeng Fu, Deepak Pathak, Jitendra Malik（UC Berkeley；RSS 2021）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2107.04034（2021-07">https://arxiv.org/abs/2107.04034（2021-07</a> preprint；RSS 2021 报告）/ 项目页（含视频）<a href="https://ashish-kmr.github.io/rma-legged-robots/">https://ashish-kmr.github.io/rma-legged-robots/</a></dd><dt>Official code</dt><dd>本次运行未检索到可直接验证的官方仓库 URL，不臆测拼接；实现细节与视频以作者项目页为准（诚实标注）</dd><dt>Date read</dt><dd>2026-09-13</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-22-2021-rma</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-22-2021-rma">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-22-2021-rma</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">rma</span><span class="tag">legged-robots</span><span class="tag">quadruped</span><span class="tag">motor-adaptation</span><span class="tag">privileged-learning</span><span class="tag">sim2real</span><span class="tag">unitree-a1</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>腿式机器人换地形就摔、真机试错不起——RMA 把"适应"拆成两阶段 privileged learning：<strong>Phase 1</strong> 用 PPO 在仿真里"开天眼"训 base policy $\pi(a_t\mid x_t,a_{t-1},z_t)$，其中 $z_t=\mu(e_t)$ 是 17 维环境参数（质量/质心/电机强度/摩擦/地形高度）经 encoder 压成的低维"环境指纹"；<strong>Phase 2</strong> 用本体感知历史 $(x,a)$ 监督训练 adaptation module $\varphi$，"闭眼"从身体感受反推 $\hat z_t=\varphi(\text{history})$；部署时 $\varphi$ 以 10Hz 估计环境、$\pi$ 以 100Hz 生成期望关节位置、经 A1 的 PD 控制器转力矩。<strong>同一个策略、零仿真标定、零真机微调</strong>，Unitree A1 走过沙地/泥地/徒步小径/高草/土堆全部 trial 零失败，下楼梯 70%——训练时从未见过松软下陷地面、植被和楼梯。</p>
@@ -131,7 +161,7 @@ pre code{background:none;padding:0;color:inherit}
 </ol>
 </section>
 <section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
-<blockquote>
+<blockquote class="pq">
 <p>符号统一：$s_t$ 真实状态；$x_t$ 本体感知状态；$a_t\in\mathbb{R}^{12}$ 期望关节位置；$e_t\in\mathbb{R}^{17}$ privileged 环境参数；$z_t=\mu(e_t)$ latent extrinsics（环境指纹）；$\hat z_t=\varphi(h_t)$ 在线估计；$h_t=(x_{t-50:t},a_{t-50:t-1})$ 历史窗口；$\xi$ 沿用 Day21 的"环境参数"记号，$e_t$ 是它的 privileged 可测版本。</p>
 </blockquote>
 <h3>1. Phase 1：开天眼的 RL（privileged teacher）</h3>
@@ -217,7 +247,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"It's not an afterthought, but a forethought. That's our secret sauce."
 —— Ashish Kumar（Berkeley Engineering 官方报道原话；论文正文金句本次未逐字核对，不臆引）</p>
 <p>"Our RMA-enabled robot shows strong adaptation performance to previously unseen environments and learns this adaptation entirely by interacting with its surroundings and learning from experience. That is new."
@@ -238,7 +268,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-13）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下 3 组问答来自 2026-09-13 当晚用户对 Day22 RMA 卡片的追问（三问 quiz：Q1 用户先抛砖、助手拆三层；Q2/Q3 助手出题、用户作答、助手判卷），原样归档。</p>
 </blockquote>
 <h3>Q1：为什么 $\varphi$ 预测 8 维 $z$ ，而不是 17 维 $e$ ？</h3>
@@ -285,8 +315,10 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 <p>类比： $\pi$ 是司机， $\varphi$ 是副驾驶。副驾驶不断报路况"现在是沙地"（ $\hat z_t$ ），司机切换驾驶模式——司机本人没重新学开车，但行为适应了路况。<strong>适应的定义看的是"行为是否随环境变"，不是"权重动没动"。</strong></p>
 <p><strong>与 Day21 的关系</strong>：Day21 ADR 里 LSTM 的 hidden state $m_t$ 干的正是这件事——inference 时更新的条件变量。RMA 只是把它从黑盒 hidden state 里拎出来，变成可监督、可可视化的显式向量 $\hat z_t$ 。隐式 → 显式，这就是 Day21 到 Day22 的那条线。</p>
-<p><strong>三条 sim2real 路线齐了</strong>：Day20 RLPD（真机学，权重更新）、Day21 ADR（仿真做宽，隐式适应）、Day22 RMA（仿真做宽 + 显式辨识，条件变量更新）。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>三条 sim2real 路线齐了</strong>：Day20 RLPD（真机学，权重更新）、Day21 ADR（仿真做宽，隐式适应）、Day22 RMA（仿真做宽 + 显式辨识，条件变量更新）。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RMA</h4><ul><li>真机权重 frozen</li><li>适应=在线更新条件变量 ẑ_t</li><li>辨而不学</li></ul></div><div class="vscol vs-b"><h4>RLPD</h4><ul><li>真机在线更新权重</li><li>学</li></ul></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>ADR</h4><ul><li>隐式适应</li><li>世界做宽</li></ul></div><div class="vscol vs-b"><h4>RMA</h4><ul><li>显式辨识</li><li>DR 做宽 + 在线辨识多一层保险</li></ul></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -297,6 +329,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

@@ -1,5 +1,7 @@
 # Day18 — RoboCasa：仿真合成的 manipulation 数据规模化
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-18-2024-robocasa/index.html
+
 > Soroush Nasiriany、Abhiram Maddukuri（共同一作）、Lance Zhang（共同一作）、Adeet Parikh、Aaron Lo、Abhishek Joshi、Ajay Mandlekar、Yuke Zhu / UT Austin + NVIDIA Research，arXiv 2406.02523（RSS 2024）。数据三角的"合成边"：120 个程序化厨房场景、2,500+ 物体（153 类别）、25 原子任务 + 75 个 LLM 建议的复合任务；4 个操作员用 SpaceMouse 采 1,250 条人类演示，经 MimicGen 放大到 100K+ 轨迹；BC-Transformer 多任务从 28.8%（Human-50）涨到 47.6%（Generated 全集）；真机上小数据 + 仿真 co-train 把 seen 物体成功率从 13.6% 拉到 24.4%。
 
 ## 元信息
@@ -184,3 +186,6 @@ $$\begin{bmatrix} R & t \\ 0 & 1 \end{bmatrix}$$
 **顺带**：移动底盘的导航任务 MimicGen 直接**不支持**——基座轨迹没法锚定到某个物体上，"object-centric"这个前提就不成立。
 
 **和之前工作的关系**：三处失效正是本 NOTES §6"假设与数学没有覆盖的真实误差"第一条（ $\Delta T$ 是纯几何操作）的具体展开；铰链/插入的边界也反衬 Day12 Diffusion Policy 的路线——接触丰富的任务不靠刚体搬运，而靠扩散模型直接拟合多模态接触行为分布。
+
+<!-- viz:stats: co-train 增益 seen 13.6%→24.4% | 120 程序化厨房 × 生成纹理 -->
+<!-- viz:vs: Bridge | 真实廉价臂扩张 skill 轴 || RoboCasa | 仿真扩张 scene × object 轴; MimicGen 程序化放大 -->

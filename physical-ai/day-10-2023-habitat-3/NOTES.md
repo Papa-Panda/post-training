@@ -1,5 +1,7 @@
 # Day 10 — Habitat 3.0：把 embodied AI 从“独居 agent”推进到人机共居
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-10-2023-habitat-3/index.html
+
 ## 元信息
 - Title: Habitat 3.0: A Co-Habitat for Humans, Avatars and Robots
 - Authors / Org: Xavier Puig, Eric Undersander, Andrew Szot et al. / FAIR at Meta, Georgia Tech, Simon Fraser University, UC Berkeley, University of Washington, Stanford University, Carnegie Mellon University
@@ -101,3 +103,6 @@ Habitat 3.0 在 Habitat-Sim / Habitat-Lab 上加入高效多样的 SMPL-X humano
 - Project: https://aihabitat.org/habitat3/
 - Official code: https://github.com/facebookresearch/habitat-lab
 - ICLR 2024: https://iclr.cc/virtual/2024/poster/19442
+
+<!-- viz:stats: 4×A100 | 每卡 24 并行 env | 每次 update 128 steps | 8.5M 参数 | 200M env steps -->
+<!-- viz:flow: scripted partner population 扩多样性 → 学会适应伙伴行为 → zero-shot coordination -->

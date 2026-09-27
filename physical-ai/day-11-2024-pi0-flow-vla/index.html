@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -78,20 +113,15 @@ pre code{background:none;padding:0;color:inherit}
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：统一成一个部分可观测的条件生成控制问题</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a><a href="#sec-14">问答补充（2026-09-07）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: π₀: A Vision-Language-Action Flow Model for General Robot Control</li>
-<li>Authors / Org: Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, Szymon Jakubczak, Tim Jones, Liyiming Ke, Sergey Levine, Adrian Li-Bell, Mohith Mothukuri, Suraj Nair, Karl Pertsch, Lucy Xiaoyang Shi, James Tanner, Quan Vuong, Anna Walling, Haohuan Wang, Ury Zhilinsky / Physical Intelligence</li>
-<li>Link / arXiv / Blog: https://arxiv.org/abs/2410.24164 / https://www.physicalintelligence.company/blog/pi0</li>
-<li>Official code: https://github.com/Physical-Intelligence/openpi</li>
-<li>Date read: 2026-09-01</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">pi0</span><span class="tag">flow-matching</span><span class="tag">action-chunking</span><span class="tag">cross-embodiment</span><span class="tag">dexterous-manipulation</span><span class="tag">robot-foundation-model</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-11-2024-pi0-flow-vla</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-11-2024-pi0-flow-vla</li>
-</ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/index.html</p>
+</blockquote>
 </section>
-<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>π₀: A Vision-Language-Action Flow Model for General Robot Control</dd><dt>Authors / Org</dt><dd>Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, Szymon Jakubczak, Tim Jones, Liyiming Ke, Sergey Levine, Adrian Li-Bell, Mohith Mothukuri, Suraj Nair, Karl Pertsch, Lucy Xiaoyang Shi, James Tanner, Quan Vuong, Anna Walling, Haohuan Wang, Ury Zhilinsky / Physical Intelligence</dd><dt>Link / arXiv / Blog</dt><dd><a href="https://arxiv.org/abs/2410.24164">https://arxiv.org/abs/2410.24164</a> / <a href="https://www.physicalintelligence.company/blog/pi0">https://www.physicalintelligence.company/blog/pi0</a></dd><dt>Official code</dt><dd><a href="https://github.com/Physical-Intelligence/openpi">https://github.com/Physical-Intelligence/openpi</a></dd><dt>Date read</dt><dd>2026-09-01</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-11-2024-pi0-flow-vla</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-11-2024-pi0-flow-vla">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-11-2024-pi0-flow-vla</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">pi0</span><span class="tag">flow-matching</span><span class="tag">action-chunking</span><span class="tag">cross-embodiment</span><span class="tag">dexterous-manipulation</span><span class="tag">robot-foundation-model</span></div></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">300M</div><div class="l">action expert</div></div><div class="stat"><div class="v">3.3B</div><div class="l">VLA</div></div></div>
 <p>π₀ 把 PaliGemma 的视觉—语言语义与一个 300M action expert 接在同一 Transformer 中，用 conditional flow matching 一次生成 50-step 连续动作块；再以 10,000+ 小时、7 类机器人配置、68 个任务的跨 embodiment 数据预训练，并用少量高质量数据 post-train，使单一 3.3B VLA 能在最高 50 Hz 的双臂精细操作中兼顾语义、动作流畅度和错误恢复。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
@@ -150,7 +180,7 @@ pre code{background:none;padding:0;color:inherit}
 <h3>4) 假设与数学没有覆盖的真实误差</h3>
 <p>这个 loss 默认示范动作在时间上对齐、归一化和 embodiment mask 正确，也默认观测足以消除关键歧义；它没有显式建模相机延迟、控制通信抖动、joint backlash、力 / 触觉、摩擦变化、柔性物体内部状态、碰撞约束和执行器饱和。更关键的是，0.5–0.8 秒 open-loop 窗口内真实 transition $x_{t+1}=f(x_t,a_t,w_t)$ 仍会受未观测扰动 $w_t$ 影响；flow loss 只拟合示范分布，不保证闭环稳定性、安全性或约束可行性。</p>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">广覆盖 pre-training</div><div class="farrow">→</div><div class="fnode">高质量 post-training</div><div class="farrow">→</div><div class="fnode">复杂任务部署</div></div>
 <ol>
 <li><strong>Motivation：离散 action token 不够高频、也不够连续</strong></li>
 <li>机器人 foundation model 既要继承 VLM 的语义泛化，又要执行双臂、柔性物体和接触丰富的连续动作；逐 token 自回归动作在控制频率、量化误差和长 action sequence 延迟上受限。</li>
@@ -212,7 +242,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>“Our generalist robot policy uses a pre-trained vision-language model (VLM) backbone, as well as a diverse cross-embodiment dataset with a variety of dexterous manipulation tasks.”</p>
 <p>“Intuitively, the diverse (but lower quality) pre-training data allows the model to recover from mistakes and handle highly varied situations, which might not otherwise occur in the high-quality post-training data, while the post-training data teaches the model to perform the task well.”</p>
 </blockquote>
@@ -241,7 +271,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-07）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
 </blockquote>
 <h3>Flow Matching 是什么</h3>
@@ -261,8 +291,10 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>问</strong>：day12 有道理，day11 不对啊——因为都没有语言输入，怎么做很多活？</p>
 <p><strong>答</strong>：纠正：π₀ 是<strong>有</strong>语言输入的；前一条"一个模型干很多活"的表述没把条件讲全，容易误会。它的观测 $ o $ 本来就是三件套：多视角图像 + 本体感知 $ q_t $ + <strong>语言指令</strong> $ \ell $ ，PaliGemma 那一半就是专门吃"图像+文字"的。所以"干很多活"靠的是语言切换任务：说"擦桌子"它擦桌子，说"叠衣服"它叠衣服，动作头都是同一个 flow 模型。Day12 的 Diffusion Policy 才是真的没有语言——所以它只能死守一个任务。逻辑是：π₀ "有语言→多任务"，DP "无语言→单任务"，各自自洽。</p>
 <p><strong>符号</strong>： $ q_t $ 本体感知（关节角/末端位姿）； $ \ell $ 语言指令。</p>
-<p><strong>与之前工作的关系</strong>：本节 3 问构成 Day11 的"flow 生成"主线——速度场直觉 → loss 对 $ \tau $ 取期望 → 语言条件带来多任务；与 Day12 的"去噪"参数化对照（对照见 README 问答记录），与 Day14 的 flow 低层执行相接。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p><strong>与之前工作的关系</strong>：本节 3 问构成 Day11 的"flow 生成"主线——速度场直觉 → loss 对 $ \tau $ 取期望 → 语言条件带来多任务；与 Day12 的"去噪"参数化对照（对照见 README 问答记录），与 Day14 的 flow 低层执行相接。</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RT-2/OpenVLA</h4><ul><li>动作即 token</li><li>复用 next-token CE infra</li></ul></div><div class="vscol vs-b"><h4>π₀</h4><ul><li>动作块即条件生成轨迹</li><li>10 次 flow integration 换连续精度</li></ul></div></div>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">20</div><div class="l">Hz 每 0.8s 执行 16 步</div></div><div class="stat"><div class="v">50</div><div class="l">Hz 每 0.5s 执行 25 步</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -273,6 +305,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

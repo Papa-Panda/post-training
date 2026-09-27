@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -79,27 +114,19 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a><a href="#sec-13">第二轮复习（2026-09-22）</a></nav>
   </details>
   <section class="sec" id="sec-0">
-<blockquote>
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/index.html</p>
 <p>自动生成骨架 2026-08-23，基于 PAPER_TEMPLATE.md，Physical AI 战略起点；非 paper 而是 org / acquisition 解析。</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: Meta ARI / MSL / Robotics Studio - Physical AGI via Humanoid</li>
-<li>Authors / Org: ARI (Xiaolong Wang / Lerrel Pinto) + Meta MSL (Alexandr Wang) + Meta Robotics Studio</li>
-<li>Link / Blog: https://www.pymnts.com/meta/2026/meta-acquires-ari-to-fuel-humanoid-robot-push/ / https://www.eweek.com/news/meta-acquires-ari-humanoid-robotics-ai/ / https://thejournal.com/articles/2026/05/06/meta-pushes-into-physical-ai-with-acquisition-of-robotics-ai-startup.aspx</li>
-<li>Date read: 2026-08-23</li>
-<div class="meta"><span class="tag">physical-ai</span><span class="tag">humanoid</span><span class="tag">physical-agi</span><span class="tag">msl</span><span class="tag">robotics-studio</span><span class="tag">ari</span><span class="tag">sim2real</span><span class="tag">whole-body-control</span></div>
-<li>Thread: physical-ai</li>
-<li>Folder: day-01-2025-ari-msl-robotics-studio</li>
-<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-01-2025-ari-msl-robotics-studio</li>
-</ul>
+<dl class="meta-grid"><dt>Title</dt><dd>Meta ARI / MSL / Robotics Studio - Physical AGI via Humanoid</dd><dt>Authors / Org</dt><dd>ARI (Xiaolong Wang / Lerrel Pinto) + Meta MSL (Alexandr Wang) + Meta Robotics Studio</dd><dt>Link / Blog</dt><dd><a href="https://www.pymnts.com/meta/2026/meta-acquires-ari-to-fuel-humanoid-robot-push/">https://www.pymnts.com/meta/2026/meta-acquires-ari-to-fuel-humanoid-robot-push/</a> / <a href="https://www.eweek.com/news/meta-acquires-ari-humanoid-robotics-ai/">https://www.eweek.com/news/meta-acquires-ari-humanoid-robotics-ai/</a> / <a href="https://thejournal.com/articles/2026/05/06/meta-pushes-into-physical-ai-with-acquisition-of-robotics-ai-startup.aspx">https://thejournal.com/articles/2026/05/06/meta-pushes-into-physical-ai-with-acquisition-of-robotics-ai-startup.aspx</a></dd><dt>Date read</dt><dd>2026-08-23</dd><dt>Thread</dt><dd>physical-ai</dd><dt>Folder</dt><dd>day-01-2025-ari-msl-robotics-studio</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-01-2025-ari-msl-robotics-studio">https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-01-2025-ari-msl-robotics-studio</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">physical-ai</span><span class="tag">humanoid</span><span class="tag">physical-agi</span><span class="tag">msl</span><span class="tag">robotics-studio</span><span class="tag">ari</span><span class="tag">sim2real</span><span class="tag">whole-body-control</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>Meta 2026-05-01 收购 ARI（Assured Robot Intelligence，20人，SD，Xiaolong Wang / Lerrel Pinto）并入 MSL，协同内部 Robotics Studio，将 humanoid 定义为通向 physical AGI 的通用物理智能体载体，核心 scaling 哲学是 learning directly from human experience, not teleoperation alone。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
-<blockquote>
+<blockquote class="pq">
 <p>知识图谱位置：Physical AI 轨道 Day01 起点，对应你 ai-data Day01 / ai-infra Day01 的“地基”位；后续 Day02 Isaac Lab / Day03 World Model / Day06 Whole-body Control 都接在这里的战略定义上。</p>
 </blockquote>
 <ul>
@@ -190,7 +217,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句</h2>
-<blockquote>
+<blockquote class="pq">
 <p>"We believe this agent will be humanoid — and that scaling will come from learning directly from human experience, not teleoperation alone." — Xiaolong Wang, ARI co-founder</p>
 <p>"Meta's ecosystem brings together the key components needed to make this vision possible. We will be joining Meta Superintelligence Labs (MSL) to help bring personal superintelligence into the physical world."</p>
 </blockquote>
@@ -218,7 +245,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-13"><h2><span class="n">13</span>第二轮复习（2026-09-22）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>本轮核验：2026-05 收购报道多方交叉（The Journal / TechCrunch / PYMNTS / CIOL / en.sedaily，均为 2026-05-01 至 05-06；ainvest 深度分析）。初读 NOTES 有一处人物背景实质性误读，已修正；另补三条初读缺失的公开事实。</p>
 </blockquote>
 <h3>元信息修正</h3>
@@ -270,8 +297,10 @@ pre code{background:none;padding:0;color:inherit}
 - CIOL：https://www.ciol.com/news/meta-acquires-assured-robot-intelligence-amid-rising-ai-costs-11797551
 - en.sedaily（2026-05-04）：https://en.sedaily.com/news/2026/05/04/meta-acquires-robotics-startup-enters-humanoid-race</p>
 <p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/NOTES.md</p>
-<p>相关讨论（Gemini 网页版，2026-09-22）：https://gemini.google.com/app/6ddbd577e468f338</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<p>相关讨论（Gemini 网页版，2026-09-22）：https://gemini.google.com/app/6ddbd577e468f338</p>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Tesla/SpaceX 路径</h4><ul><li>硬件驱动</li></ul></div><div class="vscol vs-b"><h4>Meta 路径</h4><ul><li>data/ecosystem 驱动 + human experience scaling</li><li>infra 复用现有 compute/data</li></ul></div></div>
+<div class="viz viz-flow flow"><div class="fnode">定方向 humanoid 为什么是 now</div><div class="farrow">→</div><div class="fnode">ARI/MSL 分工</div><div class="farrow">→</div><div class="fnode">Isaac Lab 建仿真锚点</div><div class="farrow">→</div><div class="fnode">World Model 扩数据</div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -282,6 +311,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

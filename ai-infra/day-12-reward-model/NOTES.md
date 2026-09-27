@@ -1,5 +1,7 @@
 # Day 12 NOTES — Reward Model Calibration
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12-reward-model/index.html
+
 > Connection to Prev: Day11 Tj_max 82.49°C throttle 0.83% → Day12 σ + |cal-raw| 过滤；Day10 5类失败率 → 不确定性集合；Day08/09 γ*(ΔT)^2 二阶 → ECE/Brier 二阶。
 
 Date: 2026-08-12 (RL Training / Reward Model uncertainty calibration)
@@ -46,3 +48,5 @@ Bonus:
 
 ## 代码
 - `reward_oas_calibration.py` CPU gloo ok，待H100补
+
+<!-- viz:stats: 0.0906→0.0881 ECE | 5.39% 平均校准位移 | 0.045 ensemble σ | 0.0% high_uncert -->

@@ -1,5 +1,7 @@
 # Day 34 — Physical Intelligence π0.7：组合泛化，做没教过的任务（最新进展 4/4）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-34-2026-pi07/index.html
+
 ## 元信息
 - Title: π0.7: a Steerable Generalist Robotic Foundation Model with Emergent Capabilities
 - Authors / Org: Physical Intelligence（约 100 人，含 Sergey Levine、Chelsea Finn、Karol Hausman 等）
@@ -148,3 +150,6 @@ $$\ell \xrightarrow{\;\pi^H\;} s \xrightarrow{\;g_\psi\;} \hat{I}_{\text{goal}} 
 ## 连接
 - 上一篇：Day 33 — Figure AI Helix 2.5（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-33-2026-figure-ai-helix25）
 - 下一篇预告：第二轮复习 02/34（2026-09-27 起，一天一篇，只更新已有 NOTES）
+
+<!-- viz:stats: 5B 约 = 4B VLM + 860M action expert | 80% UR5e 折衣 vs 人类 80.6% -->
+<!-- viz:vs: 世界模型做数据工厂 | Day27 Cosmos 离线造数据 || 世界模型做在线 steer | π0.7 用 subgoal 图像 steer 策略 -->

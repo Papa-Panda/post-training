@@ -1,5 +1,7 @@
 # Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与"AGI era"（最新进展 2/4）
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/index.html
+
 ## 元信息
 - Title: GPT-6 Astra: A new generation of intelligence
 - Authors / Org: OpenAI（2026-09-03 发布；发布前 9-01 有"Path to Astra"预热 post，来源：FourWeekMBA）
@@ -145,3 +147,6 @@ GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的
 ## 连接
 - 上一篇：Day 31 — World Labs Atlas（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas）
 - 下一篇预告：Day 33 — Figure AI（Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包；2026-09-25）
+
+<!-- viz:stats: 92.7% ScreenSpot-Pro | 1.9 倍 Mind2Web 比 GPT-5.6 快 -->
+<!-- viz:vs: π₀ | 50 步连续动作 chunk; 毫秒级控制 || Astra | 分钟级任务几百步 UI 动作; 控制频率差 3–4 数量级 -->

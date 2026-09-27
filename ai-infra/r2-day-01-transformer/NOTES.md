@@ -1,5 +1,7 @@
 # NOTES - r2-Day01 Transformer
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-01-transformer/index.html
+
 第二轮 Day1 地基，粗略理解即可
 
 - Attention O(N²) 是后续 FlashAttention/量化/解耦的动机
@@ -36,3 +38,6 @@
 - Pre-Norm vs Post-Norm (Xiong et al., 2020): https://arxiv.org/abs/2002.04745 - 为何大模型用Pre-Norm更稳
 - Chinchilla Scaling (Hoffmann et al., 2022): https://arxiv.org/abs/2203.15556 - forward 2ND，6ND total，MFU定义来源
 - LLaMA Architecture (Touvron et al., 2023): https://arxiv.org/abs/2302.13971 - SwiGLU FFN 11008，RMSNorm，RoPE实例
+
+<!-- viz:stats: 2ND 每 token FLOPs | 2·D²·d_model QKᵀ 单项 -->
+<!-- viz:vs: Post-Norm | 原始 Transformer 用法; 深层训练不稳 || Pre-Norm | 大模型主流; 训练更稳 -->

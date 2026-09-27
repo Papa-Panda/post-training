@@ -1,5 +1,7 @@
 # Day 1 - DDP basics - Done
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-01-ddp-basics/index.html
+
 Date: 2026-08-02 10:30 AM PDT (America/Los_Angeles)
 Status: done
 
@@ -19,3 +21,5 @@ Status: done
 
 Next: Day 2 FSDP wrap, compare mem.
 
+<!-- viz:flow: grad 1.0 与 3.0 → all-reduce 求和得 4.0 → 除以 world_size 2 → 同步均值 2.0 -->
+<!-- viz:stats: 2 ranks gloo CPU 验证 | 梯度 1.0 与 3.0 求和 4.0 | 同步均值 2.0 -->

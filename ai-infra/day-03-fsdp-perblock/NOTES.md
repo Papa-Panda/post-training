@@ -1,4 +1,6 @@
 # Day 3 - Done Date: 2026-08-04 22:10 PDT
+
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-03-fsdp-perblock/index.html
 Status: done (CPU verified, CUDA N/A 待H100) ## FSDP per-block 显存
 - DDP 常驻 4P，FSDP 常驻 4P/G，峰值 (P-b)/G + b + (grad+opt)/G
 - block 越小峰值越低，通信启动次数炸，per-block 是甜点
@@ -17,3 +19,7 @@ Status: done (CPU verified, CUDA N/A 待H100) ## FSDP per-block 显存
 3. 成本：tokens/sec, GPU-hour, 失败率
 4. 瓶颈：rollout约80%墙钟
 5. 动作：FSDP per-block可把7B塞进2×A100可跑eval，省Z小时 Raw log: see profiler table in README, ckpt /tmp/fsdp_day3_ckpt.pt
+
+<!-- viz:stats: 32 个 block | b≈0.9GB | 峰值约 42.5GB bf16 mix | 2×80GB 够装 7B -->
+<!-- viz:bars: all_gather(0) 14.55% | all_gather(1) 9.43% -->
+<!-- viz:vs: DDP | 常驻 4P || FSDP | 常驻 4P/G; 峰值 (P-b)/G + b + (grad+opt)/G -->

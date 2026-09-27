@@ -1,5 +1,7 @@
 # Day14 — π₀.₅: a Vision-Language-Action Model with Open-World Generalization
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/index.html
+
 > Physical Intelligence, arXiv 2504.16054 (2025-04-22). π₀的开放世界续作：异构 co-training + 高层语义子任务预测 + knowledge insulation，在未见过的真实家庭做长程灵巧操作。
 
 ## 元信息
@@ -207,3 +209,6 @@ $$\mathcal{L}(\theta)=\sum_{k\in\{\mathrm{robot,subtask,web,det}\}}w_k\mathcal{L
 $ k $ 数据源编号（robot / subtask / web / det 四类）； $ w_k $ 第 $ k $ 类数据的混合权重； $ \mathcal{L}_k $ 第 $ k $ 类数据上的 loss； $ \theta $ 网络权重。
 
 和 Day16 DROID 正好是两个方向：DROID 固定身体、扩张场景多样性；π₀.₅ 拥抱身体异构，靠配方让共享表示自己长出"语义"和"控制"的分工——这正是 README 问答记录里"接口即泛化（Octo）vs 配方即泛化（π₀.₅）"对照的另一面。
+
+<!-- viz:flow: 高层语义子任务重规划 → action chunk → 执行短前缀 → 双层闭环 -->
+<!-- viz:vs: Day09-13 | 训练分布内桌案任务泛化 || π₀.₅ | 4 个未见真实家庭; 核心变量是训练混合配方 -->

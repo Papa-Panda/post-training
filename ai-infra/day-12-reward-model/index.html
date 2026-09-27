@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 12 — Reward Model Calibration</title>
+<title>Day 12 NOTES — Reward Model Calibration</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -48,6 +49,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -58,12 +62,43 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,60 +106,99 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-infra · Day 12</span>
-    <h1>Day 12 — Reward Model Calibration</h1>
-    <p class="sub">RM 不确定性校准：ensemble K=5 得 σ≈4.5%，ECE 0.0906→0.0881，|cal-raw| 5.39% 作补偿；σ>0.15 直接过滤，省 \$/有用 8–12%。</p>
+    <h1>Day 12 NOTES — Reward Model Calibration</h1>
+    <p class="sub">RM 不确定性校准：ensemble K=5 得 σ≈4.5%，ECE 0.0906→0.0881，|cal-raw| 5.39% 作补偿；σ&amp;amp;amp;amp;amp;amp;gt;0.15 直接过滤，省 \$/有用 8–12%。</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">3个CPU真数（合成 N=2000/500 dim16 flip15% seed42 K=5）</a><a href="#sec-3">待H100 NCCL</a><a href="#sec-4">映射表（RL only）</a><a href="#sec-5">一句收敛</a><a href="#sec-6">代码</a></nav>
+    <nav><a href="#sec-1">3个CPU真数（合成 N=2000/500 dim16 flip15% seed42 K=5）</a><a href="#sec-2">待H100 NCCL</a><a href="#sec-3">映射表（RL only）</a><a href="#sec-4">一句收敛</a><a href="#sec-5">代码</a></nav>
   </details>
-<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Date: 2026-08-12 (RL Training / Reward Model uncertainty calibration)</li>
-</ul>
-<blockquote><p>Connection to Prev: Day11 Tj_max 82.49°C throttle 0.83% → Day12 σ + |cal-raw| 过滤；Day10 5类失败率 → 不确定性集合；Day08/09 γ*(ΔT)^2 二阶 → ECE/Brier 二阶。</p></blockquote></section>
-<section class="sec" id="sec-2"><h2><span class="n">2</span>3个CPU真数（合成 N=2000/500 dim16 flip15% seed42 K=5）</h2>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12-reward-model/index.html</p>
+<p>Connection to Prev: Day11 Tj_max 82.49°C throttle 0.83% → Day12 σ + |cal-raw| 过滤；Day10 5类失败率 → 不确定性集合；Day08/09 γ*(ΔT)^2 二阶 → ECE/Brier 二阶。</p>
+</blockquote>
+<p>Date: 2026-08-12 (RL Training / Reward Model uncertainty calibration)</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>3个CPU真数（合成 N=2000/500 dim16 flip15% seed42 K=5）</h2>
 <h3>Single-rank</h3>
 <ul>
 <li>ECE_raw 0.09063980728387833 / ECE_cal 0.08811241388320923 improve 0.002527393400669098</li>
 <li>reward_std_mean (ensemble σ) 0.04498102888464928</li>
 <li>oas_spread_mean (|cal-raw|) 0.053879059851169586 → 平均校准位移 5.39%</li>
 </ul>
-<p>Bonus:</p>
-<ul>
-<li>high_uncert_rate (σ&gt;0.15) 0.0% (阈值0.05 → ~30-35%可配)</li>
-<li>acc_raw 0.798 / acc_cal 0.792 / brier_raw 0.15919 / brier_cal 0.16281</li>
-<li>platt_a 0.7161718606948853 b 0.0839608907699585</li>
-</ul>
+<p>Bonus:
+- high_uncert_rate (σ&gt;0.15) 0.0% (阈值0.05 → ~30-35%可配)
+- acc_raw 0.798 / acc_cal 0.792 / brier_raw 0.15919 / brier_cal 0.16281
+- platt_a 0.7161718606948853 b 0.0839608907699585</p>
 <h3>2-rank gloo</h3>
 <ul>
 <li>ECE_raw ~0.0949575 / ECE_cal ~0.0863821</li>
 <li>reward_std_mean 0.0427129 / oas_spread_mean 0.06168676 / high_uncert 0.0%</li>
 </ul>
-<p><strong>逻辑验证</strong>：gloo all_reduce SUM/2 ok，CPU 2进程 ok，待H100 NCCL + max_memory_allocated + 真实负载</p></section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>待H100 NCCL</h2>
+<p><strong>逻辑验证</strong>：gloo all_reduce SUM/2 ok，CPU 2进程 ok，待H100 NCCL + max_memory_allocated + 真实负载</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>待H100 NCCL</h2>
 <ul>
-<li>真人偏好：ai-data RM pairs / DPO-reward-gap human-RM gap 分布，ECE@10/15，abstain</li>
-<li>vLLM 联动：长CoT 500→5000 tok 失败12-18% vs σ 相关性，σ&gt;0.15 过滤省 \$/有用 8-12%</li>
-<li>显存：RM 7B/13B FSDP max_memory_allocated vs (P-b)/G+b</li>
-<li>Thermal：Tj 82.49/67.54°C 时 TPOT变慢 → reward偏低，σ随Tj +3-5°C 增10-15% (需 NVML)</li>
-<li>在线：GRPO 每500 steps 重拟合 a/b，EWMA跟踪σ，hysteresis 防震荡</li>
-</ul></section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>映射表（RL only）</h2>
+<li>[ ] 真人偏好：ai-data RM pairs / DPO-reward-gap human-RM gap 分布，ECE@10/15，abstain</li>
+<li>[ ] vLLM 联动：长CoT 500→5000 tok 失败12-18% vs σ 相关性，σ&gt;0.15 过滤省 \$/有用 8-12%</li>
+<li>[ ] 显存：RM 7B/13B FSDP max_memory_allocated vs (P-b)/G+b</li>
+<li>[ ] Thermal：Tj 82.49/67.54°C 时 TPOT变慢 → reward偏低，σ随Tj +3-5°C 增10-15% (需 NVML)</li>
+<li>[ ] 在线：GRPO 每500 steps 重拟合 a/b，EWMA跟踪σ，hysteresis 防震荡</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>映射表（RL only）</h2>
 <table>
-<tr><th>概念</th><th>RL RM</th><th>本code</th></tr>
-<tr><td>真效用 r_true</td><td>oracle w_true·diff</td><td>w_true随机</td></tr>
-<tr><td>未校准 r_raw</td><td>sigmoid(w·diff)</td><td>logits→probs</td></tr>
-<tr><td>不确定性 source</td><td>flip15% + ensemble σ 0.045</td><td>15% 翻转</td></tr>
-<tr><td>校准位移</td><td>|cal-raw|</td><td>0.0539</td></tr>
-<tr><td>校准缩放</td><td>Platt a/b</td><td>a=0.716 b=0.084 收缩过自信</td></tr>
-<tr><td>过滤</td><td>σ&gt;0.15 → 0%本轮</td><td>0.05→30%可配</td></tr>
-</table></section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>一句收敛</h2>
-<blockquote><p>&ldquo;rollout长CoT 12-18% + 热节流0.83% + 标注15% 三噪，ensemble 5得σ≈4.5%，ECE 0.0906→0.0881，|cal-raw| 5.39%当补偿，高σ直接过滤，省 \$/有用 8-12%。&rdquo;</p></blockquote></section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>代码</h2>
-<ul><li><code>reward_oas_calibration.py</code> CPU gloo ok，待H100补</li></ul></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12-reward-model/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+<thead>
+<tr>
+<th>概念</th>
+<th>RL RM</th>
+<th>本code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>真效用 r_true</td>
+<td>oracle w_true·diff</td>
+<td>w_true随机</td>
+</tr>
+<tr>
+<td>未校准 r_raw</td>
+<td>sigmoid(w·diff)</td>
+<td>logits→probs</td>
+</tr>
+<tr>
+<td>不确定性 source</td>
+<td>flip15% + ensemble σ 0.045</td>
+<td>15% 翻转</td>
+</tr>
+<tr>
+<td>校准位移</td>
+<td></td>
+<td>cal-raw</td>
+</tr>
+<tr>
+<td>校准缩放</td>
+<td>Platt a/b</td>
+<td>a=0.716 b=0.084 收缩过自信</td>
+</tr>
+<tr>
+<td>过滤</td>
+<td>σ&gt;0.15 → 0%本轮</td>
+<td>0.05→30%可配</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>一句收敛</h2>
+<p>“rollout长CoT 12-18% + 热节流0.83% + 标注15% 三噪，ensemble 5得σ≈4.5%，ECE 0.0906→0.0881，|cal-raw| 5.39%当补偿，高σ直接过滤，省 \$/有用 8-12%。”</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>代码</h2>
+<ul>
+<li><code>reward_oas_calibration.py</code> CPU gloo ok，待H100补</li>
+</ul>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">0.0906</div><div class="l">→0.0881 ECE</div></div><div class="stat"><div class="v">5.39%</div><div class="l">平均校准位移</div></div><div class="stat"><div class="v">0.045</div><div class="l">ensemble σ</div></div><div class="stat"><div class="v">0.0%</div><div class="l">high_uncert</div></div></div></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12-reward-model/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -135,6 +209,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

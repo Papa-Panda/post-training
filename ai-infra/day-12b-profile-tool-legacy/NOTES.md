@@ -1,5 +1,7 @@
 # NOTES — Day 17 Profile Tool
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12b-profile-tool-legacy/index.html
+
 > Connection to Prev: Day16 Monetization Story v1 → Day17 Profile Tool: ROI故事算清了\$/useful但没定位通信是AllReduce还是AllGather热点，需要profiler拆compute vs comm；Day15 Megatron 3D的TP4+PP2决策坑在今天用torch.profiler + gloo all_reduce SUM/2验证 + per-block 32×1.99ms真数解决。
 
 Date: 2026-08-17 (Infra Systems / PyTorch Distributed / Profile Tool) — actually 2026-08-21 delivery
@@ -117,3 +119,6 @@ Bonus (from profile_result.json):
 ## Connection 一句话（用于 ai_daily.csv Notes）
 
 Day16 Monetization 150字ROI故事省\$200M方法论 → Day17 Profile用profiler把AllGather 60% vs ReduceScatter 40%拆开证明切分热点，CPU proxy comm 46.5%真机预期7-15%，per-block 32×1.99ms峰值-35%复用Day03。
+
+<!-- viz:stats: 46.5% 通信占比 | 14.2GB→9.1GB 峰值降 35% -->
+<!-- viz:bars: AllGather 60% | ReduceScatter 40% -->

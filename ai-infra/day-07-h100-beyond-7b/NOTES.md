@@ -1,5 +1,7 @@
 # NOTES — Large-model FSDP Capacity Planning
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-h100-beyond-7b/index.html
+
 ## Audit correction
 
 The earlier version presented unmeasured throughput, failure-rate, communication-percentage, and fit ranges beside analytical values. It also described a script as “ready for H100,” although selecting `--model 7b/13b/70b` instantiated the nominal full-size proxy and the activation-checkpoint flag was unused.
@@ -30,3 +32,5 @@ Semantic tests verify:
 - the synthetic evaluation delta and all unmeasured H100 throughput/failure distributions.
 
 The historical `infra_note_latest.md` now contains a deprecation notice rather than a second source of estimates.
+
+<!-- viz:stats: 16 bytes/parameter 混合精度 Adam | 7B unsharded 112GB | 去掉 master copy 后 12 bytes/parameter -->
