@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 04 — LESS: Selecting Influential Data for Targeted Instruction Tuning · ai-data 阅读版</title>
+<title>NOTES</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,82 +102,144 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 04</span>
-    <h1>Day 04 — LESS: Selecting Influential Data for Targeted Instruction Tuning</h1>
+    <h1>NOTES</h1>
     <p class="sub">为想定向提升的能力（推理/BBH/MMLU）准备几条 few-shot 锚点，把大池子 27万 条指令的 low-rank 梯度跟锚点做相似度搜索，只训 top 5% 的数据，经常比训全量还好，且用 7B 选的数据能直接给 13B/Mistral 用。 · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">官方 Repo</a><a href="#sec-8">第二轮复习（2026-09-04）</a><a href="#sec-9">6. 今天的一道思考题</a><a href="#sec-10">原文链接</a><a href="#sec-11">问答补充（2026-09-04）</a><a href="#sec-12">问答补充（2026-09-11）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">官方 Repo</a><a href="#sec-8">第二轮复习（2026-09-04）</a><a href="#sec-9">原文链接</a><a href="#sec-10">问答补充（2026-09-04）</a><a href="#sec-11">问答补充（2026-09-11）</a></nav>
   </details>
+  <section class="sec" id="sec-0"><blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/index.html</p>
+</blockquote>
+</section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul><li>Title: LESS: Selecting Influential Data for Targeted Instruction Tuning</li><li>Authors / Org: Mengzhou Xia, Sadhika Malladi, Suchin Gururangan, Sanjeev Arora, Danqi Chen / Princeton NLP</li><li>Link / arXiv: <a href="https://arxiv.org/abs/2402.04333">https://arxiv.org/abs/2402.04333</a></li><li>Code: <a href="https://github.com/princeton-nlp/LESS">https://github.com/princeton-nlp/LESS</a></li><li>Date read: 2026-08-06</li><div class="meta"><span class="tag">sft</span><span class="tag">data-selection</span><span class="tag">influence</span><span class="tag">data-attribution</span><span class="tag">instruction-tuning</span><span class="tag">curation</span><span class="tag">targeted</span></div></ul>
+<dl class="meta-grid"><dt>Title</dt><dd>LESS: Selecting Influential Data for Targeted Instruction Tuning</dd><dt>Authors / Org</dt><dd>Mengzhou Xia, Sadhika Malladi, Suchin Gururangan, Sanjeev Arora, Danqi Chen / Princeton NLP</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2402.04333">https://arxiv.org/abs/2402.04333</a></dd><dt>Code</dt><dd><a href="https://github.com/princeton-nlp/LESS">https://github.com/princeton-nlp/LESS</a></dd><dt>Date read</dt><dd>2026-08-06</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">sft</span><span class="tag">data-selection</span><span class="tag">influence</span><span class="tag">data-attribution</span><span class="tag">instruction-tuning</span><span class="tag">curation</span><span class="tag">targeted</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>为想定向提升的能力（推理/BBH/MMLU）准备几条 few-shot 锚点，把大池子 27万 条指令的 low-rank 梯度跟锚点做相似度搜索，只训 top 5% 的数据，经常比训全量还好，且用 7B 选的数据能直接给 13B/Mistral 用。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">27万</div><div class="l">指令池</div></div><div class="stat"><div class="v">5%</div><div class="l">精选训练</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">5%热身</div><div class="farrow">→</div><div class="fnode">梯度相似度</div><div class="farrow">→</div><div class="fnode">取top5%</div><div class="farrow">→</div><div class="fnode">定向微调</div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>LESS梯度选</h4><ul><li>按目标影响选</li><li>5%常胜全量</li></ul></div><div class="vscol vs-b"><h4>BM25/embedding选</h4><ul><li>表面相似</li><li>训了没用</li></ul></div></div>
+
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
-<ol><li><strong>Motivation</strong>: 全量指令微调混了太多水数据，想提升某个专项能力时，大部分数据是 noise。传统 BM25 / embedding 选的是表面像的，训了没用。需要按“对目标 loss 的实际影响”来选。</li><li><strong>Data Pipeline</strong>: <ul><li>Warmup: 随机抽 5% 数据把 base (Llama-2) 热一下，让梯度不要是纯噪</li><li>Gradient Datastore: 只取 LoRA adapter 的梯度，随机投影到 8192 维 (JL引理保点积)，建一次库可复用</li><li>Scoring: <code>score(z)=cos(mean_g_target, g_low(z))</code>，优化目标是 Adam 修正后的 influence <code>η * grad_target^T Gamma(z)</code>，其中 <code>Gamma = Adam_precond(grad)</code>（注：cosine 是独立的工程取舍，不由 Adam-aware 严格推出，见问答补充 Q4–Q5）</li><li>Select: 取分数最高的 5% (≈13k) 去做 instruction tuning</li></ul></li><li><strong>Key Tricks</strong>: <ul><li>优化器感知: 不是 SGD 点积，用 Adam 的 m/v 修正后的梯度</li><li>LoRA + 随机投影: 全参梯度 7B 维存不下，LoRA 降到几百万再 JL 到 8192</li><li>Warmup: 不 warmup 梯度全是噪，相似度排名失效</li></ul></li><li><strong>Results</strong>: 5% LESS 选的数据训 Llama-2-7B，在 MMLU/BBH/TyDiQA 上常打赢 27万 全量；随机 5% / BM25 / RDS 都输。Transfer：7B 选的数据给 13B / Mistral-7B 用同样赢。</li></ol>
+<ol>
+<li><strong>Motivation</strong>: 全量指令微调混了太多水数据，想提升某个专项能力时，大部分数据是 noise。传统 BM25 / embedding 选的是表面像的，训了没用。需要按“对目标 loss 的实际影响”来选。</li>
+<li><strong>Data Pipeline</strong>: <ul>
+<li>Warmup: 随机抽 5% 数据把 base (Llama-2) 热一下，让梯度不要是纯噪</li>
+<li>Gradient Datastore: 只取 LoRA adapter 的梯度，随机投影到 8192 维 (JL引理保点积)，建一次库可复用</li>
+<li>Scoring: <code>score(z)=cos(mean_g_target, g_low(z))</code>，优化目标是 Adam 修正后的 influence <code>η * grad_target^T Gamma(z)</code>，其中 <code>Gamma = Adam_precond(grad)</code>（注：cosine 是独立的工程取舍，不由 Adam-aware 严格推出，见问答补充 Q4–Q5）</li>
+<li>Select: 取分数最高的 5% (≈13k) 去做 instruction tuning</li>
+</ul>
+</li>
+<li><strong>Key Tricks</strong>: <ul>
+<li>优化器感知: 不是 SGD 点积，用 Adam 的 m/v 修正后的梯度</li>
+<li>LoRA + 随机投影: 全参梯度 7B 维存不下，LoRA 降到几百万再 JL 到 8192</li>
+<li>Warmup: 不 warmup 梯度全是噪，相似度排名失效</li>
+</ul>
+</li>
+<li><strong>Results</strong>: 5% LESS 选的数据训 Llama-2-7B，在 MMLU/BBH/TyDiQA 上常打赢 27万 全量；随机 5% / BM25 / RDS 都输。Transfer：7B 选的数据给 13B / Mistral-7B 用同样赢。</li>
+</ol>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>可迁移</h2>
-<ul><li>对你现在 coding data 工作的 1-2 个直接可试的点：<ol><li>拿 10 条 LiveCodeBench 难例当 target，用你 1B 小 proxy 建 gradient 库，筛 5% 合成 code 数据试 pass@k，对比随机 5%</li><li>用 self-influence 思路把 coding SFT 池子里 high high self-influence 的脏/需强记样本清掉，留推理型</li></ol></li><li>Infra 视角：gradient datastore 建一次多任务复用，成本 O(N) 建库后每次选数据都是 O(N) cosine，适合 fly-wheels；可扩展到 RLHF 数据筛选。</li></ul>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：</li>
+<li>拿 10 条 LiveCodeBench 难例当 target，用你 1B 小 proxy 建 gradient 库，筛 5% 合成 code 数据试 pass@k，对比随机 5%</li>
+<li>用 self-influence 思路把 coding SFT 池子里 high high self-influence 的脏/需强记样本清掉，留推理型</li>
+<li>Infra 视角：gradient datastore 建一次多任务复用，成本 O(N) 建库后每次选数据都是 O(N) cosine，适合 fly-wheels；可扩展到 RLHF 数据筛选。</li>
+</ul>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>疑问 / 下一步</h2>
-<ul><li>如果 target 是 code generation 而不是推理，few-shot 靶子要怎么写才能让梯度更准？是不是要用 execution trace 而不是最终答案？（2026-09-11 已在下方"问答补充" Q6 中回答：trace 做增广 + rejection sampling 做等价类降噪）</li><li>小 proxy 太弱时 transfer 失效的临界点在哪？对 coding 1B proxy 够吗？（2026-09-11 已在下方"问答补充" Q7 中回答：临界点是靶子是否落在 proxy 的 ZPD 内，即 $\text{pass@k} &gt; 0$ ）</li></ul>
+<ul>
+<li>如果 target 是 code generation 而不是推理，few-shot 靶子要怎么写才能让梯度更准？是不是要用 execution trace 而不是最终答案？（2026-09-11 已在下方"问答补充" Q6 中回答：trace 做增广 + rejection sampling 做等价类降噪）</li>
+<li>小 proxy 太弱时 transfer 失效的临界点在哪？对 coding 1B proxy 够吗？（2026-09-11 已在下方"问答补充" Q7 中回答：临界点是靶子是否落在 proxy 的 ZPD 内，即 $\text{pass@k} &gt; 0$ ）</li>
+</ul>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>原文金句 (1-2句)</h2>
-<blockquote><p>Instruction tuning on a LESS-selected 5% of the data can often outperform training on the full dataset. — and the selected data is highly transferable across models.</p></blockquote>
-<blockquote><p>Our method goes beyond surface form cues to identify data that exemplifies the necessary reasoning skills.</p></blockquote>
+<blockquote class="pq">
+<p>Instruction tuning on a LESS-selected 5% of the data can often outperform training on the full dataset. — and the selected data is highly transferable across models.</p>
+<p>Our method goes beyond surface form cues to identify data that exemplifies the necessary reasoning skills.</p>
+</blockquote>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>官方 Repo</h2>
-<ul><li>GitHub: <a href="https://github.com/princeton-nlp/LESS">https://github.com/princeton-nlp/LESS</a> — 包含 warmup / datastore / selection / train / eval 全流程代码</li></ul>
+<ul>
+<li>GitHub: https://github.com/princeton-nlp/LESS — 包含 warmup / datastore / selection / train / eval 全流程代码</li>
+</ul>
 </section>
 <section class="sec" id="sec-8"><h2><span class="n">8</span>第二轮复习（2026-09-04）</h2>
 <h3>1. 核心命题</h3>
 <p>LESS 真正解决的 data 问题：<strong>指令池是能力异构混合物时，如何为"定向能力"选数据</strong>。它不回答"哪条数据质量高"（那是 DEITA / Day 20 的问题）、不回答"哪条难"（SuperFiltering / Day 12 的问题）、也不回答"哪条文本像目标"（BM25 / DSIR 的问题），而是回答：<strong>哪条数据被训练之后，能把模型推向目标 loss 的下降方向</strong>。</p>
 <p>核心命题是把"数据价值"从文本的内在属性重定义为<strong>关系属性</strong>——由 target 梯度与优化器几何共同定义。5% 打赢全量的本质不是"数据越少越好"，而是把有限的更新预算集中到目标对齐的方向上，稀释掉 95% 与目标正交或反向的梯度噪声。这是一个 target-scoped 的结论：LESS 从不声称这 5% 是普适更好的数据集，只声称它是对<strong>具名目标</strong>更好的数据集。"少即是多"在这里是"定向集中"的推论，不是信条。</p>
 <h3>2. 图谱位置</h3>
-<ul><li><strong>直接前驱 Day 03 TracIn</strong>：LESS 继承"梯度点积 = 影响"的记账思想，但做了三处关键改动：(a) SGD 一步点积 → Adam 感知的 update representation；(b) 全参梯度 → LoRA 梯度 + JL 随机投影到 8192 维（可扩展性）；(c) 多 checkpoint 累加 → 单个 warmup 后 checkpoint + few-shot target 锚点（目标条件化）。TracIn 回答"这条数据在真实训练路径上是否推过目标"，LESS 回答"这条数据若被训一步，是否沿 Adam 真实更新方向推目标"。</li><li><strong>谱系源头 Day 02 Influence</strong>：LESS 是 influence 谱系的实用分支——放弃 endpoint 反事实，即下式中的曲率重优化：</li></ul>
-<p>$$S_{\mathrm{IF}}(z,z_*)=g_*^\top H^{-1}g_z$$</p>
-<p>保留的是"一步更新对目标 loss 的即时作用"。Day 02 / 03 复习里推过：Adam 下一步的真实作用是</p>
-<p>$$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z$$</p>
-<p>而不是 SGD 近似 $$\eta g_*^\top g_z$$。LESS 正是把那个注脚变成了方法：用 Adam 预条件替换 Hessian 曲率修正。</p>
-<ul><li><strong>平行 / 互补 Day 05 DataInf（重点直接对比）</strong>：同一块 LoRA 梯度 substrate，走了相反方向。DataInf 回到 Influence 路线，用经验 Fisher 做闭式近似</li></ul>
-<p>$$(1/n)\sum_i g_i g_i^\top+\lambda I\approx H$$</p>
-<p>算的是<strong>每条样本对 test loss 的近似精确影响分</strong>（1 秒一条，适合扫脏 / 找负影响样本）；LESS 用 Adam 预条件 + cosine，算的是<strong>候选与目标梯度的方向对齐</strong>，建一次库后每次选择是 O(N) cosine（适合批量定向选）。对照：DataInf 的 Fisher 逆扮演<strong>曲率</strong>角色（对应 Influence 的 $$H^{-1}$$，回答"扰动被训练集拉回多少"），LESS 的 Adam 预条件扮演<strong>优化器</strong>角色（回答"训练实际会走哪一步"）；DataInf 是 per-sample 精确归因工具，LESS 是 target-conditioned 批量选择器。给 coding 的分工因此是：DataInf 扫脏（找拖累 HumanEval 的负影响样本），LESS 定向选（为 LiveCodeBench 难例挑 5%）。两者共享 LoRA 假设，恰好互补。</p>
-<ul><li><strong>便宜替代 Day 12 SuperFiltering</strong>：125M 弱模型 IFD 做 target-free 难度筛选，是 LESS 的"粗筛版"。两篇共同验证了"选择信号跨尺度迁移"（125M 选的约等于 7B 选的；7B 选的可给 13B / Mistral 用）。但二者选的不是同一种东西：SuperFiltering 选"内在难"（与目标无关），LESS 选"对目标有用"（目标条件化）。工程正确组合是 cascade：SuperFiltering 粗筛到 20% → LESS 精选到 5%，而非二选一（Day 12 NOTES 已有此判断，本轮复核确认为正确）。</li><li><strong>后继呼应</strong>：Day 11 LIMR 是 LESS 思想在 RL 轨迹上的版本（轨迹对齐选 1.3k 难例）；Day 17 / 18 LIMO / s1 走了另一条"少即是多"路线（人工策展质量而非梯度影响）；Day 20 DEITA 的三因子 $$s=c\times q\times \mathrm{diversity}$$ 里，LESS 只贡献了 influence 轴——缺的 diversity 轴正是第 4 节的结构性缺口。</li></ul>
+<ul>
+<li><strong>直接前驱 Day 03 TracIn</strong>：LESS 继承"梯度点积 = 影响"的记账思想，但做了三处关键改动：(a) SGD 一步点积 → Adam 感知的 update representation；(b) 全参梯度 → LoRA 梯度 + JL 随机投影到 8192 维（可扩展性）；(c) 多 checkpoint 累加 → 单个 warmup 后 checkpoint + few-shot target 锚点（目标条件化）。TracIn 回答"这条数据在真实训练路径上是否推过目标"，LESS 回答"这条数据若被训一步，是否沿 Adam 真实更新方向推目标"。</li>
+<li><strong>谱系源头 Day 02 Influence</strong>：LESS 是 influence 谱系的实用分支——放弃 endpoint 反事实，即下式中的曲率重优化：
+$$S_{\mathrm{IF}}(z,z_*)=g_*^\top H^{-1}g_z$$
+保留的是"一步更新对目标 loss 的即时作用"。Day 02 / 03 复习里推过：Adam 下一步的真实作用是
+$$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z$$
+而不是 SGD 近似 $$\eta g_*^\top g_z$$。LESS 正是把那个注脚变成了方法：用 Adam 预条件替换 Hessian 曲率修正。</li>
+<li><strong>平行 / 互补 Day 05 DataInf（重点直接对比）</strong>：同一块 LoRA 梯度 substrate，走了相反方向。DataInf 回到 Influence 路线，用经验 Fisher 做闭式近似
+$$(1/n)\sum_i g_i g_i^\top+\lambda I\approx H$$
+算的是<strong>每条样本对 test loss 的近似精确影响分</strong>（1 秒一条，适合扫脏 / 找负影响样本）；LESS 用 Adam 预条件 + cosine，算的是<strong>候选与目标梯度的方向对齐</strong>，建一次库后每次选择是 O(N) cosine（适合批量定向选）。对照：DataInf 的 Fisher 逆扮演<strong>曲率</strong>角色（对应 Influence 的 $$H^{-1}$$，回答"扰动被训练集拉回多少"），LESS 的 Adam 预条件扮演<strong>优化器</strong>角色（回答"训练实际会走哪一步"）；DataInf 是 per-sample 精确归因工具，LESS 是 target-conditioned 批量选择器。给 coding 的分工因此是：DataInf 扫脏（找拖累 HumanEval 的负影响样本），LESS 定向选（为 LiveCodeBench 难例挑 5%）。两者共享 LoRA 假设，恰好互补。</li>
+<li><strong>便宜替代 Day 12 SuperFiltering</strong>：125M 弱模型 IFD 做 target-free 难度筛选，是 LESS 的"粗筛版"。两篇共同验证了"选择信号跨尺度迁移"（125M 选的约等于 7B 选的；7B 选的可给 13B / Mistral 用）。但二者选的不是同一种东西：SuperFiltering 选"内在难"（与目标无关），LESS 选"对目标有用"（目标条件化）。工程正确组合是 cascade：SuperFiltering 粗筛到 20% → LESS 精选到 5%，而非二选一（Day 12 NOTES 已有此判断，本轮复核确认为正确）。</li>
+<li><strong>后继呼应</strong>：Day 11 LIMR 是 LESS 思想在 RL 轨迹上的版本（轨迹对齐选 1.3k 难例）；Day 17 / 18 LIMO / s1 走了另一条"少即是多"路线（人工策展质量而非梯度影响）；Day 20 DEITA 的三因子 $$s=c\times q\times \mathrm{diversity}$$ 里，LESS 只贡献了 influence 轴——缺的 diversity 轴正是第 4 节的结构性缺口。</li>
+</ul>
 <h3>3. 机制深挖</h3>
 <p><strong>(a) Warmup：让 score 有方差的必要条件。</strong> 在 base Llama-2 上，指令数据的 loss 主要由"学 chat 格式 / 长度"主导，所有候选梯度共享一个巨大的"格式学习"方向，cosine 会坍缩（全都接近 1，排不出序）。随机 5% warmup 把参数推入"格式已学会、推理成分可分"的 basin，候选梯度才分裂出可比的方向差异。同时 warmup 产出 Adam 的 optimizer state（m, v）——这是 Adam-aware 表示的必需品。Warmup 不是修辞性的"热身"，它是信号存在的前提。</p>
-<p><strong>(b) Adam-aware 表示。</strong> SGD 近似下，一步更新对目标 loss 的影响是 $$-\eta g_*^\top g_z$$。但实际训练走 Adam：</p>
-<p>$$\Delta\theta=-\eta\,\hat m/(\sqrt{\hat v}+\epsilon)$$</p>
-<p>LESS 定义 $$\Gamma(z)=\hat m_z/(\sqrt{\hat v_z}+\epsilon)$$ 为"样本 z 诱导的 Adam 更新方向"，score 取</p>
-<p>$$\mathrm{score}(z)=\cos(\bar\Gamma_{\mathrm{target}},\Gamma(z))$$</p>
-<p>这就是 optimizer-aware influence：衡量的不是梯度本身，而是<strong>优化器真正会走的那一步</strong>。注意 $$\bar\Gamma_{\mathrm{target}}$$ 是对 target 锚点取平均——均值向量的方向即"目标技能"的估计方向。</p>
+<p><strong>(b) Adam-aware 表示。</strong> SGD 近似下，一步更新对目标 loss 的影响是 $$-\eta g_*^\top g_z$$。但实际训练走 Adam：
+$$\Delta\theta=-\eta\,\hat m/(\sqrt{\hat v}+\epsilon)$$
+LESS 定义 $$\Gamma(z)=\hat m_z/(\sqrt{\hat v_z}+\epsilon)$$ 为"样本 z 诱导的 Adam 更新方向"，score 取
+$$\mathrm{score}(z)=\cos(\bar\Gamma_{\mathrm{target}},\Gamma(z))$$
+这就是 optimizer-aware influence：衡量的不是梯度本身，而是<strong>优化器真正会走的那一步</strong>。注意 $$\bar\Gamma_{\mathrm{target}}$$ 是对 target 锚点取平均——均值向量的方向即"目标技能"的估计方向。</p>
 <p><strong>(c) 为什么用 cosine 而不用 dot。</strong> 梯度 norm 被 token 数和"惊讶度"主导，与"有用性"弱相关；dot product 会被长序列 / 高 loss 异常值劫持。cosine 丢掉 magnitude 换排名鲁棒性——代价是同方向下"推得多 vs 推得少"无法区分。论文 ablation 证实 cosine 优于 dot：这是用校准精度换稳健性的深思熟虑 trade-off，不是不加思考的归一化。</p>
 <p><strong>(d) LoRA + JL 投影：可扩展性的代价。</strong> 7B 全参梯度 × 27 万条存不下 → 只取 LoRA adapter 梯度（数百万维）→ JL 随机投影到 8192 维保内积。藏了两个强假设：① 推理能力的"有用方向"能被低秩更新表达（LoRA 子空间限制）；② JL 保的是固定向量对的内积，而选择用的是均值目标向量与候选的 cosine——期望成立，但单个候选的排名噪声会被投影放大。DataInf 恰好站在同一个 LoRA substrate 上走了闭式路线：两篇的分叉点不在数据假设，而在"要不要显式处理曲率 / 优化器"。</p>
 <p><strong>(e) Target 锚点 = 单均值向量的单簇检索。</strong> target 是约 10 条 few-shot 例子的梯度均值。均值是一个方向 → 选择本质是单簇检索。若目标能力需要多种异构技能（如 BBH 同时要符号操作和世界知识），均值只指向主导技能，次要技能的数据得分系统性偏低。<strong>LESS 没有 diversity 项</strong>——这是它相对 Vendi / Day 19、D4 / Day 24、DEITA / Day 20 的结构性缺口，也是第 6 节思考题的出发点。</p>
 <h3>4. 边界与反例</h3>
-<ol><li><strong>Target 锚点误设</strong>：few-shot 例子必须代表目标"技能"而非"格式"。若锚点全是特定措辞的选择题，选出来的是"同格式"不是"同技能"。对 coding：只用最终答案做锚点会漏掉 execution trace 推理，因为</li></ol>
-<p>$$\nabla_\theta L(\text{answer})$$</p>
-<p>与下式指向不同方向：</p>
-<p>$$\nabla_\theta L(\text{trace})$$</p>
-<p>这呼应初读疑问"是不是要用 execution trace 而不是最终答案"：答案是肯定的，至少对推理型 coding 任务。</p>
-<ol><li><strong>单均值坍缩 + 无去重</strong>：top 5% 可能全是与均值最像的近重复模板（13k 条"let's think step by step"变体）。论文<strong>没有度量选中集合内部的冗余度</strong>。反例构造：池中若有 10k 条同一模板的改写，LESS 会整块选入；Vendi / D4 则会惩罚这种冗余。这是纯 influence 选择的阿喀琉斯之踵。</li><li><strong>静态一次性选择</strong>：score 在 warmup checkpoint 上算一次；训练 100 步后，某条"当时有用"的数据可能已被其他选中样本覆盖（diminishing returns 未建模）。没有迭代重选机制——与 flywheel 式持续选择不兼容。</li><li><strong>Transfer 未探的边界</strong>：7B → 13B / Mistral 验证了，但"1B 弱 proxy 选给 70B 用"的临界点没测。SuperFiltering 证明"难度排名"可从 125M 迁移，但"目标条件梯度方向"能否从弱 proxy 迁移是另一个问题：弱模型的梯度方向本身可能是噪的，cosine 会放大这种噪。</li><li><strong>证据没证明什么</strong>：5% &gt; 全量只在目标 benchmark（MMLU / BBH / TyDiQA）上成立；<strong>没测通用能力的"定向税"</strong>——为专项牺牲了多少通用性未知。也<strong>没对比"top-5% + 随机 5%"混合</strong>，无法区分"去掉噪声"和"选中精华"各自的贡献。严格说，论文证明的是"去掉 95% 不伤害目标"，而不是"选出的 5% 是最优的 5%"。</li><li><strong>LoRA 子空间限制</strong>：influence 只在 LoRA 参数空间度量；若最终做全参训练，排名可能错位。论文自洽（选和训都用 LoRA），迁移到全参 SFT 时需重新验证。</li></ol>
+<ol>
+<li><strong>Target 锚点误设</strong>：few-shot 例子必须代表目标"技能"而非"格式"。若锚点全是特定措辞的选择题，选出来的是"同格式"不是"同技能"。对 coding：只用最终答案做锚点会漏掉 execution trace 推理，因为
+$$\nabla_\theta L(\text{answer})$$
+与下式指向不同方向：
+$$\nabla_\theta L(\text{trace})$$
+这呼应初读疑问"是不是要用 execution trace 而不是最终答案"：答案是肯定的，至少对推理型 coding 任务。</li>
+<li><strong>单均值坍缩 + 无去重</strong>：top 5% 可能全是与均值最像的近重复模板（13k 条"let's think step by step"变体）。论文<strong>没有度量选中集合内部的冗余度</strong>。反例构造：池中若有 10k 条同一模板的改写，LESS 会整块选入；Vendi / D4 则会惩罚这种冗余。这是纯 influence 选择的阿喀琉斯之踵。</li>
+<li><strong>静态一次性选择</strong>：score 在 warmup checkpoint 上算一次；训练 100 步后，某条"当时有用"的数据可能已被其他选中样本覆盖（diminishing returns 未建模）。没有迭代重选机制——与 flywheel 式持续选择不兼容。</li>
+<li><strong>Transfer 未探的边界</strong>：7B → 13B / Mistral 验证了，但"1B 弱 proxy 选给 70B 用"的临界点没测。SuperFiltering 证明"难度排名"可从 125M 迁移，但"目标条件梯度方向"能否从弱 proxy 迁移是另一个问题：弱模型的梯度方向本身可能是噪的，cosine 会放大这种噪。</li>
+<li><strong>证据没证明什么</strong>：5% &gt; 全量只在目标 benchmark（MMLU / BBH / TyDiQA）上成立；<strong>没测通用能力的"定向税"</strong>——为专项牺牲了多少通用性未知。也<strong>没对比"top-5% + 随机 5%"混合</strong>，无法区分"去掉噪声"和"选中精华"各自的贡献。严格说，论文证明的是"去掉 95% 不伤害目标"，而不是"选出的 5% 是最优的 5%"。</li>
+<li><strong>LoRA 子空间限制</strong>：influence 只在 LoRA 参数空间度量；若最终做全参训练，排名可能错位。论文自洽（选和训都用 LoRA），迁移到全参 SFT 时需重新验证。</li>
+</ol>
 <h3>5. 迁移到 coding / post-training data</h3>
 <p><strong>可执行方案：双锚点 LESS + 去重 cascade（针对 500k 合成 coding 池）</strong></p>
-<ol><li>造<strong>两个</strong> target 锚点（对冲单均值坍缩）：锚点 A = 10 道 LiveCodeBench 竞赛级难例（含 reference solution + <strong>execution trace</strong>，不只有最终代码）；锚点 B = 10 个 repo 级 API / 库使用任务。分别算均值 Adam 表示（记为 $$\bar\Gamma_A,\bar\Gamma_B$$）。</li><li>Warmup：1B code proxy 在池中随机 5% 上 warmup（省成本；proxy transfer 有效性本身就是待验证假设，先小规模验证再放大）。</li><li>建库：LoRA 梯度 + JL 投影到 8192 维，对 500k 全池算分；分别按与 $$\bar\Gamma_A,\bar\Gamma_B$$ 的 cosine 各取 top 2.5%，合并去重得约 5%。</li><li><strong>补上 LESS 原生缺失的多样性</strong>：在选出的 5% 内跑 SemDeDup 式语义去重（Day 24），杀模板冗余——coding 池模板化严重，这一步不是可选。</li><li>对照实验：训三组——LESS 双锚点 5%、随机 5%、SuperFiltering 式 IFD 10%——在 HumanEval+ / LiveCodeBench 上比 pass@k，并记录 MMLU 看定向税。</li><li>预算不足时的便宜 cascade：先用 350M CodeT5 的 IFD 粗筛到 20%（Day 12），再在 20% 上做 LESS 精选到 5%。</li></ol>
-</section>
-<section class="sec sec-qa" id="sec-9"><h2><span class="n">9</span>6. 今天的一道思考题</h2>
+<ol>
+<li>造<strong>两个</strong> target 锚点（对冲单均值坍缩）：锚点 A = 10 道 LiveCodeBench 竞赛级难例（含 reference solution + <strong>execution trace</strong>，不只有最终代码）；锚点 B = 10 个 repo 级 API / 库使用任务。分别算均值 Adam 表示（记为 $$\bar\Gamma_A,\bar\Gamma_B$$）。</li>
+<li>Warmup：1B code proxy 在池中随机 5% 上 warmup（省成本；proxy transfer 有效性本身就是待验证假设，先小规模验证再放大）。</li>
+<li>建库：LoRA 梯度 + JL 投影到 8192 维，对 500k 全池算分；分别按与 $$\bar\Gamma_A,\bar\Gamma_B$$ 的 cosine 各取 top 2.5%，合并去重得约 5%。</li>
+<li><strong>补上 LESS 原生缺失的多样性</strong>：在选出的 5% 内跑 SemDeDup 式语义去重（Day 24），杀模板冗余——coding 池模板化严重，这一步不是可选。</li>
+<li>对照实验：训三组——LESS 双锚点 5%、随机 5%、SuperFiltering 式 IFD 10%——在 HumanEval+ / LiveCodeBench 上比 pass@k，并记录 MMLU 看定向税。</li>
+<li>预算不足时的便宜 cascade：先用 350M CodeT5 的 IFD 粗筛到 20%（Day 12），再在 20% 上做 LESS 精选到 5%。</li>
+</ol>
+<h3>6. 今天的一道思考题</h3>
 <p>综合 <strong>Day 04 LESS、Day 19 Vendi、Day 24 D4 / SemDeDup、Day 20 DEITA</strong>：LESS 用单一均值目标梯度做 cosine 检索选 top 5%，完全没有多样性项；Vendi 给出多样性的公理化度量（kernel 特征值熵），D4 用"原型式剪枝"在 embedding 空间保证覆盖，DEITA 把选择分解为 complexity × quality × diversity 三因子。</p>
 <p>请设计一个"影响力 + 多样性"的联合选择目标：</p>
-<ul><li>写出数学形式（例如次模目标 $$\max_{|S|=k}\sum_{z\in S}s(z)-\lambda R(S)$$，或 DEITA 式的乘法三因子）。</li><li>明确 influence 得分与冗余项的记号：前者记为 $$s(z)$$</li><li>后者记为 $$R(S)$$</li><li>diversity 项应取什么<strong>可计算</strong>形式（覆盖 Vendi 的 kernel 熵与 D4 的原型距离两种思路，说明各自计算代价）。</li><li>论证 $$\lambda$$ 的选择依据：下式两种极限分别退化成哪种已知的选择策略：</li></ul>
-<p>$$\lambda\to 0,\qquad \lambda\to\infty$$</p>
-<ul><li>构造一个具体反例说明纯 LESS 会选出 13k 条近重复模板而你的目标不会——用"模板簇"的梯度几何解释：为什么同一模板的 $$\Gamma(z)$$ 彼此 cosine 接近（提示：共享的模板 token 主导梯度方向）。</li><li>最后用 DEITA 三因子回答：LESS 的 influence score 对应 c / q / diversity 中的哪一个？缺的两个在 coding SFT 里分别对应什么可计算的 proxy（各举一个，并说明为什么 IFD 只能算其中之一）？</li></ul>
+<ul>
+<li>写出数学形式（例如次模目标 $$\max_{|S|=k}\sum_{z\in S}s(z)-\lambda R(S)$$，或 DEITA 式的乘法三因子）。</li>
+<li>明确 influence 得分与冗余项的记号：前者记为 $$s(z)$$</li>
+<li>后者记为 $$R(S)$$</li>
+<li>diversity 项应取什么<strong>可计算</strong>形式（覆盖 Vendi 的 kernel 熵与 D4 的原型距离两种思路，说明各自计算代价）。</li>
+<li>论证 $$\lambda$$ 的选择依据：下式两种极限分别退化成哪种已知的选择策略：
+$$\lambda\to 0,\qquad \lambda\to\infty$$</li>
+<li>构造一个具体反例说明纯 LESS 会选出 13k 条近重复模板而你的目标不会——用"模板簇"的梯度几何解释：为什么同一模板的 $$\Gamma(z)$$ 彼此 cosine 接近（提示：共享的模板 token 主导梯度方向）。</li>
+<li>最后用 DEITA 三因子回答：LESS 的 influence score 对应 c / q / diversity 中的哪一个？缺的两个在 coding SFT 里分别对应什么可计算的 proxy（各举一个，并说明为什么 IFD 只能算其中之一）？</li>
+</ul>
 <p>答案不许只复述 LESS 原文；必须实质用到至少两篇对比论文的机制。</p>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文链接</h2>
-<ul><li>Paper: <a href="https://arxiv.org/abs/2402.04333">https://arxiv.org/abs/2402.04333</a></li><li>GitHub NOTES: <a href="https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less">https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less</a></li></ul>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文链接</h2>
+<ul>
+<li>Paper: https://arxiv.org/abs/2402.04333</li>
+<li>GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less</li>
+</ul>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>问答补充（2026-09-04）</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>问答补充（2026-09-04）</h2>
 <p>本节收录 2026-09-04 晚侧聊中的用户问答（已按"先问题、再推导、最后几何含义"整理为结构化条目），不改动上方既有内容。</p>
 <h3>Q1：BM25 是什么</h3>
 <p>BM25 是经典的信息检索相关度公式：给定查询 $q$ 与文档池，按相关度排序文档。核心三项——词频（边际递减）、逆文档频率（罕见词权重高）、长度归一化（惩罚堆词长文档）：</p>
@@ -176,7 +269,10 @@ pre code{background:none;padding:0;color:inherit}
 <p>关键澄清："从 Adam 导出 cosine"其实是<strong>两个独立的决定</strong>。</p>
 <p>TracIn 用 $\eta\,g_*^\top g_z$ ，等于在假设"模型走的是 SGD 更新"；实际走的是 Adam 更新，正确的即时作用应该是：</p>
 <p>$$g_*^\top\Delta\theta_z^{\text{Adam}}=-\eta\,g_*^\top\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$</p>
-<ol><li><strong>用 Adam 表示代替原始梯度</strong>——这是从优化器真实性来的，是 LESS 的核心改进；</li><li><strong>用 cosine 代替点积</strong>——这是工程取舍，丢掉梯度大小换排名鲁棒性。</li></ol>
+<ol>
+<li><strong>用 Adam 表示代替原始梯度</strong>——这是从优化器真实性来的，是 LESS 的核心改进；</li>
+<li><strong>用 cosine 代替点积</strong>——这是工程取舍，丢掉梯度大小换排名鲁棒性。</li>
+</ol>
 <p>一句话：<strong>Adam 解释了为什么用 $\Gamma(z)$ ，工程鲁棒性解释了为什么用 cosine。</strong></p>
 <h3>Q5："所以并非严格数学，只是一种类比"（确认 + 精确化）</h3>
 <p>用户总结得到确认。严格说法分两层：</p>
@@ -184,12 +280,16 @@ pre code{background:none;padding:0;color:inherit}
 <p>$$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx -\eta\,g_*^\top\frac{\hat m_z}{\sqrt{\hat v_z}+\epsilon}$$</p>
 <p>只要 $\hat m_z,\hat v_z$ 是当时真实的 Adam 状态。</p>
 <p>第二层就不严格了。LESS 没有直接用这个点积，而是用 $\cos(\bar\Gamma_{\text{target}},\Gamma(z))$ ；这个改动做了三件事，每件都有代价：</p>
-<ul><li><strong>丢掉学习率 $\eta$ </strong>：所有样本都乘同一个 $\eta$ ，不影响排名；</li><li><strong>目标梯度 $g_*$ 换成 $\bar\Gamma_{\text{target}}$ </strong>：目标也套了 Adam 预处理，但真实的 loss 下降用的是原始 $g_*$ ，不是预处理后的；</li><li><strong>点积换 cosine</strong>：丢掉梯度大小，只留方向。</li></ul>
+<ul>
+<li><strong>丢掉学习率 $\eta$ </strong>：所有样本都乘同一个 $\eta$ ，不影响排名；</li>
+<li><strong>目标梯度 $g_*$ 换成 $\bar\Gamma_{\text{target}}$ </strong>：目标也套了 Adam 预处理，但真实的 loss 下降用的是原始 $g_*$ ，不是预处理后的；</li>
+<li><strong>点积换 cosine</strong>：丢掉梯度大小，只留方向。</li>
+</ul>
 <p>即：$$g_*^\top\Delta\theta_z\quad\Longrightarrow\quad\cos(\bar\Gamma_{\text{target}},\Gamma(z))$$</p>
 <p>中间是一个"去掉大小、只看对齐"的类比跳跃，<strong>不是等价变换</strong>。LESS 的价值在于把 TracIn 的 SGD 近似换成了更接近训练现实的 Adam 视角；但若把它当成严格的反事实数学，就走远了。</p>
 <p><strong>知识图谱关系</strong>：Q3–Q5 共同构成了"LESS 计分规则的完整推导链条"，上接本 NOTES"核心 §2 Data Pipeline（Adam 修正后的 influence）"与"第二轮复习 §1 核心命题"，下接 Day 19 Vendi / Day 24 D4 的"单均值 + 无 diversity"缺口讨论。Q1–Q2 澄清了 BM25 的准确位置：LESS 实验的文本相似度对照基线（与 random、DSIR、RDS 并列），非 30 篇阅读路线成员。</p>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>问答补充（2026-09-11）</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>问答补充（2026-09-11）</h2>
 <p>本节收录 2026-09-11 晚侧聊中的用户问答，问题来自上方"疑问 / 下一步"的两个开放问题。不改动上方既有内容。</p>
 <h3>Q6：code generation 的 target 靶子怎么写（execution trace + rejection sampling）</h3>
 <p>用户在初读疑问的基础上进一步提出：code generation 搜索空间更大，few-shot 靶子应该用 rejection sampling。</p>
@@ -210,8 +310,7 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>反直觉的一半</strong>：proxy 太强也坏。若在靶子上 $\text{pass@1} \approx 1$ 、loss $\approx 0$ ，梯度趋于 0，Adam 归一化 $\hat{m}/\sqrt{\hat{v}}$ 退化为小量比值，方向被残余的个别难 token 主导 → 噪声。因此 sweet spot 是 $0 &lt; \text{pass@k} &lt; 1$ ：靶子落在 proxy 自己的最近发展区（ZPD）内——ZPD 概念在 Day11 用于数据选择，这里平移到 proxy 选择。</p>
 <p><strong>临界点不是模型大小，是 (proxy, target) 的关系</strong>：靶集 $\mathcal{V}$ 是否落在 proxy 的 ZPD 内。可操作的 pilot test（跑完整 LESS 前先做）：① 可达性门槛：proxy 在靶难度上测 $\text{pass@k}$ （ $k=10$ 或 $50$ ）； $\approx 0$ 直接判死刑， $\approx 1$ 则信号太弱。② 排名相关性：在 1–2k 候选子集上分别用小 proxy 与 7B 参考算 LESS 分数，看 Spearman 相关性；显著低则梯度几何对不上，transfer 不可信。</p>
 <p><strong>对 coding 1B 的判断</strong>：取决于靶难度。HumanEval-easy 级（基础函数合成），1B code 模型通常 $\text{pass@k} &gt; 0$ ，错误是技能相关的 → 可能够，应用上述测试验证而非直接否定；LiveCodeBench-hard / 竞赛级 $\text{pass@k} \approx 0$ ，正确解在其可达分布外 → 不够。经验法则（待验证的 heuristic，非定理）：proxy 在靶难度上最好有 20%+ 的 $\text{pass@k}$ ；选 proxy 不是越大越好，是选"刚好够得着靶子"的那个。</p>
-<p><strong>知识图谱关系</strong>：Q6 承接 §4.1"target 锚点误设"与 §6 思考题（单均值 + 无 diversity 缺口），并把 Day11 的 outcome-only 盲区与"蒸馏 frontier 数据"逻辑复用到 target 构造；Q7 把 Day11 的 ZPD 从数据选择平移到 proxy 选择，并给出 transfer 可信度的可操作检验。</p>
-</section>
+<p><strong>知识图谱关系</strong>：Q6 承接 §4.1"target 锚点误设"与 §6 思考题（单均值 + 无 diversity 缺口），并把 Day11 的 outcome-only 盲区与"蒸馏 frontier 数据"逻辑复用到 target 构造；Q7 把 Day11 的 ZPD 从数据选择平移到 proxy 选择，并给出 transfer 可信度的可操作检验。</p></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>

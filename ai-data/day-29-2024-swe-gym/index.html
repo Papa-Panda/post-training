@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 29 — Training Software Engineering Agents and Verifiers with SWE-Gym</title>
+<title>Training Software Engineering Agents and Verifiers with SWE-Gym</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,42 +102,71 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 29</span>
-    <h1>Day 29 — Training Software Engineering Agents and Verifiers with SWE-Gym</h1>
+    <h1>Training Software Engineering Agents and Verifiers with SWE-Gym</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul><li>Title: Training Software Engineering Agents and Verifiers with SWE-Gym</li><li>Authors / Org: Jiayi Pan, Xingyao Wang, Graham Neubig, Navdeep Jaitly, Heng Ji, Alane Suhr, Yizhe Zhang / UC Berkeley, UIUC, CMU, Apple</li><li>Link / arXiv: https://arxiv.org/abs/2412.21139</li><li>Date read: 2026-08-29</li><div class="meta"><span class="tag">coding-data</span><span class="tag">rl-data</span><span class="tag">executable-environment</span><span class="tag">trajectory-data</span><span class="tag">unit-tests</span><span class="tag">curation</span><span class="tag">quality</span></div></ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-29-2024-swe-gym/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Training Software Engineering Agents and Verifiers with SWE-Gym</dd><dt>Authors / Org</dt><dd>Jiayi Pan, Xingyao Wang, Graham Neubig, Navdeep Jaitly, Heng Ji, Alane Suhr, Yizhe Zhang / UC Berkeley, UIUC, CMU, Apple</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2412.21139">https://arxiv.org/abs/2412.21139</a></dd><dt>Date read</dt><dd>2026-08-29</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">coding-data</span><span class="tag">rl-data</span><span class="tag">executable-environment</span><span class="tag">trajectory-data</span><span class="tag">unit-tests</span><span class="tag">curation</span><span class="tag">quality</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>SWE-Gym 从 11 个开源 Python 仓库整理 2,438 个真实 issue 任务，为每题封装代码库、自然语言需求、可执行环境与单元测试，把静态 coding 样本升级为可验证的仓库级交互数据，并公开训练轨迹供 SFT / RL 数据构造使用。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">11</div><div class="l">开源仓库</div></div><div class="stat"><div class="v">2438</div><div class="l">真实任务</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">真实issue</div><div class="farrow">→</div><div class="fnode">封装环境</div><div class="farrow">→</div><div class="fnode">配单测</div><div class="farrow">→</div><div class="fnode">可验证轨迹</div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>仓库级交互数据</h4><ul><li>可验证</li></ul></div><div class="vscol vs-b"><h4>静态coding样本</h4><ul><li>不可执行验证</li></ul></div></div>
+
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
-<ul><li><strong>知识图谱位置</strong>：Day 27 OSS-Instruct（开源代码锚定合成 instruction）→ Day 16 Qwen2.5-Coder（parser / compiler / execution 过滤）→ <strong>Day 29 SWE-Gym（真实 issue + repo context + executable environment + unit tests + agent trajectories）</strong>；同时把 Day 28 ORZ 的“可验证题池”从数学最终答案扩展到仓库级代码修改。</li><li><strong>接上的线</strong>：它接 Day 27 的 coding synthetic 线，但把数据单位从“代码片段—合成问答”推进为“issue—完整仓库—交互轨迹—测试结果”；也接 Day 16 的 execution-filter 线，把执行从离线清洗门禁推进为每个任务自带的训练反馈。</li><li><strong>补的短板</strong>：此前数据大多是静态文本或单轮答案，缺少依赖可复现、跨文件修改、测试反馈与失败轨迹。SWE-Gym 补的是可运行的环境化数据，不是新的优化算法。</li><li><strong>替代 / 分叉 / 改进</strong>：它不替代 OSS-Instruct 的低成本规模化合成，而是分叉到更贵但真实性和可验证性更高的 repo-level 数据；与 Day 28 相比，verifier 从答案匹配升级为环境内单元测试，数据工程成本也显著上升。</li></ul>
+<ul>
+<li><strong>知识图谱位置</strong>：Day 27 OSS-Instruct（开源代码锚定合成 instruction）→ Day 16 Qwen2.5-Coder（parser / compiler / execution 过滤）→ <strong>Day 29 SWE-Gym（真实 issue + repo context + executable environment + unit tests + agent trajectories）</strong>；同时把 Day 28 ORZ 的“可验证题池”从数学最终答案扩展到仓库级代码修改。</li>
+<li><strong>接上的线</strong>：它接 Day 27 的 coding synthetic 线，但把数据单位从“代码片段—合成问答”推进为“issue—完整仓库—交互轨迹—测试结果”；也接 Day 16 的 execution-filter 线，把执行从离线清洗门禁推进为每个任务自带的训练反馈。</li>
+<li><strong>补的短板</strong>：此前数据大多是静态文本或单轮答案，缺少依赖可复现、跨文件修改、测试反馈与失败轨迹。SWE-Gym 补的是可运行的环境化数据，不是新的优化算法。</li>
+<li><strong>替代 / 分叉 / 改进</strong>：它不替代 OSS-Instruct 的低成本规模化合成，而是分叉到更贵但真实性和可验证性更高的 repo-level 数据；与 Day 28 相比，verifier 从答案匹配升级为环境内单元测试，数据工程成本也显著上升。</li>
+</ul>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
 <p>它是 coding data 从静态 SFT 样本走向 agentic RL data 的关键桥：真实 issue 提供任务分布，仓库快照提供上下文，隔离执行环境与单元测试提供低噪声 verifier，agent rollout 再产出可筛选的成功 / 失败轨迹。今天只关注任务如何采集、封装、去重、验证与形成轨迹池；训练算法一句带过。</p>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
-<ol><li>2,438 个任务从 11 个 Python 仓库进入 SWE-Gym 前，issue / PR、仓库快照、依赖和测试分别经过了哪些过滤与可复现性门禁？</li><li>论文最终用于训练的 491 条轨迹如何从 rollout 池中选择：只留成功轨迹会不会损失失败诊断信号，又会引入多大的 agent scaffold 偏置？</li><li>对比 Day 27 OSS-Instruct 与 Day 16 Qwen2.5-Coder：SWE-Gym 的真实 repo + 单元测试到底补了哪些静态合成 / execution-filter 无法覆盖的数据维度，代价又是什么？</li></ol>
+<ol>
+<li>2,438 个任务从 11 个 Python 仓库进入 SWE-Gym 前，issue / PR、仓库快照、依赖和测试分别经过了哪些过滤与可复现性门禁？</li>
+<li>论文最终用于训练的 491 条轨迹如何从 rollout 池中选择：只留成功轨迹会不会损失失败诊断信号，又会引入多大的 agent scaffold 偏置？</li>
+<li>对比 Day 27 OSS-Instruct 与 Day 16 Qwen2.5-Coder：SWE-Gym 的真实 repo + 单元测试到底补了哪些静态合成 / execution-filter 无法覆盖的数据维度，代价又是什么？</li>
+</ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
-<ol><li><strong>Motivation</strong>: 静态 coding 数据缺少真实仓库上下文、依赖环境和可执行验证，无法直接支持仓库级软件工程 agent 的训练数据闭环。</li><li><strong>Data Pipeline</strong>: GitHub 真实 issue / 代码库 → 固定仓库状态与依赖 → 封装可执行 runtime → 配套 unit tests → agent rollout → 按测试结果形成可验证轨迹数据。</li><li><strong>Key Tricks</strong>: 待读论文后填写，重点记录任务采集规则、环境复现门禁、测试可靠性、轨迹筛选与污染控制。</li><li><strong>Results</strong>: 待读论文后核对数据规模、有效环境比例、轨迹数量与下游 resolve-rate 增益；算法细节不展开。</li></ol>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">GitHub 真实 issue / 代码库</div><div class="farrow">→</div><div class="fnode">固定仓库状态与依赖</div><div class="farrow">→</div><div class="fnode">封装可执行 runtime</div><div class="farrow">→</div><div class="fnode">配套 unit tests</div><div class="farrow">→</div><div class="fnode">agent rollout</div><div class="farrow">→</div><div class="fnode">按测试结果形成可验证轨迹数据</div></div>
+<ol>
+<li><strong>Motivation</strong>: 静态 coding 数据缺少真实仓库上下文、依赖环境和可执行验证，无法直接支持仓库级软件工程 agent 的训练数据闭环。</li>
+<li><strong>Data Pipeline</strong>: GitHub 真实 issue / 代码库 → 固定仓库状态与依赖 → 封装可执行 runtime → 配套 unit tests → agent rollout → 按测试结果形成可验证轨迹数据。</li>
+<li><strong>Key Tricks</strong>: 待读论文后填写，重点记录任务采集规则、环境复现门禁、测试可靠性、轨迹筛选与污染控制。</li>
+<li><strong>Results</strong>: 待读论文后核对数据规模、有效环境比例、轨迹数量与下游 resolve-rate 增益；算法细节不展开。</li>
+</ol>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
-<ul><li>对 coding data 工作：把数据 schema 从 <code>{prompt, answer}</code> 扩展为 <code>{issue, repo_snapshot, environment, tests, trajectory, outcome}</code>，并显式记录编译、运行、测试与基础设施失败类型。</li><li>Infra 视角：关注环境构建成功率、冷启动成本、可复现率、测试 flakiness、sandbox 隔离、轨迹存储与 verifier 吞吐，而不是展开具体 RL 优化器。</li></ul>
+<ul>
+<li>对 coding data 工作：把数据 schema 从 <code>{prompt, answer}</code> 扩展为 <code>{issue, repo_snapshot, environment, tests, trajectory, outcome}</code>，并显式记录编译、运行、测试与基础设施失败类型。</li>
+<li>Infra 视角：关注环境构建成功率、冷启动成本、可复现率、测试 flakiness、sandbox 隔离、轨迹存储与 verifier 吞吐，而不是展开具体 RL 优化器。</li>
+</ul>
 </section>
 <section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
-<ul><li>如何做 train / eval 的仓库、时间与语义级去重，避免来自同一代码演化链的近重复 issue 造成 benchmark contamination？</li></ul>
+<ul>
+<li>如何做 train / eval 的仓库、时间与语义级去重，避免来自同一代码演化链的近重复 issue 造成 benchmark contamination？</li>
+</ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
-<blockquote><p>We present SWE-Gym, the first environment for training real-world software engineering (SWE) agents.</p></blockquote>
-<blockquote><p>SWE-Gym contains 2,438 real-world Python task instances, each comprising a codebase with an executable runtime environment, unit tests, and a task specified in natural language.</p></blockquote>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-29-2024-swe-gym/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2412.21139">论文原文</a></div>
+<blockquote class="pq">
+<p>We present SWE-Gym, the first environment for training real-world software engineering (SWE) agents.</p>
+<p>SWE-Gym contains 2,438 real-world Python task instances, each comprising a codebase with an executable runtime environment, unit tests, and a task specified in natural language.</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-29-2024-swe-gym/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {

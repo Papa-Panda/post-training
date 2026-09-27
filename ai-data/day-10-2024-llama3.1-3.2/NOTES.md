@@ -1,5 +1,7 @@
 # Paper 模板 - Day 10 自动骨架
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-10-2024-llama3.1-3.2/index.html
+
 ## 元信息
 - Title: Llama 3.1 / 3.2 - Post-training Expansion, Multilingual / Long-Context / Tool Use, Distillation & Pruning for 1B/3B and Vision 11B/90B
 - Authors / Org: Meta AI - Llama Team
@@ -11,6 +13,11 @@
 
 ## 一句话总结
 Llama 3 已用 15.6T 训到 405B，3.1/3.2 不再加 pretrain tokens量级，而是在 post-training 上做增量：8语言多语+128K长上下文+tool use/func calling+多轮人工+合成SFT+多轮RS+DPO（2026-09-10 注：“5.5M+”在三份原文中无出处，见第二轮复习 §4），以及1B/3B用3.1 8B/70B logits 做pretrain distillation + pruning+量化，11B/90B Vision 用cross-attention adapter接图像——把“预训练堆数据”转为“后训练数据飞轮+小模型蒸馏/剪枝+多模态扩展”的工程化范例。
+
+
+<!-- viz:stats: 128K 长上下文 | 8语言 多语 | 1B 小模型蒸馏 -->
+<!-- viz:flow: 多轮SFT → 多轮RS → DPO → 蒸馏剪枝 -->
+<!-- viz:vs: 后训练飞轮 | 数据飞轮+蒸馏剪枝 || 预训练堆量 | 15.6T已到头 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：pretrain / scaling 主线的“增量迭代点”，不是新 pretrain，是 Day 7 Llama 3 (15.6T dense 五级过滤+code 17%+annealing；2026-09-10 纠正：初读写的"code 25%"有误，论文 §3.1.2 最终配比是 50% 通用 / 25% math+reasoning / 17% code / 8% 多语，见 Day07 第二轮复习 §4.1) 的直接后继。对比 Day 8 DeepSeek-V3 (14.8T MoE，提升 math/code 配比+去冗余保多样+FIM；2026-09-10 注：初读写的"code 30%+激进去重"已在 Day08 第二轮复习 §4 中收回，四词在论文全文零命中，此处降级为存在性表述) 和 Day 9 Qwen2.5 (18T file+repo级 code 5.5T + 1M SFT +多阶段RL)，Llama 3.1/3.2 补上了那三家都弱的一环：**后训练数据的规模化、产品化配方**。

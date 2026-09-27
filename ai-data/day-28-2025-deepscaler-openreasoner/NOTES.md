@@ -1,5 +1,7 @@
 # Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-28-2025-deepscaler-openreasoner/index.html
+
 ## 元信息
 - Title: Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model
 - Authors: Jingcheng Hu, Yinmin Zhang, Qi Han, Daxin Jiang, Xiangyu Zhang, Heung-Yeung Shum
@@ -10,6 +12,10 @@
 
 ## 一句话总结
 Open-Reasoner-Zero 用可验证题目、基于模型通过率的两端过滤，以及 v1 中“129k 全量 RL → 13k 困难尾部继续 RL”的 hard-example mining 支撑约 1,200 步长程强化学习；它是后来 ProRL 系统化“prolonged RL”路线的重要先行证据。
+
+
+<!-- viz:stats: 12.9万 全量 | 1.3万 困难尾部 | 1200 长程RL步数 -->
+<!-- viz:flow: 可验证题池 → 通过率过滤 → 困难尾部 → 长程RL -->
 
 ## 版本说明：v1 与 v2
 - **v1（2025-03）**：初始数据约 129k；32B 模型先在全量数据上训练 1,100 步，再把 64 次作答中答对少于 4 次的题定义为困难题，得到约 13k，继续训练 100 步。

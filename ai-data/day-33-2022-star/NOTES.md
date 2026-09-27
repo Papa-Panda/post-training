@@ -1,5 +1,7 @@
 # Day33 STaR — NOTES
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-33-2022-star/index.html
+
 ## 元信息
 - Title: "STaR: Bootstrapping Reasoning With Reasoning"
 - Authors / Org: Eric Zelikman, Yuhuai Wu, Jesse Mu, Noah D. Goodman / Stanford（Goodman 另属 Google Research）
@@ -9,6 +11,12 @@
 
 ## 一句话总结
 用 rationalization 自举推理数据：以 $P = 10$ 条带 rationale 的 few-shot 例子为种子，让 GPT-J 自己对全数据集生成 rationale——答对的保留、答错的把正确答案塞进 prompt 反向生成 rationale 再过滤，多轮外循环把"自产"的推理数据越滚越大；CQA 上 6B 的 GPT-J 做到 72.5%，逼平 30 倍参数的 GPT-3（73.0%），是 SFT 数据与 RL 数据之间"模型自己造数据"的开山之作。
+
+
+<!-- viz:stats: 10条 few-shot种子 | 72.5% CQA | 30倍 参数规模追平 -->
+<!-- viz:flow: 答对保留 → 答错反推 → 多轮外循环 → 数据滚大 -->
+<!-- viz:bars: STaR 6B 72.5% | GPT-3 175B 73.0% -->
+<!-- viz:vs: 低温greedy | 防污染 || 高温多采样 | 推理错混入 -->
 
 ## 核心
 1. **Motivation**: CoT rationale 能涨点，但已有的两条路都有硬伤——人逐条写 rationale 太贵、每个新任务都要重来；纯 few-shot in-context 精度远不如在 (x, y) 数据上直接做答案 SFT。而现成数据集只有问题和答案、没有中间推理过程。STaR 的思路是把"模型已有的推理能力"本身变成数据生产引擎，用少量种子把无 rationale 的大数据集"翻译"成 rationale 数据集。

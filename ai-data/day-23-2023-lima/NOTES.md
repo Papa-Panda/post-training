@@ -1,5 +1,7 @@
 # Paper 模板 - Day 23
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-23-2023-lima/index.html
+
 > 自动生成骨架 2026-08-23，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。
 
 ## 元信息
@@ -13,6 +15,12 @@
 
 ## 一句话总结
 用仅 1,000 条经过来源、风格与多样性精心策展的 SFT 样本验证“对齐数据质量与覆盖比数量更关键”，把 Day17 LIMO / Day18 s1 的少即是多现象追溯到通用对齐数据的早期起点。
+
+
+<!-- viz:stats: 1000条 策展 | 750 社区 | 250 手写 | 43% 平/胜GPT-4 -->
+<!-- viz:flow: 社区挖掘 → 手写200 → 风格过滤 → 1k定版 -->
+<!-- viz:bars: LIMA vs GPT-4 43% | LIMA vs Bard 58% | LIMA vs DaVinci003 65% -->
+<!-- viz:vs: LIMA人工策展 | 1k打赢52K Alpaca || Self-Instruct自举 | 52K; 被打赢 -->
 
 ## 和之前工作的关系
 

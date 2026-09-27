@@ -1,5 +1,7 @@
 # Paper 模板 - Day 22
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-22-2023-evol-instruct/index.html
+
 > 自动生成骨架 2026-08-22，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。
 
 ## 元信息
@@ -13,6 +15,11 @@
 
 ## 一句话总结
 用 Evol-Instruct 的 In-depth / In-breadth 演化算子把简单指令递归改写成约 70k 条更复杂、多样的 SFT 数据，补上 Self-Instruct 会自举但容易停留在简单任务分布的短板。
+
+
+<!-- viz:stats: 7万 演化指令 | 2种 演化算子 -->
+<!-- viz:flow: 简单指令 → In-depth演化 → In-breadth演化 → 70k复杂集 -->
+<!-- viz:vs: Evol-Instruct | 递归改写变复杂 || Self-Instruct | 停留简单分布 -->
 
 ## 和之前工作的关系
 

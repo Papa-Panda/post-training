@@ -1,4 +1,6 @@
 # 元信息
+
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-02-2017-influence-functions/index.html
 - Title: Understanding Black-box Predictions via Influence Functions
 - Authors / Org: Pang Wei Koh, Percy Liang / Stanford
 - Link / arXiv: https://arxiv.org/abs/1703.04730 / https://proceedings.mlr.press/v70/koh17a.html
@@ -26,6 +28,9 @@
 > Even on non-convex and non-differentiable models where the theory breaks down, approximations to influence functions can still provide valuable information. ## 复现链接
 - Official TF1 code: https://github.com/kohpangwei/influence-release
 - PyTorch reimpl: https://github.com/PRAISE-Lab-Repository/pytorch_influence_functions
+
+
+<!-- viz:flow: 训练集 → 训得参数 → 算影响分 → 定位关键样本 -->
 
 ## 第二轮复习（2026-09-02）
 

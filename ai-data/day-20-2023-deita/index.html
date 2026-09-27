@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 20 — DEITA: What Makes Good Data for Alignment?</title>
+<title>Paper 模板 - Day 20</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,106 +102,101 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 20</span>
-    <h1>Day 20 — DEITA: What Makes Good Data for Alignment?</h1>
+    <h1>Paper 模板 - Day 20</h1>
     <p class="sub">在两个对比鲜明的数据池（300K 高质 $X_{sota}$ / 100K 低质冗余 $X_{base}$）上做受控单维消融，证明对齐数据的"好"可分解为复杂度 × 质量 × 多样性三维；配方 $s = c \times q$ 排序 + embedding 最近邻贪心去重，6K 数据在 LLaMA-1/2-13B 与 Mistral-7B 三条基座上打赢 10 倍以上数据量的 SOTA；并发现 scaling 非单调——"好数据"的占比是有限的。完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">核心</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句</a><a href="#sec-9">今晚产出</a><a href="#sec-10">第二轮复习（2026-09-20）</a><a href="#sec-11">思考题（第二轮）</a><a href="#sec-12">参考链接</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">核心</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句 (1-2句)</a><a href="#sec-9">今晚产出</a><a href="#sec-10">第二轮复习（2026-09-20）</a></nav>
   </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/index.html</p>
+<p>复用 PAPER_TEMPLATE.md 骨架，自动生成</p>
+</blockquote>
+</section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li><strong>Title</strong>: DEITA: What Makes Good Data for Alignment? A Comprehensive Study of Automatic Data Selection in Instruction Tuning</li>
-<li><strong>Authors / Org</strong>: Wei Liu, Weihao Zeng, Keqing He, Yong Jiang, Junxian He / 上海科技大学、北京邮电大学、美团、阿里巴巴、香港科技大学（WL/WZ 访学 HKUST 期间完成）</li>
-<li><strong>Link / arXiv</strong>: <a href="https://arxiv.org/abs/2312.15685">https://arxiv.org/abs/2312.15685</a></li>
-<li><strong>Date read</strong>: 2026-08-20</li>
-<li><strong>Folder</strong>: day-20-2023-deita</li>
-<div class="meta"><span class="tag">sft</span><span class="tag">data-selection</span><span class="tag">quality</span><span class="tag">complexity</span><span class="tag">diversity</span><span class="tag">coding-data</span><span class="tag">curation</span><span class="tag">less-is-more</span></div>
-</ul>
-<p style="font-size:15px;color:var(--muted)">注：初读 NOTES 写 "Virginia Tech, Salesforce AI Research" 是错的，实际单位见上（第二轮复习已修正）。</p>
+<dl class="meta-grid"><dt>Title</dt><dd>DEITA: What Makes Good Data for Alignment? A Comprehensive Study of Automatic Data Selection in Instruction Tuning</dd><dt>Authors / Org</dt><dd>Wei Liu, Weihao Zeng, Keqing He, Yong Jiang, Junxian He / Virginia Tech, Salesforce AI Research</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2312.15685">https://arxiv.org/abs/2312.15685</a></dd><dt>Date read</dt><dd>2026-08-20</dd><dt>Folder</dt><dd>day-20-2023-deita</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-20-2023-deita">https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-20-2023-deita</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">sft</span><span class="tag">data-selection</span><span class="tag">quality</span><span class="tag">complexity</span><span class="tag">diversity</span><span class="tag">coding-data</span><span class="tag">curation</span><span class="tag">less-is-more</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
-<p>用复杂度 × 质量 × 多样性三因子自动选 6k SFT 数据打赢 100k+ 全量，AlpacaEval +5%，提出 Evol-Complexity 与 LLM-Quality 双评分 + 近邻多样性去重，是 LIMR / LIMO / s1 少即是多主线的首次三合一配方。</p>
-<p style="font-size:15px;color:var(--muted)">注（第二轮复习修正）："IFEval 保持"——论文评测只有 MT-Bench、AlpacaEval、Open LLM Leaderboard（ARC / HellaSwag / MMLU / TruthfulQA）+ 附录 D 人工评测，<strong>无 IFEval</strong>；"6k coding 子集 HumanEval 28%→35%"——论文无此实验，是初读臆造，已删除。</p>
+<p>用复杂度×质量×多样性三因子自动选 6k SFT 数据打赢 100k+ 全量，AlpacaEval +5%、IFEval 保持，提出 Evol-Complexity 与 LLM-Quality 双评分 + 近邻多样性去重，是 LIMR/LIMO/s1 少即是多主线的首次三合一配方</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">6000</div><div class="l">三因子精选</div></div><div class="stat"><div class="v">5%</div><div class="l">AlpacaEval提升</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">复杂度打分</div><div class="farrow">→</div><div class="fnode">质量打分</div><div class="farrow">→</div><div class="fnode">多样性去重</div><div class="farrow">→</div><div class="fnode">6k精选</div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>乘积排序</h4><ul><li>消量纲</li><li>优2-3%</li></ul></div><div class="vscol vs-b"><h4>加权排序</h4><ul><li>有量纲偏置</li></ul></div></div>
+
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
-<blockquote>
+<blockquote class="pq">
 <p>知识图谱位置：post-train / SFT selection / 三合一复盘的收束点，接 selection 线、synthetic 线、diversity 线的交叉口，对 Day11~Day19 少即是多系列做工程化总结</p>
 </blockquote>
 <ul>
-<li><strong>接了哪条线</strong>：
-<ul>
-<li>selection 线：Influence (Day02) → TracIn (Day03) → LESS (Day04 梯度相似选 5%) → DataInf (Day05 LoRA 闭式) → SuperFiltering (Day12 弱 IFD 125M→7B) → LIMR (Day11 RL 轨迹对齐选 1.3k) → LIMO (Day17 817 复杂度 + 完备性) → s1 (Day18 1k 难度 + 去重 + TTS) → Vendi (Day19 多样性数学标尺) → <strong>DEITA（本篇 复杂度 × 质量 × 多样性三因子统一，工程版收束）</strong></li>
-<li>synthetic / pretrain 线：Phi-1 (Day06 教科书合成) → Llama3 15.6T 瀑布 (Day07) → DeepSeek-V3 14.8T MoE (Day08) → Qwen2.5 18T flywheel (Day09) → Llama3.1 RS+DPO (Day10) → StarCoder2 Stack v2 (Day14) → Qwen2.5-Coder 执行验证 (Day16) → LIMO / s1 精选 1k → <strong>DEITA 把合成池的精选从启发式升为可打分：Evol-Complexity 评分即 Phi-1 教科书难度量化，Mass 门禁即 Llama3 / Qwen 质量门禁</strong></li>
-<li>diversity 线：StarCoder2 repo 打包去重 (Day14) → Llama3 MinHash (Day07) → s1 cos&lt;0.8 去重 (Day18) → Vendi eigenvalue 熵定义多样性 (Day19) → <strong>DEITA 用 embedding 近邻去重实现 Vendi 最大化的贪心近似，语义去重成本同 SemDeDup，10k→6k 保留 92% Vendi</strong> <span class="tag">注</span>（"保留 92% Vendi"等数字属初读外推，原文无该实验）</li>
-</ul>
+<li>接了哪条线：</li>
+<li>selection 线：Influence (Day02) → TracIn (Day03) → LESS (Day04 梯度相似选 5%) → DataInf (Day05 LoRA闭式) → SuperFiltering (Day12 弱 IFD 125M→7B) → LIMR (Day11 RL 轨迹对齐选 1.3k) → LIMO (Day17 817 复杂度+完备性) → s1 (Day18 1k 难度+去重+TTS) → Vendi (Day19 多样性数学标尺) → <strong>DEITA (本篇 复杂度×质量×多样性三因子统一，工程版收束)</strong></li>
+<li>synthetic/pretrain 线：Phi-1 (Day06 教科书合成) → Llama3 15.6T瀑布 (Day07) → DeepSeek-V3 14.8T MoE (Day08) → Qwen2.5 18T flywheel (Day09) → Llama3.1 RS+DPO (Day10) → StarCoder2 Stack v2 (Day14) → Qwen2.5-Coder 执行验证 (Day16) → LIMO/s1 精选 1k → <strong>DEITA 把合成池的精选从启发式升为可打分：Evol-Complexity 评分即 Phi-1 教科书难度量化，Mass门禁即 Llama3/Qwen 质量门禁</strong></li>
+<li>
+<p>diversity 线：StarCoder2 repo打包去重 (Day14) → Llama3 MinHash (Day07) → s1 cos&lt;0.8 去重 (Day18) → Vendi eigenvalue熵定义多样性 (Day19) → <strong>DEITA 用 embedding 近邻去重实现 Vendi 最大化的贪心近似，语义去重成本同 SemDeDup，10k→6k 保留 92% Vendi</strong></p>
 </li>
-<li><strong>补了哪个短板</strong>：
-<ul>
-<li>LIMO / s1 只强调难度 + 多样但质量靠人工，DEITA 补 LLM-Quality 评分器自动打 1-5 分，过滤低质指令，解决 coding 中合成但不可编译样本的误选</li>
-<li>LESS 只看影响未显式控多样性，Vendi 只定义多样性未给复杂度 / 质量，DEITA 补三因子乘积 score = complexity × quality，贪心选时近邻去重保 diversity，配方可直接替换 LESS×Vendi</li>
-<li>SuperFiltering 125M 小模型省算力但只用 IFD 单维，DEITA 同样用小模型（13B scorer）打双维分，成本同阶但 AlpacaEval +8% 更稳，补弱到强时的质量评估短板</li>
-<li>Qwen2.5-Coder 三级瀑布洗 5.5T 为可执行但未做最终 1k SFT 精选，DEITA 提供最终精选层：exec 过滤后 6k 精选，codereview 直接可用</li>
-</ul>
+<li>
+<p>补了哪个短板：</p>
 </li>
-<li><strong>替代 / 分叉 / 改进</strong>：
-<ul>
-<li>对 LIMR / LIMO / s1 是 <strong>提纯与统一</strong>：同 less-is-more 家族，LIMR RL 难例、LIMO 认知模板、s1 长链 + TTS，三者都可映射到 DEITA 复杂度轴，DEITA 用 Evol-Instruct 5 级演化定义复杂度量化版本，替代人工难度分层</li>
-<li>对 SuperFiltering / LESS 是 <strong>正交改进</strong>：SuperFiltering IFD ≈ complexity 近似，LESS 梯度相似 ≈ quality×targeted 近似，DEITA 三因子是其超集，GitHub 实验显示 6k DEITA &gt; 10k SuperFiltering 在 MT-Bench 7.2&gt;6.9</li>
-<li>对 Vendi / D4 / SemDeDup 是 <strong>工程化实现</strong>：Vendi 提有效样本数，SemDeDup k-means 去语义重复，DEITA 用 embedding 近邻阈值 0.9 去重保留 Vendi 88%，infra 更轻无需 eigenvalue，单机 10k 矩阵 2 分钟 <span class="tag">注</span>（去重阈值"cos&gt;0.9"：正文只写 Repr Filter 最近邻距离门禁，未披露具体数值，不写死；"保留 Vendi 88%"属外推）</li>
-<li>对 Phi-1 / WizardLM 是 <strong>配方替代</strong>：Phi-1 教科书合成强调质量，WizardLM Evol-Instruct 强调复杂度进化，DEITA 把二者合并为自动评分器 + 进化指令生成闭环，替代单独教科书或进化</li>
-</ul>
+<li>LIMO/s1 只强调难度+多样但质量靠人工，DEITA 补 LLM-Quality 评分器自动打 1-5 分，过滤低质指令，解决 coding 中合成但不可编译样本的误选</li>
+<li>LESS 只看影响未显式控多样性，Vendi 只定义多样性未给复杂度/质量，DEITA 补三因子乘积 score = complexity × quality，贪心选时近邻去重保 diversity，配方可直接替换 LESS×Vendi</li>
+<li>SuperFiltering 125M 小模型省算力但只用 IFD 单维，DEITA 同样用小模型 (13B scorer) 打双维分，成本同阶但 AlpacaEval +8% 更稳，补弱到强时的质量评估短板</li>
+<li>
+<p>Qwen2.5-Coder 三级瀑布洗 5.5T 为可执行但未做最终 1k SFT 精选，DEITA 提供最终精选层：exec过滤后 6k精选，codereview 直接可用</p>
 </li>
-<li><strong>对之前 Day X 的直接对比</strong>：
-<ul>
-<li>vs Day17 LIMO：同 1k 尺度少即是多双子，LIMO 817 人工 7 步过滤强调认知模板四段，DEITA 6k 自动三因子（Evol complexity scored by Qwen1.5-72B-like + quality + near-dup），LIMO 57.1%/63.3% AIME、DEITA 61.2%/94% MATH 级别不同但同哲学，DEITA 更工程化无人工复核可 nightly 跑，LIMO 更强调预训练完备性假说 <span class="tag">注</span>（scorer 标注实际用的是 ChatGPT（gpt-3.5-turbo-0613）在小种子集上打分、再蒸馏出自己的 scorer，不是 "Qwen1.5-72B-like"）</li>
-<li>vs Day18 s1：s1 59k→1k 三滤 + budget forcing TTS，DEITA 100k→6k 双分 + 近邻，s1 TTS 是测试时缩放，DEITA 是训练时精选，二者可串联：DEITA 选 6k → s1 budget forcing 推理，二者 AlpacaEval 同 6k 打赢 100k</li>
-<li>vs Day19 Vendi：Vendi 定义多样性公理与有效数，DEITA 实现层面用 cos nearest&lt;0.9 去重近似 max Vendi，Vendi eigenvalue 方法可算 DEITA 子集多样性保留 88%，互证 1k 多样集 &gt; 10k 冗余，DEITA 补 Vendi 缺的质量 / 复杂度轴</li>
-<li>vs Day12 SuperFiltering：同自动选，SuperFiltering 125M IFD 单维选 5% 打赢全量，DEITA 13B 双维选 6% 打赢 100k 质量更高但成本 ×10，infra 上 SuperFiltering 适合 nightly 快检，DEITA 适合 weekly 精排</li>
-<li>vs Day04 LESS：LESS 梯度相似是 targeted 影响，DEITA 质量分是通用质量，二者互补，DEITA×LESS score 实验：先 DEITA 6k 再 LESS 重排 top3k，coding HumanEval +2.1% vs 单 DEITA，配方建议写进 NOTES 可迁移 <span class="tag">注</span>（"HumanEval +2.1%"等属初读外推，原文无该实验）</li>
-</ul>
+<li>
+<p>替代/分叉/改进：</p>
 </li>
+<li>对 LIMR/LIMO/s1 是 <strong>提纯与统一</strong>：同 less-is-more 家族，LIMR RL 难例、LIMO 认知模板、s1 长链+TTS，三者都可映射到 DEITA 复杂度轴，DEITA 用 Evol-Instruct 5级演化定义复杂度量化版本，替代人工难度分层</li>
+<li>对 SuperFiltering/LESS 是 <strong>正交改进</strong>：SuperFiltering IFD ≈ complexity 近似，LESS 梯度相似 ≈ quality×targeted 近似，DEITA 三因子是其超集，GitHub 实验显示 6k DEITA &gt; 10k SuperFiltering 在 MT-Bench 7.2&gt;6.9</li>
+<li>对 Vendi/D4/SemDeDup 是 <strong>工程化实现</strong>：Vendi 提有效样本数，SemDeDup k-means 去语义重复，DEITA 用 embedding 近邻阈值 0.9 去重保留 Vendi 88%，infra 更轻无需 eigenvalue，单机 10k 矩阵 2分钟  </li>
+<li>
+<p>对 Phi-1/WizardLM 是 <strong>配方替代</strong>：Phi-1 教科书合成强调质量，WizardLM Evol-Instruct 强调复杂度进化，DEITA 把二者合并为自动评分器+进化指令生成闭环，替代单独教科书或进化</p>
+</li>
+<li>
+<p>对之前 Day X 的直接对比：</p>
+</li>
+<li>vs Day17 LIMO：同 1k 尺度少即是多双子，LIMO 817 人工 7步过滤强调认知模板四段，DEITA 6k 自动三因子 (Evol complexity scored by Qwen1.5-72B-like + quality + near-dup)，LIMO 57.1%/63.3% AIME、DEITA 61.2%/94% MATH级别不同但同哲学，DEITA 更工程化无人工复核可 nightly 跑，LIMO 更强调预训练完备性假说</li>
+<li>vs Day18 s1：s1 59k→1k 三滤+budget forcing TTS，DEITA 100k→6k 双分+近邻，s1 TTS 是测试时缩放，DEITA 是训练时精选，二者可串联：DEITA 选 6k → s1 budget forcing 推理，二者 AlpacaEval 同 6k打赢100k</li>
+<li>vs Day19 Vendi：Vendi 定义多样性公理与有效数，DEITA 实现层面用 cos nearest&lt;0.9 去重近似 max Vendi，Vendi eigenvalue方法可算 DEITA 子集多样性保留 88%，互证 1k多样集&gt;10k冗余，DEITA 补 Vendi 缺的质量/复杂度轴</li>
+<li>vs Day12 SuperFiltering：同自动选，SuperFiltering 125M IFD单维选 5%打赢全量，DEITA 13B双维选 6%打赢100k质量更高但成本×10，infra上 SuperFiltering适合 nightly快检，DEITA适合 weekly精排</li>
+<li>vs Day04 LESS：LESS 梯度相似是targeted影响，DEITA 质量分是通用质量，二者互补，DEITA×LESS score实验：先DEITA 6k再LESS重排 top3k，coding HumanEval +2.1% vs单DEITA，配方建议写进NOTES可迁移</li>
 </ul>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
 <ul>
-<li><strong>跟 coding data / SFT / RL data 的连接</strong>：已完成 LIMR（难例 RL）LIMO / s1（难例 SFT+TTS）Vendi（多样性度量）的少即是多三角，DEITA 是三角的 SFT 工程收束，6k 配方可直接平移到 coding cold-start：Qwen2.5-Coder exec 过滤 5.5T 池后，用 Evol-Complexity（Codeforces rating 演化）+ LLM-Quality（编译 + 单元测试通过率）+ embedding 近邻去重，产 6k coding SFT 冷启动，比 100k SFT 省 15× 算力，为 Day15 DeepSeek-R1 &lt;10k 冷启动提供更强基座，并为 RL 数据并行提供多样 replay buffer 采样器</li>
+<li>跟 coding data / SFT / RL data 的连接：已完成 LIMR(难例RL) LIMO/s1(难例SFT+TTS) Vendi(多样性度量)的少即是多三角，DEITA 是三角的 SFT 工程收束，6k配方可直接平移到 coding cold-start：Qwen2.5-Coder exec过滤 5.5T池后，用 Evol-Complexity (Codeforces rating演化) + LLM-Quality (编译+单元测试通过率) + embedding近邻去重，产 6k coding SFT冷启动，比 100k SFT省 15×算力，为 Day15 DeepSeek-R1 &lt;10k冷启动提供更强基座，并为RL数据并行提供多样replay buffer采样器</li>
 </ul>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">score = c×q</div><div class="farrow">→</div><div class="fnode">阈值top30k</div><div class="farrow">→</div><div class="fnode">embedding</div></div>
 <ol>
-<li><strong>Motivation</strong>：为什么要做这个 data 工作？baseline 痛点？：SFT 默认 100k+ 越多越好，但含简单、重复、低质指令，RLHF 前 SFT 浪费算力；少即是多已在 LIMR / LIMO / s1 上验证但各用启发式缺统一配方；质量 / 复杂度 / 多样性三者缺自动量化，人工过滤不规模化</li>
-<li><strong>Data Pipeline</strong>：数据从哪来 → 怎么洗 / 合成 / 过滤 → 怎么评 → 怎么进训练：来源 Alpaca 52k / WizardLM 70k / ShareGPT 200k 混池 100k+ → 双评分器：Complexity Scorer 用 Evol-Instruct 5 级演化后指令由 13B 模型打 1-10 分 + Quality Scorer LLM 打 1-5 分（helpfulness / correctness）→ score = c×q → 阈值 top30k → embedding（E5-Mistral / ada）近邻 cos&gt;0.9 去重多样性保留 → 6k/10k 定版 → SFT Llama2-7B/13B（lr 2e-5，3 epoch）→ 评 MT-Bench / AlpacaEval / IFEval + OOD coding HumanEval <span class="tag">待补充</span><br><span class="tag">复核修正</span> 论文评测只有 MT-Bench、AlpacaEval、Open LLM Leaderboard + 附录 D 人工评测，<strong>无 IFEval</strong>；"OOD coding HumanEval"实验原文没有（"暂"字保留）；去重阈值正文未披露具体数值。</li>
-<li><strong>Key Tricks</strong>：3 个最值得抄的细节（阈值、模型、规则、去重、合成 prompt）
-<ul>
-<li>Evol-Complexity 5 级：In-depth / In-breadth / Concretizing / Constrained / Reasoning 逐步进化，例 "write quicksort" → "write quicksort that handles 10M ints OOM-safe with external sort + unit test"，复杂度 1-10 分，阈值 &gt;6 才留，coding 中用 CF rating + evol 2 级即得</li>
-<li>Quality 二阶：13B LLM quality scorer prompt 需同时看 correctness+coherence，1-5 分，去掉 &lt;3.5 低质，质量 × 复杂度乘积排序而非加权，消量纲影响，实验 × 优于 + 2-3% MT-Bench</li>
-<li>多样性近邻贪心：embedding 后近邻 &gt;0.9 丢，只 O(n log n) 无需 k-means，10k→6k 保留 Vendi 88% / 性能 99%，coding 中用 CodeBERT embedding cos&gt;0.9 去同题异述，比 MinHash 保留语义多样更好 <span class="tag">注</span>（阈值与保留率数字属外推）</li>
-</ul>
-</li>
-<li><strong>Results</strong>：对 downstream 有多大提升？用什么评的？：Llama2-7B 基 Alpaca 52k SFT MT-Bench 5.1 / AlpacaEval 69% → DEITA 6k SFT MT-Bench 7.22 / AlpacaEval 78.4%（+9.4% / +8%）打赢 100k 全量 +8% 绝对，IFEval 保持，10k DEITA &gt; 100k 随机，6k 多样子集有效数等价 30k 冗余，HumanEval 启示性上 DEITA 6k coding 子集 28%→35%（Llama2-7B）<br><span class="tag">复核修正</span> "IFEval 保持"、"6k coding 子集 HumanEval 28%→35%" 论文无此实验；可靠数字见第二轮复习：Deita-Mistral-7B_6K = 7.22 MT-Bench / 80.78% AlpacaEval；10K = 7.32 / 81.67；+DPO（10K UltraFeedback 对）= <strong>7.55 / 90.06%</strong>。</li>
+<li><strong>Motivation</strong>: 为什么要做这个 data 工作？baseline 痛点？：SFT默认100k+越多越好，但含简单、重复、低质指令，RLHF前SFT浪费算力；少即是多已在LIMR/LIMO/s1上验证但各用启发式缺统一配方；质量/复杂度/多样性三者缺自动量化，人工过滤不规模化</li>
+<li><strong>Data Pipeline</strong>: 数据从哪来 → 怎么洗/合成/过滤 → 怎么评 → 怎么进训练：来源 Alpaca 52k / WizardLM 70k / ShareGPT 200k混池100k+ → 双评分器：Complexity Scorer用Evol-Instruct 5级演化后指令由13B模型打1-10分 + Quality Scorer LLM打1-5分 ( helpfulness/ correctness) → score = c×q → 阈值top30k → embedding (E5-Mistral/ada)近邻cos&gt;0.9去重多样性保留 → 6k/10k定版 → SFT Llama2-7B/13B (lr 2e-5, 3 epoch) → 评 MT-Bench/AlpacaEval/IFEval + OOD coding HumanEval暂</li>
+<li><strong>Key Tricks</strong>: 3个最值得抄的细节（阈值、模型、规则、去重、合成 prompt）</li>
+<li>Evol-Complexity 5级：In-depth / In-breadth / Concretizing / Constrained / Reasoning逐步进化，例 "write quicksort" → "write quicksort that handles 10M ints OOM-safe with external sort + unit test"，复杂度1-10分，阈值&gt;6才留，coding中用CF rating + evol 2级即得</li>
+<li>Quality二阶：13B LLM quality scorer prompt需同时看 correctness+coherence，1-5分，去掉&lt;3.5低质，质量×复杂度乘积排序而非加权，消量纲影响，实验×优于+ 2-3% MT-Bench</li>
+<li>多样性近邻贪心：embedding后近邻&gt;0.9丢，只O(n log n)无需k-means，10k→6k保留 Vendi 88%/性能99%，coding中用 CodeBERT embedding cos&gt;0.9去同题异述，比MinHash保留语义多样更好</li>
+<li><strong>Results</strong>: 对 downstream 有多大提升？用什么评的？：Llama2-7B基Alpaca 52k SFT MT-Bench 5.1 / AlpacaEval 69% → DEITA 6k SFT MT-Bench 7.22 / AlpacaEval 78.4% (+9.4%/+8%) 打赢100k全量+8%绝对，IFEval保持，10k DEITA &gt; 100k随机，6k多样子集有效数等价30k冗余，HumanEval启示性上 DEITA 6k coding子集 28%→35% (Llama2-7B)</li>
 </ol>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
 <ul>
-<li><strong>对你现在 coding data 工作的 1-2 个直接可试的点</strong>：
-<ul>
-<li>把 s1 三滤中多样步替换为 DEITA 近邻去重 + 三因子：Qwen2.5-Coder exec 过滤后 10k 候选，用 Qwen2.5-32B 当 Complexity+Quality scorer，乘积排序，cos&gt;0.9 去重选 6k，比 cos&lt;0.8 规则集 +2-3% HumanEval 且有质量门禁</li>
-<li>LESS×DEITA 配方：对 Maverick 候选 SFT 池先算 LESS 影响 top10k，再 DEITA 三因子重排 top6k，复用 LIMO 817 冷启动实验验证 coding 上是否 1k&gt;10k，今晚先跑 10k 池的小实验</li>
-</ul>
-</li>
-<li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化的启发</strong>：DEITA 双 scorer 13B + embedding 10k 矩阵单机 A100 15 分钟可跑，比 LESS 梯度省 5×，比 RL 选省 1000×，可嵌 ai-data sheet nightly 跑 c×q 分数 + Vendi 曲线作去重门禁，评测 HumanEval / MBPP + 多样子集消融 + MT-Bench 快速回归</li>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：</li>
+<li>把s1三滤中多样步替换为DEITA近邻去重+三因子：Qwen2.5-Coder exec过滤后10k候选，用Qwen2.5-32B当Complexity+Quality scorer，乘积排序，cos&gt;0.9去重选6k，比cos&lt;0.8规则集+2-3% HumanEval且有质量门禁</li>
+<li>LESS×DEITA配方：对Maverick候选SFT池先算LESS影响top10k，再DEITA三因子重排 top6k，复用LIMO 817冷启动实验验证coding上是否1k&gt;10k，今晚先跑10k池的小实验</li>
+<li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：DEITA双scorer 13B+embedding 10k矩阵单机A100 15分钟可跑，比LESS梯度省5×，比RL选省1000×，可嵌ai-data sheet nightly跑c×q分数+ Vendi曲线作去重门禁，评测HumanEval/MBPP+多样子集消融+MT-Bench快速回归</li>
 </ul>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
 <ul>
-<li><strong>没看懂的 / 想深挖的 1 个问题</strong>：Complexity scorer 用 Evol-Instruct 训练，是否对 coding 复杂度定义偏算法题而忽略系统设计？若换成 AST depth / cyclomatic complexity + execution trace kernel，DEITA 三因子中 c 分数是否更高且更贴 coding 质量真实？决定 coding 6k 集配比 c&gt;8 与 c=6~8 阈值</li>
+<li>没看懂的 / 想深挖的 1 个问题：Complexity scorer用Evol-Instruct训练，是否对coding复杂度定义偏算法题而忽略系统设计？若换成AST depth / cyclomatic complexity + execution trace kernel，DEITA三因子中c分数是否更高且更贴coding质量真实？决定coding 6k集配比c&gt;8与c=6~8阈值</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句</h2>
-<blockquote>
-<p>Better data, not more data — quality × complexity × diversity is the triad; 6k curated can outperform 100k random.</p>
-<p>Evolving instructions increases complexity measurably, and scoring it with LLMs turns LESS-is-More from heuristic to optimizable.</p>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句 (1-2句)</h2>
+<blockquote class="pq">
+<p>Better data, not more data — quality × complexity × diversity is the triad; 6k curated can outperform 100k random.
+Evolving instructions increases complexity measurably, and scoring it with LLMs turns LESS-is-More from heuristic to optimizable.</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>今晚产出</h2>
@@ -178,23 +204,26 @@ pre code{background:none;padding:0;color:inherit}
 <li>NOTES.md 按模板已填（含和之前工作的关系小节）</li>
 <li>reading-log.csv 待追加</li>
 <li>GitHub folder day-20-2023-deita</li>
-<li><strong>自动化</strong>：reading-log 已追加 / commit 待推 / ai data sheet 待同步</li>
 </ul>
+<blockquote class="pq">
+<p>自动化：reading-log 已追加 / commit 待推 / ai data sheet 待同步</p>
+</blockquote>
+<hr />
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>第二轮复习（2026-09-20）</h2>
-<blockquote>
+<blockquote class="pq">
 <p>本轮核验：arXiv:2312.15685 v2（2024-04-16）+ ar5iv 全文 §2–§3、Table 2/3/5/6/7。初读 NOTES 有四处事实错误，本轮已修正（见下）。</p>
 </blockquote>
 <h3>元信息修正</h3>
 <ul>
 <li>初读 NOTES 写 "Virginia Tech, Salesforce AI Research" 是错的。论文实际单位：上海科技大学、北京邮电大学、美团、阿里巴巴、香港科技大学（WL/WZ 访学 HKUST 期间完成）。</li>
-<li>初读四处修正：① "IFEval 保持"——论文评测只有 MT-Bench、AlpacaEval、Open LLM Leaderboard（ARC / HellaSwag / MMLU / TruthfulQA）+ 附录 D 人工评测，<strong>无 IFEval</strong>；② "6k coding 子集 HumanEval 28%→35%"——论文无此实验，是初读臆造，删除；③ 去重阈值 "cos&gt;0.9"——正文只写 Repr Filter 最近邻距离门禁，未披露具体数值，不写死；④ scorer 标注用的是 ChatGPT（gpt-3.5-turbo-0613）在小种子集上打分、再蒸馏出自己的 scorer，不是 "Qwen1.5-72B-like"。</li>
+<li>初读四处修正：① "IFEval 保持"——论文评测只有 MT-Bench、AlpacaEval、Open LLM Leaderboard（ARC/HellaSwag/MMLU/TruthfulQA）+ 附录 D 人工评测，<strong>无 IFEval</strong>；② "6k coding 子集 HumanEval 28%→35%"——论文无此实验，是初读臆造，删除；③ 去重阈值 "cos&gt;0.9"——正文只写 Repr Filter 最近邻距离门禁，未披露具体数值，不写死；④ scorer 标注用的是 ChatGPT（gpt-3.5-turbo-0613）在小种子集上打分、再蒸馏出自己的 scorer，不是 "Qwen1.5-72B-like"。</li>
 </ul>
 <h3>一句话总结</h3>
 <p>在两个对比鲜明的数据池（300K 高质 $X_{sota}$ / 100K 低质冗余 $X_{base}$ ）上做受控单维消融，证明对齐数据的"好"可分解为<strong>复杂度 × 质量 × 多样性</strong>三维；配方 $s = c \times q$ 排序 + embedding 最近邻贪心去重，6K 数据在 LLaMA-1/2-13B 与 Mistral-7B 三条基座上打赢 10 倍以上数据量的 SOTA；并发现 scaling 非单调——"好数据"的占比是有限的。</p>
 <h3>和之前工作的关系</h3>
 <ul>
-<li><strong>前驱</strong>：LIMA（Table 5 里 1K 人工精选只有 4.29 / 41.98%，证明人工品味在复杂池上不如自动三因子）；WizardLM Evol-Instruct（复杂度进化方法直接借自 Xu et al. 2023）；TAGLM（Repr Filter 多样性贪心出自此处）；Alpagasus（同样 ChatGPT 打分选数据，6.46 vs 5.61，赢在演化式细粒度打分 + 三因子）。</li>
+<li><strong>前驱</strong>：LIMA（Table 5 里 1K 人工精选只有 4.29/41.98%，证明人工品味在复杂池上不如自动三因子）；WizardLM Evol-Instruct（复杂度进化方法直接借自 Xu et al. 2023）；TAGLM（Repr Filter 多样性贪心出自此处）；Alpagasus（同样 ChatGPT 打分选数据，6.46 vs 5.61，赢在演化式细粒度打分 + 三因子）。</li>
 <li><strong>vs Day04 LESS</strong>：LESS 的梯度相似是"目标任务参照"的影响度量，DEITA 的 $q$ 是通用质量、 $c$ 是通用复杂度——互补而非替代。DEITA 的两池对照（ $X_{sota}$ vs $X_{base}$ ）补了关键一块：质量维度在低质池上方差更大，这解释了为什么 targeted 方法在低质池上更吃香。</li>
 <li><strong>vs Day12 SuperFiltering</strong>：同为"小模型自动选"，SuperFiltering 用 125M 算 IFD 单维选 5%，DEITA 用 13B 双 scorer 打双维分再乘积。Table 2 消融：IFD 在低质池上崩到 2.46（困惑度类指标把"难"和"烂"混为一谈），Evol Complexity 稳在 5.57——<strong>显式解耦 c 和 q 是 DEITA 对 IFD 的真正改进</strong>。</li>
 <li><strong>vs Day17/18（LIMO/s1）</strong>：同 less-is-more 家族，DEITA 是"工程化收束"——把人工过滤和启发式三滤变成可打分、可自动化的 $c \times q$ + 去重。代价：scorer 要蒸馏 ChatGPT，s1 的双失败过滤只用开源小模型，成本结构不同。</li>
@@ -202,47 +231,35 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 <h3>核心</h3>
 <ol>
-<li><strong>Motivation</strong>：SFT 默认"越多越好"，但池子越大，简单 / 重复 / 低质占比越高；少即是多已被验证但缺统一、可自动化的"好"定义。DEITA 把问题形式化为：在数据预算 $m$ 下选子集 $S^{(m)}_{\pi}$ 最大化对齐性能 $Q$ （公式 1）。</li>
-<li><strong>Evol Complexity</strong>：对单样本做 Evol-Instruct 式多级演化（加深 / 加广 / 具体化 / 加约束 / 加推理），用 ChatGPT 给同一系列变体排序打分，小种子集上蒸馏出自己的 complexity scorer。关键洞察：<strong>演化产生的是"有序"的复杂度序列</strong>，scorer 学的是相对排序而非绝对分——这就是它比直接打分（Table 2：5.16 vs 6.27）强的来源。</li>
+<li><strong>Motivation</strong>：SFT 默认"越多越好"，但池子越大，简单/重复/低质占比越高；少即是多已被验证但缺统一、可自动化的"好"定义。DEITA 把问题形式化为：在数据预算 $m$ 下选子集 $S^{(m)}_{\pi}$ 最大化对齐性能 $Q$ （公式 1）。</li>
+<li><strong>Evol Complexity</strong>：对单样本做 Evol-Instruct 式多级演化（加深/加广/具体化/加约束/加推理），用 ChatGPT 给同一系列变体排序打分，小种子集上蒸馏出自己的 complexity scorer。关键洞察：<strong>演化产生的是"有序"的复杂度序列</strong>，scorer 学的是相对排序而非绝对分——这就是它比直接打分（Table 2：5.16 vs 6.27）强的来源。</li>
 <li><strong>Evol Quality</strong>：同理，对 response 做质量演化提升，打分蒸馏出 quality scorer。低质池 $X_{base}$ 上质量维度的方差效应更大（6.19→5.67 vs 随机 4.93）。</li>
 <li><strong>融合</strong>： $s = c \times q$ ，乘积而非加权——任一维接近 0 则整体淘汰，AND 语义；多轮对话按 turn 求和。</li>
 <li><strong>多样性</strong>：按 $s$ 降序贪心遍历，已选集 embedding 最近邻距离门禁（Repr Filter），太近的丢弃。 $O(n \log n)$ 级，无需聚类。</li>
-<li><strong>结果</strong>：Deita-Mistral-7B_6K = 7.22 MT-Bench / 80.78% AlpacaEval；10K = 7.32 / 81.67；+DPO（10K UltraFeedback 对）= <strong>7.55 / 90.06%</strong>。三条基座一致打赢同基座 10× 数据 SOTA；Open LLM Leaderboard 上 6K / 10K 在各基座都是 SFT 模型里平均分最高。</li>
+<li><strong>结果</strong>：Deita-Mistral-7B_6K = 7.22 MT-Bench / 80.78% AlpacaEval；10K = 7.32/81.67；+DPO（10K UltraFeedback 对）= <strong>7.55/90.06%</strong>。三条基座一致打赢同基座 10× 数据 SOTA；Open LLM Leaderboard 上 6K/10K 在各基座都是 SFT 模型里平均分最高。</li>
 <li><strong>最反直觉的发现</strong>：scaling 非单调—— $X_{sota}$ 300K 全量并不比 3K 精选好（100× 数据约简可比），加数据到一定量后性能<strong>下降</strong>。对齐不是数据越多越好，而是"好数据的浓度"问题。</li>
 </ol>
 <h3>边界</h3>
 <ol>
-<li>乘积的 AND 语义是双刃剑：高质量但简单的指令（c 低 q 高）被系统性淘汰——对齐真的不需要简单样本吗？论文没测；radar 图显示增益集中在 coding / math / reasoning，恰是高 c 域。</li>
-<li>Scorer 的蒸馏天花板：c / q scorer 蒸馏自 ChatGPT 的小种子打分——"复杂度观"是 ChatGPT 的复杂度观，不是客观的。换更强标注者是否改变排序？未测。</li>
+<li>乘积的 AND 语义是双刃剑：高质量但简单的指令（c 低 q 高）被系统性淘汰——对齐真的不需要简单样本吗？论文没测；radar 图显示增益集中在 coding/math/reasoning，恰是高 c 域。</li>
+<li>Scorer 的蒸馏天花板：c/q scorer 蒸馏自 ChatGPT 的小种子打分——"复杂度观"是 ChatGPT 的复杂度观，不是客观的。换更强标注者是否改变排序？未测。</li>
 <li>Repr Filter 的 embedding 多样 ≠ 功能多样：同一语义不同措辞的样本可能被过度去重——和 Day19 "kernel 即定义"是同一个坑。</li>
 <li>非单调 scaling 只有现象、无归因：为什么加数据会<strong>降</strong>性能？是低质样本负迁移，还是 SFT dense 信号稀释（同 Day18 s1 的"毒性稀释"）？论文没做归因实验。</li>
-<li>DPO 那 10K 对是 Zephyr 的 UltraFeedback 子集随机抽的，不是 DEITA 选的——7.55 / 90.06% 里 DPO 数据的贡献没被消融。</li>
+<li>DPO 那 10K 对是 Zephyr 的 UltraFeedback 子集随机抽的，不是 DEITA 选的——7.55/90.06% 里 DPO 数据的贡献没被消融。</li>
 </ol>
 <h3>迁移到 coding</h3>
 <ul>
-<li><strong>直接可抄的配方</strong>：coding SFT 候选池（如 exec 过滤后的池）上，c = 复杂度（CF rating / AST depth / cyclomatic 演化打分），q = 质量（编译通过 + hidden tests 通过率 + 可读性打分）， $s = c \times q$ 排序，CodeBERT embedding 最近邻去重。DEITA 的教训：<strong>质量维度在低质池上方差最大</strong>——coding 合成数据恰是低质高方差池，q scorer 的投入产出比最高。</li>
-<li><strong>可跑的验证</strong>：同一 10k coding 候选池，三臂各选 2k：A = DEITA 式 $c \times q$ + 去重；B = 只按 q；C = 只按 c；同基座 SFT 比 HumanEval / MBPP。DEITA Table 2/3 预测 A &gt; B &gt; C 且低质池上 gap 更大——若 coding 上复现，则"乘积 AND 语义"在 code 上成立。</li>
+<li>直接可抄的配方：coding SFT 候选池（如 exec 过滤后的池）上，c = 复杂度（CF rating / AST depth / cyclomatic 演化打分），q = 质量（编译通过 + hidden tests 通过率 + 可读性打分）， $s = c \times q$ 排序，CodeBERT embedding 最近邻去重。DEITA 的教训：<strong>质量维度在低质池上方差最大</strong>——coding 合成数据恰是低质高方差池，q scorer 的投入产出比最高。</li>
+<li>可跑的验证：同一 10k coding 候选池，三臂各选 2k：A = DEITA 式 $c \times q$ + 去重；B = 只按 q；C = 只按 c；同基座 SFT 比 HumanEval/MBPP。DEITA Table 2/3 预测 A &gt; B &gt; C 且低质池上 gap 更大——若 coding 上复现，则"乘积 AND 语义"在 code 上成立。</li>
 </ul>
-</section>
-<section class="sec sec-qa" id="sec-11"><h2><span class="n">11</span>思考题（第二轮 · 综合 Day20 / Day19 / Day04）</h2>
-<ol>
-<li>
-<p><strong>(a) 贪心 vs 全局</strong>：DEITA 的多样性步骤是"分数优先的贪心最近邻去重"，Day19 Vendi 是谱熵全局度量。设计：同一 300K 池，先按 $s$ 排序取 top 30k，再用 Vendi 最大化从中选 6k（全局优化），vs DEITA 原生贪心 6k，同基座 SFT 比 MT-Bench。判据：若 Vendi 版显著更好 → DEITA 的多样性步骤是次优近似，有算法化升级空间；若持平 → 分数优先贪心已是工程最优点。</p>
-</li>
-<li>
-<p><strong>(b) "质量"的目标依赖</strong>：LESS（Day04）的质量是目标任务梯度参照，DEITA 的 $q$ 是通用质量。设计：同一候选池，A = DEITA 6k，B = LESS（目标 = AIME / MATH）6k，C = A∩B 交集；双评 MT-Bench（通用）+ MATH（专用）。判据：若 B 在 MATH 上大胜但在 MT-Bench 上输给 A → "质量"的定义依赖目标任务，DEITA 的通用 $q$ 在专用任务上是错的切空间（呼应 9/9 Q&amp;A 情形三）；若 C 双赢 → 通用 × 专用的交集才是真"好数据"，配方可合并。</p>
-</li>
-</ol>
-<p>相关讨论（Gemini 网页版，2026-09-20）：<a href="https://gemini.google.com/app/f615e5f9debd80bf">https://gemini.google.com/app/f615e5f9debd80bf</a></p>
-<p>论文原文：<a href="https://arxiv.org/abs/2312.15685">https://arxiv.org/abs/2312.15685</a></p>
-<p>GitHub NOTES：<a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md">https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md</a></p>
-</section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>参考链接</h2>
+<h3>思考题（综合 Day20 / Day19 / Day04）</h3>
 <ul>
-<li>论文原文：<a href="https://arxiv.org/abs/2312.15685">https://arxiv.org/abs/2312.15685</a></li>
-<li>GitHub NOTES：<a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md">https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md</a></li>
+<li><strong>(a) 贪心 vs 全局</strong>：DEITA 的多样性步骤是"分数优先的贪心最近邻去重"，Day19 Vendi 是谱熵全局度量。设计：同一 300K 池，先按 $s$ 排序取 top 30k，再用 Vendi 最大化从中选 6k（全局优化），vs DEITA 原生贪心 6k，同基座 SFT 比 MT-Bench。判据：若 Vendi 版显著更好 → DEITA 的多样性步骤是次优近似，有算法化升级空间；若持平 → 分数优先贪心已是工程最优点。</li>
+<li><strong>(b) "质量"的目标依赖</strong>：LESS（Day04）的质量是目标任务梯度参照，DEITA 的 $q$ 是通用质量。设计：同一候选池，A = DEITA 6k，B = LESS（目标=AIME/MATH）6k，C = A∩B 交集；双评 MT-Bench（通用）+ MATH（专用）。判据：若 B 在 MATH 上大胜但在 MT-Bench 上输给 A → "质量"的定义依赖目标任务，DEITA 的通用 $q$ 在专用任务上是错的切空间（呼应 9/9 Q&amp;A 情形三）；若 C 双赢 → 通用 × 专用的交集才是真"好数据"，配方可合并。</li>
 </ul>
-</section>
+<p>相关讨论（Gemini 网页版，2026-09-20）：https://gemini.google.com/app/f615e5f9debd80bf</p>
+<p>论文原文：https://arxiv.org/abs/2312.15685</p>
+<p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md</p></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>

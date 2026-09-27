@@ -1,5 +1,7 @@
 # UltraFeedback: Boosting Language Models with Scaled AI Feedback
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-26-2023-ultrafeedback/index.html
+
 ## 元信息
 - Title: UltraFeedback: Boosting Language Models with Scaled AI Feedback
 - Authors / Org: OpenBMB / Tsinghua University
@@ -9,6 +11,10 @@
 
 ## 一句话总结
 UltraFeedback 从 64k 条多来源指令出发，为每条指令采样 4 个不同模型回答，并用 GPT-4 生成细粒度评价与分数，把普通 instruction pool 转成可追溯的偏好数据底座。
+
+
+<!-- viz:stats: 64000条 指令 | 4模型 回答 -->
+<!-- viz:flow: 多源指令 → 多模型回答 → GPT-4评价 → 偏好对 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：偏好数据构造线的源头层，位于 Day10 Llama 3.1/3.2 后训练数据切分之后、Day13 DPO-Reward-Gap 偏好对选择之前。

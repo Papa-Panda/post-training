@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 25 — FineWeb: Decanting the Web for the Finest Text Data at Scale（对照 RefinedWeb）</title>
+<title>Paper 模板 - Day 25</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,7 +102,7 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 25</span>
-    <h1>Day 25 — FineWeb: Decanting the Web for the Finest Text Data at Scale（对照 RefinedWeb）</h1>
+    <h1>Paper 模板 - Day 25</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
@@ -79,41 +110,75 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a></nav>
   </details>
   <section class="sec" id="sec-0">
-<blockquote><p>自动生成骨架 2026-08-25，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。</p></blockquote>
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-25-2023-fineweb-refinedweb/index.html</p>
+<p>自动生成骨架 2026-08-25，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。</p>
+</blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul><li>Title: FineWeb: Decanting the Web for the Finest Text Data at Scale（对照 RefinedWeb）</li><li>Authors / Org: Penedo et al. / Hugging Face（RefinedWeb: Penedo et al. / Technology Innovation Institute）</li><li>Link / arXiv: https://arxiv.org/abs/2406.17557</li><li>Supporting paper: https://arxiv.org/abs/2306.01116</li><li>Date read: 2026-08-25</li><div class="meta"><span class="tag">pretraining</span><span class="tag">web-data</span><span class="tag">data-curation</span><span class="tag">filtering</span><span class="tag">deduplication</span><span class="tag">quality</span><span class="tag">scale</span></div><li>Folder: day-25-2023-fineweb-refinedweb</li><li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-25-2023-fineweb-refinedweb</li></ul>
+<dl class="meta-grid"><dt>Title</dt><dd>FineWeb: Decanting the Web for the Finest Text Data at Scale（对照 RefinedWeb）</dd><dt>Authors / Org</dt><dd>Penedo et al. / Hugging Face（RefinedWeb: Penedo et al. / Technology Innovation Institute）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2406.17557">https://arxiv.org/abs/2406.17557</a></dd><dt>Supporting paper</dt><dd><a href="https://arxiv.org/abs/2306.01116">https://arxiv.org/abs/2306.01116</a></dd><dt>Date read</dt><dd>2026-08-25</dd><dt>Folder</dt><dd>day-25-2023-fineweb-refinedweb</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-25-2023-fineweb-refinedweb">https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-25-2023-fineweb-refinedweb</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">pretraining</span><span class="tag">web-data</span><span class="tag">data-curation</span><span class="tag">filtering</span><span class="tag">deduplication</span><span class="tag">quality</span><span class="tag">scale</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>FineWeb 把 RefinedWeb 开创的“只靠高质量 Common Crawl 也能训练强模型”路线扩展为 15T-token、可复现且经消融验证的网页语料管线，用 URL/文本过滤、语言识别、重复控制和质量评测把“过滤规则清单”升级为可审计的数据配方。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">15</div><div class="l">T tokens</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">URL过滤</div><div class="farrow">→</div><div class="fnode">语言识别</div><div class="farrow">→</div><div class="fnode">重复控制</div><div class="farrow">→</div><div class="fnode">质量评测</div></div>
+
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
-<blockquote><p>知识图谱位置：大规模预训练过滤主干；接 Day24 D4 的“去重且保覆盖”，并把 Day07 Llama3、Day14 StarCoder2、Day16 Qwen2.5-Coder 里分散的工业清洗步骤组织成可复现、可消融的数据瀑布。</p></blockquote>
-<ul><li><strong>接了哪条线：</strong>接 Day24 D4 / Day19 Vendi 的 dedup-diversity 线，也回接 Day07 Llama3 的网页预训练瀑布与 Day14 StarCoder2 的规则化 code curation。</li><li><strong>补了哪个短板：</strong>Day24 重点解释“怎样删语义重复并保多样性”，但没有给出从原始 Common Crawl 到训练语料的完整、可审计 web pipeline；FineWeb 补上逐步过滤、去重位置、质量代理和消融评测。</li><li><strong>替代 / 分叉 / 改进：</strong>它不是替代 D4，而是上层系统化配方；相对 RefinedWeb，它把管线设计选择和过滤步骤做了更细的消融，强调每个数据决策都要由小模型训练评测验证，而不是把规则当常识。</li><li><strong>对之前 Day X 的直接对比：</strong>vs Day07 Llama3，FineWeb 更像公开可复现的 web-only 对照组，便于看清每级过滤的边际收益；vs Day24 D4，D4 深挖 semantic dedup / diversification，FineWeb 覆盖端到端网页语料生产，两者应组合为“规模过滤瀑布 + 语义去重/覆盖审计”。</li></ul>
+<blockquote class="pq">
+<p>知识图谱位置：大规模预训练过滤主干；接 Day24 D4 的“去重且保覆盖”，并把 Day07 Llama3、Day14 StarCoder2、Day16 Qwen2.5-Coder 里分散的工业清洗步骤组织成可复现、可消融的数据瀑布。</p>
+</blockquote>
+<ul>
+<li><strong>接了哪条线：</strong>接 Day24 D4 / Day19 Vendi 的 dedup-diversity 线，也回接 Day07 Llama3 的网页预训练瀑布与 Day14 StarCoder2 的规则化 code curation。</li>
+<li><strong>补了哪个短板：</strong>Day24 重点解释“怎样删语义重复并保多样性”，但没有给出从原始 Common Crawl 到训练语料的完整、可审计 web pipeline；FineWeb 补上逐步过滤、去重位置、质量代理和消融评测。</li>
+<li><strong>替代 / 分叉 / 改进：</strong>它不是替代 D4，而是上层系统化配方；相对 RefinedWeb，它把管线设计选择和过滤步骤做了更细的消融，强调每个数据决策都要由小模型训练评测验证，而不是把规则当常识。</li>
+<li><strong>对之前 Day X 的直接对比：</strong>vs Day07 Llama3，FineWeb 更像公开可复现的 web-only 对照组，便于看清每级过滤的边际收益；vs Day24 D4，D4 深挖 semantic dedup / diversification，FineWeb 覆盖端到端网页语料生产，两者应组合为“规模过滤瀑布 + 语义去重/覆盖审计”。</li>
+</ul>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
 <p>Day21→24 已完成“合成扩量 → 复杂度演化 → 少量高质策展 → 语义去重与多样化剪枝”，今天补齐预训练数据工厂本身：原始网页怎样经过可复现的门禁变成万亿 token 级训练池。对 coding data，可直接借鉴规则分层、去重顺序、每一步保留率与小规模训练消融；对 SFT / RL data，则可迁移“每个过滤器都必须用下游质量曲线验收”的方法，而不是照搬网页规则。本文只讨论数据获取、过滤、去重、质量与评测，不展开训练算法。</p>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
-<ol><li>FineWeb 从 Common Crawl 到 15T-token 语料依次经过哪些 data gates？URL、语言、文本质量、重复与个人信息等过滤分别改变了什么，应该记录哪些保留率和误杀率？</li><li>对比 Day24 D4 与 Day07 Llama3：FineWeb 的去重粒度、去重时机和质量消融，如何与 D4 的语义去重/多样化剪枝组合，哪些步骤与 Llama3 的闭源五级过滤可以一一对应？</li><li>迁移到 coding / SFT / RL data 时，怎样建立“规则或模型过滤器 → 小规模训练/评测 → 保留或回滚”的可审计闭环，避免高分过滤器把长尾、难例或新颖解法一起删掉？</li></ol>
+<ol>
+<li>FineWeb 从 Common Crawl 到 15T-token 语料依次经过哪些 data gates？URL、语言、文本质量、重复与个人信息等过滤分别改变了什么，应该记录哪些保留率和误杀率？</li>
+<li>对比 Day24 D4 与 Day07 Llama3：FineWeb 的去重粒度、去重时机和质量消融，如何与 D4 的语义去重/多样化剪枝组合，哪些步骤与 Llama3 的闭源五级过滤可以一一对应？</li>
+<li>迁移到 coding / SFT / RL data 时，怎样建立“规则或模型过滤器 → 小规模训练/评测 → 保留或回滚”的可审计闭环，避免高分过滤器把长尾、难例或新颖解法一起删掉？</li>
+</ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
-<ol><li><strong>Motivation</strong>: [待读后填写] 为什么仅报告 token 规模不足以定义高质量 web corpus？RefinedWeb 留下了哪些可复现性与过滤归因问题？</li><li><strong>Data Pipeline</strong>: [待读后填写] Common Crawl 获取 → URL/语言/文本质量过滤 → 重复控制 → 数据混合与质量评测 → 发布数据集；记录每级输入、输出、保留率和失败样本。</li><li><strong>Key Tricks</strong>: [待读后填写] 只记 data 细节：过滤规则、阈值、去重范围/顺序、质量分类器、抽样与消融设计；不展开 optimizer 或训练算法。</li><li><strong>Results</strong>: [待读后填写] 只记录数据规模、保留率、污染/重复变化、与 RefinedWeb/C4 等数据集的控制变量评测及计算成本。</li></ol>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">待读后填写] Common Crawl 获取</div><div class="farrow">→</div><div class="fnode">URL/语言/文本质量过滤</div><div class="farrow">→</div><div class="fnode">重复控制</div><div class="farrow">→</div><div class="fnode">数据混合与质量评测</div><div class="farrow">→</div><div class="fnode">发布数据集</div></div>
+<ol>
+<li><strong>Motivation</strong>: [待读后填写] 为什么仅报告 token 规模不足以定义高质量 web corpus？RefinedWeb 留下了哪些可复现性与过滤归因问题？</li>
+<li><strong>Data Pipeline</strong>: [待读后填写] Common Crawl 获取 → URL/语言/文本质量过滤 → 重复控制 → 数据混合与质量评测 → 发布数据集；记录每级输入、输出、保留率和失败样本。</li>
+<li><strong>Key Tricks</strong>: [待读后填写] 只记 data 细节：过滤规则、阈值、去重范围/顺序、质量分类器、抽样与消融设计；不展开 optimizer 或训练算法。</li>
+<li><strong>Results</strong>: [待读后填写] 只记录数据规模、保留率、污染/重复变化、与 RefinedWeb/C4 等数据集的控制变量评测及计算成本。</li>
+</ol>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
-<ul><li>对你现在 coding data 工作的 1-2 个直接可试的点：[待读后填写]</li><li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：[待读后填写]</li></ul>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：[待读后填写]</li>
+<li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：[待读后填写]</li>
+</ul>
 </section>
 <section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
-<ul><li>没看懂的 / 想深挖的 1 个问题：[待读后填写]</li></ul>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：[待读后填写]</li>
+</ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
-<blockquote><p>[阅读后补原文，勿凭记忆引用]</p></blockquote>
+<blockquote class="pq">
+<p>[阅读后补原文，勿凭记忆引用]</p>
+</blockquote>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
-<ul><li>按模板补齐 Data Pipeline / Key Tricks / Results / 可迁移</li><li>保留并完善「和之前工作的关系」小节</li><li>全程只写数据：curation / selection / quality / diversity / complexity / synthetic / execution-filter；算法只一句带过</li></ul>
-<blockquote><p>自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步</p></blockquote>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-25-2023-fineweb-refinedweb/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2406.17557">论文原文</a></div>
+<ul>
+<li>按模板补齐 Data Pipeline / Key Tricks / Results / 可迁移</li>
+<li>保留并完善「和之前工作的关系」小节</li>
+<li>全程只写数据：curation / selection / quality / diversity / complexity / synthetic / execution-filter；算法只一句带过</li>
+</ul>
+<blockquote class="pq">
+<p>自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-25-2023-fineweb-refinedweb/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {

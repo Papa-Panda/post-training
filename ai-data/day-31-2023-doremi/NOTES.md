@@ -1,5 +1,7 @@
 # DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-31-2023-doremi/index.html
+
 ## 元信息
 - Title: DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining
 - Authors / Org: Sang Michael Xie et al. / Google DeepMind & Stanford University
@@ -9,6 +11,11 @@
 
 ## 一句话总结
 DoReMi 用 280M reference/proxy model 的跨域 excess loss 自动学出预训练数据的 domain mixture，再按该配比重采样给 8B 模型训练：在 The Pile 上平均 few-shot 准确率高 6.5 个百分点，并用 2.6× 更少训练步数达到 baseline 水平。
+
+
+<!-- viz:stats: 280M 小模型定配比 | 6.5百分点 准确率提升 | 2.6× 步数节省 -->
+<!-- viz:flow: 划分domain → 训reference → 算excess loss → 重采样 -->
+<!-- viz:vs: DoReMi配比 | 自动学; 省2.6倍步数 || reference配比 | baseline -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：这是预训练数据线新增的“配比层”。Day 24 D4 决定域内哪些文档该去重/保留，Day 25 FineWeb 决定网页数据如何过滤，Day 31 DoReMi 决定清洗后的 Wikipedia、GitHub、books、web 等数据域各占多少。

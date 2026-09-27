@@ -1,5 +1,7 @@
 # Day34 Constitutional AI — NOTES
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-34-2022-constitutional-ai/index.html
+
 ## 元信息
 - Title: "Constitutional AI: Harmlessness from AI Feedback"
 - Authors / Org: Bai et al. / Anthropic（51 作者）
@@ -9,6 +11,12 @@
 
 ## 一句话总结
 RLAIF 的源头：人类监督从"逐条标有害/无害"收缩为"写一张原则清单（constitution）"——SL 阶段模型按随机抽到的原则自我 critique+revision、自产对齐数据微调；RL 阶段模型按原则对两条回复做 AI 偏好标注、训练 PM 再 PPO，全程零人类有害标注，human-judged harmlessness 显著超过当时的人类 RLHF 基线（HH-RLHF），是把"规则"编译成"数据"的第一份完整 recipe。
+
+
+<!-- viz:stats: 16条 原则清单 | 2阶段 SL+RL -->
+<!-- viz:flow: 写原则 → 自我critique → revision → AI偏好标注 -->
+<!-- viz:bars: CAI harmlessness 73 | HH-RLHF 63 -->
+<!-- viz:vs: 原则清单 | 规则编译成数据 || 逐条人工标 | 重 -->
 
 ## 核心
 1. **Motivation**: RLHF 的 harmlessness 标注扩展性差：要让人逐条判断"哪条回复更有害"，贵、慢、且标注员接触大量有害内容本身是负担。问题是：能不能把人类监督"上移一层"——只写原则（自然语言），让模型自己把原则翻译成标注？这就是 constitution 的由来：对齐目标可审计、可版本化，而不是藏在几十万条人类标注的隐式分布里。

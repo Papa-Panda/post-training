@@ -1,5 +1,7 @@
 # Magicoder: Empowering Code Generation with OSS-Instruct
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-27-2023-oss-instruct/index.html
+
 ## 元信息
 - Title: Magicoder: Empowering Code Generation with OSS-Instruct
 - Authors / Org: University of Illinois Urbana-Champaign / Tsinghua University
@@ -9,6 +11,11 @@
 
 ## 一句话总结
 OSS-Instruct 从开源代码中抽取 80K 个短片段作为多样化现实锚点，让教师模型据此合成 coding problem + solution，经去重与 benchmark decontamination 后得到约 75K 条指令数据，减少只靠少量人工种子或固定演化规则带来的分布偏置。
+
+
+<!-- viz:stats: 80K 代码片段 | 75K 指令数据 -->
+<!-- viz:flow: 抽代码片段 → 合成题解 → 去重 → 防污染 -->
+<!-- viz:vs: 真实代码锚定 | 分布偏置小 || 少量种子合成 | 分布偏置大 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：位于合成指令线的 coding 专用分叉：Day21 Self-Instruct 通用自举 → Day22 Evol-Instruct 显式提升复杂度 → Day27 OSS-Instruct 用真实开源代码片段扩展任务来源；再向下连接 Day06 Phi-1 的合成 code 数据与 Day16 Qwen2.5-Coder 的 execution-filter。

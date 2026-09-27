@@ -1,5 +1,7 @@
 # Day 01 — StarCoder2 / The Stack v2 数据策展入门
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-01-example-starcoder2/index.html
+
 ## 元信息
 - Title: StarCoder 2 and The Stack v2: The Next Generation
 - Authors / Org: BigCode / Hugging Face / ServiceNow Research et al.
@@ -25,6 +27,9 @@ $$z=(\text{repo},\text{commit},\text{path},\text{language},\text{license},\text{
 $$D_{train}=G_{mix}\circ G_{optout}\circ G_{risk}\circ G_{contam}\circ G_{dedup}\circ G_{quality}\circ G_{license}(D_{raw})$$
 
 每个 $G$ 都回答不同问题：能否合法/负责地用、是否像代码、是否重复、是否泄漏评测、是否含隐私或恶意内容、最终是否与模型容量和目标分布匹配。论文的核心贡献是把这些约束组织成端到端工程系统，而不是证明某一条 heuristic 普适最优。
+
+
+<!-- viz:flow: 许可过滤 → 质量过滤 → 去重 → 防污染 → 风险过滤 → 配比混合 -->
 
 ### 2. 图谱位置
 

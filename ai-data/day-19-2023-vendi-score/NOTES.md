@@ -1,5 +1,7 @@
 # Paper 模板 - Day 19
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/index.html
+
 > 复用 PAPER_TEMPLATE.md 骨架，自动生成
 
 ## 元信息
@@ -13,6 +15,10 @@
 
 ## 一句话总结
 用 kernel eigenvalue 的指数熵定义 Vendi Score 作为可微、样本数无关的多样性度量，证明唯有同时满足有效样本数、重复敏感和可分解性，提出以 Vendi 为过滤/去重/精选目标，1k 多样集常打赢 10k 冗余集，是 LIMO/s1 1k 精选背后的数学标尺，补了 LESS/TracIn 只看影响缺多样性的短板。
+
+
+<!-- viz:stats: 80% Vendi保留 | 95% 性能保留 -->
+<!-- viz:vs: Vendi多样性选 | 可微; 样本数无关 || 影响分数选 | 缺多样性维度 -->
 
 ## 和之前工作的关系
 

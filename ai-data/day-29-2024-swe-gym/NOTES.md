@@ -1,5 +1,7 @@
 # Training Software Engineering Agents and Verifiers with SWE-Gym
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-29-2024-swe-gym/index.html
+
 ## 元信息
 - Title: Training Software Engineering Agents and Verifiers with SWE-Gym
 - Authors / Org: Jiayi Pan, Xingyao Wang, Graham Neubig, Navdeep Jaitly, Heng Ji, Alane Suhr, Yizhe Zhang / UC Berkeley, UIUC, CMU, Apple
@@ -9,6 +11,11 @@
 
 ## 一句话总结
 SWE-Gym 从 11 个开源 Python 仓库整理 2,438 个真实 issue 任务，为每题封装代码库、自然语言需求、可执行环境与单元测试，把静态 coding 样本升级为可验证的仓库级交互数据，并公开训练轨迹供 SFT / RL 数据构造使用。
+
+
+<!-- viz:stats: 11 开源仓库 | 2438 真实任务 -->
+<!-- viz:flow: 真实issue → 封装环境 → 配单测 → 可验证轨迹 -->
+<!-- viz:vs: 仓库级交互数据 | 可验证 || 静态coding样本 | 不可执行验证 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：Day 27 OSS-Instruct（开源代码锚定合成 instruction）→ Day 16 Qwen2.5-Coder（parser / compiler / execution 过滤）→ **Day 29 SWE-Gym（真实 issue + repo context + executable environment + unit tests + agent trajectories）**；同时把 Day 28 ORZ 的“可验证题池”从数学最终答案扩展到仓库级代码修改。

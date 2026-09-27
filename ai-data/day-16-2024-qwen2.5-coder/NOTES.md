@@ -1,5 +1,7 @@
 # Paper 模板
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-16-2024-qwen2.5-coder/index.html
+
 > 复制这个模板到 `{name}/NOTES.md`（现在直接在 ai-data 下平铺，不再有 papers/ 中间层）
 
 ## 元信息
@@ -11,6 +13,10 @@
 
 ## 一句话总结
 Qwen2.5-Coder 解决了 code data 灌水与不可执行噪音问题，用 parser 语法过滤 + 执行验证过滤 + LLM质量过滤 + 去重三级瀑布，把5.5T code tokens洗成可验证可执行的高质code/推理语料，让7B/32B在HumanEval/MBPP/Aider上超同级并反哺Qwen2.5生成可验证RL数据。
+
+
+<!-- viz:stats: 5.5T code tokens | 32B 超同级模型 -->
+<!-- viz:flow: parser过滤 → 执行验证 → LLM质检 → 去重 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：post-train coding data主线的「执行过滤」分支，承接 pretrain瀑布过滤（Llama3 5级 / Qwen2.5 file→repo）与合成数据（Phi-1教科书 / DeepSeek-V3高质量合成annealing），补之前 Day 09 Llama3、Day 10 DeepSeek-V3、Day 11 Qwen2.5只讲预训练过滤、Day 15 DeepSeek-R1只讲verifiable reward但没讲filter具体的短板

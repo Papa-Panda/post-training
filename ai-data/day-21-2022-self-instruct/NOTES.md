@@ -1,5 +1,7 @@
 # Paper 模板 - Day 21
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/index.html
+
 > 自动生成骨架 2026-08-21，基于 PAPER_TEMPLATE.md，纯 Data 视角
 
 ## 元信息
@@ -13,6 +15,10 @@
 
 ## 一句话总结
 用 175 条人工种子指令让 175B 级 LLM 自举生成 52k 指令-输入-输出三元组，仅用自生成 SFT 就让 GPT-3 在 SuperNI 上 +33%，奠定合成指令范式，后面所有合成（Evol-Instruct、OSS-Instruct、Phi-1 教科书、Magpie）都抄它的 bootstrap 循环。
+
+
+<!-- viz:stats: 175 人工种子 | 52000条 自举 | 33% SuperNI提升 -->
+<!-- viz:flow: 175种子 → 自举生成 → ROUGE去重 → 52k指令 -->
 
 ## 和之前工作的关系
 

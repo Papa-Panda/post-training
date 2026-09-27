@@ -1,5 +1,7 @@
 # Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-30-2024-decontamination/index.html
+
 ## 元信息
 - Title: Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models
 - Authors / Org: Martin Riddell, Ansong Ni, Arman Cohan / Yale University
@@ -9,6 +11,10 @@
 
 ## 一句话总结
 这篇把 code benchmark 防污染从只查文本重合升级为 surface-level 与 semantic-level 双重匹配，在 The Stack / The Pile 中定位 HumanEval、MBPP 的近重复解法，并验证污染子集会显著抬高代码生成成绩。
+
+
+<!-- viz:flow: 测试题 → 检索候选 → 双重匹配 → 阈值判定 -->
+<!-- viz:vs: 双重匹配 | surface+semantic || 纯文本重合 | 查不全 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：这是 30 天 data 主线的质量门收口：Day 24 D4 / SemDeDup 处理训练语料内部的冗余，Day 27 OSS-Instruct 构造开源代码锚定的合成数据，Day 29 SWE-Gym 构造 repo-level 可执行任务，Day 30 则在这些数据进入训练前检查它们是否泄漏 benchmark。

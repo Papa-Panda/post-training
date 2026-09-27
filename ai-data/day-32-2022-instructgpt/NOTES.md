@@ -1,5 +1,7 @@
 # Day32 InstructGPT — NOTES
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-32-2022-instructgpt/index.html
+
 ## 元信息
 - Title: Training language models to follow instructions with human feedback
 - Authors / Org: Ouyang et al. / OpenAI
@@ -9,6 +11,11 @@
 
 ## 一句话总结
 RLHF 数据管线的正典：40 名筛选过的 contractor 产出三层数据——12,725 条 SFT demonstration、33,207 条 prompt 的 K 选排序（RM 用）、31,144 条无标注 API prompt（PPO 环境用）；175B InstructGPT 被偏好率 85±3% 碾压同尺寸 GPT-3，1.3B 版本甚至打赢 175B GPT-3。
+
+
+<!-- viz:stats: 12,725 SFT演示 | 33,207 排序prompt | 31,144 无标注prompt -->
+<!-- viz:flow: SFT演示 → RM排序 → PPO优化 -->
+<!-- viz:vs: 真实API分布 | 生成/头脑风暴57% || 公开NLP集 | 抓不住分布 -->
 
 ## 核心
 1. **Motivation**: 预训练目标（next-token on web）与"按用户意图办事"错位；public NLP 数据集（FLAN/T0）捕捉不到真实 API prompt 分布（生成/头脑风暴占 ~57%，分类/QA 只占 ~18%），需要直接从人类偏好造数据。

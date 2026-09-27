@@ -1,4 +1,6 @@
 # 元信息
+
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-03-2020-tracin/index.html
 - Title: Estimating Training Data Influence by Tracing Gradient Descent (TracIn)
 - Authors / Org: Garima Pruthi, Frederick Liu, Mukund Sundararajan, et al. / Google
 - Link / arXiv: https://arxiv.org/abs/2002.08484
@@ -11,6 +13,10 @@
 
 ## 一句话总结
 不用 Hessian，把训练过程上每个 checkpoint 的梯度点积加起来估计影响 —— TracIn，工程上把 Influence Functions 做到了大模型可用的版本，是现在 LLM 数据清洗最实用的基线。
+
+
+<!-- viz:stats: 20% 数据抽查 | 80% 错标签找回 | 10% 清洗不掉点 -->
+<!-- viz:flow: 各ckpt梯度 → 点积累加 → 影响分数 → 排序扫脏 -->
 
 ## 核心
 ### 1. Motivation

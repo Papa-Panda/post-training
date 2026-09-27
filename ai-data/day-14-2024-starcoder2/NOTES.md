@@ -1,5 +1,7 @@
 # Paper 模板 - Day 14 自动骨架
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-14-2024-starcoder2/index.html
+
 ## 元信息
 - Title: StarCoder 2 and The Stack v2: The Next Generation
 - Authors / Org: BigCode / ServiceNow / HuggingFace - Anton Lozhkov, Raymond Li, et al.
@@ -11,6 +13,11 @@
 
 ## 一句话总结
 600+语言/近1T tokens 的 The Stack v2 用“来源可追溯+许可证过滤+去重/PII/600+规则清洗+repo级打包+中英+issue/PR构造对话”把 3B/7B/15B StarCoder2 训到 HumanEval 35-46% 超 CodeLlama-7B/StableCode-3B，证明 code pretrain 的天花板是 curation 不是 tokens——和 Day 6 Phi-1 的质量>数量一致，但走的是“真实大规模+重清洗”而非合成。
+
+
+<!-- viz:stats: 600 语言 | 1T tokens | 15B 模型 -->
+<!-- viz:flow: 许可过滤 → 去重/PII → 600规则清洗 → repo打包 -->
+<!-- viz:vs: 真实大规模+重清洗 | The Stack v2; 天花板在curation || 纯合成路线 | Phi-1式; 不同路 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：pretrain / curation 主线的“code专用”基石，对位 Day 7 Llama3 / Day 8 DeepSeek-V3 / Day 9 Qwen2.5 的“通用 15T+”三角——StarCoder2 是把通用里 code 25-30% 这条线单独抠出来做极致，500B+ code tokens 级别。接了 Day 3 TracIn/Day5 DataInf 的可清洗思想（用规则+模型双重踢数据）但没算 influence，用的是 heuristics+模型打分。

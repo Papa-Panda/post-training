@@ -1,5 +1,7 @@
 # Paper 模板 — Day 15 DeepSeek-R1
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-15-2025-deepseek-r1/index.html
+
 ## 元信息
 - Title: DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning
 - Authors / Org: DeepSeek-AI (DeepSeek-R1 Team)
@@ -10,6 +12,12 @@
 
 ## 一句话总结
 用 <10k 合成冷启动 + 纯 RL（可验证奖励）让 base 模型自发涌现长链推理，SFT 只起格式稳定，真正泛化靠 RL，证明 SFT memorizing vs RL generalizing 在 coding/reasoning 上的分水岭。
+
+
+<!-- viz:stats: 79.8% AIME | 97.3% MATH | 71% R1-Zero纯RL -->
+<!-- viz:flow: 冷启动SFT → 大规模RL → 拒绝采样 → 再SFT+RL -->
+<!-- viz:bars: R1 79.8% | R1-Zero 71% -->
+<!-- viz:vs: RL泛化 | 长链自发涌现 || SFT记忆 | 只稳格式 -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：post-train RL 主线的集大成，对接 2025_limr (RL 少即是多) 的“选难例”——R1 冷启动 10k 就是 LIMR 式的硬例筛选；对接 2024_superfiltering (SFT weak-to-strong) 的对比——SuperFiltering 说小模型选 SFT 数据管用，R1 说 SFT 只能稳格式，选对难例后 RL 才能超 SFT；对接 2023_phi-1 (合成教科书) 线——R1 的冷启动合成推理轨迹就是 Phi-1 教科书思想的 RL 版本，但从“教”变“写出题过程”。

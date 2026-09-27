@@ -1,5 +1,7 @@
 # Paper 模板
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-09-2024-qwen2.5/index.html
+
 ## 元信息
 - Title: Qwen2.5 Technical Report
 - Authors / Org: Alibaba Cloud Qwen Team (Qwen2.5 / Qwen2.5-Coder / Qwen2.5-Math series)
@@ -11,6 +13,10 @@
 
 ## 一句话总结
 从 7T 拉到 18T 预训练（2026-09-09 修正：初读的"其中 code ~5.5T 来自 Qwen2.5-Coder 线"表述不准确——5.5T 语料（最终训练集 5.2T）是 Qwen2.5-Coder 自身的预训练规模，主报告只说 18T 并入了 Math/Coder 专用数据，未披露 code 占比，见第二轮复习 §4），文件级+仓库级混合、弱模型分类器过滤、版图更大且多语，1M+ SFT + 多阶段 RL（offline DPO → online GRPO；RM↔SFT 迭代进化是 Qwen2.5-Math 报告的 self-improvement 设计，见 2026-09-09 澄清与第二轮复习 §4）+ MoE Turbo/Plus，72B 与 Llama-3-405B-Instruct 打到 competitive（2026-09-09 修正：初读的"超"为夸大，论文原文用词是 competitive，见第二轮复习 §4），证明 data recipe / flywheel > 单纯参数堆砌。
+
+
+<!-- viz:stats: 18T 预训练 | 1M SFT | 72B 模型 -->
+<!-- viz:flow: 18T预训练 → 1M SFT → offline DPO → online GRPO -->
 
 ## 和之前工作的关系
 - **知识图谱位置**：pretrain / scaling / curation 主线的第三极，对齐 Day 7 Llama 3 (15.6T dense) 和 Day 8 DeepSeek-V3 (14.8T MoE) —— 三大 2024 开源 frontier 配方三角在此闭合。从 influence/selection 线（Day 2-5）到 synthetic 线（Day 6 Phi-1）再到 pretrain 线（Day 7-9），Qwen 是 pretrain 向 SFT/RL 跨线的桥梁。

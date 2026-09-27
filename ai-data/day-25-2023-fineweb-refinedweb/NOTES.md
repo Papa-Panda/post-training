@@ -1,5 +1,7 @@
 # Paper 模板 - Day 25
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-25-2023-fineweb-refinedweb/index.html
+
 > 自动生成骨架 2026-08-25，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。
 
 ## 元信息
@@ -14,6 +16,10 @@
 
 ## 一句话总结
 FineWeb 把 RefinedWeb 开创的“只靠高质量 Common Crawl 也能训练强模型”路线扩展为 15T-token、可复现且经消融验证的网页语料管线，用 URL/文本过滤、语言识别、重复控制和质量评测把“过滤规则清单”升级为可审计的数据配方。
+
+
+<!-- viz:stats: 15T tokens | 可复现 | 消融验证 -->
+<!-- viz:flow: URL过滤 → 语言识别 → 重复控制 → 质量评测 -->
 
 ## 和之前工作的关系
 

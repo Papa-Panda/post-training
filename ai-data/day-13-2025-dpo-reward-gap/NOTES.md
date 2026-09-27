@@ -1,5 +1,7 @@
 # Paper 模板
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-13-2025-dpo-reward-gap/index.html
+
 ## 元信息
 - Title: Difficulty-Based Preference Data Selection by DPO Implicit Reward Gap
 - Authors / Org: Xuan Qi, Rongwu Xu, Zhijing Jin - UW / Tsinghua / MPI
@@ -9,6 +11,11 @@
 
 ## 一句话总结
 做 DPO 对齐别全量上，算 DPO 隐式 reward 的 chosen-rejected gap，gap 小的难例留 10%，对齐效果打赢全量，证明难的偏好对才值钱。
+
+
+<!-- viz:stats: 10% 难例精选 | 75% 维度打赢 -->
+<!-- viz:flow: 算gap → 排序 → 留10%难例 → 训DPO -->
+<!-- viz:vs: gap小难例 | 信号大; 10%胜全量 || 全量偏好对 | 水数据多 -->
 
 ## 核心
 1.  **Motivation**: RLHF/DPO 都靠大偏好集，贵，且高质量偏好怎么选没人说清

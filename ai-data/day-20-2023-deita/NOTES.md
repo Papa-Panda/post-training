@@ -1,5 +1,7 @@
 # Paper 模板 - Day 20
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/index.html
+
 > 复用 PAPER_TEMPLATE.md 骨架，自动生成
 
 ## 元信息
@@ -13,6 +15,11 @@
 
 ## 一句话总结
 用复杂度×质量×多样性三因子自动选 6k SFT 数据打赢 100k+ 全量，AlpacaEval +5%、IFEval 保持，提出 Evol-Complexity 与 LLM-Quality 双评分 + 近邻多样性去重，是 LIMR/LIMO/s1 少即是多主线的首次三合一配方
+
+
+<!-- viz:stats: 6000条 三因子精选 | 5% AlpacaEval提升 -->
+<!-- viz:flow: 复杂度打分 → 质量打分 → 多样性去重 → 6k精选 -->
+<!-- viz:vs: 乘积排序 | 消量纲; 优2-3% || 加权排序 | 有量纲偏置 -->
 
 ## 和之前工作的关系
 

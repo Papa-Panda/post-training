@@ -1,5 +1,7 @@
 # Paper 模板
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-07-2024-llama3/index.html
+
 ## 元信息
 - Title: The Llama 3 Herd of Models
 - Authors / Org: Meta AI (Llama Team, Aaron Grattafiori et al. ~500 authors)
@@ -9,6 +11,11 @@
 
 ## 一句话总结
 Meta 用 15.6T tokens 从零搭的工业级预训练管线，堆了 5级质量过滤+多轮去重+code/math 专用抽取（最终配比约 50% 通用 / 25% 数学推理 / 17% 代码 / 8% 多语）+annealing 高质数据，把 405B 训到对标 GPT-4，证明了长尾质量飞轮比单纯堆数据量更管用。（2026-09-08 修正：初读误写"code上采样25%"与"多轮合成/回译"，见第二轮复习 §4）
+
+
+<!-- viz:stats: 15.6T 训练tokens | 405B 参数 | 87.3% MMLU -->
+<!-- viz:flow: heuristic过滤 → MinHash去重 → fastText过滤 → Llama2打分 → annealing -->
+<!-- viz:vs: 5级瀑布 | 成本/召回可控 || 单级分类器 | Phi-1式; 粗 -->
 
 ## 核心
 1. **Motivation**: 之前 Llama 2 2T 就见顶，再堆 token 收益衰减。问题不在量，在 web 臭、重复多、code配比低。需要一套可控 15T 的配方，让 405B 既懂 web 又会 code 还能长推理。

@@ -1,3 +1,5 @@
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/index.html
+
 ## 元信息
 - Title: LESS: Selecting Influential Data for Targeted Instruction Tuning
 - Authors / Org: Mengzhou Xia, Sadhika Malladi, Suchin Gururangan, Sanjeev Arora, Danqi Chen / Princeton NLP
@@ -8,6 +10,11 @@
 
 ## 一句话总结
 为想定向提升的能力（推理/BBH/MMLU）准备几条 few-shot 锚点，把大池子 27万 条指令的 low-rank 梯度跟锚点做相似度搜索，只训 top 5% 的数据，经常比训全量还好，且用 7B 选的数据能直接给 13B/Mistral 用。
+
+
+<!-- viz:stats: 27万 指令池 | 5% 精选训练 -->
+<!-- viz:flow: 5%热身 → 梯度相似度 → 取top5% → 定向微调 -->
+<!-- viz:vs: LESS梯度选 | 按目标影响选; 5%常胜全量 || BM25/embedding选 | 表面相似; 训了没用 -->
 
 ## 核心
 1.  **Motivation**: 全量指令微调混了太多水数据，想提升某个专项能力时，大部分数据是 noise。传统 BM25 / embedding 选的是表面像的，训了没用。需要按“对目标 loss 的实际影响”来选。

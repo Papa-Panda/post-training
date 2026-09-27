@@ -1,5 +1,7 @@
 # Paper 模板 - Day 18
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-18-2025-s1/index.html
+
 > 复用 PAPER_TEMPLATE.md 骨架，自动生成
 
 ## 元信息
@@ -13,6 +15,12 @@
 
 ## 一句话总结
 用 1k 最高质长链推理轨迹 s1K 做 SFT + budget forcing 控制 test-time thinking 长度，让 Qwen2.5-32B-Instruct 在 AIME 50%+、MATH 切换到 90%+，匹敌 o1/R1，证明 SFT 阶段少即是多 + 推理时算力缩放可直接替代大规模 RL，是 LIMO 的推理时延伸和平行验证。
+
+
+<!-- viz:stats: 1000条 长链 | 1.7% 入选率 | 50% AIME24 -->
+<!-- viz:flow: 难度筛 → 去蒸馏 → 完整性 → 强制续写 -->
+<!-- viz:bars: s1 50% | o1-preview 44.6% -->
+<!-- viz:vs: SFT+TTS | 1k数据+推理时缩放 || 大规模RL | 可被替代 -->
 
 ## 和之前工作的关系
 

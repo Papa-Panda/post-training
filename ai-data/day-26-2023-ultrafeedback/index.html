@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 26 — UltraFeedback: Boosting Language Models with Scaled AI Feedback</title>
+<title>UltraFeedback: Boosting Language Models with Scaled AI Feedback</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,41 +102,70 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 26</span>
-    <h1>Day 26 — UltraFeedback: Boosting Language Models with Scaled AI Feedback</h1>
+    <h1>UltraFeedback: Boosting Language Models with Scaled AI Feedback</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul><li>Title: UltraFeedback: Boosting Language Models with Scaled AI Feedback</li><li>Authors / Org: OpenBMB / Tsinghua University</li><li>Link / arXiv: https://arxiv.org/abs/2310.01377</li><li>Date read: 2026-08-26</li><div class="meta"><span class="tag">preference-data</span><span class="tag">ai-feedback</span><span class="tag">data-quality</span><span class="tag">diversity</span><span class="tag">curation</span><span class="tag">sft</span><span class="tag">rl-data</span></div></ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-26-2023-ultrafeedback/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>UltraFeedback: Boosting Language Models with Scaled AI Feedback</dd><dt>Authors / Org</dt><dd>OpenBMB / Tsinghua University</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2310.01377">https://arxiv.org/abs/2310.01377</a></dd><dt>Date read</dt><dd>2026-08-26</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">preference-data</span><span class="tag">ai-feedback</span><span class="tag">data-quality</span><span class="tag">diversity</span><span class="tag">curation</span><span class="tag">sft</span><span class="tag">rl-data</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>UltraFeedback 从 64k 条多来源指令出发，为每条指令采样 4 个不同模型回答，并用 GPT-4 生成细粒度评价与分数，把普通 instruction pool 转成可追溯的偏好数据底座。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">64000</div><div class="l">指令</div></div><div class="stat"><div class="v">4</div><div class="l">模型 回答</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">多源指令</div><div class="farrow">→</div><div class="fnode">多模型回答</div><div class="farrow">→</div><div class="fnode">GPT-4评价</div><div class="farrow">→</div><div class="fnode">偏好对</div></div>
+
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
-<ul><li><strong>知识图谱位置</strong>：偏好数据构造线的源头层，位于 Day10 Llama 3.1/3.2 后训练数据切分之后、Day13 DPO-Reward-Gap 偏好对选择之前。</li><li><strong>接了哪条线</strong>：接 Day21 Self-Instruct / Day22 Evol-Instruct 的“先造 instruction pool”，再为每个 prompt 扩展多模型 response，并补上 AI feedback 标注。</li><li><strong>补了哪个短板</strong>：Day10 展示了后训练数据分阶段但配方闭源；UltraFeedback 给出公开、可复用的 prompt → 多回答 → critique/score → preference pair 数据管线。</li><li><strong>替代 / 分叉 / 改进</strong>：它不是替代 Day13，而是其上游数据源；UltraFeedback 负责造广覆盖偏好池，Day13 再从池中挑 reward gap 小的难偏好对。</li><li><strong>直接对比 Day13</strong>：Day13 研究“哪些 pair 值得留下”，本篇研究“pair 从哪里来、如何批量标注”；两者可串成生成 → 打分 → 难例选择。</li></ul>
+<ul>
+<li><strong>知识图谱位置</strong>：偏好数据构造线的源头层，位于 Day10 Llama 3.1/3.2 后训练数据切分之后、Day13 DPO-Reward-Gap 偏好对选择之前。</li>
+<li><strong>接了哪条线</strong>：接 Day21 Self-Instruct / Day22 Evol-Instruct 的“先造 instruction pool”，再为每个 prompt 扩展多模型 response，并补上 AI feedback 标注。</li>
+<li><strong>补了哪个短板</strong>：Day10 展示了后训练数据分阶段但配方闭源；UltraFeedback 给出公开、可复用的 prompt → 多回答 → critique/score → preference pair 数据管线。</li>
+<li><strong>替代 / 分叉 / 改进</strong>：它不是替代 Day13，而是其上游数据源；UltraFeedback 负责造广覆盖偏好池，Day13 再从池中挑 reward gap 小的难偏好对。</li>
+<li><strong>直接对比 Day13</strong>：Day13 研究“哪些 pair 值得留下”，本篇研究“pair 从哪里来、如何批量标注”；两者可串成生成 → 打分 → 难例选择。</li>
+</ul>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
 <p>前 25 天已覆盖预训练过滤、SFT 合成与少即是多，但偏好数据仍缺一个透明底座。UltraFeedback 把 coding/SFT prompt 扩成多候选回答并附细粒度质量信号，正好补齐从 instruction data 到 RL/preference data 的数据转换层；这里仅研究数据来源、覆盖、标注质量和 pair 构造，不展开 DPO/RLHF 算法。</p>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
-<ol><li>64k prompts 来自哪些数据源，怎样控制任务覆盖、难度与重复，避免偏好池只放大原始 instruction distribution？</li><li>每个 prompt 的 4 个回答由哪些模型产生；多模型采样如何增加质量跨度与风格多样性，GPT-4 细粒度标注又会引入什么系统性偏差？</li><li>对比 Day13 DPO-Reward-Gap：若把 UltraFeedback 的 4-way scores 转成 pairs，再优先保留小 gap 难对，怎样同时守住 prompt 多样性、回答质量和难度分布？</li></ol>
+<ol>
+<li>64k prompts 来自哪些数据源，怎样控制任务覆盖、难度与重复，避免偏好池只放大原始 instruction distribution？</li>
+<li>每个 prompt 的 4 个回答由哪些模型产生；多模型采样如何增加质量跨度与风格多样性，GPT-4 细粒度标注又会引入什么系统性偏差？</li>
+<li>对比 Day13 DPO-Reward-Gap：若把 UltraFeedback 的 4-way scores 转成 pairs，再优先保留小 gap 难对，怎样同时守住 prompt 多样性、回答质量和难度分布？</li>
+</ol>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
-<ol><li><strong>Motivation</strong>: 大规模偏好数据昂贵且来源不透明；需要一条可扩展的 AI-feedback 数据生产管线。</li><li><strong>Data Pipeline</strong>: 多来源 prompts → 多模型各生成回答 → GPT-4 按多个质量维度给 critique 与 score → 整理为偏好排序 / chosen-rejected pairs → 做数据质检与评估。</li><li><strong>Key Tricks</strong>: 多模型响应增加质量跨度；细粒度维度评分保留比单一总分更丰富的监督；同时保留 critique、score 与 response，方便后续重筛和重组 pair。</li><li><strong>Results</strong>: 待读后填写；重点记录数据规模、来源占比、标注一致性与下游数据消融，不展开训练算法。</li></ol>
+<ol>
+<li><strong>Motivation</strong>: 大规模偏好数据昂贵且来源不透明；需要一条可扩展的 AI-feedback 数据生产管线。</li>
+<li><strong>Data Pipeline</strong>: 多来源 prompts → 多模型各生成回答 → GPT-4 按多个质量维度给 critique 与 score → 整理为偏好排序 / chosen-rejected pairs → 做数据质检与评估。</li>
+<li><strong>Key Tricks</strong>: 多模型响应增加质量跨度；细粒度维度评分保留比单一总分更丰富的监督；同时保留 critique、score 与 response，方便后续重筛和重组 pair。</li>
+<li><strong>Results</strong>: 待读后填写；重点记录数据规模、来源占比、标注一致性与下游数据消融，不展开训练算法。</li>
+</ol>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
-<ul><li>对你现在 coding data 工作的 1-2 个直接可试的点：为同一 coding prompt 采样多个模型答案，保存 execution result、judge critique 与分项分数，再按正确性、难度和多样性组成 pair。</li><li>Infra 视角：把生成、执行验证、AI judge、pair 构造拆成可追踪 stage；每条记录保留 provenance 与版本，支持重放、重标和偏差审计。</li></ul>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：为同一 coding prompt 采样多个模型答案，保存 execution result、judge critique 与分项分数，再按正确性、难度和多样性组成 pair。</li>
+<li>Infra 视角：把生成、执行验证、AI judge、pair 构造拆成可追踪 stage；每条记录保留 provenance 与版本，支持重放、重标和偏差审计。</li>
+</ul>
 </section>
 <section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
-<ul><li>GPT-4 judge 的绝对分与 pairwise preference 在不同 prompt domain 上是否校准一致？coding execution signal 能否作为独立硬门禁纠偏？</li></ul>
+<ul>
+<li>GPT-4 judge 的绝对分与 pairwise preference 在不同 prompt domain 上是否校准一致？coding execution signal 能否作为独立硬门禁纠偏？</li>
+</ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
-<blockquote><p>待读后补充。</p></blockquote>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-26-2023-ultrafeedback/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2310.01377">论文原文</a></div>
+<blockquote class="pq">
+<p>待读后补充。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-26-2023-ultrafeedback/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {

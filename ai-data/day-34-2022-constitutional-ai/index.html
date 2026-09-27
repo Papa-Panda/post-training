@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 34 — Constitutional AI: Harmlessness from AI Feedback</title>
+<title>Day34 Constitutional AI — NOTES</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,36 +102,71 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 34</span>
-    <h1>Day 34 — Constitutional AI: Harmlessness from AI Feedback</h1>
+    <h1>Day34 Constitutional AI — NOTES</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">思考题</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul><li>Title: "Constitutional AI: Harmlessness from AI Feedback"</li><li>Authors / Org: Bai et al. / Anthropic（51 作者）</li><li>Link / arXiv: https://arxiv.org/abs/2212.08073</li><li>Date read: 2026-09-26</li><div class="meta"><span class="tag">rl-data</span><span class="tag">preference-data</span><span class="tag">rlaif</span><span class="tag">constitution</span><span class="tag">critique-revision</span><span class="tag">curation</span></div></ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-34-2022-constitutional-ai/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>"Constitutional AI: Harmlessness from AI Feedback"</dd><dt>Authors / Org</dt><dd>Bai et al. / Anthropic（51 作者）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2212.08073">https://arxiv.org/abs/2212.08073</a></dd><dt>Date read</dt><dd>2026-09-26</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">rl-data</span><span class="tag">preference-data</span><span class="tag">rlaif</span><span class="tag">constitution</span><span class="tag">critique-revision</span><span class="tag">curation</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>RLAIF 的源头：人类监督从"逐条标有害/无害"收缩为"写一张原则清单（constitution）"——SL 阶段模型按随机抽到的原则自我 critique+revision、自产对齐数据微调；RL 阶段模型按原则对两条回复做 AI 偏好标注、训练 PM 再 PPO，全程零人类有害标注，human-judged harmlessness 显著超过当时的人类 RLHF 基线（HH-RLHF），是把"规则"编译成"数据"的第一份完整 recipe。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">16</div><div class="l">原则清单</div></div><div class="stat"><div class="v">2</div><div class="l">阶段 SL+RL</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">写原则</div><div class="farrow">→</div><div class="fnode">自我critique</div><div class="farrow">→</div><div class="fnode">revision</div><div class="farrow">→</div><div class="fnode">AI偏好标注</div></div>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">CAI harmlessness</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">73</div></div><div class="barrow"><div class="barlabel">HH-RLHF</div><div class="bartrack"><div class="barfill" style="width:86.3%"></div></div><div class="barval">63</div></div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>原则清单</h4><ul><li>规则编译成数据</li></ul></div><div class="vscol vs-b"><h4>逐条人工标</h4><ul><li>重</li></ul></div></div>
+
 </section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
-<ol><li><strong>Motivation</strong>: RLHF 的 harmlessness 标注扩展性差：要让人逐条判断"哪条回复更有害"，贵、慢、且标注员接触大量有害内容本身是负担。问题是：能不能把人类监督"上移一层"——只写原则（自然语言），让模型自己把原则翻译成标注？这就是 constitution 的由来：对齐目标可审计、可版本化，而不是藏在几十万条人类标注的隐式分布里。</li><li><strong>Data Pipeline</strong>: 两段式，全部数据自产：<ul><li><strong>SL 阶段（self-critique → revision）</strong>：取 helpful RLHF 后的初始模型 + 一批 red-team prompts（人类写的 + 模型 few-shot 扩写的）。每条 prompt：模型先生成初始回复 → 随机抽一条 critique 原则（16 条里抽 1，如"这条回复是否助长了非法行为？"）→ few-shot 格式生成 critique → 再按 revision 指令生成修订版。<strong>只保留最终修订版作为 SL 目标，丢掉原始回复</strong>，在 (prompt, revision) 上微调。数据阀：过滤掉修订版退化成模板式拒绝/重复套话的样本——拒绝容易学，修订难，要的是"不回避但讲清立场"的修订质量。</li><li><strong>RL 阶段（AI 偏好标注 → PM → PPO，即 RLAIF）</strong>：对每条 prompt 从 SL 模型采样 2 条回复 → 随机抽一条偏好原则（16 条，如"哪条回复是更明智、有道德、礼貌友好的人会说的？"）→ 模型做选择题式判断（"A 好还是 B 好？"，带 CoT 推理再取 (A)/(B) token 概率得偏好标签）→ 训练 preference model → PPO。偏好数据里的人类成分是零，原则是唯一的注入点。</li><li>关键点：critique/revision 和偏好判断都用 few-shot + CoT——CoT 不只涨标注质量，还让 AI 的"判决理由"可读，这是"可审计对齐"的雏形。</li></ul></li><li><strong>Key Tricks</strong>:<ul><li><strong>原则即数据规格</strong>：16+16 条自然语言原则是唯一的"人工制品"，每条 prompt 随机抽 1 条用——相当于用采样把原则分布注入数据分布，改原则 = 改数据分布，不用重标；</li><li><strong>SL 只训 revision、丢弃原回复</strong>：训练信号是"按原则改完之后的样子"，模型学到的是"自我修正的终态分布"而不是"先犯错再改"的过程；</li><li><strong>AI 标注用选择题 + CoT 提取 token 概率</strong>：不是让模型直接打分（打分不稳定），而是二选一 + 读 (A)/(B) 概率，偏好标签变成可校准的概率信号；</li><li><strong>non-evasive 是刻意的数据目标</strong>：修订/偏好原则明确奖励"正面回应并解释反对理由"而非"一拒了之"，RLAIF 训练出的助手对有害请求会解释立场而不是模板拒绝——这是数据设计直接决定产品行为的例子。</li></ul></li><li><strong>Results</strong>:<ul><li>人评 Elo：harmlessness 上 CAI 73 vs HH-RLHF（人类标注 RLHF）63；helpfulness 上 HH-RLHF 62 vs CAI 56——无害性大胜、helpfulness 小输，tradeoff 明确；</li><li>crowdworker 在 red-team prompts 上显著更偏好 CAI 回复；AI 标注训练的 PM 性能接近人类标注训练的 PM（CoT 对一致性提升明显）；</li><li>数据意义：证明了 harmlessness 这条维度可以完全不依赖人类有害标注达到 SOTA——RLHF 的"人"不是不可替代的，至少在这一维上。</li></ul></li></ol>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">AI 偏好标注</div><div class="farrow">→</div><div class="fnode">PM</div><div class="farrow">→</div><div class="fnode">PPO，即 RLAIF</div></div>
+<ol>
+<li><strong>Motivation</strong>: RLHF 的 harmlessness 标注扩展性差：要让人逐条判断"哪条回复更有害"，贵、慢、且标注员接触大量有害内容本身是负担。问题是：能不能把人类监督"上移一层"——只写原则（自然语言），让模型自己把原则翻译成标注？这就是 constitution 的由来：对齐目标可审计、可版本化，而不是藏在几十万条人类标注的隐式分布里。</li>
+<li><strong>Data Pipeline</strong>: 两段式，全部数据自产：</li>
+<li><strong>SL 阶段（self-critique → revision）</strong>：取 helpful RLHF 后的初始模型 + 一批 red-team prompts（人类写的 + 模型 few-shot 扩写的）。每条 prompt：模型先生成初始回复 → 随机抽一条 critique 原则（16 条里抽 1，如"这条回复是否助长了非法行为？"）→ few-shot 格式生成 critique → 再按 revision 指令生成修订版。<strong>只保留最终修订版作为 SL 目标，丢掉原始回复</strong>，在 (prompt, revision) 上微调。数据阀：过滤掉修订版退化成模板式拒绝/重复套话的样本——拒绝容易学，修订难，要的是"不回避但讲清立场"的修订质量。</li>
+<li><strong>RL 阶段（AI 偏好标注 → PM → PPO，即 RLAIF）</strong>：对每条 prompt 从 SL 模型采样 2 条回复 → 随机抽一条偏好原则（16 条，如"哪条回复是更明智、有道德、礼貌友好的人会说的？"）→ 模型做选择题式判断（"A 好还是 B 好？"，带 CoT 推理再取 (A)/(B) token 概率得偏好标签）→ 训练 preference model → PPO。偏好数据里的人类成分是零，原则是唯一的注入点。</li>
+<li>关键点：critique/revision 和偏好判断都用 few-shot + CoT——CoT 不只涨标注质量，还让 AI 的"判决理由"可读，这是"可审计对齐"的雏形。</li>
+<li><strong>Key Tricks</strong>:</li>
+<li><strong>原则即数据规格</strong>：16+16 条自然语言原则是唯一的"人工制品"，每条 prompt 随机抽 1 条用——相当于用采样把原则分布注入数据分布，改原则 = 改数据分布，不用重标；</li>
+<li><strong>SL 只训 revision、丢弃原回复</strong>：训练信号是"按原则改完之后的样子"，模型学到的是"自我修正的终态分布"而不是"先犯错再改"的过程；</li>
+<li><strong>AI 标注用选择题 + CoT 提取 token 概率</strong>：不是让模型直接打分（打分不稳定），而是二选一 + 读 (A)/(B) 概率，偏好标签变成可校准的概率信号；</li>
+<li><strong>non-evasive 是刻意的数据目标</strong>：修订/偏好原则明确奖励"正面回应并解释反对理由"而非"一拒了之"，RLAIF 训练出的助手对有害请求会解释立场而不是模板拒绝——这是数据设计直接决定产品行为的例子。</li>
+<li><strong>Results</strong>:</li>
+<li>人评 Elo：harmlessness 上 CAI 73 vs HH-RLHF（人类标注 RLHF）63；helpfulness 上 HH-RLHF 62 vs CAI 56——无害性大胜、helpfulness 小输，tradeoff 明确；</li>
+<li>crowdworker 在 red-team prompts 上显著更偏好 CAI 回复；AI 标注训练的 PM 性能接近人类标注训练的 PM（CoT 对一致性提升明显）；</li>
+<li>数据意义：证明了 harmlessness 这条维度可以完全不依赖人类有害标注达到 SOTA——RLHF 的"人"不是不可替代的，至少在这一维上。</li>
+</ol>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>可迁移</h2>
-<ul><li>对你现在 coding data 工作的 1-2 个直接可试的点：把代码规范/安全 checklist 写成"constitution"（如"不引入 SQL 注入面""错误处理不吞异常"），让模型对自生成的代码做 critique→revision，自产 (bad code, revised code) 对做 SFT 或偏好数据——等于把 code review 规则编译成数据，比逐条人工 review 可扩展；Day33 STaR 是"答案对错"做阀，CAI 是"原则符合度"做阀，coding 里两者可以叠：单测做答案阀，constitution 做风格/安全阀。</li><li>Infra 视角：CAI 把最贵的人力环节（有害标注）换成了最便宜的可版本化资产（一页原则）+ 模型 inference——数据成本结构从 O(标注条数) 降到 O(原则条数)；代价是"回音室"风险（标注模型的偏见被放大进 policy），需要独立的红队/人评做外部校验，这正是 Day35 PRM step-level 监督和 Day36 RLAIF-vs-RLHF 对比要回答的。</li></ul>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：把代码规范/安全 checklist 写成"constitution"（如"不引入 SQL 注入面""错误处理不吞异常"），让模型对自生成的代码做 critique→revision，自产 (bad code, revised code) 对做 SFT 或偏好数据——等于把 code review 规则编译成数据，比逐条人工 review 可扩展；Day33 STaR 是"答案对错"做阀，CAI 是"原则符合度"做阀，coding 里两者可以叠：单测做答案阀，constitution 做风格/安全阀。</li>
+<li>Infra 视角：CAI 把最贵的人力环节（有害标注）换成了最便宜的可版本化资产（一页原则）+ 模型 inference——数据成本结构从 O(标注条数) 降到 O(原则条数)；代价是"回音室"风险（标注模型的偏见被放大进 policy），需要独立的红队/人评做外部校验，这正是 Day35 PRM step-level 监督和 Day36 RLAIF-vs-RLHF 对比要回答的。</li>
+</ul>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>疑问 / 下一步</h2>
-<ul><li>16 条原则是作者手写的——原则的"覆盖度"和"冲突"怎么度量？两条原则打架时（helpful vs harmless）采样机制实际学到的是什么分布？</li><li>AI 偏好标注与人类标注的一致性在 harmlessness 之外（helpfulness、honesty）是否同样成立？Day36 的 RLAIF vs RLHF 头对头对比会给出答案。</li></ul>
+<ul>
+<li>16 条原则是作者手写的——原则的"覆盖度"和"冲突"怎么度量？两条原则打架时（helpful vs harmless）采样机制实际学到的是什么分布？</li>
+<li>AI 偏好标注与人类标注的一致性在 harmlessness 之外（helpfulness、honesty）是否同样成立？Day36 的 RLAIF vs RLHF 头对头对比会给出答案。</li>
+</ul>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>原文金句 (1-2句)</h2>
-<blockquote><p>We experiment with methods for training a harmless AI assistant through self-improvement, without any human labels identifying harmful outputs. The only human oversight is provided through a list of rules or principles, and so we refer to the method as 'Constitutional AI'.</p></blockquote>
-<blockquote><p>These methods make it possible to control AI behavior more precisely and with far fewer human labels.</p></blockquote>
+<blockquote class="pq">
+<p>We experiment with methods for training a harmless AI assistant through self-improvement, without any human labels identifying harmful outputs. The only human oversight is provided through a list of rules or principles, and so we refer to the method as 'Constitutional AI'.</p>
+<p>These methods make it possible to control AI behavior more precisely and with far fewer human labels.</p>
+</blockquote>
 </section>
 <section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>思考题</h2>
-<ol><li>CAI 把"逐条人工标注"换成"一页自然语言原则 + AI 自产数据"——这套"规则前置"范式能搬到 coding data 吗？比如把代码规范写成 constitution，让模型对自生成的代码做 critique→revision，和 Day33 STaR 的"单测答案阀"叠起来用？</li><li>RLAIF 全程零人类有害标注，但 AI 标注的偏见会被 PPO 放大成"回音室"——如果原则本身有盲区，数据管线里哪个环节能发现？Day36 的 RLAIF vs RLHF 对比、Day35 的 step-level 监督，哪个更可能是解法？</li></ol>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-34-2022-constitutional-ai/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2212.08073">论文原文</a></div>
+<ol>
+<li>CAI 把"逐条人工标注"换成"一页自然语言原则 + AI 自产数据"——这套"规则前置"范式能搬到 coding data 吗？比如把代码规范写成 constitution，让模型对自生成的代码做 critique→revision，和 Day33 STaR 的"单测答案阀"叠起来用？</li>
+<li>RLAIF 全程零人类有害标注，但 AI 标注的偏见会被 PPO 放大成"回音室"——如果原则本身有盲区，数据管线里哪个环节能发现？Day36 的 RLAIF vs RLHF 对比、Day35 的 step-level 监督，哪个更可能是解法？</li>
+</ol></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-34-2022-constitutional-ai/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {

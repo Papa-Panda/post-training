@@ -1,5 +1,7 @@
 # DeepSeek-V3 Data - MoE 685B Open Recipe
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/index.html
+
 ## 元信息
 - Title: DeepSeek-V3 Technical Report
 - Authors / Org: DeepSeek-AI
@@ -9,6 +11,9 @@
 
 ## 一句话总结
 用 14.8T MoE 专用管线（提高数学与代码样本占比——论文未给数字，FIM 10% PSM，去冗余保多样——论文未披露方法），训 671B MoE（37B激活）对标 Llama 3 405B；论文未做数据消融，"更激进、更干净"是存在性层面的解读，不可引为因果结论。（2026-09-08 修正初读推断："code 30%+"等非论文事实，见第二轮复习 §4）
+
+
+<!-- viz:stats: 14.8T tokens | 671B 参数 | 37B 激活 | 2.788M H800 GPU时 -->
 
 ## 和之前工作的关系
 这篇在知识结构里是 Llama 3 Day 7 的同级对标（pretrain/scaling 线），不是延续。

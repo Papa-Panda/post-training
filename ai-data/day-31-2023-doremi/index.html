@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day 31 — DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining</title>
+<title>DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,51 +102,84 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 31</span>
-    <h1>Day 31 — DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining</h1>
+    <h1>DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">问答补充（2026-09-08）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul><li>Title: DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining</li><li>Authors / Org: Sang Michael Xie et al. / Google DeepMind &amp; Stanford University</li><li>Link / arXiv: https://arxiv.org/abs/2305.10429</li><li>Date read: 2026-08-31</li><div class="meta"><span class="tag">pretraining</span><span class="tag">data-mixture</span><span class="tag">domain-reweighting</span><span class="tag">curation</span><span class="tag">quality</span><span class="tag">proxy-model</span></div></ul>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-31-2023-doremi/index.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining</dd><dt>Authors / Org</dt><dd>Sang Michael Xie et al. / Google DeepMind &amp; Stanford University</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2305.10429">https://arxiv.org/abs/2305.10429</a></dd><dt>Date read</dt><dd>2026-08-31</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">pretraining</span><span class="tag">data-mixture</span><span class="tag">domain-reweighting</span><span class="tag">curation</span><span class="tag">quality</span><span class="tag">proxy-model</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>DoReMi 用 280M reference/proxy model 的跨域 excess loss 自动学出预训练数据的 domain mixture，再按该配比重采样给 8B 模型训练：在 The Pile 上平均 few-shot 准确率高 6.5 个百分点，并用 2.6× 更少训练步数达到 baseline 水平。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">280M</div><div class="l">小模型定配比</div></div><div class="stat"><div class="v">6.5</div><div class="l">百分点 准确率提升</div></div><div class="stat"><div class="v">2.6×</div><div class="l">步数节省</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">划分domain</div><div class="farrow">→</div><div class="fnode">训reference</div><div class="farrow">→</div><div class="fnode">算excess loss</div><div class="farrow">→</div><div class="fnode">重采样</div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>DoReMi配比</h4><ul><li>自动学</li><li>省2.6倍步数</li></ul></div><div class="vscol vs-b"><h4>reference配比</h4><ul><li>baseline</li></ul></div></div>
+
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
-<ul><li><strong>知识图谱位置</strong>：这是预训练数据线新增的“配比层”。Day 24 D4 决定域内哪些文档该去重/保留，Day 25 FineWeb 决定网页数据如何过滤，Day 31 DoReMi 决定清洗后的 Wikipedia、GitHub、books、web 等数据域各占多少。</li><li><strong>接了哪条线</strong>：接 Day 07 Llama 3、Day 08 DeepSeek-V3、Day 09 Qwen2.5 中“多域预训练 mixture”这条线，把大模型报告里的经验配比改造成可由小模型学习的数据配方。</li><li><strong>补了哪个短板</strong>：此前路线覆盖了样本级质量、去重、多样性和 selection，却缺少 domain-level allocation；即使每个域都很干净，错误配比仍会浪费 token budget 或压低长尾域表现。</li><li><strong>替代 / 分叉 / 改进</strong>：它不替代 Day 25 的过滤，也不替代 Day 04 LESS 的目标任务样本选择；它位于两者之间，是“先把数据分域，再决定各域采样概率”的宏观重加权层。</li><li><strong>直接对比 Day 04 / Day 25</strong>：Day 04 LESS 用目标任务梯度在样本级选少量 SFT 数据，Day 25 FineWeb 用规则、去重和消融造干净网页池；DoReMi 不依赖下游任务标签，用小代理模型的跨域 excess loss 给整个预训练池配比。</li></ul>
+<ul>
+<li><strong>知识图谱位置</strong>：这是预训练数据线新增的“配比层”。Day 24 D4 决定域内哪些文档该去重/保留，Day 25 FineWeb 决定网页数据如何过滤，Day 31 DoReMi 决定清洗后的 Wikipedia、GitHub、books、web 等数据域各占多少。</li>
+<li><strong>接了哪条线</strong>：接 Day 07 Llama 3、Day 08 DeepSeek-V3、Day 09 Qwen2.5 中“多域预训练 mixture”这条线，把大模型报告里的经验配比改造成可由小模型学习的数据配方。</li>
+<li><strong>补了哪个短板</strong>：此前路线覆盖了样本级质量、去重、多样性和 selection，却缺少 domain-level allocation；即使每个域都很干净，错误配比仍会浪费 token budget 或压低长尾域表现。</li>
+<li><strong>替代 / 分叉 / 改进</strong>：它不替代 Day 25 的过滤，也不替代 Day 04 LESS 的目标任务样本选择；它位于两者之间，是“先把数据分域，再决定各域采样概率”的宏观重加权层。</li>
+<li><strong>直接对比 Day 04 / Day 25</strong>：Day 04 LESS 用目标任务梯度在样本级选少量 SFT 数据，Day 25 FineWeb 用规则、去重和消融造干净网页池；DoReMi 不依赖下游任务标签，用小代理模型的跨域 excess loss 给整个预训练池配比。</li>
+</ul>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
 <p>30 天主干已经闭环了“数据从哪里来、怎么合成、过滤、去重、选择、验证和防漏”，但还少一个关键旋钮：不同来源各喂多少。对 coding data，可以把 GitHub、StackExchange、技术文档、合成题、执行轨迹等看成不同 domain，用小模型先估计 learnable headroom，再决定 SFT / continued-pretrain 数据预算；这里只研究 domain 定义、配比估计与重采样，不展开优化器或训练算法。</p>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
-<ol><li>DoReMi 为什么用 proxy 相对 reference 的 non-negative excess loss，而不是直接用高 loss 给 domain 加权；它如何避免把纯噪声或天然高熵域误当成高价值数据？</li><li>对 coding data，domain 应按来源（GitHub/文档/问答）、语言、难度还是可执行性切分；怎样保留 provenance，才能让学到的 mixture 可审计、可重采样？</li><li>对比 Day 04 LESS 与 Day 25 FineWeb：什么时候应做样本级 target-aware selection，什么时候应做规则过滤，什么时候应做 DoReMi 式 domain-level allocation；三层怎样串成一条数据管线？</li></ol>
+<ol>
+<li>DoReMi 为什么用 proxy 相对 reference 的 non-negative excess loss，而不是直接用高 loss 给 domain 加权；它如何避免把纯噪声或天然高熵域误当成高价值数据？</li>
+<li>对 coding data，domain 应按来源（GitHub/文档/问答）、语言、难度还是可执行性切分；怎样保留 provenance，才能让学到的 mixture 可审计、可重采样？</li>
+<li>对比 Day 04 LESS 与 Day 25 FineWeb：什么时候应做样本级 target-aware selection，什么时候应做规则过滤，什么时候应做 DoReMi 式 domain-level allocation；三层怎样串成一条数据管线？</li>
+</ol>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
-<ol><li><strong>Motivation</strong>: 预训练各数据域的采样比例显著影响效果，但常靠 token 量或人工经验设置；需要一个不依赖下游任务、可由小模型估计并迁移到大模型的数据配方。</li><li><strong>Data Pipeline</strong>: 将语料划分为多个 domain → 按 reference mixture 训练小 reference model → 用同规模 proxy model 估计各域相对 reference 的 excess loss → 对 domain 权重做平滑并沿训练轨迹求平均 → 按新权重重采样语料 → 训练 full-size model。</li><li><strong>Key Tricks</strong>: 用 excess loss 近似“可学习余量”而非原始 loss；把负 excess loss 截为 0，降低噪声/极易域误导；保留小的 uniform smoothing 权重，避免 domain 被彻底饿死；用时间平均权重提高稳定性。</li><li><strong>Results</strong>: 论文用 280M reference/proxy 为 8B 主模型定配比；在 The Pile 上平均 few-shot 准确率提升 6.5 个百分点，并以 2.6× 更少训练步数达到 baseline 准确率，且各域 perplexity 都改善。待读后核对各域权重、消融与跨规模稳定性。</li></ol>
+<ol>
+<li><strong>Motivation</strong>: 预训练各数据域的采样比例显著影响效果，但常靠 token 量或人工经验设置；需要一个不依赖下游任务、可由小模型估计并迁移到大模型的数据配方。</li>
+<li><strong>Data Pipeline</strong>: 将语料划分为多个 domain → 按 reference mixture 训练小 reference model → 用同规模 proxy model 估计各域相对 reference 的 excess loss → 对 domain 权重做平滑并沿训练轨迹求平均 → 按新权重重采样语料 → 训练 full-size model。</li>
+<li><strong>Key Tricks</strong>: 用 excess loss 近似“可学习余量”而非原始 loss；把负 excess loss 截为 0，降低噪声/极易域误导；保留小的 uniform smoothing 权重，避免 domain 被彻底饿死；用时间平均权重提高稳定性。</li>
+<li><strong>Results</strong>: 论文用 280M reference/proxy 为 8B 主模型定配比；在 The Pile 上平均 few-shot 准确率提升 6.5 个百分点，并以 2.6× 更少训练步数达到 baseline 准确率，且各域 perplexity 都改善。待读后核对各域权重、消融与跨规模稳定性。</li>
+</ol>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
-<ul><li>对 coding data 工作：先定义稳定、互斥且有 provenance 的 source × language × verifiability domains；对每个域记录 token 量、excess loss、最终采样权重和下游增益，形成可版本化 mixture recipe。</li><li>Infra 视角：用小 proxy 周期性重估 mixture，materialize 可复现的 weighted sampler；监控 domain starvation、重复采样、有效 token 利用率和跨规模 transfer drift。</li></ul>
+<ul>
+<li>对 coding data 工作：先定义稳定、互斥且有 provenance 的 source × language × verifiability domains；对每个域记录 token 量、excess loss、最终采样权重和下游增益，形成可版本化 mixture recipe。</li>
+<li>Infra 视角：用小 proxy 周期性重估 mixture，materialize 可复现的 weighted sampler；监控 domain starvation、重复采样、有效 token 利用率和跨规模 transfer drift。</li>
+</ul>
 </section>
 <section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
-<ul><li>当 coding domains 重叠且层级化（同一条样本同时属于 Python、GitHub、可执行、repo-level）时，怎样设计 domain taxonomy，才能避免权重不可辨识并保持 mixture 的工程可解释性？</li></ul>
+<ul>
+<li>当 coding domains 重叠且层级化（同一条样本同时属于 Python、GitHub、可执行、repo-level）时，怎样设计 domain taxonomy，才能避免权重不可辨识并保持 mixture 的工程可解释性？</li>
+</ul>
 </section>
 <section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
-<blockquote><p>待读后补充。</p></blockquote>
+<blockquote class="pq">
+<p>待读后补充。</p>
+</blockquote>
 </section>
 <section class="sec" id="sec-10"><h2><span class="n">10</span>问答补充（2026-09-08）</h2>
-<blockquote><p>来自 <code>ai data</code> side chat 用户主动问答（2026-09-08 09:46 PDT），归档时精简整理；答案保留原符号定义与结论。</p></blockquote>
+<blockquote class="pq">
+<p>来自 <code>ai data</code> side chat 用户主动问答（2026-09-08 09:46 PDT），归档时精简整理；答案保留原符号定义与结论。</p>
+</blockquote>
 <p><strong>问题（用户）</strong>：a) 过滤和配比谁的边际贡献更大？DoReMi 是先切开学权重的，所以猜配比影响更大？ b) "先过滤再配比"是合理的工程决策吗？毕竟过滤的效果可以单独测出来。</p>
 <p><strong>核心答案</strong>：</p>
 <p>(a) "谁更大"有个更锋利的切法。先定义：域划分 $D = \{d_1, \dots, d_K\}$ ，域内分布 $P(x|d)$ ，域间权重 $w_d = P(d)$ 。<strong>过滤是域内操作</strong>（改 $P(x|d)$ ，把域内的烂样本拿掉），<strong>配比是域间操作</strong>（改 $w_d$ ，域之间怎么分 token）——配比永远修不好域内的噪声，过滤也永远修不好域间失衡。谁的边际贡献大，取决于池子里哪个是 binding constraint。对合成题池（典型问题是域内噪声而非某域 token 太多），押过滤的边际更大。2×2 预测：(开，DoReMi) ≥ (开，均匀) &gt; (关，DoReMi) &gt; (关，均匀)；关键的一对是中间两个——(开，均匀) vs (关，DoReMi)，这是"样本级过滤"和"域级重加权"作为<strong>去噪替代品</strong>的正面对决。</p>
 <p>但这个 2×2 设计本身有个漏洞：<strong>DoReMi 会吃掉过滤的功劳</strong>。DoReMi 的 excess loss 是 $e_d = \ell(\mathrm{proxy 在\ } d) - \ell(\mathrm{专训\ } d \mathrm{的\ ref\ 在\ } d)$ ；烂域里连 ref 都学不好， $e_d$ 小，权重自然被压低——所以 (关，DoReMi) 这一格里，"配比"的贡献已经包含了一部分去噪，测出来的"配比边际"会被系统性高估。修正办法：DoReMi 的 domain 必须切得和过滤正交（按来源×可执行性切，而不是按"质量"切），或者把总增益拆成：过滤主效应 + 配比主效应 + 交互项。交互项为负（替代关系）时，"谁更大"本身就是顺序依赖的伪问题。</p>
 <p>(b) "先过滤"的工程直觉是对的，而且可以比"能单独测出来"说得更硬：① 噪声污染一切下游估计——DoReMi 的 proxy 在池子上训出来，池子越脏，excess loss 估计越不准，学出的权重越不可信，先过滤 = 先给估计器降噪；② 成本不对称——过滤大多局部、便宜、可并行（dedup、heuristic），配比学习全局、贵（要训 proxy），便宜的先做；③ 可单独测量。但 caveat：<strong>过滤不是配比中性的</strong>——line-dedup 会系统性砍掉 code 域的高频样板（license、import），过滤完 $P(d)$ 已经变了，code 域可能凭空缩水。正确流程不是"过滤→配比→收工"，而是：过滤 → 重测域直方图 → 在过滤后的池子上学权重 →（可选）再一轮轻过滤；一轮就够，因为过滤对 excess loss 的影响是二阶的。</p>
 <p><strong>修正说明（2026-09-08，同轮对话内）</strong>：昨日思考题题干中"过滤后该域 excess loss 下降、权重被系统性低估"的断言过强，现收回一半——过滤后 proxy 和 ref 的 loss 都下降，gap 的符号不确定；"过滤与配比不交换"成立，但偏差方向不定。原文其余部分不做改动。</p>
-<p><strong>关联</strong>：Day 31 DoReMi（domain-level allocation）。 <strong>图谱关系</strong>：接 Day 24 D4（域内去重）、Day 25 FineWeb（网页过滤）、Day 04 LESS（样本级目标感知选择）——DoReMi 位于"过滤"和"选择"之间的配比层；与 Day 07 / Day 08 / Day 09 报告中的经验配比是一脉，"把人工经验配比改造成可由小模型学习的数据配方"。</p>
-</section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-31-2023-doremi/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2305.10429">论文原文</a></div>
+<p><strong>关联</strong>：Day 31 DoReMi（domain-level allocation）。
+<strong>图谱关系</strong>：接 Day 24 D4（域内去重）、Day 25 FineWeb（网页过滤）、Day 04 LESS（样本级目标感知选择）——DoReMi 位于"过滤"和"选择"之间的配比层；与 Day 07 / Day 08 / Day 09 报告中的经验配比是一脉，"把人工经验配比改造成可由小模型学习的数据配方"。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-31-2023-doremi/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {

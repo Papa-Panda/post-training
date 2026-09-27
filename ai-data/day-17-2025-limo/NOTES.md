@@ -1,5 +1,7 @@
 # Paper 模板 - Day 17
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-17-2025-limo/index.html
+
 > 复用 PAPER_TEMPLATE.md 骨架，自动生成
 
 ## 元信息
@@ -11,6 +13,12 @@
 
 ## 一句话总结
 用仅 817 条精挑的复杂推理样本 SFT，Qwen2-32B-Instruct 在 AIME 57.1%→63.3% (v3) 和 MATH 94.8%→95.6%，打赢 10 万+样本训的模型，提出 LIMO 假说：预训练已编码知识时，极少但精的“认知模板”即可唤醒复杂推理，挑战 SFT=记忆的常识。
+
+
+<!-- viz:stats: 817条 精选 | 0.8% 入选率 | 63.3% AIME -->
+<!-- viz:flow: 难度筛 → 模板完整性 → 817精挑 → SFT唤醒 -->
+<!-- viz:bars: LIMO 63.3% | Qwen2基线 6.5% -->
+<!-- viz:vs: 认知模板 | 817条唤醒推理 || 10万+样本训 | 被打赢 -->
 
 ## 和之前工作的关系
 

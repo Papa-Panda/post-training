@@ -1,5 +1,7 @@
 # Paper 模板
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-11-2025-limr/index.html
+
 ## 元信息
 - Title: LIMR: Less is More for RL Scaling
 - Authors / Org: Xuefeng Li, Haoyang Zou, Pengfei Liu - SJTU, SII, GAIR
@@ -9,6 +11,11 @@
 
 ## 一句话总结
 RL 阶段不用堆 8k 题，用 Learning Impact Measurement 按学习轨迹挑 1,389 题硬题，7B RL 效果反超全量，证明 RL 里少即是多就是影响力对齐。
+
+
+<!-- viz:stats: 1,389 硬题 | 8,523 全量题 | 16.7% AIME24提升 -->
+<!-- viz:flow: 全量轨迹 → LIM打分 → 挑1389 → RL对比 -->
+<!-- viz:vs: LIM轨迹对齐选 | 按贡献选; 1389胜8523 || 主观难度选 | 不准 -->
 
 ## 核心
 1.  **Motivation**: o1, R1 都说 RL 能提推理，但数据要多少说不清。SFT 少量好用的 LIMO/s1 在 7B 上拉胯，说明 SFT 的少即是多不能直接搬到 RL。

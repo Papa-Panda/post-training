@@ -1,3 +1,5 @@
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-06-2023-phi-1/index.html
+
 ## 元信息
 - Title: Textbooks Are All You Need (Phi-1)
 - Authors / Org: Suriya Gunasekar et al. / Microsoft Research
@@ -8,6 +10,11 @@
 
 ## 一句话总结
 不用堆 100B web code，用 GPT-3.5 合成“教科书质量”的 6B 精筛 web + 1B 合成练习，1.3B 模型训 4 天就 50.6% HumanEval，证明高质量合成数据 >> 大量低质数据。
+
+
+<!-- viz:stats: 1.3B 参数 | 6B 精筛web | 1B 合成练习 | 50.6% HumanEval -->
+<!-- viz:bars: Phi-1 50.6% | Phi-1-small 45% -->
+<!-- viz:vs: 教科书合成数据 | 1B合成+6B精筛; 质量大于数量 || Web原生code训 | 7B-15B; 效果反输 -->
 
 ## 核心
 1.  **Motivation**: scaling law 让人以为堆数据就好，但 web code 又臭又长又重复。能不能像教课本一样，把知识蒸馏成干净、渐进、带解释的教材，让小模型也学会？

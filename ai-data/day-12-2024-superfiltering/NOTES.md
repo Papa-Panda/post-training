@@ -1,5 +1,7 @@
 # Paper 模板
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-12-2024-superfiltering/index.html
+
 ## 元信息
 - Title: Superfiltering: Weak-to-Strong Data Filtering for Fast Instruction-Tuning
 - Authors / Org: Ming Li, Yong Zhang, Shwai He, Zhitao Li, Hongyu Zhao, et al. - UMD / Ping An
@@ -9,6 +11,10 @@
 
 ## 一句话总结
 不用大模型当过滤器，用小 125M 的 GPT-2 算 IFD 难度分去筛指令，能筛出给 7B 训后效果反而更好的数据，证明选数据的能力在小模型上就有了。
+
+
+<!-- viz:stats: 125M GPT-2过滤器 | 7B 目标模型 -->
+<!-- viz:vs: 小模型IFD筛 | 125M GPT-2; 效果反好 || 大模型过滤器 | 贵; 非必需 -->
 
 ## 核心
 1.  **Motivation**: 指令微调数据又烂又冗余，用 GPT-4 去筛太贵，SFT 全量训又浪费

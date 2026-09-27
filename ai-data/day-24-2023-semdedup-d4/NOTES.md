@@ -1,5 +1,7 @@
 # Paper 模板 - Day 24
 
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-24-2023-semdedup-d4/index.html
+
 > 自动生成骨架 2026-08-24，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。
 
 ## 元信息
@@ -13,6 +15,10 @@
 
 ## 一句话总结
 D4 把语义近重复去除（SemDeDup）与表示空间中的原型式多样化剪枝串成预训练数据管线，在压缩冗余语料的同时保留更广覆盖，补上 Day19 Vendi Score“会量多样性但还不会规模化选数”的工程短板。
+
+
+<!-- viz:flow: 语义去重 → 原型剪枝 → 预训练 -->
+<!-- viz:vs: D4工程化 | 规模化选数 || Vendi Score | 只会量多样性 -->
 
 ## 和之前工作的关系
 

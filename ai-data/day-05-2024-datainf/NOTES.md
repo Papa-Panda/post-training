@@ -1,3 +1,5 @@
+> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-05-2024-datainf/index.html
+
 ## 元信息
 - Title: DataInf: Efficiently Estimating Data Influence in LoRA-tuned LLMs and Diffusion Models
 - Authors / Org: Yongchan Kwon, Eric Wu, Kevin Wu, James Zou / Columbia & Stanford
@@ -8,6 +10,11 @@
 
 ## 一句话总结
 把 Influence Functions 中 $H^{-1}$ 的迭代求解，改成 LoRA 参数上的闭式近似 $(1/n \sum g_i g_i^T + \lambda I)^{-1}$ ，比 LiSSA/CG 快 1000倍，1秒算一条 influence，专门为 LLM LoRA 微调设计，可直接用于扫脏数据/高影响样本挖掘。
+
+
+<!-- viz:stats: 1000倍 提速 | 1秒 单条计算 | 10% 近似误差内 -->
+<!-- viz:flow: LoRA梯度 → 闭式近似 → 影响分数 → 扫脏挖掘 -->
+<!-- viz:vs: DataInf闭式 | 快1000倍; 误差10%内 || LiSSA/CG迭代 | 慢2-3量级; 真值基准 -->
 
 ## 核心
 1.  **Motivation**: Influence 很好但算不动，LLM 上算 $H^{-1}v$ 要 LiSSA 迭代几百次，每次全量 HVP。大模型 + LoRA 场景急需快版。DataInf 盯的就是 LoRA 微调这个常见设定。
