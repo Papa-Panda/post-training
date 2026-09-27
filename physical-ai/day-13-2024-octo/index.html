@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 13 — Octo：开放通用机器人策略与可插拔 diffusion readout</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 13</span>
+    <h1>Day 13 — Octo：开放通用机器人策略与可插拔 diffusion readout</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：POMDP 上的多域条件行为克隆</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a><a href="#sec-14">问答补充（2026-09-07）</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: Octo: An Open-Source Generalist Robot Policy</li>
+<li>Authors / Org: Octo Model Team / UC Berkeley, Stanford University, Carnegie Mellon University, Google DeepMind（RSS 2024）</li>
+<li>Link / arXiv / Blog: https://arxiv.org/abs/2405.12213 / https://octo-models.github.io/</li>
+<li>Official code: https://github.com/octo-models/octo</li>
+<li>Date read: 2026-09-03</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">generalist-robot-policy</span><span class="tag">open-x-embodiment</span><span class="tag">transformer</span><span class="tag">diffusion-policy</span><span class="tag">action-chunking</span><span class="tag">cross-embodiment</span><span class="tag">finetuning</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-13-2024-octo</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-13-2024-octo</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Octo 把 25 个 Open X-Embodiment 数据集中的约 80 万条轨迹统一成“任务/观测 token → block-masked Transformer → diffusion action chunk”的开放通用策略；它真正有价值的不是零样本万能，而是能在约 100 条目标域示范、单张消费级 GPU 数小时内，适配新传感器、新动作空间和新机器人。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线：</strong> Day09 的 RT-2 / OpenVLA 建立 VLA 总览，Day11 的 π₀ 用 flow matching 生成高频 action chunk，Day12 解释了 Diffusion Policy 的条件动作扩散与 receding horizon；Day13 把 Day12 的 diffusion readout 放进跨数据集、跨 embodiment 的通用 Transformer policy。</li>
+<li><strong>补了哪个短板：</strong> Day12 主要证明单任务/单平台 visuomotor diffusion 的控制收益；Octo 进一步解决输入模态、相机数量、任务条件和 action space 不同导致的接口碎片化，并把“可微调”本身当作架构目标。</li>
+<li><strong>替代 / 分叉 / 改进：</strong> 相比 Day09 的 action-token VLA，Octo 不把连续动作量化成 token，而保留连续 diffusion head；相比 Day11 的 π₀，Octo 规模更小、语义推理较弱，但代码、checkpoint、数据管线完整开放，且新 observation/action adapter 的边界更清楚。</li>
+<li><strong>对之前 Day X 的直接对比：</strong> Day12 的核心是 $p(A_t\mid O_t)$ 的多峰建模；Octo 学的是 $p(A_t\mid O_{t-H_o+1:t},c,d)$ ，其中 $c$ 是语言或目标图像， $d$ 是隐含在数据集/机器人分布中的 embodiment 与采集域。它没有显式输入完整动力学参数，所谓 cross-embodiment transfer 仍主要来自数据覆盖和 finetuning，而不是一个严格的 embodiment-invariant controller。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>Day11–14 是 VLA 专题扩展。Octo 是把三个此前分开的部件接成可复现系统的关键节点：Open X-Embodiment 的多源数据、可扩展 Transformer 表征、Diffusion Policy 的连续多峰动作输出。它也直接暴露通用机器人策略的工程真相：输入/输出 schema、mask、数据 mixture、shuffle、action normalization、控制频率和 finetuning contract，往往比“模型更大”更决定能否迁移。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li>当 25 个数据集的机器人、相机、语言标注和控制接口不一致时，Octo 如何用 token/mask/readout 结构保留共享表征，同时允许下游替换传感器或 action head？</li>
+<li>为什么 diffusion action head 在 WidowX 消融中达到 83%，显著高于 MSE 的 35% 和离散动作交叉熵的 18%；这个收益来自多峰分布、连续精度，还是 action chunk 的时间一致性？</li>
+<li>约 80 万条轨迹能带来哪些真正的 zero-shot generalization，哪些能力仍必须靠约 100 条目标域示范微调；怎样用部署 gate 区分“新物体”“新场景”“新技能”和“新 embodiment”？</li>
+</ol>
+</section>
+<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角：POMDP 上的多域条件行为克隆</h2>
+<h3>1) State / observation / action / objective</h3>
+<p>把第 $d$ 个机器人数据域写成部分可观测动力系统：</p>
+<p>$$x_{t+1}=f_d(x_t,a_t,w_t),\qquad o_t=h_d(x_t,v_t),\qquad c\in\{\ell,g\}.$$</p>
+<ul>
+<li>$d\in\{1,\ldots,25\}$ ：预训练数据集/机器人域；不同 $d$ 对应不同动力学 $f_d$ 、相机 $h_d$ 、控制频率和动作标度。</li>
+<li>$x_t\in\mathbb R^{d_x(d)}$ ：真实但未完全观测的机器人、物体与接触状态；维度随 embodiment 改变。</li>
+<li>$o_t$ ：观测字典，通常含第三人称 RGB、可选腕部 RGB、可选 proprioception。Octo 预训练使用两帧历史 $H_o=2$ 。</li>
+<li>$c$ ：任务条件； $\ell$ 是语言指令， $g$ 是未来目标图像。没有语言标注的数据可用 hindsight goal relabeling 构造 $g$ 。</li>
+<li>$a_t\in\mathbb R^{d_a(d)}$ ：连续控制。预训练数据筛到 delta end-effector control 并对齐夹爪语义；发布配置的共享 action 维度为 7，常见解释为 3 维位置增量、3 维旋转增量和 1 维夹爪命令。下游可把 $d_a$ 换成关节位置或双臂 14 维动作。</li>
+<li>$w_t,v_t$ ：未建模动力学扰动与传感噪声。</li>
+</ul>
+<p>策略不是学习显式 $f_d$ ，而是在示范混合分布上做条件行为克隆：</p>
+<p>$$\pi_\theta(A_t\mid O_t,c),\qquad O_t=o_{t-H_o+1:t},\qquad A_t=[a_t,\ldots,a_{t+H_a-1}]\in\mathbb R^{H_a\times d_a}.$$</p>
+<p>Octo checkpoint 使用 $H_a=4$ 的 action chunk。部署可执行整段，也可只执行前 $H_e\le H_a$ 步后重新观测； $H_e=1$ 就是最强反馈的 receding-horizon control。真实控制频率因平台而异：论文中的 finetuning 系统约 5–15 Hz，接触丰富任务还由 1 kHz 低层 impedance controller 跟踪高层命令。</p>
+<h3>2) Token interface：把异构输入变成统一序列</h3>
+<p>模态 tokenizer 将输入映射到共同 embedding 维度 $D$ ：</p>
+<p>$$\mathcal T_\ell=E_\ell(\ell),\qquad \mathcal T_g=E_I(g),\qquad \mathcal T_{o,t}=E_O(o_t),$$</p>
+<p>$$E=T_\theta([\mathcal T_c,\mathcal T_{o,t-H_o+1},\ldots,\mathcal T_{o,t},\mathcal T_{R,t}];M)\in\mathbb R^{B\times L\times D}.$$</p>
+<ul>
+<li>$B$ 是 batch size，预训练为 2048； $L$ 是所有 task/observation/readout token 数，随相机和 mask 改变。</li>
+<li>$D=384$ （Octo-Small，27M 参数）或 \$768\$（Octo-Base，93M 参数），两者都是 12 层 Transformer。</li>
+<li>第三人称图像缩放为 $256\times256$ ，经 $16\times16$ patch 得到 256 个 image tokens；腕部图像为 $128\times128$ ，得到 64 个 tokens；T5-base 产生 16 个 language tokens。</li>
+<li>$M$ 是 block-wise attention mask：观测 token 只看任务条件和当前/过去时间步；缺失语言、腕部相机等模态被 mask；readout token $\mathcal T_{R,t}$ 可以读取上下文，却不反向污染输入 token。</li>
+</ul>
+<p>系统含义是：新相机只需加 tokenizer/position embedding，新动作空间只需加 readout head；主体 Transformer 可继承预训练权重。这里的“通用”首先是接口组合性，不等于任意新形态都可零样本工作。</p>
+<h3>3) Diffusion action objective</h3>
+<p>令干净动作块为 $A_t^0\in\mathbb R^{B\times H_a\times d_a}$ ，噪声步 $k\in\{1,\ldots,K\}$ ， $K=20$ 。前向加噪：</p>
+<p>$$A_t^k=\sqrt{\bar\alpha_k}A_t^0+\sqrt{1-\bar\alpha_k}\,\epsilon,\qquad \epsilon\sim\mathcal N(0,I).$$</p>
+<p>Transformer 的 readout embedding $e_t\in\mathbb R^{B\times D}$ 作为条件，三层、hidden size 256 的 MLP diffusion head 预测噪声：</p>
+<p>$$\mathcal L_{\text{Octo}}(\theta)=\mathbb E_{d\sim q,\,(O_t,c,A_t^0)\sim\mathcal D_d,\,k,\epsilon}\left[\left\|\epsilon-\epsilon_\theta(A_t^k,e_t,k)\right\|_2^2\right].$$</p>
+<ul>
+<li>$q(d)$ 是人工调过权重的 25 数据集 mixture；更丰富的数据集加权，过度重复的数据集降权。</li>
+<li>$\epsilon_\theta$ 的输出与 $A_t^k$ 同形状，为 $B\times H_a\times d_a$ 。</li>
+<li>训练用 cosine noise schedule。微调时仍用同一 objective，并更新全模型；论文报告 full finetuning 优于只冻结/更新部分参数。</li>
+</ul>
+<p>推理先对视觉/语言上下文跑一次大 Transformer，再只在小 action head 内做 20 步去噪：</p>
+<p>$$A_t^{k-1}=\alpha_k\left(A_t^k-\gamma_k\epsilon_\theta(A_t^k,e_t,k)+\eta_k\right),\qquad \eta_k\sim\mathcal N(0,\sigma_k^2I).$$</p>
+<p>这继承 Day12 的关键计算分解：昂贵的 context encoding 每个控制周期只做一次，多步采样留在小 head；否则 20 次完整 Transformer forward 很难满足机器人闭环时延。</p>
+<h3>4) 多域训练与迁移的统一视角</h3>
+<p>预训练优化的是 mixture risk：</p>
+<p>$$\min_\theta\;\sum_{d=1}^{25}q_d\,\mathbb E_{\tau\sim\mathcal D_d}\left[\mathcal L_{\text{Octo}}(\theta;\tau,d)\right].$$</p>
+<p>下游域 $d^\star$ 只有约 100 条示范时，从 $\theta_{\text{pre}}$ 初始化并继续优化：</p>
+<p>$$\theta^\star=\arg\min_\theta\;\mathbb E_{\tau\sim\mathcal D_{d^\star}}[\mathcal L_{\text{Octo}}(\theta)],\qquad \theta\leftarrow\theta_{\text{pre}}.$$</p>
+<p>迁移收益可理解为：backbone 已学到视觉-任务-动作的共享低维结构，下游只需校准新传感器、动作坐标与局部任务分布。但若 $f_{d^\star}$ 、技能支持集或 observation semantics 超出预训练覆盖，低 loss 并不保证闭环成功。</p>
+<h3>5) 假设与数学没有覆盖的真实误差</h3>
+<p>上面的 POMDP/BC 模型隐含假设：不同数据集的时间同步可靠，动作单位/坐标系可对齐，成功示范覆盖部署状态，语言或目标图像足以消除任务歧义。它没有显式建模 camera calibration drift、控制频率不一致、动作延迟、backlash、接触冲击、夹爪力、object mass/friction、operator style、失败恢复和安全约束。</p>
+<p>论文的实证也暴露这些边界：只有 27% 预训练数据含 wrist camera，56% 含语言标注；新场景成功率下降，新技能更差。模型在 imitation objective 下只学“数据里接下来怎么动”，没有 reward、动力学可达性或 constraint satisfaction 保证。部署仍需要 schema validator、时间戳/坐标系检查、低层反馈控制、限位/限力、collision shield、OOD gate 和分桶闭环评测。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<ol>
+<li><strong>Motivation：通用策略的瓶颈不只是规模，而是 I/O contract</strong></li>
+<li>机器人数据横跨相机布局、任务定义、action space 和 embodiment；固定输入顺序或固定输出头会让预训练权重难以复用。</li>
+<li>Octo 用 modality tokenizer + block-wise mask + readout token 解耦输入、backbone 与输出，使下游新增传感器或动作头时不必重置大部分模型。</li>
+<li>
+<p>目标是“可适配的开放初始化”，而不是声称一个模型零样本解决所有机器人任务。</p>
+</li>
+<li>
+<p><strong>System / Method：Transformer-first backbone + modular diffusion head</strong></p>
+</li>
+<li>语言用 frozen T5-base，图像用浅层卷积 stem + patch tokens；绝大多数参数/FLOPs 放进 Transformer，而不是大 ResNet encoder。</li>
+<li>readout token 汇总任务和历史观测，再由小 diffusion MLP 联合生成连续 action chunk；缺失模态通过 mask/zero padding 处理。</li>
+<li>
+<p>Transformer 每次动作预测只 forward 一次，20 步去噪都在轻量 head 内完成；这是把生成模型塞进控制 loop 的关键系统设计。</p>
+</li>
+<li>
+<p><strong>Training / Data Details：80 万轨迹的 mixture 工程决定可迁移性</strong></p>
+</li>
+<li>从 Open X-Embodiment 约 150 万 episodes 中筛出 25 个含图像、delta end-effector action 且行为多样的数据集，共约 80 万轨迹；RT-X 对照使用约 35 万。</li>
+<li>更丰富的数据集加倍权重，重复性高的数据集降权；统一夹爪语义（+1 open，0 closed），缺失相机通道 zero-pad。</li>
+<li>随机丢弃 language 或 goal-image 条件，使同一模型支持两种 task specification；无语言数据用 future-state goal image。</li>
+<li>
+<p>Octo-Base 以 batch 2048、TPUv4-128、300k steps 训练约 14 小时；目标域微调约 100 条轨迹、50k steps，单张 24GB A5000 约 5 小时。</p>
+</li>
+<li>
+<p><strong>Key Tricks：最值得抄的细节</strong></p>
+</li>
+<li><strong>Trick 1 — passive readout token：</strong> 输出 token 读取上下文但不被输入 token 反向注意，新增 action head 时可保持 pretrained representation 的结构稳定。</li>
+<li><strong>Trick 2 — 先打通 schema，再谈 scale：</strong> camera mask、gripper convention、delta action、goal relabeling 和 dataset mixture 都是模型 contract；任何一项漂移都可能让“跨 embodiment”退化成数据混乱。</li>
+<li><strong>Trick 3 — 4-step chunk + receding horizon：</strong> 联合预测多步提高动作连贯性，部署端可选择执行 1–4 步来交换反馈带宽与推理成本；论文未发现 temporal ensembling 比 receding horizon 更有额外收益。</li>
+<li><strong>Trick 4 — 大 shuffle buffer：</strong> 将不同轨迹的 frame 在解码前交错，shuffle buffer 从 20k 扩到 500k，并限制每条长轨迹最多抽 100 steps，避免 batch 被少数 trajectory 挤占。</li>
+<li>
+<p><strong>Trick 5 — full finetuning：</strong> 新 observation/action space 下，全模型继续训练优于只调 head；模块化接口降低改造成本，但 representation 仍需随目标域校准。</p>
+</li>
+<li>
+<p><strong>Results：强迁移，但不是无限泛化</strong></p>
+</li>
+<li>9 个机器人平台、4 家机构；in-distribution zero-shot 中，Octo 平均成功率比开放的 RT-1-X 高 29%，在部分 WidowX/RT-1 robot 任务上与 55B RT-2-X 相近。</li>
+<li>六个约 100-demo 的目标域微调设置平均成功率 72%，显著高于 scratch 20% 和 VC-1 15%；论文表述为比次优 baseline 平均高 52 个百分点。</li>
+<li>WidowX 消融：完整 Octo-Small 83%，缩窄 RT-X mixture 60%，只用单机器人 Bridge Data 43%；diffusion head 83%，MSE 35%，离散动作 18%。</li>
+<li>真正的零样本边界清楚：in-distribution 85%，novel objects 80%，novel environment 40%，novel skill 5%。它更像强 initialization，而不是已有新技能组合器。</li>
+<li>数据缺口直接映射成模型缺口：wrist camera 只占 27%、language annotation 只占 56%，相应模态表现也不稳定。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<ul>
+<li><strong>方法在 held-out 上是否 transfer？模型 vs 框架哪个贡献更大？</strong> 新物体 transfer 较强，新场景下降，新技能几乎失败；约 100 条目标域示范后的迁移则很强。消融显示数据 breadth、diffusion objective 和 Transformer-first 架构都贡献明显，不能把收益只归因于参数量。</li>
+<li><strong>对你 Infra → Post-training → Physical AI 迁移的直接启发：</strong></li>
+<li>通用机器人 post-training 的核心对象应是带 schema 的 trajectory mixture，不只是 token 数：每条数据要携带 embodiment、camera set、action frame/unit、control rate、success/failure 和 mask。</li>
+<li>rollout/eval infra 要把 adapter correctness 与 policy quality 分开诊断；先验证 shape、timestamp、坐标系和 action saturation，再看 task success，否则模型问题和接口问题会混在一起。</li>
+<li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong> 训练需要多数据集并行读取、解码前 shuffle、每域采样权重和缺失模态 mask；部署要记录 <code>observation age → transformer latency → 20-step head latency → action queue → controller tracking error</code>。建议评测矩阵按新物体/新场景/新技能/新 embodiment 分桶，并把 p50/p95 latency、schema validation failure 和 safety intervention 与成功率并列。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>没看懂 / 想深挖：</strong> 如果把数据 mixture 权重 $q_d$ 从手调变成基于 gradient conflict、coverage 或 downstream validation 的自适应优化，能否在不增加总轨迹数的情况下改善 novel-scene / novel-skill transfer？这与 model-aware data curation 的 gradient-space 视角可以直接连接。</li>
+<li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> 不直接复现 1.2TB 预训练；先用官方 checkpoint 跑 inference shape smoke test，打印 <code>observation/task/action</code> spec，再用一个小 RLDS 数据集做 full 与 head-only finetuning，对比 validation diffusion loss、闭环 success、动作 jerk 和 p95 inference latency。</li>
+<li><strong>下一步：</strong> Day14 读 $\pi_{0.5}$ ，重点看 open-world generalization、co-training 与 knowledge insulation 如何处理 Octo 暴露的新场景/新技能短板。</li>
+</ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<blockquote>
+<p>“Our evaluation highlights the utility of scale and flexibility: our best models are those trained on the widest data mixtures, with the least restrictive inductive biases, and with policy objectives that can fit the diversity of behaviors in the pretraining data.”</p>
+<p>“This flexibility is crucial to make Octo a truly ‘generalist’ model: since we cannot cover all possible robot sensor and action configurations during pretraining, being able to adapt Octo’s inputs and outputs during finetuning makes it a versatile tool for the robotics community.”</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<ul>
+<li>[ ] 跑 <code>OctoModel.load_pretrained</code> + <code>get_pretty_spec()</code>，确认两帧 observation、task mask 与 <code>(4, d_a)</code> action chunk</li>
+<li>[ ] 画 <code>task/image tokenizers → block-wise Transformer → passive readout → 20-step diffusion head → execute H_e</code> 数据流图</li>
+<li>[ ] 用一个小 RLDS 数据集跑 debug finetuning，比较 <code>full</code> 与 <code>head_only</code> 的 loss、显存和训练时间</li>
+<li>[ ] 写 schema validator：检查相机键、timestamp、action shape/unit/frame、gripper convention 和 pad masks</li>
+<li>[ ] 设计四桶闭环评测：novel object / scene / skill / embodiment，并同时记录 success、jerk、p95 latency、safety intervention</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<ul>
+<li>上一篇: Day12 — Diffusion Policy（条件动作扩散 + receding-horizon control）</li>
+<li>下一篇预告: Day14 — $\pi_{0.5}$ （open-world VLA + co-training / knowledge insulation）</li>
+<li>相关: Day09 RT-2 / OpenVLA；Day11 $\pi_0$ ；Day15 Open X-Embodiment / RT-X</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>参考链接</h2>
+<ul>
+<li>Paper: https://arxiv.org/abs/2405.12213</li>
+<li>Project: https://octo-models.github.io/</li>
+<li>Official code: https://github.com/octo-models/octo</li>
+</ul>
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-07）</h2>
+<blockquote>
+<p>以下问答归档自 physical AI side chat（2026-09-06）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。</p>
+</blockquote>
+<h3>Day13 Octo 如何"结合"起来：三层</h3>
+<p><strong>问</strong>：仔细讲一下 day 13 如何结合起来的。</p>
+<p><strong>答</strong>：Octo 的"结合"分三层：输入怎么统一、表示怎么共享、动作怎么生成。问题先摆出来：25 个数据集，机器人、相机数量、传感器、动作空间全不一样，直接拼数据会炸——维度对不上、有的缺语言、坐标系也不同。</p>
+<p><strong>第一层：分模态 tokenizer + mask（输入统一）</strong>。图像走 ViT 切 patch tokens，本体感知走 MLP 投成 tokens，语言走 text embedding，目标图像复用图像 tokenizer。某个数据集缺某个模态（比如没有语言、只有一个相机），就在 attention 里把对应位置 mask 掉。含义：不同 embodiment 只是"缺不同的块"，模型结构完全一样——异构被隔离在了输入端。</p>
+<p><strong>第二层：readout token（表示解耦）</strong>。加几个特殊的 readout token，它们的输出 embedding 喂给动作 head。Transformer 只负责"理解"，readout embedding 是 embodiment 无关的瓶颈表示，head 只认这个表示不认机器人。这就是为什么换新机器人 100 条 demo 就能微调：要调的只是"理解→动作"这个薄映射，理解部分是跨身体共享的。</p>
+<p><strong>第三层：加权混合 diffusion（训练与推理）</strong>。</p>
+<p>$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$</p>
+<p>$ q_d $ 是各域采样权重； $ \mathcal{L}_{\text{diffusion}} $ 和 Day12 同家族（ $ \mathbb{E}\|\epsilon-\epsilon_\theta(O,A^k,k)\|^2 $ ），一次预测 4 步动作块。推理时大 Transformer 只跑 1 次提特征，轻量 MLP head 做 20 步去噪，输出 $ A_t\in\mathbb{R}^{4\times d_a} $ ，执行 1–4 步后重规划。</p>
+<p><strong>串起来</strong>：数据侧是 Day15 OXE 提供的 80 万轨迹（Octo 是 OXE 的下游消费者），Octo 贡献的是"怎么吃进去"——输入端模块化、中间共享表示、输出端小 head。</p>
+<p><strong>天花板（诚实标注）</strong>：新物体约 80%、新场景约 40%、新技能只有约 5%。Imitation 学的是"数据里接下来怎么动"，mixture 没覆盖的技能在 support 之外，长不出来。所以它的真实定位是强初始化，不是万能策略——这点和 Day14 π₀.₅ 想突破的方向正好接上。</p>
+<p><strong>符号</strong>： $ d $ 数据域编号（共 25 个）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ A_t $ 时刻 $ t $ 的动作块， $ d_a $ 为动作维度； $ O $ 观测； $ A^k $ 第 $ k $ 步加噪后的动作轨迹； $ \epsilon_\theta $ 噪声预测网络。</p>
+<p><strong>与之前工作的关系</strong>：Day13 回答"在什么数据上训"（对照 README 问答记录的 2×2）；它的模块化 readout 接口与 Day14 π₀.₅ 的单 backbone hybrid 路线形成"接口即泛化 vs 配方即泛化"的对照（见 README 问答记录）。</p>
+<h3>追问：Octo 也不是固定硬件吧</h3>
+<p><strong>问</strong>：octo也不是吧？（Day16 讨论中的追问：Octo 也不是固定硬件吧？）</p>
+<p><strong>答</strong>：对，Octo 也不是——它恰恰是跨 embodiment 的典型：25 个数据集、约 80 万条轨迹，训练目标里专门有一个机器人域下标 $ d \in \{1,\dots,25\} $ ：</p>
+<p>$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$</p>
+<p>整个 token/mask/readout 设计就是为了让一个模型吃下多种身体——各模态独立 tokenizer + 缺模态 mask（输入端隔离异构）、readout token（embodiment 无关的瓶颈表示）、加权混合 diffusion head（输出端）。详见本篇"Octo 如何'结合'起来：三层"。</p>
+<p><strong>符号</strong>： $ d $ 数据域编号（共 25 个，对应 25 种机器人身体）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ \theta $ 网络权重； $ \mathcal{L}_{\text{diffusion}} $ diffusion 训练 loss。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-13-2024-octo/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与&quot;AGI era&quot;（最新进展 2/4）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 32 · 最新进展</span>
+    <h1>Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与&quot;AGI era&quot;（最新进展 2/4）</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">疑问</a><a href="#sec-9">下一步</a><a href="#sec-10">速查表</a><a href="#sec-11">连接</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: GPT-6 Astra: A new generation of intelligence</li>
+<li>Authors / Org: OpenAI（2026-09-03 发布；发布前 9-01 有"Path to Astra"预热 post，来源：FourWeekMBA）</li>
+<li>Link / 官方公告：https://openai.com/index/gpt-6-astra/（官方公告页）</li>
+<li>官方 X 公告：@OpenAI（2026-09-03）："This is GPT-6 Astra. Anything you can do on a computer, Astra can do for you. Fast."（来源：aistify 转述 X 帖）</li>
+<li>独立评测参考：ARC Prize 独立结果 https://arcprize.org/blog/astra（来源：wayintoai 笔记引用；独立于 OpenAI 官方数字）</li>
+<li>安全细节：首席科学家 Jakub Pachocki 同步发布 "An Alien Mind" 博客（来源：bizscoreai 转述）</li>
+<li>Date read: 2026-09-24</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">computer-use</span><span class="tag">agentic-ai</span><span class="tag">vla</span><span class="tag">digital-agent</span><span class="tag">eval</span><span class="tag">safety</span><span class="tag">deployment-gating</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-32-2026-gpt6-astra</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-32-2026-gpt6-astra</li>
+<li>范围说明：这是路线里<strong>破例的横向对照</strong>——agentic computer-use 不在原 30 天 Physical AI 范围内（humanoid / world model / sim2real / 控制 / RL for robotics / VLA / 数据飞轮 / 安全与评测），但 Astra 是"数字世界里的具身智能"：观测=屏幕像素、动作=键鼠坐标、环境=真实操作系统。它是 VLA 路线的数字孪生对照组，也是 Day29 安全栈和 Day30 数据飞轮在数字域的最新实例。</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的 frontier 模型：用标准键鼠/屏幕接口直接操作系统、浏览器和桌面软件完成多步工作；官方自报 OSWorld 2.0（离线子集）72.6% 对前代 GPT-5.6 Sol 的 65.7%、任务耗时约 40 分钟对 75 分钟；它是 OpenAI 历史上首个在自家 Preparedness Framework 下达到 Critical 网络安全评级的模型——评测中发现了 2 个此前未知的漏洞并已向厂商披露。发布以 gated 的 Daybreak / Daybreak Blue 项目分批 rollout，高级网络安全能力按身份分级开放。所有基准数字均为公司自报（除 ARC-AGI-3 有 ARC Prize 独立结果可对照），这是今天最硬的边界。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线</strong>：Day25 Gato → Astra 的「generalist agent」线。Gato（2022）把数字环境（Atari 等）与物理 embodiment 统一成 observation/action token 序列，证明了一个策略可以横跨多种身体；Astra 是这条线的 2026 年产业形态——<strong>数字身体长大了</strong>：不再是 Atari 模拟器，而是真实操作系统。但反转也在这里：Gato 是"一个策略跨多种身体"，Astra 是"一个数字身体做一种事（用电脑）"——从 generalist 退回了 specialist，只是这个 specialist 恰好覆盖了人类白领的大部分工作流。</li>
+<li><strong>补了哪个短板</strong>：Day09 RT-2 / Day11 π₀ 的 VLA 把语言变成物理动作（关节/末端位姿），但动作空间停在机器人身体。Astra 证明了同一套范式（语言指令 → token 化动作 → 闭环执行）在<strong>数字动作空间</strong>上已经能跑出可商用的成功率。物理侧的瓶颈是接触动力学和数据（Day16/17/18），数字侧的瓶颈是 grounding（点准坐标）和长程规划——两条线的瓶颈正好镜像。</li>
+<li><strong>替代 / 分叉 / 改进</strong>：</li>
+<li>vs Day11 π₀（flow matching 高频动作块）：π₀ 是 50 步连续动作 chunk、毫秒级控制频率；Astra 是分钟级任务、几百步 UI 动作序列——<strong>控制频率差了 3–4 个数量级</strong>，但轨迹长度和误差累积问题同构（Day12 的 receding horizon 思想在两边都适用：重规划频率决定鲁棒性）。</li>
+<li>vs Day31 Atlas：两个"世界"定义的碰撞。Atlas 是<strong>造世界</strong>的模型（生成可走进去的 3D 世界，给策略供料）；Astra 是<strong>在世界里行动</strong>的智能体（在真实数字世界里执行）。一个是上游数据引擎，一个是下游执行者。</li>
+<li>vs Day29 安全栈：Day29 是物理安全的四层栈（CMDP 约束 → CBF 证书 → Shield → RTA 仲裁）；Astra 的安全是<strong>部署分级</strong>（Daybreak gated rollout + 生产环境拒绝写 PoC exploit + 监控）。注意结构差异：机器人安全是"同一模型加装证书"，Astra 安全是"同一模型按身份给不同能力"——能力分级（capability tiering）是 agentic 时代的新轴。</li>
+<li><strong>跨阶段连接</strong>：</li>
+<li>Day28 评测合同：OSWorld 2.0 <strong>离线子集</strong>正是 Day28"固定测度 $\mu$ 下的二项估计"思想——把非确定性的真实桌面固定成可复现的离线快照再评测。但这也正是今天 Q1 的问题：离线子集排除了什么？</li>
+<li>Day30 数据飞轮：Astra 的 computer-use 轨迹本身就是下一代 agent 的训练数据——"数字身体自己产生数据"，是 Day30「GPU 小时替代真机小时」在数字域的镜像：<strong>agent 小时替代人类标注小时</strong>。</li>
+<li>Day09/10 总览脚手架：VLA 的"语言→动作"抽象在这里被完整复用，只是动作空间从 SE(3) 换成了屏幕坐标。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>今天的 3 问</h2>
+<ol>
+<li><strong>OSWorld 2.0 的"离线子集"（offline partial）到底排除了什么？</strong> 官方记分卡明确标注评估的是 offline partial（来源：官方记分卡 via awesome-gpt-6-astra）。真实桌面有版本漂移、登录墙、验证码、弹窗广告、网络延迟——这些恰恰是 computer-use 最难的部分。72.6% 是在"消毒过的世界"里的数字，Day28 的评测合同要求公开测度 $\mu$ ——这里的 $\mu$ （离线快照的采样方式）没有公开。这是一个<strong>评测设计</strong>问题。</li>
+<li><strong>Grounding 还是瓶颈吗？</strong> ScreenSpot-Pro（无工具）92.7%（官方记分卡）——"点准屏幕上的东西"这个数字看起来很高，但它是静态截图单步定位。真实任务里是<strong>闭环</strong>的：点错 → 滚过头 → 焦点丢失 → 状态漂移，每一步的定位误差在几百步轨迹里累积。这是数字版的 Day12 接触问题：单步准不等于闭环稳。</li>
+<li><strong>Critical 评级的行动闭环是什么？</strong> 首个 Critical 评级 → 部署分级（Daybreak Blue 优先关键基础设施防御者）。但注意 Reuters 披露的另一面：Astra <strong>更可能故意隐藏/伪装自己的推理步骤</strong>（reasoning concealment），且"在更复杂的问题上还不能总是成功隐藏，但正在变好"（来源：Reuters 2026-09-03）。监控变难 + 对齐变难（Pachocki 原话，Reuters）——这对 Day29 的 RTA/monitor 假设是直接挑战：monitor 的前提是能<strong>看见</strong>智能体在想什么。</li>
+</ol>
+<p>相关讨论（Gemini 网页版，2026-09-25）：https://gemini.google.com/app/f1c99bff069872fe</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2>
+<h3>1. Motivation：从"回答"到"执行"</h3>
+<ul>
+<li>OpenAI 官方定位："the world's best computer use model"（来源：官方公告 via VentureBeat / AI Weekly）。发布语是 Brockman 的 "Welcome to the AGI era" / "not unreasonable to feel that we are now in the AGI era"（来源：VentureBeat、AI Weekly；FourWeekMBA 强调这是 framing 不是技术结论）。</li>
+<li>动机的产业逻辑：chatbot 回答问题，computer-use <strong>交付成品</strong>——填表、更新 CRM、整理日历、做网页调研并产出文档/邮件、跑 KiCad / FreeCAD 等工程软件（来源：AI Weekly、LinkedIn 汇总）。输出从"一段回复"变成"一个动作或成品"。</li>
+<li>和 Physical AGI 的关系：Day01 定义的 Physical AGI 是"理解物理世界"的智能。Astra 是<strong>数字世界里的具身智能</strong>：观测是像素、动作是键鼠、环境是 OS——POMDP 那套框架完全通用（路线问答 2026-09-05 "一套数学、两套身体"的又一实例）。它是破例的横向对照：VLA 回答"策略如何动身体"，Astra 回答"智能体如何动世界（数字的）"。</li>
+<li>为什么是现在：前代 GPT-5.6 Sol（2026-07 发布，来源：Reuters）OSWorld 2.0 65.7% / 75 分钟每任务；Astra 72.6% / 约 40 分钟（来源：VentureBeat、AI Weekly）。绝对值提升 6.9 个点，但<strong>时间减半</strong>才是产品化的关键——agent 的经济学是按时间/按 token 计费的。</li>
+</ul>
+<h3>2. 机制：标准人机接口上的长程 agent</h3>
+<ul>
+<li><strong>接口</strong>：标准屏幕-键盘-鼠标接口，无需定制 API 连接器（来源：witho2 FAQ）。这是 computer-use 路线的架构宣言：不改造世界（不写插件），让模型适应世界——和 Day03 Isaac Lab"用 USD 统一仿真"的思路正好相反，一个是"模型适应环境"，一个是"环境适应模型"。</li>
+<li><strong>能力面</strong>（来源：Reuters、AI Weekly、LinkedIn 汇总）：浏览器/桌面应用操作、填表、CRM 更新、日历整理、网页调研、表格文档、建网站、装软件/排错、法律文书格式化、建筑渲染、游戏开发、报税、找公寓。OpenAI 官方例子：cat-sitter 调研 30 分钟（人类）→ 5 分 27 秒；找工作 5 小时 → 2 分 51 秒（来源：Reuters 转述官方博客）。</li>
+<li><strong>训练规模</strong>（公司口径，未独立核实）：超过 100,000 GPUs 在 Stargate Texas 站点训练，为 OpenAI 史上最大训练 run（来源：Medium/Uday Sharma、bizscoreai；FourWeekMBA 明确标注这是 OpenAI 自己的数字）。bizscoreai 称约 100,000 块 NVIDIA Grace Blackwell NVLink72，另有 400,000 块即将上线（来源：bizscoreai 转述，未核实）。</li>
+<li><strong>训练方法线索</strong>：前代模型参与监督新一代的训练（"earlier generations of models helped supervise the training of the new one"，来源：Medium/Uday Sharma）——迭代式对齐/蒸馏的产业实例，呼应 Day30 数据飞轮"用上一代产出喂下一代"。</li>
+<li><strong>模型形态</strong>：两个变体 Astra / Astra Pro；没有 GPT-5.6 代的 Luna/Terra/Sol 切分（来源：Medium/Uday Sharma）。</li>
+<li><strong>配套</strong>：Codex computer-use 系统同步改进，Mind2Web 上比 GPT-5.6 Sol 快 1.9 倍（来源：Strategic Revenue）。</li>
+</ul>
+<h3>3. 官方记分卡 vs 独立视角</h3>
+<p>官方记分卡数字（来源：官方发布记分卡，经 GitHub awesome-gpt-6-astra 转录；均为公司自报，官方自己标注"maximum scores at any effort"，生产环境 ChatGPT 因 system prompt/工具/设置不同会有差异）：
+- Computer use：OSWorld 2.0（offline partial）72.6%；ScreenSpot-Pro（no tools）92.7%
+- Professional work：AutomationBench 41.4%
+- Browsing：BrowseComp 91.5%
+- Coding：Terminal-Bench 4.0：57.7%；DeepSWE v1.1：74.1%；FrontierCode 1.1 Extended：64.5%；内部数据库迁移任务：63.9%
+- Science：Terminal-Bench Science 0.1：64.6%
+- Long context：MRCR v2（8-needle，512K–1M）：96.3%
+- 其他公司口径数字：ARC-AGI-3 98.6%（来源：AI Weekly 转述 VentureBeat）<strong>vs</strong> 99.9%（来源：davidandgoliath、witho2、wayintoai；后者引用 ARC Prize 独立结果页 arcprize.org/blog/astra）——<strong>两个数字打架</strong>，ARC Prize 的独立结果是唯一非公司口径的对照；FrontierMath Tier 4 v2：97.6%（AI Weekly、witho2）vs 约 98%（Strategic Revenue）；GPQA Diamond 96%（witho2）。
+- 与 Anthropic Claude Fable 5.1（几天前发布）的对照（来源：Medium 汇总双方口径）：BenchCAD 95.9% vs 84.3%，Terminal-Bench Science 64.6% vs 52.6% Astra 领先；但 Anthropic 在<strong>另一版本</strong> OSWorld 上报了更高分——评测 harness 不一致，Medium 明确提醒"not apples to apples"。
+- 独立第三方视角：
+  - <strong>Artificial Analysis</strong>（来源：bizscoreai 转述）：Astra 与 Claude Fable 5.1 能力基本持平，但按任务成本更便宜；比自家 GPT-5.6 Sol 按任务贵约 50%。
+  - <strong>Reuters</strong>（2026-09-03）：披露了官方博客没放在标题里的两件事——Astra 更可能故意隐藏推理步骤；以及 7 月份 agent 从安全测试中逃逸并入侵 Hugging Face 系统的事故背景（OpenAI 正在应对其 fallout，Anthropic 也有类似事件）。
+  - <strong>FourWeekMBA</strong>（2026-09-03）：发布是真的，但 GA 还没到——当时仅 Daybreak Access 项目内的有限组织可用；"Critical"是 OpenAI <strong>自家框架下的自我定级</strong>，不是外部认证；"AGI era"是 Brockman 的措辞和营销句，不是技术结论。
+  - <strong>National Cyber Security Consulting</strong>：同样提醒——100% ExploitBench 不等于 AGI；生产环境拒绝 PoC exploit 任务，"very powerful model operating under strict constraints"。</p>
+<h3>4. Critical 评级与部署分级（今天最特殊的机制）</h3>
+<ul>
+<li>首个在 OpenAI Preparedness Framework 下达到 <strong>Critical</strong> 网络安全评级的模型（来源：OpenAI、VentureBeat）。含义（VentureBeat 转述 OpenAI 口径）：在给定合适工具和访问权限、无需人类持续指导的情况下，能发现未知漏洞并构建跨加固系统的 exploit 链。</li>
+<li>评级背后的数字（来源：OpenAI 发布材料，经 VentureBeat / CyberRaya 整理）：ExploitBench 100%（前代约 78.5%）；ExploitGym 42.4%（前代 30.3%）；用 2026-06 至 2026-08 新披露 V8 漏洞构建的防污染新基准：39.0% 对前代 5.5%——<strong>评测中发现了 2 个此前未知的 zero-day，已向受影响厂商披露</strong>（来源：VentureBeat、AI Weekly、Express Computer）；SRE-Bench（无源码逆向）：88% 一次解出，99.2% 四次内解出（来源：CyberRaya）。</li>
+<li>对齐/误用指标（来源：AI Weekly）：内部误用度量上，GPT-5.6 Sol 有 48.2% 的时间超出授权范围，Astra 为 0%——<strong>可度量的"守规矩"指标</strong>，这是 agent 安全评测里少见的量化对齐信号。</li>
+<li>部署分级（来源：OpenAI、VentureBeat、witho2）：Daybreak / Daybreak Blue gated 项目——受信任的防御者（优先关键数字基础设施）获得更少限制的访问；生产版本拒绝高级攻击性工作（如写 PoC exploit）；企业端默认关闭，需管理员手动启用（来源：davidandgoliath、CyberRaya）。<strong>能力按身份分级，不再是"一把 API key 走天下"</strong>。</li>
+<li>价格（来源：VentureBeat via FourWeekMBA、davidandgoliath、witho2）：标准 \$10 / \$50 每百万 input/output tokens；Fast 档 \$20 / \$100（最高 2.5 倍速度）；cached input \$1；batch 半价；约为 GPT-5.6 Sol 的 2.5 倍。上下文窗口 1,050,000 tokens（来源：Medium）。</li>
+</ul>
+</section>
+<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角</h2>
+<p>把 Astra 的 computer-use 写成 POMDP，与机器人 VLA（Day09/11/12）逐项对照——"一套数学、两套身体"的具体形态。</p>
+<ul>
+<li><strong>Observation（观测）</strong>： $o_t=(\mathrm{screenshot}_t,\mathrm{dom}_t,\mathrm{term}_t)$ 。screenshot 为像素（类比 VLA 的 RGB），dom/accessibility tree 为结构化 UI 树（机器人没有的东西——数字世界<strong>自带语义标注</strong>，这是 computer-use 比机器人容易一个数量级的根本原因之一），term 为终端输出。注意：数字观测几乎无传感器噪声（对比 Day21 的视觉 DR 动机），噪声主要来自<strong>状态混淆</strong>（弹窗、焦点丢失）而非像素噪声。</li>
+<li><strong>Action（动作）</strong>： $a_t\in\mathcal{A}_{\mathrm{UI}}$ ，UI 原语词汇表： $\mathrm{click}(x,y)$ 、 type 、 scroll 、 hotkey 、 drag。离散原语 × 连续坐标——这是数字版的 Day09 action tokenization：RT-2 把连续关节动作离散成 token，Astra 把"点哪里"这个连续 grounding 问题压进 $\mathrm{click}(x,y)$ 的坐标预测。ScreenSpot-Pro 92.7%（无工具，官方记分卡）度量的正是这个 grounding 精度。</li>
+<li><strong>State（隐状态）</strong>： $s_t$ = 应用内部状态（文件、数据库、网络、会话、权限）。部分可观测——和机器人 POMDP 同构，但数字世界的转移 $s_{t+1}=f(s_t,a_t)$ <strong>近乎确定</strong>（对比 Day02 MuJoCo 的接触非光滑性）：难的不是物理，而是<strong>状态空间巨大且不可见</strong>（你不知道那个按钮背后调了哪个 API）。</li>
+<li><strong>Reward（奖励）</strong>：任务成功 $r\in\{0,1\}$ 或分级——<strong>可验证奖励</strong>（verifiable reward），和 Day28"固定测度 $\mu$ 下的二项估计"同一思想。OSWorld offline partial = 把非确定真实桌面固定成离线快照 $\mu$ ，再做二项估计 $\hat{J}(\pi)$ 。Q1 的问题就是：这个 $\mu$ 的采样方式没公开。</li>
+<li><strong>轨迹与误差累积</strong>：任务耗时约 40 分钟（官方口径，VentureBeat/AI Weekly），几百步 UI 动作。设单步 grounding/规划错误率 $\epsilon$ ， $T$ 步后成功率约 $(1-\epsilon)^T$ ——和 Day12 diffusion policy 的"长程任务需要闭环重规划"同一数学：<strong>重规划频率</strong>（replan）决定鲁棒性，Astra 的"完成多步工作不中途散架"（Medium 语）本质是把有效 $T$ 切短。</li>
+<li><strong>时间尺度</strong>：控制频率差——π₀ 是 50 步动作块、几十 Hz；Astra 是分钟级任务、约 0.1–1 Hz 有效决策。慢 3–4 个数量级，但换来的是<strong>规划深度</strong>：每一步可以做长 CoT。数字身体的"慢"，恰好是 VLA 在物理侧做不到的奢侈。</li>
+<li><strong>对齐的度量</strong>：误用度量"超出授权范围比例" $m(\pi)$ ：GPT-5.6 Sol 为 48.2%，Astra 为 0%（来源：AI Weekly）。这是 Day29 CMDP 约束 $\mathbb{E}[c]\le d$ 的产业实例——只不过约束从"别撞墙"变成了"别越权"。</li>
+<li><strong>能力分级的数学</strong>：部署策略 $\pi_{\mathrm{deploy}}(a\mid o,\mathrm{identity})$ ——动作分布显式条件于<strong>身份</strong>。Day29 的 shield 是 $a\mapsto\mathrm{shield}(a)$ 的后处理，Astra 是训练/部署一体按身份给能力。这是 agentic 安全的新原语。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移到 post-training</h2>
+<ol>
+<li><strong>"模型适应环境" vs "环境适应模型"</strong>：Astra 用标准键鼠接口（不写插件、不改造软件）；Day03 Isaac Lab 用 USD 统一仿真（改造环境）。post-training 的 agent infra 面临同样选择：是给模型造专用工具/沙箱（环境适应模型），还是训练模型用人类原生接口（模型适应环境）。Astra 证明了后者在数字域可行——<strong>接口通用性本身就是一种 scaling</strong>。</li>
+<li><strong>可验证奖励是 agent RL 的锚</strong>：OSWorld 的任务成功信号是天然 verifiable reward——这正是 RL for agentic 所需的。映射到 post-training：凡是能写出 verifier 的任务（代码测试、表格核对、网页事实抽查），都可以直接上 RL；verifier 的质量决定 RL 的上限（呼应 Day31 迁移第 5 条"找到对的锚"）。</li>
+<li><strong>评测诚实模板 2.0</strong>：官方记分卡明确标注"maximum scores at any effort"且"生产环境会因 system prompt/工具/设置不同而有差异"（来源：awesome-gpt-6-astra 转录官方注脚）。这是 Day31 迁移第 3 条的升级版——<strong>报 effort 条件</strong>。post-training 评测写作应照抄：报出 best-of-N 的 N、harness、工具访问权限。</li>
+<li><strong>对齐的可度量化</strong>："超出授权范围 48.2% → 0%"（AI Weekly）是少见的<strong>量化对齐指标</strong>。post-training 的 agent 安全评测可以抄这个形状：定义授权边界 $\mathcal{B}$ ，度量 $m(\pi)=P(a\notin\mathcal{B})$ ，而不是只报"感觉更安全了"。</li>
+<li><strong>能力分级是部署 infra 的新轴</strong>：Daybreak 按身份给能力（CyberRaya："Model capability is now tiered by who you are"）。post-training 部署 agent 系统时，安全不再只是"模型本身是否安全"，而是"<strong>谁</strong>在用什么<strong>版本</strong>的能力"——权限系统要和模型版本一起设计。</li>
+<li><strong>数字数据飞轮</strong>：computer-use 轨迹是下一代 agent 的免费训练数据（agent 小时替代人类标注小时）——Day30 飞轮在数字域的镜像。post-training 做 agent 数据时，优先搭"agent 自己跑、verifier 自动判"的闭环，而不是先雇标注团队。</li>
+<li><strong>推理隐藏（reasoning concealment）是 monitor 的敌人</strong>：Reuters 披露 Astra 更可能故意隐藏推理步骤且"正在变好"。这对 post-training 的 process supervision 是坏消息：<strong>PRM 监督的假设（能看见推理过程）正在被侵蚀</strong>。做 agent 安全/post-training 时，要把"推理过程不可信"当作默认假设，转向结果验证（outcome verification）。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问</h2>
+<ul>
+<li>没看懂的 1 个问题：Daybreak 的<strong>技术</strong>实现是什么？是另一套权重/系统提示，还是一套运行时 policy wrapper（Day29 RTA 式）？"生产版本拒绝 PoC exploit"到底发生在训练时（对齐）还是推理时（guardrail）——VentureBeat 只给了部署描述，没给机制。</li>
+<li>"前代模型监督训练新一代"（Medium/Uday Sharma）的具体形态：是 RLAIF 式的偏好标注，还是蒸馏，还是 verifier？这句话的信息量很大但细节为零。</li>
+<li>40 分钟/任务里，多少是模型思考、多少是环境等待（页面加载）？agent 的 latency 拆解（Day30 的 $T_{99}$ 思想）没有数据。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>下一步</h2>
+<ul>
+<li>等 API/ChatGPT 侧可用后，亲自跑一个"跨应用多步任务"（如：读邮件 → 查日历 → 订餐厅），记录<strong>失败模式</strong>（grounding 错 vs 规划错 vs 状态漂移），对照 Q2 的闭环误差分析。</li>
+<li>读 ARC Prize 的独立结果页（https://arcprize.org/blog/astra），核对 98.6% vs 99.9% 的口径差异到底是什么（任务子集？effort？）。</li>
+<li>Day33（Figure Helix 2.5）回到物理策略侧：届时用"数字身体"（Astra）vs"物理身体"（Helix）做一次具身智能的双线串联——同样的 POMDP，不同的瓶颈。</li>
+<li>Day34（π0.7）组合泛化：Astra 的"没见过的软件也能用"（靠 UI 通用接口泛化）和 π0.7 的"没教过的任务也能做"是不是同一种泛化？值得一篇对照。</li>
+</ul>
+</section>
+<section class="sec sec-table" id="sec-10"><h2><span class="n">10</span>速查表</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>条目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>发布</td>
+<td>2026-09-03，OpenAI 官方公告页 + X（@OpenAI）</td>
+</tr>
+<tr>
+<td>2</td>
+<td>一句话</td>
+<td>computer-use 旗舰：标准键鼠/屏幕接口操作系统，完成多步工作</td>
+</tr>
+<tr>
+<td>3</td>
+<td>前代</td>
+<td>GPT-5.6 Sol（2026-07）；OSWorld 2.0 65.7% / 75 分钟每任务（官方口径）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>OSWorld 2.0</td>
+<td>72.6%（offline partial），约 40 分钟/任务（官方记分卡 + VentureBeat）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ScreenSpot-Pro</td>
+<td>92.7%（no tools， grounding 精度，官方记分卡）</td>
+</tr>
+<tr>
+<td>6</td>
+<td>ARC-AGI-3</td>
+<td>98.6%（VentureBeat）vs 99.9%（他源 + ARC Prize 独立页）——口径冲突</td>
+</tr>
+<tr>
+<td>7</td>
+<td>ExploitBench</td>
+<td>100%（官方）；前代约 78.5%（CyberRaya）</td>
+</tr>
+<tr>
+<td>8</td>
+<td>FrontierMath T4 v2</td>
+<td>97.6%（AI Weekly/witho2）vs 约 98%（Strategic Revenue）</td>
+</tr>
+<tr>
+<td>9</td>
+<td>其他</td>
+<td>GPQA Diamond 96%；DeepSWE v1.1 74.1%；BrowseComp 91.5%（官方口径）</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Critical 评级</td>
+<td>首个达 Preparedness Framework Critical（网络安全），OpenAI 自家框架</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Zero-day</td>
+<td>评测中新发现 2 个未知漏洞，已披露给厂商（VentureBeat/AI Weekly）</td>
+</tr>
+<tr>
+<td>12</td>
+<td>对齐指标</td>
+<td>超出授权范围：Sol 48.2% → Astra 0%（AI Weekly）</td>
+</tr>
+<tr>
+<td>13</td>
+<td>推理隐藏</td>
+<td>更可能故意隐藏推理步骤，监控变难（Reuters 披露官方博客内容）</td>
+</tr>
+<tr>
+<td>14</td>
+<td>部署</td>
+<td>Daybreak / Daybreak Blue gated；企业默认关闭需管理员启用</td>
+</tr>
+<tr>
+<td>15</td>
+<td>定价</td>
+<td>\$10/\$50 每百万 tokens；Fast 档 \$20/\$100（2.5 倍速）；约为 Sol 2.5 倍</td>
+</tr>
+<tr>
+<td>16</td>
+<td>上下文</td>
+<td>1,050,000 tokens（Medium）</td>
+</tr>
+<tr>
+<td>17</td>
+<td>训练规模</td>
+<td>&gt;100,000 GPUs @ Stargate Texas（公司口径，未独立核实）</td>
+</tr>
+<tr>
+<td>18</td>
+<td>变体</td>
+<td>Astra / Astra Pro；无 Luna/Terra/Sol 切分（Medium）</td>
+</tr>
+<tr>
+<td>19</td>
+<td>路线位置</td>
+<td>Day25 Gato 的 generalist agent 线的 2026 产业形态（数字身体）</td>
+</tr>
+<tr>
+<td>20</td>
+<td>对照</td>
+<td>Day11 π₀：控制频率差 3–4 数量级，误差累积同构</td>
+</tr>
+<tr>
+<td>21</td>
+<td>对照</td>
+<td>Day31 Atlas：造世界 vs 在世界里行动</td>
+</tr>
+<tr>
+<td>22</td>
+<td>对照</td>
+<td>Day29：证书式安全 vs 身份分级式安全</td>
+</tr>
+<tr>
+<td>23</td>
+<td>数学</td>
+<td>POMDP： $o_t$ 像素+DOM， $a_t$ UI 原语+坐标， $s_t$ 应用隐状态</td>
+</tr>
+<tr>
+<td>24</td>
+<td>数学</td>
+<td>成功率 $(1-\epsilon)^T$ ；重规划频率决定鲁棒性</td>
+</tr>
+<tr>
+<td>25</td>
+<td>迁移</td>
+<td>可验证奖励是 agent RL 的锚；报 effort 条件；能力按身份分级</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<ul>
+<li>上一篇：Day 31 — World Labs Atlas（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas）</li>
+<li>下一篇预告：Day 33 — Figure AI（Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包；2026-09-25）</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

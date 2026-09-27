@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 11 — π₀：用 flow matching 生成高频连续动作块的 VLA</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 11</span>
+    <h1>Day 11 — π₀：用 flow matching 生成高频连续动作块的 VLA</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：统一成一个部分可观测的条件生成控制问题</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a><a href="#sec-14">问答补充（2026-09-07）</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: π₀: A Vision-Language-Action Flow Model for General Robot Control</li>
+<li>Authors / Org: Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, Szymon Jakubczak, Tim Jones, Liyiming Ke, Sergey Levine, Adrian Li-Bell, Mohith Mothukuri, Suraj Nair, Karl Pertsch, Lucy Xiaoyang Shi, James Tanner, Quan Vuong, Anna Walling, Haohuan Wang, Ury Zhilinsky / Physical Intelligence</li>
+<li>Link / arXiv / Blog: https://arxiv.org/abs/2410.24164 / https://www.physicalintelligence.company/blog/pi0</li>
+<li>Official code: https://github.com/Physical-Intelligence/openpi</li>
+<li>Date read: 2026-09-01</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">vla</span><span class="tag">pi0</span><span class="tag">flow-matching</span><span class="tag">action-chunking</span><span class="tag">cross-embodiment</span><span class="tag">dexterous-manipulation</span><span class="tag">robot-foundation-model</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-11-2024-pi0-flow-vla</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-11-2024-pi0-flow-vla</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>π₀ 把 PaliGemma 的视觉—语言语义与一个 300M action expert 接在同一 Transformer 中，用 conditional flow matching 一次生成 50-step 连续动作块；再以 10,000+ 小时、7 类机器人配置、68 个任务的跨 embodiment 数据预训练，并用少量高质量数据 post-train，使单一 3.3B VLA 能在最高 50 Hz 的双臂精细操作中兼顾语义、动作流畅度和错误恢复。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线：</strong> Day09 用 RT-2 / OpenVLA 建立“视觉 + 语言 → 动作”的 VLA 总览；Day11 专门深挖连续动作生成这一分支，回答 action token 在高频、双臂、接触丰富任务上的限制。</li>
+<li><strong>补了哪个短板：</strong> Day09 的 OpenVLA 把每个动作维度离散成 token，单帧自回归输出 7D action；π₀ 直接建模条件分布 $p(A_t\mid o_t)$ ，一次联合生成整段 $H=50$ 的连续动作，因此能表达跨时间、跨关节耦合与多峰策略。</li>
+<li><strong>替代 / 分叉 / 改进：</strong> π₀ 不替代 Day07/08 的 torque / locomotion 稳定环，也不显式学习 Day04–06 那种环境 transition model；它是低频语义条件与中频 manipulation command 之间的生成式 policy。真实电机安全、力控和碰撞约束仍由底层 controller 兜底。</li>
+<li><strong>对之前 Day X 的直接对比：</strong> RT-2 / OpenVLA 的主轴是“动作即 token”，π₀ 的主轴是“动作块即条件生成轨迹”。前者复用 next-token CE infra；后者用 10 次 flow integration 换取连续精度和 action-chunk 联合建模。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>路线保留 Day09/10 的总览后再进入 Day11–18 分专题扩展。π₀ 是 VLA 从离散动作 token 走向连续生成式控制的关键节点，也把 LLM 式 pre-training / post-training 配方直接迁移到机器人：广而杂的预训练数据提供覆盖和恢复行为，高质量 post-training 数据提供流畅、稳定、任务特定的执行风格。这和 Jun 当前关注的 data flywheel、post-training、rollout infra 有直接可迁移性。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li>为什么对高频双臂 manipulation，联合生成 $H=50$ 的连续 action chunk 会比逐动作、逐维 token 解码更合适；收益来自连续精度、时间耦合，还是推理摊销？</li>
+<li>预训练混合中“低质量但多样”的纠错轨迹和 post-training 中“高质量且一致”的示范如何配比，才能同时避免笨拙与脆弱？</li>
+<li>action chunk 有 0.5–0.8 秒 open-loop 执行窗口；接触、遮挡或人类干预使真实状态偏离后，何时应提前重规划，怎样把 uncertainty 接到底层 safety controller？</li>
+</ol>
+</section>
+<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角：统一成一个部分可观测的条件生成控制问题</h2>
+<h3>1) State / observation / action / objective</h3>
+<p>真实系统可视为 POMDP：隐藏物理状态</p>
+<p>$$x_t=(q_t,\dot q_t,\text{object poses},\text{contact modes},\text{friction},\text{deformation},\ldots),$$</p>
+<p>但 policy 只能看到</p>
+<p>$$o_t=[I_t^1,\ldots,I_t^n,\ell_t,q_t].$$</p>
+<ul>
+<li>$I_t^i\in\mathbb{R}^{h\times w\times 3}$ ：第 $i$ 个 RGB 相机，论文每个平台用 $n=2$ 或 \$3\$ 个视角。</li>
+<li>$\ell_t=(w_1,\ldots,w_L)$ ：长度为 $L$ 的语言 token 序列，既可以是总任务，也可以是约 2 秒粒度的 segment annotation / 高层子指令。</li>
+<li>$q_t\in\mathbb{R}^{d_q}$ ：本体状态，主要是关节角；跨机器人训练时 padding 到最大维度 18，并 mask 不存在的 image slot。</li>
+<li>单步动作 $a_t\in\mathbb{R}^{d_a}$ ，整段动作为 $A_t=[a_t,\ldots,a_{t+H-1}]\in\mathbb{R}^{H\times d_a}$ ； $H=50$ ， $d_a$ 随 embodiment 变化并 padding 到统一维度。</li>
+</ul>
+<p>行为克隆目标不是预测一个均值动作，而是学习完整条件分布：</p>
+<p>$$\pi_\theta(A_t\mid o_t)\approx p_{\mathcal D}(A_t\mid o_t).$$</p>
+<p>这很重要：同一件衣服可能向左或向右展平，双臂绕过障碍也可能有多条可行轨迹；普通 MSE 容易平均出不可执行动作，flow matching 则允许多峰连续分布。</p>
+<h3>2) Conditional flow matching</h3>
+<p>从噪声 $\epsilon\sim\mathcal N(0,I_{H d_a})$ 到示范动作块 $A_t$ 建立线性概率路径：</p>
+<p>$$A_t^{\tau}=(1-\tau)\epsilon+\tau A_t,\qquad \tau\in[0,1].$$</p>
+<p>对应的目标速度场为 $u=A_t-\epsilon$ （若采用反向时间参数化，符号相反），训练 action expert $v_\theta$ ：</p>
+<p>$$\mathcal L_{\mathrm{FM}}(\theta)=\mathbb E_{(o_t,A_t)\sim\mathcal D,\epsilon,\tau}\left[\left\|v_\theta(A_t^\tau,o_t,\tau)-(A_t-\epsilon)\right\|_2^2\right].$$</p>
+<ul>
+<li>$A_t^\tau\in\mathbb R^{H\times d_a}$ ：第 $\tau$ 个 flow time 的 noisy action chunk；这里的 $\tau$ 是生成积分时间，不是机器人控制时间 $t$ 。</li>
+<li>$v_\theta\in\mathbb R^{H\times d_a}$ ：模型预测的整段动作速度场；所有 $H$ 个 action slots 彼此双向 attention，因此关节与时间步联合建模。</li>
+<li>论文对 $\tau$ 使用偏向低 $\tau$ / 高噪声区的 shifted Beta 分布，而不是均匀采样；直觉是给定机器人观测后，“从纯噪声找出合理平均动作”并不容易，应增加这一区域的训练权重。</li>
+</ul>
+<p>推理从 $A_t^0\sim\mathcal N(0,I)$ 出发，用 10 步 Euler 积分（ $\delta=0.1$ ）：</p>
+<p>$$A_t^{\tau+\delta}=A_t^\tau+\delta\,v_\theta(A_t^\tau,o_t,\tau).$$</p>
+<p>最后得到 $A_t^1$ 并执行其中一部分动作。20 Hz 的 UR5e / Franka 每 0.8 秒重推理一次、执行 16 步；其他 50 Hz 平台每 0.5 秒重推理一次、执行 25 步。因此 $H=50$ 是模型预测 horizon，不等于每次都 open-loop 执行 50 步。</p>
+<h3>3) 和系统实现的对应</h3>
+<ul>
+<li><strong>VLM prefix：</strong> $[I_t^1,\ldots,I_t^n,\ell_t]$ 进入 PaliGemma 3B backbone，承接 Internet-scale 视觉语义。</li>
+<li><strong>Robot suffix：</strong> $[q_t,A_t^\tau]$ 进入约 300M 的 action expert；两组参数只通过 self-attention 交互，避免让机器人连续量直接挤进语言词表。</li>
+<li><strong>三段 blockwise mask：</strong> image/language、state、noisy actions 各自块内双向 attention，前块不看未来块；于是 image/language/state 的 KV cache 可在 10 个 flow steps 间复用。</li>
+<li><strong>延迟预算：</strong> 3 个相机、RTX 4090 上 image encoder 14 ms、observation pass 32 ms、10 次 action pass 合计 27 ms，总 on-board 73 ms；off-board 加网络后 86 ms。action chunk 将高频控制和较慢模型推理解耦。</li>
+</ul>
+<h3>4) 假设与数学没有覆盖的真实误差</h3>
+<p>这个 loss 默认示范动作在时间上对齐、归一化和 embodiment mask 正确，也默认观测足以消除关键歧义；它没有显式建模相机延迟、控制通信抖动、joint backlash、力 / 触觉、摩擦变化、柔性物体内部状态、碰撞约束和执行器饱和。更关键的是，0.5–0.8 秒 open-loop 窗口内真实 transition $x_{t+1}=f(x_t,a_t,w_t)$ 仍会受未观测扰动 $w_t$ 影响；flow loss 只拟合示范分布，不保证闭环稳定性、安全性或约束可行性。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<ol>
+<li><strong>Motivation：离散 action token 不够高频、也不够连续</strong></li>
+<li>机器人 foundation model 既要继承 VLM 的语义泛化，又要执行双臂、柔性物体和接触丰富的连续动作；逐 token 自回归动作在控制频率、量化误差和长 action sequence 延迟上受限。</li>
+<li>π₀ 用 flow matching 输出连续 action chunk，使整个时间窗内的动作相关性一次建模，也把多次控制命令摊到一次视觉编码和一次条件生成。</li>
+<li>
+<p>目标不是只做一个漂亮模型，而是形成“广覆盖 pre-training → 高质量 post-training → 复杂任务部署”的机器人训练 recipe。</p>
+</li>
+<li>
+<p><strong>System / Method：3B VLM backbone + 300M action expert</strong></p>
+</li>
+<li>PaliGemma 负责 image / language tokens，action expert 负责 proprioception / noisy actions；总参数约 3.3B，action expert 从零初始化。</li>
+<li>模型采用 3-block attention：视觉语言、机器人状态、动作块。动作 token 之间全双向 attention，适合联合生成 $H=50$ 的轨迹。</li>
+<li>每次采样做 10 次 flow integration；条件 prefix 的 KV cache 复用，使多步生成不必重复算视觉与语言。</li>
+<li>
+<p>控制动作并非 torque-level safety policy；它输出 robot-specific joint / gripper / base command，底层执行器仍需速率、位置、碰撞和急停约束。</p>
+</li>
+<li>
+<p><strong>Training / Data Details：覆盖与质量分阶段优化</strong></p>
+</li>
+<li>自有数据超过 10,000 小时，涵盖 7 种机器人配置和 68 个宽定义任务；另混合 OXE、Bridge V2、DROID。自有数据约 903M timesteps，其中 106M 单臂、797M 双臂；开源数据占训练 mixture 的 9.1%。</li>
+<li>不平衡的 task-robot 组合按 $n^{0.43}$ 加权，而不是按样本数线性采样，从而压低 laundry 等大数据任务的垄断效应。</li>
+<li>预训练强调任务、场景、机器人和错误恢复的覆盖；post-training 用 5 小时到 100+ 小时不等的任务特定高质量数据，强化流畅、稳定和一致策略。</li>
+<li>
+<p>语言标签同时使用 coarse task name 与约 2 秒的细粒度 segment annotation；复杂任务还可由高层 VLM 动态输出子指令。</p>
+</li>
+<li>
+<p><strong>Key Tricks：最值得抄的细节</strong></p>
+</li>
+<li><strong>Trick 1 — action expert 解耦参数、共享 attention：</strong> 保留 VLM 语义参数，同时给连续状态 / 动作独立容量；比把动作硬塞进语言 token 更适合高维、连续和高频控制。</li>
+<li><strong>Trick 2 — action chunk + prefix KV cache：</strong> 一次生成 50 步、实际执行 16 或 25 步再重规划；10 次 flow pass 只重算 action suffix，达到 73 ms on-board inference。</li>
+<li><strong>Trick 3 — pretrain 学恢复，post-train 学风格：</strong> 广而杂的数据包含失误、纠正和长尾状态，高质量小数据教 fluent execution；只用后者会脆，只用前者会笨。</li>
+<li><strong>Trick 4 — $n^{0.43}$ mixture weighting：</strong> 以次线性频率保留大数据集信号，又给小任务足够曝光，是 data curation 与 model training 联动的简单可复用接口。</li>
+<li>
+<p><strong>Trick 5 — 低噪声区少采、高噪声区多采：</strong> flow timestep 分布针对 action prediction 调整，不照搬图像生成的 logit-normal recipe。</p>
+</li>
+<li>
+<p><strong>Results：生成架构、VLM 初始化和预训练 recipe 都有贡献，但评测仍偏小样本</strong></p>
+</li>
+<li>Base model 在 shirt folding、两档 bussing、grocery bagging、toast 等 5 个任务上，以每方法每任务 10 trials 评估；完整 700k-step π₀ 最强，160k-step compute-parity 版本也超过同 mixture 的 OpenVLA / Octo。</li>
+<li>新任务 fine-tuning 中，π₀ 通常优于 OpenVLA、Octo、ACT 和 Diffusion Policy；相似于预训练分布的任务收益更大，部分设置中预训练相对 scratch 可到约 2×。</li>
+<li>复杂任务包括随机皱褶衣物折叠、移动取衣、桌面清理、纸箱组装、装蛋和外卖盒打包；完整 pretrain + post-train 在所有任务平均得分超过满分的 50%，并普遍优于 zero-shot / scratch ablation。</li>
+<li>但大多结果只有每任务 10 次真机 trial，baseline 训练步数并非全部严格匹配；论文也承认尚不清楚不同数据源的边际价值，以及跨得很远的 domain（驾驶、导航、legged locomotion）是否正迁移。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<ul>
+<li><strong>方法在 held-out 上是否 transfer？模型 vs 框架哪个贡献更大？</strong> 有新物体、新任务、跨机器人和少量数据 fine-tuning 的正迁移证据；但 π₀ 同时改变了模型规模、VLM 初始化、连续 action head、action chunk、数据规模和训练 recipe，单项贡献不能只凭总成绩归因。更严谨的视角是“完整系统栈”的胜利。</li>
+<li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</strong></li>
+<li>机器人 post-training 与 LLM post-training 的结构高度相似：base model 的 coverage / recovery repertoire 与高质量 task data 的行为塑形必须分开管理；真正的机会在 mixture observability、dataset value、failure replay 和 eval flywheel。</li>
+<li>rollout infra 不只要吞吐，还要建模 control deadline：图像编码、prefix pass、10 次 flow pass、网络、机器人执行必须形成 latency budget；p95 jitter 会直接改变闭环 policy，而不是单纯服务质量指标。</li>
+<li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong> 按 task × embodiment × camera config 记录数据权重、action norm stats、mask、loss 与 success；serving 同时记录 flow-step latency、achieved action Hz、stale-observation age、chunk interruption、controller saturation、collision / recovery。官方 openpi 已提供 base checkpoints、JAX / PyTorch 实现和 remote policy server，但截至其文档，PyTorch 路线仍缺 FSDP、LoRA、EMA 与 mixed precision 等能力。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>没看懂 / 想深挖：</strong> 怎样在保持 chunk-level 多峰性的同时显式引入 closed-loop feedback？固定每 0.5–0.8 秒重规划会把 inference schedule 当超参，但真正需要的是根据接触变化、uncertainty 或 safety residual 自适应中断。</li>
+<li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> 用 openpi 的无机器人 inference / LIBERO example 做 smoke test：固定同一 observation batch，比 10 / 5 / 2 flow steps 的 p50/p95 latency、action smoothness 与 task success；再人为增加 50–150 ms observation delay，测 chunk length 与重规划频率的交互。</li>
+<li><strong>下一步：</strong> Day12 深挖 Diffusion Policy，分离“连续生成式 action head”本身与 π₀ 的 VLM / 大规模跨 embodiment 数据贡献。</li>
+</ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<blockquote>
+<p>“Our generalist robot policy uses a pre-trained vision-language model (VLM) backbone, as well as a diverse cross-embodiment dataset with a variety of dexterous manipulation tasks.”</p>
+<p>“Intuitively, the diverse (but lower quality) pre-training data allows the model to recover from mistakes and handle highly varied situations, which might not otherwise occur in the high-quality post-training data, while the post-training data teaches the model to perform the task well.”</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<ul>
+<li>[ ] 画 <code>multi-view RGB + language + proprioception → VLM prefix / action expert → 10-step flow → H=50 action chunk → low-level controller</code> 数据流图</li>
+<li>[ ] 用 NumPy 写 20 行 conditional flow toy：二维双峰 action distribution，比较 MSE mean 与 flow samples</li>
+<li>[ ] 跑 openpi 无机器人 inference smoke test，记录 GPU 显存、image / prefix / flow latency 和输出 shape</li>
+<li>[ ] 做 <code>2 / 5 / 10 flow steps × 8 / 16 / 25 executed actions</code> 小矩阵，明确算力—反馈频率 trade-off</li>
+<li>[ ] 为 robot data mixture 设计日志字段：task、embodiment、source、quality、recovery flag、sampling weight、held-out success</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<ul>
+<li>上一篇: Day10 — Habitat 3.0（动态人类伙伴、协作环境与分层 skill 评测）</li>
+<li>下一篇预告: Day12 — Diffusion Policy（视觉条件动作扩散与 receding-horizon 控制）</li>
+<li>相关: Day05 UniSim；Day06 DreamerV3；Day09 RT-2 / OpenVLA</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>参考链接</h2>
+<ul>
+<li>Paper: https://arxiv.org/abs/2410.24164</li>
+<li>Project: https://www.physicalintelligence.company/blog/pi0</li>
+<li>Official code: https://github.com/Physical-Intelligence/openpi</li>
+</ul>
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-07）</h2>
+<blockquote>
+<p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
+</blockquote>
+<h3>Flow Matching 是什么</h3>
+<p><strong>问</strong>：flow matching 是啥？</p>
+<p><strong>答</strong>：Flow Matching 就是学一个"把噪声推向数据"的速度场。设真实动作块为 $ A $ ，高斯噪声为 $ \epsilon $ ，画一条直线把它们连起来：</p>
+<p>$$A^\tau=(1-\tau)\epsilon+\tau A,\quad \tau\in[0,1].$$</p>
+<p>$ \tau=0 $ 时是纯噪声， $ \tau=1 $ 时是真实数据；这条直线上的瞬时速度很简单，就是 $ A-\epsilon $ 。训练让网络 $ v_\theta(A^\tau,o,\tau) $ 去拟合这个速度：</p>
+<p>$$\mathcal{L}=\mathbb{E}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$</p>
+<p>学好之后，推理时从噪声出发，跟着学到的速度场往前走，解一个常微分方程 $ dA/d\tau=v_\theta $ ，用 Euler 积分 10 步就从噪声走到了一个合法的动作块。跟 Diffusion 的区别：Diffusion 学的是"去噪"，走的是随机的 SDE 路径，有 100 个离散时间步；Flow Matching 学的是"方向"，走的是确定性的直线 ODE，路径更短、更快。π₀ 选它，就是因为要 50Hz 实时控制，10 步生成一个 50 步动作块刚刚好。</p>
+<p><strong>符号</strong>： $ A $ 真实动作块； $ \epsilon $ 高斯噪声； $ \tau $ flow 时间（去噪进行到哪了）； $ o $ 观测（含图像、本体感知、语言）； $ v_\theta $ 速度场网络， $ \theta $ 为参数； $ \mathcal{L} $ 训练 loss 标量。</p>
+<h3>这个 loss 是 tau 的函数吗</h3>
+<p><strong>问</strong>：这个 loss 是 tau 的函数吗？</p>
+<p><strong>答</strong>：对一半。训练时每一个样本的误差项是 $ \tau $ 的函数，网络 $ v_\theta $ 也把 $ \tau $ 当输入（它要知道现在噪声有多大、该用多大的速度）。但最终的 loss 是对 $ \tau\sim\text{Uniform}[0,1] $ 取了期望的标量：</p>
+<p>$$\mathcal{L}=\mathbb{E}_{\tau,A,\epsilon,o}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$</p>
+<p>所以它不是某一个 $ \tau $ 的函数，而是把所有 $ \tau $ 上的误差平均掉了。训练时每次随机采样一个 $ \tau $ 来算，时间长了就相当于把整条路径都学好了。</p>
+<h3>修正：π₀ 有语言输入（澄清前一条回答的表述）</h3>
+<p><strong>问</strong>：day12 有道理，day11 不对啊——因为都没有语言输入，怎么做很多活？</p>
+<p><strong>答</strong>：纠正：π₀ 是<strong>有</strong>语言输入的；前一条"一个模型干很多活"的表述没把条件讲全，容易误会。它的观测 $ o $ 本来就是三件套：多视角图像 + 本体感知 $ q_t $ + <strong>语言指令</strong> $ \ell $ ，PaliGemma 那一半就是专门吃"图像+文字"的。所以"干很多活"靠的是语言切换任务：说"擦桌子"它擦桌子，说"叠衣服"它叠衣服，动作头都是同一个 flow 模型。Day12 的 Diffusion Policy 才是真的没有语言——所以它只能死守一个任务。逻辑是：π₀ "有语言→多任务"，DP "无语言→单任务"，各自自洽。</p>
+<p><strong>符号</strong>： $ q_t $ 本体感知（关节角/末端位姿）； $ \ell $ 语言指令。</p>
+<p><strong>与之前工作的关系</strong>：本节 3 问构成 Day11 的"flow 生成"主线——速度场直觉 → loss 对 $ \tau $ 取期望 → 语言条件带来多任务；与 Day12 的"去噪"参数化对照（对照见 README 问答记录），与 Day14 的 flow 低层执行相接。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

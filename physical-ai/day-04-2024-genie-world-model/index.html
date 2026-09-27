@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 04 — Genie: Generative Interactive Environments (World Model)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 04</span>
+    <h1>Day 04 — Genie: Generative Interactive Environments (World Model)</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote>
+<p>Day 04 of physical-ai track, following Day03 Isaac Lab. First World Model entry.</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: Genie: Generative Interactive Environments</li>
+<li>Authors / Org: DeepMind — Bruce, Dennis, Edwards, Parker-Holder, Shi et al. (Feb 2024 Genie 1, Dec 2024 Genie 2, Aug 2025 Genie 3)</li>
+<li>Link / Blog: https://deepmind.google/research/publications/60474/ / https://en.wikipedia.org/wiki/Genie_(world_model) / https://techcrunch.com/2025/08/05/deepmind-thinks-genie-3-world-model-presents-stepping-stone-towards-agi/</li>
+<li>Date read: 2026-08-25</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">world-model</span><span class="tag">genie</span><span class="tag">sim2real</span><span class="tag">interactive-env</span><span class="tag">latent-action</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-04-2024-genie-world-model</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-04-2024-genie-world-model</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Genie 是 DeepMind 的 foundation world model，从无标签 Internet videos 无监督训出，通过 spatiotemporal video tokenizer + autoregressive dynamics + latent action model，用单图/文本 prompt 生成可帧级交互的虚拟世界，11B 参数起点，Genie 2 扩展到 3D 10-20s 360p，Genie 3 到 720p 24fps 实时交互 1-2 分钟记忆。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线：</strong> 接 Day01 ARI/MSL 的 physical AGI 定义（learning from human experience）和 Day02 MuJoCo / Day03 Isaac Lab 的仿真基座线。MuJoCo/Isaac 是 physics-grounded sim，Genie 是 generative world model，两条 sim 路线分叉。</li>
+<li><strong>补了哪个短板：</strong> 物理仿真器需要手工建 MJCF/USD + 材质，Genie 直接从视频学 dynamics，无需 action labels，用 latent action 隐式控制，补“如何从海量无标签视频 scale 出可交互环境”的短板。</li>
+<li><strong>替代 / 分叉 / 改进：</strong> vs Isaac Lab：Isaac 准确但贵、需建模；Genie 便宜可无限生成但物理一致性弱，gamey artifacts。两者可互补：Genie 生成 diverse edge cases，Isaac 做 physics-correct filter。</li>
+<li><strong>对你 Infra 迁移的直接对比：</strong> 你 ai-data 的合成数据 flywheel (Self-Instruct → Evol-Instruct) 类比到 Genie 的无标签视频 → latent action → endless envs，infra 挑战都是如何评一致性和防止漂移。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>World Model 是 Physical AI 的另一半，Meta MSL 要做 personal superintelligence in physical world，需要能在想象中 rollout 的 model，Genie 是最经典的 foundation world model 基线，理解它才能看懂后续 UniSim / DreamerV3 / Waymo World Model。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li>Genie 如何在无 ground-truth action 情况下学出 latent action model？ST tokenizer 如何把视频切成离散 tokens 供 autoregressive dynamics 学？</li>
+<li>Genie 1 → 2 → 3 的记忆从 1s → 10-20s → 1min + 720p 24fps 的关键技术跃迁是什么？自回归误差累积怎么缓解？</li>
+<li>对比 Isaac Lab 的 physics-correct sim，Genie 的 generative sim 在训练 humanoid VLA / RL 时 pros/cons？能否用 Genie 生成数据 + Isaac 验证形成闭环？</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol>
+<li>
+<p><strong>Motivation</strong>: 传统 world model 需要 domain-specific + action labels，难以 scale。Genie 目标是从无标签 Internet videos 无监督训出可交互环境生成器，promptable via text / synthetic image / photo / sketch，endless variety，为 generalist agent 提供无限训练场。</p>
+</li>
+<li>
+<p><strong>System / Method</strong>:</p>
+</li>
+<li><strong>架构三件套 (11B Genie 1)</strong>：spatiotemporal video tokenizer (视频 → 离散 tokens，类似 VQ-VAE 时空版) + autoregressive dynamics model (Transformer 预测下一帧 tokens，条件是历史帧 + latent action) + simple scalable latent action model (从相邻帧差分无监督学出离散 action codes，无需人工标)。</li>
+<li><strong>交互</strong>：用户键盘输入映射到 latent action space，帧级控制，尽管训练时无 action labels。</li>
+<li><strong>Genie 2</strong>：diffusion-based 3D，Imagen 3 生成首帧，支持 first-person / isometric / third-person，10-20s 一致性，记忆被遮挡后重现优于 Oasis。</li>
+<li><strong>Genie 3</strong>：实时交互，720p 24fps，promptable world events (改天气/加物体/调相机)，视觉记忆 1 分钟，自回归生成但保持物理一致性，Waymo 用其变体训 robotaxi edge cases。</li>
+<li>
+<p><strong>Project Genie (2026)</strong>：Google AI Ultra 订阅 Web UI，World Sketching / Exploration / Remixing。</p>
+</li>
+<li>
+<p><strong>Training / Data Details</strong>:</p>
+</li>
+<li>数据：大规模无标签 Internet videos + platformer 游戏视频，约 200k+ hours (?)，无需 action。</li>
+<li>Tokenizer 训：重建视频帧，时空压缩。</li>
+<li>Dynamics 训：给定历史 tokens + latent action 预测未来 tokens，cross-entropy。</li>
+<li>Latent Action 训：看两帧差，学出可解释的离散 action codebook (8 actions in Genie 1 demo)，类似 VQ。</li>
+<li>
+<p>无需 reward，可用于 imitation：从 unseen video 推断 latent actions 训 agent。</p>
+</li>
+<li>
+<p><strong>Key Tricks</strong>:</p>
+</li>
+<li><strong>Trick 1 - Latent Action from Video Only</strong>：不靠人工标，用帧间变化无监督聚类出 action，避免 teleop 成本，和 Day01 ARI 的 human experience scaling 哲学同构。</li>
+<li><strong>Trick 2 - Spatiotemporal Tokenizer + AR Dynamics</strong>：把视频当语言，tokenizer 压到离散，Transformer 像 LLM 一样 next-token prediction 学世界 dynamics，复用 LLM infra。</li>
+<li>
+<p><strong>Trick 3 - Memory via History Conditioning</strong>：Genie 2/3 通过 conditioning 过去 1 分钟帧来保持一致性，解决自回归漂移，类似 LLM 的 long context，物理一致性涌现而非显式编程。</p>
+</li>
+<li>
+<p><strong>Results</strong>:</p>
+</li>
+<li>Genie 1：2D platformer，1 fps，endless，11B 可控。</li>
+<li>Genie 2：3D，360p，10-20s，multi-view，physics 推断水/烟但 gamey。</li>
+<li>Genie 3：720p 24fps，1-2min，real-time interactive，promptable events，Waymo World Model 变体训 edge cases。</li>
+<li>对比：优于 Oasis 的记忆，Waymo 用其生成 street envs  via Street View。</li>
+</ol>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移 / Transfer</h2>
+<ul>
+<li><strong>对你 Infra → Physical AI 迁移的 1-2 个直接启发：</strong></li>
+<li><strong>Data flywheel</strong>：你 ai-data 的 15T → 5级过滤类比到 Internet video → ST tokenizer → latent action filter，如何从海量视频里筛出可交互片段是关键，质量门设计可复用。</li>
+<li>
+<p><strong>Eval</strong>：Genie 的一致性评测类似你 eval-bench-efficiency 的 IRT，如何自动评生成世界是否物理一致、记忆是否保持，可借鉴 VBench / physics benchmark。</p>
+</li>
+<li>
+<p><strong>Infra 视角：</strong></p>
+</li>
+<li>可扩展性：Genie 像 LLM infra，tokenizer + AR 训练可 scale 到 100B，但 inference 24fps 实时要求高，需 speculative / distillation。</li>
+<li>成本：无标签视频便宜，比 Isaac 建模便宜，但训练 11B+ Transformer 贵。</li>
+<li>评测自动化：需 physics consistency / controllability 自动评，否则 human eval 贵。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>没看懂的</strong>：latent action codebook 具体大小和可解释性，8 个 action 如何覆盖 platformer 的复杂控制？</li>
+<li><strong>第一个实验</strong>：跑 Genie 1 开源复现 (Oasis 300M) 对比，看 latent action 控制感；再试 Project Genie Web UI 生成一个 street scene 测记忆。</li>
+<li><strong>下一步预告</strong>：Day05 UniSim — 真实世界交互模拟，real-world video + action 条件生成，和 Genie 的 game world 互补。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句</h2>
+<blockquote>
+<p>"We introduce Genie, the first generative interactive environment trained in an unsupervised manner from unlabelled Internet videos. The model can be prompted to generate an endless variety of action-controllable virtual worlds" — DeepMind Abstract</p>
+<p>"Genie 3 is the first real-time interactive general-purpose world model... It can generate both photo-realistic and imaginary worlds, and everything in between." — Shlomi Fruchter, DeepMind Research Director</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<ul>
+<li>[x] Day04 Genie NOTES 初版</li>
+<li>[ ] Genie 2/3 vs Oasis 记忆对比视频</li>
+<li>[ ] Day05 UniSim 预习</li>
+</ul>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<ul>
+<li>上一篇: Day03 Isaac Lab — GPU 规模化仿真</li>
+<li>下一篇预告: Day05 UniSim — Real-world Interaction Simulator</li>
+<li>相关: ai-data Day21 Self-Instruct (无标签合成类比), Day06 Phi-1 (合成数据)</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>参考链接</h2>
+<ul>
+<li>DeepMind Genie: https://deepmind.google/research/publications/60474/</li>
+<li>Wiki: https://en.wikipedia.org/wiki/Genie_(world_model)</li>
+<li>Genie 3 TC: https://techcrunch.com/2025/08/05/deepmind-thinks-genie-3-world-model-presents-stepping-stone-towards-agi/</li>
+<li>Engadget Genie 2: https://www.engadget.com/ai/google-deepminds-genie-2-can-generate-interactive-3d-worlds-200708207.html</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-04-2024-genie-world-model/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

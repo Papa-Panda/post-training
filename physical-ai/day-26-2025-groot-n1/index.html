@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 26 — GR00T N1：双系统人形基础模型 + 数据金字塔</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 26</span>
+    <h1>Day 26 — GR00T N1：双系统人形基础模型 + 数据金字塔</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: GR00T N1: An Open Foundation Model for Generalist Humanoid Robots</li>
+<li>Authors / Org: NVIDIA（App. A 完整作者列表；GTC 2025 发布）</li>
+<li>Link / arXiv: https://arxiv.org/abs/2503.14734（v1 2025-03-18；v2 含修订）</li>
+<li>官方页面：https://research.nvidia.com/publication/2025-03_nvidia-isaac-gr00t-n1-open-foundation-model-humanoid-robots</li>
+<li>Official code: https://github.com/NVIDIA/Isaac-GR00T（Apache 2.0，模型 / 代码 / 数据 / 评测基准全部开源）</li>
+<li>模型权重：https://huggingface.co/nvidia/GR00T-N1-2B（GR00T-N1-2B：2.2B 总参数，其中 VLM 1.34B）</li>
+<li>Date read: 2026-09-17</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">groot-n1</span><span class="tag">humanoid</span><span class="tag">vla</span><span class="tag">dual-system</span><span class="tag">flow-matching</span><span class="tag">diffusion-transformer</span><span class="tag">data-pyramid</span><span class="tag">sim2real</span><span class="tag">cross-embodiment</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-26-2025-groot-n1</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-26-2025-groot-n1</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>GR00T N1 是 NVIDIA GTC 2025 开源的<strong>首个人形机器人 foundation model</strong>：Kahneman 双系统架构——慢思考的预训练 VLM（Eagle-2，System 2，10Hz）负责理解场景和语言目标，快思考的 Diffusion Transformer（System 1，120Hz）用 flow matching 生成高频闭环动作 chunk；训练上最大的创新不是模型而是<strong>数据金字塔</strong>（web/人类视频垫底 → 仿真+神经生成数据在中 → 真机轨迹封顶，780K 条仿真轨迹 11 小时生成，等价 9 个月人工遥操作），真机 GR-1 双臂语言条件任务上以高数据效率超越 SOTA 模仿学习基线——它把"数据从哪来"这个 Physical AI 最大的 infra 问题，做成了一个可工程化的回答。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线</strong>：Day25–30 "Physical AGI / Eval / Safety" 块的第二篇。Day25 Gato 定义了 generalist 的想象上限，GR00T N1 给出一个<strong>完全开源、可复现、可 fine-tune</strong>的工程实现——Gato 无官方代码，GR00T N1 模型+代码+数据+评测全开（Apache 2.0）。</li>
+<li><strong>补了哪个短板</strong>：Day25 Gato 用离散 token 做动作（精度瓶颈）；GR00T N1 继承 Gato 的 generalist 精神，但动作头改成<strong>连续的 flow matching DiT</strong>（Day11 π₀ / Day12 Diffusion Policy 路线的修正方向），同时保留 VLM 的语义泛化——是"Gato 的 generalist + π₀ 的连续动作"的一次合流。</li>
+<li><strong>替代 / 分叉 / 改进</strong>：</li>
+<li>vs Day11（π₀）：都是 flow matching 动作生成。差别有三：① π₀ 单系统（一个网络从观测直达动作），GR00T N1 双系统（VLM 推理与 DiT 控制解耦、异步频率）；② π₀ 闭源，GR00T N1 全开；③ GR00T N1 的数据金字塔（human video + neural traj + sim）是 π₀ 公开材料之外的<strong>数据 infra 方法论</strong>。</li>
+<li>vs Day12（Diffusion Policy）：DiT + flow matching 本质上是 DP 的 DDPM action diffusion 的<strong>工程替代</strong>（ODE 积分，K=4 步即可推理，比 DDPM 的多步去噪快；Day11 已讲过 rectified flow 的数学）。</li>
+<li>vs Day13（Octo）："统一 backbone + embodiment 可插拔 readout"思想的<strong>直接继承和放大</strong>——Octo 的 diffusion readout head → GR00T N1 的 embodiment-specific state/action encoder-decoder MLP；Octo 只在机器人域内，GR00T N1 把人类视频（latent action / LAPA）也当成一种 embodiment 混进来。</li>
+<li>vs Day09（RT-2 / OpenVLA）：RT-2 用离散 action token，OpenVLA 同理。GR00T N1 的选择是：<strong>VLM 只负责推理（System 2），动作一律连续生成</strong>——承认离散化精度损失是接触任务的硬伤，不在 System 1 里妥协。</li>
+<li>vs Day15（OXE）/ Day18（RoboCasa）：OXE 真实多 embodiment 数据是数据金字塔的塔尖原料之一；DexMimicGen（RoboCasa 的 MimicGen 人形版）是塔中仿真数据的生成引擎——Day18 的"程序化放大演示"在这里变成 780K 轨迹的工业管线。</li>
+<li>vs Day19–24（RL 块）：GR00T N1 是<strong>纯 BC / flow-matching，没有 RL</strong>。它回答的是"演示者从哪来、怎么放大"，RL 块回答"如何超越演示者"——数据资产 infra 和在线优化 infra 的两条腿，合起来才是 Day30 数据飞轮。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>Roadmap Day26–30 是"Physical AGI 落地工程"：Day26 的 GR00T N1 是这个块里<strong>唯一全开源的、可复现的人形 VLA</strong>——对你而言它是"如果自己搭一个 generalist humanoid policy stack，参考实现长什么样"的活答案。它的双系统架构给出了一个<strong>可部署的两时间尺度控制</strong>设计（10Hz 推理 vs 120Hz 控制），它的数据金字塔给出了"真机数据永远不够"这个根本约束下的<strong>数据 infra 配方</strong>（web 视频 + VQ-VAE latent action + 视频生成模型 + DexMimicGen 仿真），训练 infra（OSMO + Ray + 1024 H100，5 万 H100 小时）则是你熟悉的 infra 语言。这是把 Day01–25 的点连成"一条可交付的管线"的一天。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li>双系统解耦：System 2（VLM，10Hz）输出的 vision-language token $\phi_t$ 是 System 1（DiT，120Hz）唯一的语义条件。推理侧频率差 12 倍意味着 DiT 在连续 12 个控制步里复用同一套语义 token——<strong>语义 stale</strong>的代价是什么？论文用"中层 LLM embedding（第 12 层）而非末层"来同时提速和提分，这暗示了什么（表征的哪一层对动作生成最有用）？</li>
+<li>Flow-matching 损失（式 1）里，LAPA latent action 和真实机器人动作是<strong>同一套 $V_\theta$ 参数、按 embodiment 分头训练</strong>的。VQ-VAE 从视频帧对 $(x_t, x_{t+H})$ 提取的连续 latent embedding，真的是"动作"吗？它在物理上对应什么（跨 embodiment 的运动方向先验），又在什么情况下会误导 DiT？</li>
+<li>神经轨迹（neural trajectories）用视频生成模型把 88 小时真机遥操作放大到 827 小时（~10x），IDM 标注伪动作后 1:1 co-train——<strong>视频模型的幻觉（物体消失/物理不自洽）会不会污染 policy？</strong> 论文用 MLLM 当 judge 过滤+重打标，这个"模型审模型"的数据闭环的失败模式是什么？</li>
+</ol>
+<p>相关讨论（Gemini 网页版，2026-09-19）：https://gemini.google.com/app/ee2b6d0b878b1530</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<h3>1. Motivation</h3>
+<ul>
+<li>人形机器人是 physical AGI 最自然的硬件载体，但"没有人形机器人的互联网级数据集"——单台硬件的数据量小好几个数量级；OXE 式的跨 embodiment 混合又变成"数据孤岛群岛"（控制模式、自由度、传感器各异）。</li>
+<li>Baseline（单 embodiment IL、RT-2 式离散 VLA、纯仿真 DP）各自缺一块：泛化语义、连续精细控制、数据规模。GR00T N1 的目标是<strong>一次给出"模型+数据+开源"的完整答案</strong>，让社区能 fine-tune 而不是从零造轮子。</li>
+<li>和 Physical AGI 的关系：它不宣称 AGI，只宣称"foundation model for humanoid robots"——<strong>语义理解（System 2）+ 实时运动生成（System 1）+ 跨 embodiment</strong> 三个 generalist 的必要条件，全部给出可训练的实现。</li>
+</ul>
+<h3>2. System / Method</h3>
+<ul>
+<li><strong>双系统架构</strong>（Kahneman, 2011 的快慢思考）：</li>
+<li>System 2：Eagle-2 VLM（SigLIP-2 视觉编码器 + 微调自 SmolLM2 的 LLM；224×224 图像经 pixel shuffle 得每帧 64 token），10Hz 运行在 L40 上，把图像+语言指令变成环境/任务 token $\phi_t$ 。</li>
+<li>System 1：Diffusion Transformer $V_\theta$ （AdaLN 步数条件），在 proprioceptive state $q_t$ 、加噪动作 chunk $A_t^\tau$ 上做 self-attention，对 $\phi_t$ 做 cross-attention（Flamingo/VIMA 式交替块），120Hz 输出闭环电机动作。</li>
+<li>两系统<strong>紧耦合、端到端联合训练</strong>，不是 pipeline 拼接。</li>
+<li><strong>跨 embodiment 处理</strong>：每个 embodiment 一对 MLP（state/action encoder 把变维度 $s/a$ 投到共享 embedding 维；末端 embodiment-specific action decoder），"不同机器人 = 不同 embodiment 分头"——包括人类视频的 latent action（LAPA embodiment）。</li>
+<li><strong>动作分块</strong>： $A_t = [a_t, a_{t+1}, \dots, a_{t+H-1}]$ ， $H = 16$ （Zhao et al., 2023 的 ACT 路线）；推理时 $K=4$ 步欧拉积分去噪，16 个动作 chunk 在 L40 bf16 下 63.9ms。</li>
+<li><strong>关键工程细节</strong>：取 LLM <strong>中间层（第 12 层）</strong>embedding 而非末层——更快、policy 成功率反而更高（末层过拟合语言任务，中间层保留更多视觉 grounding）。</li>
+</ul>
+<h3>3. Training / Data Details</h3>
+<ul>
+<li><strong>数据金字塔</strong>（从底到顶：数据量递减、embodiment 特异性递增）：</li>
+<li>底层：web 数据（VLM 预训练已含）+ 人类第一视角视频 → VQ-VAE 从帧对 $(x_t, x_{t+H})$ 提取 latent action $z_t$ （编码器→codebook 最近邻量化，解码器重建 $x_{t+H}$ ），连续 pre-quantized embedding 当伪动作标签，按 LAPA embodiment 训练——<strong>把"看人类视频"变成"多一个 embodiment 的 BC"</strong>。</li>
+<li>中层：① <strong>神经轨迹</strong>：在 88 小时自有遥操作数据上微调 img2video 模型，用新语言 prompt 生成反事实视频，88h → 827h（~10x）；MLLM 当 judge 过滤不跟随指令的视频并重打标；② <strong>仿真轨迹</strong>：DexMimicGen（Day18 MimicGen 的人形双臂版）从少量人类演示自动扩增，<strong>780K 条轨迹 = 6500 小时 = 9 个月连续人工演示，11 小时生成完毕</strong>。</li>
+<li>顶层：真机数据——自有 GR-1 遥操作（VIVE 追踪手腕 + Xsens 手套捕捉手指，IK 重定向，20Hz，头戴相机）、OXE（RT-1/Bridge-v2/DROID 等）、AgiBot-Alpha（14 万轨迹）。</li>
+<li><strong>训练配方</strong>：预训练全程 flow-matching（式 1），跨 embodiment+跨数据源混合采样；post-training 阶段冻结 VL backbone 的语言部分，只 fine-tune 其余（适配器层+DiT 可在<strong>单张 A6000</strong> 上训，batch 200）——<strong>低成本适配是开源策略的核心</strong>。</li>
+<li><strong>训练 infra</strong>：NVIDIA OSMO 编排 + 自研 Ray 库容错多节点训练，单模型最多 1024 H100，GR00T-N1-2B 预训练约 <strong>50,000 H100 GPU 小时</strong>。</li>
+<li>Verifiable signal：纯 BC/flow-matching，<strong>没有 RL、没有 reward</strong>——成功信号只来自演示数据的筛选（DexMimicGen 只保留成功的仿真 rollout；神经轨迹靠 MLLM judge 过滤）。</li>
+</ul>
+<h3>4. Key Tricks（最值得抄的 3 个）</h3>
+<ol>
+<li><strong>latent action 把 action-less 视频变成可训练数据</strong>：VQ-VAE $(x_t, x_{t+H}) \to z_t$ 统一了所有数据源的"动作"接口，人类视频/神经视频/机器人轨迹共享一套 latent action 空间（图 4 跨 8 种 embodiment 检索到一致的"右臂左移"）。这是数据金字塔能成立的<strong>数学粘合剂</strong>。</li>
+<li><strong>视频生成模型当数据放大器</strong>：88h → 827h 的神经轨迹管线（微调 img2video + 新 prompt 反事实 + MLLM 过滤/重打标 + IDM 伪动作 + 1:1 co-train），是"真机数据永远不够"约束下的<strong>可复制配方</strong>——Day27 Cosmos 就是把这条线做成 foundation model。</li>
+<li><strong>双系统异步 + 中层特征</strong>：10Hz 语义 / 120Hz 控制的频率解耦让 VLM 的延迟不进控制环；取 LLM 第 12 层而非末层 embedding（更快+更准）——<strong>"最好的表征层不一定是最后一层"</strong>，对任何 VLM-as-backbone 的 policy 都是可直接抄的消融结论。</li>
+</ol>
+<h3>5. Results</h3>
+<ul>
+<li>仿真标准 benchmark（多 embodiment）上<strong>超越 SOTA 模仿学习基线</strong>（论文摘要原话；具体 benchmark 含 RoboCasa/DexMimicGen 系任务）。</li>
+<li>真机：Fourier GR-1 人形机器人，<strong>语言条件双臂操作任务</strong>，高数据效率（post-training 少量演示即达强性能）。</li>
+<li>开源交付：GR00T-N1-2B 权重（HF）、训练数据、仿真评测基准、Isaac-GR00T 代码库，Apache 2.0——这是它和 Gato/π₀/RT-2 最大的<strong>生态位差异</strong>：别人发论文，它发 infra。</li>
+<li>续作注记：GR00T N1.5（2025-05）后续发布，主要改进合成数据质量和指令跟随；路线未变。</li>
+</ul>
+<h3>数学视角（统一框架：两时间尺度级联控制 + 条件流匹配）</h3>
+<p><strong>框架</strong>：把 GR00T N1 看成一个<strong>部分可观测马尔可夫决策过程（POMDP）上的两时间尺度级联策略</strong>。</p>
+<ul>
+<li><strong>记号</strong>：时刻 $t$ ，真实状态 $s_t$ 不可观测；观测 $o_t = (I_t, q_t, \ell)$ ，其中 $I_t$ 为多视角 RGB 图像（每帧经 SigLIP-2 + pixel shuffle 压缩为 64 token）， $q_t \in \mathbb{R}^{d_q}$ 为本体感知（关节角/速度， $d_q$ 随 embodiment 变）， $\ell$ 为语言指令。动作 $a_t \in \mathbb{R}^{d_a}$ （关节/末端指令， $d_a$ 随 embodiment 变）。动作为块 $A_t = [a_t, \dots, a_{t+H-1}] \in \mathbb{R}^{H \times d_a}$ ， $H = 16$ 。</li>
+<li><strong>System 2（慢系统，10Hz）</strong>：VLM 编码器 $\Phi$ 把 $(I_t, \ell)$ 映射为语义 token $\phi_t = \Phi(I_t, \ell) \in \mathbb{R}^{L \times d}$ （实际取 LLM 第 12 层隐状态）。它不输出动作，只输出<strong>任务的充分统计量</strong>——相当于把 POMDP 的 belief $b_t$ 压缩成一个低频更新的语义先验。</li>
+<li><strong>System 1（快系统，120Hz）</strong>：DiT 向量场 $V_\theta(\phi_t, A_t^\tau, q_t)$ ，在加噪动作块 $A_t^\tau$ 上做流匹配去噪。</li>
+</ul>
+<p>核心训练目标（论文式 1，flow matching）：</p>
+<p>$$\mathcal{L}_{fm}(\theta) = \mathbb{E}_{\tau}\left[\lVert V_{\theta}(\phi_t, A_t^{\tau}, q_t) - (\epsilon - A_t)\rVert^{2}\right]$$</p>
+<ul>
+<li><strong>每个符号</strong>： $\tau \in [0,1]$ 为流时间（注意它<strong>不是</strong>机器人物理时间 $t$ ，是去噪过程的虚拟时间）； $\epsilon \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$ 为高斯噪声； $A_t^\tau = \tau A_t + (1-\tau)\epsilon$ 为插值路径（ $\tau=0$ 纯噪声， $\tau=1$ 真实动作块）；目标向量场 $\epsilon - A_t$ 是从噪声指向数据的<strong>直线方向</strong>（rectified flow，Day11 π₀ 已讲：比 DDPM 的弯曲 SDE 路径更短、更少步数可解）； $\tau$ 的采样分布 $p(\tau) = \text{Beta}(\frac{s-\tau}{s}; 1.5, 1)$ ， $s = 0.999$ ——Beta(1.5,1) 偏向大 $\tau$ ，即<strong>训练时更关注接近真实动作的精细去噪阶段</strong>，这正是接触任务需要精度的区域。</li>
+<li><strong>推理</strong>：从 $A_t^0 \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$ 出发， $K=4$ 步前向欧拉 $A_t^{\tau+1/K} = A_t^{\tau} + \frac{1}{K}V_\theta(\phi_t, A_t^\tau, q_t)$ 。 $K=4$ 之所以够用，正因为目标向量场近似直线——这是 flow matching 相对 DDPM（Day12）的<strong>核心数学红利</strong>：直线路径的截断误差是 $O(1/K^2)$ 量级，弯曲路径需要更多步。</li>
+<li><strong>跨 embodiment 的数学处理</strong>：encoder MLP $E_{\text{emb}}: \mathbb{R}^{d_a^{(\text{emb})}} \to \mathbb{R}^{d}$ 把不同维度动作投影到共享空间——相当于为每个 embodiment 学一个<strong>线性（+非线性）坐标卡</strong>，DiT 永远在共享坐标里做流匹配，decoder 再投影回去。LAPA latent action 只是多了一张"人类视频"坐标卡。</li>
+<li><strong>两时间尺度的控制含义</strong>： $\phi_t$ 每 100ms 更新一次，DiT 每 ~8ms 用同一 $\phi_t$ 生成新动作块——这是一个<strong>慢变参数的快变控制器</strong>（slow-fast cascade）。数学上要求任务语义在 100ms 内近似恒定（ $\lVert \phi_{t+\delta} - \phi_t \rVert$ 小），快速变化的场景（物体被碰倒）会有最多 100ms 的语义延迟——这是双系统架构<strong>没有覆盖的真实部署误差之一</strong>。</li>
+<li><strong>数学没有覆盖的</strong>：① flow matching 只建模<strong>动作分布</strong>，不建模世界动力学 $p(s_{t+1}|s_t,a_t)$ ——和 Day25 Gato 一样，GR00T N1 不能做 planning/imagination（对比 Day06 Dreamer）；② 损失是 BC，没有<strong>超越演示者</strong>的机制（对比 Day19–24 RL）；③ VQ-VAE latent action 的"动作"语义只在<strong>视觉变化可逆</strong>时成立——力/触觉不可见的接触（打滑、软体变形）无法从 $(x_t, x_{t+H})$ 恢复，latent 监督在这些任务上是<strong>有偏的</strong>。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移 / Transfer</h2>
+<ul>
+<li>模型 vs 框架哪个贡献大：论文的消融指向<strong>数据框架</strong>（金字塔 + 神经轨迹 + 1:1 co-train）贡献大于单点模型 trick——模型本身是"VLM + DiT + flow matching"的标准件组合，没有私有算子。<strong>开源的真正资产是数据配方和评测基准</strong>，不是 2.2B 权重。</li>
+<li>对 Infra → Post-training → Physical AI 的启发：</li>
+<li><strong>数据 infra 是 Physical AI 的第一性原理约束</strong>：780K 轨迹 / 11 小时 / 50K H100 小时这组数字说明，robotics foundation model 的 scaling law 目前瓶颈不在模型而在<strong>数据生成管线</strong>（仿真并行 + 视频生成 + 自动标注）。这正是你 ML-for-infra 背景（autoscaling、数据管线）可以直接变现的地方。</li>
+<li><strong>双系统 = 推理与控制的解耦部署</strong>：10Hz 大模型 + 120Hz 小快模型的异步级联，是把"大模型延迟"挡在控制环之外的通用模式——和 LLM serving 里 prefill/decode 分离、speculative decoding 的思想同构。</li>
+<li>Infra 视角：训练用 OSMO + Ray 容错（1024 H100 fat-tree），post-training 可压到<strong>单 A6000</strong>（只训 adapter + DiT，batch 200）——<strong>预训练重、适配轻</strong>的分层算力设计，是 foundation model 落地的标准 infra 形状；评测基准开源则解决了 robotics 最大的可复现性痛点（对比 Day28 要讲的评测主题）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 1 个问题：LAPA latent action 和真实动作<strong>共享同一套 DiT 参数</strong>训练时，两种监督信号的梯度会不会打架（latent action 是视觉运动先验，真实动作是精确电机指令）？论文按 embodiment 分头但共享主干——这个共享到底是迁移还是干扰，需要看消融。</li>
+<li>如果要复现 / 小规模试：第一个实验——拿 Isaac-GR00T 仓库 + GR00T-N1-2B 权重，在<strong>单 A6000</strong> 上按官方脚本只 fine-tune adapter（state/action encoder-decoder + DiT），用 50–100 条自己 teleop 的单臂任务验证"冻结 VLM 语言部分 + 小数据适配"的 data-efficiency 宣称是否成立。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句</h2>
+<blockquote>
+<p>However, unlike the digital realms of words and pixels, no Internet of humanoid robot datasets exists for large-scale pre-training.
+（不像文字和像素的数字世界，不存在可供大规模预训练的人形机器人数据集互联网——这句话是整篇论文、也是数据金字塔的全部动机。）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<ul>
+<li>[x] 按模板补齐 System / Training / Key Tricks / Results / 可迁移（含数学视角：两时间尺度级联 + 条件流匹配）</li>
+<li>[x] 保留并完善「和之前工作的关系」小节（vs Day25 Gato / Day11 π₀ / Day12 DP / Day13 Octo / Day09 RT-2 / Day15 OXE / Day18 RoboCasa / Day19–24 RL）</li>
+<li>[x] 更新 reading-log.csv、README.md 进度（26/30），commit + push</li>
+</ul>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<ul>
+<li>上一篇: Day 25 — Gato（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-25-2022-gato）</li>
+<li>下一篇预告: Day 27 — Cosmos 世界基础模型（用世界模型生成/筛选 Physical AI 训练数据——正是今天"神经轨迹"这条线的 foundation-model 版本）</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

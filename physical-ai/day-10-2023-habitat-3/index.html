@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 10 — Habitat 3.0：把 embodied AI 从“独居 agent”推进到人机共居</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 10</span>
+    <h1>Day 10 — Habitat 3.0：把 embodied AI 从“独居 agent”推进到人机共居</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: Habitat 3.0: A Co-Habitat for Humans, Avatars and Robots</li>
+<li>Authors / Org: Xavier Puig, Eric Undersander, Andrew Szot et al. / FAIR at Meta, Georgia Tech, Simon Fraser University, UC Berkeley, University of Washington, Stanford University, Carnegie Mellon University</li>
+<li>Link / arXiv / Blog: https://arxiv.org/abs/2310.13724</li>
+<li>Project: https://aihabitat.org/habitat3/</li>
+<li>Official code: https://github.com/facebookresearch/habitat-lab</li>
+<li>Venue: ICLR 2024</li>
+<li>Date read: 2026-08-31</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">habitat-3</span><span class="tag">habitat-lab</span><span class="tag">embodied-ai</span><span class="tag">human-robot-interaction</span><span class="tag">social-navigation</span><span class="tag">social-rearrangement</span><span class="tag">multi-agent-rl</span><span class="tag">human-in-the-loop</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-10-2023-habitat-3</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-10-2023-habitat-3</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Habitat 3.0 在 Habitat-Sim / Habitat-Lab 上加入高效多样的 SMPL-X humanoid、可回放的 human-in-the-loop 工具，以及 Social Navigation / Social Rearrangement 两个标准任务，使人机协作策略能在未见家庭、未见伙伴和真实人类控制的 avatar 上训练与评测；关键不只是在模拟器里“加个人”，而是把动态伙伴、协作效率和安全距离变成闭环 RL 问题。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线：</strong> Day02 MuJoCo 与 Day03 Isaac Lab 解决物理和并行模拟；Day04–06 研究可学习的世界模型；Day07–08 解决 humanoid 低层全身控制；Day09 RT-2 / OpenVLA 连接语义感知与动作。Day10 把这些能力放进多人共享、动态变化的家庭环境，转向 embodied navigation、协作和标准化评测。</li>
+<li><strong>补了哪个短板：</strong> Day09 的 VLA 多数在单机器人、桌面 manipulation、单帧观测上评估，几乎不测人类伙伴会移动、抢占空间或改变任务状态。Habitat 3.0 明确定义 social navigation、zero-shot coordination、collision 与 relative efficiency，补上“和人一起做事”的环境与指标。</li>
+<li><strong>替代 / 分叉 / 改进：</strong> 它不替代 VLA 或 torque controller，而是提供更高层的训练 / 评测 substrate。低层 locomotion、pick/place、VLA action proposal 都可以成为 Habitat policy 的 skill；Habitat 负责场景、多人状态、任务生成、rollout 和评测。</li>
+<li><strong>对之前 Day X 的直接对比：</strong> Day09 用 web + robot demonstrations 扩展 semantic generalization；Day10 用伙伴 population 与未见场景扩展 interaction generalization。前者问“看懂指令后做什么”，后者问“另一位 agent 也在行动时，怎样安全、高效地配合”。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>路线图 Day10 从 VLA 切到 Habitat。Physical AI 的可靠性不能只在静态桌面和单 agent 成功率上衡量；真实家庭是部分可观测、多人、动态且安全敏感的系统。Habitat 3.0 的价值在于把 humanoid simulation、HITL 数据 / 评测、multi-agent RL 和可复现 benchmark 接成一条 pipeline，也暴露出高层 policy 依赖 oracle skill 时会被低层误差击穿的典型分层系统问题。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li>自动 humanoid population 上的 policy ranking 在多大程度上能预测真实人类协作体验；需要什么 behavior coverage 才不把 simulator partner 过拟合误当作 generalization？</li>
+<li>为什么扩大 scripted partner population 能改善 zero-shot coordination，而 8 个随机初始化的 learned partners 仍缺乏足够行为多样性；怎样用数据驱动指标而不是 population size 衡量 partner diversity？</li>
+<li>高层策略用 oracle navigation / pick / place 训练、换成 learned skills 后性能骤降，说明层间接口缺了什么：failure state、uncertainty、retry / recovery，还是端到端 joint fine-tuning？</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol>
+<li><strong>Motivation：embodied AI 不能永远是“独居 agent”</strong></li>
+<li>传统 Habitat / embodied benchmarks 通常假设环境只因单个 agent 的动作而变化，但家用辅助机器人必须与会移动、会改动环境、行为偏好各异的人共享空间。</li>
+<li>真机 + 真人训练成本高、难规模化且有安全风险，也很难做标准化重复实验；因此需要同时支持 realistic humanoid、real human-in-the-loop 和机器人 policy 的高速仿真平台。</li>
+<li>
+<p>Habitat 3.0 的三项核心贡献是：高效 humanoid simulation、HITL 基础设施、Social Navigation / Social Rearrangement 两个协作任务及其 learned / heuristic baselines。</p>
+</li>
+<li>
+<p><strong>System / Method：物理 skeleton、视觉 skin、分层行为与 HITL client-server</strong></p>
+</li>
+<li><strong>Humanoid representation：</strong> 用 articulated skeleton 做碰撞与物理，用 skinned surface mesh 做视觉；SMPL-X 参数化 pose / shape。系统离线缓存 12 个基础 body（4 male、4 female、4 neutral）的 rig、mesh 和 blend-shape 结果，运行时主要做 linear blend skinning，以少量视觉保真损失换吞吐。</li>
+<li><strong>Motion / behavior：</strong> 高层 planner 或 learned policy 组合 navigation、pick、place 等低层 skill。行走用 AMASS motion clip 循环并沿 waypoint 投影；reach / pick / place 用 VPoser 预计算 pose library，运行时按目标手部位置插值，再以 kinematic attach / detach 处理物体。</li>
+<li><strong>Human-in-the-loop：</strong> server 负责仿真、agent inference 与 avatar control，client 负责平台相关的渲染和输入；支持键鼠、浏览器与 VR，并可记录 / 回放高层 action、精确 pose 与物体 trajectory，也能从不同 camera 重新渲染。</li>
+<li><strong>Social Navigation：</strong> Spot 在未见场景中寻找并保持距 humanoid 1–2 m，输入 depth、humanoid detector、相对位置 / 朝向，DD-PPO recurrent policy 输出局部 linear / angular velocity；指标覆盖 Finding Success、SPS、Following Rate、Collision Rate。</li>
+<li>
+<p><strong>Social Rearrangement：</strong> robot 与 humanoid 把两个物体搬到目标位置。两层 policy 中，高层 DD-PPO 从预定义 skill library 选择 navigate / pick / place；训练 population 可由单一伙伴、1–4 个 planner partner 或 8 个 jointly learned partner 组成，评测强调未见伙伴的 zero-shot coordination。</p>
+</li>
+<li>
+<p><strong>Training / Data Details：高吞吐 rollout + partner population + 可验证 reward</strong></p>
+</li>
+<li>场景来自 HSSD，Social Navigation 使用 37 train / 12 validation / 10 test scenes；两类任务都用 Boston Dynamics Spot 与 humanoid avatar。</li>
+<li>Social Navigation 用 4×A100、每卡 24 parallel environments、每次 update 收集 128 steps；ResNet-18 + 2-layer LSTM 约 8.5M 参数，DD-PPO 约 200M environment steps（约 4 天）收敛，3 seeds。</li>
+<li>Navigation reward 按 geodesic distance 塑形：太近（&lt;1 m）奖励远离，1–2 m 内给常量奖励，太远则奖励接近；保持 1–2 m 且朝向 humanoid 400 steps 得 +10，collision 终止，另有 -0.1 slack penalty。</li>
+<li>Social Rearrangement 同样用 4×A100、96 parallel environments、100M steps、ResNet-18 + 2-layer LSTM；reward 为成功 +10、每个 pick / place subgoal +5、collision -5 并终止、每步 -0.005。所有结果按 3 seeds 汇报。</li>
+<li>
+<p>HITL 评测覆盖 30 participants，比较 human solo、Learn-Single 和 Plan-Pop3。回放机制使同一策略 / 任务可保存并重渲染，为 failure analysis 和数据闭环提供可追溯轨迹。</p>
+</li>
+<li>
+<p><strong>Key Tricks：最值得抄的细节</strong></p>
+</li>
+<li><strong>Trick 1 — physics / appearance 解耦并缓存人体形变：</strong> skeleton 管碰撞，skin mesh 管视觉，SMPL-X / VPoser 的昂贵部分离线缓存，动作运行时做 motion projection / pose interpolation；robot + humanoid 在单 GPU 16 environments 下达到约 1191 FPS。</li>
+<li><strong>Trick 2 — 用 partner population 训练 coordination，而不是只做 scene randomization：</strong> Plan-Pop3/4 的多种 scripted strategy 让 policy 学会适应“伙伴会做什么”，比单一伙伴或仅靠随机初始化得到的 learned population 更稳健。</li>
+<li>
+<p><strong>Trick 3 — 分层 action space + 可中断 skill：</strong> 高层选择语义 skill，低层执行导航 / 抓取；当 robot 距 humanoid 小于 1.5 m 时终止当前 skill 并重规划，由简单的 safety interrupt 诱导出后退让路、改拿另一件物体等 reactive behavior。</p>
+</li>
+<li>
+<p><strong>Results：仿真吞吐强、协作泛化可见，但 oracle-to-learned gap 很大</strong></p>
+</li>
+<li><strong>速度：</strong> 单环境 robot 为 <code>245±19 FPS</code>、humanoid 为 <code>188±2 FPS</code>；双 agent 时 robot-robot <code>150±13 FPS</code>、robot-humanoid <code>136±8 FPS</code>；单 GPU 16 environments 时 robot-humanoid 为 <code>1191±3 FPS</code>。</li>
+<li><strong>Social Navigation：</strong> heuristic expert 的 Finding Success / SPS / Following Rate / Collision Rate 为 <code>1.00 / 0.97 / 0.51 / 0.52</code>；无地图 end-to-end RL 为 <code>0.97 / 0.65 / 0.44 / 0.51</code>。RL 虽路径效率较低，但学到 anticipation、backing-up 和在窄道让路。</li>
+<li><strong>Partner generalization：</strong> 单伙伴 Learn-Single 从 train-partner SR <code>98.50%</code> 降到 unseen-partner <code>50.94%</code>；Plan-Pop3 在 unseen partner 上达到 <code>71.79%</code>，Plan-Pop4 为 <code>71.32%</code>，说明“行为多样的伙伴集”比只优化已知搭档更重要。</li>
+<li><strong>层间 sim-to-real 类比 gap：</strong> Plan-Pop3 高层策略从 oracle skill 切换到 learned low-level skills、且不重训时，train-pop SR 从 <code>77.79%</code> 降到 <code>41.09%</code>，ZSC SR 从 <code>71.79%</code> 降到 <code>21.44%</code>。高层若看不到低层 uncertainty / failure，就会严重 distribution shift。</li>
+<li><strong>真人协作：</strong> 30 人 HITL 中，solo 平均 1253.17 steps；Learn-Single 降至 936.60（relative efficiency 133.80），Plan-Pop3 为 1015.05（123.46）。自动 humanoid evaluation 能反映相对排序，但论文并未证明它可完全替代真实用户评测。</li>
+</ol>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移 / Transfer</h2>
+<ul>
+<li><strong>方法在 held-out 上是否 transfer？模型 vs 框架哪个贡献更大？</strong> 论文明确在未见 HSSD 场景、未见 humanoid policies 与 30 位真实人类控制者上评测；partner-population training 改善了未见搭档 SR。不过结果依赖 Habitat 的高速 simulator、任务定义、传感器和 oracle skill 设计，因此这是“框架 + benchmark + policy”共同结果，不应归因于单一 network。</li>
+<li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</strong></li>
+<li>Partner diversity 对 robotics RL 很像 post-training 的 task / opponent / user distribution：不能只数样本或 partner 数，要测 behavioral coverage、held-out collaborator success、worst-bucket failure。</li>
+<li>Oracle skill → learned skill 的性能坍塌对应 agentic RL 里 planner 在完美 tool 假设下训练、上线却遭遇 latency / error / partial execution；需要把 tool failure、uncertainty 和 recovery 放进 training loop。</li>
+<li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong> 把 simulator FPS、并发 env 数、environment steps、GPU-hours 与 sample efficiency 一起记；evaluation 按 scene × partner × skill backend 分桶，并强制记录 collision、interrupt、replan、subgoal completion 与 HITL replay，避免 aggregate SR 掩盖安全和协作失败。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>没看懂 / 想深挖：</strong> 自动 avatar population 要达到怎样的行为覆盖，才能可靠预测真实人的长尾反应？仅用 SR / RE 排序不足以识别礼貌、可预测性、个人空间与主观信任之间的差异。</li>
+<li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> 用 Habitat-Lab v0.3.0 的 Habitat 3.0 multi-agent config 跑最小 Social Navigation evaluation：固定同一批 scenes / seeds，对比完整 sensor、去掉 humanoid GPS、去掉 arm depth 三组；记录 S / SPS / F / CR、FPS 与 collision replay。先只跑 evaluation / 短 rollout，不复现 200M-step full training。</li>
+<li><strong>下一步：</strong> 路线图当前表只定义到 Day10；下一日应先在 README 补齐并锁定 Day11–30 映射，再按序进入 VLA / Habitat data scaling，而不是临时选题。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<blockquote>
+<p>“Today’s embodied AI agents are largely hermits – existing within and navigating through virtual worlds as solitary occupants.” — Habitat 3.0, Introduction</p>
+<p>“We believe it is now time to more comprehensively study and develop social embodied agents that assist and cooperate with humans.” — Habitat 3.0, Introduction</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<ul>
+<li>[ ] 画 <code>HSSD scene → humanoid population → robot policy → SocialNav/SocialRearrange → automated/HITL eval</code> 数据流图</li>
+<li>[ ] 从 Habitat-Lab 跑通一个最小 multi-agent episode，记录环境版本、FPS、seed 与 replay 路径</li>
+<li>[ ] 复算 Social Navigation 的 S / SPS / F / CR，并检查 collision termination 与 1–2 m safety band</li>
+<li>[ ] 列一张 oracle skill vs learned skill 的 distribution-shift 表：可见状态、失败模式、恢复机制、SR drop</li>
+<li>[ ] 为下一次实验定义 partner-diversity 指标，至少覆盖 task allocation、yielding、no-op / waiting 与 adversarial conflict</li>
+</ul>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<ul>
+<li>上一篇: Day09 — RT-2 / OpenVLA（语义感知到动作 token 的 VLA）</li>
+<li>下一篇预告: Day11 — 待 README 路线图补齐后按顺序执行</li>
+<li>相关: Day02 MuJoCo；Day03 Isaac Lab；Day07 H2O；Day08 Humanoid-Gym</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>参考链接</h2>
+<ul>
+<li>Paper: https://arxiv.org/abs/2310.13724</li>
+<li>Project: https://aihabitat.org/habitat3/</li>
+<li>Official code: https://github.com/facebookresearch/habitat-lab</li>
+<li>ICLR 2024: https://iclr.cc/virtual/2024/poster/19442</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-10-2023-habitat-3/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

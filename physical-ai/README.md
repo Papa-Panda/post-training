@@ -53,79 +53,79 @@ graph TD
 
 | Day | Folder | 标题 | Tier |
 |-----|--------|------|------|
-| 01 | day-01-2025-ari-msl-robotics-studio | Meta ARI / MSL / Robotics Studio ✅ 2026-08-23 | S |
-| 02 | day-02-2024-mujoco | MuJoCo Contact Model ✅ 2026-08-23 | S |
-| 03 | day-03-2025-isaac-lab | Isaac Lab / Isaac Sim — USD + PhysX + Sim2Real ✅ 2026-08-24 | S |
-| 04 | day-04-2024-genie-world-model | Genie / Genie 2 / Genie 3 — latent action 可交互生成式世界 ✅ 2026-08-25 | S |
-| 05 | day-05-2023-unisim | UniSim — action-conditioned video diffusion + learned simulator RL ✅ 2026-08-26 | S |
-| 06 | day-06-2023-dreamerv3 | DreamerV3 — latent RSSM + imagined actor-critic ✅ 2026-08-27 | S |
-| 07 | day-07-2024-h2o-whole-body-control | H2O — Human-to-Humanoid Real-Time Whole-Body Teleoperation ✅ 2026-08-28 | S |
-| 08 | day-08-2024-humanoid-gym-locomotion | Humanoid-Gym — RL Locomotion + Sim2Sim + Zero-Shot Sim2Real ✅ 2026-08-29 | A |
-| 09 | day-09-2024-rt2-openvla | RT-2 / OpenVLA — action tokenization + web knowledge transfer + open VLA scaling ✅ 2026-08-30 | S |
-| 10 | day-10-2023-habitat-3 | Habitat 3.0 / Habitat-Lab — humanoid simulation + HITL + social collaboration ✅ 2026-08-31 | A |
-| 11 | day-11-2024-pi0-flow-vla | π₀ — flow matching VLA + high-frequency action chunks ✅ 2026-09-01 | S |
-| 12 | day-12-2023-diffusion-policy | Diffusion Policy — visuomotor diffusion + receding-horizon control ✅ 2026-09-02 | S |
-| 13 | day-13-2024-octo | Octo — open generalist robot policy + diffusion readout ✅ 2026-09-03 | S |
-| 14 | day-14-2025-pi05-open-world | π₀.₅ — open-world VLA + knowledge insulation ✅ 2026-09-05 | S |
-| 15 | day-15-2023-open-x-embodiment-rtx | Open X-Embodiment / RT-X — cross-robot data scaling ✅ 2026-09-06 | S |
-| 16 | day-16-2024-droid | DROID — in-the-wild robot manipulation dataset ✅ 2026-09-07 | S |
-| 17 | day-17-2023-bridgedata-v2 | BridgeData V2 — scalable heterogeneous imitation data ✅ 2026-09-08 | A |
-| 18 | day-18-2024-robocasa | RoboCasa — large-scale simulation data for everyday manipulation ✅ 2026-09-09 | A |
-| 19 | day-19-2017-ppo-robotics | PPO for Robotics — clipped policy optimization and rollout systems ✅ 2026-09-10 | S |
-| 20 | day-20-2023-rlpd | RLPD — sample-efficient real-world robot RL with prior data ✅ 2026-09-11 | S |
-| 21 | day-21-2019-domain-randomization | Domain Randomization — visual/dynamics randomization for sim2real ✅ 2026-09-12 | S |
-| 22 | day-22-2021-rma | RMA — rapid motor adaptation under latent dynamics ✅ 2026-09-13 | S |
-| 23 | day-23-2019-residual-rl | Residual RL — combine classical control priors with learned correction ✅ 2026-09-14 | A |
-| 24 | day-24-sim2real-system-identification | SimOpt — 系统辨识 + Sim2Real 评估（REPS 行为匹配校准分布） ✅ 2026-09-15 | A |
-| 25 | day-25-2022-gato | Gato — one generalist policy across modalities and embodiments ✅ 2026-09-16 | A |
-| 26 | day-26-2025-groot-n1 | GR00T N1 — humanoid foundation model and dual-system reasoning/control ✅ 2026-09-17 | S |
-| 27 | day-27-2025-cosmos-world-foundation | Cosmos — world foundation models for Physical AI data generation ✅ 2026-09-18 | A |
-| 28 | day-28-maniskill-robosuite-eval | ManiSkill3 / robosuite — reproducible manipulation benchmarks ✅ 2026-09-19 | A |
-| 29 | day-29-safe-robot-learning | Safe Robot Learning — constraints, shielding, CBF and runtime monitors ✅ 2026-09-20 | S |
-| 30 | day-30-physical-ai-eval-data-flywheel | Physical AI Eval + Data Flywheel — end-to-end synthesis ✅ 2026-09-21 | S |
-| 31 | day-31-2026-worldlabs-atlas | World Labs Atlas — 首个从零训练的多模态世界模型（2026-09-01 发布）✅ 2026-09-23 | S |
-| 32 | day-32-2026-gpt6-astra | OpenAI GPT-6 Astra — computer-use 旗舰，"AGI era"（2026-09-03 发布）✅ 2026-09-24 | S |
-| 33 | day-33-2026-figure-ai-helix25 | Figure AI — Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包 ✅ 2026-09-25 | S |
-| 34 | day-34-2026-pi07 | Physical Intelligence π0.7 — 组合泛化，做没教过的任务（2026-04-16 发布）✅ 2026-09-26 | S |
+| 01 | [day-01-2025-ari-msl-robotics-studio](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/index.html) | Meta ARI / MSL / Robotics Studio ✅ 2026-08-23 | S |
+| 02 | [day-02-2024-mujoco](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/index.html) | MuJoCo Contact Model ✅ 2026-08-23 | S |
+| 03 | [day-03-2025-isaac-lab](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-03-2025-isaac-lab/index.html) | Isaac Lab / Isaac Sim — USD + PhysX + Sim2Real ✅ 2026-08-24 | S |
+| 04 | [day-04-2024-genie-world-model](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-04-2024-genie-world-model/index.html) | Genie / Genie 2 / Genie 3 — latent action 可交互生成式世界 ✅ 2026-08-25 | S |
+| 05 | [day-05-2023-unisim](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-05-2023-unisim/index.html) | UniSim — action-conditioned video diffusion + learned simulator RL ✅ 2026-08-26 | S |
+| 06 | [day-06-2023-dreamerv3](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-06-2023-dreamerv3/index.html) | DreamerV3 — latent RSSM + imagined actor-critic ✅ 2026-08-27 | S |
+| 07 | [day-07-2024-h2o-whole-body-control](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-07-2024-h2o-whole-body-control/index.html) | H2O — Human-to-Humanoid Real-Time Whole-Body Teleoperation ✅ 2026-08-28 | S |
+| 08 | [day-08-2024-humanoid-gym-locomotion](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-08-2024-humanoid-gym-locomotion/index.html) | Humanoid-Gym — RL Locomotion + Sim2Sim + Zero-Shot Sim2Real ✅ 2026-08-29 | A |
+| 09 | [day-09-2024-rt2-openvla](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-09-2024-rt2-openvla/index.html) | RT-2 / OpenVLA — action tokenization + web knowledge transfer + open VLA scaling ✅ 2026-08-30 | S |
+| 10 | [day-10-2023-habitat-3](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-10-2023-habitat-3/index.html) | Habitat 3.0 / Habitat-Lab — humanoid simulation + HITL + social collaboration ✅ 2026-08-31 | A |
+| 11 | [day-11-2024-pi0-flow-vla](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/index.html) | π₀ — flow matching VLA + high-frequency action chunks ✅ 2026-09-01 | S |
+| 12 | [day-12-2023-diffusion-policy](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/index.html) | Diffusion Policy — visuomotor diffusion + receding-horizon control ✅ 2026-09-02 | S |
+| 13 | [day-13-2024-octo](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-13-2024-octo/index.html) | Octo — open generalist robot policy + diffusion readout ✅ 2026-09-03 | S |
+| 14 | [day-14-2025-pi05-open-world](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/index.html) | π₀.₅ — open-world VLA + knowledge insulation ✅ 2026-09-05 | S |
+| 15 | [day-15-2023-open-x-embodiment-rtx](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-15-2023-open-x-embodiment-rtx/index.html) | Open X-Embodiment / RT-X — cross-robot data scaling ✅ 2026-09-06 | S |
+| 16 | [day-16-2024-droid](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-16-2024-droid/index.html) | DROID — in-the-wild robot manipulation dataset ✅ 2026-09-07 | S |
+| 17 | [day-17-2023-bridgedata-v2](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-17-2023-bridgedata-v2/index.html) | BridgeData V2 — scalable heterogeneous imitation data ✅ 2026-09-08 | A |
+| 18 | [day-18-2024-robocasa](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-18-2024-robocasa/index.html) | RoboCasa — large-scale simulation data for everyday manipulation ✅ 2026-09-09 | A |
+| 19 | [day-19-2017-ppo-robotics](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/index.html) | PPO for Robotics — clipped policy optimization and rollout systems ✅ 2026-09-10 | S |
+| 20 | [day-20-2023-rlpd](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-20-2023-rlpd/index.html) | RLPD — sample-efficient real-world robot RL with prior data ✅ 2026-09-11 | S |
+| 21 | [day-21-2019-domain-randomization](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/index.html) | Domain Randomization — visual/dynamics randomization for sim2real ✅ 2026-09-12 | S |
+| 22 | [day-22-2021-rma](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/index.html) | RMA — rapid motor adaptation under latent dynamics ✅ 2026-09-13 | S |
+| 23 | [day-23-2019-residual-rl](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/index.html) | Residual RL — combine classical control priors with learned correction ✅ 2026-09-14 | A |
+| 24 | [day-24-sim2real-system-identification](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-24-sim2real-system-identification/index.html) | SimOpt — 系统辨识 + Sim2Real 评估（REPS 行为匹配校准分布） ✅ 2026-09-15 | A |
+| 25 | [day-25-2022-gato](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-25-2022-gato/index.html) | Gato — one generalist policy across modalities and embodiments ✅ 2026-09-16 | A |
+| 26 | [day-26-2025-groot-n1](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/index.html) | GR00T N1 — humanoid foundation model and dual-system reasoning/control ✅ 2026-09-17 | S |
+| 27 | [day-27-2025-cosmos-world-foundation](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-27-2025-cosmos-world-foundation/index.html) | Cosmos — world foundation models for Physical AI data generation ✅ 2026-09-18 | A |
+| 28 | [day-28-maniskill-robosuite-eval](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/index.html) | ManiSkill3 / robosuite — reproducible manipulation benchmarks ✅ 2026-09-19 | A |
+| 29 | [day-29-safe-robot-learning](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-29-safe-robot-learning/index.html) | Safe Robot Learning — constraints, shielding, CBF and runtime monitors ✅ 2026-09-20 | S |
+| 30 | [day-30-physical-ai-eval-data-flywheel](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-30-physical-ai-eval-data-flywheel/index.html) | Physical AI Eval + Data Flywheel — end-to-end synthesis ✅ 2026-09-21 | S |
+| 31 | [day-31-2026-worldlabs-atlas](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-31-2026-worldlabs-atlas/index.html) | World Labs Atlas — 首个从零训练的多模态世界模型（2026-09-01 发布）✅ 2026-09-23 | S |
+| 32 | [day-32-2026-gpt6-astra](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/index.html) | OpenAI GPT-6 Astra — computer-use 旗舰，"AGI era"（2026-09-03 发布）✅ 2026-09-24 | S |
+| 33 | [day-33-2026-figure-ai-helix25](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-33-2026-figure-ai-helix25/index.html) | Figure AI — Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包 ✅ 2026-09-25 | S |
+| 34 | [day-34-2026-pi07](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-34-2026-pi07/index.html) | Physical Intelligence π0.7 — 组合泛化，做没教过的任务（2026-04-16 发布）✅ 2026-09-26 | S |
 
 ### Day N 映射表（34 天）
 
 | Day | Folder | 贡献 | Tier |
 |-----|--------|------|------|
-| 01 | day-01-2025-ari-msl-robotics-studio | Physical AGI 定义，MSL 生态，humanoid scaling 哲学，learning from human experience vs teleop | S |
-| 02 | day-02-2024-mujoco | MuJoCo fast accurate contact, MJCF, MJX million steps/s, lightweight baseline for humanoid control | S |
-| 03 | day-03-2025-isaac-lab | OpenUSD scene layer + PhysX Direct-GPU + RTX tiled rendering + manager-based MDP + domain randomization, scalable sim2real platform | S |
-| 04 | day-04-2024-genie-world-model | Genie foundation world model：无标签视频 → latent action → 可交互生成式世界 | S |
-| 05 | day-05-2023-unisim | 多源数据统一为 action-in-video-out；video diffusion simulator + learned reward 支持 VLM / RL 与 zero-shot real-robot transfer | S |
-| 06 | day-06-2023-dreamerv3 | 离散 latent RSSM + imagined actor-critic；free bits / symlog / two-hot / percentile normalization 支撑固定超参跨 150+ tasks | S |
-| 07 | day-07-2024-h2o-whole-body-control | sim-to-data 筛掉 embodiment-infeasible motions；deployable goal state + PPO + domain randomization 实现 RGB 驱动 H1 全身控制与 zero-shot sim2real | S |
-| 08 | day-08-2024-humanoid-gym-locomotion | Isaac Gym 8192-env PPO + 15-frame history + asymmetric critic + gait prior；MuJoCo sim2sim gate 后在 XBot-S/L 展示 zero-shot sim2real locomotion | A |
-| 09 | day-09-2024-rt2-openvla | RT-2 把 action 变成 token 并用 web+robot co-finetuning 保留语义；OpenVLA 用 970k OpenX demonstrations、DINOv2+SigLIP+Llama 2 7B 与 LoRA/量化把 VLA 变成开源可适配系统 | S |
-| 10 | day-10-2023-habitat-3 | 高速 SMPL-X humanoid + HITL + Social Navigation/Rearrangement；以 partner population 和未见场景评测协作泛化，暴露 oracle skill → learned skill 的层间 distribution shift | A |
-| 11 | day-11-2024-pi0-flow-vla | PaliGemma + 300M action expert，以 conditional flow matching 联合生成 50-step 连续 action chunk；10k+ 小时跨 embodiment 预训练后用高质量数据 post-train | S |
-| 12 | day-12-2023-diffusion-policy | 在动作序列上做条件 DDPM/DDIM，以 observation/prediction/execution 三个 horizon 连接多峰行为克隆、时间一致性与闭环重规划 | S |
-| 13 | day-13-2024-octo | 25 个 OXE 数据集约 80 万轨迹 + block-masked Transformer + diffusion action chunk；以可插拔 token/readout 接口适配新传感器、动作空间与机器人 | S |
-| 14 | day-14-2025-pi05-open-world | 异构 co-training（多机器人+web+子任务预测+检测）+ knowledge insulation 两阶段配方，首次在未见真实家庭完成长程灵巧操作 | S |
-| 15 | day-15-2023-open-x-embodiment-rtx | 60 数据集 / 22 embodiment / 100万+ 轨迹统一为 RLDS + 7 维末端动作接口；RT-1-X 小域 +50%，RT-2-X emergent skills ~3×（去 Bridge 消融钉死因果） | S |
-| 16 | day-16-2024-droid | 18 台统一 Franka、50 采集员、52 栋建筑 564 真实场景采 76k 轨迹（350h/86任务）；本域小数据 + DROID co-train diffusion policy，6 任务 × 4 地点平均 +20%，场景覆盖即泛化增益 | S |
-| 17 | day-17-2023-bridgedata-v2 | WidowX 250 廉价臂 60,096 轨迹 / 24 环境 / 13 技能，全部带语言标注；同一套数据跑通 GCBC / D-GCBC / ACT / CRL / LCBC / RT-1 六种 offline 方法；技能多样性 13 vs 3 在等量数据下未见 pick-and-place 0.30→0.65 | A |
-| 18 | day-18-2024-robocasa | MimicGen 的 SE(3) 搬运把 1,250 条人类演示放大到 100K+ 轨迹；BC-Transformer 28.8% → 47.6% 单调 scaling；真机 co-train seen 13.6% → 24.4%（+79% 相对），unseen 2.6% → 9.3%；合成是覆盖四轴的 reality 端 | A |
-| 19 | day-19-2017-ppo-robotics | PPO clipped surrogate + GAE：ratio-clip 把信任域写进目标函数，实现同批数据多 epoch 复用；GPU 向量化 rollout（legged_gym/rsl_rl）让 ANYmal 平地 <4 分钟、崎岖地形 20 分钟单卡收敛；补完 Day07/08 的算法黑盒，确立 BC-MLE vs on-policy-RL 两条正交轴 | S |
-| 19 | day-19-2017-ppo-robotics | 从 clipped surrogate、GAE 到并行 rollout，建立 robot policy optimization 的 actor-critic 基线 | S |
-| 20 | day-20-2023-rlpd | SAC 三件套（50/50 对称采样 + LayerNorm critic + UTD 20 + Q 集成）把离线数据常驻 replay 在线训，无需悲观预训练；D4RL/Adroit/AntMaze/V-D4RL 平均 2.5× 领先，是 Days 15–18 离线数据资产通向真机在线 RL 的 canonical 配方；与 Day19 PPO 构成"交互便宜 vs 交互昂贵"的对偶 | S |
-| 21 | day-21-2019-domain-randomization | Tobin 2017 视觉 DR 起源 + OpenAI ADR（边界扩张、熵单调递增的自动课程）：$J_{\text{DR}}(\theta)=\mathbb{E}_{\xi\sim p_\phi}[J(\theta;\xi)]$，transfer 判据 $\xi_{\text{real}}\in\text{support}(p_\phi)$；LSTM 隐式在线辨识涌现 meta-learning；纯仿真五指手真机解魔方 60%（极限打乱 20%）；与 Day20 RLPD 构成"世界覆盖 vs 数据覆盖"的对偶 | S |
-| 21 | day-21-2019-domain-randomization | 对视觉、动力学、延迟和接触参数随机化，使策略对真实参数后验保持鲁棒 | S |
-| 22 | day-22-2021-rma | 两阶段 privileged learning：PPO 开天眼训 $\pi(a_t\mid x_t,a_{t-1},z_t)$（$z_t=\mu(e_t)$ 为 17 维环境参数的低维指纹），$\varphi$ 从 50 步本体感知历史监督回归 $\hat z_t$；部署 10Hz 辨识 + 100Hz 控制双频异步；Unitree A1 零真机微调，沙地/泥地/高草/土堆零失败、下楼梯 70%；与 Day21 ADR+LSTM 构成"隐式 vs 显式在线辨识"对照 | S |
-| 23 | day-23-2019-residual-rl | 在模型控制器动作上学习 residual，以先验稳定性缩小探索空间并保留可解释接口 | A |
-| 24 | day-24-sim2real-system-identification | SimOpt 双循环：内层 PPO + 外层 REPS 以真机行为残差更新仿真参数分布 $p_\phi(\xi)$ ；与 sim2sim / HIL 探针 / 分桶指标拼成 sim2real release gate 四件套 ✅ 2026-09-15 | A |
-| 25 | day-25-2022-gato | 统一 observation/action token 序列展示 generalist agent 范式，同时检视跨任务容量与控制精度限制 ✅ 2026-09-16 | A |
-| 26 | day-26-2025-groot-n1 | 双系统 VLM reasoning + diffusion control 面向 humanoid，多 embodiment 数据与部署栈联合设计 ✅ 2026-09-17 | S |
-| 27 | day-27-2025-cosmos-world-foundation | 20M 小时视频 → 因果 tokenizer（CV/DV）→ diffusion + AR 双路线 WFM → Transfer 可控 world-to-world 生成；开源平台（代码 Apache 2.0 / 权重 Open Model License）；五个用途无实证，realism vs action-grounded usefulness 差距待 Day28 评测回答 ✅ 2026-09-18 | A |
-| 27 | day-27-2025-cosmos-world-foundation | 以世界基础模型生成/筛选 Physical AI 训练数据，评估视频 realism 与 action-grounded usefulness 的差距 | A |
-| 28 | day-28-maniskill-robosuite-eval | robosuite（MuJoCo 模块化：robot×arena×object×controller 正交组合）定义评测合同；ManiSkill3（SAPIEN 并行渲染 + PhysX GPU + 异构仿真）30,000+ FPS、2–3× 省显存、12 类任务域/20+ embodiment；demo 管线复用 Day20 RLPD/RFCL 在线 IL；评测=固定测度 $p_\phi$ 下的 $J(\pi)$ 二项估计，吞吐决定 $N$ 与统计精度 ✅ 2026-09-19 | A |
-| 29 | day-29-safe-robot-learning | 安全四层栈：CMDP 期望约束（Lagrangian/CPO）→ CBF 前向不变证书（QP 安全滤波器）→ Shield 最小干预修正（LTL 合成）→ RTA 运行时仲裁（Simplex/monitor+备份控制器）；证书与策略解耦、事后加装；期望可平均、逐点不可平均 ✅ 2026-09-20 | S |
-| 29 | day-29-safe-robot-learning | 约束 MDP、control barrier function、shield 和 runtime monitor 共同覆盖训练与部署安全 | S |
-| 30 | day-30-physical-ai-eval-data-flywheel | 汇总 state/action/latency/safety 指标，设计 failure → triage → recollect/resimulate → retrain → gated deploy 闭环 ✅ 2026-09-21 | S |
+| 01 | [day-01-2025-ari-msl-robotics-studio](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/index.html) | Physical AGI 定义，MSL 生态，humanoid scaling 哲学，learning from human experience vs teleop | S |
+| 02 | [day-02-2024-mujoco](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/index.html) | MuJoCo fast accurate contact, MJCF, MJX million steps/s, lightweight baseline for humanoid control | S |
+| 03 | [day-03-2025-isaac-lab](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-03-2025-isaac-lab/index.html) | OpenUSD scene layer + PhysX Direct-GPU + RTX tiled rendering + manager-based MDP + domain randomization, scalable sim2real platform | S |
+| 04 | [day-04-2024-genie-world-model](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-04-2024-genie-world-model/index.html) | Genie foundation world model：无标签视频 → latent action → 可交互生成式世界 | S |
+| 05 | [day-05-2023-unisim](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-05-2023-unisim/index.html) | 多源数据统一为 action-in-video-out；video diffusion simulator + learned reward 支持 VLM / RL 与 zero-shot real-robot transfer | S |
+| 06 | [day-06-2023-dreamerv3](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-06-2023-dreamerv3/index.html) | 离散 latent RSSM + imagined actor-critic；free bits / symlog / two-hot / percentile normalization 支撑固定超参跨 150+ tasks | S |
+| 07 | [day-07-2024-h2o-whole-body-control](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-07-2024-h2o-whole-body-control/index.html) | sim-to-data 筛掉 embodiment-infeasible motions；deployable goal state + PPO + domain randomization 实现 RGB 驱动 H1 全身控制与 zero-shot sim2real | S |
+| 08 | [day-08-2024-humanoid-gym-locomotion](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-08-2024-humanoid-gym-locomotion/index.html) | Isaac Gym 8192-env PPO + 15-frame history + asymmetric critic + gait prior；MuJoCo sim2sim gate 后在 XBot-S/L 展示 zero-shot sim2real locomotion | A |
+| 09 | [day-09-2024-rt2-openvla](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-09-2024-rt2-openvla/index.html) | RT-2 把 action 变成 token 并用 web+robot co-finetuning 保留语义；OpenVLA 用 970k OpenX demonstrations、DINOv2+SigLIP+Llama 2 7B 与 LoRA/量化把 VLA 变成开源可适配系统 | S |
+| 10 | [day-10-2023-habitat-3](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-10-2023-habitat-3/index.html) | 高速 SMPL-X humanoid + HITL + Social Navigation/Rearrangement；以 partner population 和未见场景评测协作泛化，暴露 oracle skill → learned skill 的层间 distribution shift | A |
+| 11 | [day-11-2024-pi0-flow-vla](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/index.html) | PaliGemma + 300M action expert，以 conditional flow matching 联合生成 50-step 连续 action chunk；10k+ 小时跨 embodiment 预训练后用高质量数据 post-train | S |
+| 12 | [day-12-2023-diffusion-policy](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/index.html) | 在动作序列上做条件 DDPM/DDIM，以 observation/prediction/execution 三个 horizon 连接多峰行为克隆、时间一致性与闭环重规划 | S |
+| 13 | [day-13-2024-octo](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-13-2024-octo/index.html) | 25 个 OXE 数据集约 80 万轨迹 + block-masked Transformer + diffusion action chunk；以可插拔 token/readout 接口适配新传感器、动作空间与机器人 | S |
+| 14 | [day-14-2025-pi05-open-world](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/index.html) | 异构 co-training（多机器人+web+子任务预测+检测）+ knowledge insulation 两阶段配方，首次在未见真实家庭完成长程灵巧操作 | S |
+| 15 | [day-15-2023-open-x-embodiment-rtx](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-15-2023-open-x-embodiment-rtx/index.html) | 60 数据集 / 22 embodiment / 100万+ 轨迹统一为 RLDS + 7 维末端动作接口；RT-1-X 小域 +50%，RT-2-X emergent skills ~3×（去 Bridge 消融钉死因果） | S |
+| 16 | [day-16-2024-droid](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-16-2024-droid/index.html) | 18 台统一 Franka、50 采集员、52 栋建筑 564 真实场景采 76k 轨迹（350h/86任务）；本域小数据 + DROID co-train diffusion policy，6 任务 × 4 地点平均 +20%，场景覆盖即泛化增益 | S |
+| 17 | [day-17-2023-bridgedata-v2](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-17-2023-bridgedata-v2/index.html) | WidowX 250 廉价臂 60,096 轨迹 / 24 环境 / 13 技能，全部带语言标注；同一套数据跑通 GCBC / D-GCBC / ACT / CRL / LCBC / RT-1 六种 offline 方法；技能多样性 13 vs 3 在等量数据下未见 pick-and-place 0.30→0.65 | A |
+| 18 | [day-18-2024-robocasa](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-18-2024-robocasa/index.html) | MimicGen 的 SE(3) 搬运把 1,250 条人类演示放大到 100K+ 轨迹；BC-Transformer 28.8% → 47.6% 单调 scaling；真机 co-train seen 13.6% → 24.4%（+79% 相对），unseen 2.6% → 9.3%；合成是覆盖四轴的 reality 端 | A |
+| 19 | [day-19-2017-ppo-robotics](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/index.html) | PPO clipped surrogate + GAE：ratio-clip 把信任域写进目标函数，实现同批数据多 epoch 复用；GPU 向量化 rollout（legged_gym/rsl_rl）让 ANYmal 平地 <4 分钟、崎岖地形 20 分钟单卡收敛；补完 Day07/08 的算法黑盒，确立 BC-MLE vs on-policy-RL 两条正交轴 | S |
+| 19 | [day-19-2017-ppo-robotics](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/index.html) | 从 clipped surrogate、GAE 到并行 rollout，建立 robot policy optimization 的 actor-critic 基线 | S |
+| 20 | [day-20-2023-rlpd](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-20-2023-rlpd/index.html) | SAC 三件套（50/50 对称采样 + LayerNorm critic + UTD 20 + Q 集成）把离线数据常驻 replay 在线训，无需悲观预训练；D4RL/Adroit/AntMaze/V-D4RL 平均 2.5× 领先，是 Days 15–18 离线数据资产通向真机在线 RL 的 canonical 配方；与 Day19 PPO 构成"交互便宜 vs 交互昂贵"的对偶 | S |
+| 21 | [day-21-2019-domain-randomization](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/index.html) | Tobin 2017 视觉 DR 起源 + OpenAI ADR（边界扩张、熵单调递增的自动课程）：$J_{\text{DR}}(\theta)=\mathbb{E}_{\xi\sim p_\phi}[J(\theta;\xi)]$，transfer 判据 $\xi_{\text{real}}\in\text{support}(p_\phi)$；LSTM 隐式在线辨识涌现 meta-learning；纯仿真五指手真机解魔方 60%（极限打乱 20%）；与 Day20 RLPD 构成"世界覆盖 vs 数据覆盖"的对偶 | S |
+| 21 | [day-21-2019-domain-randomization](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/index.html) | 对视觉、动力学、延迟和接触参数随机化，使策略对真实参数后验保持鲁棒 | S |
+| 22 | [day-22-2021-rma](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/index.html) | 两阶段 privileged learning：PPO 开天眼训 $\pi(a_t\mid x_t,a_{t-1},z_t)$（$z_t=\mu(e_t)$ 为 17 维环境参数的低维指纹），$\varphi$ 从 50 步本体感知历史监督回归 $\hat z_t$；部署 10Hz 辨识 + 100Hz 控制双频异步；Unitree A1 零真机微调，沙地/泥地/高草/土堆零失败、下楼梯 70%；与 Day21 ADR+LSTM 构成"隐式 vs 显式在线辨识"对照 | S |
+| 23 | [day-23-2019-residual-rl](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/index.html) | 在模型控制器动作上学习 residual，以先验稳定性缩小探索空间并保留可解释接口 | A |
+| 24 | [day-24-sim2real-system-identification](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-24-sim2real-system-identification/index.html) | SimOpt 双循环：内层 PPO + 外层 REPS 以真机行为残差更新仿真参数分布 $p_\phi(\xi)$ ；与 sim2sim / HIL 探针 / 分桶指标拼成 sim2real release gate 四件套 ✅ 2026-09-15 | A |
+| 25 | [day-25-2022-gato](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-25-2022-gato/index.html) | 统一 observation/action token 序列展示 generalist agent 范式，同时检视跨任务容量与控制精度限制 ✅ 2026-09-16 | A |
+| 26 | [day-26-2025-groot-n1](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/index.html) | 双系统 VLM reasoning + diffusion control 面向 humanoid，多 embodiment 数据与部署栈联合设计 ✅ 2026-09-17 | S |
+| 27 | [day-27-2025-cosmos-world-foundation](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-27-2025-cosmos-world-foundation/index.html) | 20M 小时视频 → 因果 tokenizer（CV/DV）→ diffusion + AR 双路线 WFM → Transfer 可控 world-to-world 生成；开源平台（代码 Apache 2.0 / 权重 Open Model License）；五个用途无实证，realism vs action-grounded usefulness 差距待 Day28 评测回答 ✅ 2026-09-18 | A |
+| 27 | [day-27-2025-cosmos-world-foundation](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-27-2025-cosmos-world-foundation/index.html) | 以世界基础模型生成/筛选 Physical AI 训练数据，评估视频 realism 与 action-grounded usefulness 的差距 | A |
+| 28 | [day-28-maniskill-robosuite-eval](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/index.html) | robosuite（MuJoCo 模块化：robot×arena×object×controller 正交组合）定义评测合同；ManiSkill3（SAPIEN 并行渲染 + PhysX GPU + 异构仿真）30,000+ FPS、2–3× 省显存、12 类任务域/20+ embodiment；demo 管线复用 Day20 RLPD/RFCL 在线 IL；评测=固定测度 $p_\phi$ 下的 $J(\pi)$ 二项估计，吞吐决定 $N$ 与统计精度 ✅ 2026-09-19 | A |
+| 29 | [day-29-safe-robot-learning](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-29-safe-robot-learning/index.html) | 安全四层栈：CMDP 期望约束（Lagrangian/CPO）→ CBF 前向不变证书（QP 安全滤波器）→ Shield 最小干预修正（LTL 合成）→ RTA 运行时仲裁（Simplex/monitor+备份控制器）；证书与策略解耦、事后加装；期望可平均、逐点不可平均 ✅ 2026-09-20 | S |
+| 29 | [day-29-safe-robot-learning](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-29-safe-robot-learning/index.html) | 约束 MDP、control barrier function、shield 和 runtime monitor 共同覆盖训练与部署安全 | S |
+| 30 | [day-30-physical-ai-eval-data-flywheel](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-30-physical-ai-eval-data-flywheel/index.html) | 汇总 state/action/latency/safety 指标，设计 failure → triage → recollect/resimulate → retrain → gated deploy 闭环 ✅ 2026-09-21 | S |
 
 ---
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 21 — Domain Randomization / ADR：Solving Rubik&#x27;s Cube with a Robot Hand</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 21</span>
+    <h1>Day 21 — Domain Randomization / ADR：Solving Rubik&#x27;s Cube with a Robot Hand</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充</a><a href="#sec-14">问答补充（2026-09-13）</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: Solving Rubik's Cube with a Robot Hand（Automatic Domain Randomization，ADR）</li>
+<li>Authors / Org: OpenAI（Ilge Akkaya<em>, Marcin Andrychowicz</em>, Maciek Chociej<em>, Mateusz Litwin</em>, Bob McGrew<em>, Arthur Petron</em>, Alex Paino<em>, Matthias Plappert</em>, Glenn Powell<em>, Raphael Ribas</em>, Jonas Schneider<em>, Nikolas Tezak</em>, Jerry Tworek<em>, Peter Welinder</em>, Lilian Weng<em>, Qiming Yuan</em>, Wojciech Zaremba<em>, Lei Zhang</em>；作者按字母序，引用请用 OpenAI et al.）</li>
+<li>Link / arXiv / Blog: https://arxiv.org/abs/1910.07113（2019-10-17 preprint）/ 官方博客 http://openai.com/index/solving-rubiks-cube/</li>
+<li>Date read: 2026-09-12</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">domain-randomization</span><span class="tag">adr</span><span class="tag">sim2real</span><span class="tag">dexterous-manipulation</span><span class="tag">ppo</span><span class="tag">meta-learning</span><span class="tag">rubiks-cube</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-21-2019-domain-randomization</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-21-2019-domain-randomization</li>
+<li>Official code: 训练系统<strong>无官方开源</strong>（同 2018 Dactyl 一样）；环境层面的 Shadow hand 可参考 openai/robogym，但不含 ADR 训练管线——卡片里只给论文 + 官方博客链接，诚实标注。</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>真机数据太贵、接触动力学（摩擦/弹性/延迟）又测不准——DR 的赌注是"<strong>别试图把仿真做准，把仿真做宽</strong>"：在随机化的环境参数分布 $p_\phi(\xi)$ 上训策略，只要真实世界落在分布的支撑集里，transfer 自然发生。Tobin 2017 证明了视觉 DR 可行（纯仿真 RGB 训物体检测器转真机抓取）；OpenAI 把它推到动力学 DR（2018 Dactyl 方块重定向），再用 <strong>ADR（Automatic Domain Randomization）</strong> 解决"手工调随机化范围"这个工程瓶颈——随机化分布的边界按策略在边界上的表现<strong>自动扩张</strong>，熵单调递增，形成"难度永远递增"的自动 curriculum。最终：<strong>纯仿真训练的五指灵巧手在真机上解魔方，完整打乱 60% 成功率、极限打乱 20%</strong>，且戴橡胶手套、绑住手指、被长颈鹿玩偶捅都不崩——鲁棒性不是调出来的，是分布"吃"出来的。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线</strong>：接 Day02（MuJoCo 接触物理是仿真器）、Day03（Isaac Lab 的 randomization manager 正是 DR 的工程载体）、Day07/08（locomotion 的 sim2real 全靠动力学 DR）——DR 是这三天"为什么能 transfer"的<strong>数学地基</strong>。同时接 Day19（PPO）：ADR 论文用的就是 OpenAI Five 那套分布式 PPO，Day19 的算法黑盒在这里是"被随机化喂大的"版本。</li>
+<li><strong>补了哪个短板</strong>：Day07/08 讲了"PPO + DR 能 zero-shot sim2real"，但<strong>没讲 DR 本身</strong>——随机化什么、范围怎么定、为什么有效、边界在哪。Day21 把这块地基补上：DR 的数学是"在世界分布上做期望/鲁棒优化"，transfer 的充要直觉是"真机参数落在随机化支撑集里"。</li>
+<li><strong>替代 / 分叉 / 改进</strong>：三条 sim2real 路线的分叉点就在今天：</li>
+<li><strong>DR/ADR 路线</strong>（今天）：不碰真机数据，把仿真做宽。代价是算力（数千年仿真经验）和峰值性能（hedging 吃精度）。</li>
+<li><strong>RLPD 路线</strong>（Day20）：直接在真机/贵环境上在线学，用离线数据当燃料。代价是真机交互和安全风险。</li>
+<li><strong>显式自适应路线</strong>（Day22 RMA 预告）：学一个 adaptation module 在线辨识动力学。代价是需要 privileged 训练。
+  三者不是谁替代谁——<strong>交互成本 × 仿真可信度 × 接触复杂度</strong>决定选哪条（见数学视角 §6 的决策表）。</li>
+<li><strong>对之前 Day X 的直接对比</strong>：</li>
+<li><strong>vs Day19（PPO）</strong>：同一套 PPO，但在 ADR 下优化的不再是"一个 MDP"，而是"一个 MDP 分布"——Day19 的 trust region 管的是"策略别走太远"，ADR 的边界扩张管的是"世界别太窄"。两个"别"合起来才是真机可用的策略。</li>
+<li><strong>vs Day20（RLPD）</strong>：数学上的对偶。RLPD：$ \mathcal{L}_Q $ 在"离线+在线"混合经验分布上做 Bellman 备份——<strong>用数据覆盖不确定性</strong>；ADR：$ J(\theta) $ 在"随机化世界分布"上做期望——<strong>用世界覆盖不确定性</strong>。一个说"真机交互贵，所以复用数据"，一个说"真机交互贵，所以别碰真机"。Day20 诚实标注了"论文无真机结果"，ADR 则是真机魔方的端到端 demo——两条路各有各的证据。</li>
+<li><strong>vs Day12（Diffusion Policy）</strong>：DP 完全不做 sim2real——它假设你有真机示范数据；ADR 假设你<strong>没有</strong>真机数据、只有仿真器。数据假设相反，数学工具也相反（DP 是"拟合示范分布"，ADR 是"在世界分布上做 RL"）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>Roadmap 把 Day21 放在"RL for Robotics / Sim2Real"块的第二天，标题是"Domain Randomization — visual/dynamics randomization for sim2real"。它是 Day07/08/19/20 共同依赖却从未正面拆解的地基：<strong>sim2real 的"为什么能 transfer"</strong>。对 Jun 的路线而言，它的战略意义是给你一个<strong>可计算的 transfer 判据</strong>——"真机参数是否落在随机化支撑集里"，以及一个<strong>自动化的答案</strong>（ADR）来回答"范围怎么定"这个最折磨人的工程问题。同时它和 Day22（RMA）的关系是"隐式 vs 显式自适应"的经典对照：ADR+LSTM 的 emergent meta-learning vs RMA 的 adaptation module——明天读 RMA 时直接对比。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li>DR 的数学到底是"鲁棒优化"（max-min）还是"贝叶斯平均"（期望）？transfer 发生的精确条件是什么？（提示：$\xi_{\text{real}} \in \text{support}(p_\phi)$；期望 vs 最坏情况，两种解读对应两种失败模式。）</li>
+<li>ADR 的"边界扩张"规则为什么是一个 curriculum？它和固定 DR 的本质区别是什么？为什么论文说 memory-augmented（LSTM）策略在 ADR 下会涌现 meta-learning？（提示：随机化分布的熵 $H[p_\phi]$ 单调递增；LSTM hidden state 是对 $\xi$ 的在线后验。）</li>
+<li>DR 和 RLPD 是两条相反的路——什么时候该"把仿真做宽"（DR），什么时候该"直接在真机上学"（RLPD）？（提示：交互成本 × 仿真可信度 × 接触复杂度，三轴决策。）</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol>
+<li><strong>Motivation</strong>: sim2real 的核心障碍是 <strong>reality gap</strong>：仿真器的接触动力学（摩擦、弹性、延迟、柔性）和真实世界永远对不准，而真机数据贵（时间/安全/硬件磨损）。两条经典出路——system identification（把仿真调准，Day24 主题）和 domain adaptation（用真机数据对齐）——都要真机数据。DR 问了一个反直觉的问题：<strong>能不能不做准、只做宽？</strong> Tobin 2017（IROS）先证明了视觉侧可行：纯仿真随机纹理/光照/相机位姿训出的物体检测器，直接转真机抓取。OpenAI 2018（Dactyl 方块重定向）证明了动力学侧可行：摩擦/质量/外观/延迟全随机化，Shadow hand 真机 vision-based 重定向成功。但手工 DR 有个致命工程痛点：<strong>随机化范围是人拍的</strong>——太窄，真机掉出去；太宽，策略学不出来（hedging 吃掉所有性能）。ADR 就是为杀掉这个"人拍参数"而生的。</li>
+<li><strong>System / Method</strong>: 系统 = <strong>ADR（环境分布生成器）+ 分布式 PPO（OpenAI Five 同款栈）+ LSTM memory policy + vision pose estimator + Kociemba 子目标分解 + 为 ML 定制的硬件平台</strong>。</li>
+<li><strong>ADR</strong>：对每个随机化维度 $i$（摩擦、质量、cube 尺寸、视觉材质、延迟……）维护区间 $[lo_i, hi_i]$，每个 episode 从均匀分布 $\xi_i \sim U(lo_i, hi_i)$ 采样环境参数。训练中定期在<strong>区间边界</strong>上评估策略表现：表现高于阈值 → 向外扩张边界；低于阈值 → 收缩。所有维度独立进行。效果：分布的熵只增不减（除收缩外），策略永远在"刚好能学会"的最难分布上训练——<strong>自动 curriculum</strong>。</li>
+<li><strong>Policy</strong>：LSTM（memory-augmented）+ PPO。输入是<strong>指尖位置 + 视觉估计的 cube 位姿</strong>（不是全关节本体感知——论文发现指尖位置就够了，这是个反直觉的输入选择）；输出 20 维连续动作（Shadow hand 24 自由度，腕部固定）。</li>
+<li><strong>Vision estimator</strong>：CNN 从 RGB 图像估计 cube 位姿 + sticker 角度。训练数据：先用训好的 policy 在仿真里 rollout 收集 1M 个 state，再用 Unity 渲染合成图像（label 来自仿真器 ground truth，免费）。真机 ground truth 用 PhaseSpace 动作捕捉给。</li>
+<li><strong>任务分解</strong>：魔方求解本身用 Kociemba 算法算出子目标序列（rotate top face / flip 等），RL 只学"执行子目标"的灵巧操作——<strong>规划和控制解耦</strong>，RL 不负责想步骤。</li>
+<li><strong>硬件</strong>：定制版 Shadow hand + RGB 相机阵列，为 ML 训练加固（能扛住 RL 训练初期的暴力探索）。</li>
+<li><strong>Training / Data Details</strong>: Sim 数据 = <strong>全部</strong>：policy 的 rollout 100% 来自随机化 MuJoCo 仿真（量级：block 任务用了约 100 年仿真经验 / 50 小时 wall-clock，8 V100 + 6144 CPU cores；魔方任务量级更大，论文称"数千年"人类等效经验）。Real 数据 = <strong>零</strong>（训练期不用任何真机数据——这是 DR 路线的定义性特征；真机只做评估）。Sim2Real = <strong>ADR 本体</strong>：vision estimator 和 control policy 都在 ADR 分布上训练，真机是"分布内的一个采样点"。Reward = 稀疏子目标奖励（完成一个 rotate/flip 给分）+ 密集 shaping；<strong>verifiable signal</strong>：子目标完成是二值的、可验证的——和 Day20 的 Adroit 稀疏奖励同类，但这里用 ADR + 大算力硬扛稀疏性。</li>
+<li><strong>Key Tricks</strong>: ① <strong>ADR 边界规则只看"边界表现"</strong>：不评估分布内部（内部迟早会被边界扩张覆盖），只在每个维度的 $lo_i/hi_i$ 处测——$O(d)$ 次评估管 $d$ 个维度，维度灾难被"边界即最难"这个单调性假设消掉。这是 ADR 工程上最聪明的一刀。② <strong>LSTM 不是为了"记忆轨迹"，是为了"在线辨识"</strong>：policy 的 hidden state 在 episode 内累积观测证据，隐式估计当前 $\xi$——论文明确报告了 emergent meta-learning：同一个 frozen policy，在测试时对未见过的扰动（绑手指、戴手套）表现出适应性行为。<strong>这是 Day22 RMA 的"隐式版"</strong>——RMA 把这件事显式化（adaptation module），ADR 让它从 LSTM 里长出来。③ <strong>输入做减法</strong>：只用指尖位置 + 视觉位姿，不用全关节角度——仿真里"测得准"的量才值得进 policy，测不准的量进了就是 reality gap 的入口。<strong>DR 的哲学延伸到输入设计</strong>：只信任那些"随机化后仍然可辨识"的信号。</li>
+<li><strong>Results</strong>: 真机完整打乱魔方 <strong>60% 成功率</strong>，极限难度打乱 20%（论文/博客原文）。鲁棒性 demo：戴橡胶手套、绑住几根手指、被毛绒长颈鹿捅——全是训练分布外的扰动，策略不崩。Vision estimator 真机位姿估计误差在可操作范围内（PhaseSpace ground truth 对照）。消融：无 ADR（固定窄随机化）的策略真机直接失败；无 memory（feedforward）的策略在宽分布上学不出来——<strong>ADR 和 LSTM 是绑定的</strong>，缺一不可。预算：OpenAI Five 级别的分布式 infra（数千 CPU + 数十 GPU，数周）——这是 DR 路线的"明码标价"。</li>
+</ol>
+</section>
+<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
+<blockquote>
+<p>符号统一：$\xi \in \Xi$ 环境参数向量（摩擦系数、质量、延迟、纹理、光照……每个维度一个物理/视觉量）；$p_\phi(\xi)$ 参数为 $\phi$ 的随机化分布（ADR 里 $\phi = \{(lo_i, hi_i)\}_{i=1}^d$）；$p_\xi(s'\mid s,a)$、$p_\xi(o\mid s)$ 为参数 $\xi$ 下的转移/观测模型；$\pi_\theta(a\mid o, m)$ 为带 memory $m$ 的策略；$\xi_{\text{real}}$ 真实世界的（未知）参数；$J(\theta; \xi)$ 为固定 $\xi$ 下的期望回报。</p>
+</blockquote>
+<h3>1. DR 的目标函数：从"一个 MDP"到"MDP 分布"</h3>
+<p>标准 RL（Day19 的 PPO）：</p>
+<p>$$J(\theta; \xi_0) = \mathbb{E}_{\tau \sim p_{\xi_0}(\cdot\mid\pi_\theta)}\left[\sum_t \gamma^t r_t\right],$$</p>
+<p>$\xi_0$ 是仿真器的<strong>一组</strong>参数。DR 把它换成：</p>
+<p>$$J_{\text{DR}}(\theta; \phi) = \mathbb{E}_{\xi \sim p_\phi(\xi)}\left[\,J(\theta; \xi)\,\right] = \mathbb{E}_{\xi \sim p_\phi}\mathbb{E}_{\tau \sim p_\xi(\cdot\mid\pi_\theta)}\left[\sum_t \gamma^t r_t\right].$$</p>
+<p>直觉：<strong>不再赌仿真器准，赌"真世界是分布里的一个采样"</strong>。优化器被迫学一个"在所有 $\xi$ 上都还行"的策略——hedging 是内建的。</p>
+<h3>2. 两种解读：贝叶斯平均 vs 鲁棒优化（回答 Q1）</h3>
+<ul>
+<li><strong>贝叶斯平均解读</strong>：把 $p_\phi(\xi)$ 看成对 $\xi_{\text{real}}$ 的先验（epistemic uncertainty），$J_{\text{DR}}$ 是先验下的期望回报。transfer 条件：$\xi_{\text{real}} \in \text{support}(p_\phi)$ 且 $p_\phi$ 在那附近有足够密度——<strong>先验盖住真相</strong>。失败模式：先验拍错了（真机摩擦超出 $hi_{\text{friction}}$），策略在没见过的 $\xi$ 上行为未定义。</li>
+<li><strong>鲁棒优化解读</strong>：当 $p_\phi$ 很宽时，期望近似于 $\min_{\xi \in \text{supp}}$ 的软版本——策略在学"最坏情况也别太烂"。失败模式：分布太宽 → 策略过度保守，<strong>在简单 $\xi$ 上的峰值性能被 hedging 吃掉</strong>（论文里魔方 60% 而不是 99%，部分原因在此）。</li>
+</ul>
+<p>一句话：<strong>DR 的 transfer 定理只有一句话——"真机参数落在随机化支撑集里"。</strong> 所有 DR 工程（Tobin 的视觉随机化、Isaac Lab 的 randomization manager、ADR 的自动扩张）都是在<strong>扩大支撑集</strong>，同时<strong>不让期望回报塌掉</strong>。</p>
+<h3>3. ADR：熵单调递增的自动 curriculum（回答 Q2）</h3>
+<p>ADR 维护 $\phi = \{(lo_i, hi_i)\}_{i=1}^d$，每个 episode $\xi_i \sim U(lo_i, hi_i)$。更新规则（第 $i$ 维）：</p>
+<p>$$\text{评估 } \bar J_i^{\text{hi}} = \mathbb{E}[J(\theta; \xi)\mid \xi_i = hi_i], \quad \bar J_i^{\text{lo}} = \mathbb{E}[J(\theta; \xi)\mid \xi_i = lo_i],$$</p>
+<p>$$\text{若 } \bar J_i^{\text{hi}} &gt; t_H \Rightarrow hi_i \leftarrow hi_i + \Delta_i \quad (\text{扩张}), \qquad \text{若 } \bar J_i^{\text{hi}} &lt; t_L \Rightarrow hi_i \leftarrow hi_i - \Delta_i \quad (\text{收缩}),$$</p>
+<p>$lo_i$ 对称处理。$t_H &gt; t_L$ 是表现阈值。</p>
+<p>为什么这是 curriculum：均匀分布的熵 $H[p_\phi] = \sum_i \log(hi_i - lo_i)$ ——每次扩张都增加熵，<strong>环境分布的"难度"（熵）单调递增</strong>，而策略的表现被阈值 $t_H$ 钉在"刚好能学会"的边界上。对比固定 DR：$\phi$ 是人拍的常数，策略要么太简单（学不到鲁棒性）要么太难（学不出来）；ADR 让 $\phi$ 成为<strong>策略能力的函数</strong> $\phi(\theta)$，难度永远比能力高一格。</p>
+<p>为什么只测边界：若策略在 $\xi_i = hi_i$（该维度最极端）表现达标，则内部 $\xi_i \in (lo_i, hi_i)$ 大概率也达标（单调性假设）——$d$ 个维度只需 $2d$ 次边界评估，绕开维度灾难。</p>
+<h3>4. LSTM 的 emergent meta-learning：隐式的在线系统辨识（回答 Q2 后半）</h3>
+<p>Memory policy：$m_t = f_\theta(m_{t-1}, o_t, a_{t-1})$，$\pi_\theta(a_t \mid o_t, m_t)$。在 ADR 分布上训练时，最优策略的形式是<strong>贝叶斯自适应策略</strong>：</p>
+<p>$$m_t \approx \text{belief}(\xi \mid o_{1:t}, a_{1:t-1}), \qquad \pi^*(a_t \mid o_t, m_t) \approx \pi^*(a_t \mid o_t, \xi \text{ 的后验}).$$</p>
+<p>直觉：episode 开始时 $m_0$ 是均匀先验（"不知道摩擦多大"）；手一摸 cube，观测到的滑动/阻力就是关于 $\xi$ 的证据，$m_t$ 收敛到"当前世界"的点估计；策略据此调整发力。<strong>这就是论文说的 emergent meta-learning</strong>——不是训了个 meta-learner，而是"宽分布 + memory + RL"三者逼出了在线辨识。数学上它和 Day22（RMA）的 adaptation module 是同一个东西：RMA 把 $m_t \to \hat z_t$（latent dynamics）显式化、两阶段训；ADR 让它隐式地长在 LSTM 里。<strong>明天读 RMA 时，这个对照是第一问。</strong></p>
+<h3>5. DR 的代价方程：鲁棒性不是免费的</h3>
+<p>设 $\xi_0$ 为"标称"仿真参数，$\theta^*_{\xi_0} = \arg\max J(\theta; \xi_0)$ 为单环境最优。DR 策略 $\theta^*_{\text{DR}} = \arg\max J_{\text{DR}}(\theta; \phi)$ 满足：</p>
+<p>$$\underbrace{J(\theta^*_{\xi_0}; \xi_0) - J(\theta^*_{\text{DR}}; \xi_0)}_{\text{hedging 代价：在标称环境上变差}} \quad \text{vs} \quad \underbrace{\mathbb{E}_{\xi\sim p_\phi}[J(\theta^*_{\text{DR}}; \xi)] - \mathbb{E}_{\xi\sim p_\phi}[J(\theta^*_{\xi_0}; \xi)]}_{\text{鲁棒性收益：在分布上变好}}.$$</p>
+<p>$p_\phi$ 越宽，左边越大（峰值性能越低），右边越大（transfer 越稳）。<strong>ADR 的阈值 $t_H/t_L$ 本质上是在自动走这条 trade-off 曲线</strong>——表现不够就不扩张（保住左边的性能），表现够了就扩张（去赚右边的鲁棒性）。这也是为什么 ADR 论文的魔方只有 60%：它优化的是"宽分布上的期望"，不是"标称环境上的峰值"。</p>
+<h3>6. 三条 sim2real 路线的决策表（回答 Q3：DR vs RLPD vs RMA）</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>DR/ADR（今天）</th>
+<th>RLPD（Day20）</th>
+<th>RMA（Day22 预告）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>真机数据</td>
+<td>0（训练期不用）</td>
+<td>大量（在线交互）</td>
+<td>少量（ adaptation module 部署时在线用）</td>
+</tr>
+<tr>
+<td>仿真器要求</td>
+<td>高（接触/动力学要"可随机化"，即参数化）</td>
+<td>无（可直接真机）</td>
+<td>高（privileged $\xi$ 训练）</td>
+</tr>
+<tr>
+<td>数学本质</td>
+<td>$\max_\theta \mathbb{E}_{\xi\sim p_\phi}[J(\theta;\xi)]$（世界分布上期望）</td>
+<td>混合经验分布上解 Bellman 最优（数据复用）</td>
+<td>$\pi(a\mid o, \hat z), \hat z = g(\text{history})$（显式辨识）</td>
+</tr>
+<tr>
+<td>算力账</td>
+<td>巨大（数千年仿真经验）</td>
+<td>中（真机步数 × UTD 20 的梯度）</td>
+<td>中（仿真 + adaptation 训练）</td>
+</tr>
+<tr>
+<td>失败模式</td>
+<td>$\xi_{\text{real}} \notin \text{support}$（先验拍错）</td>
+<td>探索不安全 / 奖励稀疏点不燃</td>
+<td>sim 里 privileged 信息真机不可测</td>
+</tr>
+<tr>
+<td>适合</td>
+<td>接触复杂、真机贵、仿真"结构对参数错"（灵巧手）</td>
+<td>仿真建不出来、真机可试错（部分操作任务）</td>
+<td>地形/载荷变化快、需要毫秒级适应（足式）</td>
+</tr>
+</tbody>
+</table>
+<p>决策直觉：<strong>仿真器"结构对、参数错" → DR</strong>（魔方、抓取）；<strong>仿真器"结构都不对" → 别仿真，直接上真机 RLPD</strong>；<strong>环境变化比 episode 还快 → RMA 式在线辨识</strong>。三者可以叠：Isaac Lab 里训 locomotion 就是"DR 先做宽 + 真机 RLPD 微调"的组合拳（Day07/08 的 H1/Humanoid-Gym 都是这个配方）。</p>
+<h3>7. 数学没有覆盖的东西（诚实标注）</h3>
+<ul>
+<li><strong>单调性假设</strong>：ADR"只测边界"依赖"边界最难"的单调性——真实物理里参数耦合（摩擦×质量×延迟联合效应）可能让最难的点不在边界上，ADR 对此沉默。</li>
+<li><strong>分布族的限制</strong>：$p_\phi$ 是各维度独立均匀分布——真实世界的参数是<strong>相关的</strong>（重的东西往往摩擦也大），独立均匀是错的先验，只是"够宽所以够用"。</li>
+<li><strong>视觉 vs 动力学的不同数学</strong>：Tobin 2017 的视觉 DR（纹理/光照随机化）本质是"让 CNN 学不变量"，动力学 DR 是"让 policy 学鲁棒反馈"——两者都叫 DR，但一个作用在表示、一个作用在控制，论文把它们混在一个框架里讲，数学上是两回事。</li>
+<li><strong>60% 的天花板</strong>：hedging 代价（§5）+ 稀疏奖励 + LSTM 辨识的滞后——ADR 没有回答"宽分布上的期望最优"离"真机最优"还差多远。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<ul>
+<li>方法在 held-out 上是否 transfer？模型 vs 框架 哪个贡献更大？<strong>框架贡献远大于模型</strong>：ADR 的 policy 就是普通 LSTM+PPO，没有结构创新——transfer 的功劳全在"环境分布生成器"这个<strong>训练框架</strong>。证据：同一套 ADR 管线从 2018 block 重定向搬到 2019 魔方（任务复杂度跃升一个量级），只换了任务和随机化维度，框架不动。这正是"把泛化归因于训练配方"的又一个案例（呼应 README 问答里 Day13 vs Day14 的"接口即泛化 vs 配方即泛化"——ADR 是配方派最极端的形态：<strong>连任务都不用换，换分布就行</strong>）。</li>
+<li>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</li>
+<li><strong>"把仿真做宽" vs "把数据做宽"</strong>：ADR 的 $\xi \sim p_\phi$ 和 LLM post-training 的"prompt/环境多样化"是同一数学——都是在输入分布上做期望来换鲁棒性。做 VLA 的 RL 后训练时，"随机化仿真参数"和"随机化指令/场景"是同一枚硬币的两面，ADR 的边界扩张规则可以直接抄去做"课程式数据混合"。</li>
+<li><strong>LSTM 隐式辨识的教训</strong>：memory + 宽分布 ⇒ 在线自适应免费出现——这对具身智能的 policy 架构有直接含义：<strong>别急着把 adaptation 做成显式模块，先问宽分布 + memory 能不能长出来</strong>。RMA（明天）就是"长不出来/不够快时才显式化"的答案。</li>
+<li>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：① ADR 的算力账是"数千年仿真经验"——Infra 视角这是<strong>用算力买数据</strong>，和 Day20 RLPD"用梯度买数据"（UTD=20）是同一笔账的不同记法；② ADR 的边界评估是天然的<strong>自动化评测门</strong>：每个维度的 $\bar J_i^{\text{hi}}$ 就是 sim2real readiness 的分项指标——这正是 Day24（system identification + sim2real evaluation）要讲的"release gate"的雏形；③ 可复现性差：无官方代码，随机化维度全是论文附录里的表——这是 DR 路线至今的工程短板，也是 Isaac Lab 的 randomization manager（Day03）要解决的"把 DR 做成可复用算子"的问题。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：ADR 的阈值 $t_H/t_L$ 和扩张步长 $\Delta_i$ 是怎么定的？论文说"performance above a threshold"，但阈值本身是不是又成了新的"人拍参数"？——ADR 号称杀掉手工调参，但可能只是把"调随机化范围"变成了"调阈值"。有没有后续工作把阈值也自动化（比如按分位数自适应）？</li>
+<li>如果要复现 / 小规模试，第一个实验做什么？在 Isaac Lab（Day03）里拿一个单维度做最小 ADR：固定其他参数，只随机化<strong>地面摩擦</strong>，实现"边界评估→扩张/收缩"循环，观察 $H[p_\phi]$ 曲线和策略成功率曲线的关系——这是整套 ADR 最便宜的"啊哈时刻"（一个维度的 entropy-performance 曲线）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<blockquote>
+<p>"We demonstrate that models trained only in simulation can be used to solve a manipulation problem of unprecedented complexity on a real robot. This is made possible by two key components: a novel algorithm, which we call automatic domain randomization (ADR) and a robot platform built for machine learning."（摘要）
+"ADR automatically generates a distribution over randomized environments of ever-increasing difficulty."（摘要）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<ul>
+<li>按模板补齐 System / Training / Key Tricks / Results / 可迁移 ✅</li>
+<li>保留并完善「和之前工作的关系」小节 ✅</li>
+<li>数学视角：DR 目标函数（MDP 分布）、贝叶斯平均 vs 鲁棒优化、ADR 熵增 curriculum、LSTM 隐式辨识、hedging 代价方程、三路线决策表 ✅</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<ul>
+<li>上一篇: day-20-2023-rlpd — RLPD：交互贵时的 off-policy 解法（用数据覆盖不确定性）；Day21 是其对偶——用世界分布覆盖不确定性，零真机数据</li>
+<li>下一篇预告: day-22-2021-rma — RMA：rapid motor adaptation——把 ADR 里 LSTM 隐式做的"在线辨识"显式化为 adaptation module，毫秒级适应地形与载荷</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充</h2>
+<p>（本日暂无用户追问。）</p>
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-13）</h2>
+<blockquote>
+<p>以下 3 组问答来自 2026-09-13 上午用户对 Day21 DR/ADR 卡片的追问（quiz 三题），原样归档。</p>
+</blockquote>
+<h3>Q1：DR 的数学是"鲁棒优化"还是"贝叶斯平均"？transfer 的精确条件是什么？</h3>
+<p><strong>问题原文</strong>："DR 的数学是\"鲁棒优化\"（max-min）还是\"贝叶斯平均\"（期望）？transfer 发生的精确条件是什么？"</p>
+<p><strong>核心答案</strong>："贝叶斯平均"是主答案：</p>
+<p>$$J_{\text{DR}} = \mathbb{E}_{\xi \sim p_\phi}[J(\theta; \xi)]$$</p>
+<ul>
+<li>$\xi$ ：物理参数向量（摩擦、质量、阻尼等）——"真相"；</li>
+<li>$p_\phi$ ：随机化分布，由超参 $\phi$ 决定——充当先验；</li>
+<li>$\theta$ ：策略参数；</li>
+<li>$J(\theta; \xi)$ ：在参数 $\xi$ 的世界里策略 $\theta$ 的回报。</li>
+</ul>
+<p><strong>transfer 精确条件</strong>： $\xi_{\text{real}} \in \text{support}(p_\phi)$ ，且附近有足够密度——用户原话"先验盖住真相"完全正确。</p>
+<p>但"鲁棒优化"不是错答案，两者是<strong>分布宽度的插值</strong>： $p_\phi$ 窄 → 贝叶斯平均；把 $p_\phi$ 拉得很宽，期望就退化成软 max-min——策略被迫"在支撑集里最坏情况也别太烂"，这正是 hedging（魔方 60% 而不是 99% 的来源）。两种失败模式各对应一种解读用错地方：<strong>先验拍错</strong>（贝叶斯失败，真机掉出支撑集）vs <strong>分布太宽吃掉峰值</strong>（鲁棒过头）。考试时答"贝叶斯平均为主，宽分布下退化为软鲁棒"，满分。</p>
+<h3>Q2：ADR 的边界扩张为什么是 curriculum？为什么 LSTM 策略会涌现 meta-learning？</h3>
+<p><strong>问题原文</strong>："ADR 的边界扩张为什么是一个 curriculum？为什么（LSTM）策略在 ADR 下会涌现 meta-learning？"</p>
+<p><strong>核心答案</strong>：</p>
+<p><strong>curriculum</strong>：熵 $H[p_\phi] = \sum_i \log(hi_i - lo_i)$ 随边界扩张单调增（ $hi_i, lo_i$ 为第 $i$ 个参数区间的上下界），难度永远比能力高一格——这就是 curriculum。</p>
+<p><strong>"hidden state 是对 $\xi$ 的在线后验"</strong>：ADR 每个 episode 采样一个<strong>固定</strong>的 $\xi$ （比如摩擦=0.3），但 policy <strong>看不到</strong> $\xi$ ，只能看到观测 $o_t$ 。想走好，它必须先回答"我在哪个世界里？"——证据全在历史里：发出力矩 $\tau$ ，观测到关节速度 $\omega$ 比预期小 → 摩擦大或负载重；几个 timestep 下来，历史 $h_t = (o_1, a_1, \dots, o_t)$ 里就藏着 $\xi$ 的全部证据。</p>
+<p>LSTM 干的事： $m_t = f_\theta(m_{t-1}, o_t, a_{t-1})$ ，把历史压缩成一个向量（ $m_t$ 为 LSTM 隐状态），policy 按 $\pi(a \mid o_t, m_t)$ 行动。它的<strong>功能角色</strong> = 后验 $p(\xi \mid h_t)$ ：把"到目前为止身体感受到的一切"压缩成"对环境的信念"，再基于信念行动。贝叶斯后验是 $p(\xi \mid h) \propto p(h \mid \xi) p(\xi)$ ；LSTM 不显式算 Bayes 公式，但 ADR 训练（ $\xi$ 一直在变 + reward 只奖励"适应对了的"行为）<strong>逼着</strong> $m_t$ 成为 $\xi$ 的充分统计量——"在线后验"说的就是这个功能等价，不是说它手算贝叶斯。</p>
+<p><strong>为什么叫 emergent meta-learning</strong>：meta-learning = "学会如何适应"。外层 PPO 在 $\xi$ 变化的 episodes 上训练，学的不是"某个 $\xi$ 下的步态"，而是 LSTM 的<strong>更新规则</strong> $f_\theta$ 本身——即"如何从历史中推断 $\xi$ "。部署时权重一动不动，适应全靠 $m_t$ 更新 → 学会了"适应"这件事。而它是被 ADR <strong>逼出来</strong>的： $\xi$ 不变 → 没必要辨识；难度不递增 → 躺平学个保守步态（hedging 解）就够了。只有"环境一直在变 + 越来越难"，policy 才被迫"先辨识、再行动"。这正是 Day22 RMA 要<strong>显式化</strong>的东西——Day21 是隐式版。</p>
+<h3>Q3：DR vs RLPD——什么时候"把仿真做宽"，什么时候"直接在真机上学"？</h3>
+<p><strong>问题原文</strong>："DR vs RLPD 两条相反的路——什么时候\"把仿真做宽\"，什么时候\"直接在真机上学\"？"</p>
+<p><strong>核心答案</strong>：最锋利的一刀——<strong>接触复杂度本身不决定方向，决定方向的是"仿真器结构对不对"</strong>：</p>
+<ul>
+<li><strong>结构对、参数错</strong>（MuJoCo 的接触模型 OK，只是摩擦/质量测不准）→ DR，把参数做宽盖住真相；</li>
+<li><strong>结构都不对</strong>（揉面团、线缆、流体——仿真器原理性建模不了）→ 做宽也盖不住 → 别仿真，直接 RLPD 真机学。</li>
+</ul>
+<p>接触复杂度高的两种去向正好说明这点：灵巧手魔方 → ADR（大力出奇迹）；揉面团 → 真机 RLPD。另外两条路线可以叠：Isaac Lab 里训 locomotion 就是"DR 先做宽 + 真机 RLPD 微调"的组合拳，Day07/08 的 H1 都是这个配方——三选一是伪命题，成年人全都要，只是比例问题。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

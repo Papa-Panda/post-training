@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 23 — Residual RL：Residual Reinforcement Learning for Robot Control</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 23</span>
+    <h1>Day 23 — Residual RL：Residual Reinforcement Learning for Robot Control</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: Residual Reinforcement Learning for Robot Control</li>
+<li>Authors / Org: Tobias Johannink<em>, Shikhar Bahl</em>, Ashvin Nair<em>（</em>共同一作）, Jianlan Luo, Avinash Kumar, Matthias Loskyll, Juan Aparicio Ojea, Eugen Solowjow, Sergey Levine（Siemens Corporation / UC Berkeley / Hamburg University of Technology；ICRA 2019）</li>
+<li>Link / arXiv: https://arxiv.org/abs/1812.03201（2018-12-07 v1，v2 2018-12-18；ICRA 2019 接收）/ 项目页（含视频）residualrl.github.io（论文内提及）</li>
+<li>Official code: 论文未提供官方实现仓库（诚实标注）；底层 TD3 用的是 rlkit 的公开实现，residual 框架本身与 RL 算法解耦</li>
+<li>Date read: 2026-09-14</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">residual-rl</span><span class="tag">robot-control</span><span class="tag">classical-control</span><span class="tag">feedback-control</span><span class="tag">actor-critic</span><span class="tag">td3</span><span class="tag">sim2real</span><span class="tag">contact-rich-manipulation</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-23-2019-residual-rl</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-23-2019-residual-rl</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>真机学接触任务太贵、纯 RL 从零学太慢太危险——Residual RL 把控制问题拆成两半：<strong>经典反馈控制器</strong> $\pi_H$ 管"几何部分"（走到哪、跟轨迹，刚体动力学先验足够），<strong>TD3 学的残差策略</strong> $\pi_\theta$ 只管"接触部分"（推 block 不推倒、补偿摩擦），最终执行 $u=\pi_H+\pi_\theta$ 叠加；Sawyer 7 自由度臂在 <strong>真机上只用约 8000 步（3 小时）</strong> 学会把 block 插进两个会倒的立块之间——同样条件下手写控制器在 block 被转 ±20° 时成功率 2/20，residual RL 15/20。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线</strong>：Day19–24 "RL for Robotics / Sim2Real" 块的第四天，roadmap 标题 "Residual RL — combine classical control priors with learned correction"。Day19（PPO/TD3 这类 actor-critic 是残差头的算法本体——本篇底层用的就是 TD3）；Day21（DR：把世界做宽来 robust）、Day22（RMA：privileged sim + 零真机交互的显式辨识）之后，Day23 给出第三条 sim2real/真机学习路线：<strong>先验来自控制理论，真机只做小量在线学习</strong>。</li>
+<li><strong>补了哪个短板</strong>：Day19–22 的路线里，"先验"要么是数据（Day20 RLPD 的 offline data）、要么是随机化（Day21 DR）、要么是特权仿真（Day22 RMA）。但工厂里最现成的先验其实是<strong>随机器人一起发货的经典控制器</strong>（PID、阻抗控制、笛卡尔位置控制器）——论文原话："our method only requires a conventional controller for motion, which ships with most robots"。Residual RL 是第一套把这个"免费先验"形式化进 RL 目标函数的 canonical 方法。</li>
+<li><strong>替代 / 分叉 / 改进</strong>：不是替代 DR/RMA/RLPD，而是<strong>正交的先验来源轴</strong>。三分法更新：① 先验=无 → Day21 ADR（世界做宽）；② 先验=privileged sim → Day22 RMA（零真机交互，只做 inference-time 辨识）；③ 先验=经典控制器 → Day23 residual（真机小量交互，权重继续学）；④ 先验=离线数据 → Day20 RLPD（真机在线更新权重）。四条路线的选择标准：你手里有什么免费的东西——可参数化仿真器？现成控制器？人类演示数据？什么都没有？</li>
+<li><strong>对之前 Day X 的直接对比</strong>：</li>
+<li><strong>vs Day22（RMA）</strong>：RMA 真机上权重 frozen、"适应"=条件变量 $\hat z_t$ 更新；residual RL 真机上 TD3 权重<strong>继续梯度更新</strong>——"学"还在，只是被先验框在了一个很小的残差流形里。RMA 是"辨而不学"，residual 是"带着镣铐学"。</li>
+<li><strong>vs Day20（RLPD）</strong>：RLPD 的先验是<strong>数据</strong>（replay 里常驻 offline transitions），residual 的先验是<strong>模型/控制器</strong>（加法结构里常驻 $\pi_H$ ）。关键差异：RLPD 的 BC 初始化策略会<strong>继承并可能遗忘</strong>先验偏置（catastrophic forgetting）；residual 的加法结构让 $\pi_\theta$ 可以<strong>主动抵消</strong> $\pi_H$ 的偏置——"undo" 能力是结构自带的（见数学视角 §5）。</li>
+<li><strong>vs Day12（Diffusion Policy）</strong>：DP 是纯 behavior cloning（学 $p(A\mid O)$ ），residual 是 RL（优化回报）。DP 需要高质量演示、换任务重训；residual 需要可写的经典控制器 + 可定义的回报——<strong>先验的形态决定了路线的形态</strong>。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>Roadmap Day23 的标题就是它。这是"控制理论 × 深度 RL"结合最干净的一篇：没有花哨架构，就一个加法 $u=\pi_H+\pi_\theta$ ，却同时回答了真机 RL 的三个硬问题——<strong>样本效率</strong>（先验吃掉几何部分）、<strong>安全性</strong>（先验稳定 $s_m$ ，探索被限制在小残差内）、<strong>可解释接口</strong>（ $\pi_H$ 是工程师能看懂、能单独 debug 的模块）。对 Jun 的路线：① 这是"先验注入"最便宜的形态——不需要 teleop 数据（RLPD 的痛）、不需要可参数化仿真器（RMA 的痛）；② "把 MDP re-center 到先验周围再学"是一个通用设计模式，LLM 训练里 SFT-then-RL、RLHF 里 reference-policy KL 约束都是它的表亲；③ Day24（系统辨识）的前置：residual 学出来的 $\pi_\theta$ 本身就是"先验模型误差"的测量。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li>Algorithm 1 里 critic 学的 $Q(s,u)$ 中的 $u$ 到底指什么？把 $\pi_H$ 看成环境的一部分后，critic 实际在解哪个 MDP？（提示：wrapped MDP—— $p'(s'\mid s,u_{\text{res}})=p(s'\mid s,u_{\text{res}}+\pi_H(s))$ ；Q 定义在残差动作上，TD3 本体一行不用改。）</li>
+<li>为什么 residual 结构能"undo"一个有偏的 $\pi_H$ 、理论上仍收敛到最优策略，而 BC 预训练再 finetune 的路线做不到？（提示：加法永远在线 vs 初始化继承偏置；finetune 还会 catastrophic forgetting 掉演示先验。）</li>
+<li>$r_t=f(s_m)+g(s_o)$ 的"几何/接触"分解什么时候失效？（提示：当修正 $s_o$ 必须违背 $f$ 时——比如为了扶正 block 必须先偏离几何目标—— $\pi_\theta$ 被迫和 $\pi_H$ 打架，"小残差"的高效论证就塌了。Block insertion 恰好可分： $\pi_H$ 管"走到缝隙"， $\pi_\theta$ 只管"轻推不倒"。）</li>
+</ol>
+<p>相关讨论（Gemini 网页版，2026-09-14）：https://gemini.google.com/app/1db272bf9b7e80f2</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol>
+<li><strong>Motivation</strong>: 工厂里的机器人做重复任务，缺的是对不确定性的适应力。经典反馈控制（PID、computed torque）跟轨迹很高效，但一碰到<strong>接触和摩擦</strong>就脆——接触参数辨识极难，调参成本"可能和机器人硬件本身相当"（论文原话）。纯 RL 能处理接触，但从零学：① 真机交互贵且初期不安全；② block insertion 这种任务随机探索几乎撞不到成功。Residual RL 的赌注：<strong>任务里"能被经典控制高效解决的部分"和"必须靠交互学的部分"是可分的</strong>——前者用先验免费吃掉，RL 只学后者。</li>
+<li><strong>System / Method</strong>: 核心方程（论文式 5）：
+   $$u=\pi_H(s_m)+\pi_\theta(s_m,s_o),$$
+   $\pi_H$ 为手写控制器（只看机器人本体状态 $s_m$ ）， $\pi_\theta$ 为神经网络残差策略（看 $(s_m,s_o)$ ，含物体状态）。执行流程（Algorithm 1）： $u_t=\pi_\theta(s_t)+\mathcal{N}_t$ （探索噪声只加在残差上）→ 实际执行 $u'_t=u_t+\pi_H(s_t)$ → 存 $(s_t,u_t,s_{t+1})$ 进 replay → TD3 更新 $\theta$ 。注意：<strong>replay 里存的是残差动作</strong>， $\pi_H$ 被吸收进了环境转移核——RL 算法本体完全不用改。</li>
+<li><strong>系统论分解</strong>（论文式 1）： $[s_{m,t+1};s_{o,t+1}]=\big[[A(s_{m,t}),0];[B(s_{m,t},s_{o,t}),C(s_{o,t})]\big][s_{m,t};s_{o,t}]+D[u_t;0]$ ， $s_m$ 为全驱动机器人状态， $s_o$ 为欠驱动物体状态。 $A,C$ 是已知的刚体动力学，<strong>耦合矩阵 $B(s_m,s_o)$ 未知</strong>——接触和摩擦就藏在 $B$ 里。经典控制能镇定 $s_m$ （ $f$ 部分），但对 $B$ 无能为力（ $g$ 部分）。</li>
+<li><strong>奖励分解</strong>（论文式 4）： $r_t=f(s_m)+g(s_o)$ ， $f$ 为几何项（到目标距离/轨迹误差，先验可解）， $g$ 为物体项（block 不倒、不移位，必须靠交互学）。</li>
+<li><strong>Training / Data Details</strong>: <strong>底层 RL = TD3</strong>（twin delayed DDPG，rlkit 公开实现；作者强调 residual 框架与 RL 算法解耦，可换任意算法）。Off-policy + replay 是真机可行的关键（sample efficient）。</li>
+<li><strong>Sim</strong>：MuJoCo，Sawyer 7 自由度臂 + 平行夹爪，笛卡尔空间位置控制器；两个立块各 3 自由度（顶部带斜角），可在 $x$ / $y$ 滑动、绕 $y$ 轴倾倒；观测 = 末端位置 + 末端六维力/力矩 + block 位置 + 目标位置；初始状态夹爪已抓起待插入 block 悬在上方。Sim reward（式 6）： $r_t=-\lVert x_g-x_t\rVert_2-\lambda(\lVert\theta_l\rVert_1+\lVert\theta_r\rVert_1)$ ， $\theta_{l/r}$ 为左右立块相对桌面的倾角。</li>
+<li><strong>Real</strong>：compliant joint-space 阻抗控制器（自研，顺滑且容忍接触）；block 位姿来自<strong>相机跟踪系统</strong>（非真值）；因 block 轻且会滑动、Sawyer 测不到 $x$ / $y$ 向接触力，观测里只保留 $z$ 向末端力。Real reward（式 7）在 sim 版基础上加立块位置误差 $-\mu\lVert X_g-X_t\rVert_2$ 和绕 $z$ 轴偏角项 $-\beta(\lVert\phi_l\rVert_1+\lVert\phi_r\rVert_1)$ 。<strong>Verifiable signal</strong>：block 是否保持直立且在原位——相机可测、人工可判定（成功率人工计数）。</li>
+<li><strong>Real 数据量级</strong>：从零真机训练约 <strong>8000 步 ≈ 3 小时</strong>收敛；sim 初始化后再做 residual，<strong>不到 1000 步</strong>真机交互即解。</li>
+<li><strong>Key Tricks</strong>: ① <strong>残差动作进 replay</strong>： $(s_t,u_t,s_{t+1})$ 存的是 $\pi_\theta$ 的输出， $\pi_H(s_t)$ 不进 buffer——数学上等价于把先验"编译"进环境，TD3 一行不用改，这是框架能即插即用的原因。② <strong>信息分工是故意的</strong>： $\pi_H$ 只看 $s_m$ （几何）， $\pi_\theta$ 看 $(s_m,s_o)$ （接触）——先验的信息瓶颈不是缺陷，是设计：所有物体反馈只走学习通道，工程师 debug $\pi_H$ 时不用管接触。③ <strong>探索噪声只加在残差上</strong>： $\mathcal{N}_t$ 的幅度天然小（残差本身小），探索半径被先验框住——纯 RL 的"broad spatial variance"（论文原话，真机危险）在 residual 里被结构性消除。④ <strong>有偏控制器实验</strong>： $\sigma=0.05,\mu\in[0,0.2]$ 的偏置下 residual 性能恒定、手写控制器崩——残差学的是<strong>积分动作/扰动抑制</strong>，等于把 sensor drift 在线吃掉（论文明确点出 automation 里 sensor drift 的应用）。</li>
+<li><strong>Results</strong>: <strong>Block insertion 任务</strong>（把 block 插进两个立块之间，不碰倒、不移位）：</li>
+<li><strong>样本效率</strong>（sim + 真机）：residual RL 收敛更快、最终性能更高；纯 RL 要从零学位置控制结构，探索状态空间更广（真机危险）。</li>
+<li><strong>环境变化</strong>：立块初始朝向随机倾斜（sim： $U[-r,r],r$ 到 0.3 rad；真机：直立/顺时针/逆时针 ±20° 三档）——手写控制器 <strong>2/20</strong>，residual RL <strong>15/20</strong>；学到的是"consistent small corrective feedback behaviors…slightly nudge the blocks in the right direction without tipping them over"（论文原话）——<strong>小修正反馈</strong>，正是 residual 名字的由来。</li>
+<li><strong>控制噪声/偏置</strong>：输出加 $\mathcal{N}(\mu,\sigma^2)$ 噪声， $\mu=0,\sigma\in[0.01,0.1]$ 下性能几乎不受影响；偏置 $\mu\in[0,0.2]$ 下 residual 保持、手写控制器性能随偏置单调崩塌；真机偏置实验同样通过。</li>
+<li><strong>Sim2Real</strong>： $\pi_H$ 取"sim 里用 deep RL 训出的参数化策略"（block 固定场景），真机 residual <strong>&lt;1000 步</strong>解决——"highly sample efficient, practical way to solve robotics problems with difficult contact dynamics"。</li>
+<li>失败/局限（论文 Discussion 诚实标注）：依赖精心搭建的视觉系统估计位姿，限制新场景应用；若手写视觉丢掉边缘等关键信息，学出的反馈控制器质量受限；未来方向是端到端视觉输入。</li>
+</ol>
+</section>
+<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
+<blockquote>
+<p>符号统一： $s_t=(s_{m,t},s_{o,t})$ ， $s_m$ 全驱动机器人状态， $s_o$ 欠驱动物体状态； $u_t$ 控制输入； $\pi_H$ 手写控制器（ $s_m\mapsto u$ ）； $\pi_\theta$ 残差策略（ $(s_m,s_o)\mapsto u_{\text{res}}$ ）； $u'_t=u_{\text{res},t}+\pi_H(s_t)$ 实际执行； $r_t=f(s_m)+g(s_o)$ ； $B(s_m,s_o)$ 未知接触耦合矩阵； $\gamma$ 折扣因子。</p>
+</blockquote>
+<h3>1. 先验已知的世界： $A,C$ vs 未知的 $B$</h3>
+<p>论文式 (1) 把机器人+物体写成块矩阵系统。控制论视角：<strong> $A(s_m)$ 和 $C(s_o)$ 是刚体动力学，先验已知</strong>——经典控制（PID、computed torque、阻抗控制）镇定 $s_m$ 误差动态是指数稳定的（论文明确给出这个结论：忽略 $\pi_\theta$ 时， $\pi_H$ 给出 $s_m$ 子空间的指数稳定误差动态，前提是子空间可镇定）。<strong> $B(s_m,s_o)$ 是接触/摩擦耦合，先验未知</strong>——这就是为什么"调参成本堪比硬件"：工程师在用试错法拟合 $B$ 。Residual RL 的数学分工： $\pi_H$ 吃掉 $A$ 已知的部分（最大化 $f$ ）， $\pi_\theta$ 只负责学 $B$ 未知的部分（最大化 $g$ ）。<strong>先验的形状决定了学习的形状</strong>——这是整篇论文的数学母题。</p>
+<h3>2. 核心方程：加法即接口</h3>
+<p>$$u=\pi_H(s_m)+\pi_\theta(s_m,s_o)\tag{5}$$</p>
+<p>三个性质一次读懂：
+- <strong>叠加是线性接口</strong>： $\pi_H$ 和 $\pi_\theta$ 之间唯一的契约是"加法"——工程师可以独立设计、测试、替换 $\pi_H$ （比如从 PID 换成 MPC）， $\pi_\theta$ 的训练代码不用动。这是 Day13 Octo"接口即泛化"在控制层的回声：<strong>窄接口 + 强先验 = 可维护性</strong>。
+- <strong>信息不对称是故意的</strong>： $\pi_H$ 只看 $s_m$ ， $\pi_\theta$ 看 $(s_m,s_o)$ 。 $s_o$ 的反馈只走学习通道——先验被故意蒙在鼓里，这样它的失败模式是可预测的（几何部分永远对），残差只需要"修正"，不需要"重做"。
+- ** $f/g$ 分解是设计假设，不是定理**： $r_t=f(s_m)+g(s_o)$ 要求任务可分——"走到缝隙"（ $f$ ）和"轻推不倒"（ $g$ ）在 block insertion 里恰好正交。如果任务不可分（见 §7），加法结构还在，但"小残差"的高效论证失效。</p>
+<h3>3. Wrapped MDP：先验被编译进环境（回答 Q1）</h3>
+<p>Algorithm 1 的关键细节：replay 存的是 $(s_t,u_t,s_{t+1})$ ，其中 $u_t=\pi_\theta(s_t)+\mathcal{N}_t$ 是<strong>残差动作</strong>，而环境转移发生在 $u'_t=u_t+\pi_H(s_t)$ 下。定义 wrapped 转移核：</p>
+<p>$$p'(s_{t+1}\mid s_t,u_{\text{res},t})\;\triangleq\;p(s_{t+1}\mid s_t,\,u_{\text{res},t}+\pi_H(s_t)).$$</p>
+<p>于是 critic 学的 $Q_\phi(s,u_{\text{res}})$ 是<strong>以 $\pi_H$ 为新原点的 MDP</strong> 的值函数：</p>
+<p>$$Q^{\pi_\theta}(s,u_{\text{res}})=\mathbb{E}\left[\,r_t+\gamma\,Q^{\pi_\theta}(s_{t+1},\pi_\theta(s_{t+1}))\;\middle|\;s_t=s,u_{\text{res},t}=u_{\text{res}}\,\right],\quad s_{t+1}\sim p'(\cdot\mid s,u_{\text{res}}).$$</p>
+<p>直觉：<strong>residual RL = 标准 actor-critic，但坐标系被平移到了先验上</strong>。TD3 的 twin critics、delayed update、target smoothing 全都不用改——因为"先验"在数学上只是一个环境包装器。这就是为什么论文说"Our method is independent of the choice of RL algorithm"：任何 RL 算法都可以套这个包装器。这也是统一框架：<strong>凡是"已知结构 + 未知残差"的问题，都可以写成 wrapped MDP，把已知结构编译进 $p'$ </strong>。</p>
+<h3>4. 为什么样本高效：三重红利</h3>
+<ol>
+<li><strong>探索流形被先验锚定</strong>： $\pi_H$ 把状态分布 $d^{\pi}(s)$ 钉在任务相关流形上（"走到缝隙"附近）。纯 RL 的初始 $d^{\pi_0}$ 是均匀随机游走——block insertion 的成功集在状态空间中测度极小，随机探索几乎撞不到。数学上：先验把<strong>有效探索半径</strong>从整个动作空间压缩到残差球 $\lVert u_{\text{res}}\rVert\le\delta$ 内。</li>
+<li><strong>信用分配变短</strong>： $f$ 部分的回报被 $\pi_H$ 提前饱和，critic 只需要拟合 $g$ 相关的残差回报——TD 误差的方差主要来自"推 block 那一下"，而不是"走过去那 50 步"。这就是 sim+真机学习曲线里 residual 前期陡峭的原因。</li>
+<li><strong>安全性是结构性的</strong>： $\pi_H$ 镇定 $s_m$ ⇒ 即使 $\pi_\theta$ 输出垃圾，总动作 $u'_t$ 仍被 $\pi_H$ 主导在稳定域附近。论文原话：纯 RL "needs to explore a wider set of states…potentially dangerous in hardware deployments"——residual 用<strong>加法结构</strong>把危险探索在数学上排除，而不是靠 reward shaping 祈祷。</li>
+</ol>
+<h3>5. Undo 偏置：残差是可学习的积分动作（回答 Q2）</h3>
+<p>设手写控制器带偏置 $\tilde\pi_H(s)=\pi_H(s)+b$ （ $b$ 常数或慢变，对应 sensor drift / 参数失配）。加法结构下残差可以学到：</p>
+<p>$$\pi_\theta(s)\;\approx\;-b\;+\;\text{feedback correction}(s_m,s_o).$$</p>
+<p>第一项是<strong>常值抵消</strong>——经典控制里这正是积分器的活（消除稳态误差）；第二项是真正的接触反馈。实验（式 8， $\mu\in[0,0.2]$ 偏置）证实：residual 性能恒定，手写控制器单调崩塌。</p>
+<p>对比 BC-pretrain-then-finetune（Day20 RLPD 路线）：finetune 是<strong>初始化</strong>在先验上——梯度路径被先验偏置污染，且可能 catastrophic forgetting 掉演示知识（RRLfD, arXiv:2106.08050 明确指出 residual 形式能缓解这一点）。Residual 是<strong>加法永远在线</strong>： $\pi_H$ 永不消失， $\pi_\theta$ 永远有机会纠正它。<strong>初始化是"起点"，加法是"结构"</strong>——起点会被优化带偏，结构一直在场。这是回答 Q2 的核心：residual 理论上能收敛到最优策略（把 $\pi_H$ 完全 undo 掉： $\pi_\theta^*=\pi^*-\pi_H$ ），而 finetune 的收敛性依赖初始化盆地。</p>
+<h3>6. 四条路线的统一坐标系（Day19–23 串联）</h3>
+<table>
+<thead>
+<tr>
+<th>路线</th>
+<th>先验来源</th>
+<th>真机上更新什么</th>
+<th>真机交互量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Day21 ADR</td>
+<td>无（世界做宽）</td>
+<td>什么都不更新（LSTM 隐式辨识是 inference）</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Day22 RMA</td>
+<td>privileged sim（ $e_t$ ）</td>
+<td>条件变量 $\hat z_t$ （inference），权重 frozen</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Day23 Residual</td>
+<td>经典控制器 $\pi_H$</td>
+<td>残差权重 $\theta$ （gradient）</td>
+<td>~8000 步 / 3h</td>
+</tr>
+<tr>
+<td>Day20 RLPD</td>
+<td>离线数据（replay 常驻）</td>
+<td>$Q,\pi$ 权重（gradient）</td>
+<td>在线持续</td>
+</tr>
+</tbody>
+</table>
+<p>横轴是"先验从哪来"（模型/控制器 vs 数据 vs 特权仿真 vs 无），纵轴是"真机上动什么"（权重 vs 条件变量 vs 不动）。<strong>选路线 = 看你手里有什么免费的东西</strong>：有可参数化仿真器 → RMA；有现成控制器 → residual；有人类演示 → RLPD；什么都没有 → ADR 把世界做宽。Day24（系统辨识）的伏笔：residual 学出的 $\pi_\theta$ 本身就是" $B$ 矩阵有多未知"的测量——辨识和残差是同一枚硬币的两面。</p>
+<h3>7. 数学没有覆盖的东西（诚实标注）</h3>
+<ul>
+<li><strong>残差幅度无约束</strong>："小残差"高效、安全，论文里是<strong>涌现</strong>的（学出来的是 small corrective feedback），不是<strong>强制</strong>的——目标函数里没有 $\lVert u_{\text{res}}\rVert$ 正则。如果 $\pi_H$ 很烂， $\pi_\theta$ 会被迫长大，"带着镣铐学"退化成"纯 RL + 一个常数偏置"。</li>
+<li>** $f/g$ 可分性假设**：若修正 $s_o$ 必须违背 $f$ （比如为了扶正 block 必须先大幅偏离几何目标）， $\pi_\theta$ 被迫和 $\pi_H$ 打架——此时最优残差不再是"小修正"，样本效率论证塌掉。Block insertion 恰好可分，这是任务选择的眼光，不是方法的普适性。</li>
+<li>** $\pi_H$ 的信息瓶颈**： $\pi_H$ 看不到 $s_o$ 是设计，但也意味着所有"几何目标本身该随物体变化"的场景（如目标缝隙在动）先验天然盲区——残差要同时干"重规划几何"和"接触修正"两份活。</li>
+<li><strong>视觉瓶颈</strong>：论文 Discussion 明确承认——位姿来自精心搭建的相机跟踪系统，非端到端；视觉丢掉边缘信息会直接限制反馈控制器质量。这是 Day09–14 VLA 路线（端到端视觉）相对 residual 的优势区。</li>
+<li><strong>Wrapped MDP 的代价</strong>：critic 仍要在 $(s,u_{\text{res}})$ 全空间学 $Q$ ——先验只帮了<strong>探索</strong>，没帮<strong>函数逼近</strong>。 $Q$ 的拟合难度（接触动力学的非光滑性）一点没少，这也是为什么底层必须用 TD3 这种 sample-efficient 的 off-policy 方法。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<ul>
+<li><strong>方法在 held-out 上是否 transfer？模型 vs 框架 哪个贡献更大？</strong> 贡献在<strong>框架</strong>： $u=\pi_H+\pi_\theta$ + wrapped MDP + 奖励/信息分工。证据：① 同一框架被并发独立提出（Silver et al. "Residual Policy Learning", arXiv:1812.06298，仿真长程稀疏奖励任务）——框架收敛，任务各异；② 后续 RRLfD（arXiv:2106.08050）把 residual 从"控制器先验"推广到"演示先验"，框架复用；③ sim2real 实验里 $\pi_H$ 本身就是"sim 训出的 RL 策略"——先验可以是任何东西（手写、MPC、sim policy），接口不变。</li>
+<li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发</strong>：</li>
+<li><strong>"已知结构编译进环境"是通用模式</strong>：LLM 的 SFT-then-RL（SFT 是 $\pi_H$ ，RL 是残差）、RLHF 的 reference-policy KL 约束（ $\pi_{\text{ref}}$ 是先验锚点），数学上都是 wrapped MDP——先把已知的钉死，再学未知的。以后设计 post-training 流程，先问"我的 $\pi_H$ 是什么"。</li>
+<li><strong>加法 vs 初始化</strong>：凡是"已有 baseline + 想改进"的场景（线上模型迭代、控制器升级），优先考虑<strong>加法结构</strong>（residual head / adapter）而非 finetune——前者保留 undo 能力、后者继承偏置。这和 LLM adapter/LoRA 的哲学同构。</li>
+<li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性</strong>：residual 把"工程师可维护的 $\pi_H$ "和"数据驱动的 $\pi_\theta$ "解耦—— $\pi_H$ 可单元测试、可形式化验证（指数稳定是定理）， $\pi_\theta$ 走数据飞轮；这是 Day29（安全）的前置思想：<strong>安全关键的部分用可验证的先验 covering，学习只发生在安全包络内</strong>。评测上"2/20 vs 15/20"的人工计数 + 相机可测位姿是接触任务评测的诚实写法（Day28 评测主题会 formalize）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>没看懂的 / 想深挖的 1 个问题</strong>： $\pi_\theta$ 学出的残差场 $u_{\text{res}}(s)$ 的几何——在"block 已对准" vs "block 倾斜 20°"两种状态下，残差是"常值偏置抵消"主导还是"状态相关反馈"主导？把残差场画出来，能直接验证 §5 的"积分动作"解释 vs 纯反馈解释。</li>
+<li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> MuJoCo 里最小闭环：① 写一个笛卡尔 PD 控制器当 $\pi_H$ （setpoint = 目标缝隙上方，5 行代码）；② 用 stable-baselines3 的 TD3 学残差，任务 = 论文的简化版（固定立块，只学插入）；③ 先复现"无扰动下手写控制器 20/20、加 ±20° 扰动掉到 ~2/20、residual 拉回 15/20"的三段对比——先验证框架，再谈真机。</li>
+</ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<blockquote>
+<p>"The final control policy is a superposition of both control signals."（摘要）
+"We believe this approach can accelerate learning of many tasks, especially those where the control problem can be solved in large part by prior knowledge but requires some model-free reasoning to solve perfectly."（Discussion）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<ul>
+<li>[x] 按模板补齐 System / Training / Key Tricks / Results / 可迁移（含数学视角 §1–7）</li>
+<li>[x] 保留并完善「和之前工作的关系」小节（Day19–23 四路线统一坐标系）</li>
+<li>[x] 论文逐节核验（arXiv HTML 全文 761 行已读，公式/数据/引用均来自原文非记忆）</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<ul>
+<li>上一篇: day-22-2021-rma（RMA：privileged 两阶段 + 显式在线辨识，零真机交互）</li>
+<li>下一篇预告: day-24-sim2real-system-identification（System Identification + Sim2Real Evaluation——把"先验有多准"变成 release gate；residual 学出的 $\pi_\theta$ 本身就是模型误差的测量）</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充</h2>
+<p>（本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）</p>
+<h3>2026-09-14：Day23 NOTES 在 GitHub 上公式渲染失效</h3>
+<p><strong>问题原文</strong>（用户，2026-09-14 18:40 PDT）："[Day23 NOTES 链接] 这里面有很多数学公式 format 完全不对 没有渲染好"</p>
+<p><strong>核心答案</strong>：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 <code>（ $\pi_H$ ）</code> 里的 <code>（$\pi_H$）</code>、<code>$s_m$，</code>。GitHub 的渲染规则是行内 <code>$...$</code> 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，<code>$$...$$</code> 独立公式块本来就是好的未动。<code>tools/check_repo.py</code> lint 门过，Day23 零新增问题。commit <code>f297c17</code>，已 push。</p>
+<p><strong>关联</strong>：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

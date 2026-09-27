@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 05 — UniSim：Learning Interactive Real-World Simulators</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">physical-ai · Day 05</span>
+    <h1>Day 05 — UniSim：Learning Interactive Real-World Simulators</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote>
+<p>Day 05 of physical-ai track, following Day04 Genie. Focus on action-conditioned video diffusion as a learned simulator for real-world interaction and policy training.</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: Learning Interactive Real-World Simulators</li>
+<li>Authors / Org: Sherry Yang, Yilun Du, Seyed Kamyar Seyed Ghasemipour, Jonathan Tompson, Leslie Kaelbling, Dale Schuurmans, Pieter Abbeel / UC Berkeley, Google DeepMind, MIT, University of Alberta</li>
+<li>Link / arXiv / Project: https://arxiv.org/abs/2310.06114 / https://universal-simulator.github.io</li>
+<li>First submitted: 2023-10-09</li>
+<li>Date read: 2026-08-26</li>
+<div class="meta"><span class="tag">physical-ai</span><span class="tag">world-model</span><span class="tag">unisim</span><span class="tag">video-diffusion</span><span class="tag">sim2real</span><span class="tag">vla</span><span class="tag">model-based-rl</span></div>
+<li>Thread: physical-ai</li>
+<li>Folder: day-05-2023-unisim</li>
+<li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-05-2023-unisim</li>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>UniSim 把互联网图像/视频、人类活动、全景扫描、仿真和真实机器人数据统一成 <code>action in → video out</code>：用 5.6B action-conditioned video diffusion 预测下一段观察，再把生成式世界包成 RL environment；在 Language Table 上，纯模拟 rollout 的 RL 把成功率从 BC 的 0.58 提到 0.81，并展示了 zero-shot real-robot transfer。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul>
+<li><strong>接了哪条线：</strong> 接 Day04 Genie 的 learned world model 路线，但从“无标签视频中发现 latent action”转向“显式把语言、机器人控制、相机运动统一成 action condition”，更直接服务 policy training。</li>
+<li><strong>补了哪个短板：</strong> Genie 擅长开放式、可交互世界生成，但 action grounding 偏隐式；UniSim 把 high-level instruction 和 low-level control 都纳入统一接口，并展示 VLM hindsight data、model-based RL、real-robot zero-shot transfer 三种下游用途。</li>
+<li><strong>替代 / 分叉 / 改进：</strong> 相对 Day02 MuJoCo / Day03 Isaac Lab，UniSim 不显式求解接触和刚体动力学，而从像素经验学习视觉后果；它能吸收真实世界长尾外观，却失去精确 state、force/contact observability 和 hard physical constraints。</li>
+<li><strong>对之前 Day X 的直接对比：</strong> Day03 的 transition 是 PhysX solver，Day04 的 action 是 learned latent code，Day05 的 transition 是 video diffusion，action 是 T5 language embedding + discretized controls。三者分别代表显式物理、隐式交互和显式条件生成三种 simulator abstraction。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>Day05 路线图指定 UniSim。它把 world model 从“好看的交互视频”推进到“可被 agent 反复 step、可接 reward、可做 policy optimization 的环境”，与 Agentic RL Infra 的 rollout server / actor-learner / learned verifier 结构高度同构。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol>
+<li><strong>异构数据怎样进入同一个 action space？</strong> 文本指令、连续机器人控制、相机位姿和静态图像分别如何对齐到可条件化的视频 transition？</li>
+<li><strong>生成模型怎样成为 RL environment？</strong> <code>p(o_t | h_{t-1}, a_{t-1})</code> 如何 autoregressive rollout，reward 从哪里来，simulator bias 又会怎样被 policy exploit？</li>
+<li><strong>“视觉逼真”是否足够支撑 sim2real？</strong> UniSim 的 zero-shot 展示证明了什么，又没有证明什么；如何加入 contact、force、uncertainty 和真实闭环校准？</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol>
+<li><strong>Motivation：世界数据各自只覆盖一条轴</strong></li>
+<li>互联网图像覆盖丰富对象/场景但缺动作；human activity video 有高层动作但少机械控制；robotics data 有稠密 control 却规模小；panorama 有空间变化但无真实交互。</li>
+<li>单一数据集无法同时学到 object diversity、action granularity、embodiment 和 navigation。UniSim 的核心命题不是“一个数据集包打天下”，而是把互补数据编排进统一 <code>action-in-video-out</code> 接口。</li>
+<li>
+<p>真正目标是可交互 observation prediction，而非一次性 text-to-video：给定近期观察与动作，生成动作的视觉后果，并跨 video segment 自回归展开。</p>
+</li>
+<li>
+<p><strong>System / Method：统一 action-conditioned observation prediction</strong></p>
+</li>
+<li>定义 transition：<code>p(o_t | h_{t-1}, a_{t-1})</code>。<code>o_t</code> 是下一段可变长度视频，<code>h_{t-1}</code> 是有限近期帧，<code>a_{t-1}</code> 可为语言、相机运动或低层 motor control。</li>
+<li>文本先经 T5 得到连续 embedding；连续 control 先 normalize，再离散到 4096 bins，并与 language embedding 拼接。静态 text-image 被视为 single-frame video；panorama 由 camera pose 构造 turn/move action。</li>
+<li>生成器是 5.6B 3D video U-Net：base model 在 <code>[16,24,40]</code> 时空分辨率预测，两个 spatial super-resolution stages 依次放大到 <code>[48,80]</code> 与 <code>[192,320]</code>；时空 attention / convolution 交错。</li>
+<li>历史条件取上一 segment 的 4 帧，沿 channel 维与未来帧 noise 拼接；action 通过 classifier-free guidance 注入。下一 segment 再条件于刚生成的帧，形成 autoregressive rollout。</li>
+<li>
+<p>训练规模：512 TPU-v3、20 天、1M steps、batch 256、256 diffusion sampling steps。模型规模从 500M → 1.6B → 5.6B 时 FVD 277.85 → 224.61 → 211.30，但作者指出收益开始平台化。</p>
+</li>
+<li>
+<p><strong>Training / Data Details：多源 mixture + 生成式 rollout + learned reward</strong></p>
+</li>
+<li><strong>数据组成：</strong> Habitat HM3D 710、Language Table sim 160k、Bridge Data 2k、RT-1 70k、Language Table real 440k、Ego4D 3.5M、Something-Something V2 160k、EPIC-KITCHENS 25k、Matterport R2R scans 3.5M、LAION-400M 400M、ALIGN 400M、互联网视频 13M，外加未公开的 robot/human video collections。</li>
+<li><strong>Mixture：</strong> 各域权重仅用 0.05 或 0.1，未精调。低数据域可在 action 前加 dataset identifier 提升 in-domain generation，但会伤害 out-of-domain generalization。</li>
+<li><strong>长程 VLM data：</strong> 在 simulator 中每条轨迹 rollout 3–5 次 scripted instruction，合成 10k long-horizon trajectories；以最终帧为 goal 做 hindsight relabeling，再训练 image-goal-conditioned PaLM-E policy。</li>
+<li><strong>RL loop：</strong> PaLI 3B 先做 BC、steps-to-success prediction、instruction prediction；把 video generation 暴露为 RPC，并用 DM Env API 包成 <code>step()</code>。64 actor processes 在 UniSim 中 rollout，冻结的 steps-to-success model 产生 progress reward，REINFORCE 更新 policy。</li>
+<li>
+<p><strong>Reward：</strong> <code>r_t = -[d(o_{t+1},g)-d(o_t,g)]·C</code>，其中 <code>d</code> 预测距离成功还剩多少步，<code>C=5e-2</code>。这是 learned visual progress verifier，不是 simulator 自带 ground-truth state reward。</p>
+</li>
+<li>
+<p><strong>Key Tricks：最值得抄的细节</strong></p>
+</li>
+<li><strong>Trick 1 — Action-space normalization, not raw dataset merging：</strong> 先把不同数据集统一成 temporally extended action + video segment，再做 mixture；数据 schema 比“多收数据”更关键。</li>
+<li><strong>Trick 2 — Finite recent history as practical state：</strong> 4 个 recent frames 把 Ego4D FVD 从 315.69 降到 211.30，优于单帧和 distant history；不是记忆越长越好，而是要找足够 Markov 的最小窗口。</li>
+<li><strong>Trick 3 — Hindsight relabeling turns stochastic generation into supervision：</strong> 先 rollout，再把真正到达的末帧当 goal，避免要求生成器严格命中预设目标；相当于把 model error 吸收进 label construction。</li>
+<li><strong>Trick 4 — Simulator 与 reward 解耦：</strong> transition model 只预测观察，reward 单独学习；同一 simulator 可以复用到多任务，但也必须防 reward model 与 simulator 共同偏差被 policy exploit。</li>
+<li>
+<p><strong>Trick 5 — RPC environment boundary：</strong> 把昂贵 video generation 包在远端 environment service 后面，actor-learner 不依赖模型内部实现；这正是可横向扩容、限流、版本化和 shadow evaluation 的 infra seam。</p>
+</li>
+<li>
+<p><strong>Results：有效，但证据边界要说清</strong></p>
+</li>
+<li><strong>视频预测：</strong> Ego4D 上 4 recent-frame conditioning 达到 FID 34.63、FVD 211.30、IS 3.52、CLIP 22.63；单帧条件为 FID 59.47、FVD 315.69。</li>
+<li><strong>长程 policy：</strong> 10k UniSim hindsight trajectories 训练的 VLM，在 5 次模拟评估中 RDG(moved/all) 为 0.34/0.34；短程 BC 为 0.11/0.07，约 3–4× 提升。</li>
+<li><strong>RL：</strong> Language Table 的 48 个模拟任务中，Simulator-RL overall success 0.81 vs VLA-BC 0.58；pointing tasks 为 0.71 vs 0.12。</li>
+<li><strong>Real robot：</strong> 论文给出 simulator-only training 后的 zero-shot Language Table 成功案例，但主要是定性展示，没有报告与表 3 同等级的大样本真实机器人成功率；不能把 0.81 当作真实机器人 success rate。</li>
+<li><strong>跨任务生成数据：</strong> PaLI-X 仅用 UniSim 生成视频微调后，ActivityNet CIDEr 从 15.2 升到 46.23，达到真实数据微调 54.90 的约 84%；并在 MSR-VTT / VATEX / SMIT 上超过只用 ActivityNet 真实数据微调。</li>
+</ol>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移 / Transfer</h2>
+<ul>
+<li><strong>方法在 held-out 上是否 transfer？模型 vs 框架哪个贡献更大？</strong></li>
+<li>UniSim 展示了跨数据类型与少量 real-robot zero-shot transfer，但作者明确指出：训练主要覆盖 4 种 robot morphology，未见 embodiment 上泛化有限。这里的贡献更像“统一数据接口 + 足够大的条件视频模型”，不是一个已解决通用物理规律的 simulator。</li>
+<li>
+<p>数据 ablation 中，internet-only FVD 219.62、without-internet 307.80、完整 mixture 211.30，说明 broad prior 与 action-rich domain data 缺一不可；不是单纯扩大模型就能替代数据编排。</p>
+</li>
+<li>
+<p><strong>对 Infra → Post-training → Physical AI 迁移的直接启发：</strong></p>
+</li>
+<li><strong>World-model rollout server ≈ RL rollout engine：</strong> model version、environment seed、action schema、history window、sampling config、reward version都必须进入 trajectory metadata，否则无法复现和定位 reward hacking。</li>
+<li>
+<p><strong>Learned simulator 需要 uncertainty-aware routing：</strong> 高置信常规段走生成 simulator，contact-heavy / OOD 段回退显式物理或真机数据；像 cascade evaluator，而不是让单一模型裁决全部 rollout。</p>
+</li>
+<li>
+<p><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong></p>
+</li>
+<li><strong>可扩展性：</strong> 256-step diffusion 极慢，actor 会被 environment latency 主导；需要 batching、异步 actor、rate limiting、cache，未来更适合 latent video model / consistency distillation。</li>
+<li><strong>成本：</strong> 512 TPU-v3 × 20 天约 245,760 chip-hours，只是 simulator pretraining；policy rollout 还持续支付生成成本。</li>
+<li><strong>评测自动化：</strong> FVD/CLIP 只能测感知质量，必须加 action compliance、object permanence、contact consistency、counterfactual consistency、closed-loop policy regret 和 real-robot calibration。</li>
+<li><strong>可复现性：</strong> 记录 dataset mixture、domain identifiers、CFG strength、history frames、diffusion seed、simulator checkpoint、reward checkpoint 与 RPC version；否则同一 action 的 stochastic outcome 无法审计。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>想深挖：</strong> 如何定义 <code>model exploitation gap</code>：同一 policy 在 UniSim、显式 simulator、real robot 三个环境中的 return / state visitation divergence？仅比较生成视频质量会漏掉最危险的 policy-induced distribution shift。</li>
+<li><strong>限制提醒：</strong> unrealistic action 会触发 hallucination；近期 4 帧无法保存长期 object permanence；未见 morphology 泛化弱；只模拟视觉，不适合 force/contact 变化但像素近似不变的任务。</li>
+<li><strong>第一个小实验：</strong> 不复现 5.6B 训练，先实现一个 toy RPC Gym env：用小型 action-conditioned video predictor 作为 <code>step()</code>，另训 progress reward；比较 BC 与 model-based rollout fine-tuning，并用 held-out ground-truth env 统计 exploit gap。</li>
+<li><strong>下一步：</strong> Day06 DreamerV3——从像素级 diffusion simulator 切到 compact latent dynamics，比较 rollout throughput、reward grounding、uncertainty 与真实世界可迁移性。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<blockquote>
+<p>“We define a simulator of the real world as a model that, given some state of the world (e.g., an image frame), can take in some action as input, and produce the visual consequence of the action (in the form of a video) as output.”</p>
+<p>“We formulate the action-in-video-out framework as an observation prediction model conditioned on finite history and parametrized by a video diffusion model.”</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<ul>
+<li>[ ] 画一页 <code>actor → RPC video env → learned reward → replay/learner</code> 数据流图，标清版本与 trajectory metadata</li>
+<li>[ ] 用表格对比 Isaac Lab / Genie / UniSim：state、action、transition、reward、throughput、可验证性、主要 failure mode</li>
+<li>[ ] 写出 5 个 learned-simulator eval：action compliance、object permanence、contact consistency、OOD detection、policy exploit gap</li>
+<li>[ ] 用 10 行伪代码写 UniSim 的 autoregressive <code>step()</code> 与 progress reward</li>
+</ul>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<ul>
+<li>上一篇: Day04 — Genie: Generative Interactive Environments</li>
+<li>下一篇预告: Day06 — DreamerV3: Mastering Diverse Domains through World Models</li>
+<li>相关: Day02 MuJoCo（显式 dynamics）；Day03 Isaac Lab（GPU physics + sim2real）；后续 VLA / RL for Robotics</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>参考链接</h2>
+<ul>
+<li>Paper (arXiv): https://arxiv.org/abs/2310.06114</li>
+<li>Project / demos: https://universal-simulator.github.io</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-05-2023-unisim/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
