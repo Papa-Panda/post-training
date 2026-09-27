@@ -56,3 +56,5 @@ PRM 训练数据的开山之作：800K 条 step-level 人工标签（75K 条解�
 ## 思考题
 1. Day33 的 STaR 只用"答案对错"做数据阀——PRM 的 step-level 标签是不是它缺的那块拼图？coding 里"单测通过但推理胡扯"的样本，用 convincing wrong-answer 选样 + 首错截断标注能筛出来吗？
 2. PRM800K 花 800K 人工 step 标签换 $2.6\times$ 数据效率 + 负对齐税：这笔账在 coding data 上划算吗？哪些 step-level 负标签可以用"单测失败定位"自动造，哪些必须人工？
+
+相关讨论（Gemini 网页版，2026-09-27）：https://gemini.google.com/app/704a41c5ba8668b0
