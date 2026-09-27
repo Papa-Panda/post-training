@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day35 Let&#x27;s Verify Step by Step — NOTES</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 35</span>
+    <h1>Day35 Let&#x27;s Verify Step by Step — NOTES</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">思考题</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Title: "Let's Verify Step by Step"</li>
+<li>Authors / Org: Lightman et al. / OpenAI</li>
+<li>Link / arXiv: https://arxiv.org/abs/2305.20050</li>
+<li>Date read: 2026-09-27</li>
+<div class="meta"><span class="tag">rl-data</span><span class="tag">verifier-data</span><span class="tag">process-supervision</span><span class="tag">prm</span><span class="tag">reasoning-data</span><span class="tag">quality</span></div>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>PRM 训练数据的开山之作：800K 条 step-level 人工标签（75K 条解法 / 12K 道题）训出的 process-supervised reward model，在 best-of-N 搜索下以 $78.2\%$ 打赢 outcome supervision 的 $72.4\%$ ；核心数据洞见是"首错截断标注 + 诱人错解主动学习"，把昂贵的人工标注预算换成 $2.6\times$ 的数据效率，还顺带拿了个"负对齐税"。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li><strong>Motivation</strong>: 复杂多步推理里，一个逻辑错就足以让整道题报废——而 SOTA 模型恰好经常犯这种错。训练可靠的 reward model 有两条路：outcome supervision（只看最终答案对错）和 process supervision（每一步都给反馈）。Uesato et al. 2022 在小学数学上做过对比，结论是两者打平；但那次基模型弱、人工反馈少、题太简单。本篇用更强的 GPT-4 基座、800K step-level 人工标签、在更难的 MATH 数据集上重做头对头对比。另有一层对齐动机：process 监督奖励的是"人类认可的推理链本身"，而不是把"结果对"当对齐的代理指标。</li>
+<li><strong>Data Pipeline</strong>: 生成器 → 人工逐步标注 → PRM 训练 → best-of-N 搜索评测：</li>
+<li><strong>生成器</strong>：GPT-4 基座在 MATH 上做 1 epoch 微调，目的只有一个——学会"换行分隔的 step-by-step 输出格式"（few-shot 生成解法 → 只保留最终答案正确的 → 微调），不教新能力；</li>
+<li><strong>人工标注</strong>：labeler 对每一步打 positive / negative / neutral；<strong>只监督到第一个错步就停</strong>（first-error-stop），之后的步不再标——这样 outcome 和 process 的信息差恰好等于"错步的位置"，也让人工成本可比（判整解对错 ≈ 找出第一个错步）；neutral 标签是给"说不清"的出口，模糊数据的处理后置到测试时；</li>
+<li><strong>PRM800K 规模</strong>：800K step-level 标签，覆盖 75K 条解法、12K 道题（含 4.5K 道 MATH 测试题混入训练集防过拟合；评测只用剩下的 500 道代表性子集）；</li>
+<li><strong>主动学习选样</strong>（最关键的数据工程）：不均匀送标。策略是 "convincing wrong-answer"——把当前最优 PRM 打高分、但最终答案错的解法优先送人工标注；采集中途多次用新数据重训 PRM 再选样。小规模复刻实验用 $80\%$ 最"诱人"错解 + $20\%$ 最"诱人"其余解的配比，估计出 $2.6\times$ 数据效率（拟合斜率对比均匀送标）；</li>
+<li><strong>PRM 训练</strong>：在每步末 token 后预测该步正确性，标准 LM 训练流程；推理时解法分数 = 各步正确概率的<strong>乘积</strong>（"每一步都对"的联合概率），一次前向得到全部 step 分数；</li>
+<li><strong>ORM 对照</strong>：每题 100 条均匀采样、训整解对错分类器（最终答案自动判分，混有"推理错但答案对"的误判噪声）；训练集比 PRM800K 大一个量级、且无交集——是"各自形态的最强版本"对比；</li>
+<li><strong>混杂因素剥离</strong>（小规模实验）：用 PRM_large 当标注 oracle 训小模型，三组对照——process（PRM_large 逐步监督）/ outcome（PRM_large 整解监督）/ outcome（最终答案判分），<strong>process 在所有数据规模下都赢</strong>，排除了"数据集不可比"和"答案判分误判"两种解释。</li>
+<li><strong>Key Tricks</strong>:</li>
+<li><strong>首错截断标注</strong>：只标到第一个错步——信息差精确可控、人工成本可比；错步之后的"错误连锁"信息被主动丢掉（后续工作如自动标注补全正是从这里切入）；</li>
+<li><strong>convincing wrong-answer 选样 + 迭代重训</strong>：标注预算只花在"当前模型最被骗"的样本上； $80\%$ / $20\%$ 配比防止数据集过度偏向错解（作者试过把 ORM 训在这种偏置数据上，性能反而更差）；</li>
+<li><strong>neutral 标签</strong>：允许标注员对模糊步"弃权"，测试时可灵活当正或负——把"模糊"的裁决从标注时推迟到使用时；</li>
+<li><strong>乘积式解法打分</strong>：PRM 分数 = 各步正确概率连乘； $N$ 越大，PRM 相对 ORM 的优势越拉开——搜索越深，信用分配（credit assignment）越重要，这正是 step-level 信号的用武之地。</li>
+<li><strong>Results</strong>:</li>
+<li>Best-of-1860（500 道 MATH 代表性子集）：PRM $78.2\%$ vs ORM $72.4\%$ vs majority voting $69.6\%$ ；</li>
+<li>OOD 泛化（234 道最新 AP/AMC STEM 真题，预训练后发布、防污染）：PRM aggregate $72.9\%$ vs ORM $63.8\%$ ；</li>
+<li>主动学习：约 $2.6\times$ 数据效率提升；</li>
+<li>开源 <strong>PRM800K</strong>：完整的 800K step-level 人工标签数据集；</li>
+<li>对齐意义：process supervision 是"负对齐税"——更安全的监督方式反而性能更高，降低了采用对齐方法的阻力。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>可迁移</h2>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：coding 天然有 step 结构（行/hunk），而单测/CI 只是 outcome 信号——"单测通过但推理胡扯"的错解正是 ORM 的盲区，也是 Day33 STaR 思考题里悬而未决的筛法问题。PRM 式 recipe：用 convincing wrong-answer 选样——模型高置信但单测失败的 patch 优先送审，对"第一个引入 bug 的 hunk"做首错截断标注；rerank 时候选 patch 分数取各 hunk 正确概率乘积。neutral 标签对应 code review 里"这行可疑但不确定"的后置处理。</li>
+<li>Infra 视角：主动学习把最贵的人工标注预算定向花在"模型最被骗"的样本上（ $2.6\times$ 效率）；但论文 4.2 末尾实证过一个坑——采集中途<strong>迭代重训 selector 出现不稳定、没有涨点</strong>，数据飞轮里别盲目加"在线重训选样"环节，先离线验证稳定性。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>疑问 / 下一步</h2>
+<ul>
+<li>首错截断丢掉了错步之后的全部信息：错误连锁本身是否也有训练信号？后续自动 step 标注（如 MATH-SHEPHERD 类方法）是不是把这块补上了？</li>
+<li>800K 标签是纯人工（数十人标注团队量级的工作量）：coding 场景里，哪些 step-level 负标签能用"单测失败定位到 hunk"自动构造，哪些必须人工？PRM800K 的人工 recipe 里哪个环节最先被自动化替代？</li>
+<li>PRM 只做了 best-of-N rerank，明确没进 RL 训练 generator（论文 scope 外）——把 PRM 信号接进 PPO/GRPO 会发生什么？Day37 DAPO / Day39 Kimi k1.5 会部分回答。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>原文金句 (1-2句)</h2>
+<blockquote>
+<p>Process supervision makes credit assignment easier, and we believe that this explains its strong performance.</p>
+<p>Our results show that process supervision in fact incurs a negative alignment tax.</p>
+</blockquote>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>思考题</h2>
+<ol>
+<li>Day33 的 STaR 只用"答案对错"做数据阀——PRM 的 step-level 标签是不是它缺的那块拼图？coding 里"单测通过但推理胡扯"的样本，用 convincing wrong-answer 选样 + 首错截断标注能筛出来吗？</li>
+<li>PRM800K 花 800K 人工 step 标签换 $2.6\times$ 数据效率 + 负对齐税：这笔账在 coding data 上划算吗？哪些 step-level 负标签可以用"单测失败定位"自动造，哪些必须人工？</li>
+</ol></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-35-2023-lets-verify-step-by-step/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
