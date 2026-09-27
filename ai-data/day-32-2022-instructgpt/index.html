@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 32 — Training language models to follow instructions with human feedback</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 32</span>
+    <h1>Day 32 — Training language models to follow instructions with human feedback</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: Training language models to follow instructions with human feedback</li><li>Authors / Org: Ouyang et al. / OpenAI</li><li>Link / arXiv: https://arxiv.org/abs/2203.02155</li><li>Date read: 2026-09-24</li><div class="meta"><span class="tag">rl-data</span><span class="tag">preference-data</span><span class="tag">rlhf</span><span class="tag">human-feedback</span><span class="tag">curation</span><span class="tag">quality</span></div></ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>RLHF 数据管线的正典：40 名筛选过的 contractor 产出三层数据——12,725 条 SFT demonstration、33,207 条 prompt 的 K 选排序（RM 用）、31,144 条无标注 API prompt（PPO 环境用）；175B InstructGPT 被偏好率 85±3% 碾压同尺寸 GPT-3，1.3B 版本甚至打赢 175B GPT-3。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol><li><strong>Motivation</strong>: 预训练目标（next-token on web）与"按用户意图办事"错位；public NLP 数据集（FLAN/T0）捕捉不到真实 API prompt 分布（生成/头脑风暴占 ~57%，分类/QA 只占 ~18%），需要直接从人类偏好造数据。</li><li><strong>Data Pipeline</strong>: prompt 两个来源——API Playground 提交（去 PII）+ labeler 手写（Plain / Few-shot / User-based 三类）。三层数据分工：<ul><li>SFT：labeler 写 demonstration，train 12,725（labeler 11,295 + customer 1,430；labeler 占主导是因为同一条 instruction 采样不同 few-shot 组合可合成多个数据点）；</li><li>RM：每条 prompt 给 labeler 看 $K = 4$ ~ $K = 9$ 个模型输出做全排序，train 33,207 条 prompt（labeler 6,623 + customer 26,584）；</li><li>PPO：31,144 条纯 API prompt，零人工标注，只当 RL 环境输入。</li></ul></li><li><strong>Key Tricks</strong>:<ul><li>RM 训练把每条 prompt 的 $\binom{K}{2}$ 个组合对当<strong>单个 batch 元素</strong>：每个 completion 只需一次 forward pass，且不再过拟合（朴素打散 shuffle 一遍就过拟合，因为每个 completion 被用 $K-1$ 次梯度更新）；</li><li>RM 只用 6B（175B RM 训练不稳定，不适合当 value function），并归一化使 demonstration 均值 reward 为 0；</li><li>RM loss（Eq 1）：</li></ul></li></ol>
+<p>$$\mathrm{loss}(\theta) = -\frac{1}{\binom{K}{2}} \mathbb{E}_{(x,y_w,y_l)\sim D}\left[\log\sigma\left(r_\theta(x,y_w) - r_\theta(x,y_l)\right)\right]$$</p>
+<ul><li>PPO 加 per-token KL 惩罚锚定 SFT；PPO-ptx 再混入预训练梯度（Eq 2， $\gamma \geq 20$ 在 1.3B 上修复 DROP/SQuAD 回退），用 8 倍于 RL episode 数的预训练样本；</li></ul>
+<p>$$\mathrm{objective}(\phi) = \mathbb{E}_{(x,y)\sim D_{\pi_\phi^{RL}}}\left[r_\theta(x,y) - \beta\log\left(\pi_\phi^{RL}(y|x)/\pi^{SFT}(y|x)\right)\right] + \gamma\,\mathbb{E}_{x\sim D_{pretrain}}\left[\log \pi_\phi^{RL}(x)\right]$$</p>
+<ul><li>labeler 协议本身就是数据资产：40 名 contractor 经 screening（敏感言论 flag 一致性、排序一致性 75% cutoff、demonstration 6/7 分）+ onboarding + 详细指令 + 共享答疑群；标注者间一致性 72.6±1.5%；</li><li>标注指令写死 trade-off 规则：通常 harmless + truthful &gt; helpful，除非 (a) helpful 明显更强、(b) truthful/harmless 只略差、(c) 非高风险域；终极标尺是"customer assistant 你更想收到哪个输出"。</li></ul><ol><li><strong>Results</strong>: 175B InstructGPT vs 175B GPT-3 偏好率 85±3%，vs few-shot GPT-3 71±4%；TruthfulQA 真实有用回答 ~2 倍；闭域幻觉率 21% vs 41%；被要求礼貌时毒性输出 -25%；bias（Winogender/CrowS-Pairs）无改善；PPO 有 alignment tax（SQuAD/DROP/HellaSwag/翻译回退），PPO-ptx 大幅缓解——单纯加大 KL 系数修不好；FLAN/T0 微调版在 API 分布上不如 SFT 基线（InstructGPT 对其 head-to-head 78±4% / 79±4%）。</li></ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>可迁移</h2>
+<ul><li>对 coding data 工作：三层数据分工可直接套用——人工写"理想代码回答"（SFT demonstration）/ 对同一需求的多个模型输出做排序（RM 数据）/ 无标注的真实用户 coding prompt 池（RL 环境）。labeler 指令的 helpful/truthful/harmless 三角可改写成代码场景的 correct/safe/clear，外加 trade-off 例外条款。</li><li>Infra 视角：RM 只需 6B（偏好建模的容量需求远小于生成），K 选排序的单 batch 元素技巧省 forward pass；PPO-ptx 的 8 倍预训练混合说明 RL 数据不能脱离 pretrain 分布——rollout 数据管线里要常驻一条 pretrain 回流。</li></ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>疑问 / 下一步</h2>
+<ul><li>论文 5.2 自认对齐的是"40 个 labeler + 研究员这个特定人群"的偏好，而 held-out labeler 来自同一 vendor 且未经 screening——泛化实验的外部效度有多强？</li><li>Table 8：PPO valid 集每 customer 平均 31.55 条 prompt，valid 客户高度重复——validation reward 的代表性是否被高估？</li><li>训练时让 labeler 优先 helpfulness，终评时却优先 truthfulness/harmlessness——标注目标与评测目标不一致，这是刻意设计还是妥协？对 RM 训练的信号意味着什么？</li></ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>原文金句 (1-2句)</h2>
+<blockquote><p>This procedure aligns the behavior of GPT-3 to the stated preferences of a specific group of people (mostly our labelers and researchers), rather than any broader notion of "human values".</p></blockquote>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-32-2022-instructgpt/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2203.02155">论文原文</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

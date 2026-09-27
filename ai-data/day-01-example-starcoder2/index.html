@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 01 — StarCoder2 / The Stack v2 数据策展入门 · ai-data 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 01</span>
+    <h1>Day 01 — StarCoder2 / The Stack v2 数据策展入门</h1>
+    <p class="sub">这篇真正解决的不是“多抓一些 GitHub 代码”，而是：<strong>怎样把规模巨大、权属不一、重复严重、质量异质且可能泄漏 benchmark 的开源代码，变成可追溯、可删除、可审计、可按模型容量配比的训练资产。</strong> · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">第二轮复习（2026-09-01）</a><a href="#sec-3">6. 今天的一道思考题</a><a href="#sec-4">原文链接</a></nav>
+  </details>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: StarCoder 2 and The Stack v2: The Next Generation</li><li>Authors / Org: BigCode / Hugging Face / ServiceNow Research et al.</li><li>Link / arXiv: <a href="https://arxiv.org/abs/2402.19173">https://arxiv.org/abs/2402.19173</a></li><li>Date read: 2026-08-04</li><li>Review date: 2026-09-01</li><div class="meta"><span class="tag">coding-data</span><span class="tag">curation</span><span class="tag">quality</span><span class="tag">deduplication</span><span class="tag">decontamination</span><span class="tag">pii</span><span class="tag">licensing</span><span class="tag">provenance</span></div></ul>
+<blockquote><p>更正第一轮索引中的一句话：<strong>“600+”指最终覆盖 619 种编程语言，不是 600+ 条过滤规则。</strong> 论文公开的是一组分层 basic / language-specific / source-specific gates，以及去重、PII、防污染、恶意代码和 opt-out 流程。</p></blockquote>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>第二轮复习（2026-09-01）</h2>
+<h3>1. 核心命题</h3>
+<p>这篇真正解决的不是“多抓一些 GitHub 代码”，而是：<strong>怎样把规模巨大、权属不一、重复严重、质量异质且可能泄漏 benchmark 的开源代码，变成可追溯、可删除、可审计、可按模型容量配比的训练资产。</strong></p>
+<p>关键对象不是单一 quality score，而是带 provenance 的数据记录：</p>
+<p>$$z=(\text{repo},\text{commit},\text{path},\text{language},\text{license},\text{content},\text{source})$$</p>
+<p>策展过程可写成一串门禁：</p>
+<p>$$D_{train}=G_{mix}\circ G_{optout}\circ G_{risk}\circ G_{contam}\circ G_{dedup}\circ G_{quality}\circ G_{license}(D_{raw})$$</p>
+<p>每个 $G$ 都回答不同问题：能否合法/负责地用、是否像代码、是否重复、是否泄漏评测、是否含隐私或恶意内容、最终是否与模型容量和目标分布匹配。论文的核心贡献是把这些约束组织成端到端工程系统，而不是证明某一条 heuristic 普适最优。</p>
+<h3>2. 图谱位置</h3>
+<ul><li><strong>前驱</strong>：The Stack v1 / StarCoder / SantaCoder 提供开放代码语料、opt-out 与 MinHash-LSH 去重基础；StarCoder2 将源扩到 Software Heritage，并增加更完整的 license、PII、decontamination、malware 与多源数据处理。</li><li><strong>后继</strong>：Day 14 对同一工作做完整 code-pretraining 复盘；Day 24 D4 / SemDeDup 把“去重”推进到语义近重复与覆盖保持；Day 25 FineWeb 强调逐级消融与可复现过滤归因；Day 27 OSS-Instruct 在干净代码上构造 instruction data；Day 30 将 train–eval 隔离推进到 surface + semantic contamination gate。</li><li><strong>直接对比 Day 24 D4</strong>：StarCoder2 用 5-gram MinHash + LSH、Jaccard 0.7 做可扩展的 near-dedup，并按 stars / forks / 最新 commit 选簇代表；D4 更关心 embedding 空间里的语义重复和 prototype-based diversification。前者便宜、可解释、适合数亿文件粗筛，后者更能发现改名/改写后的语义冗余并显式保覆盖。两者是 <strong>cascade 互补</strong>，不是替代关系。</li><li><strong>与 Day 30 的边界</strong>：训练集内部去重优化的是 token 效率与分布；benchmark decontamination 保护的是评测可信度。StarCoder2 的空白归一化字符串匹配召回有限，Day 30 的语义级匹配应成为后置的定向质量门。</li></ul>
+<h3>3. 机制深挖</h3>
+<h4>3.1 来源、权属与可追溯性</h4>
+<ol><li>从 Software Heritage <code>2023-09-06</code> 图快照中抽 GitHub repo，只保留 main/default branch 的最新 revision；用目录内容哈希去重 repo，目录遍历深度最多 64，压缩后大于 10MB 的文件不取。</li><li>许可证先取 GHArchive repo-level 元数据；缺失时用 ScanCode 在 license-like 文件中做 file-level 检测，再沿目录传播 SPDX license。论文只保留 permissive 或 unlicensed，排除 commercial 与 copyleft。</li><li>发布 SWHID，使“这条代码来自哪个归档对象”可以追踪；opt-out 可沿 provenance 删除，而不是训练前得到一个无法回溯的文本 blob。</li></ol>
+<p>这里最值得迁移的机制不是某个 license 白名单，而是 <strong>lineage first</strong>：先保存来源和版本，再谈后续评分，否则删除请求、污染回溯和错误分析都无法闭环。</p>
+<h4>3.2 粗质量门：规则不是“600+ 条”</h4>
+<ul><li><code>go-enry</code> 先识别 658 种语言；社区对约 1,000 个扩展名做可视检查，排除 130 个扩展名和 39 种语言，最终留下 619 种语言。</li><li>通用过滤包括：文件超过 100k 行；多数语言平均行长超过 100 或最大行长超过 1,000；<code>go-enry</code>/文件头判定 autogenerated；字母占比低于 25%；长 Base64/hex/Unicode 编码块超过阈值。</li><li>语言特定规则避免一刀切：HTML 要有至少 100 个可见字符且可见文本占比至少 20%；JSON/YAML/Text 等限制行数；assembly/WebAssembly 改用 alphanumeric 比例。</li></ul>
+<p>这些 signal 估计的是“像不像可学习的人类代码”，不是“对目标任务有没有边际价值”。因此它们适合高召回 coarse filter，不应直接充当最终 selection score。</p>
+<h4>3.3 去重、代表样本选择与覆盖</h4>
+<p>对 code、PR、notebook、issue、documentation 计算 5-gram MinHash，再以 LSH 近似分桶；Jaccard 相似度阈值为 0.7，每个重复簇只留一个样本。若多个候选等价，优先 stars / forks 更多的 repo，再用较新 commit 打破平局。</p>
+<p>可把该决策写成：</p>
+<p>$$k^*=\arg\max_{z\in C}\big(\alpha\log(1+\text{stars})+\beta\log(1+\text{forks})+\gamma\,\text{recency}\big),$$</p>
+<p>其中 $C$ 是 LSH 候选簇。论文实际是规则式优先级，不是学习出的线性分数；上式只是把隐含偏好显式化，便于审计。它保留“更流行/更新”的副本，但不保证保留的是最正确、最完整或许可证最清晰的版本。</p>
+<h4>3.4 风险门与评测门</h4>
+<ul><li>StarPII 对 code / PR / issue / StackOverflow 隐去姓名、邮箱、key、password、IP、username；不同来源采用不同实体子集。</li><li>Benchmark decontamination 删除含 HumanEval / MBPP docstring 或 solution、APPS docstring、GSM8K question、DS1000 prompt 的文件；匹配前去掉空白以提高召回。</li><li>ClamAV + SaneSecurity 扫恶意代码，删除 59,442 / 654M 文件（0.009%）。</li><li>截止日期后执行 opt-out，删除 91 个用户/组织关联的 1,561 个 repo、22,066 个 source files。</li></ul>
+<p>这说明 <strong>低命中率不等于可以省略</strong>：malware 占比很小，但失败成本不对称；decontamination 也不能用总体删除比例评价，而要看是否保护关键 benchmark。</p>
+<h4>3.5 配比也是 curation</h4>
+<p>3B/7B 只使用 17 种主流编程语言的 <code>smol</code> code subset；15B 才使用 619 种语言的 <code>full</code> subset。数据侧的假设是模型容量有限时，过宽的语言覆盖会发生 capacity competition。论文还将 Java 与 JavaScript 下采样到各 200GB、HTML 到 100GB、JSON/XML/YAML 到 8GB，并保留更多 Markdown 作为文档信号。</p>
+<p>因此“619 种语言”不是无条件越多越好；它是受模型容量约束的 coverage budget。最终 unique-token pool 分别约为 622B（3B）、659B（7B）、913B（15B），模型通过多轮采样训练到 3.3–4.3T tokens。</p>
+<h3>4. 边界与反例</h3>
+<ol><li><strong>Popularity bias</strong>：stars/forks 高会系统性偏向热门框架、英文生态和成熟 repo；一个零星但正确的 Rust/内部 DSL 实现可能被热门但陈旧的副本替代。</li><li><strong>Recency 不等于质量</strong>：最新 commit 可能正处于迁移中、含 regression 或自动生成产物；“更新”只适合作为 tie-breaker。</li><li><strong>词法 near-dedup 会两头出错</strong>：模板代码可能因公共 boilerplate 被误删；变量重命名、函数拆分或等价算法又可能绕过 5-gram Jaccard 0.7。Day 24 的语义去重和 Day 30 的定向 semantic contamination 可补，但也会带来更多误杀。</li><li><strong>规则会伤长尾</strong>：低字母比例、长行、encoded-block 等规则可能误杀 assembly、shader、generated-but-useful bindings、压缩模型定义；论文靠语言例外缓解，却不能穷尽 DSL。</li><li><strong>最新主干快照丢历史</strong>：只取 latest main revision 很适合静态 pretraining，却丢掉 bug→patch、review→revision 的演化信号；PR/issue 作为独立源只能部分补回。</li><li><strong>权属不等于质量</strong>：permissive / unlicensed 是治理分类，不是 correctness score；尤其 unlicensed 数据仍留下法务与使用政策问题。</li><li><strong>论文没有证明的事</strong>：模型提升同时混入了数据规模、来源、模型大小、训练 token、上下文长度与 formatting 变化；没有逐门禁、同预算的完整 ablation，所以不能把最终性能归因于某一条 filter，更不能从结果推出“规则过滤一定优于 model-aware selection”。</li></ol>
+<h3>5. 迁移到 coding / post-training data</h3>
+<p>对一个 500k 条 coding SFT / verifiable-RL 候选池，可落地成下面的 versioned gate DAG；<strong>不直接照搬预训练阈值</strong>，先以 quarantine + audit 校准：</p>
+<ol><li><code>G0 provenance</code>：保存 source repo、commit time、path、license、generator/checker version；无法追溯的样本先隔离。</li><li><code>G1 coarse quality</code>：syntax/parser、文件/答案长度、autogenerated/encoded/secret/PII 检测；按语言设例外，不跨语言共用单阈值。</li><li><code>G2 redundancy</code>：先 exact hash，再对 prompt、solution、test 分字段做 MinHash；重复簇保留“测试最完整、依赖可复现、来源最清晰”的样本，而不是默认保留 stars 最大者。</li><li><code>G3 contamination</code>：对 HumanEval/MBPP/LiveCodeBench/SWE-bench 建 versioned registry；先 whitespace/token match，再 AST/embedding 候选召回，人工复核高风险簇。</li><li><code>G4 execution</code>：在沙箱中重跑 unit tests，记录 pass/fail、flakiness、runtime、依赖可安装性；可验证 RL 只接收 verifier 稳定的样本。</li><li><code>G5 coverage</code>：按 language × task type × difficulty × repo lineage 设最小覆盖；在每个桶内再做质量/难度 selection，避免全局分数吞掉长尾。</li></ol>
+<p>最小可执行实验：随机保留 5% audit set；比较 <code>raw → G1 → G1+G2 → G1+G2+G3+G4</code> 四个版本，在固定 token budget / seed 下报告 clean benchmark pass@1、contamination hit rate、execution pass rate、unique-repo coverage、长尾语言 delta 与每级保留率。这样才能回答“哪个 gate 真正贡献了收益”，而不只是展示数据越来越少。</p>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>6. 今天的一道思考题</h2>
+<p>综合 <strong>Day 01 StarCoder2、Day 24 D4、Day 30 code decontamination</strong>：假设 500k 条 coding SFT 候选中，30% 是词法近重复，5% 与评测集存在语义近邻，Rust/SQL 等长尾合计不足 1%，且执行验证成本只能覆盖 20%。请设计一个两阶段 cascade：</p>
+<ul><li>先说明 exact/MinHash、semantic dedup、benchmark decontamination、coverage constraint、execution sampling 的顺序与各自优化目标；</li><li>再说明重复簇中保留哪个样本，如何防止“热门 repo 优先”吞掉长尾；</li><li>最后给出一个固定 token-budget 的对照实验，区分“真实泛化提升”与“污染/题目变容易造成的虚假提升”。</li></ul>
+<p>答案不能只列过滤器；必须说明每一级的误杀对象、复核抽样和可推翻该设计的证据。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>原文链接</h2>
+<ul><li>Paper: <a href="https://arxiv.org/abs/2402.19173">https://arxiv.org/abs/2402.19173</a></li><li>GitHub NOTES: <a href="https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-01-example-starcoder2">https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-01-example-starcoder2</a></li></ul>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-01-example-starcoder2/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

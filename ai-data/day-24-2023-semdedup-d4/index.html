@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 24 — D4: Improving LLM Pretraining via Document De-Duplication and Diversification</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 24</span>
+    <h1>Day 24 — D4: Improving LLM Pretraining via Document De-Duplication and Diversification</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成 · 含第二轮复习</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">第二轮复习（2026-09-24）</a><a href="#sec-12">思考题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote><p>自动生成骨架 2026-08-24，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。</p></blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: D4: Improving LLM Pretraining via Document De-Duplication and Diversification</li><li>Authors / Org: Tirumala et al. / Meta AI</li><li>Link / arXiv: https://arxiv.org/abs/2308.12284</li><li>Date read: 2026-08-24</li><div class="meta"><span class="tag">pretraining</span><span class="tag">data-curation</span><span class="tag">deduplication</span><span class="tag">diversity</span><span class="tag">quality</span><span class="tag">semantic-dedup</span><span class="tag">coding-data</span></div><li>Folder: day-24-2023-semdedup-d4</li><li>GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-24-2023-semdedup-d4</li></ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>D4 把语义近重复去除（SemDeDup）与表示空间中的原型式多样化剪枝串成预训练数据管线，在压缩冗余语料的同时保留更广覆盖，补上 Day19 Vendi Score“会量多样性但还不会规模化选数”的工程短板。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<blockquote><p>知识图谱位置：预训练去重源头；Day07 Llama3 / Day14 StarCoder2 的大规模过滤与去重实践，向上追溯到可复用的语义去重 + 多样化选择方法；并把 Day19 Vendi Score 的多样性概念落成实际数据剪枝。</p></blockquote>
+<ul><li><strong>接了哪条线：</strong>接 Day19 Vendi Score → Day20 DEITA 的 diversity / redundancy 线，也回接 Day07 Llama3、Day14 StarCoder2、Day16 Qwen2.5-Coder 的预训练与 code data 清洗线。</li><li><strong>补了哪个短板：</strong>此前的管线多写 MinHash、规则过滤或一句“去重”，缺少对语义近重复、簇内保留策略和覆盖损失的系统拆解；D4 把“删重复”和“保多样”明确分成两步。</li><li><strong>替代 / 分叉 / 改进：</strong>它不是替代 MinHash / exact dedup，而是在词面去重后增加 semantic dedup，再用 diversity-aware pruning 避免只保留高密度主流样本；这是质量过滤之外的正交改进。</li><li><strong>对之前 Day X 的直接对比：</strong>vs Day19 Vendi Score，Vendi 给出数据集多样性的度量标尺，D4 给出可执行的删样本流程；vs Day20 DEITA，DEITA 在 SFT 池中按质量×复杂度×多样性选 6k，D4 面向预训练规模，重点是近重复消除与覆盖保持。</li></ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>Day21→23 已完成“合成扩量 → 复杂度演化 → 少量高质策展”，今天转到数据池进入训练前的第一道规模化门禁：先把重复信息删掉，又不能把长尾覆盖一起删掉。对 coding data，可用文件/函数表示做语义近重复聚类，并在每簇中保留质量更高、许可与测试更完整的代表；对 SFT / RL data，也可把同模板改写和等价题目视为语义簇，控制有效样本数与任务覆盖。本文只研究数据去重、选择与覆盖，不展开训练算法。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol><li>D4 如何定义并串联 lexical dedup、SemDeDup 和 prototype-based diversification？每一步删除哪类冗余，簇内代表样本按什么数据标准保留？</li><li>对比 Day19 Vendi Score 与 Day20 DEITA：D4 的“多样化剪枝”是在优化一个可量化的 diversity 指标，还是依赖表示空间启发式？三者如何组合成“质量门禁 → 去重 → 覆盖审计”的流水线？</li><li>迁移到 coding / SFT / RL data 时，embedding 选型、相似度阈值和簇粒度如何避免误删“表面相似但边界条件不同”的样本？该用哪些覆盖与下游评测验证去重没有伤到长尾？</li></ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol><li><strong>Motivation</strong>: [待读后填写] 大规模预训练语料中的重复与高密度主题如何浪费计算、放大记忆，并挤压长尾覆盖？</li><li><strong>Data Pipeline</strong>: [待读后填写] 文档表示 → 聚类/近邻 → 语义近重复删除 → 原型式多样化剪枝 → 数据规模与覆盖审计 → 进入预训练。</li><li><strong>Key Tricks</strong>: [待读后填写] 记录 embedding、聚类粒度、相似度阈值、簇内保留规则、删除比例，以及不同语料域是否使用不同门槛；不展开训练算法。</li><li><strong>Results</strong>: [待读后填写] 只记录数据压缩率、重复率/多样性变化、token/compute 节省和 downstream 对照，不展开 optimizer 等算法细节。</li></ol>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
+<ul><li>对你现在 coding data 工作的 1-2 个直接可试的点：[待读后填写]</li><li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：[待读后填写]</li></ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<ul><li>没看懂的 / 想深挖的 1 个问题：[待读后填写]</li></ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<blockquote><p>[阅读后补原文，勿凭记忆引用]</p></blockquote>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<ul><li>按模板补齐 Data Pipeline / Key Tricks / Results / 可迁移</li><li>保留并完善「和之前工作的关系」小节</li><li>全程只写数据：curation / selection / quality / diversity / complexity / synthetic / execution-filter；算法只一句带过</li></ul>
+<blockquote><p>自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步</p></blockquote>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>第二轮复习（2026-09-24）</h2>
+<h3>元信息修正</h3>
+<ul><li>D4 全称是 <strong>Document De-Duplication and Diversification</strong>（Tirumala et al. / Meta AI，arXiv 2308.12284，2023-08-23），不是 data-diet 式的四个 D。</li><li>两个组件各有出处：<strong>SemDeDup</strong> 来自 Abbas et al. 2023（另一团队），<strong>SSL Prototypes</strong> 的 prototypicality 概念来自 Sorscher et al. 2022 "Beyond neural scaling laws" 的数据剪枝工作；D4 的贡献是"先去重再重聚类"的串联顺序。</li><li>文本实验的 embedding 是 <strong>OPT-125M 最后一层表示</strong>（跨数据集的现成模型表示可直接用，Abbas et al. 已验证换 CLIP 也几乎不掉点）；k-means 用球面 k-means（Faiss，单 GPU 可跑）。</li><li>评测协议：消融用 1.3B OPT / 40B tokens，规模验证到 6.7B；基线数据是 CCdedup；选择率固定 $R_{dedup} = 0.75$ ，只扫 $R_{proto}$ 。</li><li>初读 3 问之"簇内按什么标准保留代表"：SemDeDup 默认从每组重复对里保留<strong>与簇质心余弦相似度最低</strong>的那一个；三策略（留远/随机/留近）下游差异可忽略（附录 E.3）。</li></ul>
+<h3>一句话总结</h3>
+<p>D4 的真正洞察不是"去重+多样化"的字面拼接，而是<strong>重复会劫持聚类</strong>：原始数据的 k-means 簇是 duplicate-driven 的，质心被重复模板钉死，所以必须先 SemDeDup 把重复逐出、re-cluster 让质心回到主题中心，再用 SSL Prototypes 剪掉新质心周围的密集区—— ， $R = R_{dedup} \times R_{proto}$ ，在 6.7B / 16 任务上换来约 20% 训练效率增益与最高 2% 的下游平均精度提升。</p>
+<h3>和之前工作的关系</h3>
+<ul><li><strong>vs Day19 Vendi Score（直接对比）</strong>：Vendi 是"标尺"——kernel 特征值熵 $VS_k(D) = \exp(H(\bar{\lambda}))$ ，有有效样本数/重复敏感/可分解三公理的可微多样性度量；D4 是"流程"——可执行的删样本两步走。但关键欠账：D4 全程<strong>从不显式优化任何多样性标量</strong>，"diversification" 只是"剪质心近邻"的密度启发式，原文没有任何"精选前后 Vendi 分数对比"的消融。也就是说，D4 借用了多样性的修辞，却没有用 Day19 的尺子量过自己。</li><li><strong>vs Day25 FineWeb（直接对比）</strong>：FineWeb 的去重在词面层（MinHash / exact / URL 去重 + 启发式瀑布），D4 在嵌入语义层；两者正交可串联——FineWeb 式"词面瀑布"在前，D4 式"语义去重+覆盖审计"在后。Day07 Llama3 闭源五级过滤里语义去重只是一笔带过，D4 是它的方法学注脚。</li><li><strong>vs Day20 DEITA（机制同构）</strong>：DEITA 的 Repr Filter 在 SFT 池里做近邻去重（多样性 = 别选近邻），D4 的 SSL Prototypes 在预训练池里剪质心近邻（多样性 = 稀释模式、保长尾）。同一个几何直觉，两个规模级。</li><li><strong>接线</strong>：Day19（度量）→ Day24（工程流程）→ Day25（端到端瀑布）；回接 Day07 / Day14 的预训练去重管线；前接 Day30 防污染——同一套 embedding 近邻机器，D4 用来删训练集内重复，Day30 用来检 train–eval 泄漏。</li></ul>
+<h3>核心（动机 + 机制深挖）</h3>
+<ul><li><strong>动机</strong>："单 epoch 扫尽可能多 web token" 的收益随规模递减；更深的问题是重复<strong>污染后续一切基于簇的数据操作</strong>——质心落在重复模板堆里，任何"按簇剪枝"剪的都是重复的形状而非主题的分布。D4 把"先驱逐重复"变成多样化的前置条件。</li><li><strong>Step 1 — SemDeDup（删语义近重复）</strong>：文档 embedding → 球面 k-means（簇数 5 万量级）→ 簇内两两余弦相似度 $&gt; 1 - \epsilon$ 判为重复组，每组只留 1 个（默认留离质心最远者）； $\epsilon$ 不手调，由目标保留率 $R_{dedup}$ 反推。这一步把"模板式重复"从表示空间里连根拔掉。</li><li><strong>Step 2 — re-cluster（关键顺序）</strong>：在去重后的数据集 $D^{\prime}$ 上重做 k-means。原文 Figure 7 的证据：跳过这步直接在旧簇上做原型剪枝，效果显著变差——因为旧质心仍被残余重复牵引。</li><li><strong>Step 3 — SSL Prototypes（稀释密集区）</strong>：prototypicality 定义为到新质心的距离 $d(x) = \|e_x - c_k\|$ （或等价余弦距离）；按 $d(x)$ 从小到大剪掉 $1 - R_{proto}$ 。附录 A.4 的定性检查：质心近邻多为语义冗余的模板（如固定格式的 SEO 文本），k-means 质心天然落在稠密区，所以"剪近邻" = "剪模板"。注意这与 Sorscher 原文"保留原型（简单样本）最优"的结论方向相反——D4 要的是覆盖，不是拟合。</li><li><strong>对比协议（方法论上最值得抄的一点）</strong>：固定 token 预算—— $R$ 每降一档，源数据集等比放大（选 1/4 就用 4 倍源数据），1.3B / 40B tokens 下比较。这样"精选 vs 随机"比的纯粹是<strong>选择质量</strong>，而不是"谁见过更多 token"。很多数据论文的增益其实混杂了数据量，D4 把这个混杂钉死了。</li><li><strong>反直觉结果</strong>：精选子集多 epoch 重复训练<strong>稳定打赢</strong>基线，而随机子集重复则打输。重复的边际价值 = 分布质量 × 重复次数——"不要重复数据"的惯例只在"重复的是随机 web  sludge"时成立。</li></ul>
+<h3>边界（何时失效 / 证据没证明什么）</h3>
+<ul><li><strong>embedding 即偏见</strong>：语义相似度完全继承 OPT-125M 表示的偏见。搬到 coding：同模板、不同边界条件的代码（如换变量名的等价解 vs 边界条件不同的两个实现）在通用文本 embedding 下可能挤进同一个 $\epsilon$ 球——<strong>误删的方向正是高价值的长尾变体</strong>。阈值全局一刀切，不同学科/代码域密度不同。</li><li><strong>"模板 ≠ 低质"没有消融</strong>：SSL Prototypes 剪掉的质心近邻里，混有多少高质量规范样本（如标准库文档、canonical 解法模板）？原文只给了定性"多为冗余模板"，没有"被剪掉的近邻里好样本占比"的量化。这是 D4 证据链里最大的暗角。</li><li><strong>平均数掩盖方差</strong>：16 任务平均 +2%，但任务间方差大（附录 Figure A3），某些任务零增益甚至为负——"多样化"对所有下游一视同仁的假设不成立。</li><li><strong>先付费后精选</strong>：embedding + 两次全量 k-means 是离线一次性成本；池子太小（&lt; 目标选择量的 4 倍）时， $R$ 降档协议玩不起来，小团队更多是"有多少用多少"。</li><li><strong>Vendi 欠账</strong>（见上）：没有精选前后的多样性标量对比，"diversification" 是宣称不是测量。</li></ul>
+<h3>迁移到 coding / post-training data（一个具体可执行的映射）</h3>
+<ul><li><strong>场景</strong>：你的 coding SFT 池（如 OSS-Instruct 式合成的 ~75k 条），模板改写泛滥（同一题换变量名/换语言的等价样本）。</li><li><strong>映射（照抄 D4 三步，但改两处）</strong>：<ol><li>表示换成 code embedding（UnixCoder / CodeSage 类；退而求其次用 AST 归一化后的 token embedding），球面 k-means 聚类；簇内余弦 $&gt; 0.95$ 判同模板组，每组只留 1 条——<strong>保留规则改成"留测试覆盖最全者"</strong>，不用 D4 的"留离质心最远"，因为 code 场景质心近邻可能是 canonical 解法模板，盲目剪会伤规范解。</li><li>去重后重聚类，剪新质心近邻 10–20% 作为"模板稀释"对照组。</li><li><strong>验收 = 补上 D4 欠的消融</strong>：固定 token 预算，精选子集 vs 随机子集训 1B 小模型，看 HumanEval / MBPP delta，<strong>同时报告两边精选前后的 Vendi 分数</strong>——一次实验同时验证 D4 的宣称和 Day19 的尺子。</li></ol></li><li><strong>红线</strong>： $\epsilon$ 按"域"分档（算法题/系统代码/配置文件密度不同），不要全局一个阈值；被剪样本落盘留档，每月抽 50 条人工复核"模板 vs 规范解"的误伤率。</li></ul>
+</section>
+<section class="sec sec-qa" id="sec-12"><h2><span class="n">12</span>思考题</h2>
+<ol><li><strong>(a) 综合 Day24 + Day19</strong>：D4 声称 diversification 却从未报告 Vendi。设计一个 200 GPU-hour 内可跑的验证：固定 $R = 0.25$ ，比较 D4 精选子集 vs 同比例随机子集——用同一 kernel 算双方的 Vendi Score，再各训一个 1B 模型（10B tokens）看下游 delta。若出现"Vendi 更高但下游不涨"，说明了多样性度量与下游之间的什么关系？进一步：你能构造一个 Vendi 极高但训练有害的子集吗？（提示：往池子里掺与任务正交的噪声域。）</li><li><strong>(b) 综合 Day24 + Day30</strong>：同一套"embedding 近邻"机器，D4 用来删训练集内重复，Day30 用来检 train–eval 泄漏。假设你的语义去重阈值 $\epsilon_{dedup}$ 设得比防污染阈值 $\epsilon_{decon}$ 更激进，会观测到什么后果？——与 HumanEval 语义相近但合法的训练样本被成片删掉，表现为"去污染分数虚高"：防漏指标变好不是因为模型更干净，而是训练分布被掏空了一块。请设计一个对照实验，区分"真干净"与"分布被掏空"。（提示：固定评测集，比较激进/保守两档 $\epsilon_{dedup}$ 下，被删样本中"与 benchmark 近邻" vs "与 benchmark 远但高质量"的比例，以及两档的下游 delta。）</li></ol>
+<p>相关讨论（Gemini 网页版，2026-09-24）：https://gemini.google.com/app/b10432c02e770db5</p>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-24-2023-semdedup-d4/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2308.12284">论文原文</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

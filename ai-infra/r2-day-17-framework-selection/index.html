@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day17 NOTES — 术语、公式核对与上一课/下一课链接</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-infra · R2-Day17</span>
+    <h1>r2-Day17 NOTES — 术语、公式核对与上一课/下一课链接</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成 · 选型课：把 Day14（ZeRO）、Day15（TP/PP/SP）、Day16（AMP/累积/checkpoint）拼成决策表——FSDP vs Megatron 3D vs DeepSpeed。</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">术语（准确定义）</a><a href="#sec-2">公式核对（与 r2-Day03/Day14/Day15/Day16 一致性）</a><a href="#sec-3">与上一课的连接</a><a href="#sec-4">下一课预告</a><a href="#sec-5">讨论难点（供 ai chat）</a></nav>
+  </details>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>术语（准确定义）</h2>
+<ul>
+<li><strong>FSDP（Fully Sharded Data Parallel）</strong>：PyTorch 对 ZeRO-3 的原生实现。核心机制：flat parameter（把多层参数拍平成一维大 tensor 再切分，减少all-gather 碎片）+ <code>reshard_after_forward</code>（forward 用完参数分片立即释放，backward 再 gather）。效果：显存峰值低；代价：每层 forward/backward各一次 all-gather，通信 ≈ 1.5× DDP。</li>
+<li><strong>ZeRO stage</strong>：ZeRO-1 只切 optimizer states；ZeRO-2 加切 grads；ZeRO-3 连 params 也切。FSDP 默认即 ZeRO-3 语义；DeepSpeed 允许按 stage选，config 里一行切换。</li>
+<li><strong>reshard_after_forward</strong>：FSDP 的标志性 trade——"用完即还"。对比 Megatron TP 的"常驻分片"：TP 分片一直在显存里（通信模式固定），FSDP 分片用完就扔（显存峰值低，但 gather 更频繁）。这是讨论难点的题眼。</li>
+<li><strong>3D 并行</strong>：TP（张量内切，通信密集限机内）× PP（层间切，有 bubble$ (p-1)/(m+p-1) $ ）× DP（数据并行）。Megatron-LM 是 3D 的生产样板；FSDP/DeepSpeed 本质是 DP 的显存优化版（ZeRO），不是 3D。</li>
+<li><strong>1-bit Adam / ZeRO-Offload</strong>：DeepSpeed 大礼包里的两件：前者把 optimizer 通信压缩（误差补偿），后者把 optimizer states / params卸载到 CPU/NVMe（PCIe 带宽换显存）。本课只记名字，数学在选型时知道"有这个选项"即可。</li>
+<li><strong>代码侵入（code intrusion）</strong>：从现有训练脚本切到某框架要改多少行。排序（低→高）：DeepSpeed config（一行）≈ FSDP <code>fully_shard</code> 包裹&lt; Megatron（按 3D 重组模型与脚本）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>公式核对（与 r2-Day03/Day14/Day15/Day16 一致性）</h2>
+<ul>
+<li>ring all-reduce $ 2(N-1)/N \times $ payload：r2-Day03 公式，本课<code>ring_allreduce_bytes</code> 原样复用。DDP grad 通信 24.5GB（ $2\times 7/8 \times 14$ ）与 Day14 的 DDP 口径一致。</li>
+<li>FSDP 1.5× 系数：r2-Day14 的 toy（P=100, N=4）已验证ZeRO-3 通信 = 1.5 × DDP。本课 toy 用同一 P/N，450B = 1.5 × 300B，系数咬合。</li>
+<li>7B 台账 14/14/56 = 84GB：r2-Day14 的 ledger 原样引用；r2-Day16 的 AMP 台账 112GB 是另一口径（fp32 master + fp16 param），本课用 fp16 param + fp32 opt 的 12B/param 口径，README 已声明，不要与 Day16 的 16B/param 混用。</li>
+<li>Megatron 每层 4 次 all-reduce：r2-Day15 口径（forward 2 + backward 2），117.4MB/次、80 层 37.6GB/step 直接引用 Day15，不在本课重算。</li>
+<li>TP 的"只认机内带宽"：r2-Day15 的 NVLink 41.8ms vs IB 0.75s（18×），是本课讨论难点的定价依据。</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>与上一课的连接</h2>
+<p>r2-Day16 回答"每卡手里的张量还能怎么压"（精度/累积/重计算，不换并行结构）。r2-Day17 回答"压完之后跑在哪个框架上"：框架 = 并行语义 + 代码侵入形态的打包。FSDP 恰好是 Day14 ZeRO-3 的生产形态；Megatron 恰好是 Day153D 并行的生产形态；DeepSpeed 是"不想改代码也想吃 ZeRO 红利"的形态。三课的台账互相咬合：Day14 算出台账，Day16 压出台账，Day17 把台账装进框架——选型三问本质是在问"你愿意为什么付迁移成本"。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>下一课预告</h2>
+<p>r2-Day18：Checkpoint &amp; Recovery（DCP）。框架选好、训起来之后，下一个工程问题是"挂了怎么恢复"：full rank0 gather vs sharded DCPper-rank，含 optimizer + epoch + rng。r2-Day16 的 checkpoint（存 activation）和 Day18 的 checkpoint（存训练状态）名字一样、对象完全不同，注意区分。</p>
+</section>
+<section class="sec sec-qa" id="sec-5"><h2><span class="n">5</span>讨论难点（供 ai chat）</h2>
+<p>FSDP 的 reshard_after_forward（用完即释放、显存峰值低、通信 1.5×）vs Megatron TP 分片常驻（通信模式固定 4 次/layer、要求机内 NVLink）：如果只有跨机 IB（无 NVLink）的 8 卡环境跑 7B，你选 FSDP 还是 TP=8？为什么？提示：用 r2-Day15 的 18× 带宽比给两种方案的通信定价。</p>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-17-framework-selection/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 34 — Constitutional AI: Harmlessness from AI Feedback</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 34</span>
+    <h1>Day 34 — Constitutional AI: Harmlessness from AI Feedback</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">思考题</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: "Constitutional AI: Harmlessness from AI Feedback"</li><li>Authors / Org: Bai et al. / Anthropic（51 作者）</li><li>Link / arXiv: https://arxiv.org/abs/2212.08073</li><li>Date read: 2026-09-26</li><div class="meta"><span class="tag">rl-data</span><span class="tag">preference-data</span><span class="tag">rlaif</span><span class="tag">constitution</span><span class="tag">critique-revision</span><span class="tag">curation</span></div></ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>RLAIF 的源头：人类监督从"逐条标有害/无害"收缩为"写一张原则清单（constitution）"——SL 阶段模型按随机抽到的原则自我 critique+revision、自产对齐数据微调；RL 阶段模型按原则对两条回复做 AI 偏好标注、训练 PM 再 PPO，全程零人类有害标注，human-judged harmlessness 显著超过当时的人类 RLHF 基线（HH-RLHF），是把"规则"编译成"数据"的第一份完整 recipe。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol><li><strong>Motivation</strong>: RLHF 的 harmlessness 标注扩展性差：要让人逐条判断"哪条回复更有害"，贵、慢、且标注员接触大量有害内容本身是负担。问题是：能不能把人类监督"上移一层"——只写原则（自然语言），让模型自己把原则翻译成标注？这就是 constitution 的由来：对齐目标可审计、可版本化，而不是藏在几十万条人类标注的隐式分布里。</li><li><strong>Data Pipeline</strong>: 两段式，全部数据自产：<ul><li><strong>SL 阶段（self-critique → revision）</strong>：取 helpful RLHF 后的初始模型 + 一批 red-team prompts（人类写的 + 模型 few-shot 扩写的）。每条 prompt：模型先生成初始回复 → 随机抽一条 critique 原则（16 条里抽 1，如"这条回复是否助长了非法行为？"）→ few-shot 格式生成 critique → 再按 revision 指令生成修订版。<strong>只保留最终修订版作为 SL 目标，丢掉原始回复</strong>，在 (prompt, revision) 上微调。数据阀：过滤掉修订版退化成模板式拒绝/重复套话的样本——拒绝容易学，修订难，要的是"不回避但讲清立场"的修订质量。</li><li><strong>RL 阶段（AI 偏好标注 → PM → PPO，即 RLAIF）</strong>：对每条 prompt 从 SL 模型采样 2 条回复 → 随机抽一条偏好原则（16 条，如"哪条回复是更明智、有道德、礼貌友好的人会说的？"）→ 模型做选择题式判断（"A 好还是 B 好？"，带 CoT 推理再取 (A)/(B) token 概率得偏好标签）→ 训练 preference model → PPO。偏好数据里的人类成分是零，原则是唯一的注入点。</li><li>关键点：critique/revision 和偏好判断都用 few-shot + CoT——CoT 不只涨标注质量，还让 AI 的"判决理由"可读，这是"可审计对齐"的雏形。</li></ul></li><li><strong>Key Tricks</strong>:<ul><li><strong>原则即数据规格</strong>：16+16 条自然语言原则是唯一的"人工制品"，每条 prompt 随机抽 1 条用——相当于用采样把原则分布注入数据分布，改原则 = 改数据分布，不用重标；</li><li><strong>SL 只训 revision、丢弃原回复</strong>：训练信号是"按原则改完之后的样子"，模型学到的是"自我修正的终态分布"而不是"先犯错再改"的过程；</li><li><strong>AI 标注用选择题 + CoT 提取 token 概率</strong>：不是让模型直接打分（打分不稳定），而是二选一 + 读 (A)/(B) 概率，偏好标签变成可校准的概率信号；</li><li><strong>non-evasive 是刻意的数据目标</strong>：修订/偏好原则明确奖励"正面回应并解释反对理由"而非"一拒了之"，RLAIF 训练出的助手对有害请求会解释立场而不是模板拒绝——这是数据设计直接决定产品行为的例子。</li></ul></li><li><strong>Results</strong>:<ul><li>人评 Elo：harmlessness 上 CAI 73 vs HH-RLHF（人类标注 RLHF）63；helpfulness 上 HH-RLHF 62 vs CAI 56——无害性大胜、helpfulness 小输，tradeoff 明确；</li><li>crowdworker 在 red-team prompts 上显著更偏好 CAI 回复；AI 标注训练的 PM 性能接近人类标注训练的 PM（CoT 对一致性提升明显）；</li><li>数据意义：证明了 harmlessness 这条维度可以完全不依赖人类有害标注达到 SOTA——RLHF 的"人"不是不可替代的，至少在这一维上。</li></ul></li></ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>可迁移</h2>
+<ul><li>对你现在 coding data 工作的 1-2 个直接可试的点：把代码规范/安全 checklist 写成"constitution"（如"不引入 SQL 注入面""错误处理不吞异常"），让模型对自生成的代码做 critique→revision，自产 (bad code, revised code) 对做 SFT 或偏好数据——等于把 code review 规则编译成数据，比逐条人工 review 可扩展；Day33 STaR 是"答案对错"做阀，CAI 是"原则符合度"做阀，coding 里两者可以叠：单测做答案阀，constitution 做风格/安全阀。</li><li>Infra 视角：CAI 把最贵的人力环节（有害标注）换成了最便宜的可版本化资产（一页原则）+ 模型 inference——数据成本结构从 O(标注条数) 降到 O(原则条数)；代价是"回音室"风险（标注模型的偏见被放大进 policy），需要独立的红队/人评做外部校验，这正是 Day35 PRM step-level 监督和 Day36 RLAIF-vs-RLHF 对比要回答的。</li></ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>疑问 / 下一步</h2>
+<ul><li>16 条原则是作者手写的——原则的"覆盖度"和"冲突"怎么度量？两条原则打架时（helpful vs harmless）采样机制实际学到的是什么分布？</li><li>AI 偏好标注与人类标注的一致性在 harmlessness 之外（helpfulness、honesty）是否同样成立？Day36 的 RLAIF vs RLHF 头对头对比会给出答案。</li></ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>原文金句 (1-2句)</h2>
+<blockquote><p>We experiment with methods for training a harmless AI assistant through self-improvement, without any human labels identifying harmful outputs. The only human oversight is provided through a list of rules or principles, and so we refer to the method as 'Constitutional AI'.</p></blockquote>
+<blockquote><p>These methods make it possible to control AI behavior more precisely and with far fewer human labels.</p></blockquote>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>思考题</h2>
+<ol><li>CAI 把"逐条人工标注"换成"一页自然语言原则 + AI 自产数据"——这套"规则前置"范式能搬到 coding data 吗？比如把代码规范写成 constitution，让模型对自生成的代码做 critique→revision，和 Day33 STaR 的"单测答案阀"叠起来用？</li><li>RLAIF 全程零人类有害标注，但 AI 标注的偏见会被 PPO 放大成"回音室"——如果原则本身有盲区，数据管线里哪个环节能发现？Day36 的 RLAIF vs RLHF 对比、Day35 的 step-level 监督，哪个更可能是解法？</li></ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-34-2022-constitutional-ai/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2212.08073">论文原文</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

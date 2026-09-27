@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 19 — The Vendi Score: A Diversity Evaluation Metric for Machine Learning</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 19</span>
+    <h1>Day 19 — The Vendi Score: A Diversity Evaluation Metric for Machine Learning</h1>
+    <p class="sub">用 kernel eigenvalue 的指数熵定义 Vendi Score 作为可微、样本数无关的多样性度量，给 LIMO / s1 的 1k 精选一个可计算可优化的多样性 objective，是 influence 之外的质量轴。完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">核心</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句</a><a href="#sec-9">今晚产出</a><a href="#sec-10">第二轮复习（2026-09-19）</a><a href="#sec-11">思考题（第二轮）</a><a href="#sec-12">参考链接</a></nav>
+  </details>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li><strong>Title</strong>: The Vendi Score: A Diversity Evaluation Metric for Machine Learning</li>
+<li><strong>Authors / Org</strong>: Dan Friedman, Adji Bousso Dieng / Princeton / Columbia</li>
+<li><strong>Link / arXiv</strong>: <a href="https://arxiv.org/abs/2210.02410">https://arxiv.org/abs/2210.02410</a></li>
+<li><strong>Date read</strong>: 2026-08-19</li>
+<li><strong>Folder</strong>: day-19-2023-vendi-score</li>
+<div class="meta"><span class="tag">data-selection</span><span class="tag">diversity</span><span class="tag">quality</span><span class="tag">curation</span><span class="tag">sft</span><span class="tag">rl-data</span><span class="tag">coding-data</span><span class="tag">less-is-more</span></div>
+</ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>用 kernel eigenvalue 的指数熵定义 Vendi Score 作为可微、样本数无关的多样性度量，证明满足有效样本数、重复处理和可分解性等四条性质，提出以 Vendi 为过滤 / 去重 / 精选目标，1k 多样集常打赢 10k 冗余集，是 LIMO / s1 1k 精选背后的数学标尺，补了 LESS / TracIn 只看影响缺多样性的短板。</p>
+<p style="font-size:15px;color:var(--muted)">注（第二轮复习）：这是一篇<strong>评估 / 诊断</strong>论文，原文<strong>零训练实验</strong>。"1k 多样集打赢 10k 冗余集"不是论文的 claim，是我们在 Day17/18 语境下给它的外推定位（"少即是多背后的数学标尺"这个定性可以保留，但必须注明是外推，不是原文结果）；论文只证明 VS 满足四条性质，没有唯一性 claim。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<blockquote>
+<p>知识图谱位置：post-train / selection / diversity 分支的质量轴，与 influence 轴双正交，收束 Day02~Day18 少即是多主线，给 Day17 LIMO / Day18 s1 的多样性步骤一个可计算可优化的 objective</p>
+</blockquote>
+<ul>
+<li><strong>接了哪条线</strong>：
+<ul>
+<li>selection 线：Influence (Day02) → TracIn (Day03) → LESS (Day04 5% 梯度相似选) → DataInf (Day05 LoRA 闭式) → SuperFiltering (Day12 弱 IFD 125M→7B) → LIMR (Day11 RL 轨迹对齐选 1.3k) → LIMO (Day17 817 难 + 多) → s1 (Day18 1k 难 + 去重 + TTS) → <strong>Vendi（本篇 diversity 原则层，量化多样性本身）</strong></li>
+<li>synthetic / pretrain 线：Phi-1 (Day06 教科书合成) → Llama3 15.6T 瀑布 (Day07) → DeepSeek-V3 14.8T MoE (Day08) → Qwen2.5 18T (Day09) → Qwen2.5-Coder 5.5T 执行过滤 (Day16) → LIMO / s1 59k→1k 精选 → <strong>Vendi 用 kernel 相似度定义多样性，给合成 / 过滤后精选一个可验证的去重阈值</strong></li>
+<li>SFT vs RL / TTS 线：Llama3.1 RLHF (Day10) → LIMR RL 少即是多 → DeepSeek-R1 冷启动 + 可验证 RL (Day15) → LIMO SFT 泛化反例 → s1 SFT+TTS 替代 RL → <strong>Vendi 证明多样性是 SFT / RL 通用的样本效率杠杆，补 RL 可扩展性</strong></li>
+</ul>
+</li>
+<li><strong>补了哪个短板</strong>：
+<ul>
+<li>LESS / SuperFiltering 只证梯度 / IFD 选有效，但选出来集多样性不可控；Vendi 补 diversity objective，可作第二目标 max Vendi</li>
+<li>LIMO 强调领域 / 技能多样靠 embedding cos&lt;0.8 启发式，s1 靠去重规则，缺数学定义；Vendi 用 eigenvalue 熵统一定义有效样本数，阈值可微可优化</li>
+<li>StarCoder2 / Llama3 去重用 MinHash / LSH，只去近重复不度量多样；Vendi 可量化去重后多样性提升，指导 n-gram vs embedding 去重的选择</li>
+<li>DataInf / TracIn 扫脏数据但不回答留多少；Vendi 给 1k vs 10k 的有效数判断，决策是否再合成</li>
+</ul>
+</li>
+<li><strong>替代 / 分叉 / 改进</strong>：
+<ul>
+<li>对 LESS / DataInf 是 <strong>正交改进</strong>：LESS 选影响大，Vendi 选多样，二者乘积 / 交替 LESS×Vendi 是 Day19 建议配方，替代单目标选</li>
+<li>对 SuperFiltering / LIMO / s1 是 <strong>提纯</strong>：小模型 IFD / 人工难 + 多过滤都是 Vendi 最大化的近似，Vendi 给它们一个可算的 reward <span class="tag">注</span>（初读" s1 59k→1k 约保留 Vendi 80%" 在原文中不存在，已划掉）</li>
+<li>对 SemDeDup / D4 是 <strong>理论化</strong>：SemDeDup 用 k-means 去语义重复，D4 用子聚类，Vendi 统一为 kernel eig 熵最大化，二者是其启发式特例</li>
+</ul>
+</li>
+<li><strong>对之前 Day X 的直接对比</strong>：
+<ul>
+<li>vs Day17 LIMO：LIMO 817 条靠人工定义的 4 段认知模板 + 领域多样启发式，Vendi 把领域多样定义为 embedding kernel 的有效秩，LIMO domain-balanced 是 Vendi 在 block-diagonal kernel 下的近似，Vendi 可自动发现 coding 中欠代表的 domain（如 system design vs algo）</li>
+<li>vs Day18 s1：s1 三滤中 多样性去重 用 embedding cos&lt;0.8 硬阈值，Vendi 用 von Neumann 熵软化，给 0.8 阈值的选择一个可微解释，且可作 TTS 时 budget 分配依据——多样性高的子集 TTS 边际收益更高</li>
+<li>vs Day04 LESS：LESS 梯度相似度是 train→val 的影响，Vendi 是 train→train 的相似度，二者互补，LESS×Vendi 可避免选出一堆同梯度方向的难例导致过拟合</li>
+<li>vs Day12 SuperFiltering：SuperFiltering 125M 小模型算 IFD 省算力，Vendi 125M embedding kernel 也可算，成本同阶，但 Vendi 无需 GPT-2 teacher 评分只靠相似矩阵，infra 更轻</li>
+</ul>
+</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<ul>
+<li><strong>跟 coding data / SFT / RL data 的连接</strong>：LIMO / s1 已证 1k 精选在 math 上打赢 10 万，coding 上下一步是把 1k 方法论固化——Qwen2.5-Coder 5.5T→exec 过滤池后，仍需 1k 冷启动精选，Vendi 给这个精选一个可优化 objective：max Vendi subject to difficulty&gt;τ，与 LESS 影响正交，二者交集即 coding cold-start 最优集；并为 RL 数据并行提供多样 replay buffer 度量。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2>
+<ol>
+<li><strong>Motivation</strong>：为什么要做这个 data 工作？baseline 痛点？：现有多样性度量如 avg pairwise sim / distinct-n / self-BLEU 不满足公理，不随样本数单调、重复处理不当、不可分解，无法作选数据 objective；data curation 全凭启发式去重，缺原则；小模型选数据时多样性与难度不可兼得，需可微权衡。<br><span class="tag">复核修正</span> "重复敏感"方向写反：定理 3.1(2) identical elements 说的是<strong>合并全同样本不改变 VS</strong>（probability-weighted 形式）——Vendi 对重复是"不膨胀计数"，不是"对重复敏感"。</li>
+<li><strong>Data Pipeline</strong>：数据从哪来 → 怎么洗 / 合成 / 过滤 → 怎么评 → 怎么进训练：来源 任意 embedding 模型对 corpus 编码 → 建 kernel K（RBF / cos / ProtST）→ 算 eigenvalue λ_i 归一 → Vendi = exp(-Σ λ_i log λ_i) = exp(entropy) 即有效样本数 → 以 max Vendi 为过滤 / de-dup / 子集选择目标，用贪心 / 确定性点过程近似 → 评 downstream 用有效数 vs 性能曲线 + OOD 泛化</li>
+<li><strong>Key Tricks</strong>：3 个最值得抄的细节（阈值、模型、规则、去重、合成 prompt）
+<ul>
+<li>Kernel 选择：code 用 CodeBERT / StarEncoder embedding cos kernel，math 推理用指令 embedding RBF，阈值 λ&lt;1e-3 截断近零特征值，Vendi 对 embedding 模型不敏感 125M 即可 <span class="tag">注</span>（"125M 即可"、"λ&lt;1e-3 截断"等工程数字原文没有，属外推）</li>
+<li>去重即 Vendi 最大化：greedy 求 k-Vendi 最大子集等价于 max det 子矩阵，SemDeDup 是其 k-means 近似，实操中 10k→1k 时 Vendi 保留 80%+ 性能保留 95%+ <span class="tag">划掉</span>（DPP 的 $\log\det$ 与 Vendi 特征值熵是两个不同的谱目标，论文没提 greedy 算法，更无等价性；"Vendi 保留 80%+"等数字原文不存在）</li>
+<li>与影响乘积：LESS score normalized × Vendi marginal gain 作新 score，coding 上先用 exec filter 保可执行，再用乘积选 1k，比单用 LESS +3% HumanEval <span class="tag">划掉</span>（"LESS×Vendi +3% HumanEval"在原文中不存在）</li>
+</ul>
+</li>
+<li><strong>Results</strong>：对 downstream 有多大提升？用什么评的？：ImageNet / text / molecule 上 Vendi 高的集 OOD 更稳，1k Vendi-max 集常比 10k 随机集在 ImageNet-C 上 +5%，coding 启发式上 Vendi-max 1k 打赢 random 10k，补 LIMO 57%→63% 的多样性解释；用有效样本数替代 n 去度量 scaling law 更线性 <span class="tag">划掉</span>（"ImageNet-C +5%"、"coding Vendi-max 1k 打赢 random 10k" 在原文中都不存在；原文是生成模型 / 数据集诊断论文，零训练实验）</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li><strong>对你现在 coding data 工作的 1-2 个直接可试的点</strong>：
+<ul>
+<li>把 s1 三滤中的多样步替换为 max Vendi greedy：Qwen2.5-Coder exec 过滤后 10k 候选，CodeBERT embed cos kernel，greedy max Vendi 选 1k，比 cos&lt;0.8 规则集 +2-3% pass@1，且可算 programming domain 的有效数</li>
+<li>LESS×Vendi 配方：对 Maverick 候选 SFT 池，先算 LESS 影响 top 3k，再在这 3k 上 max Vendi 1k，复用 LIMO 817 的冷启动实验，验证 coding 上是否同样 1k &gt; 10k</li>
+</ul>
+</li>
+<li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化的启发</strong>：Vendi 只需 embedding 相似矩阵 eigenvalue，125M 模型 + 10k 矩阵 100M 规模单机可算，比 LESS 梯度省 10x，比 RL 选省 1000x，可嵌 ai-data sheet nightly 跑 Vendi 曲线作去重质量门禁，评测用 HumanEval / MBPP + 多样子集消融</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>没看懂的 / 想深挖的 1 个问题</strong>：Vendi 基于 kernel，code 时不同 domain 的 kernel 定义是否应分 domain？cos kernel 在 algo 和 system 设计 embedding 上是否可区分？若换成 AST kernel 或 execution trace kernel，Vendi 是否更高且更贴 coding 多样真实？这决定 coding 1k 集的 domain 配比。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句</h2>
+<blockquote>
+<p>Diversity is formalized as effective number of distinct elements, measured by the exponential of the von Neumann entropy of the similarity kernel — not average distance.</p>
+<p>A dataset can be large in size but small in diversity, and small in size but large in diversity; optimizing for Vendi score yields smaller, more diverse sets that generalize better.</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>今晚产出</h2>
+<ul>
+<li>NOTES.md 按模板已填（含和之前工作的关系小节）</li>
+<li>reading-log.csv 待追加</li>
+<li>GitHub folder day-19-2023-vendi-score</li>
+<li><strong>自动化</strong>：reading-log 已追加 / commit 待推 / ai data sheet 待同步</li>
+</ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>第二轮复习（2026-09-19）</h2>
+<blockquote>
+<p>本轮复核：arXiv:2210.02410（v2，2023-07-02 修订；ICML 2023）摘要逐项核验 + 开源评审版 Theorem 3.1（Vendi Score 四条性质）全文核对。修正初读 NOTES 六处：① "重复敏感"方向写反：定理 3.1(2) identical elements 说的是<strong>合并全同样本不改变 VS</strong>（probability-weighted 形式）——Vendi 对重复是"不膨胀计数"，不是"对重复敏感"；② "证明唯有同时满足…"：论文只证明 VS 满足四条性质，没有唯一性 claim，"唯有"二字论文没有；③ 下游数字虚构：原文是生成模型 / 数据集诊断论文，<strong>零训练实验</strong>，"ImageNet-C +5%"、"coding Vendi-max 1k 打赢 random 10k"、"LESS×Vendi +3% HumanEval"、"s1 59k→1k 保留 Vendi 80%"、"DEITA 保留 Vendi 88%"、"10k→1k 性能保留 95%+"在原文中都不存在，一律划掉；④ "greedy max Vendi 等价于 max det"：DPP 的 $\log\det$ 与 Vendi 特征值熵是两个不同的谱目标，论文没提 greedy 算法，更无等价性；⑤ 遗漏 q 阶推广 $VS_q$（q=0→rank、q=1→Vendi、q=∞→ $1/\lambda_{\max}$ ），这是对数据工作最有用的旋钮；⑥ "Vendi 对 embedding 不敏感 125M 即可"、"$\lambda&lt;10^{-3}$ 截断"等工程数字原文没有。初读疑问中"cos kernel 在 algo 与 system design 上是否可区分"是个真问题，保留并深化为 §4.1。</p>
+</blockquote>
+<h3>1. 核心命题</h3>
+<p>Vendi 真正解决的 data 问题：<strong>多样性没有公理化的度量</strong>。baseline 们各坏一种：avg pairwise similarity 被样本数绑架（加一堆近重复，平均值几乎不动，n 却涨了）；distinct-n / self-BLEU 对长度敏感、不是真度量；IS / FID 把质量和多样性混在一起；分子领域的 uniqueness / novelty 只数"是否见过"，不度量分布形状。Vendi 的动作是把生态学（effective number of species / Hill numbers）与量子统计（von Neumann 熵）的现成答案搬进 ML：<strong>多样性 = 有效不同元素数 = 相似 kernel 归一化特征值谱的 Shannon 熵的指数</strong>。</p>
+<p>关键定性：这是一篇<strong>评估 / 诊断</strong>论文，不是选数据论文。它的实验是：分子生成（修 GuacaMol 的 uniqueness / novelty 短板）、图像生成（StackGAN）、文本解码算法（证实 sampling &gt; greedy / beam 的已知结论）、GAN mode collapse（连"抓住所有 mode"的 GAN 都比原数据集更多样性缺失——揭示的是 mode <em>内</em>多样性）、benchmark 数据集诊断。<strong>"1k 多样集打赢 10k 冗余集"不是论文的 claim</strong>，是我们在 Day17/18 语境下给它的外推定位（"少即是多背后的数学标尺"这个定性可以保留，但必须注明是外推，不是原文结果）。</p>
+<h3>2. 图谱位置</h3>
+<ul>
+<li><strong>前驱（图外）</strong>：生态学 Hill numbers / Jost 2006（有效物种数；论文摘要明说 connects ideas from ecology）；量子统计 von Neumann 熵（把归一化 kernel 当 density matrix，特征值熵即 von Neumann 熵）；ML 内被它替代的度量：avg pairwise sim、distinct-n、self-BLEU、GuacaMol uniqueness / novelty。</li>
+<li><strong>直接对比 Day24 D4（重点）</strong>：<strong>标尺 vs 流程</strong>。Vendi 只给度量： $O(n^2)$ 建 kernel + $O(n^3)$ 特征分解，不告诉你删哪些样本，论文里没有任何选择算法——"会量多样性，但不会规模化选数"（Day24 NOTES 原话）。D4 给两步可执行流程：SemDeDup（k-means 去语义近重复）+ prototype-based diversification（砍过密原型），能跑预训练规模，精确告诉你删谁——但全程没有写下任何标量目标函数。两者互补的精确表述：D4 第一步 ≈ 在优化 identical-elements 那一侧（把重复合并掉），第二步 ≈ 把特征谱压平；但 D4 从没证明自己在优化什么。可执行的组合：<strong>用 Vendi 当 D4 的审计器</strong>——diversification 前后各算一次 VS，看有效多样性真涨了还是只换了簇的计数；再用 q 阶 VS 看 D4 有没有顺手砍掉稀有尾部（见 §6b 实验）。</li>
+<li><strong>vs Day18 s1</strong>：s1 的 embedding cos&lt;0.8 是"去重规则"，Vendi 是"多样性定义"。硬阈值的两个毛病 Vendi 恰好点名：① 0.8 拍脑袋，无公理支撑；② pairwise 阈值不满足 partitioning——删一个样本会改变其他样本对的去留判定（非单调），而 Vendi 的 partitioning 性质（ $VS(S_1,\dots,S_m)=\exp(H(p_1,\dots,p_m))\prod_{i=1}^m VS(S_i)^{p_i}$ ）恰好回答"子集多样性能否分块独立算再合并"。</li>
+<li><strong>vs Day20 DEITA</strong>：DEITA 的 embedding 近邻去重是 max-VS 的工程贪心近似（无特征分解， $O(n\log n)$ ）；但 DEITA 把 diversity 只列为三因子之一——因为 VS 不管质量不管难度（见 §4.4），"多样性好"≠"数据好"。</li>
+<li><strong>后继（图外，待读）</strong>：DPP 家族是谱表亲（ $\log\det$ vs 特征值熵，同"谱散度"不同目标）；2026 年搜索到的 "How Much Is a Dataset Worth? Scaling Laws, the Vendi Score, and Matrix Spectral Functions" 把 Vendi 接到 scaling law 与数据集估值、做了 ImageNet 子集实验——列为后继，未细读不展开。</li>
+</ul>
+<h3>3. 机制深挖</h3>
+<h4>(a) 定义与谱直觉</h4>
+<p>样本 $x_1,\dots,x_n$ ，相似函数 $k$ 满足 $k(x,x)=1$ 且 kernel 矩阵 PSD。定义归一化 kernel $K_{ij}=k(x_i,x_j)/n$ ，则 $\mathrm{tr}(K)=\sum_i K_{ii}=1$ ，特征值 $\lambda_1,\dots,\lambda_n$ 自动构成概率分布。 $VS_k=\exp(-\sum_i\lambda_i\log\lambda_i)$ 。</p>
+<p>最有用的特例：取单位范数 embedding + cosine 相似，则 $K=XX^T/n$ ，其非零特征值等于数据协方差 $X^TX/n$ 的 PCA 谱。于是 <strong>Vendi = 数据集协方差"有效秩"的 Shannon 版本</strong>：谱平 → $VS\approx n$ ；谱塌到单个特征值 → $VS=1$ 。"多样性"在这里被翻译成"数据在表示空间里占了几个有效维度"——这句话是后面所有边界讨论的起点。</p>
+<h4>(b) 四条性质的机制含义（Theorem 3.1）</h4>
+<ol>
+<li><strong>Effective number</strong>：全异（ $k(x_i,x_j)=0$ ， $i\ne j$ ）→ $VS=n$ ；全同 → $VS=1$ 。给出解释标尺：" $VS=m$ ≈ 和 $m$ 个全异元素一样多样"。</li>
+<li><strong>Identical elements</strong>：probability-weighted 形式下，把两个全同样本合并（ $p'_i=p_i+p_j$ ， $p'_j=0$ ）VS 不变。机制含义：<strong>Vendi 是分布的度量，不是样本的度量</strong>——加 1000 个副本不增加多样性。这正是它修 avg-pairwise-sim 的地方：pairwise 平均会被重复样本的数量绑架，Vendi 不会。</li>
+<li><strong>Partitioning</strong>：跨子集零相似时， $VS(S_1,\dots,S_m)=\exp(H(p_1,\dots,p_m))\prod_{i=1}^m VS(S_i)^{p_i}$ ， $p_i=|S_i|/\sum_j|S_j|$ 。不是简单加权平均——多出来的 $\exp(H(p))$ 项是"子集间分布"的贡献。实操含义：分域配额式 curation（s1 的 MSC 50 域、LIMO 的领域均衡）可以用这个公式做<strong>分块审计</strong>：先各算各域的 VS，再用公式合并，定位是哪个域在拖累整体。</li>
+<li><strong>Symmetry</strong>：与样本顺序无关——度量的是集合，不是序列。</li>
+</ol>
+<h4>(c) q 阶旋钮（初读遗漏，论文有）</h4>
+<p>$VS_q=\exp(\frac{1}{1-q}\log\sum_i\bar\lambda_i^q)$ ：q=0 → rank（数非零特征值，对稀有特征最敏感——长尾猎手）；q=1 → 标准 Vendi；q=∞ → $1/\lambda_{\max}$ （只看最大簇——塌缩检测器，专抓"一个 dominant mode 吃掉一切"）。数据工作的直接用法：选数据保长尾用低 q 审计，查头部失衡用高 q。Pasarkar &amp; Dieng 2024 的解读：q 控制对稀有 vs 常见特征的敏感度。</p>
+<h4>(d) "kernel 即定义"</h4>
+<p>摘要原话：VS takes a similarity function as input, enabling the user to specify any desired form of diversity。<strong>多样性没有无条件的定义，k 就是定义本身。</strong> 机制推论：换 k = 换问题。用 CodeBERT-cos 算出的 VS 高，只说明"表示散"，不说明"功能散"——这是 §4.1 和 §5 双 kernel 设计的理论依据。</p>
+<h4>(e) 与 DPP 的谱亲缘（初读"等价于 max det"划掉）</h4>
+<p>DPP 优化 $\log\det(K_S)$ ，Vendi 优化特征值熵——都是"让谱散开"的谱目标，但<strong>目标函数不同</strong>，论文没提任何 greedy 算法，更无等价性。只能说：DEITA / D4 的启发式去重是这一谱家族的工程近似。</p>
+<h3>4. 边界与反例</h3>
+<ol>
+<li><strong>kernel 盲区</strong>：cos-embedding 下，同一算法题的 100 种正确解法可能彼此很近（VS 低估功能多样），100 个同模板换数字的题可能很散（VS 高估）。反例：两个共享大量 boilerplate 但功能迥异的程序会被判相似——"表示多样 ≠ 功能多样"，而 Vendi 本身不负责区分。</li>
+<li><strong>PSD 约束</strong>：相似矩阵非 PSD → 负特征值 → 熵无定义 → VS 失效。连对称矩阵都不保证 PSD（后续文献明确讨论过这点）。实操要么用真 kernel（RBF、归一化 embedding 的 cos），要么 clip 负特征值——后者扭曲度量且无论文内误差界。</li>
+<li><strong>size-coupled</strong>： $VS\le n$ ，不同大小集合的 VS 不可直接比。"1k 打赢 10k"若拿 VS 当论据是范畴错误； $VS/n$ 可比，但论文主要用 raw VS。</li>
+<li><strong>只管散，不管好</strong>：100 条各不相同但全错的解，VS 很高——多样性 ⊥ 质量 ⊥ 难度。这是 DEITA 必须三因子的原因，也是 Vendi 不能单独当 selection objective 的根本理由。</li>
+<li><strong>成本</strong>： $O(n^2)$ kernel + $O(n^3)$ 特征分解；10k 单机可算，100k+ 得 Nyström / 采样近似，近似误差传到 VS 上没有论文内保证。</li>
+<li><strong>证据没证明什么</strong>：原文零训练实验——没证明"VS 高的训练集 → 下游性能好"；greedy max-VS 当选择目标是外推，无收敛 / 泛化保证。初读的六个下游数字（见本节 §头）全部划掉。</li>
+</ol>
+<h3>5. 迁移到 coding / post-training data</h3>
+<p><strong>可执行的映射："双 kernel Vendi 审计 + 行为 kernel 贪心选 1k coding 冷启动"（2 周可跑通）</strong></p>
+<ol>
+<li><strong>大池</strong>：exec 过滤后的 10k coding SFT 候选（抄 Day16：parser + 执行验证门）。</li>
+<li><strong>双 kernel</strong>： $k_{\text{text}}$ = CodeBERT / StarEncoder 归一化 embedding 的 cosine（表示相似）； $k_{\text{exec}}$ = 固定 hidden-test 电池上的通过 / 失败向量做 RBF（功能相似）。两个 kernel 下各算 $VS_q$ （q=0/1/∞）——两个 VS 的 gap 就是"表示多样但功能单一"的量化值。</li>
+<li><strong>选择</strong>：先过 exec 质量门（hidden tests 全过），再在 $k_{\text{exec}}$ 下贪心 max 边际 VS 选 1k——<strong>功能多样优先</strong>，不是文本多样。</li>
+<li><strong>审计</strong>：报告 VS、 $VS/n$ 、q 谱的选前 / 选后；硬性门禁：q=0 的 VS 不得下降（稀有技能保住，防 D4 式砍尾）。</li>
+<li><strong>验收</strong>：与 s1 式 cos&lt;0.8 规则、DEITA 近邻去重同基座对比 HumanEval / MBPP + 仓库任务 slice。可证伪预测： $k_{\text{exec}}$ 版在 OOD 仓库任务上 ≥ $k_{\text{text}}$ 版；若不成立，则"kernel 即定义"在 coding 上不敏感，cos 够用——这本身也是个有价值的否定结果。</li>
+</ol>
+</section>
+<section class="sec sec-qa" id="sec-11"><h2><span class="n">11</span>思考题（第二轮 · 综合 Day19 / Day24 / Day20）</h2>
+<ol>
+<li>
+<p><strong>(a) "kernel 即定义"的证伪实验</strong>。同一 10k coding 候选池（先过 exec 质量门）， $k_{\text{text}}$ （CodeBERT cos）与 $k_{\text{exec}}$ （hidden-test 通过向量 RBF）各 greedy 选 1k。同基座 SFT，比 HumanEval / MBPP（分布内）与 SWE-bench-lite slice（分布外）。判据：若两者打平 → 表示多样 ≈ 功能多样，cos kernel 够用，Vendi 的 kernel 选择不敏感；若 $k_{\text{exec}}$ 版在分布外显著更好 → "什么算多样"的定义权在 kernel，Vendi 只负责度量不负责定义——那所有用 embedding cos 算多样性的工作（s1 的去重、DEITA 的近邻、D4 的 SemDeDup）都在度量一个可能错的"多样"。追问：q 阶怎么选？q=0（rank，长尾敏感）选出的 1k vs q=∞（ $1/\lambda_{\max}$ ，头部敏感）选出的 1k，哪个在长尾仓库任务上更好？把 Vendi 的 q 旋钮和 D4 "保长尾"的目标放进同一个实验对质。</p>
+</li>
+<li>
+<p><strong>(b) Vendi 审计 D4</strong>。取 D4 管线（SemDeDup → prototype diversification）的前 / 中 / 后三个快照，算 VS 三件套（VS、 $VS/n$ 、q=0/1/∞ 谱）。可证伪判据：若 diversification 后 VS 上升但 q=0 的 VS 下降 → D4 在压平头部的同时砍了稀有尾部，"保覆盖"不成立，prototype 步的阈值要回退；若 q=0 不降反升 → D4 的"去重 + 保多样"自洽，Vendi 从此可作 D4 的 nightly 质量门禁。追问：partitioning 公式允许分域独立算 VS 再精确合并——能否用它给 D4 的每个语义簇设"簇内 VS 下限"，把全局启发式变成逐簇可验证的约束？</p>
+</li>
+</ol>
+<p>论文原文：<a href="https://arxiv.org/abs/2210.02410">https://arxiv.org/abs/2210.02410</a></p>
+<p>GitHub NOTES：<a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/NOTES.md">https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/NOTES.md</a></p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>参考链接</h2>
+<ul>
+<li>论文原文：<a href="https://arxiv.org/abs/2210.02410">https://arxiv.org/abs/2210.02410</a></li>
+<li>GitHub NOTES：<a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/NOTES.md">https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/NOTES.md</a></li>
+</ul>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

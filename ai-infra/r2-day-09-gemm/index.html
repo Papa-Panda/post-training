@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day09 GEMM Tiling</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+
+.sec-qa ol.qa-sub{list-style:decimal;padding-left:24px}
+.sec-qa ol.qa-sub>li{background:none;border:none;border-radius:0;padding:0 0 0 4px;
+  margin-bottom:8px;position:static}
+.sec-qa ol.qa-sub>li::before{content:none}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-infra · R2-Day09</span>
+    <h1>r2-Day09 GEMM Tiling</h1>
+    <p class="sub">tiled GEMM 的流量账：global loads 从 $2MNK$ 降到 $2MNK/T$，以及为什么理论加速推不出 cuBLAS 50%<br>完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">准确术语</a><a href="#sec-2">Connection to Prev 的实质</a><a href="#sec-3">三重循环与 shape</a><a href="#sec-4">可手算例子 1：数值正确性</a><a href="#sec-5">可手算例子 2： $4\times4,T=2$ 流量</a><a href="#sec-6">CUDA 代码每一步确实做了什么</a><a href="#sec-7">Edge tile 与计数边界</a><a href="#sec-8">为什么“tile 越大越好”是错的</a><a href="#sec-9">讨论难点</a><a href="#sec-10">真机验证协议（尚未执行）</a><a href="#sec-11">验证状态</a><a href="#sec-12">原始 / 官方来源</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
+<ul>
+<li><strong>GEMM (General Matrix Multiply)</strong>：通常指 $C\leftarrow\alpha\,op(A)op(B)+\beta C$ ；本课自写 kernel 固定为 row-major、 $\alpha=1,\beta=0$ 、不转置的 $C=AB$ 。</li>
+<li><strong>Tile / blocking</strong>：把 \$M,N,K\$ 三个循环按块组织，使一块输入在更近的 memory hierarchy 中被多次使用。</li>
+<li><strong>CTA / thread block tile</strong>：一个 CUDA block 协作计算的输出子矩阵；本课是 $16\times16$ 。</li>
+<li><strong>Register accumulator</strong>：每个 thread 的局部 <code>acc</code>；遍历所有 $K$ tiles 后才写 global $C$ 。</li>
+<li><strong>Arithmetic intensity</strong>：算法工作量 FLOPs 除以数据移动 bytes；必须注明在哪一级 memory 与如何计数。本课只给理想 FP32 global payload model，不冒充 DRAM counter。</li>
+<li><strong>Tensor Core / MMA</strong>：warp 或 warp-group 协作执行 matrix multiply-accumulate 的专用路径；本课 scalar FP32 kernel 没有使用它。</li>
+<li><strong>Epilogue</strong>：把 accumulator 转换/缩放并写回输出的阶段；生产 GEMM 常在这里融合 bias、activation 等操作。</li>
+</ul>
+</section><section class="sec" id="sec-2"><h2><span class="n">2</span>Connection to Prev 的实质</h2>
+<p>Day08 reduction 用“global → shared → registers”缩小汇合范围；Day09 GEMM 用同一层级扩大复用范围：</p>
+<ol>
+<li>naive kernel 的多个输出会反复读取同一个 $A_{iq}$ 或 $B_{qj}$ ；</li>
+<li>tiled kernel 让一个 block 协作加载 $A/B$ tiles；</li>
+<li><code>__syncthreads()</code> 保证 tile 完整后再消费，也保证下一轮覆盖 shared memory 前上一轮消费已结束；</li>
+<li>每个 thread 把自己的 $C_{ij}$ partial sum 留在 register 中跨越全部 $K$ tiles。</li>
+</ol>
+<p><strong>牺牲</strong>：2 个 block barriers/K-tile、shared memory、边界 zero-padding、布局/occupancy 调优复杂度。<strong>换取</strong>：整除模型下，global scalar loads 从 $2MNK$ 降到 $2MNK/T$ 。<strong>何时不赚</strong>：固定开销主导的小矩阵、极瘦矩阵、低复用/不规则访问、tile 资源压力压低 occupancy，或 cuBLAS/CUTLASS 已覆盖的标准算子。</p>
+</section><section class="sec" id="sec-3"><h2><span class="n">3</span>三重循环与 shape</h2>
+<p>数学定义：</p>
+<p>$$A[M,K]\times B[K,N]\rightarrow C[M,N]$$</p>
+<p>标量循环：</p>
+<pre><code class="language-text">for i in [0, M):
+  for j in [0, N):
+    acc = 0
+    for q in [0, K):
+      acc += A[i,q] * B[q,j]
+    C[i,j] = acc
+</code></pre>
+<ul>
+<li>输出元素：\$MN\$；</li>
+<li>每元素： $K$ 次乘法和 $K$ 次累加到 zero-initialized accumulator；</li>
+<li>conventional count： $2MNK$ FLOPs；</li>
+<li>数学上若把第一个 product 直接赋值，可写 \$MNK\$ multiplies 与 $MN(K-1)$ adds，但 GEMM 性能口径仍通常用 $2MNK$ 。</li>
+</ul>
+</section><section class="sec" id="sec-4"><h2><span class="n">4</span>可手算例子 1：数值正确性</h2>
+<p>$$A=\begin{bmatrix}1&amp;2\\3&amp;4\end{bmatrix},\quad B=\begin{bmatrix}5&amp;6\\7&amp;8\end{bmatrix}$$</p>
+<p>逐项：</p>
+<ul>
+<li>$C_{00}=1\cdot5+2\cdot7=19$</li>
+<li>$C_{01}=1\cdot6+2\cdot8=22$</li>
+<li>$C_{10}=3\cdot5+4\cdot7=43$</li>
+<li>$C_{11}=3\cdot6+4\cdot8=50$</li>
+</ul>
+<p><code>test_hand_computable_two_by_two</code> 对 naive、tile=1、tile=2 三条真实执行路径都断言此结果。</p>
+</section><section class="sec" id="sec-5"><h2><span class="n">5</span>可手算例子 2： $4\times4,T=2$ 流量</h2>
+<p>共有 $2\times2=4$ 个 output tiles，每个 output tile 遍历 $K/T=2$ 个 K-tiles。每阶段加载：</p>
+<p>$$A_{tile}:2^2=4,\quad B_{tile}:2^2=4$$</p>
+<p>因此 tiled 总 loads：</p>
+<p>$$4\ \text{output tiles}\times2\ \text{K stages}\times(4+4)=64$$</p>
+<p>而 naive 总 loads：</p>
+<p>$$MN\times2K=16\times8=128$$</p>
+<p>两者都做 64 multiply-adds，按惯例为 128 FLOPs，并写 16 个输出。计入 FP32 payload：</p>
+<p>$$I_{naive}=\frac{128}{4(128+16)}\approx0.222\ \text{FLOP/byte}$$</p>
+<p>$$I_{tiled}=\frac{128}{4(64+16)}=0.4\ \text{FLOP/byte}$$</p>
+<p>这不是硬件 DRAM bytes，因为 cache line、write policy、transactions、编译器与 L1/L2 命中都未建模。</p>
+</section><section class="sec" id="sec-6"><h2><span class="n">6</span>CUDA 代码每一步确实做了什么</h2>
+<h3><code>gemm_naive</code></h3>
+<ul>
+<li><code>row/col</code> 由真实 <code>blockIdx/threadIdx</code> 计算；</li>
+<li>inner loop 真实读取 <code>a[row*k+inner]</code> 与 <code>b[inner*n+col]</code>；</li>
+<li><code>acc</code> 被最终写入 <code>c[row*n+col]</code>，不会被 dead-code eliminate。</li>
+</ul>
+<h3><code>gemm_tiled</code></h3>
+<p>每个 $K$ -tile：</p>
+<ol>
+<li>每 thread 各加载一个 $A$ 与一个 $B$ scalar；越界位置写 0；</li>
+<li>第一个 <code>__syncthreads()</code> 后，任何 thread 才能读取其他线程发布的 tile 值；</li>
+<li>inner loop 使用 shared tiles 更新 register <code>acc</code>；</li>
+<li>第二个 <code>__syncthreads()</code> 防止下一阶段覆盖仍被其他 warp 消费的 tile；</li>
+<li>所有阶段完成后，in-bounds thread 把真实 accumulator 写回 $C$ 。</li>
+</ol>
+<h3>cuBLAS row-major 映射</h3>
+<p>cuBLAS 原生按 column-major 解释指针。row-major 存储中的 $A$ 可被看成 column-major 的 $A^T$ ，所以 harness 交换输入顺序并计算：</p>
+<p>$$C^T=B^TA^T$$</p>
+<p>具体调用的维度是 <code>(n, m, k)</code>，先传 <code>B</code>（leading dimension <code>n</code>），再传 <code>A</code>（leading dimension <code>k</code>），输出 leading dimension <code>n</code>。harness 显式设置并打印 <code>CUBLAS_DEFAULT_MATH</code>；cuBLAS 结果先保存为 reference，再用于检查两个自写 kernel。</p>
+</section><section class="sec" id="sec-7"><h2><span class="n">7</span>Edge tile 与计数边界</h2>
+<p>CUDA kernel 对 $M/N/K$ 非 16 整除时，把 out-of-bounds shared entries 置 0，因此数值语义正确；CPU model 只 materialize 有效子块。于是 CPU 的 <code>modeled_global_loads</code> 数的是<strong>有效 scalar payload</strong>，不是 CUDA warp 实际发出的 memory transactions。整除公式 $2MNK/T$ 只用于整除尺寸。</p>
+</section><section class="sec" id="sec-8"><h2><span class="n">8</span>为什么“tile 越大越好”是错的</h2>
+<ul>
+<li>shared footprint 按 $2T^2$ 增长，可能减少每 SM resident blocks；</li>
+<li>本课一 thread/输出的设计需要 $T^2$ threads，受 1024 threads/block 限制；</li>
+<li>register pressure、bank conflict、coalescing 与 instruction issue 会改变瓶颈；</li>
+<li>生产 kernel 用 thread tile/warp tile，让每 thread 算多个输出，并通过 MMA/Tensor Cores 提升 instruction-level throughput；</li>
+<li>async copy/double buffering 可覆盖 global→shared latency，但又增加 stage storage。</li>
+</ul>
+<p>所以 tile 是 hardware/workload-specific 参数，应由正确性检查与 profiler 共同选择。</p>
+</section><section class="sec sec-qa" id="sec-9"><h2><span class="n">9</span>讨论难点</h2>
+<ol><li><p><strong>为什么把 theoretical global loads 降低 16 倍，仍不能推导 tiled kernel 达到 cuBLAS 50%，甚至不能保证比 naive 快？</strong></p><p>回答应覆盖：</p><ol class="qa-sub"><li>cache 可能已消除部分 naive 重读，payload model 不等于 DRAM transactions；</li><li>两次 barrier/K-tile、address arithmetic 与边界分支会增加开销；</li><li>tile 的 shared/register footprint 会改变 occupancy；</li><li>本课 scalar FP32 FMA 没用 Tensor Cores，cuBLAS 可能使用架构专用 MMA、pipelining 与 tuned epilogue；</li><li>尺寸与 layout 决定 coalescing、reuse 和 launch amortization；</li><li>只有同输入、同精度语义、warmup/repeats、CUDA events 与数值校验后的真机测量才可报告 ratio。</li></ol></li></ol>
+</section><section class="sec" id="sec-10"><h2><span class="n">10</span>真机验证协议（尚未执行）</h2>
+<ul>
+<li>记录 GPU 型号、SM、clock/power policy、driver、CUDA/cuBLAS 版本；</li>
+<li>固定 \$M,N,K\$、dtype/layout、tile、warmups=5、repeats=21；</li>
+<li>保存完整编译命令与原始 stdout；</li>
+<li>分别报告 median kernel ms 与按 $2MNK/t$ 计算的 TFLOP/s；</li>
+<li>报告相对 cuBLAS ratio，同时保存 <code>max_abs_error_vs_cublas</code>；</li>
+<li>用 Nsight Compute 核对 DRAM bytes、global-load efficiency、shared transactions/bank conflicts、barrier stalls、occupancy、Tensor Core utilization；</li>
+<li>不把 CPU theoretical payload 或旧机器数字复制成 H100 benchmark。</li>
+</ul>
+</section><section class="sec" id="sec-11"><h2><span class="n">11</span>验证状态</h2>
+<ul>
+<li>已执行 <code>py_compile</code>、8 个 CPU 单元测试和 CPU report。</li>
+<li>已核对 shape： $A[M,K]B[K,N]\to C[M,N]$ ；CUDA 与 CPU 都支持 rectangular/edge shapes。</li>
+<li>已核对单位：FP32 scalar 为 4 bytes；CUDA event 为 ms；TFLOP/s 公式分母使用 <code>ms * 1e9</code>；FLOPs、loads、stores 为无量纲计数。</li>
+<li><strong>execution not validated on CUDA/H100 / 待H100验证</strong>：无 <code>nvcc</code>/GPU/cuBLAS，CUDA 编译、性能、Nsight 与 ROADMAP 50% cuBLAS 目标均保持 blocked/todo。</li>
+</ul>
+</section><section class="sec" id="sec-12"><h2><span class="n">12</span>原始 / 官方来源</h2>
+<ol>
+<li>NVIDIA CUDA C++ Best Practices Guide — Shared Memory in Matrix Multiplication: <a href="https://docs.nvidia.com/cuda/archive/12.1.0/cuda-c-best-practices-guide/index.html">https://docs.nvidia.com/cuda/archive/12.1.0/cuda-c-best-practices-guide/index.html</a></li>
+<li>NVIDIA cuBLAS documentation — GEMM and <code>cublasSgemm</code>: <a href="https://docs.nvidia.com/cuda/archive/12.1.0/cublas/index.html">https://docs.nvidia.com/cuda/archive/12.1.0/cublas/index.html</a></li>
+<li>NVIDIA CUTLASS — Efficient GEMM in CUDA: <a href="https://docs.nvidia.com/cutlass/4.3.2/media/docs/cpp/efficient_gemm.html">https://docs.nvidia.com/cutlass/4.3.2/media/docs/cpp/efficient_gemm.html</a></li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-09-gemm/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

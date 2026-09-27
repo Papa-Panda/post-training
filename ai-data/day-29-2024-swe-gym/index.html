@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 29 — Training Software Engineering Agents and Verifiers with SWE-Gym</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 29</span>
+    <h1>Day 29 — Training Software Engineering Agents and Verifiers with SWE-Gym</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: Training Software Engineering Agents and Verifiers with SWE-Gym</li><li>Authors / Org: Jiayi Pan, Xingyao Wang, Graham Neubig, Navdeep Jaitly, Heng Ji, Alane Suhr, Yizhe Zhang / UC Berkeley, UIUC, CMU, Apple</li><li>Link / arXiv: https://arxiv.org/abs/2412.21139</li><li>Date read: 2026-08-29</li><div class="meta"><span class="tag">coding-data</span><span class="tag">rl-data</span><span class="tag">executable-environment</span><span class="tag">trajectory-data</span><span class="tag">unit-tests</span><span class="tag">curation</span><span class="tag">quality</span></div></ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>SWE-Gym 从 11 个开源 Python 仓库整理 2,438 个真实 issue 任务，为每题封装代码库、自然语言需求、可执行环境与单元测试，把静态 coding 样本升级为可验证的仓库级交互数据，并公开训练轨迹供 SFT / RL 数据构造使用。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul><li><strong>知识图谱位置</strong>：Day 27 OSS-Instruct（开源代码锚定合成 instruction）→ Day 16 Qwen2.5-Coder（parser / compiler / execution 过滤）→ <strong>Day 29 SWE-Gym（真实 issue + repo context + executable environment + unit tests + agent trajectories）</strong>；同时把 Day 28 ORZ 的“可验证题池”从数学最终答案扩展到仓库级代码修改。</li><li><strong>接上的线</strong>：它接 Day 27 的 coding synthetic 线，但把数据单位从“代码片段—合成问答”推进为“issue—完整仓库—交互轨迹—测试结果”；也接 Day 16 的 execution-filter 线，把执行从离线清洗门禁推进为每个任务自带的训练反馈。</li><li><strong>补的短板</strong>：此前数据大多是静态文本或单轮答案，缺少依赖可复现、跨文件修改、测试反馈与失败轨迹。SWE-Gym 补的是可运行的环境化数据，不是新的优化算法。</li><li><strong>替代 / 分叉 / 改进</strong>：它不替代 OSS-Instruct 的低成本规模化合成，而是分叉到更贵但真实性和可验证性更高的 repo-level 数据；与 Day 28 相比，verifier 从答案匹配升级为环境内单元测试，数据工程成本也显著上升。</li></ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>它是 coding data 从静态 SFT 样本走向 agentic RL data 的关键桥：真实 issue 提供任务分布，仓库快照提供上下文，隔离执行环境与单元测试提供低噪声 verifier，agent rollout 再产出可筛选的成功 / 失败轨迹。今天只关注任务如何采集、封装、去重、验证与形成轨迹池；训练算法一句带过。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol><li>2,438 个任务从 11 个 Python 仓库进入 SWE-Gym 前，issue / PR、仓库快照、依赖和测试分别经过了哪些过滤与可复现性门禁？</li><li>论文最终用于训练的 491 条轨迹如何从 rollout 池中选择：只留成功轨迹会不会损失失败诊断信号，又会引入多大的 agent scaffold 偏置？</li><li>对比 Day 27 OSS-Instruct 与 Day 16 Qwen2.5-Coder：SWE-Gym 的真实 repo + 单元测试到底补了哪些静态合成 / execution-filter 无法覆盖的数据维度，代价又是什么？</li></ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol><li><strong>Motivation</strong>: 静态 coding 数据缺少真实仓库上下文、依赖环境和可执行验证，无法直接支持仓库级软件工程 agent 的训练数据闭环。</li><li><strong>Data Pipeline</strong>: GitHub 真实 issue / 代码库 → 固定仓库状态与依赖 → 封装可执行 runtime → 配套 unit tests → agent rollout → 按测试结果形成可验证轨迹数据。</li><li><strong>Key Tricks</strong>: 待读论文后填写，重点记录任务采集规则、环境复现门禁、测试可靠性、轨迹筛选与污染控制。</li><li><strong>Results</strong>: 待读论文后核对数据规模、有效环境比例、轨迹数量与下游 resolve-rate 增益；算法细节不展开。</li></ol>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
+<ul><li>对 coding data 工作：把数据 schema 从 <code>{prompt, answer}</code> 扩展为 <code>{issue, repo_snapshot, environment, tests, trajectory, outcome}</code>，并显式记录编译、运行、测试与基础设施失败类型。</li><li>Infra 视角：关注环境构建成功率、冷启动成本、可复现率、测试 flakiness、sandbox 隔离、轨迹存储与 verifier 吞吐，而不是展开具体 RL 优化器。</li></ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<ul><li>如何做 train / eval 的仓库、时间与语义级去重，避免来自同一代码演化链的近重复 issue 造成 benchmark contamination？</li></ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<blockquote><p>We present SWE-Gym, the first environment for training real-world software engineering (SWE) agents.</p></blockquote>
+<blockquote><p>SWE-Gym contains 2,438 real-world Python task instances, each comprising a codebase with an executable runtime environment, unit tests, and a task specified in natural language.</p></blockquote>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-29-2024-swe-gym/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2412.21139">论文原文</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

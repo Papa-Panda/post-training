@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 13 — Reliability / SLO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-infra · Day 13</span>
+    <h1>Day 13 — Reliability / SLO</h1>
+    <p class="sub">三个 SLO：成功率 0.955&lt;0.98 FAIL（5 类失败）、排队 p95 0.385s PASS、功率抖动 0.146 PASS 但 Tj 90.5°C 节流 2.5% FAIL。</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">3个CPU真数（sim n=200 seed42 burst每40job）</a><a href="#sec-3">待H100 NCCL</a><a href="#sec-4">映射表（RL only）</a><a href="#sec-5">一句收敛</a><a href="#sec-6">代码</a></nav>
+  </details>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Date: 2026-08-13 (Infra Systems / Cluster Reliability SLO)</li>
+</ul>
+<blockquote><p>Connection to Prev: Day12 σ 0.045 + |cal-raw| 0.0539 → Day13 SLO1 success_rate≥0.98 5类失败桶；Day11 Tj_max 82.49°C throttle 0.83% → SLO3 power_jitter 0.15 + throttle 1%；Day08/09 p50 1.141s p95 3.249s gpu_idle 92.85% async省52% → SLO2 p95 1.2s scaled。</p></blockquote></section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>3个CPU真数（sim n=200 seed42 burst每40job）</h2>
+<h3>Single-rank</h3>
+<ul>
+<li>SLO1 success_rate 0.955 / fail_rate 0.045 fail分类 timeout 5 vcj_parse 3 tool_retry 1 阈值0.98 → FAIL</li>
+<li>SLO2 queue_p95 0.385100762541043s (scaled 1.2s≈真实120s) p50 0.12253046455235257s avg_depth 0.21 max 3 → PASS</li>
+<li>SLO3 power_mean 459.1598819386836W p_std 66.95247462665081W jitter_ratio 0.1458151664817957 tj_max 90.5218911856968°C tj_avg 73.44385070587003°C throttle_rate 0.025 (5/200) → FAIL (jitter PASS 0.146&lt;0.15 但 throttle 2.5%&gt;1%)</li>
+<li>Bonus: wall_sec 0.0008747s n=200</li>
+</ul>
+<h3>2-rank gloo</h3>
+<ul>
+<li>世界 2 rank0/1 同 seed42：
+  <ul>
+    <li>success_rate_avg 0.9549999833106995 (all_reduce SUM/2) gloo_ok True</li>
+    <li>queue_p95 0.3851s 同步</li>
+    <li>power_jitter 同步</li>
+  </ul></li>
+<li><strong>逻辑验证</strong>：gloo all_reduce SUM/2 ok，CPU 2进程 ok，待H100 NCCL + torch.cuda.max_memory_allocated + NVML Tj时序 + RAPL功率</li>
+</ul></section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>待H100 NCCL</h2>
+<ul>
+<li>真实vLLM rollout 500→5000 tok 长CoT失败率 12-18% 5类比例 vs sim 4.5% → 修正SLO1阈值0.98是否过严/过松</li>
+<li>真实eval排队 5-10s sandbox 真实P95 8-15min bench → 将scaled 1.2s映射到真实120s验证（100x缩放）</li>
+<li>显存：FSDP 7B/13B/70B G=2/4/8峰值 (P-b)/G+b + max_memory_allocated vs jitter关联 — 大模型常驻显存高时power burst更大</li>
+<li>Thermal：真实nvidia-smi Tj + nvml power + fan cubic fit Rhs(fan)=R0/(fan^0.8+0.15) + hyst 82/72°C节流窗口10min防抖</li>
+<li>SLO联动：throttle_rate&gt;1%时自动扩冷却窗口，同复用Paper1冷却10min抗抖；GRPO组内N=64 advantage过滤阈值联动SLO1超阈告警</li>
+<li>在线：GRPO每500 steps重算 SLO budget消耗，EWMA跟踪σ漂移，hysteresis防震荡，同Day12 Platt重拟合</li>
+</ul></section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>映射表（RL only）</h2>
+<table>
+<tr><th>概念</th><th>RL集群</th><th>本code</th></tr>
+<tr><td>作业成功</td><td>rollout 5类失败外总成功</td><td>0.955</td></tr>
+<tr><td>排队p95</td><td>eval异步阻塞感知</td><td>0.385s scaled → 38.5s? 真实120s</td></tr>
+<tr><td>功率抖动</td><td>vLLM burst 450→720W</td><td>459W mean σ67W jitter0.146</td></tr>
+<tr><td>热节流</td><td>Tj&gt;82°C降频 TPOT+30%</td><td>90.5°C max 2.5% rate</td></tr>
+<tr><td>GRPO budget</td><td>2% fail可控，&gt;5%稀释优势</td><td>4.5%本轮超budget</td></tr>
+</table></section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>一句收敛</h2>
+<blockquote><p>&ldquo;Day12 σ0.045 + |cal-raw|0.0539告诉你过滤啥，SLO告诉你何时算集群不可用——success 0.955&lt;0.98 FAIL 5类失败，queue p95 0.385s PASS async省52%，power jitter 0.146 PASS但 Tj 90.5°C throttle 2.5%FAIL，双阈值防抖复用Paper2 hyst 82/72°C。&rdquo;</p></blockquote></section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>代码</h2>
+<ul><li><code>slo_sim.py</code> CPU gloo ok，待H100补 max_memory_allocated + nvidia-smi + RAPL + 真vLLM失败率</li></ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-13-reliability-slo/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

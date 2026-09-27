@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 03 — Estimating Training Data Influence by Tracing Gradient Descent (TracIn) · ai-data 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 03</span>
+    <h1>Day 03 — Estimating Training Data Influence by Tracing Gradient Descent (TracIn)</h1>
+    <p class="sub">不用 Hessian，把训练过程上每个 checkpoint 的梯度点积加起来估计影响 —— TracIn，工程上把 Influence Functions 做到了大模型可用的版本，是现在 LLM 数据清洗最实用的基线。 · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句</a><a href="#sec-7">复现链接</a><a href="#sec-8">第二轮复习（2026-09-03）</a><a href="#sec-9">6. 今天的一道思考题</a><a href="#sec-10">原文链接</a><a href="#sec-11">数学补充：TracIn 与 Influence Functions 的统一推导</a><a href="#sec-12">问答补充（2026-09-04）</a></nav>
+  </details>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: Estimating Training Data Influence by Tracing Gradient Descent (TracIn)</li><li>Authors / Org: Garima Pruthi, Frederick Liu, Mukund Sundararajan, et al. / Google</li><li>Link / arXiv: <a href="https://arxiv.org/abs/2002.08484">https://arxiv.org/abs/2002.08484</a></li><li>PDF: <a href="https://proceedings.neurips.cc/paper/2020/file/e6385d39ec9394f2f3a354d9d2b88eec-Paper.pdf">https://proceedings.neurips.cc/paper/2020/file/e6385d39ec9394f2f3a354d9d2b88eec-Paper.pdf</a></li><li>Date read: 2026-08-05</li><li>Review date: 2026-09-03</li><div class="meta"><span class="tag">data-attribution</span><span class="tag">tracin</span><span class="tag">influence-functions</span><span class="tag">coding-data</span><span class="tag">data-cleaning</span><span class="tag">self-influence</span></div><li>Blog: <a href="https://research.google/blog/tracin-a-simple-method-to-estimate-training-data-influence/">https://research.google/blog/tracin-a-simple-method-to-estimate-training-data-influence/</a></li><li>Code: <a href="https://github.com/frederick0329/TracIn">https://github.com/frederick0329/TracIn</a></li></ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>不用 Hessian，把训练过程上每个 checkpoint 的梯度点积加起来估计影响 —— TracIn，工程上把 Influence Functions 做到了大模型可用的版本，是现在 LLM 数据清洗最实用的基线。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. Motivation</h3>
+<p>Influence Functions 要 $H^{-1}$ ，贵、不稳、非凸不成立。作者问：既然模型是 SGD 一步步走出来的，能不能直接看路上谁推了谁一把？理想的 influence 应该是整个轨迹上损失下降的累积。</p>
+<h3>2. Data Pipeline</h3>
+<ul><li>训练时存 $K$ 个 checkpoint $\theta_{t_1}... \theta_{t_K}$ ，学习率 $\eta_t$</li><li>对任一训练点 $z$ 和测试点 \$z'\$：</li></ul>
+<p>$$ TracIn(z,z') = \sum_{t} \eta_t \nabla L(z',\theta_t)^T \nabla L(z,\theta_t) $$</p>
+<ul><li>实际用 TracInCP：只用 checkpoint，忽略同一 checkpoint 内不同 step 的差异，batch 内近似</li><li>Self-influence： $z'=z$ 时，分数越高，模型越靠死记这条点才能记住它</li></ul>
+<h3>3. Key Tricks (3个最值得抄的)</h3>
+<ol><li><strong>不要Hessian，只要点积</strong>： $\eta \nabla_{test}\cdot\nabla_{train}$ 就是 influence。实现上就是两次 backward，算 cosine/dot，比 Influence Functions 快 10-100x</li><li><strong>Checkpoint 选择</strong>：论文用最后几个 + 均匀采样，3-5个就够。实践：早期 checkpoint 抓语法/去重噪声，后期 checkpoint 抓语义难例。对 code 建议：epoch 1,2,末尾 各1个，共3个起步</li><li><strong>Self-influence = 脏数据探测器</strong>：把训练集按 self-influence 排序，top 1% 拿去人工看，基本是 mislabeled / 爬到的孤岛代码 / 极长尾 API / 重复但标签矛盾的数据。Google 用这个清 10% 数据不掉点</li></ol>
+<h3>4. Results / 用途验证</h3>
+<ul><li>CIFAR/MNIST 上：和真 LOO 相关性 &gt;0.8，Influence Functions LiSSA 只有 0.6 且慢 10x</li><li>找 mislabeled：按 self-influence 排序，查 20% 数据就能找到 80% 错误标签，比 Influence Functions 快</li><li>工程上已用到 BERT/ResNet，checkpoint 存 3-10 个就行，内存可接受</li></ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>可迁移</h2>
+<ul><li><strong>对你现在 coding data 工作的 1-2 个直接可试的点：</strong><ol><li><strong>脏数据过滤器 (今晚就能跑)</strong>：用你 1B proxy 训 3 epoch，存 3 个 checkpoint，算所有训练 code 的 self-influence。Top 2% 导出，看是不是过时语言/错的API/从 StackOverflow 拷的带问号的代码。清掉再训 7B，看 HumanEval 有没有稳</li><li><strong>合成数据价值评估</strong>：合成的 code 不是全留。用 TracIn：对 LiveCodeBench 难例算 $TracIn(合成样本, 难例)$ ，平均为正才留。比“过得了单元测试就留”更贴近真实 eval</li><li><strong>冗余 prune</strong>：Helpful 的样本彼此梯度余弦相似度高，只留 1 个，呼应你 infra 省钱思维</li></ol></li><li><strong>Infra 视角：</strong><ul><li>不用二阶，天然 DDPer-friendly，checkpoint 存量 $K \times P$ ，可以只存 LoRA 分支梯度来把成本压到 1/100</li><li>可扩展到 RL data：RLHF 偏好数据哪条最有用，用 TracIn 对 reward model 难例打分</li></ul></li></ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>疑问 / 下一步</h2>
+<ul><li>3个 checkpoint 的采样策略对 code 任务是否最优？试早期密集 vs 均匀</li><li>TracInCP 有偏，TracIn 论文里 checkpoint 内用一阶近似，误差多大？看后续 2023 TracIn++ / D-TracIn</li><li>今晚实验：跑通 <code>tracin_demo.py</code> 20 行版，对你手头小 code 集算 self-influence 分布，是否长尾</li></ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>原文金句</h2>
+<blockquote><p>The influence of a training example can be estimated by tracing the loss reduction it contributes during training.</p></blockquote>
+<blockquote><p>Self-influence is a strong signal for mislabeled and outlier examples.</p></blockquote>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>复现链接</h2>
+<ul><li>Official TF: <a href="https://github.com/frederick0329/TracIn">https://github.com/frederick0329/TracIn</a></li><li>PyTorch toy: <code>tracin_demo.py</code> (本文件夹)</li><li>Blog: <a href="https://research.google/blog/tracin-a-simple-method-to-estimate-training-data-influence/">https://research.google/blog/tracin-a-simple-method-to-estimate-training-data-influence/</a></li></ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>第二轮复习（2026-09-03）</h2>
+<h3>1. 核心命题</h3>
+<p>这篇真正解决的 data 问题是：<strong>能否不做逐点删数重训、也不求 Hessian 逆，而直接从已经发生的训练轨迹中估计“某条训练数据在什么时候、朝哪个方向改变了某个目标样本的 loss”？</strong></p>
+<p>TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改写成“训练过程中，每次用到这条数据时，它给目标 loss 带来了多少局部变化”。因此它衡量的不是数据的静态质量，而是一个依赖 <strong>目标样本、模型状态和训练路径</strong> 的关系量。对目标 \$z'\$ 为正，表示该训练点在轨迹上总体与降低 \$z'\$ 的 loss 同向（proponent）；为负则表示总体抬高了 \$z'\$ 的 loss（opponent）。这使数据审计从只看规则、loss 或 embedding 相似度，推进到“这条数据实际上怎样推动了训练”。</p>
+<h3>2. 图谱位置</h3>
+<ul><li><strong>前驱 — Day 02 Influence Functions</strong>：Influence Functions 在终点 $\hat\theta$ 附近用 $-g_{z'}^\top H^{-1}g_z$ 近似 upweight / delete-one 的反事实，优点是问题定义清晰并有曲率校正，代价是依赖局部最优、Hessian 逆与 damping。TracIn 不回答同一个反事实；它沿实际优化路径累计贡献，不要求收敛，也不需要 $H^{-1}$ 。</li><li><strong>直接对比 Day 02</strong>：若训练集中有十个近重复样本，删除其中一个的局部反事实可能很小，因此 Influence Functions 会认为单个副本不重要；但每个副本都可能在 SGD 中多次提供同向更新，TracIn 会把这些实际推动记录下来。反过来，TracIn 的排名会随训练顺序、checkpoint 与 optimizer 改变，而 Influence Functions 在给定终点与 damping 下更接近“删掉这一点”的问题。</li><li><strong>后继 — Day 04 LESS</strong>：LESS 继承“目标梯度与候选梯度对齐”的骨架，但把目的从解释既有训练转为<strong>为目标任务主动选 SFT 数据</strong>，加入 warmup、LoRA 梯度、Adam-aware 更新与随机投影；它是 selection policy，不是忠实重放训练轨迹。</li><li><strong>互补 — Day 05 DataInf</strong>：DataInf 保留 Day 02 的曲率校正思路，用 LoRA 梯度和经验 Fisher 近似来降低求逆成本。TracIn 与 DataInf 不是简单的新旧替代：前者强调 path contribution，后者强调 endpoint counterfactual。</li></ul>
+<h3>3. 机制深挖</h3>
+<h4>3.1 从“真实损失变化”到梯度点积</h4>
+<p>理想定义只在训练点 $z$ 真正被用于第 $t$ 次更新时记账：</p>
+<p>$$\mathrm{TracIn}_{ideal}(z,z')=\sum_{t:z_t=z}\big[\ell(w_t,z')-\ell(w_{t+1},z')\big].$$</p>
+<p>它有一个重要守恒性质：对全部训练点求和，恰好等于目标样本从训练开始到结束的总 loss 降幅。若 SGD 更新为 $w_{t+1}=w_t-\eta_t\nabla\ell(w_t,z_t)$ ，对目标 loss 作一阶展开：</p>
+<p>$$\ell(w_t,z')-\ell(w_{t+1},z')\approx \eta_t\nabla\ell(w_t,z')^\top\nabla\ell(w_t,z_t).$$</p>
+<p>于是，两条梯度同向时是 proponent，反向时是 opponent；梯度点积同时混合了<strong>方向一致性</strong>与<strong>梯度幅值</strong>。这不是纯语义相似度：表面不同的样本也可能训练同一能力，表面相似的样本也可能因标签/答案冲突而梯度相反。</p>
+<h4>3.2 TracInCP 做了什么近似</h4>
+<p>逐 step 保存参数与样本访问记录不可行。TracInCP 只取 $K$ 个 checkpoint：</p>
+<p>$$\mathrm{TracInCP}(z,z')=\sum_{k=1}^{K}\eta_k\nabla\ell(w_{t_k},z')^\top\nabla\ell(w_{t_k},z).$$</p>
+<p>它把区间内样本真正被访问时的参数替换为 checkpoint 参数，并近似假设相邻 checkpoint 间每个样本访问一次、学习率恒定。论文也给出 counterfactual 解释：好像每条候选数据都在每个 checkpoint 被访问一次；因此甚至可以给未参加原训练的数据打分，但这时不能再说它“实际造成”了训练结果。</p>
+<p>checkpoint 不是越晚越好：早期 loss 剧烈波动，一阶近似可能差；收敛后梯度很小，信息也少。论文发现高 loss-decrease 区间比等间隔 checkpoint 更有信息，并且不同 checkpoint 暴露不同类别的错标。正确做法是覆盖稳定下降阶段，而不是机械取“前三个”或只取最终模型。</p>
+<h4>3.3 Self-influence 到底在测什么</h4>
+<p>令 $z'=z$ ：</p>
+<p>$$\mathrm{TracInCP}(z,z)=\sum_k\eta_k\|\nabla\ell(w_{t_k},z)\|_2^2\ge 0.$$</p>
+<p>所以 self-influence 没有 harmful sign；它主要是在累计样本沿训练路径的梯度能量。错标样本往往长期难拟合、梯度大，因此排名靠前；但罕见而正确的长尾、很长的 sequence、难题或 loss 归一化不当也会同样靠前。它是<strong>人工审计优先级</strong>，不是自动删除判决。</p>
+<h4>3.4 数据流水线与可扩展实现</h4>
+<ol><li>训练时保留稳定下降阶段的 checkpoints 与对应学习率；</li><li>在每个 checkpoint 对候选训练样本和目标样本计算相同 loss head 的 per-example gradient；</li><li>用点积累积 target-conditioned influence，用梯度平方和累积 self-influence；</li><li>可只取最后一层/选定层，也可用随机投影保存梯度 sketch；对多目标查询，把各 checkpoint sketch 拼接后放入近邻索引复用；</li><li>排名后进入人工、执行测试、provenance 与 slice coverage 复核，不能直接把 top self-influence 当垃圾删除。</li></ol>
+<p>论文中的证据边界很具体：CIFAR-10 人工把 10% 标签改成模型最高分的错误类后，TracIn 在检查前 20% 数据时找回超过 80% 错标，而对比方法低于 50%；MNIST 上逐 step 的一阶 loss-change 近似与真实 step loss change 的 Pearson 相关为 0.978。ImageNet 扩展实验只对 ResNet-50 的全连接层取梯度，用第 30/60/90 个 checkpoint 并投影到 1,472 维；它说明方法可扩展做案例分析，但不是全参数 LLM 级验证。</p>
+<h3>4. 边界与反例</h3>
+<ol><li><strong>路径依赖，不等于因果删点</strong>：换随机种子、数据顺序、学习率、optimizer 或 checkpoint，轨迹与排名都会变。高 TracIn 表示在这次路径上同向推动，不保证删除/添加后重训得到同等幅度的变化。</li><li><strong>TracInCP 破坏精确守恒</strong>：理想定义按真实 step 记账并可分解总 loss 降幅；checkpoint 版本把区间压成一个参数点，还假设每点每区间访问一次。重复采样、curriculum、动态混合权重或在线 RL 数据分布都会破坏该近似。</li><li><strong>Adam / momentum 不能直接套 SGD 点积</strong>：真实参数更新包含一阶矩、二阶矩、weight decay、裁剪与调度。若仍用 $\eta g_{target}^\top g_{train}$ ，解释的是原始梯度对齐，不是实际 optimizer update；Day 04 LESS 的 optimizer-aware 设计正是在补这个缺口。</li><li><strong>高 self-influence 会误伤“难但对”的数据</strong>：罕见 Rust unsafe bug、长上下文 repo repair、稀有 API migration 都可能因高 loss / 大梯度进入异常榜。若没有执行正确性、来源和语言覆盖约束，过滤会把长尾能力洗掉。</li><li><strong>长度与 loss-head 混杂</strong>：token-sum loss 让长答案梯度天然更大；token-mean 又可能掩盖关键错误 token。prompt、reasoning、final answer、tests 若混在一个 loss 中，正负贡献还会相互抵消。</li><li><strong>目标集可被污染或过窄</strong>：拿 HumanEval 当唯一 target，会偏向短函数生成并可能奖励近重复泄漏；“帮助 benchmark”不等于帮助真实 coding。目标必须去污染并按 generation、repair、test、语言长尾分 slice。</li><li><strong>论文没有证明</strong>：没有证明 TracInCP 是无偏的 delete-one estimator，没有验证全参数 Transformer/LLM、LoRA proxy→大模型迁移、生成式 token-level attribution，也没有证明按分数删数一定提升最终能力。DBPedia、住房与 ImageNet 部分被作者明确定位为应用展示，不是系统评测。</li></ol>
+<h3>5. 迁移到 coding / post-training data</h3>
+<p>做一个 <strong>50k coding SFT 候选池的“审计优先级”实验</strong>，先验证信号，不直接自动删数：</p>
+<ol><li><strong>先做硬门</strong>：沿 Day 01 做 license、secret/PII、exact/MinHash、benchmark contamination 与 sandbox execution；保留 repo、commit、language、task type 元数据。</li><li><strong>建立去污染目标集</strong>：从 code generation、repo bug repair、test generation、SQL/Rust 等长尾各取 50–100 条，分 slice 保留，不合并成单个平均目标。</li><li><strong>训练 proxy 并选 checkpoint</strong>：用与候选池同分布的 0.5B–1B 模型或 LoRA；从“warmup 后稳定下降、最大 loss-decrease、接近收敛前”取 4–8 个 checkpoint，避开初始震荡和完全收敛尾部。对 LoRA/LM head 梯度作固定 1,024–8,192 维随机投影。</li><li><strong>同时算两类分数</strong>： $S_{self}(z)=\sum_k\eta_k\|Pg_z^k\|^2$ 找高梯度异常； $S_s(z)=\sum_k\eta_k\langle Pg_z^k,Pg_{target,s}^k\rangle$ 看对每个能力 slice 的正负影响。另存 gradient norm 与 cosine，避免“只是因为序列长”主导点积。</li><li><strong>只 quarantine，不硬删</strong>：优先人工/执行检查“高 self + 多个 slice 稳定负向”的交集，并把错答案、伪通过测试、过时 API、依赖不可复现、benchmark 泄漏、有效长尾分别标注。对 checkpoint / seed 排名不稳定的样本降置信度。</li><li><strong>固定 token budget 验证</strong>：比较随机、规则门、规则门+TracIn quarantine、Day 04 LESS targeted selection 四组；报告 clean pass@1、repo repair、test generation、长尾语言、污染命中率和单位 GPU-hour 收益。只有当删数收益跨 seed 超过置信区间且长尾 slice 不退化，才把 TracIn 从审计队列升级为自动 data gate。</li></ol>
+</section>
+<section class="sec sec-qa" id="sec-9"><h2><span class="n">9</span>6. 今天的一道思考题</h2>
+<p>综合 <strong>Day 02 Influence Functions、Day 03 TracIn、Day 04 LESS</strong>：候选池里一条执行正确的 Rust repo-repair 样本，Influence Functions 在最终 checkpoint 上判断它对 repo-repair target helpful；TracIn 显示它在训练中期强 positive、后期 negative；LESS 因与目标平均梯度 cosine 很高而把它选入 top 5%。与此同时，它的 self-influence 位于 top 0.5%。</p>
+<p>请设计一个决策协议，回答保留、降权、分阶段采样还是隔离，并说明：</p>
+<ul><li>如何用 checkpoint loss-decrease、gradient norm/cosine 分解与 Adam-aware update 区分“后期已学会后的过拟合”与真实负迁移；</li><li>如何用 Day 02 的局部删点反事实和小规模 leave-one-out 重训校准 Day 03 的路径归因；</li><li>如何给 LESS 加上 language / repo / task coverage 约束，防止目标平均梯度吞掉 Rust 长尾；</li><li>哪些跨 seed、跨 target slice、固定 token budget 的证据，才足以把该样本从默认保留改为删除。</li></ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文链接</h2>
+<ul><li>Paper: <a href="https://arxiv.org/abs/2002.08484">https://arxiv.org/abs/2002.08484</a></li><li>NeurIPS PDF: <a href="https://proceedings.neurips.cc/paper/2020/file/e6385d39ec9394f2f3a354d9d2b88eec-Paper.pdf">https://proceedings.neurips.cc/paper/2020/file/e6385d39ec9394f2f3a354d9d2b88eec-Paper.pdf</a></li><li>Official code: <a href="https://github.com/frederick0329/TracIn">https://github.com/frederick0329/TracIn</a></li><li>GitHub NOTES: <a href="https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-03-2020-tracin">https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-03-2020-tracin</a></li></ul>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>数学补充：TracIn 与 Influence Functions 的统一推导</h2>
+<p>先统一记号：</p>
+<p>$$g_z=\nabla_\theta L(z,\theta),\qquad g_*=\nabla_\theta L(z_{\mathrm{target}},\theta),$$</p>
+<p>其中 $z$ 是候选训练样本， $z_{\mathrm{target}}$ 是目标/验证样本。SGD 公式中的 $z_t$ 若出现，只表示第 $t$ 个训练 step 采到的数据，不能与 target 混用。</p>
+<h3>1. TracIn 来自一步 SGD 的 Taylor 展开</h3>
+<p>训练样本 $z$ 产生一步更新：</p>
+<p>$$\theta'=\theta-\eta g_z.$$</p>
+<p>目标 loss 在当前参数处一阶展开：</p>
+<p>$$L_*(\theta')\approx L_*(\theta)-\eta g_*^\top g_z.$$</p>
+<p>因此目标 loss 的下降量是：</p>
+<p>$$S_{\mathrm{TracIn}}(z,z_*)\approx\eta g_*^\top g_z.$$</p>
+<p>沿 checkpoints 累加得到：</p>
+<p>$$S_{\mathrm{TracInCP}}(z,z_*)=\sum_k\eta_k(g_*^k)^\top g_z^k.$$</p>
+<p>这回答的是：<strong>在实际训练路径的多个模型状态上，候选数据的即时更新与目标梯度是否同向。</strong></p>
+<h3>2. Influence 来自最优条件的隐式求导</h3>
+<p>把训练样本 $z$ 的权重增加 $\epsilon$ 并重新优化：</p>
+<p>$$\theta_\epsilon=\arg\min_\theta\left[L_{\mathrm{train}}(\theta)+\epsilon L(z,\theta)\right].$$</p>
+<p>因为新参数仍需满足最优条件：</p>
+<p>$$\frac{d\theta_\epsilon}{d\epsilon}\Big|_{\epsilon=0}=-H^{-1}g_z,$$</p>
+<p>从而：</p>
+<p>$$\frac{dL_*}{d\epsilon}=-g_*^\top H^{-1}g_z.$$</p>
+<p>若 helpful score 取目标 loss 的下降量，则：</p>
+<p>$$S_{\mathrm{IF}}(z,z_*)=g_*^\top H^{-1}g_z.$$</p>
+<p>所以两篇只差 $H^{-1}$ 的表象背后，是两个不同问题：TracIn 计算<strong>一次真实更新的即时作用</strong>；Influence 计算<strong>改变样本权重、让模型重新达到局部最优后的总作用</strong>。</p>
+<h3>3. 曲率如何改变排名</h3>
+<p>若 Hessian 分解为：</p>
+<p>$$H=Q\,\mathrm{diag}(\lambda_i)Q^\top,$$</p>
+<p>并把 $g_*,g_z$ 在第 $i$ 个特征方向上的分量记为 $a_i,b_i$ ，则：</p>
+<p>$$S_{\mathrm{TracIn}}\propto\sum_i a_i b_i,$$</p>
+<p>$$S_{\mathrm{IF}}=\sum_i\frac{a_i b_i}{\lambda_i}.$$</p>
+<p>TracIn 对各方向使用普通点积；Influence 会放大低曲率的平坦方向，并压低高曲率方向。因此某条数据可能与目标梯度高度同向而获得高 TracIn，但若该方向曲率很高、很容易被其他数据拉回，它的 endpoint Influence 仍可能较小。</p>
+<h3>4. $H^{-1}$ 可以看成未来优化传播的总和</h3>
+<p>在局部二次损失和稳定的小步长 GD 下：</p>
+<p>$$H^{-1}\approx\eta\sum_{j=0}^{\infty}(I-\eta H)^j.$$</p>
+<p>右边表示一次参数扰动在后续优化中不断传播、衰减后的累计效果。因此 Influence 可看成局部动力学走到新平衡点后的总响应；TracIn 则在真实训练轨迹上对即时作用取样记账。真实 trajectory 会隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式且精确的 $H^{-1}$ 。</p>
+<p>若使用 Adam 或 momentum，更准确的一步 target loss 变化应写成：</p>
+<p>$$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z,$$</p>
+<p>其中 $\Delta\theta_z$ 包含一阶矩、二阶矩、裁剪、weight decay 与学习率调度。直接使用 $\eta g_*^\top g_z$ 只是 SGD 近似，这正是 Day 04 LESS 引入 optimizer-aware update representation 的动机。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>问答补充（2026-09-04）</h2>
+<p>本节收录 2026-09-04 晚侧聊中关于 TracIn 的用户问答，不改动上方既有内容。</p>
+<h3>Q：TracIn 的数学怎么做</h3>
+<p>记号： $z=(x,y)$ 为训练样本， $z_{\text{target}}$ 为目标样本， $z_t$ 为第 $t$ 步实际采到的数据。</p>
+<p>TracIn 的问题：<strong>在真实的训练路径上，训练样本 $z$ 在哪一步、朝哪个方向改变了目标 loss？</strong>它不问"删掉它会怎样"（那是 Influence 的问题），也不问"文本有多像"（那是 BM25 的问题），而是问训练中<strong>实际发生过什么</strong>。</p>
+<p><strong>理想版本：loss 降幅的逐点分解</strong></p>
+<p>$$\mathrm{TracIn}_{\text{ideal}}(z,z_{\text{target}})=\sum_{t:\,z_t=z}\left[L(z_{\text{target}},\theta_t)-L(z_{\text{target}},\theta_{t+1})\right]$$</p>
+<p>这是一个完美守恒账本：对所有训练样本求和，恰好等于目标样本从训练开始到结束的<strong>总 loss 降幅</strong>。</p>
+<p><strong>关键一步：SGD 一阶展开把 loss 降幅写成梯度点积</strong></p>
+<p>$$\theta_{t+1}=\theta_t-\eta_t g(z_t,\theta_t)\quad\Longrightarrow\quad S_{\text{TracIn}}(z,z_{\text{target}})\approx\sum_{t:\,z_t=z}\eta_t\,g_{\text{target}}(\theta_t)^\top g(z_t,\theta_t)$$</p>
+<p>点积含义：同向 → 帮目标 loss 下降（proponent）；反向 → 让目标 loss 上升（opponent）。</p>
+<p><strong>现实版本：TracInCP 的两个近似</strong></p>
+<p>$$S_{\text{TracInCP}}(z,z_{\text{target}})=\sum_{k=1}^{K}\eta_k\,g_{\text{target}}(\theta_{t_k})^\top g(z,\theta_{t_k})$$</p>
+<p>近似 1：区间内样本真正被访问时的参数，用 checkpoint 参数替代；近似 2：假设每个区间每条数据被访问一次、学习率恒定。checkpoints 不是越晚越好：早期 loss 震荡大一阶近似差，完全收敛后梯度太小没信息；最好选在 <strong>loss 稳定快速下降的阶段</strong>。</p>
+<p><strong>Self-influence 的几何含义</strong>：令目标等于自己：</p>
+<p>$$S_{\text{TracInCP}}(z,z)=\sum_k\eta_k\|g(z,\theta_{t_k})\|_2^2\ge 0$$</p>
+<p>永远非负，本质是<strong>沿训练路径累计的梯度能量</strong>。错标数据常因长期难拟合而梯度大，排名靠前；但正确的长尾/长 sequence/难题也一样——它是<strong>人工审计优先级</strong>，不是自动删除的判决。</p>
+<p><strong>与 Influence 的数学关系</strong>（呼应本 NOTES"数学补充"第 3 节）：把 $g_*,g_z$ 在 Hessian 特征方向上的分量记为 $a_i,b_i$ 、曲率为 $\lambda_i$ ，则</p>
+<p>$$S_{\text{IF}}=\sum_i\frac{a_i b_i}{\lambda_i},\qquad S_{\text{TracIn}}\propto\sum_i a_i b_i$$</p>
+<p>TracIn 对所有方向做普通点积；Influence 用 $1/\lambda_i$ 做曲率校正。Influence 是<strong>一次扰动经未来优化传播后的总效果</strong>，TracIn 是<strong>真实训练路径上的即时记账</strong>（真实 trajectory 隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式精确的 $H^{-1}$ ）。</p>
+<p>一句话：<strong>TracIn 是 loss 降幅的训练路径分解；Influence 是删点权重变化的重新优化响应。</strong></p>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-03-2020-tracin/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

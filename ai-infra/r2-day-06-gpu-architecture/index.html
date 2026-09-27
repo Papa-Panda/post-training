@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day06 GPU 架构与 HBM Memory Wall</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-infra · R2-Day06</span>
+    <h1>NOTES — r2-Day06 GPU 架构与 HBM Memory Wall</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成 · GPU 架构与 HBM memory wall：准确术语、Roofline 模型、vector add 手算证明它为何喂不饱 H100 算力、A100/H100/H200 核对表，所有数字均为理论估计、待 H100 验证。</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">准确术语</a><a href="#sec-2">可手算小例子：为什么 vector add 喂不饱 H100 算力</a><a href="#sec-3">1. FLOPs</a><a href="#sec-4">2. HBM 流量</a><a href="#sec-5">3. Arithmetic intensity</a><a href="#sec-6">4. H100 SXM FP32 ridge point</a><a href="#sec-7">5. 理论带宽上界与时间下限</a><a href="#sec-8">可手算小例子：tile 是否放得进 shared memory</a><a href="#sec-9">A100 / H100 / H200：只比较已核对字段</a><a href="#sec-10">今日一句话</a><a href="#sec-11">讨论难点</a><a href="#sec-12">验证状态</a><a href="#sec-13">原始 / 官方来源</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
+<ul>
+<li><strong>SM (Streaming Multiprocessor)</strong>：warp 调度与执行的基本硬件单元。</li>
+<li><strong>CUDA Core</strong>：执行通用标量/向量算术的执行通路；本课 FP32 vector add 用它建立 roofline 直觉。</li>
+<li><strong>Tensor Core</strong>：面向矩阵乘加的专用执行单元；高峰值算力会把某些算子的 ridge point 推得更高，因此喂饱 Tensor Core 更依赖数据复用。</li>
+<li><strong>HBM bandwidth</strong>：GPU device memory 的理论峰值带宽。H100 SXM 官方值 3.35 TB/s；不能和 H100 NVL、A100 PCIe/SXM 混写。</li>
+<li><strong>Arithmetic intensity</strong>：每从 HBM 搬 1 byte 做多少 FLOPs，单位 FLOP/byte。</li>
+<li><strong>Memory-bound / compute-bound</strong>：Roofline 模型中分别先撞 $B_{HBM}I$ 或 $P_{peak}$ 上界；是模型判断，不是 profiler 结论。</li>
+<li><strong>Shared-memory capacity</strong>：H100 为 228 KB/SM，但单 block 最大为 227 KB；两者不是同一个限制。</li>
+</ul>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>可手算小例子：为什么 vector add 喂不饱 H100 算力</h2>
+<p>设 $N=2^{20}=1{,}048{,}576$ ，计算 FP32 <code>C[i] = A[i] + B[i]</code>。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>1. FLOPs</h2>
+<p>每个元素 1 次加法：</p>
+$$\text{FLOPs}=N=1{,}048{,}576$$
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>2. HBM 流量</h2>
+<p>理想化地假设每个元素只读/写一次，FP32 每元素 4 bytes：</p>
+<ul>
+<li>读 A： $4N$ bytes</li>
+<li>读 B： $4N$ bytes</li>
+<li>写 C： $4N$ bytes</li>
+</ul>
+<p>所以：</p>
+$$\text{bytes}=12N=12{,}582{,}912\ \text{bytes}=12\ \text{MiB}$$
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>3. Arithmetic intensity</h2>
+$$I=\frac{N}{12N}=\frac{1}{12}\approx0.0833\ \text{FLOP/byte}$$
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>4. H100 SXM FP32 ridge point</h2>
+<p>使用官方理论峰值 FP32 67 TFLOP/s 与 HBM 3.35 TB/s；两者都按十进制前缀：</p>
+$$I^*=\frac{67}{3.35}=20\ \text{FLOP/byte}$$
+<p>因为 $0.0833\ll20$ ，这个算子在理想 Roofline 下是 memory-bound。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>5. 理论带宽上界与时间下限</h2>
+$$P_{BW}=3.35\times\frac{1}{12}=0.2792\ \text{TFLOP/s}$$
+$$t_{min}=\frac{12{,}582{,}912}{3.35\times10^{12}}=3.756\ \mu s$$
+<p>这只是<strong>理论估计</strong>。它未计入 kernel launch、cache、transaction granularity、ECC/协议、时钟、竞争与访存合并等影响，不是 benchmark。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可手算小例子：tile 是否放得进 shared memory</h2>
+<p>为了 GEMM 复用，假设一个 block 同时缓存 A、B 两个 $128\times128$ BF16 tile：</p>
+$$2\ \text{tiles}\times128\times128\times2\ \text{bytes}=65{,}536\ \text{bytes}=64\ \text{KiB}$$
+<p>64 KiB 小于 H100 的 227 KiB/block opt-in 上限，容量上可放下。若改成 $256\times256$ ：</p>
+$$2\times256\times256\times2=262{,}144\ \text{bytes}=256\ \text{KiB}$$
+<p>超过 227 KiB/block，单 block 放不下。即使容量上能放下，也不代表性能最好：还要考虑 register 用量、活跃 blocks/SM、bank conflict 与同步。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>A100 / H100 / H200：只比较已核对字段</h2>
+<table>
+<tr><th>产品</th><th>显存</th><th>理论 HBM 带宽</th></tr>
+<tr><td>A100 80GB PCIe</td><td>80 GB HBM2e</td><td>1,935 GB/s</td></tr>
+<tr><td>A100 80GB SXM</td><td>80 GB HBM2e</td><td>2,039 GB/s</td></tr>
+<tr><td>H100 SXM</td><td>80 GB</td><td>3.35 TB/s</td></tr>
+<tr><td>H200</td><td>141 GB HBM3e</td><td>4.8 TB/s</td></tr>
+</table>
+<p>结论不是“H200 一定比 H100 快 1.43 倍”，而是 memory-bound 且能有效利用带宽的部分有更高上限；compute-bound、launch-bound、同步受限或访问不规则的 workload 不会自动按带宽比例加速。</p>
+</section>
+<section class="sec sec-lede" id="sec-10"><h2><span class="n">10</span>今日一句话</h2>
+<p><strong>GPU 优化首先不是“多算”，而是判断数据从哪一级来：若每 byte 做的 FLOPs 太少，算力再高也会等 HBM。</strong></p>
+</section>
+<section class="sec sec-qa" id="sec-11"><h2><span class="n">11</span>讨论难点</h2>
+<ol>
+<li>同一个 GEMM 为什么既可能 compute-bound，也可能 memory-bound？请从矩阵尺寸、batch、tile 复用、dtype、Tensor Core 路径和 occupancy 说明：提高 arithmetic intensity 能移动 $B\cdot I$ 上界，但 tile 变大同时可能因 shared memory/register 压力降低 occupancy，所以“减少 HBM 流量”不自动等于“更快”。</li>
+</ol>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>验证状态</h2>
+<ul>
+<li><code>gpu_memory_wall.py</code> 与 6 个 CPU 单元测试已执行。</li>
+<li>所有数字输出均标为 theoretical estimate。</li>
+<li><strong>execution not validated on H100 / 待H100验证</strong>：CUDA kernel、Nsight、有效带宽、cache hit rate、occupancy、Tensor Core 吞吐均未验证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>原始 / 官方来源</h2>
+<ol>
+<li>NVIDIA H100 product specifications: <a href="https://www.nvidia.com/en-us/data-center/h100/?trk=article-ssr-frontend-pulse_little-text-block">https://www.nvidia.com/en-us/data-center/h100/?trk=article-ssr-frontend-pulse_little-text-block</a></li>
+<li>NVIDIA Hopper Tuning Guide: <a href="https://docs.nvidia.com/cuda/archive/12.2.2/hopper-tuning-guide/index.html">https://docs.nvidia.com/cuda/archive/12.2.2/hopper-tuning-guide/index.html</a></li>
+<li>NVIDIA A100 product specifications: <a href="https://www.nvidia.com/en-us/data-center/a100/?xd_co_f=3f62097c-89dd-4617-b76f-814ed24253f2">https://www.nvidia.com/en-us/data-center/a100/?xd_co_f=3f62097c-89dd-4617-b76f-814ed24253f2</a></li>
+<li>NVIDIA H200 technical post: <a href="https://developer.nvidia.com/blog/nvidia-h200-tensor-core-gpus-and-nvidia-tensorrt-llm-set-mlperf-llm-inference-records/">https://developer.nvidia.com/blog/nvidia-h200-tensor-core-gpus-and-nvidia-tensorrt-llm-set-mlperf-llm-inference-records/</a></li>
+<li>CUDA C++ Best Practices Guide: <a href="https://docs.nvidia.com/cuda/archive/12.1.0/cuda-c-best-practices-guide/index.html">https://docs.nvidia.com/cuda/archive/12.1.0/cuda-c-best-practices-guide/index.html</a></li>
+<li>NVIDIA H100 architecture whitepaper: <a href="https://nvdam.widen.net/content/tdwwiwotwr/original/gtc22-whitepaper-hopper.pdf">https://nvdam.widen.net/content/tdwwiwotwr/original/gtc22-whitepaper-hopper.pdf</a></li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-06-gpu-architecture/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

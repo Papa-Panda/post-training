@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 28 — Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 28</span>
+    <h1>Day 28 — Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">版本说明：v1 与 v2</a><a href="#sec-4">和之前工作的关系</a><a href="#sec-5">数据与难度处理</a><a href="#sec-6">为什么它对长程 RL 重要</a><a href="#sec-7">关键实验结果</a><a href="#sec-8">可迁移到 coding data</a><a href="#sec-9">局限</a><a href="#sec-10">原文关键句</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model</li><li>Authors: Jingcheng Hu, Yinmin Zhang, Qi Han, Daxin Jiang, Xiangyu Zhang, Heung-Yeung Shum</li><li>Link / arXiv: https://arxiv.org/abs/2503.24290</li><li>Related: ProRL — https://arxiv.org/abs/2505.24864</li><li>Date read: 2026-08-28</li><div class="meta"><span class="tag">rl-data</span><span class="tag">reasoning-data</span><span class="tag">verifiable-data</span><span class="tag">pass-rate</span><span class="tag">hard-example-mining</span><span class="tag">prolonged-rl</span></div></ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Open-Reasoner-Zero 用可验证题目、基于模型通过率的两端过滤，以及 v1 中“129k 全量 RL → 13k 困难尾部继续 RL”的 hard-example mining 支撑约 1,200 步长程强化学习；它是后来 ProRL 系统化“prolonged RL”路线的重要先行证据。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>版本说明：v1 与 v2</h2>
+<ul><li><strong>v1（2025-03）</strong>：初始数据约 129k；32B 模型先在全量数据上训练 1,100 步，再把 64 次作答中答对少于 4 次的题定义为困难题，得到约 13k，继续训练 100 步。</li><li><strong>v2（2025-07，当前 arXiv 版本）</strong>：报告的主要训练集为 ORZ 57k；保留“用 LLM 估计通过率并删除极端通过率样本”的描述，但不再完整保留 v1 的 129k → 13k 两阶段细节。</li><li>因此不能笼统写成“固定 easy / medium / hard 分桶 + 持续动态采样”。更准确的是：<strong>模型通过率过滤；v1 另有一次训练后困难样本挖掘。</strong></li></ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>和之前工作的关系</h2>
+<ul><li><strong>知识图谱位置</strong>：Day 26 UltraFeedback（偏好池）→ Day 13 DPO-Gap（困难偏好对）→ Day 11 LIMR（高价值 RL 题）→ <strong>Day 28 ORZ（可验证题池 + pass-rate filtering + hard mining）</strong> → Day 15 DeepSeek-R1（大规模可验证推理 RL）。</li><li><strong>连接 ProRL</strong>：ORZ 已经显示，大规模、多样、可验证数据能让 RL 从通常的几百步延长到约 1,200 步，并持续提升 reward、回答长度与 benchmark 表现。随后 ProRL 把这条路线明确命名并系统化到 2,000+ 步，加入动态采样、KL 控制与 reference-policy reset。可以把关系概括为：<strong>ORZ 提供先行证据，ProRL 提供完整的 prolonged-RL recipe。</strong></li><li><strong>连接 LIMR</strong>：LIMR 按学习轨迹与整体曲线的对齐度筛高价值题；ORZ 更直接地用可验证 rollout 的经验通过率刻画“对当前模型有多难”。</li><li><strong>连接 coding data</strong>：数学答案 verifier 对应 compiler / unit tests / sandbox；<code>pass rate</code> 可直接映射为测试通过率，构造当前模型相对难度。</li><li><strong>区别 UltraFeedback</strong>：UltraFeedback 依赖 AI 对开放回答做多维主观评价；ORZ 围绕“题目—最终答案—确定性 verifier”构造低噪声结果奖励数据。</li></ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>数据与难度处理</h2>
+<ol><li><strong>题源</strong>：AIME（截至 2023）、MATH、Numina-Math、Tulu3 MATH、OpenR1-Math-220k、AoPS，以及程序化合成的逻辑、多步推理和反事实题。</li><li><strong>可验证门禁</strong>：删除难以用规则可靠评分的题，例如证明题；v1 还明确排除了选择题。</li><li><strong>初始难度过滤</strong>：用 LLM 多次解题，以经验通过率</li></ol>
+<p>$$p_i=\frac{\text{correct rollouts}}{\text{total rollouts}}$$</p>
+<p>作为模型相对难度；删除通过率过高的题和通过率为 0 的题，避免太简单无学习信号，以及不可解、答案错误或完全超出能力边界的样本。</p>
+<ol><li><strong>v1 困难尾部挖掘</strong>：全量训练 1,100 步后，每题采样 64 次；若答对少于 4 次，即 \(p_i&lt;4/64=6.25\%\)，进入约 13k 的 hard set。</li><li><strong>应用方式</strong>：从第 1,100 步的同一模型检查点继续，用 hard set 再做 100 步 PPO。两阶段都是 RL，不是 SFT → RL。</li></ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>为什么它对长程 RL 重要</h2>
+<ul><li>短 RL 容易在简单题上迅速饱和；扩大题目数量和能力覆盖，可推迟 plateau。</li><li>只用最难题也不行：全 0 奖励没有正轨迹，且可能混入坏题或错误答案。</li><li>ORZ 的思路是先保留“可验证且可学习”的主体，再在模型变强后挖出它当时仍薄弱的困难尾部。</li><li>这解释了它为什么像 ProRL：两者都把<strong>足够大、足够多样、始终能产生有效奖励的数据供给</strong>视为延长 RL 的前提；只是 ProRL 后来增加了更完整的长期稳定机制。</li></ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>关键实验结果</h2>
+<ul><li>v2 中 ORZ 57k 相比 MATH train 7.5k，训练 reward 与回答长度继续增长，而小数据较早 plateau。</li><li>ORZ 在 Qwen2.5-{0.5B, 1.5B, 7B, 32B} 上均显示可扩展趋势。</li><li>相同 Qwen2.5-32B base 下，ORZ 在 AIME2024、MATH500 和 GPQA Diamond 上取得强结果，并报告只需 DeepSeek-R1-Zero pipeline 约十分之一的训练步数。</li></ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移到 coding data</h2>
+<ul><li>用 <code>passed_tests / total_tests</code> 代替数学题通过率，得到模型相对难度。</li><li>先删除始终全过的题，以及所有 rollout 都编译失败或被测试基础设施误杀的题；后者需先区分“真难”与“坏测试”。</li><li>全量 RL 后再重跑 rollout，挖出低但非纯噪声的通过率尾部做第二阶段训练。</li><li>将 compile error、runtime error、wrong answer、timeout 分开记录；同样的 0 分不应被视为同一种数据问题。</li></ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>局限</h2>
+<ul><li>v1 的 <code>&lt;4/64</code> 是一次 hard mining 阈值，不等于完整的持续动态课程。</li><li>难度是相对于生成这些 rollout 的模型与采样配置，不是题目的永久属性。</li><li>verifier 只能保证最终答案或测试结果可检查，不能保证中间推理真实、简洁或无投机。</li><li>v1 与 v2 数据规模和训练叙述不同，引用数字时必须注明版本。</li></ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文关键句</h2>
+<blockquote><p>We also employ LLM-based filtering to evaluate problem difficulty, removing samples with extreme pass rates to maintain a balanced dataset.</p></blockquote>
+<blockquote><p>We initially train the 32B model for 1100 steps with data sampled from the complete 129k-sample dataset. Subsequently, we pinpoint particularly difficult prompts, defined as those where the model achieves fewer than 4 correct answers out of a total of 64 attempts, resulting in approximately 13k challenging prompts.</p></blockquote>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-28-2025-deepscaler-openreasoner/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2503.24290">论文原文</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

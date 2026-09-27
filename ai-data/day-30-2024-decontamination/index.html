@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 30 — Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 30</span>
+    <h1>Day 30 — Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul><li>Title: Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models</li><li>Authors / Org: Martin Riddell, Ansong Ni, Arman Cohan / Yale University</li><li>Link / arXiv: https://arxiv.org/abs/2403.04811</li><li>Date read: 2026-08-30</li><div class="meta"><span class="tag">coding-data</span><span class="tag">decontamination</span><span class="tag">benchmark-leakage</span><span class="tag">semantic-dedup</span><span class="tag">data-quality</span><span class="tag">evaluation</span></div></ul>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这篇把 code benchmark 防污染从只查文本重合升级为 surface-level 与 semantic-level 双重匹配，在 The Stack / The Pile 中定位 HumanEval、MBPP 的近重复解法，并验证污染子集会显著抬高代码生成成绩。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<ul><li><strong>知识图谱位置</strong>：这是 30 天 data 主线的质量门收口：Day 24 D4 / SemDeDup 处理训练语料内部的冗余，Day 27 OSS-Instruct 构造开源代码锚定的合成数据，Day 29 SWE-Gym 构造 repo-level 可执行任务，Day 30 则在这些数据进入训练前检查它们是否泄漏 benchmark。</li><li><strong>接了哪条线</strong>：接 Day 14 StarCoder2 与 Day 16 Qwen2.5-Coder 的代码清洗线，也承接 Day 29 留下的“如何做 train / eval 仓库、时间与语义级去重”问题。</li><li><strong>补了哪个短板</strong>：此前的 dedup / execution-filter 分别回答“是不是重复”和“能不能运行”，却不能保证训练样本没有换变量名、改格式或保留同一算法语义后泄漏测试集；本篇补上 surface + semantic 两层 contamination gate。</li><li><strong>替代 / 分叉 / 改进</strong>：它不替代 Day 24 的大规模语料去重，而是在评测边界上增加更严格的定向排除；通用语料去重优化训练分布，benchmark decontamination 保护评测可信度。</li><li><strong>直接对比 Day 27 / Day 29</strong>：Day 27、29 解决“如何造更真实、更可验证的 coding data”，本篇解决“这些数据是否已经包含评测题或语义近邻”；生成/采集之后必须再过防污染门，才能形成可信闭环。</li></ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<p>前 29 天已经串起 coding data 的合成、筛选、执行验证和 repo-level 轨迹，但没有可靠的 train–eval 隔离，所有提升都可能被 benchmark 泄漏夸大。今天用这篇把数据闭环收口：对 SFT / RL data，不仅要查 prompt 和答案的字面重合，还要查重命名、改写与算法结构近似；这里只讨论污染检测、数据排除和评测切分，不展开模型训练算法。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<ol><li>surface-level Levenshtein 与 semantic-level Dolos / AST k-gram 分别能抓住哪类 code overlap；阈值如何用人工核验校准，避免把常见模板误判成污染？</li><li>论文如何把 HumanEval / MBPP 与 The Stack / The Pile 做规模化匹配，并证明被判为污染的子集确实带来更高模型得分，而不只是题目更容易？</li><li>对比 Day 24 D4 和 Day 29 SWE-Gym：若要为 repo-level SFT / RL 数据建立防污染门，应该按文件、函数、issue、commit 时间和执行语义分别做哪些 split 与去重？</li></ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<ol><li><strong>Motivation</strong>: 代码 benchmark 可能进入预训练或微调语料；仅靠精确字符串匹配会漏掉变量重命名、格式变化和语义近似实现，导致评测分数被污染抬高。</li><li><strong>Data Pipeline</strong>: HumanEval / MBPP 测试题与参考解法 → 在 The Stack / The Pile 中检索候选 → surface-level 字符串相似度 + semantic-level code matching → 阈值判定与人工检查 → 比较污染 / 干净子集上的模型表现。</li><li><strong>Key Tricks</strong>: 同时保留 lexical 与 semantic 信号；对每个 benchmark 样本取最相似训练候选；把污染标签与模型表现、题目难度和长度联合分析，而不是只报 overlap 比例。</li><li><strong>Results</strong>: 论文报告常用 code benchmark 与开放训练语料存在大量重合；模型在训练语料中出现相似解法的子集上表现显著更好。待读后核对各语料、阈值与分组统计。</li></ol>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
+<ul><li>对 coding data 工作：在数据入库时保存 repo、path、commit timestamp 与 provenance；评测前依次跑 exact/hash、token/字符相似、AST/k-gram 或 embedding 检索，并隔离同 repo / fork / commit lineage。</li><li>Infra 视角：建立 versioned contamination registry，让每次新增 SFT / RL 轨迹都能重跑 train–eval overlap；把候选召回、语义复核、排除原因与 clean-set 指标做成可审计流水线。</li></ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<ul><li>对 SWE-Gym 这类 repo-level agent 任务，函数级语义相似仍可能漏掉 issue/patch 的共同演化链；怎样结合 commit graph 和时间切分，得到更保守且不过度删除的 clean split？</li></ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<blockquote><p>待读后补充。</p></blockquote>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-30-2024-decontamination/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载） · <a href="https://arxiv.org/abs/2403.04811">论文原文</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

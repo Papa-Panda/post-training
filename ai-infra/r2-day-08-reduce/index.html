@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day08 Parallel Reduce 三连</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+
+.sec-qa ol.qa-sub{list-style:decimal;padding-left:24px}
+.sec-qa ol.qa-sub>li{background:none;border:none;border-radius:0;padding:0 0 0 4px;
+  margin-bottom:8px;position:static}
+.sec-qa ol.qa-sub>li::before{content:none}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-infra · R2-Day08</span>
+    <h1>r2-Day08 Parallel Reduce 三连</h1>
+    <p class="sub">parallel reduce 三种实现的真实执行语义与结构计数：atomic、shared tree、warp shuffle —— 理论计数不等于性能结论，待 H100 真机验证<br>完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">准确术语</a><a href="#sec-2">Connection to Prev 的实质</a><a href="#sec-3">三个版本真实执行什么</a><a href="#sec-4">可手算例子 1：1…8 的 width=8 shuffle</a><a href="#sec-5">可手算例子 2：N=64, T=64</a><a href="#sec-6">为什么结果正确但最后几 bit 可能不同</a><a href="#sec-7">示例代码每一步的对应关系</a><a href="#sec-8">讨论难点</a><a href="#sec-9">真机验证协议（尚未执行）</a><a href="#sec-10">验证状态</a><a href="#sec-11">原始 / 官方来源</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
+<ul>
+<li><strong>Reduction / fold</strong>：用 associative binary operator 把一列输入组合成一个 aggregate。整数加法满足结合律；IEEE-754 浮点加法只近似满足，因此并行树改变顺序时结果末位可变。</li>
+<li><strong>Global atomic update</strong>：对 global-memory location 做不可分割 read-modify-write；正确性不等于无 contention。</li>
+<li><strong>Block-wide barrier</strong>：<code>__syncthreads()</code> 要求 block 中所有未退出线程到达，保证 barrier 前的 shared/global memory accesses 对 block 内线程可见。</li>
+<li><strong>Warp shuffle</strong>：<code>__shfl_down_sync</code> 让 participating lanes 直接读取另一 lane 的 register value；mask 描述参与线程，不能把 inactive source lane 当有效输入。</li>
+<li><strong>Partial reduction</strong>：每个 block/warp 先产生局部 aggregate，再由更高层归约。</li>
+<li><strong>Theoretical structure count</strong>：从源码可数出的 atomics/barriers/shared writes；不是硬件 counter，更不是 latency/throughput benchmark。</li>
+</ul>
+</section><section class="sec" id="sec-2"><h2><span class="n">2</span>Connection to Prev 的实质</h2>
+<p>Day07 的 coalescing 解决“32 个 lanes 如何读入”；Day08 的 reduction 解决“读入后在哪里汇合”。连续读取仍要保留，但新瓶颈可能移动到：</p>
+<ol>
+<li>同一个 global output 的 atomic contention；</li>
+<li>shared-memory tree 的每轮 barrier；</li>
+<li>寄存器与 shared memory 用量导致的 occupancy 变化；</li>
+<li>最后一块与 partial warp 的 mask/zero-padding 正确性。</li>
+</ol>
+<p>所以优化路线不是“shuffle 永远最快”，而是把同步范围逐层缩小：grid-wide hotspot → block-local tree → warp-local lane exchange。</p>
+</section><section class="sec" id="sec-3"><h2><span class="n">3</span>三个版本真实执行什么</h2>
+<h3>A. <code>reduce_atomic</code></h3>
+<p>每个有效 thread 执行：</p>
+<pre><code class="language-cuda">atomicAdd(output, input[index]);
+</code></pre>
+<ul>
+<li>输入读取： $N$ 个 FP32，即理论 payload $4N$ bytes；</li>
+<li>global atomics： $N$ ；</li>
+<li>shared memory / block barrier：0。</li>
+</ul>
+<p><code>4N bytes</code> 只是输入 payload；atomic 是 read-modify-write，其真实 memory traffic 不能只按额外 4 bytes 计算，需 profiler/硬件验证。</p>
+<h3>B. <code>reduce_shared_tree</code></h3>
+<p>每 block 的 $T$ 个 threads 各写一个 shared value（越界写 0），然后做：</p>
+<p>$$T/2+T/4+\cdots+1=T-1$$</p>
+<p>次有效树加法。源码有一次 load 后 barrier，加上每层一次 barrier，共：</p>
+<p>$$1+\log_2 T$$</p>
+<p>个 block barriers；最后每 block 一个 global atomic。若 $B=\lceil N/T\rceil$ ：</p>
+<p>$$A_{global}=B$$</p>
+<h3>C. <code>reduce_warp_shuffle</code></h3>
+<ol>
+<li>每 warp 用 offsets \$16,8,4,2,1\$ 归约；</li>
+<li>每 warp 仅 lane 0 写一个 shared partial；</li>
+<li>全 block <code>__syncthreads()</code> 一次；</li>
+<li>第一个 warp 对这些 partials（其余 lanes 补 0）再做一次 warp reduction；</li>
+<li>lane 0 做每 block 一次 global atomic。</li>
+</ol>
+<p>若 $T$ 是 32 的倍数，shared writes/block 为 $T/32$ ，global atomics 仍为 $B$ ，block barriers 为 $B$ （每 block 一次）。</p>
+</section><section class="sec" id="sec-4"><h2><span class="n">4</span>可手算例子 1：1…8 的 width=8 shuffle</h2>
+<p>CUDA shuffle 的 <code>width</code> 可取不超过 32 的 2 的幂。初始 lanes：</p>
+<p>$$[1,2,3,4,5,6,7,8]$$</p>
+<p>只跟踪最终有用的 lane 0 路径：</p>
+<ul>
+<li>offset 4：lane 0 得 $1+5=6$ ；lane 2 得 $3+7=10$ ；</li>
+<li>offset 2：lane 0 得 $6+10=16$ ；lane 1 的对应 subtree 得 $8+12=20$ ；</li>
+<li>offset 1：lane 0 得 $16+20=36$ 。</li>
+</ul>
+<p><code>reduce_models.py</code> 的 32-lane版本把缺失的 24 lanes 补 0，实际执行 offsets \$16,8,4,2,1\$，测试结果同样为 36。</p>
+</section><section class="sec" id="sec-5"><h2><span class="n">5</span>可手算例子 2：N=64, T=64</h2>
+<h3>每元素 atomic</h3>
+<p>$$A_{global}=64$$</p>
+<h3>Shared tree</h3>
+<p>一 block；有效加法数：</p>
+<p>$$32+16+8+4+2+1=63$$</p>
+<p>结构计数：1 个 global atomic、64 个初始 shared writes、 $1+6=7$ 个 block barriers。</p>
+<h3>Warp shuffle</h3>
+<p>两个 warps 各自得到一个 partial；所以是 2 个 shared writes、1 个 block barrier、1 个 global atomic。两个 warp 的内部归约和第一个 warp 的 block 收尾分别执行 5 条 warp-level shuffle instructions，合计 15 条 warp-level instructions。这里“15”不是所有 lanes 的动态 scalar instruction 数。</p>
+</section><section class="sec" id="sec-6"><h2><span class="n">6</span>为什么结果正确但最后几 bit 可能不同</h2>
+<p>对实数加法， $(a+b)+c=a+(b+c)$ ；但浮点 rounding 使它一般不严格成立。例如：</p>
+<p>$$a=10^{20},\quad b=-10^{20},\quad c=3.14$$</p>
+<p>不同归约顺序可先抵消大数，也可先把小数吸收掉。因此：</p>
+<ul>
+<li>benchmark harness 用全 1 输入， $N=2^{22}$ ，FP32 可精确表示最终整数；</li>
+<li>真实训练张量需要按 dtype、规模和误差目标设置 tolerance；</li>
+<li>需要 bitwise determinism 时，不能把 nondeterministic atomic order 当作可复现 reduction。</li>
+</ul>
+</section><section class="sec" id="sec-7"><h2><span class="n">7</span>示例代码每一步的对应关系</h2>
+<h3><code>reduce_models.py</code></h3>
+<ul>
+<li><code>atomic_reduce()</code> 逐元素累加到同一个 output，结果与 atomic count 都被报告使用；</li>
+<li><code>shared_tree_reduce()</code> 真正构造/补零每个 block tile，并在 <code>_shared_tree()</code> 中执行 stride-halving additions；</li>
+<li><code>warp_shuffle_reduce()</code> 真正对每个 32-lane warp 执行 lane-exchange tree，把 warp partials 送入第一个 warp，再累加 block result；</li>
+<li><code>build_report()</code> 调用并返回三种结果，测试断言三者都等于正确 sum。</li>
+</ul>
+<h3><code>reduce_three_ways.cu</code></h3>
+<ul>
+<li><code>block_size</code> 同时进入 grid 计算、kernel launch 与 dynamic shared-memory bytes；</li>
+<li>三种 kernel 的输出都被 copy 回 host 并与 expected 比较；</li>
+<li>每个计时 case 先 <code>cudaMemset(output, 0)</code>，否则重复运行会累加旧结果；</li>
+<li>warmup 后用 CUDA events 测 21 次 kernel-only latency，输出中位数；这段流程只有在 CUDA 环境真正运行后才构成 benchmark。</li>
+</ul>
+</section><section class="sec sec-qa" id="sec-8"><h2><span class="n">8</span>讨论难点</h2>
+<ol><li><p><strong>为什么 warp shuffle 结构更省同步，却不能在没跑 profiler 时断言一定比 shared tree 快？</strong></p><p>回答至少要覆盖：</p><ol class="qa-sub"><li>两者都可能已受输入读取带宽约束，省下 barrier 不一定成为端到端主导；</li><li>compiler 生成指令、register pressure、occupancy 与 block size 会改变结果；</li><li>很小的输入下 launch/固定开销占主导；</li><li>新架构的 atomic 实现和 contention pattern 不同；</li><li>partial tile、非 32 倍 block、非 sum operator 需要更谨慎的 mask/identity；</li><li>生产中优先考虑 CUB 等经验证 collective，再用 workload-specific evidence 判断是否手写。</li></ol></li></ol>
+</section><section class="sec" id="sec-9"><h2><span class="n">9</span>真机验证协议（尚未执行）</h2>
+<p>记录后再比较：</p>
+<ul>
+<li>GPU 型号、SM 数、clock/power policy、driver、CUDA toolkit；</li>
+<li><code>N</code>、dtype、block size、grid size、warmups、repeats；</li>
+<li>完整编译命令与原始 stdout；</li>
+<li>Nsight Compute 的 DRAM bytes/throughput、atomic 指标、barrier/stall、occupancy；</li>
+<li>每个 variant 的数值校验与 tolerance。</li>
+</ul>
+<p>不要把 theoretical payload $4N$ bytes 直接当 DRAM bytes，也不要把结构计数换算成虚构 speedup。</p>
+</section><section class="sec" id="sec-10"><h2><span class="n">10</span>验证状态</h2>
+<ul>
+<li>已执行 Python <code>py_compile</code>、7 个 CPU 单元测试和 CPU report。</li>
+<li>已核对 shape/index：输入是一维 <code>[N]</code>；每 thread 对应一个 index；最后 block 越界 lanes 用 additive identity 0。</li>
+<li>已核对单位：数组元素是 FP32（4 bytes）；CUDA event 输出单位是 ms；atomic/barrier/shared-write 是无量纲次数。</li>
+<li><strong>execution not validated on CUDA/H100 / 待H100验证</strong>：环境没有 <code>nvcc</code>/GPU，CUDA kernel、CUDA events 与 Nsight 均未运行；性能状态保持 <code>blocked</code>。</li>
+</ul>
+</section><section class="sec" id="sec-11"><h2><span class="n">11</span>原始 / 官方来源</h2>
+<ol>
+<li>NVIDIA CUDA C++ Programming Guide: <a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html">https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html</a></li>
+<li>NVIDIA CUDA C++ Best Practices Guide: <a href="https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html">https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html</a></li>
+<li>NVIDIA CUB <code>BlockReduce</code>: <a href="https://nvidia.github.io/cccl/unstable/cub/api/classcub_1_1BlockReduce.html">https://nvidia.github.io/cccl/unstable/cub/api/classcub_1_1BlockReduce.html</a></li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-08-reduce/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

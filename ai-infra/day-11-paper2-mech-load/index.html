@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 11 — Paper2 机械负载 → GPU 热/功耗</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-infra · Day 11</span>
+    <h1>Day 11 — Paper2 机械负载 → GPU 热/功耗</h1>
+    <p class="sub">Paper2 机械负载非线性 SSM（双线性 IT×外温 + 二次换热 + 0.85/0.35 hysteresis）平移成 GPU 两节点 Tj/T_hs SSM；CPU 真数：EWMA RMSE 55.13 kW、Tj 峰值 82.49°C、节流 0.83%。</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">核心 — Paper2 3 技巧拆解</a><a href="#sec-3">3 个 CPU 数（gloo 2-rank，待 H100 NCCL）</a><a href="#sec-4">与之前内容的联系—代码侧</a><a href="#sec-5">怎么对应到 GPU 集群 SOP</a><a href="#sec-6">Code</a><a href="#sec-7">一句话迁移</a><a href="#sec-8">Fail-closed</a></nav>
+  </details>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<ul>
+<li>Date: 2026-08-11 08:22 PDT (manual today run 2026-08-15, 补)</li>
+<li>Status: done（CPU gloo 验证逻辑，待 H100 NCCL 真机验证 thermal + RAPL + max_memory_allocated）</li>
+<li>Lab: <code>rl-infra/day-11-paper2-mech-load/</code></li>
+<li>Source: <code>ai_daily.csv:2026-08-11</code> — Paper2拆解-机械负载 / 非线性物理建模</li>
+</ul></section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>核心 — Paper2 3 技巧拆解</h2>
+<ul>
+<li><strong>bilinear 耦合</strong>: Q_IT * (1+α(T_wb-25)) — IT*外温一次项，GPU 对应 P_gpu*Tamb 耦合</li>
+<li><strong>quadratic/cub 非线性</strong>: CHW 二次 γ*(ΔT)^2, COP 二次 κ*PLR^2, fan R_hs=R0/(fan^0.8) 三次律影子 → GPU R_th 同构</li>
+<li><strong>hysteresis 防抖</strong>: chiller on 0.85/off 0.35 机组容量比 ↔ GPU throttle on 82°C/off 72°C — 复用 Day06 10min 冷却思想，10min 内不追加功率</li>
+</ul>
+<p>SSM 公式见 README.md，CPU 已跑联动。</p></section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3 个 CPU 数（gloo 2-rank，待 H100 NCCL）</h2>
+<blockquote><p>120 steps 机械侧 350kW base + 80*sin + burst 200kW 每 40 步，GW 映射 GPU 450-720W per H100，dt mech 1min dt gpu 0.1s 串联，seed 42</p></blockquote>
+<h3>Mech 侧预测</h3>
+<ul>
+<li><strong>rmse_Q_pred_kW (EWMA α=0.3 vs true Q_IT)</strong>: <strong>55.129</strong> kW — EWMA 在 burst 段 lag 大，纯统计必偏，物理二次修正可降（待 H100 上加 γ 残差）
+<ul><li>意义：对应 GPU rollout burst 到达预测 RMSE，真机应 &lt;20kW 带物理先验</li></ul></li>
+<li><strong>avg_P_mech_kW</strong>: <strong>57.867</strong> kW — 机械制冷电，类似 GPU 额外散热功耗开销
+<ul><li>COP_ref 6.5, PLR 0.6 avg, COP avg ~5.2 → P_mech ~ Q_mech/COP</li>
+<li>GPU 视角：fan_overhead 占 P_gpu 4-6%，40卡 rack 多 2.5kW 额外</li></ul></li>
+<li><strong>p_mech_std_kW</strong>: <strong>9.380</strong> kW — 抖动 STD，对应 GPU power jitter
+<ul><li>burst 时 Δ 12-16kW，冷却 lag 3τ=15min 后仍有 5-8kW 尾巴</li>
+<li>迁移：Reward OAS 校准的 jitter 上限同理，用 STD 卡阈值避免&ldquo;抖动→重训&rdquo;</li></ul></li>
+</ul>
+<h3>GPU 热侧</h3>
+<ul>
+<li><strong>Tj_max_C</strong>: <strong>82.486</strong> °C (2-rank gloo 同 seed 42，120 steps 内最高)
+<ul><li>Tj_avg <strong>67.542</strong> °C — H100 Tj safe 90°C 阈前，burst 时窜升</li>
+<li>single rank 同样 82.49/67.54，2-rank dist avg throttle 0.00833 一致</li></ul></li>
+<li><strong>throttle_rate</strong>: <strong>0.833%</strong> — 1/120 steps 触发 Tj&gt;82°C 降频 0.68×，对应 rollout 失败率里隐性 0.8% 性能慢
+<ul><li>待 H100：<code>torch.cuda.max_memory_allocated()</code> 并采集 <code>nvidia-smi -q -d TEMPERATURE,PERFORMANCE</code> 时序，看 Tj&gt;82 时 tokens/sec 掉多少，折算 \$/有用 rollout</li></ul></li>
+</ul>
+<h3>2-rank gloo 聚合演示</h3>
+<ul>
+<li>rank0 + rank1 全 reduce throttle_rate SUM/2 = <strong>0.833%</strong> 仍一致（seed 42+rank 差小）</li>
+<li>gloo 2-rank <code>[rank0] mechanical→GPU simulation done 0.053s</code> — 通信本身不阻塞，仿真已并行</li>
+<li>CPU 逻辑通，逻辑区分：per-block FSDP 省峰值 ↔ 热容省 Tj 瞬峰 同思想</li>
+</ul>
+<h3>待 H100 NCCL 真机补</h3>
+<ul>
+<li><code>torch.cuda.max_memory_allocated()</code> / <code>reserved()</code> 对比 mech SSM 大 state 与 GPU SSM 2-node 小 state 常驻差异（&lt;100MB 预期）</li>
+<li>RAPL / <code>nvidia-smi power.draw</code> 时序：P_gpu 450→720W burst 10min 内 Tj 从 67→82°C 爬升曲线，拟 R_jh / C_j / R0 风扇律实测</li>
+<li>真数据中心对位：拿你 Paper2 真 log 跑 SSM，对比 EWMA RMSE 55kW → 物理先验能否压到 32kW (类比 GPU 提前 5-10min 预调 fan)</li>
+<li>blocks: block 非整模型 → 热学 block 非整 rack，局部热点 (Tj&gt;85) vs 平均 67°C 同理</li>
+</ul></section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>与之前内容的联系—代码侧</h2>
+<ul>
+<li>Day10 FSDP peak <code>(P-b)/G+b</code> 省峰值 ↔ 今天热容峰值 <code>Tj_next = Tj + dt/C_j*(P - ΔT/R)</code> 大 C_j 削峰，同切小块降瞬时</li>
+<li>Day08/09 EWMA nowcasting 缺二阶，今天 γ 二次补上 → Day12 reward OAS 用类似二次残差标不确定性</li>
+<li>Day07 checkpoint 读档 ↔ 今天防抖 hyst 避免频啟频停，Fail-slow (throttle) 比 Fail-stop (crash) 更隐蔽，需调度层冷却窗口</li>
+</ul></section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>怎么对应到 GPU 集群 SOP</h2>
+<ol>
+<li><strong>建模</strong>：两节点 T_j/T_hs + R_hs(fan)=R0/(fan^0.8) + hyst 82/72</li>
+<li><strong>信号</strong>：P_gpu (rollout burst) + T_amb (rack inlet, 来自机械侧 T_wb 映射) + fan_ratio + throttle_flag 三合一输入 SSM</li>
+<li><strong>决策</strong>：SSM 预测 Tj_next 若 &gt;80°C 提前 5min 加 fan / 降 batch / 迁 rollout 到冷 rack，类似 chiller 提前加机</li>
+<li><strong>验证</strong>：/有用 rollout 成本里加 <code>+ \$/thermal_waste</code>，机械侧 p_mech_std 9.38kW 对应 GPU jitter 阈值 35W</li>
+</ol></section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Code</h2>
+<ul>
+<li><code>paper2_mech_to_gpu_thermal.py</code>:
+<ul>
+<li>single: <code>python3 paper2_mech_to_gpu_thermal.py</code></li>
+<li>2-rank: <code>torchrun --nproc_per_node=2 paper2_mech_to_gpu_thermal.py</code></li>
+<li>输出 JSON 真数 + 待H100提示</li>
+<li>rank0 聚合 throttle_rate SUM/ world</li>
+</ul></li>
+</ul></section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>一句话迁移</h2>
+<blockquote><p>Paper2 机械负载非线性 SSM 的双线性 IT*外温 + 二次换热 + 0.85/0.35 加机 hysteresis，平移成 GPU 两节点 Tj/T_hs SSM + 风扇立方律 R_hs + 82/72°C 节流 hysteresis，CPU 真数 55.13 kW RMSE / 57.87 kW 平均电 / 9.38 kW 抖动STD + Tj 82.49°C 峰值/67.54°C 均值/throt 0.83%，待 H100 NCCL 补真实 Tj/功率 trace，量化成 \$/有用 rollout 热损 8-12% 降。</p></blockquote></section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>Fail-closed</h2>
+<ul>
+<li>没编 H100 数，所有 CUDA/Tj 真传感器读数标 <strong>待H100 NCCL</strong></li>
+<li>EWMA 55kW RMSE 是 CPU 缩放 IT load 300-500kW 带 burst 随机，非数据中心真机实测，提醒需 Paper2 真 log 回放</li>
+<li>Tj 82.49°C 是 CPU 热容模型估，非 nvidia-smi 真值，需 H100 长 CoT 5000 tok rollout 实跑温升</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-11-paper2-mech-load/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
