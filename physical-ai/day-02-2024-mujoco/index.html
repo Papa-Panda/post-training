@@ -72,11 +72,11 @@ pre code{background:none;padding:0;color:inherit}
   <header class="hero">
     <span class="kicker">physical-ai · Day 02</span>
     <h1>Day 02 — MuJoCo: Multi-Joint dynamics with Contact</h1>
-    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成 · 含第二轮复习</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a><a href="#sec-13">第二轮复习（2026-09-27）</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote>
@@ -203,7 +203,71 @@ pre code{background:none;padding:0;color:inherit}
 <li>GitHub: https://github.com/google-deepmind/mujoco</li>
 <li>Docs: https://mujoco.org/</li>
 <li>Tutorial: https://github.com/tayalmanan28/MuJoCo-Tutorial</li>
-</ul></section>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>第二轮复习（2026-09-27）</h2>
+<blockquote>
+<p>本轮核验：MuJoCo 主线已到 3.10.0（2026-07，mujoco-mjx 同版内部 vendored MJWarp）；3.8.0 changelog（2026-04-24）确认 multiccd 默认开启、flex 软体多单元支持。MuJoCo Warp（DeepMind + NVIDIA，NVIDIA Warp 实现）仍处 Beta，已并入 MJX 发行、无独立 wheel，并被 NVIDIA Newton physics 收为 8 种可插拔 solver 之一（第三方 intel 文档）。初读 NOTES 的技术事实无硬伤，补三处版本/生态演进 + 一处官方表述精确化。</p>
+</blockquote>
+<h3>元信息修正</h3>
+<ul>
+<li><strong>版本演进</strong>：NOTES 写于 2026-08-23 的 "MuJoCo 3 + MJX" 已是旧快照。当前主线 3.10.0；3.8.0（2026-04-24）把 convex collision detection 的 multiccd（多接触点）改为默认开启、flex 软体支持多单元（multi-cell）。"MuJoCo 不擅长软体"的边界正在被官方推进，但仍在早期。</li>
+<li><strong>MJX 与 MJWarp 的关系变化</strong>：初读把 MJX（JAX/TPU）和 Isaac GPU 并行对立。2026 年现状：MuJoCo Warp（GPU 版，DeepMind + NVIDIA 联合维护）仍处 Beta、"mostly feature complete"，已直接 vendored 进 mujoco-mjx 3.10.0（无独立 wheel）；同时 NVIDIA 的 Newton physics 框架把它收为 8 种可插拔 solver 之一，Isaac Sim 6.0 用 Newton 补"研究级物理"。Day03 的"竞争"叙事要更新为"吸收"：MuJoCo 的接触数学正在变成 Isaac 生态的一个 solver 选项。</li>
+<li><strong>接触模型的官方精确表述</strong>：NOTES 的 "optimization-based / soft contact" 是对的，官方完整说法是 "soft, convex and analytically-invertible"——把摩擦接触从通常的 LCP/NCP（NP-hard）化为凸优化；默认 Newton solver 二次收敛，另有 CG 和广义 Projected Gauss-Seidel（可处理 elliptic 真摩擦锥）；统一求解器处理 torsional/rolling friction、关节与肌腱限位、干摩擦、等式约束。<code>condim</code> 1/3/4/6 开关无摩擦/滑动/扭转/滚动摩擦分量。</li>
+<li><strong>初读 3 问第 1 问的答案现在可以收口</strong>：rich-yet-efficient = 凸优化公式（快）+ 软接触允许可控穿透（稳）+ 唯一可逆 analytically invertible（利于控制与数据分析）。和 Isaac PhysX 的区别不在"准 vs 快"一句口号，而在"凸优化统一求解 vs 迭代求解器游戏级近似"。</li>
+</ul>
+<h3>一句话总结</h3>
+<p>MuJoCo 把摩擦接触从 NP-hard 的互补问题变成凸优化：soft + convex + 可逆的接触动力学是它的第一性原理，C++ 核心给 CPU 10k steps/s 级速度，MJX（JAX）和 MuJoCo Warp 把同一套数学搬上 TPU/GPU 做百万步并行。<strong>34 天后回看：Day02 是整条路线的"物理公理层"——Day21 的随机化、Day24 的系统辨识、Day27 的世界模型、Day30 的飞轮，全部是围绕"这个公理层是近似的"展开的补救工程。</strong></p>
+<h3>和之前工作的关系</h3>
+<ul>
+<li><strong>vs Day03 Isaac Lab（直接对比：公理层 vs 规模层）</strong>：Day02 回答"接触怎么算对"（generalized coordinates + 凸优化接触），Day03 回答"怎么算得多、看得真"（USD + PhysX + photoreal）。2026 年的新事实是合流而非对立：Newton physics 把 MuJoCo Warp 收为可插拔 solver，Isaac Sim 6.0 承认 PhysX 单独不够研究级。初读"选型差异"的答案变了：不再是二选一，是"MuJoCo 数学 + Isaac 规模"的拼装。</li>
+<li><strong>vs Day09/10（总览脚手架）</strong>：RT-2 / OpenVLA 的 action 最终要落在扭矩/位置指令上，MuJoCo（经 Day08 Humanoid Gym）是这些 VLA 在 sim 里练手的第一个环境。VLA 是 policy 层，MuJoCo 是物理层——policy 的泛化（Day34 π0.7）不能补偿物理层的错。</li>
+<li><strong>vs Day11–18（专题扩展：数据）</strong>：DROID / Bridge / Open X-Embodiment 的真实轨迹是"观测"，MuJoCo 是这些数据背后的"物理先验"。数据飞轮里 sim 与 real 对齐的锚点，正是 MuJoCo 的接触参数（friction、solref）——而这正是 Day24 要辨识、Day21 要随机化的东西。</li>
+<li><strong>vs Day19–24（RL / sim2real：被攻击、被拟合、被随机化的对象）</strong>：Day19 PPO 的 env 大多是 MuJoCo/MJX；Day21 随机化的就是 MuJoCo 的 contact 参数；Day22 RMA 的 adaptation module 隐式编码的也是这些参数；Day24 系统辨识直接拟合 MuJoCo 模型参数。Day19–24 的共同前提是"Day02 是近似的"——随机化/辨识/残差（Day23）是三种不同的"承认近似"的方式。</li>
+<li><strong>vs Day25–30（physical AGI / eval / safety）</strong>：Day27 Cosmos 是"学习的世界模型"，Day02 是"解析的世界模型"，Day05 UniSim 已走混合路线；Day28 评测的物理真实性轴（penetration / jitter）本质在量"离 MuJoCo 有多远"；Day29 的 CBF 安全证书需要动力学模型，而 MuJoCo 的 analytically invertible（给定轨迹可反推接触力/参数）正是证书与系统辨识能成立的数学前提——游戏引擎没有这个性质，所以做不了严肃机器人学。</li>
+<li><strong>vs Day31–34（最新进展）</strong>：Day31 Atlas（生成式世界模型）vs Day02（解析物理）是两条世界模型路线的分野，见思考题 (b)；Day33 Figure Helix 2.5 进家庭 56%——接触丰富的家务恰恰是 MuJoCo 最弱的一环（软体、触觉、形变），Day01 复习补的 e-Flesh（传感-智能绑定）是解析物理覆盖不到的地带；Day32 GPT-6 Astra 的 computer-use 是横向对照，提醒"物理公理层"之外还有"数字世界公理层"（OS/API），两者的 sim 哲学完全不同。</li>
+</ul>
+<h3>核心</h3>
+<ol>
+<li><strong>Motivation 深挖</strong>：接触是机器人与物理世界交互的唯一通道（脚-地、手-物），发生在毫米/毫秒尺度。解析接触的本质困难是互补性：接触或分离、粘滞或滑动——写成 LCP/NCP 是 NP-hard。MuJoCo 的第一性原理选择：不求解精确互补，求解一个"软化后的凸问题"，用可控穿透换可解性。后面 32 天的所有 sim2real 工作，都是在为这个 trade-off 还债。</li>
+<li><strong>机制 = 三层</strong>：</li>
+<li>
+<p><strong>数学层</strong>：接触脉冲 $z$ 是以下凸优化的解，摩擦锥 $\mathcal{K}$ 为约束（pyramidal 线性近似求快，或 elliptic 真锥配 PGS 求准）：</p>
+<p>$$z^\* = \arg\min_{z \in \mathcal{K}} \left( \tfrac{1}{2} z^\top A z + b^\top z \right)$$</p>
+<p>其中 $\mathcal{K}$ 是摩擦锥， $A$ 、 $b$ 由当前构型 $q$ 的质量矩阵与接触雅可比决定。soft 约束允许穿透 $\delta$ ， $\delta$ 的"软度"由 solref/solimp（刚度/阻尼的离散化参数）控制。同一套 EFC 求解器统一处理接触、关节限位、肌腱、干摩擦、等式约束——"统一"是 rich 的来源。
+   - <strong>表示层</strong>：generalized coordinates（关节坐标，自由度最少，适合 articulated 结构）+ MJCF（tendon/muscle 一等公民，人可读）+ <code>condim</code> 维度开关摩擦分量。表示即先验：选关节坐标就是选了"机器人是铰接的"这个归纳偏置。
+   - <strong>规模层</strong>：MJX 把前向动力学写成纯函数式 JAX，<code>vmap</code> 天然并行 + autodiff 穿过接触求解器——可微性是 Day24 梯度法系统辨识的数学前提；MJWarp 用 NVIDIA Warp 重写，绕过 MJX 的 sharp bits（可微/变结构限制），2026 年已并入 MJX 发行。
+3. <strong>前向动力学方程</strong>：policy 输出的关节力矩 $\tau$ 经由下式变成运动——这是 VLA 的 action 与物理世界之间的翻译官：</p>
+</li>
+</ol>
+<p>$$M(q)\,\ddot{q} + C(q, \dot{q}) = \tau + J_c^\top \lambda$$</p>
+<p>其中 $M(q)$ 是广义质量矩阵， $C$ 含科氏/重力项， $J_c^\top \lambda$ 是接触雅可比转置乘接触脉冲。
+4. <strong>analytically invertible 的意义</strong>：接触映射唯一可逆，给定轨迹可反推接触力与参数——这是 control synthesis、state estimation、system identification 三件事能成立的共同根。Day24 之所以可能，前提是 Day02 的这个性质。</p>
+<h3>边界</h3>
+<ol>
+<li><strong>"准"的是求解器，不是参数</strong>：friction、solref、solimp、margin 没有第一性原理值，全是手调。MuJoCo 保证 sim 内部自洽，不保证 sim = real。Day21（随机化）和 Day24（辨识）存在，恰恰因为引擎把不确定性从求解器推到了参数——这是 Day02 留给全路线最大的诚实声明。</li>
+<li><strong>刚体假设</strong>：软体（flex 多单元 3.8 才支持，仍早期）、流体、颗粒、粘附/吸盘、线缆都不在 Day02 的舒适区。Day33 Figure 进家庭的家务（叠衣、擦桌）是软接触密集区——解析物理的盲区正是 Helix 类端到端最想吃掉的地盘。</li>
+<li><strong>GPU 路径的确定性打折</strong>：第三方实测（omnisim determinism 文档）显示 CPU <code>mj_step</code> 逐位确定（5/5 场景），而 mujoco_warp GPU 路径 24 对冷启动 0 对逐位一致、1000 步后偏差可达米级（<code>wp.atomic_add</code> 接触槽竞争）。含义：大规模并行训练的"同一 seed 可复现"在 GPU 路径上不成立，论文的 seed 声明要配 solver/路径披露。见思考题 (c)。</li>
+<li><strong>凸近似永远有代价</strong>：pyramidal 锥是线性近似（快但失真），elliptic 真锥要 PGS 迭代（准但慢）；solver 迭代次数 vs 精度是永恒 trade-off。MuJoCo 从未"证明"任何 sim2real 结论——它只证明 sim 内部自洽。</li>
+<li><strong>可微不等于可学</strong>：MJX 的 autodiff 能穿过接触求解器，但接触事件的非光滑性让梯度在接触切换处病态——梯度法系统辨识（Day24）在接触丰富任务上仍不稳定，这是数学结构决定的，不是实现 bug。Day02 的可微性是必要非充分条件。</li>
+</ol>
+<h3>迁移到 post-training / Agentic RL Infra</h3>
+<ul>
+<li><strong>可执行的映射</strong>：把 MuJoCo 的"求解器即数据清洗器"翻译成你的 RL infra——在 VLA / world-model 训练数据 pipeline 里加一个 <strong>physics plausibility gate</strong>：用 headless MuJoCo（CPU <code>mj_step</code>，逐位确定、可复现）重放 DROID / Bridge 类轨迹，自动剔除深穿透（penetration &gt; margin）、接触抖动（contact chatter）、能量异常的片段，再进训练。这和你 coding data 的 exec-filter 同构：exec 跑不通的代码不进 SFT，物理跑不通的轨迹不进 policy 训练。进一步：Day28 的评测轴（physical realism）直接变成数据 pipeline 的一个 gate；Day30 飞轮的 resimulate 分支就有了第一块可落地的砖——先有 gate，才有"什么值得 resimulate"的判据；gate 拦下的失败聚类方式，就是 Day30 triage 的输入。</li>
+</ul>
+<h3>思考题（综合 Day02 / Day21 / Day24 / Day27 / Day33）</h3>
+<ul>
+<li><strong>(a) 参数的不可辨识性</strong>：Day21 随机化 friction，Day24 辨识 friction——但从纯运动学轨迹看，(friction, solref, mass) 三元组是部分不可辨识的：不同组合可以产生相同轨迹。设计判据实验：在 MJX 里固定"真值"参数，分别用 (i) 纯运动学轨迹、(ii) 运动学 + 接触力（e-Flesh 类触觉，见 Day01 复习）做系统辨识，比较参数恢复误差。你预期 (i) 恢复的是等价类而非真值——这对"sim2real 已解决"的叙事意味着什么？Day22 RMA 的 adaptation module 是在辨识参数，还是在学习等价类的隐式编码？</li>
+<li><strong>(b) 两条世界模型路线的分工</strong>：Day02 解析物理 vs Day27 Cosmos 生成式世界模型，Day05 UniSim 已是混合（action-conditioned video diffusion + learned simulator RL）。给出分工判据：什么任务必须用解析物理（提示：Day29 的 CBF 安全证书需要什么数学性质？Day02 的哪个词——analytically invertible——是 Cosmos 给不了的？），什么任务生成式更优（提示：Day33 家庭场景的软接触与视觉多样性）？Day31 Atlas 会改变这个分工吗，还是只是把"学习侧"做得更大？</li>
+<li><strong>(c) 复现性危机</strong>：第三方实测 mujoco_warp GPU 路径 1000 步后偏差米级、24 对冷启动 0 对逐位一致。若一篇 humanoid RL 论文用 MJWarp 训练、只报 "seed=0"，它的结果在多大程度上可复现？设计一个最小披露标准（solver 类型、摩擦锥类型、迭代次数、CPU/GPU 路径、接触参数表），并论证：为什么 Day30 飞轮的 gated deploy 必须把"sim 配置哈希"作为 release gate 的一部分？</li>
+</ul>
+<p>参考链接（本轮复习）：
+- MuJoCo changelog（3.8.0，2026-04-24）：https://github.com/synreal/mujoco/blob/HEAD/doc/changelog.rst
+- MuJoCo overview（soft, convex, analytically-invertible 表述）：https://github.com/haoxiangyou/sdpg/blob/HEAD/externals/mujoco/doc/overview.rst
+- MJWarp README（Beta 状态，DeepMind + NVIDIA 维护；fork 镜像，内容与官方一致）：https://github.com/kxqovwcmq-lgtm/mujoco_warp
+- Newton / Isaac Sim 6.0 solver 对比（第三方 intel 文档）：https://github.com/redhat-et/physical-ai-platform-intel/blob/HEAD/deliverables/intel/project-comparisons/simulation-engines.md
+- GPU 路径确定性实测（第三方测试文档）：https://github.com/omnilink-tech/omnisim/blob/HEAD/docs/developer/simulator-comparison.md</p>
+<p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md</p></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
 </div>
 <script>
