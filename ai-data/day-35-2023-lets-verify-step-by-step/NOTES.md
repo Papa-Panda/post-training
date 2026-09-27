@@ -10,7 +10,14 @@
 ## 一句话总结
 PRM 训练数据的开山之作：800K 条 step-level 人工标签（75K 条解法 / 12K 道题）训出的 process-supervised reward model，在 best-of-N 搜索下以 $78.2\%$ 打赢 outcome supervision 的 $72.4\%$ ；核心数据洞见是"首错截断标注 + 诱人错解主动学习"，把昂贵的人工标注预算换成 $2.6\times$ 的数据效率，还顺带拿了个"负对齐税"。
 
+<!-- viz:stats: 800K step-level标签 | 75K 解法 | 12K 题目 | 2.6× 数据效率 -->
+
 ## 核心
+
+<!-- viz:flow: 生成器微调 → 人工逐步标注 → PRM训练 → best-of-N评测 -->
+<!-- viz:flow: 当前PRM打分 → 挑诱人错解 → 人工标注 → 重训PRM -->
+<!-- viz:vs: Process监督 | 每一步都给反馈; 信用分配更容易 || Outcome监督 | 只看最终答案; 有误判噪声 -->
+<!-- viz:bars: PRM 78.2% | ORM 72.4% | 多数投票 69.6% -->
 1. **Motivation**: 复杂多步推理里，一个逻辑错就足以让整道题报废——而 SOTA 模型恰好经常犯这种错。训练可靠的 reward model 有两条路：outcome supervision（只看最终答案对错）和 process supervision（每一步都给反馈）。Uesato et al. 2022 在小学数学上做过对比，结论是两者打平；但那次基模型弱、人工反馈少、题太简单。本篇用更强的 GPT-4 基座、800K step-level 人工标签、在更难的 MATH 数据集上重做头对头对比。另有一层对齐动机：process 监督奖励的是"人类认可的推理链本身"，而不是把"结果对"当对齐的代理指标。
 2. **Data Pipeline**: 生成器 → 人工逐步标注 → PRM 训练 → best-of-N 搜索评测：
    - **生成器**：GPT-4 基座在 MATH 上做 1 epoch 微调，目的只有一个——学会"换行分隔的 step-by-step 输出格式"（few-shot 生成解法 → 只保留最终答案正确的 → 微调），不教新能力；

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Day35 Let&#x27;s Verify Step by Step — NOTES</title>
+<title>Day35 Let's Verify Step by Step — NOTES</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -48,6 +48,9 @@ body{margin:0;background:var(--bg);color:var(--ink);
 .sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
   border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
   justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
 table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
 th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
 th{background:#f3f4f6;font-weight:600;white-space:nowrap}
@@ -61,9 +64,37 @@ pre code{background:none;padding:0;color:inherit}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
 .foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
 .foot a{color:var(--accent)}
-@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
 </style>
 </head>
 <body>
@@ -71,7 +102,7 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">ai-data · Day 35</span>
-    <h1>Day35 Let&#x27;s Verify Step by Step — NOTES</h1>
+    <h1>Day35 Let's Verify Step by Step — NOTES</h1>
     <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
@@ -79,18 +110,18 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">思考题</a></nav>
   </details>
   <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<ul>
-<li>Title: "Let's Verify Step by Step"</li>
-<li>Authors / Org: Lightman et al. / OpenAI</li>
-<li>Link / arXiv: https://arxiv.org/abs/2305.20050</li>
-<li>Date read: 2026-09-27</li>
-<div class="meta"><span class="tag">rl-data</span><span class="tag">verifier-data</span><span class="tag">process-supervision</span><span class="tag">prm</span><span class="tag">reasoning-data</span><span class="tag">quality</span></div>
-</ul>
+<dl class="meta-grid"><dt>Title</dt><dd>"Let's Verify Step by Step"</dd><dt>Authors / Org</dt><dd>Lightman et al. / OpenAI</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2305.20050">https://arxiv.org/abs/2305.20050</a></dd><dt>Date read</dt><dd>2026-09-27</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">rl-data</span><span class="tag">verifier-data</span><span class="tag">process-supervision</span><span class="tag">prm</span><span class="tag">reasoning-data</span><span class="tag">quality</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>PRM 训练数据的开山之作：800K 条 step-level 人工标签（75K 条解法 / 12K 道题）训出的 process-supervised reward model，在 best-of-N 搜索下以 $78.2\%$ 打赢 outcome supervision 的 $72.4\%$ ；核心数据洞见是"首错截断标注 + 诱人错解主动学习"，把昂贵的人工标注预算换成 $2.6\times$ 的数据效率，还顺带拿了个"负对齐税"。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">800K</div><div class="l">step-level标签</div></div><div class="stat"><div class="v">75K</div><div class="l">解法</div></div><div class="stat"><div class="v">12K</div><div class="l">题目</div></div><div class="stat"><div class="v">2.6×</div><div class="l">数据效率</div></div></div>
+
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<div class="viz viz-flow flow"><div class="fnode">生成器微调</div><div class="farrow">→</div><div class="fnode">人工逐步标注</div><div class="farrow">→</div><div class="fnode">PRM训练</div><div class="farrow">→</div><div class="fnode">best-of-N评测</div></div>
+<div class="viz viz-flow flow"><div class="fnode">当前PRM打分</div><div class="farrow">→</div><div class="fnode">挑诱人错解</div><div class="farrow">→</div><div class="fnode">人工标注</div><div class="farrow">→</div><div class="fnode">重训PRM</div></div>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Process监督</h4><ul><li>每一步都给反馈</li><li>信用分配更容易</li></ul></div><div class="vscol vs-b"><h4>Outcome监督</h4><ul><li>只看最终答案</li><li>有误判噪声</li></ul></div></div>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">PRM</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">78.2%</div></div><div class="barrow"><div class="barlabel">ORM</div><div class="bartrack"><div class="barfill" style="width:92.6%"></div></div><div class="barval">72.4%</div></div><div class="barrow"><div class="barlabel">多数投票</div><div class="bartrack"><div class="barfill" style="width:89.0%"></div></div><div class="barval">69.6%</div></div></div>
 <ol>
 <li><strong>Motivation</strong>: 复杂多步推理里，一个逻辑错就足以让整道题报废——而 SOTA 模型恰好经常犯这种错。训练可靠的 reward model 有两条路：outcome supervision（只看最终答案对错）和 process supervision（每一步都给反馈）。Uesato et al. 2022 在小学数学上做过对比，结论是两者打平；但那次基模型弱、人工反馈少、题太简单。本篇用更强的 GPT-4 基座、800K step-level 人工标签、在更难的 MATH 数据集上重做头对头对比。另有一层对齐动机：process 监督奖励的是"人类认可的推理链本身"，而不是把"结果对"当对齐的代理指标。</li>
 <li><strong>Data Pipeline</strong>: 生成器 → 人工逐步标注 → PRM 训练 → best-of-N 搜索评测：</li>
@@ -128,7 +159,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>原文金句 (1-2句)</h2>
-<blockquote>
+<blockquote class="pq">
 <p>Process supervision makes credit assignment easier, and we believe that this explains its strong performance.</p>
 <p>Our results show that process supervision in fact incurs a negative alignment tax.</p>
 </blockquote>
