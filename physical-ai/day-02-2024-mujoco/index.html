@@ -294,6 +294,7 @@ pre code{background:none;padding:0;color:inherit}
 - MJWarp README（Beta 状态，DeepMind + NVIDIA 维护；fork 镜像，内容与官方一致）：https://github.com/kxqovwcmq-lgtm/mujoco_warp
 - Newton / Isaac Sim 6.0 solver 对比（第三方 intel 文档）：https://github.com/redhat-et/physical-ai-platform-intel/blob/HEAD/deliverables/intel/project-comparisons/simulation-engines.md
 - GPU 路径确定性实测（第三方测试文档）：https://github.com/omnilink-tech/omnisim/blob/HEAD/docs/developer/simulator-comparison.md</p>
+<p>相关讨论（Gemini网页版，2026-09-27）：https://gemini.google.com/app/80638fd25b5fe1d3</p>
 <p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md</p>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>MuJoCo</h4><ul><li>轻、快、接触准</li><li>渲染弱</li><li>MJX 加 GPU</li></ul></div><div class="vscol vs-b"><h4>Isaac Sim</h4><ul><li>GPU photoreal USD PhysX</li><li>重、贵、需建模</li></ul></div></div>
 <div class="viz viz-flow flow"><div class="fnode">MJCF 定义 humanoid</div><div class="farrow">→</div><div class="fnode">forward dynamics + contact</div><div class="farrow">→</div><div class="fnode">RL policy 输出 torque</div><div class="farrow">→</div><div class="fnode">reward</div><div class="farrow">→</div><div class="fnode">并行采样百万步</div></div></section>

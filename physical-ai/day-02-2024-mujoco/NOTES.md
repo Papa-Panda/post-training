@@ -166,6 +166,8 @@ MuJoCo 把摩擦接触从 NP-hard 的互补问题变成凸优化：soft + convex
 - Newton / Isaac Sim 6.0 solver 对比（第三方 intel 文档）：https://github.com/redhat-et/physical-ai-platform-intel/blob/HEAD/deliverables/intel/project-comparisons/simulation-engines.md
 - GPU 路径确定性实测（第三方测试文档）：https://github.com/omnilink-tech/omnisim/blob/HEAD/docs/developer/simulator-comparison.md
 
+相关讨论（Gemini网页版，2026-09-27）：https://gemini.google.com/app/80638fd25b5fe1d3
+
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/NOTES.md
 
 <!-- viz:vs: MuJoCo | 轻、快、接触准; 渲染弱; MJX 加 GPU || Isaac Sim | GPU photoreal USD PhysX; 重、贵、需建模 -->
