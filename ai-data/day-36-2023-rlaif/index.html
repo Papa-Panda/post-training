@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day36 RLAIF vs RLHF — NOTES</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 36</span>
+    <h1>Day36 RLAIF vs RLHF — NOTES</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">大纲</a><a href="#sec-4">流程图</a><a href="#sec-5">核心</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句 (1-2句)</a><a href="#sec-9">思考题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-36-2023-rlaif/</p>
+</blockquote>
+<!-- viz:stats: 摘要win rate RLAIF 71% | RLHF 73% | 头对头打平50% -->
+<div class="viz viz-flow flow"><div class="fnode">候选回复对</div><div class="farrow">→</div><div class="fnode">LLM偏好标注</div><div class="farrow">→</div><div class="fnode">位置偏置对消</div><div class="farrow">→</div><div class="fnode">soft标签训RM</div><div class="farrow">→</div><div class="fnode">RL训练</div></div>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">无害harmless率 RLAIF</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">88%</div></div><div class="barrow"><div class="barlabel">RLHF</div><div class="bartrack"><div class="barfill" style="width:86.4%"></div></div><div class="barval">76%</div></div><div class="barrow"><div class="barlabel">SFT</div><div class="bartrack"><div class="barfill" style="width:72.7%"></div></div><div class="barval">64%</div></div></div>
+
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>"RLAIF vs. RLHF: Scaling Reinforcement Learning from Human Feedback with AI Feedback"</dd><dt>Authors / Org</dt><dd>Lee et al. / Google DeepMind</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2309.00267">https://arxiv.org/abs/2309.00267</a></dd><dt>Date read</dt><dd>2026-09-28</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">rl-data</span><span class="tag">preference-data</span><span class="tag">rlaif</span><span class="tag">ai-feedback</span><span class="tag">reward-model</span><span class="tag">curation</span></div></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>AI 反馈做偏好数据的完整 recipe：PaLM 2 L 当 AI 标注器、soft 标签蒸馏训 RM，RLAIF 与 RLHF 在三任务上打平（摘要 win rate $71\%$ vs $73\%$ ，差异不显著），无害对话 harmless rate $88\%$ 显著超过 RLHF 的 $76\%$ ；d-RLAIF 直接拿 LLM 1–10 打分当 reward、跳过 RM 训练，还 $60\%$ 胜过 canonical RLAIF。ICML 2024。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>大纲</h2>
+<ul>
+<li>偏好标注 recipe：PaLM 2 L 做 off-the-shelf AI labeler；prompt = preamble + few-shot（可选）+ 待标样本 + Ending；取 "1"/"2" token log-prob 做 softmax 得 soft 标签</li>
+<li>位置偏置：每对候选调换顺序标两次，结果平均</li>
+<li>CoT：先让 LLM 写 rationale，再拼回 prompt 打分；CoT 普适涨点，detailed preamble 只对摘要有效，few-shot 多数反效果</li>
+<li>主实验：RLAIF 与 RLHF 在摘要 / 有助对话 / 无害对话三任务头对头；AI 标注器对齐度 $78.0\%$ ，逼近人工互评的 $73\%$ – $77\%$</li>
+<li>自改进：同尺寸标注器（PaLM 2 XS）仍 $68\%$ 胜 SFT；helpful 上 d-RLAIF 用与初始策略同一 checkpoint 打分，构成严格自改进</li>
+<li>d-RLAIF：LLM 直接 1–10 打分、加权求 reward（归一化到 [-1, 1] ），跳过 RM 训练与 staleness；摘要 $74\%$ 胜同尺寸 RLAIF 的 $68\%$</li>
+<li>成本与规模：AI 标注比人工便宜 10 倍以上；标注器尺寸与对齐度单调正相关（L $78.0\%$ / S $73.8\%$ / XS $62.7\%$ ）；canonical RLAIF 里 labeler 只跑一次</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>流程图</h2>
+<p><div class="mermaid">graph TD
+    A[候选回复对] --&gt; B[LLM打偏好标签]
+    B --&gt; C[调换顺序再标一次]
+    C --&gt; D[平均对消位置偏置]
+    D --&gt; E[soft标签训RM]
+    E --&gt; F[RL训练策略模型]
+    F --&gt; G[人工win rate评测]
+    H[LLM直接1-10打分] --&gt; I[加权求reward]
+    I --&gt; F
+</div></p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">摘要 vs SFT：RLAIF</div><div class="bartrack"><div class="barfill" style="width:97.3%"></div></div><div class="barval">71%</div></div><div class="barrow"><div class="barlabel">RLHF</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">73%</div></div><div class="barrow"><div class="barlabel">helpful</div><div class="bartrack"><div class="barfill" style="width:86.3%"></div></div><div class="barval">63%</div></div><div class="barrow"><div class="barlabel">头对头 RLAIF vs RLHF</div><div class="bartrack"><div class="barfill" style="width:68.5%"></div></div><div class="barval">50%</div></div><div class="barrow"><div class="barlabel">/</div><div class="bartrack"><div class="barfill" style="width:71.2%"></div></div><div class="barval">52%</div></div><div class="barrow"><div class="barlabel">（与</div><div class="bartrack"><div class="barfill" style="width:68.5%"></div></div><div class="barval">50%</div></div></div>
+<ol>
+<li><strong>Motivation</strong>: RLHF 对齐有效，但高质量人工偏好标签贵、难规模化；同时 LLM 已展现与人类判断高度一致（Gilardi/Ding 2023）。Bai et al. 2022b 首次提出 RLAIF（Day34 Constitutional AI 里的人+AI 混合），但从未做过"人 vs AI 反馈"的直接对比——AI 反馈能否成为 RLHF 的平替，这个缺口本篇来补。顺带回答两个更激进的问题：标注器可以小到什么程度（自改进）？能不能跳过 RM（d-RLAIF）？</li>
+<li><strong>Data Pipeline</strong>: AI 标注器 →（可选 RM 蒸馏）→ RL → 人工评测：</li>
+<li><strong>标注器</strong>：PaLM 2 L（instruction-tuned、未做过 RL），纯 off-the-shelf；策略与 RM 基座都是 PaLM 2 XS——大模型只做离线标注，小模型做训练与推理；</li>
+<li><strong>prompt 结构</strong>：Preamble（Base 版只问"哪个好"；Detailed 版模仿给人工标注员的详细评分指令）+ few-shot exemplars（可选）+ 待标样本 + Ending（如 "Preferred Response="）；取 token "1"/"2" 的 log-prob 做 softmax → <strong>soft 标签</strong>（如 [0.6, 0.4] ），信息量多于 one-hot；</li>
+<li><strong>位置偏置对消</strong>：每对候选调换顺序标两次、结果平均（小尺寸 labeler 偏置更严重，见附录 B）；</li>
+<li><strong>CoT  elicitation</strong>：两步推理——先让 LLM 写 rationale（"Consider the coherence, accuracy, coverage..."），再把 rationale 拼回 prompt 打分；</li>
+<li><strong>标注实验规模</strong>：为快速迭代，下采样到每任务 3–4k 例（取训练 split 的 $15\%$ / $10\%$ / $10\%$ ；摘要只留人工高置信例，confidence 1/2/8/9）；</li>
+<li><strong>RM 训练</strong>：soft 标签 + cross-entropy（RM 输出经 softmax 成分布再算 loss）；<strong>RL 用带 baseline 的改进 REINFORCE</strong>（作者认为比 PPO 简单但够用），policy/value 均从 SFT 初始化——算法一句带过；</li>
+<li><strong>评测三件套</strong>：AI Labeler Alignment（AI 偏好二值化后与人工偏好的一致率）、Win Rate（人工盲排）、Harmless Rate（无害任务每条独立判 harmless/harmful，不做相对排序）；</li>
+<li><strong>d-RLAIF 分支</strong>：LLM 对生成直接 1–10 打分，加权分数 $s(y|x)=\sum_{i=1}^{10}iP(i|y,x)$ ，归一化到 [-1, 1] 当 reward；省去"偏好标注 + RM 训练"两步，顺带解决 RM <strong>staleness</strong>（RM 训在初始策略分布上，策略越训越 OOD）。</li>
+<li><strong>Key Tricks</strong>:</li>
+<li><strong>soft 标签蒸馏</strong>：不 argmax 成硬标签，保留分布训 RM——本质是模型蒸馏，RM 只是 AI labeler 的压缩版；</li>
+<li><strong>位置偏置对消</strong>：调换顺序两次推理取平均，几乎零成本的去偏手段；</li>
+<li><strong>CoT 先想后判</strong>：两步 prompt（先 rationale 后打分）一致涨点；但<strong>自洽性采样</strong>（ $T&gt;0$ 采样多条 rationale 平均）严格降点——别加；</li>
+<li><strong>few-shot 反直觉</strong>：只在 harmless 任务涨点；摘要/helpful 上 exemplars 越多对齐度越低（10 次随机 exemplar 试验，最高也只追平 Base 0-shot 的 $76.1\%$ ）——任务 labeler 本来就懂，exemplar 是干扰；</li>
+<li><strong>标注器规模实验</strong>：L $78.0\%$ → S $73.8\%$ → XS $62.7\%$ ，单调正相关；但 canonical RLAIF 里 labeler 只跑一次，所以"用更大的 labeler 做离线标注"并不贵——这是大小模型分工的理论依据。</li>
+<li><strong>Results</strong>:</li>
+<li>摘要 vs SFT：RLAIF $71\%$ ，RLHF $73\%$ （差异不显著）；helpful： $63\%$ vs $64\%$ ；头对头 RLAIF vs RLHF： $50\%$ / $52\%$ （与 $50\%$ 无显著差异）；</li>
+<li>无害对话：harmless rate RLAIF $88\%$ ＞ RLHF $76\%$ ＞ SFT $64\%$ （显著）；</li>
+<li>RLAIF 还 $79\%$ 胜过人工参考摘要（RLHF $80\%$ ）；</li>
+<li>同尺寸 RLAIF（XS 标注器）： $68\%$ 胜 SFT（与 $71\%$ 的差异 p=0.07，不显著）；</li>
+<li>d-RLAIF：摘要 $74\%$ 胜 SFT，头对头 $60\%$ 胜同尺寸 RLAIF（显著）；helpful $66\%$ 胜 SFT，且标注器 = 初始策略<strong>同一 checkpoint</strong>（严格自改进）；</li>
+<li>prompt 涨点：最优 prompt 比 Base 0-shot 高 $+1.9\%$ / $+1.3\%$ / $+1.7\%$ （摘要/helpful/harmless）；AI labeler $78.0\%$ 对齐度已达人工互评水平（ $73\%$ – $77\%$ ）；</li>
+<li>成本：AI 标注比人工便宜 <strong>10 倍以上</strong>；</li>
+<li>失败记录同样有信息量：人+AI 混合反馈没超过纯人工；Stanford Human Preferences 数据集上校正长度偏置后 RLHF/RLAIF 都没涨——长度偏置是偏好评测的老坑，本文做了 post-hoc 校正；</li>
+<li>定性观察：RLHF 有时幻觉（"作者 20 岁"，原文没提），RLAIF 有时不流畅（run-on 句子、重复 "How do I get over this?"）；70 例盲评 accuracy/coverage/coherence 无显著差异。</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：(1) patch 偏好对（"哪个 patch 更好"）的 AI 标注：prompt 里先写 rationale 再打分 + 候选调换顺序对消位置偏置，这套 recipe 可直接搬；先用 3–4k 高置信人工偏好测 AI labeler 对齐度（天花板≈人工互评一致率），达标再大规模铺开。(2) d-RLAIF 式捷径：LLM 直接 1–10 打分当 reward，跳过"偏好对→RM 蒸馏"——coding verifier/PRM 训练前，可先用 LLM judge 直接打分做数据筛选，省一轮 RM 训练；注意 RM staleness：策略分布漂移后离线 RM 会过时，d-RLAIF 的"在线打分"正是解法之一。</li>
+<li>Infra 视角：大小模型分工——大模型（L）只做离线一次性标注，小模型（XS）做策略/RM 训练与在线推理；canonical RLAIF 里 labeler 不进 RL 循环，算力账好算；d-RLAIF 把大模型放进 RL 循环，在线打分成本要重估（但省了 RM 训练）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>位置偏置对消只是两次推理平均：coding 里长 patch 对的顺序效应可能更强，这招够用吗？要不要"打乱多次 + 一致性过滤"？</li>
+<li>AI labeler $78.0\%$ 对齐度已逼近人工互评上限 $73\%$ – $77\%$ ：这是偏好任务的天花板吗？Day34 的宪法原则式 critique 能不能把 harmless 的对齐度再往上推？</li>
+<li>d-RLAIF 的 1–10 打分 reward 在 coding verifier 上复用时，"打分标尺漂移"（不同 batch 严格度不一）怎么校准？</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句 (1-2句)</h2>
+<blockquote class="pq">
+<p>Our results suggest that RLAIF can achieve performance on-par with using human feedback, offering a potential solution to the scalability limitations of RLHF.</p>
+<p>Since the AI labeler is only used to generate preference examples once and is not called during RL for canonical RLAIF, using an even larger AI labeler is not necessarily prohibitively expensive.</p>
+</blockquote>
+</section>
+<section class="sec sec-qa" id="sec-9"><h2><span class="n">9</span>思考题</h2>
+<ol>
+<li>Day34 的 Constitutional AI 也是 AI feedback——它用"宪法原则→self-critique→revision"定义对错，RLAIF 直接用 LLM 当偏好标注器：两者在"谁定义对错"上有何本质区别？coding data 里哪种更适合"哪个 patch 更好"这类偏好？</li>
+<li>Day35 的 PRM 花 800K 人工 step 标签换精度，RLAIF 证明 AI 标注可平替人工偏好：coding 的 code review 偏好数据，AI labeler 的对齐度天花板是人工互评一致率吗？CoT + 位置偏置对消这套 recipe 能直接搬吗？</li>
+</ol></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-36-2023-rlaif/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
