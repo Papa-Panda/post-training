@@ -121,7 +121,7 @@ pre code{background:none;padding:0;color:inherit}
 <section class="sec" id="sec-1"><h2><span class="n">1</span>准确术语</h2>
 <ul>
 <li><strong>GEMM (General Matrix Multiply)</strong>：通常指 $C\leftarrow\alpha\,op(A)op(B)+\beta C$ ；本课自写 kernel 固定为 row-major、 $\alpha=1,\beta=0$ 、不转置的 $C=AB$ 。</li>
-<li><strong>Tile / blocking</strong>：把 \$M,N,K\$ 三个循环按块组织，使一块输入在更近的 memory hierarchy 中被多次使用。</li>
+<li><strong>Tile / blocking</strong>：把 $M,N,K$ 三个循环按块组织，使一块输入在更近的 memory hierarchy 中被多次使用。</li>
 <li><strong>CTA / thread block tile</strong>：一个 CUDA block 协作计算的输出子矩阵；本课是 $16\times16$ 。</li>
 <li><strong>Register accumulator</strong>：每个 thread 的局部 <code>acc</code>；遍历所有 $K$ tiles 后才写 global $C$ 。</li>
 <li><strong>Arithmetic intensity</strong>：算法工作量 FLOPs 除以数据移动 bytes；必须注明在哪一级 memory 与如何计数。本课只给理想 FP32 global payload model，不冒充 DRAM counter。</li>
@@ -151,10 +151,10 @@ pre code{background:none;padding:0;color:inherit}
     C[i,j] = acc
 </code></pre>
 <ul>
-<li>输出元素：\$MN\$；</li>
+<li>输出元素：$MN$ ；</li>
 <li>每元素： $K$ 次乘法和 $K$ 次累加到 zero-initialized accumulator；</li>
 <li>conventional count： $2MNK$ FLOPs；</li>
-<li>数学上若把第一个 product 直接赋值，可写 \$MNK\$ multiplies 与 $MN(K-1)$ adds，但 GEMM 性能口径仍通常用 $2MNK$ 。</li>
+<li>数学上若把第一个 product 直接赋值，可写 $MNK$ multiplies 与 $MN(K-1)$ adds，但 GEMM 性能口径仍通常用 $2MNK$ 。</li>
 </ul>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>可手算例子 1：数值正确性</h2>
@@ -229,7 +229,7 @@ pre code{background:none;padding:0;color:inherit}
 <section class="sec" id="sec-10"><h2><span class="n">10</span>真机验证协议（尚未执行）</h2>
 <ul>
 <li>记录 GPU 型号、SM、clock/power policy、driver、CUDA/cuBLAS 版本；</li>
-<li>固定 \$M,N,K\$、dtype/layout、tile、warmups=5、repeats=21；</li>
+<li>固定 $M,N,K$、dtype/layout、tile、warmups=5、repeats=21；</li>
 <li>保存完整编译命令与原始 stdout；</li>
 <li>分别报告 median kernel ms 与按 $2MNK/t$ 计算的 TFLOP/s；</li>
 <li>报告相对 cuBLAS ratio，同时保存 <code>max_abs_error_vs_cublas</code>；</li>

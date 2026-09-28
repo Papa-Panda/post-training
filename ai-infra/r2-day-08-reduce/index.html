@@ -158,7 +158,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>$$A_{global}=B$$</p>
 <h3>C. <code>reduce_warp_shuffle</code></h3>
 <ol>
-<li>每 warp 用 offsets \$16,8,4,2,1\$ 归约；</li>
+<li>每 warp 用 offsets $16,8,4,2,1$ 归约；</li>
 <li>每 warp 仅 lane 0 写一个 shared partial；</li>
 <li>全 block <code>__syncthreads()</code> 一次；</li>
 <li>第一个 warp 对这些 partials（其余 lanes 补 0）再做一次 warp reduction；</li>
@@ -175,7 +175,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>offset 2：lane 0 得 $6+10=16$ ；lane 1 的对应 subtree 得 $8+12=20$ ；</li>
 <li>offset 1：lane 0 得 $16+20=36$ 。</li>
 </ul>
-<p><code>reduce_models.py</code> 的 32-lane版本把缺失的 24 lanes 补 0，实际执行 offsets \$16,8,4,2,1\$，测试结果同样为 36。</p>
+<p><code>reduce_models.py</code> 的 32-lane版本把缺失的 24 lanes 补 0，实际执行 offsets $16,8,4,2,1$ ，测试结果同样为 36。</p>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>可手算例子 2：N=64, T=64</h2>
 <h3>每元素 atomic</h3>

@@ -78,7 +78,7 @@ $$(H+\lambda I)s_t=g_t,$$
 #### 3.4 证据到底支持什么
 
 - 10-class MNIST logistic regression 中，预测的 leave-one-out loss 变化与真实删点重训贴合；非收敛、非凸 CNN 上相关系数仍为 $R=0.86$ 。
-- 对不可微 hinge loss 直接算不准；换成 smooth hinge 后， $t=0.001$ 时与真实重训的 Pearson $R=0.95$ ， $t=0.1$ 时为 \$0.91\$。
+- 对不可微 hinge loss 直接算不准；换成 smooth hinge 后， $t=0.001$ 时与真实重训的 Pearson $R=0.95$ ， $t=0.1$ 时为 $0.91$ 。
 - Enron spam 人为翻转 10% 标签后，按 self-influence 安排人工检查，比按训练 loss 或随机检查更快修复数据与恢复测试准确率。
 - 攻击实验说明影响高度集中也是风险信号：扰动 1/2/10 张训练图，可分别翻转 57%/77%/几乎全部被单独攻击的正确测试预测。
 

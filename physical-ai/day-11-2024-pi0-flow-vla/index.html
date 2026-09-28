@@ -149,7 +149,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>但 policy 只能看到</p>
 <p>$$o_t=[I_t^1,\ldots,I_t^n,\ell_t,q_t].$$</p>
 <ul>
-<li>$I_t^i\in\mathbb{R}^{h\times w\times 3}$ ：第 $i$ 个 RGB 相机，论文每个平台用 $n=2$ 或 \$3\$ 个视角。</li>
+<li>$I_t^i\in\mathbb{R}^{h\times w\times 3}$ ：第 $i$ 个 RGB 相机，论文每个平台用 $n=2$ 或 $3$ 个视角。</li>
 <li>$\ell_t=(w_1,\ldots,w_L)$ ：长度为 $L$ 的语言 token 序列，既可以是总任务，也可以是约 2 秒粒度的 segment annotation / 高层子指令。</li>
 <li>$q_t\in\mathbb{R}^{d_q}$ ：本体状态，主要是关节角；跨机器人训练时 padding 到最大维度 18，并 mask 不存在的 image slot。</li>
 <li>单步动作 $a_t\in\mathbb{R}^{d_a}$ ，整段动作为 $A_t=[a_t,\ldots,a_{t+H-1}]\in\mathbb{R}^{H\times d_a}$ ； $H=50$ ， $d_a$ 随 embodiment 变化并 padding 到统一维度。</li>

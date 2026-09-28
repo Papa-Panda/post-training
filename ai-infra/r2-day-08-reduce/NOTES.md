@@ -54,7 +54,7 @@ $$A_{global}=B$$
 
 ### C. `reduce_warp_shuffle`
 
-1. 每 warp 用 offsets \$16,8,4,2,1\$ 归约；
+1. 每 warp 用 offsets $16,8,4,2,1$ 归约；
 2. 每 warp 仅 lane 0 写一个 shared partial；
 3. 全 block `__syncthreads()` 一次；
 4. 第一个 warp 对这些 partials（其余 lanes 补 0）再做一次 warp reduction；
@@ -74,7 +74,7 @@ $$[1,2,3,4,5,6,7,8]$$
 - offset 2：lane 0 得 $6+10=16$ ；lane 1 的对应 subtree 得 $8+12=20$ ；
 - offset 1：lane 0 得 $16+20=36$ 。
 
-`reduce_models.py` 的 32-lane版本把缺失的 24 lanes 补 0，实际执行 offsets \$16,8,4,2,1\$，测试结果同样为 36。
+`reduce_models.py` 的 32-lane版本把缺失的 24 lanes 补 0，实际执行 offsets $16,8,4,2,1$ ，测试结果同样为 36。
 
 ## 可手算例子 2：N=64, T=64
 

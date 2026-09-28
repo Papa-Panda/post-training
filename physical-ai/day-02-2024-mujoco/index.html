@@ -260,7 +260,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>机制 = 三层</strong>：</li>
 <li>
 <p><strong>数学层</strong>：接触脉冲 $z$ 是以下凸优化的解，摩擦锥 $\mathcal{K}$ 为约束（pyramidal 线性近似求快，或 elliptic 真锥配 PGS 求准）：</p>
-<p>$$z^\* = \arg\min_{z \in \mathcal{K}} \left( \tfrac{1}{2} z^\top A z + b^\top z \right)$$</p>
+<p>$$z^* = \arg\min_{z \in \mathcal{K}} \left( \tfrac{1}{2} z^\top A z + b^\top z \right)$$</p>
 <p>其中 $\mathcal{K}$ 是摩擦锥， $A$ 、 $b$ 由当前构型 $q$ 的质量矩阵与接触雅可比决定。soft 约束允许穿透 $\delta$ ， $\delta$ 的"软度"由 solref/solimp（刚度/阻尼的离散化参数）控制。同一套 EFC 求解器统一处理接触、关节限位、肌腱、干摩擦、等式约束——"统一"是 rich 的来源。
    - <strong>表示层</strong>：generalized coordinates（关节坐标，自由度最少，适合 articulated 结构）+ MJCF（tendon/muscle 一等公民，人可读）+ <code>condim</code> 维度开关摩擦分量。表示即先验：选关节坐标就是选了"机器人是铰接的"这个归纳偏置。
    - <strong>规模层</strong>：MJX 把前向动力学写成纯函数式 JAX，<code>vmap</code> 天然并行 + autodiff 穿过接触求解器——可微性是 Day24 梯度法系统辨识的数学前提；MJWarp 用 NVIDIA Warp 重写，绕过 MJX 的 sharp bits（可微/变结构限制），2026 年已并入 MJX 发行。

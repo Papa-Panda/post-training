@@ -14,7 +14,7 @@
 - Folder: day-31-2026-worldlabs-atlas
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas
 - 前传：本路线 README「World Labs Atlas 与 roadmap 的关系（2026-09-12）」问答——当时结论是 Atlas 落在 Day27（Cosmos）射程内、不必单独开 Day；2026-09-22 用户采纳李昊建议把路线扩到 34 天，Atlas 成为 Day31 最新进展第一篇
-- 非技术背景（仅记录，不作技术证据）：公司累计融资约 \$1.23B（含 Autodesk \$200M 战略投资，NVIDIA / AMD / Fidelity 参投），报道估值约 \$5B（来源：ainvest / bestaitoolfinder 转述，PR 口径，未独立核实）；产品线 Marble 2025-11 发布、World API 2026-01 上线、2026-07 收购 SceniX（机器人空间智能方向）（来源：cryptobriefing 整理）
+- 非技术背景（仅记录，不作技术证据）：公司累计融资约 $1.23B（含 Autodesk $200M 战略投资，NVIDIA / AMD / Fidelity 参投），报道估值约 \$5B（来源：ainvest / bestaitoolfinder 转述，PR 口径，未独立核实）；产品线 Marble 2025-11 发布、World API 2026-01 上线、2026-07 收购 SceniX（机器人空间智能方向）（来源：cryptobriefing 整理）
 
 ## 一句话总结
 Atlas 是 World Labs 2026-09-01 发布的 omni 世界模型：从零预训练、原生处理 text / image / video / 3D，以相机位姿为一等输入，把「像素重建」与「像素生成」统一到 viewpoint 锚定的 spatial context 里；能输出最长 1 分钟 1440p 相机可控视频、2–3 张照片的显式 3D 重建（point cloud / 3D Gaussian splat）、以及手机视频驱动的 real-to-sim 机器人仿真数据。但它目前是面向 select partners 的 early access 公告：无公开论文、无权重、无公开 API、无独立第三方复现——所有性能数字均为公司自报，这是今天最硬的边界。

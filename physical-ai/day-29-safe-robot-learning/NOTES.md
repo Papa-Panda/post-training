@@ -72,7 +72,7 @@ $$u^*=\arg\min_u\|u-u_{\text{nom}}\|^2\quad \text{s.t.}\quad L_f h(x)+L_g h(x)\,
 
 Alshiekh et al. 2018：给定 LTL 时序逻辑规范 $\varphi$ （如 $G(\neg(\text{gripper\_closed}\land \text{hand\_in\_grasp}))$ ——"永远不要在有人手时闭爪"），**合成**一个反应式系统 shield。两种部署位置：
 - **pre-shield**：learner 做决策前，shield 先给出"安全动作集合"，learner 只能在其中选；
-- **post-shield**：learner 输出动作后，shield 监控 \$(s,a)\$ ——安全就放行，不安全才改写为 $a'\in\text{Safe}(s)$ 。
+- **post-shield**：learner 输出动作后，shield 监控 $(s,a)$ ——安全就放行，不安全才改写为 $a'\in\text{Safe}(s)$ 。
 
 核心性质 **minimal intervention**：只在违反时介入，平时零干扰。收敛保证的关键正在这里——post-shield 下 agent 看到的仍是 MDP（shield 只是环境动力学的一部分），且 shield 只在"必然违反"的动作上改写，learner 的探索空间几乎不受损。这是对 CMDP 的降维打击：不需要重训策略，**事后加装**。
 
@@ -115,7 +115,7 @@ $$\underbrace{\max_\pi J_r}_{\text{Day19 PPO}}\;\to\; \underbrace{\max_\pi J_r\ 
 
 ** $\alpha$ 的物理直觉**（Q2 的答案）：取 $\alpha(h)=\gamma h$ ，约束变成 $\dot h\ge -\gamma h$ ，即 $h$ 至多指数衰减、衰减率不超过 $\gamma$ 。 $\gamma$ 大 = "允许快速逼近边界"（激进驾驶，贴着限位走，性能高但扰动一来就越界）； $\gamma$ 小 = "提前减速"（保守驾驶，离边界还远就开始刹车）。**保守-灵活 trade-off 在公式里就是 $\gamma$ 这一个旋钮**——CBF 把"多保守"从玄学变成参数。
 
-**Shield 不破坏收敛**（Q3 的答案）：post-shield 下，learner 面对的仍是一个 MDP——只是转移函数被 shield"修正"了（ $P'(s'|s,a)=P(s'|s,S(s,a))$ ）。Alshiekh 的收敛论证依赖两点：① shield 是**确定性反应式系统**（给定 \$(s,a)\$ 输出唯一），修正后的环境仍满足 Markov 性；② minimal intervention 保证"安全动作原样通过"，最优安全策略在修正 MDP 中仍可达。换句话说，shield 没有缩小**安全策略类**，只剪掉了注定违反的枝——Q-learning 的收敛定理照用。
+**Shield 不破坏收敛**（Q3 的答案）：post-shield 下，learner 面对的仍是一个 MDP——只是转移函数被 shield"修正"了（ $P'(s'|s,a)=P(s'|s,S(s,a))$ ）。Alshiekh 的收敛论证依赖两点：① shield 是**确定性反应式系统**（给定 $(s,a)$ 输出唯一），修正后的环境仍满足 Markov 性；② minimal intervention 保证"安全动作原样通过"，最优安全策略在修正 MDP 中仍可达。换句话说，shield 没有缩小**安全策略类**，只剪掉了注定违反的枝——Q-learning 的收敛定理照用。
 
 **贯穿例子：人形双臂端热汤（厨房帮手）**
 - CMDP 层： $\mathbb{E}[\text{汤洒出量}]\le d$ ——"平均别洒"，训练目标。

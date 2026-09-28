@@ -24,7 +24,7 @@ Influence Functions 要 $H^{-1}$ ，贵、不稳、非凸不成立。作者问�
 
 ### 2. Data Pipeline
 - 训练时存 $K$ 个 checkpoint $\theta_{t_1}... \theta_{t_K}$ ，学习率 $\eta_t$
-- 对任一训练点 $z$ 和测试点 \$z'\$：
+- 对任一训练点 $z$ 和测试点 $z'$ ：
   $$ TracIn(z,z') = \sum_{t} \eta_t \nabla L(z',\theta_t)^T \nabla L(z,\theta_t) $$
 - 实际用 TracInCP：只用 checkpoint，忽略同一 checkpoint 内不同 step 的差异，batch 内近似
 - Self-influence： $z'=z$ 时，分数越高，模型越靠死记这条点才能记住它
@@ -71,7 +71,7 @@ Influence Functions 要 $H^{-1}$ ，贵、不稳、非凸不成立。作者问�
 
 这篇真正解决的 data 问题是：**能否不做逐点删数重训、也不求 Hessian 逆，而直接从已经发生的训练轨迹中估计“某条训练数据在什么时候、朝哪个方向改变了某个目标样本的 loss”？**
 
-TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改写成“训练过程中，每次用到这条数据时，它给目标 loss 带来了多少局部变化”。因此它衡量的不是数据的静态质量，而是一个依赖 **目标样本、模型状态和训练路径** 的关系量。对目标 \$z'\$ 为正，表示该训练点在轨迹上总体与降低 \$z'\$ 的 loss 同向（proponent）；为负则表示总体抬高了 \$z'\$ 的 loss（opponent）。这使数据审计从只看规则、loss 或 embedding 相似度，推进到“这条数据实际上怎样推动了训练”。
+TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改写成“训练过程中，每次用到这条数据时，它给目标 loss 带来了多少局部变化”。因此它衡量的不是数据的静态质量，而是一个依赖 **目标样本、模型状态和训练路径** 的关系量。对目标 $z'$ 为正，表示该训练点在轨迹上总体与降低 $z'$ 的 loss 同向（proponent）；为负则表示总体抬高了 $z'$ 的 loss（opponent）。这使数据审计从只看规则、loss 或 embedding 相似度，推进到“这条数据实际上怎样推动了训练”。
 
 ### 2. 图谱位置
 

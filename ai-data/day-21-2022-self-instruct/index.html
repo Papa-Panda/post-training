@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -61,6 +62,9 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
@@ -157,7 +161,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>
 <p>对之前 Day X 的直接对比：</p>
 </li>
-<li>vs Day06 Phi-1：同合成但源头不同，Phi-1 6B 精筛 web + 1B GPT-3.5 教科书重写质量极高，Self-Instruct 175 人工种子自举质量中但零外部依赖，HumanEval 1.3B Phi-1 50.6% vs Self-Instruct 52k SFT 7B 仅 33% SuperNI，但 Phi-1 成本 \$10k+，Self-Instruct \$100，coding 上 OSS-Instruct 融合二者：开源种子+自举+exec 验证</li>
+<li>vs Day06 Phi-1：同合成但源头不同，Phi-1 6B 精筛 web + 1B GPT-3.5 教科书重写质量极高，Self-Instruct 175 人工种子自举质量中但零外部依赖，HumanEval 1.3B Phi-1 50.6% vs Self-Instruct 52k SFT 7B 仅 33% SuperNI，但 Phi-1 成本 $10k+，Self-Instruct $100，coding 上 OSS-Instruct 融合二者：开源种子+自举+exec 验证</li>
 <li>vs Day12 SuperFiltering：SuperFiltering 用 125M 弱模型 IFD 选 5% 打赢全量，前提池是 Alpaca 52k (Self-Instruct 产物)，Self-Instruct 52k→SuperFiltering 3k 串联时 IFD 分布：弱模型 IFD 高即 Self-Instruct 难例，ROUGE-L 去重 &lt;0.7 的 Self-Instruct 子集 IFD 更高多样更好</li>
 <li>vs Day17 LIMO / Day18 s1 / Day23 LIMA：LIMO 817、s1 1k、LIMA 1k 都是极精选，Self-Instruct 52k 是其母集，过滤率 52k→1k 约 98% 被丢，LIMO 难度分层 0.8% 阈值对应 Self-Instruct ROUGE-L&lt;0.7 + 人工质量复核，二者过滤哲学一致但 LIMA/LIMO 强调人工质量门禁</li>
 <li>vs Day20 DEITA：DEITA 复杂度×质量×多样三因子可直接评 Self-Instruct 52k，DEITA scorer 在 Self-Instruct 52k 上 top 6k 的 MT-Bench 7.22 vs 全量 52k 5.1，证明 Self-Instruct 含 80% 低质重复，需二次洗，与 Day16 Qwen-Coder 三级瀑布同理</li>
@@ -185,7 +189,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>对你现在 coding data 工作的 1-2 个直接可试的点：</li>
 <li>coding 自举：用 175 条 hand-curated code 指令种子 (含 50 条 StackOverflow 高赞问答改写+125 条 text-to-code 模板)，8-shot Self-Instruct 循环让 Qwen2.5-Coder-32B 自生成 10k code 指令，再经 parser+exec 三级瀑布 (Day16) 洗不可编译 40%，得 6k coding Self-Instruct 池，可直接对标 OSS-Instruct 75k 的轻量版</li>
 <li>串联 LIMA/LIMO：52k 自生成后用 DEITA 三因子 (复杂度×质量×多样) 二次选 1k，复用 LIMA 1k 高质假说，验证 coding 上 1k 精选是否打赢 52k 全量，今晚先跑 52k→1k 的 Vendi+ROUGE-L 双去重小实验</li>
-<li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：Self-Instruct 流水线极轻：175 种子+单 175B 模型 API 52k 次调用，2022 成本 \$100，今 Qwen2.5-32B 本地 A100 52k 生成约 2 小时 \$20，可嵌 nightly 跑 175→52k→6k 流水线，评测用 SuperNI ROUGE-L + Exec 通过率 + DEITA 三因子作质量门禁，ai-data sheet 自动算有效样本数</li>
+<li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：Self-Instruct 流水线极轻：175 种子+单 175B 模型 API 52k 次调用，2022 成本 $100，今 Qwen2.5-32B 本地 A100 52k 生成约 2 小时 $20，可嵌 nightly 跑 175→52k→6k 流水线，评测用 SuperNI ROUGE-L + Exec 通过率 + DEITA 三因子作质量门禁，ai-data sheet 自动算有效样本数</li>
 </ul>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
@@ -260,7 +264,7 @@ Self-Instruct is a nearly annotation-free method — the only human effort is 17
 <p>相关讨论（Gemini 网页版，2026-09-21）：https://gemini.google.com/app/7fb9bc28b9820578</p>
 <p>论文原文：https://arxiv.org/abs/2212.10560</p>
 <p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/NOTES.md</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -271,6 +275,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

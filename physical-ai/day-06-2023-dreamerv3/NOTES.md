@@ -220,8 +220,8 @@ $$\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow \text{ima
 
 | 维度 | Genie 1 | UniSim | DreamerV3 |
 |---|---|---|---|
-| 数据 | 无动作标签视频 | 多源图像/视频 + 显式动作 | agent replay：\$o,a,r,c\$ |
-| 状态 | 离散视觉 tokens + 历史 | 最近视频帧 | RSSM belief \$(h,z)\$ |
+| 数据 | 无动作标签视频 | 多源图像/视频 + 显式动作 | agent replay：$o,a,r,c$ |
+| 状态 | 离散视觉 tokens + 历史 | 最近视频帧 | RSSM belief $(h,z)$ |
 | 动作 | 无监督 latent code | 语言、相机、机器人动作 | 环境定义 action |
 | transition | ST Transformer + MaskGIT | video diffusion | recurrent latent prior |
 | 输出 | 下一帧视觉 tokens | 下一段视频 | latent、reward、continue |

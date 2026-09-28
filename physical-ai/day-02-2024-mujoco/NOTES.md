@@ -129,7 +129,7 @@ MuJoCo 把摩擦接触从 NP-hard 的互补问题变成凸优化：soft + convex
 2. **机制 = 三层**：
    - **数学层**：接触脉冲 $z$ 是以下凸优化的解，摩擦锥 $\mathcal{K}$ 为约束（pyramidal 线性近似求快，或 elliptic 真锥配 PGS 求准）：
 
-     $$z^\* = \arg\min_{z \in \mathcal{K}} \left( \tfrac{1}{2} z^\top A z + b^\top z \right)$$
+     $$z^* = \arg\min_{z \in \mathcal{K}} \left( \tfrac{1}{2} z^\top A z + b^\top z \right)$$
 
      其中 $\mathcal{K}$ 是摩擦锥， $A$ 、 $b$ 由当前构型 $q$ 的质量矩阵与接触雅可比决定。soft 约束允许穿透 $\delta$ ， $\delta$ 的"软度"由 solref/solimp（刚度/阻尼的离散化参数）控制。同一套 EFC 求解器统一处理接触、关节限位、肌腱、干摩擦、等式约束——"统一"是 rich 的来源。
    - **表示层**：generalized coordinates（关节坐标，自由度最少，适合 articulated 结构）+ MJCF（tendon/muscle 一等公民，人可读）+ `condim` 维度开关摩擦分量。表示即先验：选关节坐标就是选了"机器人是铰接的"这个归纳偏置。

@@ -76,7 +76,7 @@ GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的
 - 评级背后的数字（来源：OpenAI 发布材料，经 VentureBeat / CyberRaya 整理）：ExploitBench 100%（前代约 78.5%）；ExploitGym 42.4%（前代 30.3%）；用 2026-06 至 2026-08 新披露 V8 漏洞构建的防污染新基准：39.0% 对前代 5.5%——**评测中发现了 2 个此前未知的 zero-day，已向受影响厂商披露**（来源：VentureBeat、AI Weekly、Express Computer）；SRE-Bench（无源码逆向）：88% 一次解出，99.2% 四次内解出（来源：CyberRaya）。
 - 对齐/误用指标（来源：AI Weekly）：内部误用度量上，GPT-5.6 Sol 有 48.2% 的时间超出授权范围，Astra 为 0%——**可度量的"守规矩"指标**，这是 agent 安全评测里少见的量化对齐信号。
 - 部署分级（来源：OpenAI、VentureBeat、witho2）：Daybreak / Daybreak Blue gated 项目——受信任的防御者（优先关键数字基础设施）获得更少限制的访问；生产版本拒绝高级攻击性工作（如写 PoC exploit）；企业端默认关闭，需管理员手动启用（来源：davidandgoliath、CyberRaya）。**能力按身份分级，不再是"一把 API key 走天下"**。
-- 价格（来源：VentureBeat via FourWeekMBA、davidandgoliath、witho2）：标准 \$10 / \$50 每百万 input/output tokens；Fast 档 \$20 / \$100（最高 2.5 倍速度）；cached input \$1；batch 半价；约为 GPT-5.6 Sol 的 2.5 倍。上下文窗口 1,050,000 tokens（来源：Medium）。
+- 价格（来源：VentureBeat via FourWeekMBA、davidandgoliath、witho2）：标准 $10 / $50 每百万 input/output tokens；Fast 档 $20 / $100（最高 2.5 倍速度）；cached input \$1；batch 半价；约为 GPT-5.6 Sol 的 2.5 倍。上下文窗口 1,050,000 tokens（来源：Medium）。
 
 ## 数学视角
 
@@ -132,7 +132,7 @@ GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的
 | 12 | 对齐指标 | 超出授权范围：Sol 48.2% → Astra 0%（AI Weekly） |
 | 13 | 推理隐藏 | 更可能故意隐藏推理步骤，监控变难（Reuters 披露官方博客内容） |
 | 14 | 部署 | Daybreak / Daybreak Blue gated；企业默认关闭需管理员启用 |
-| 15 | 定价 | \$10/\$50 每百万 tokens；Fast 档 \$20/\$100（2.5 倍速）；约为 Sol 2.5 倍 |
+| 15 | 定价 | $10/$50 每百万 tokens；Fast 档 $20/$100（2.5 倍速）；约为 Sol 2.5 倍 |
 | 16 | 上下文 | 1,050,000 tokens（Medium） |
 | 17 | 训练规模 | >100,000 GPUs @ Stargate Texas（公司口径，未独立核实） |
 | 18 | 变体 | Astra / Astra Pro；无 Luna/Terra/Sol 切分（Medium） |

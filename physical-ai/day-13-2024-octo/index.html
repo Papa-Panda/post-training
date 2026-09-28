@@ -163,7 +163,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>$$E=T_\theta([\mathcal T_c,\mathcal T_{o,t-H_o+1},\ldots,\mathcal T_{o,t},\mathcal T_{R,t}];M)\in\mathbb R^{B\times L\times D}.$$</p>
 <ul>
 <li>$B$ 是 batch size，预训练为 2048； $L$ 是所有 task/observation/readout token 数，随相机和 mask 改变。</li>
-<li>$D=384$ （Octo-Small，27M 参数）或 \$768\$（Octo-Base，93M 参数），两者都是 12 层 Transformer。</li>
+<li>$D=384$ （Octo-Small，27M 参数）或 $768$（Octo-Base，93M 参数），两者都是 12 层 Transformer。</li>
 <li>第三人称图像缩放为 $256\times256$ ，经 $16\times16$ patch 得到 256 个 image tokens；腕部图像为 $128\times128$ ，得到 64 个 tokens；T5-base 产生 16 个 language tokens。</li>
 <li>$M$ 是 block-wise attention mask：观测 token 只看任务条件和当前/过去时间步；缺失语言、腕部相机等模态被 mask；readout token $\mathcal T_{R,t}$ 可以读取上下文，却不反向污染输入 token。</li>
 </ul>

@@ -15,7 +15,7 @@
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-15-2023-open-x-embodiment-rtx
 
 ## 一句话总结
-OXE 把机器人学的"数据孤岛"问题变成"格式统一"问题：60 个数据集、22 种 embodiment、100 万+ 轨迹、527 个技能（160,266 个任务）全部转成 RLDS 格式，动作统一到 7 维末端执行器接口（\$x,y,z\$, roll, pitch, yaw, gripper），然后**不做任何显式的 embodiment-gap 对齐机制**，直接在混合数据上训练 RT-1-X（35M）与 RT-2-X（55B PaLI-X）；3600 次真实机器人评测证明跨机器人**正向迁移真实存在**：小数据域平均 +50%，RT-2-X 在别的机器人数据里的技能上相对 RT-2 提升约 3 倍（emergent skills 27.3% → 75.8%）。
+OXE 把机器人学的"数据孤岛"问题变成"格式统一"问题：60 个数据集、22 种 embodiment、100 万+ 轨迹、527 个技能（160,266 个任务）全部转成 RLDS 格式，动作统一到 7 维末端执行器接口（$x,y,z$, roll, pitch, yaw, gripper），然后**不做任何显式的 embodiment-gap 对齐机制**，直接在混合数据上训练 RT-1-X（35M）与 RT-2-X（55B PaLI-X）；3600 次真实机器人评测证明跨机器人**正向迁移真实存在**：小数据域平均 +50%，RT-2-X 在别的机器人数据里的技能上相对 RT-2 提升约 3 倍（emergent skills 27.3% → 75.8%）。
 
 ## 和之前工作的关系
 

@@ -5,7 +5,7 @@
 ## 准确术语
 
 - **GEMM (General Matrix Multiply)**：通常指 $C\leftarrow\alpha\,op(A)op(B)+\beta C$ ；本课自写 kernel 固定为 row-major、 $\alpha=1,\beta=0$ 、不转置的 $C=AB$ 。
-- **Tile / blocking**：把 \$M,N,K\$ 三个循环按块组织，使一块输入在更近的 memory hierarchy 中被多次使用。
+- **Tile / blocking**：把 $M,N,K$ 三个循环按块组织，使一块输入在更近的 memory hierarchy 中被多次使用。
 - **CTA / thread block tile**：一个 CUDA block 协作计算的输出子矩阵；本课是 $16\times16$ 。
 - **Register accumulator**：每个 thread 的局部 `acc`；遍历所有 $K$ tiles 后才写 global $C$ 。
 - **Arithmetic intensity**：算法工作量 FLOPs 除以数据移动 bytes；必须注明在哪一级 memory 与如何计数。本课只给理想 FP32 global payload model，不冒充 DRAM counter。
@@ -40,10 +40,10 @@ for i in [0, M):
     C[i,j] = acc
 ```
 
-- 输出元素：\$MN\$；
+- 输出元素：$MN$ ；
 - 每元素： $K$ 次乘法和 $K$ 次累加到 zero-initialized accumulator；
 - conventional count： $2MNK$ FLOPs；
-- 数学上若把第一个 product 直接赋值，可写 \$MNK\$ multiplies 与 $MN(K-1)$ adds，但 GEMM 性能口径仍通常用 $2MNK$ 。
+- 数学上若把第一个 product 直接赋值，可写 $MNK$ multiplies 与 $MN(K-1)$ adds，但 GEMM 性能口径仍通常用 $2MNK$ 。
 
 ## 可手算例子 1：数值正确性
 
@@ -136,7 +136,7 @@ CUDA kernel 对 $M/N/K$ 非 16 整除时，把 out-of-bounds shared entries 置 
 ## 真机验证协议（尚未执行）
 
 - 记录 GPU 型号、SM、clock/power policy、driver、CUDA/cuBLAS 版本；
-- 固定 \$M,N,K\$、dtype/layout、tile、warmups=5、repeats=21；
+- 固定 $M,N,K$、dtype/layout、tile、warmups=5、repeats=21；
 - 保存完整编译命令与原始 stdout；
 - 分别报告 median kernel ms 与按 $2MNK/t$ 计算的 TFLOP/s；
 - 报告相对 cuBLAS ratio，同时保存 `max_abs_error_vs_cublas`；

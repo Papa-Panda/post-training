@@ -74,11 +74,11 @@ Bridge V2 的采集协议（三件套：每场景多任务可行、不 reset 连
 
 Bridge 的关键消融把"多样性"和"数据量"解耦：28k 轨迹 / 3 skills vs 27k 轨迹 / 13 skills， $N$ 相当，未见 pick-and-place 成功率 0.30 → 0.65。注意这比"加数据"更强：** $N$ 固定时，多样性本身带来超过 2 倍增益**。
 
-机制解释（多任务表示学习）：设共享编码器 $\varphi: o \mapsto z$ ， $z$ 是视觉-运动表征，策略 $\pi(a \mid z, c)$ 。13 个技能共享 $\varphi$ 和底层原语（抓取几何、接触前对齐、手眼协调）；sweeping / folding 的数据虽然任务不同，但它们把 $\varphi$ 的训练支撑撑大，让未见 pick-and-place 的观测 \$o'\$ 落进已见支撑——于是 $d(P_{\text{test}}, \text{supp}(P_{\text{train}}))$ 缩小。这是 Q2 的答案：不是"sweeping 教会了 pick-and-place 扫地"，而是"所有技能合起来把表征的支撑铺得更宽"；也是 Day16"支撑扩张 > 单点加密"在 skill 轴上的版本。
+机制解释（多任务表示学习）：设共享编码器 $\varphi: o \mapsto z$ ， $z$ 是视觉-运动表征，策略 $\pi(a \mid z, c)$ 。13 个技能共享 $\varphi$ 和底层原语（抓取几何、接触前对齐、手眼协调）；sweeping / folding 的数据虽然任务不同，但它们把 $\varphi$ 的训练支撑撑大，让未见 pick-and-place 的观测 $o'$ 落进已见支撑——于是 $d(P_{\text{test}}, \text{supp}(P_{\text{train}}))$ 缩小。这是 Q2 的答案：不是"sweeping 教会了 pick-and-place 扫地"，而是"所有技能合起来把表征的支撑铺得更宽"；也是 Day16"支撑扩张 > 单点加密"在 skill 轴上的版本。
 
 ### 4) 次优数据的双面性：BC 要分布匹配，offline RL 要分布覆盖
 
-16% 脚本化 pick-and-place 数据（高随机、常失败）：对 BC 是标签噪声—— $\mathcal{L}_{\text{BC}}$ 会把它当专家拟合，稀释 $p_{\text{expert}}(a \mid o, c)$ ；对 CRL 这类 offline RL 是覆盖礼物—— $Q(o, a, g)$ 的估计需要在 \$(o, a)\$ 空间有支撑，随机策略的宽覆盖缓解了 value 外推高估。形式化：BC 要的是**分布匹配**（mode 越干净越好），offline RL 要的是**分布覆盖**（ $\text{supp}(p_{\text{data}})$ 越宽，value 在越宽的动作上被约束）。论文明说次优数据可被 offline RL 利用——数据论文里少见的诚实：**同一批数据对不同算法家族价值符号相反**，采集时就想好"这批数据是给谁吃的"。
+16% 脚本化 pick-and-place 数据（高随机、常失败）：对 BC 是标签噪声—— $\mathcal{L}_{\text{BC}}$ 会把它当专家拟合，稀释 $p_{\text{expert}}(a \mid o, c)$ ；对 CRL 这类 offline RL 是覆盖礼物—— $Q(o, a, g)$ 的估计需要在 $(o, a)$ 空间有支撑，随机策略的宽覆盖缓解了 value 外推高估。形式化：BC 要的是**分布匹配**（mode 越干净越好），offline RL 要的是**分布覆盖**（ $\text{supp}(p_{\text{data}})$ 越宽，value 在越宽的动作上被约束）。论文明说次优数据可被 offline RL 利用——数据论文里少见的诚实：**同一批数据对不同算法家族价值符号相反**，采集时就想好"这批数据是给谁吃的"。
 
 ### 5) 和系统实现的对应
 
@@ -101,7 +101,7 @@ Bridge 的关键消融把"多样性"和"数据量"解耦：28k 轨迹 / 3 skills
 3. **Training / Data Details**: 60,096 轨迹 / 24 环境 / 13 技能 / 100+ 物体；CC-BY 4.0；TFRecord + TFDS RLDS 双格式；评测 6 种方法（GCBC、D-GCBC、ACT、CRL、LCBC、RT-1），10 trials/任务；Sim 数据：无；Reward：纯 BC / 对比 RL，无外部 reward。
 4. **Key Tricks**（3个最值得抄的）:
    - **"多任务可行"采集协议**：不预设任务清单、不 reset，让采集员在场景里做任何可行的事——用数据分布设计（ $H(\text{task} \mid o)$ 高）代替 loss 设计，逼策略真正使用任务条件。这是数据 infra 里最便宜的归纳偏置。
-   - **脚本化次优数据当 RL 的覆盖礼物**：9,731 条高随机 pick-and-place 对 BC 是噪声、对 offline RL 是 \$(o, a)\$ 覆盖——采集时就想好"这批数据是给谁吃的"，一种数据、两种算法价值。
+   - **脚本化次优数据当 RL 的覆盖礼物**：9,731 条高随机 pick-and-place 对 BC 是噪声、对 offline RL 是 $(o, a)$ 覆盖——采集时就想好"这批数据是给谁吃的"，一种数据、两种算法价值。
    - **等量消融钉死多样性因果**：28k/3-skills vs 27k/13-skills， $N$ 相当时多样性带来 0.30 → 0.65——数据论文的 claim 就该这么做对照（对比 Day15 OXE 没公开混合权重、Day16 DROID 没做等量消融）。
 5. **Results**: seen 任务上目标条件方法相当（平均约 0.41–0.49）、RT-1 碾压 LCBC（0.49 vs 0.23）；未见物体/环境非零成功，语言方法在未见物体名上吃亏；跨机构 zero-shot 全部非零，RT-1 退化最小（0.47 → 0.40）；模型容量上升严格单调增益；数据量上升 seen + unseen 都增益；技能多样性 13 vs 3：未见 pick-and-place 0.30 → 0.65。
 

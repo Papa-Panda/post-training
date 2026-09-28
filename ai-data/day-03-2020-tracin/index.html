@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -61,6 +62,9 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
@@ -135,7 +139,7 @@ pre code{background:none;padding:0;color:inherit}
 <h3>2. Data Pipeline</h3>
 <ul>
 <li>训练时存 $K$ 个 checkpoint $\theta_{t_1}... \theta_{t_K}$ ，学习率 $\eta_t$</li>
-<li>对任一训练点 $z$ 和测试点 \$z'\$：
+<li>对任一训练点 $z$ 和测试点 $z'$ ：
   $$ TracIn(z,z') = \sum_{t} \eta_t \nabla L(z',\theta_t)^T \nabla L(z,\theta_t) $$</li>
 <li>实际用 TracInCP：只用 checkpoint，忽略同一 checkpoint 内不同 step 的差异，batch 内近似</li>
 <li>Self-influence： $z'=z$ 时，分数越高，模型越靠死记这条点才能记住它</li>
@@ -191,7 +195,7 @@ pre code{background:none;padding:0;color:inherit}
 <section class="sec" id="sec-7"><h2><span class="n">7</span>第二轮复习（2026-09-03）</h2>
 <h3>1. 核心命题</h3>
 <p>这篇真正解决的 data 问题是：<strong>能否不做逐点删数重训、也不求 Hessian 逆，而直接从已经发生的训练轨迹中估计“某条训练数据在什么时候、朝哪个方向改变了某个目标样本的 loss”？</strong></p>
-<p>TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改写成“训练过程中，每次用到这条数据时，它给目标 loss 带来了多少局部变化”。因此它衡量的不是数据的静态质量，而是一个依赖 <strong>目标样本、模型状态和训练路径</strong> 的关系量。对目标 \$z'\$ 为正，表示该训练点在轨迹上总体与降低 \$z'\$ 的 loss 同向（proponent）；为负则表示总体抬高了 \$z'\$ 的 loss（opponent）。这使数据审计从只看规则、loss 或 embedding 相似度，推进到“这条数据实际上怎样推动了训练”。</p>
+<p>TracIn 把 influence 从 Day 02 的“最终解附近删掉一点会怎样”改写成“训练过程中，每次用到这条数据时，它给目标 loss 带来了多少局部变化”。因此它衡量的不是数据的静态质量，而是一个依赖 <strong>目标样本、模型状态和训练路径</strong> 的关系量。对目标 $z'$ 为正，表示该训练点在轨迹上总体与降低 $z'$ 的 loss 同向（proponent）；为负则表示总体抬高了 $z'$ 的 loss（opponent）。这使数据审计从只看规则、loss 或 embedding 相似度，推进到“这条数据实际上怎样推动了训练”。</p>
 <h3>2. 图谱位置</h3>
 <ul>
 <li><strong>前驱 — Day 02 Influence Functions</strong>：Influence Functions 在终点 $\hat\theta$ 附近用 $-g_{z'}^\top H^{-1}g_z$ 近似 upweight / delete-one 的反事实，优点是问题定义清晰并有曲率校正，代价是依赖局部最优、Hessian 逆与 damping。TracIn 不回答同一个反事实；它沿实际优化路径累计贡献，不要求收敛，也不需要 $H^{-1}$ 。</li>
@@ -320,7 +324,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>$$S_{\text{IF}}=\sum_i\frac{a_i b_i}{\lambda_i},\qquad S_{\text{TracIn}}\propto\sum_i a_i b_i$$</p>
 <p>TracIn 对所有方向做普通点积；Influence 用 $1/\lambda_i$ 做曲率校正。Influence 是<strong>一次扰动经未来优化传播后的总效果</strong>，TracIn 是<strong>真实训练路径上的即时记账</strong>（真实 trajectory 隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式精确的 $H^{-1}$ ）。</p>
 <p>一句话：<strong>TracIn 是 loss 降幅的训练路径分解；Influence 是删点权重变化的重新优化响应。</strong></p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-03-2020-tracin/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-03-2020-tracin/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -331,6 +335,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

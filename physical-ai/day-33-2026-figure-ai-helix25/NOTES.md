@@ -53,7 +53,7 @@ Figure Helix 2.5（2026-09-17）：一台 Figure 03 人形机器人，用**同�
 - **采集方式**：Creators 戴 sensor headset 第一视角记录家务/工作（Humanoids Daily），或在 app 里雇 gig worker 上门做家务并拍摄（Humanoids Daily）。动机：Figure 先试过从外部供应商买数据，Adcock 原话 "We went out and bought a bunch of stuff and it was just crap"（Humanoids Daily livestream 转述）——有用数据需要传感器对齐（和机器人观测/动作空间匹配）、清洗和反欺诈，不只是小时数。
 - **训练配方**（Techtimes / bytevyte 转述官方）：从 **random weights 初始化，完全在 Index 上预训练**（没有 LLM base、没有环境特异的演示），然后用少量任务数据适配出三个 whole-body 行为。受控对照：同一架构、同一任务数据、同一评测设置，唯一变量是有无 Index 预训练 → 56% vs 9%。Techtimes 评价：这个单变量对照才是公告的技术心脏，不是 56% 本身。
 - **硬件不变**：Figure 03（173cm，61kg），纯软件更新（Techtimes）。30 间房用同一份冻结 checkpoint，"one fixed checkpoint, the same weights, in every single home"（StartupFortune 转述官方）。
-- **算力配套（Nscale，2026-09-03）**：初始 \$3.5B，意向扩到 \$6B+；最多 100,000 NVIDIA Vera Rubin GPUs；首批 H2 2027 上线，Barstow, Texas；Nscale 成为 Figure 优先算力供应商 + 战略入股 Figure；探索用人形机器人做 Nscale 供应链（Reuters 通稿，经 SRN News / Intelligent CIO）。Jensen Huang 口径："physical AI flywheel"——Vera Rubin 训练 → Isaac Sim 验证 → Figure 机器人端侧 NVIDIA GPU 部署。**注意限定词**：全是 "potential / intent"，第一批 GPU 要到 2027 下半年（The Weighted Average）——这是算力/融资新闻，不是技术证据，不进技术结论的分母。
+- **算力配套（Nscale，2026-09-03）**：初始 $3.5B，意向扩到 $6B+；最多 100,000 NVIDIA Vera Rubin GPUs；首批 H2 2027 上线，Barstow, Texas；Nscale 成为 Figure 优先算力供应商 + 战略入股 Figure；探索用人形机器人做 Nscale 供应链（Reuters 通稿，经 SRN News / Intelligent CIO）。Jensen Huang 口径："physical AI flywheel"——Vera Rubin 训练 → Isaac Sim 验证 → Figure 机器人端侧 NVIDIA GPU 部署。**注意限定词**：全是 "potential / intent"，第一批 GPU 要到 2027 下半年（The Weighted Average）——这是算力/融资新闻，不是技术证据，不进技术结论的分母。
 
 ### 3. 结果：官方记分卡 vs 独立视角
 - **官方**：420 试验，237 成功 = 56%（Figure 官方；TechRepublic / Humanoids Daily 转述）。分任务：铺床 94/140（67%），叠毛巾 87/140（62%），收拾客厅玩具 56/140（40%）（Sebertech / StartupFortune 转述官方图表）。判分严格：必须完整完成；收拾玩具要求 13–15 个玩具全部进篮子；safety intervention 记为失败（StartupFortune / Sebertech）。
@@ -128,7 +128,7 @@ Figure Helix 2.5（2026-09-17）：一台 Figure 03 人形机器人，用**同�
 | 15 | Index 多样性 | 每 1k 小时：373 tasks / 1146 objects / 116 envs（官方口径） |
 | 16 | Index 管线 | 自动过滤 → fraud review → 去重 → task-quota 再平衡 → hierarchical captioning |
 | 17 | Index 动机 | 外部供应商数据 "it was just crap"（Adcock）；未来 12 个月投 \$1B+ 数据+算力，采集扩 100x |
-| 18 | Nscale 协议 | 2026-09-03；初始 \$3.5B，意向 \$6B+；最多 100k Vera Rubin GPU（Reuters/Bloomberg corroborated） |
+| 18 | Nscale 协议 | 2026-09-03；初始 $3.5B，意向 $6B+；最多 100k Vera Rubin GPU（Reuters/Bloomberg corroborated） |
 | 19 | Nscale 条款 | 首批 H2 2027，Barstow, Texas；Nscale 优先算力商 + 战略入股；探索人形机器人进其供应链 |
 | 20 | Nscale 限定词 | 全是 potential/intent；第一批 GPU 2027 下半年才上线（非技术证据） |
 | 21 | Adcock 路线 | 四章：造机器 → 做自主 → 扩智能 → 扩生产；自认处在扩智能章开头 |

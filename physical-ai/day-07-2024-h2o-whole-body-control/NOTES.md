@@ -43,7 +43,7 @@ Day07 路线图进入 humanoid whole-body control。H2O 的价值不只是“动
 3. **Training / Data Details**：
    - 数据来自 AMASS 的约 13k motion sequences；启发式预过滤与 retargeting 后约 10k，再由 privileged imitator 过滤为约 8.5k feasible sequences。
    - Reward = penalty + regularization + task imitation。虽然 observation 只含 8 个目标 keypoints，训练 reward 对全部 joints / bodies 提供 DoF position/velocity、body position/rotation/linear/angular velocity 六类 dense signal。
-   - Sim2Real 随机化覆盖 friction $U(0.2,1.1)$ 、base CoM offset $U(-0.1,0.1)$ m、link mass \$0.7\$– $1.3\times$ 、PD gains \$0.75\$– $1.25\times$ 、torque noise、20–60 ms control delay、每 5 s 横向 push 及 flat/rough/low-obstacle terrain。
+   - Sim2Real 随机化覆盖 friction $U(0.2,1.1)$ 、base CoM offset $U(-0.1,0.1)$ m、link mass $0.7$– $1.3\times$ 、PD gains $0.75$– $1.25\times$ 、torque noise、20–60 ms control delay、每 5 s 横向 push 及 flat/rough/low-obstacle terrain。
    - Early termination：base height < 0.3 m、projected gravity 的 x/y 分量 > 0.7，或平均 link tracking distance > 0.5 m。
    - Verifiable signal：仿真中若任一时刻平均 body distance > 0.5 m，则判 imitation failure；同时报告 global / root-relative MPJPE 与 acceleration / velocity error。
 
