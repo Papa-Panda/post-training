@@ -83,3 +83,5 @@ graph TD
 ## 思考题
 1. Day34 的 Constitutional AI 也是 AI feedback——它用"宪法原则→self-critique→revision"定义对错，RLAIF 直接用 LLM 当偏好标注器：两者在"谁定义对错"上有何本质区别？coding data 里哪种更适合"哪个 patch 更好"这类偏好？
 2. Day35 的 PRM 花 800K 人工 step 标签换精度，RLAIF 证明 AI 标注可平替人工偏好：coding 的 code review 偏好数据，AI labeler 的对齐度天花板是人工互评一致率吗？CoT + 位置偏置对消这套 recipe 能直接搬吗？
+
+相关讨论（Gemini网页版，2026-09-28）：https://gemini.google.com/app/39e98a837a007ae1
