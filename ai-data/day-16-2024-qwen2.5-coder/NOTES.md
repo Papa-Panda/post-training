@@ -1,6 +1,6 @@
 # Paper 模板
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-16-2024-qwen2.5-coder/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-16-2024-qwen2.5-coder/
 
 > 复制这个模板到 `{name}/NOTES.md`（现在直接在 ai-data 下平铺，不再有 papers/ 中间层）
 

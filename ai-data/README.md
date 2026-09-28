@@ -10,30 +10,30 @@
 
 | Review | Date | Day | Paper | Status | 阅读版 |
 |---:|---|---:|---|---| --- |
-| 01/30 | 2026-09-01 | 01 | StarCoder2 / The Stack v2 数据策展入门 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-01-example-starcoder2/index.html) |
-| 02/30 | 2026-09-02 | 02 | Understanding Black-box Predictions via Influence Functions | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-02-2017-influence-functions/index.html) |
-| 03/30 | 2026-09-03 | 03 | Estimating Training Data Influence by Tracing Gradient Descent (TracIn) | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-03-2020-tracin/index.html) |
-| 04/30 | 2026-09-04 | 04 | LESS: Selecting Influential Data for Targeted Instruction Tuning | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/index.html) |
-| 05/30 | 2026-09-05 | 05 | DataInf: Efficiently Estimating Data Influence in LoRA-tuned LLMs and Diffusion Models | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-05-2024-datainf/index.html) |
-| 06/30 | 2026-09-06 | 06 | Textbooks Are All You Need (Phi-1) | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-06-2023-phi-1/index.html) |
-| 07/30 | 2026-09-07 | 07 | The Llama 3 Herd of Models / 15.6T 预训练数据瀑布 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-07-2024-llama3/index.html) |
-| 08/30 | 2026-09-08 | 08 | DeepSeek-V3 Technical Report / 14.8T MoE 数据配方 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/index.html) |
-| 09/30 | 2026-09-09 | 09 | Qwen2.5 Technical Report / 18T→1M SFT→多阶段RL 飞轮 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-09-2024-qwen2.5/index.html) |
-| 10/30 | 2026-09-10 | 10 | Llama 3.1 / 3.2 后训练数据引擎 / 多轮RS+DPO / 1B-3B蒸馏 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-10-2024-llama3.1-3.2/index.html) |
-| 11/30 | 2026-09-11 | 11 | LIMR: Less is More for RL Scaling / 学习轨迹对齐选 1,389 题 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-11-2025-limr/index.html) |
-| 12/30 | 2026-09-12 | 12 | SuperFiltering: Weak-to-Strong Data Filtering / 124M 算 IFD 筛 5% 打赢全量 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-12-2024-superfiltering/index.html) |
-| 13/30 | 2026-09-13 | 13 | DPO-Gap: 隐式奖励差选难偏好对 / 留 10% 打赢全量 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-13-2025-dpo-reward-gap/index.html) |
-| 14/30 | 2026-09-14 | 14 | StarCoder2 / The Stack v2: 900B+ 门禁代码底座 / 容量匹配配比 / repo-context | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-14-2024-starcoder2/index.html) |
-| 15/30 | 2026-09-15 | 15 | DeepSeek-R1 / <10k 冷启动+纯RL / (x,verifier) 数据范式 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-15-2025-deepseek-r1/index.html) |
-| 16/30 | 2026-09-16 | 16 | Qwen2.5-Coder / 5.2T 执行过滤分诊 / sandbox+checklist | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-16-2024-qwen2.5-coder/index.html) |
-| 17/30 | 2026-09-17 | 17 | LIMO: Less is More for Reasoning / 817 条认知模板 | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-17-2025-limo/index.html) |
-| 18/30 | 2026-09-18 | 18 | s1: Simple test-time scaling / 1k 长链 + budget forcing TTS | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-18-2025-s1/index.html) |
-| 19/30 | 2026-09-19 | 19 | Vendi Score / kernel 特征值熵多样性度量（标尺非流程；q 阶旋钮；kernel 即定义） | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/index.html) |
-| 20/30 | 2026-09-20 | 20 | DEITA: 复杂度×质量×多样性三因子自动选 6K（ $s = c \times q$ + Repr Filter；scaling 非单调） | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/index.html) |
-| 22/30 | 2026-09-22 | 22 | WizardLM / Evol-Instruct / 52K→250K 复杂度演化（70K 子集对 Vicuna；修正初读 70K 误读） | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-22-2023-evol-instruct/index.html) |
-| 21/30 | 2026-09-21 | 21 | Self-Instruct: 175 种子→52K bootstrap 合成指令源头（output-first 分类实例；ROUGE-L<0.7 去重；+33.1% SuperNI） | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/index.html) |
-| 23/30 | 2026-09-23 | 23 | LIMA: Less Is More for Alignment / 1k 高质策展（社区 750+手写 250；风格统一+τ=3 多样性；§5 消融：多样性/质量有效、数量 16 倍 plateau；打赢 52K Alpaca-65B） | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-23-2023-lima/index.html) |
-| 24/30 | 2026-09-24 | 24 | D4 / SemDeDup：语义近重复去除+原型式多样化剪枝（ $R = R_{dedup} \times R_{proto}$ ；OPT-125M 表示；20% 效率增益/16 任务最高 +2%；智能重复打赢基线） | ✅ 完成 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-24-2023-semdedup-d4/index.html) |
+| 01/30 | 2026-09-01 | 01 | StarCoder2 / The Stack v2 数据策展入门 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-01-example-starcoder2/) |
+| 02/30 | 2026-09-02 | 02 | Understanding Black-box Predictions via Influence Functions | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/) |
+| 03/30 | 2026-09-03 | 03 | Estimating Training Data Influence by Tracing Gradient Descent (TracIn) | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/) |
+| 04/30 | 2026-09-04 | 04 | LESS: Selecting Influential Data for Targeted Instruction Tuning | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/) |
+| 05/30 | 2026-09-05 | 05 | DataInf: Efficiently Estimating Data Influence in LoRA-tuned LLMs and Diffusion Models | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-05-2024-datainf/) |
+| 06/30 | 2026-09-06 | 06 | Textbooks Are All You Need (Phi-1) | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-06-2023-phi-1/) |
+| 07/30 | 2026-09-07 | 07 | The Llama 3 Herd of Models / 15.6T 预训练数据瀑布 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-07-2024-llama3/) |
+| 08/30 | 2026-09-08 | 08 | DeepSeek-V3 Technical Report / 14.8T MoE 数据配方 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-08-2024-deepseek-v3/) |
+| 09/30 | 2026-09-09 | 09 | Qwen2.5 Technical Report / 18T→1M SFT→多阶段RL 飞轮 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-09-2024-qwen2.5/) |
+| 10/30 | 2026-09-10 | 10 | Llama 3.1 / 3.2 后训练数据引擎 / 多轮RS+DPO / 1B-3B蒸馏 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-10-2024-llama3.1-3.2/) |
+| 11/30 | 2026-09-11 | 11 | LIMR: Less is More for RL Scaling / 学习轨迹对齐选 1,389 题 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-11-2025-limr/) |
+| 12/30 | 2026-09-12 | 12 | SuperFiltering: Weak-to-Strong Data Filtering / 124M 算 IFD 筛 5% 打赢全量 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/) |
+| 13/30 | 2026-09-13 | 13 | DPO-Gap: 隐式奖励差选难偏好对 / 留 10% 打赢全量 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-13-2025-dpo-reward-gap/) |
+| 14/30 | 2026-09-14 | 14 | StarCoder2 / The Stack v2: 900B+ 门禁代码底座 / 容量匹配配比 / repo-context | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-14-2024-starcoder2/) |
+| 15/30 | 2026-09-15 | 15 | DeepSeek-R1 / <10k 冷启动+纯RL / (x,verifier) 数据范式 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-15-2025-deepseek-r1/) |
+| 16/30 | 2026-09-16 | 16 | Qwen2.5-Coder / 5.2T 执行过滤分诊 / sandbox+checklist | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-16-2024-qwen2.5-coder/) |
+| 17/30 | 2026-09-17 | 17 | LIMO: Less is More for Reasoning / 817 条认知模板 | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-17-2025-limo/) |
+| 18/30 | 2026-09-18 | 18 | s1: Simple test-time scaling / 1k 长链 + budget forcing TTS | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-18-2025-s1/) |
+| 19/30 | 2026-09-19 | 19 | Vendi Score / kernel 特征值熵多样性度量（标尺非流程；q 阶旋钮；kernel 即定义） | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-19-2023-vendi-score/) |
+| 20/30 | 2026-09-20 | 20 | DEITA: 复杂度×质量×多样性三因子自动选 6K（ $s = c \times q$ + Repr Filter；scaling 非单调） | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-20-2023-deita/) |
+| 22/30 | 2026-09-22 | 22 | WizardLM / Evol-Instruct / 52K→250K 复杂度演化（70K 子集对 Vicuna；修正初读 70K 误读） | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/) |
+| 21/30 | 2026-09-21 | 21 | Self-Instruct: 175 种子→52K bootstrap 合成指令源头（output-first 分类实例；ROUGE-L<0.7 去重；+33.1% SuperNI） | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/) |
+| 23/30 | 2026-09-23 | 23 | LIMA: Less Is More for Alignment / 1k 高质策展（社区 750+手写 250；风格统一+τ=3 多样性；§5 消融：多样性/质量有效、数量 16 倍 plateau；打赢 52K Alpaca-65B） | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/) |
+| 24/30 | 2026-09-24 | 24 | D4 / SemDeDup：语义近重复去除+原型式多样化剪枝（ $R = R_{dedup} \times R_{proto}$ ；OPT-125M 表示；20% 效率增益/16 任务最高 +2%；智能重复打赢基线） | ✅ 完成 | [📖](https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/) |
 
 ## RL data 补充（Day 32+，第一轮）
 
@@ -41,11 +41,11 @@
 
 | Day | Paper | Status | 阅读版 |
 |---:|---|---| --- |
-| 31 | DoReMi（此前误加保留，不计入本系列） | — | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-31-2023-doremi/index.html) |
-| 32 | InstructGPT / RLHF 数据管线正典（labeler 指令 + 偏好对 + RM 数据） | ✅ 2026-09-24 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-32-2022-instructgpt/index.html) |
-| 33 | STaR / rationalization 自举推理数据 | ✅ 2026-09-25 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-33-2022-star/index.html) |
-| 34 | Constitutional AI / RLAIF 源头（原则→critique→revision） | ✅ 2026-09-26 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-34-2022-constitutional-ai/index.html) |
-| 35 | Let's Verify Step by Step / PRM 800K step-level 标签 | ✅ 2026-09-27 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-35-2023-lets-verify-step-by-step/index.html) |
+| 31 | DoReMi（此前误加保留，不计入本系列） | — | [📖](https://papa-panda.github.io/post-training/ai-data/day-31-2023-doremi/) |
+| 32 | InstructGPT / RLHF 数据管线正典（labeler 指令 + 偏好对 + RM 数据） | ✅ 2026-09-24 | [📖](https://papa-panda.github.io/post-training/ai-data/day-32-2022-instructgpt/) |
+| 33 | STaR / rationalization 自举推理数据 | ✅ 2026-09-25 | [📖](https://papa-panda.github.io/post-training/ai-data/day-33-2022-star/) |
+| 34 | Constitutional AI / RLAIF 源头（原则→critique→revision） | ✅ 2026-09-26 | [📖](https://papa-panda.github.io/post-training/ai-data/day-34-2022-constitutional-ai/) |
+| 35 | Let's Verify Step by Step / PRM 800K step-level 标签 | ✅ 2026-09-27 | [📖](https://papa-panda.github.io/post-training/ai-data/day-35-2023-lets-verify-step-by-step/) |
 | 36 | RLAIF vs. RLHF / AI 反馈偏好数据 recipe（ICML 2024） | ⬜ 待读 | — |
 | 37 | DAPO / RL 训练期数据工程（dynamic sampling + overlong shaping） | ⬜ 待读 | — |
 | 38 | Tülu 3 / 开源 post-training 全配方（SFT + DPO + RLVR） | ⬜ 待读 | — |
@@ -181,16 +181,16 @@ graph TD
 
 | Day | 拟定 Folder | 标题 | 为什么是主干 (Data视角) | Tier | 阅读版 |
 |-----|-------------|------|------------------------|------| --- |
-| 21 | day-21-2022-self-instruct | Self-Instruct ✅已完成 2026-08-21 | 合成SFT起点，175种子→52k，bootstrap范式，后面所有合成都抄它 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/index.html) |
-| 22 | day-22-2023-evol-instruct | WizardLM / Evol-Instruct ✅已完成 2026-08-22 | 复杂度演化 In-depth/Breadth 约70k，解决 Self-Instruct 自举数据偏简单 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-22-2023-evol-instruct/index.html) |
-| 23 | day-23-2023-lima | LIMA: Less Is More for Alignment ✅已完成 2026-08-23 | 1k高质量打赢全量，LIMO/s1前身，证质量>数量 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-23-2023-lima/index.html) |
-| 24 | day-24-2023-semdedup-d4 | D4 / SemDeDup ✅已完成 2026-08-24 | 语义近重复去除+原型式多样化剪枝，Vendi的工程版，Llama3去重对照 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-24-2023-semdedup-d4/index.html) |
-| 25 | day-25-2023-fineweb-refinedweb | FineWeb / RefinedWeb ✅已完成 2026-08-25 | 15T过滤管线：heuristics+MinHash+C4规则，预训练高质数据标杆 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-25-2023-fineweb-refinedweb/index.html) |
-| 26 | day-26-2023-ultrafeedback | UltraFeedback ✅已完成 2026-08-26 | 64k prompts×4多模型回答+GPT-4细粒度反馈，偏好数据底座，给DPO-gap提供上游池 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-26-2023-ultrafeedback/index.html) |
-| 27 | day-27-2023-oss-instruct | OSS-Instruct / Magicoder ✅已完成 2026-08-27 | 开源代码片段锚定合成约75k code指令，补Self-Instruct少种子与Evol固定规则的来源偏置 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-27-2023-oss-instruct/index.html) |
-| 28 | day-28-2025-deepscaler-openreasoner | DeepScaleR / OpenReasoner-Zero Data ✅已完成 2026-08-28 | v2 57k可验证题池；v1 129k全量RL→13k困难尾部继续RL，是ProRL长程RL路线的先行证据 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-28-2025-deepscaler-openreasoner/index.html) |
-| 29 | day-29-2024-swe-gym | SWE-Gym ✅已完成 2026-08-29 | 2,438个真实issue任务+可执行环境+单元测试，形成repo级可验证轨迹数据，接Qwen2.5-Coder exec | A | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-29-2024-swe-gym/index.html) |
-| 30 | day-30-2024-decontamination | Quantifying Code Contamination ✅已完成 2026-08-30 | surface-level + semantic-level code matching 检漏，防 coding SFT/RL 数据泄漏 HumanEval/MBPP，质量门最后一道 | A | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-30-2024-decontamination/index.html) |
+| 21 | day-21-2022-self-instruct | Self-Instruct ✅已完成 2026-08-21 | 合成SFT起点，175种子→52k，bootstrap范式，后面所有合成都抄它 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/) |
+| 22 | day-22-2023-evol-instruct | WizardLM / Evol-Instruct ✅已完成 2026-08-22 | 复杂度演化 In-depth/Breadth 约70k，解决 Self-Instruct 自举数据偏简单 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/) |
+| 23 | day-23-2023-lima | LIMA: Less Is More for Alignment ✅已完成 2026-08-23 | 1k高质量打赢全量，LIMO/s1前身，证质量>数量 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/) |
+| 24 | day-24-2023-semdedup-d4 | D4 / SemDeDup ✅已完成 2026-08-24 | 语义近重复去除+原型式多样化剪枝，Vendi的工程版，Llama3去重对照 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/) |
+| 25 | day-25-2023-fineweb-refinedweb | FineWeb / RefinedWeb ✅已完成 2026-08-25 | 15T过滤管线：heuristics+MinHash+C4规则，预训练高质数据标杆 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-25-2023-fineweb-refinedweb/) |
+| 26 | day-26-2023-ultrafeedback | UltraFeedback ✅已完成 2026-08-26 | 64k prompts×4多模型回答+GPT-4细粒度反馈，偏好数据底座，给DPO-gap提供上游池 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-26-2023-ultrafeedback/) |
+| 27 | day-27-2023-oss-instruct | OSS-Instruct / Magicoder ✅已完成 2026-08-27 | 开源代码片段锚定合成约75k code指令，补Self-Instruct少种子与Evol固定规则的来源偏置 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-27-2023-oss-instruct/) |
+| 28 | day-28-2025-deepscaler-openreasoner | DeepScaleR / OpenReasoner-Zero Data ✅已完成 2026-08-28 | v2 57k可验证题池；v1 129k全量RL→13k困难尾部继续RL，是ProRL长程RL路线的先行证据 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-28-2025-deepscaler-openreasoner/) |
+| 29 | day-29-2024-swe-gym | SWE-Gym ✅已完成 2026-08-29 | 2,438个真实issue任务+可执行环境+单元测试，形成repo级可验证轨迹数据，接Qwen2.5-Coder exec | A | [📖](https://papa-panda.github.io/post-training/ai-data/day-29-2024-swe-gym/) |
+| 30 | day-30-2024-decontamination | Quantifying Code Contamination ✅已完成 2026-08-30 | surface-level + semantic-level code matching 检漏，防 coding SFT/RL 数据泄漏 HumanEval/MBPP，质量门最后一道 | A | [📖](https://papa-panda.github.io/post-training/ai-data/day-30-2024-decontamination/) |
 
 > 这10篇已跑完，**合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏** 全链条贯通。
 
@@ -208,37 +208,37 @@ graph TD
 
 | Day | Folder | Data贡献 (非算法) | Tier | 阅读版 |
 |-----|--------|-------------------|------| --- |
-| 01 | day-01-example-starcoder2 | 入门：600规则扫curation | 示例 | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-01-example-starcoder2/index.html) |
-| 02 | day-02-2017-influence-functions | 数据归因：定义train→test影响 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-02-2017-influence-functions/index.html) |
-| 03 | day-03-2020-tracin | 归因工程化：ckpt点积无Hessian，可算self-influence扫脏 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-03-2020-tracin/index.html) |
-| 04 | day-04-2024-less | 选SFT：梯度相似挑5%目标任务数据 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/index.html) |
-| 05 | day-05-2024-datainf | 选LoRA：闭式1秒一条，扫脏 | A | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-05-2024-datainf/index.html) |
-| 06 | day-06-2023-phi-1 | 合成数据：教科书1B+精筛6B | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-06-2023-phi-1/index.html) |
-| 07 | day-07-2024-llama3 | 预训练瀑布：15.6T 5级过滤+去重+配比 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-07-2024-llama3/index.html) |
-| 08 | day-08-2024-deepseek-v3 | MoE数据配比：14.8T 30%code+FIM | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/index.html) |
-| 09 | day-09-2024-qwen2.5 | 飞轮数据：18T→1M SFT→多阶段RL数据门禁 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-09-2024-qwen2.5/index.html) |
-| 10 | day-10-2024-llama3.1-3.2 | 后训练数据切分：多轮RS/DPO数据来源 | B | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-10-2024-llama3.1-3.2/index.html) |
-| 11 | day-11-2025-limr | RL数据：LIM轨迹选1389难例 | A | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-11-2025-limr/index.html) |
-| 12 | day-12-2024-superfiltering | SFT数据：125M弱模型IFD选7B | B | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-12-2024-superfiltering/index.html) |
-| 13 | day-13-2025-dpo-reward-gap | 偏好数据：gap小难对留10% | B | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-13-2025-dpo-reward-gap/index.html) |
-| 14 | day-14-2024-starcoder2 | Code数据：600+语言1T清洗+PII | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-14-2024-starcoder2/index.html) |
-| 15 | day-15-2025-deepseek-r1 | RL数据：<10k冷启动合成+可验证奖励数据 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-15-2025-deepseek-r1/index.html) |
-| 16 | day-16-2024-qwen2.5-coder | Code执行数据：parser+exec三级洗5.5T | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-16-2024-qwen2.5-coder/index.html) |
-| 17 | day-17-2025-limo | SFT数据极点：817条认知模板 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-17-2025-limo/index.html) |
-| 18 | day-18-2025-s1 | SFT+TTS数据：1k长链+难度/去重 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-18-2025-s1/index.html) |
-| 19 | day-19-2023-vendi-score | 数据多样性度量：kernel熵公理 | B | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-19-2023-vendi-score/index.html) |
-| 20 | day-20-2023-deita | 数据质量配方：复杂度×质量×多样6k | B | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-20-2023-deita/index.html) |
-| 21 | day-21-2022-self-instruct | 合成指令源头：175 种子→52k bootstrap，无外部依赖自举 SFT，合成范式起点 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-21-2022-self-instruct/index.html) |
-| 22 | day-22-2023-evol-instruct | 指令复杂度演化：52K Alpaca 种子经 4 轮 In-depth/Breadth 演化得 250K（70K 子集与 Vicuna 对比训练） | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-22-2023-evol-instruct/index.html) |
-| 23 | day-23-2023-lima | 对齐极简：1k 条经来源、风格与多样性策展的高质 SFT，验证质量与覆盖优先于规模 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-23-2023-lima/index.html) |
-| 24 | day-24-2023-semdedup-d4 | 预训练去重：语义近重复删除+原型式多样化剪枝，压缩冗余同时保留长尾覆盖 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-24-2023-semdedup-d4/index.html) |
-| 25 | day-25-2023-fineweb-refinedweb | 网页过滤工厂：15T-token逐级过滤、去重与训练消融，把规则清单升级为可复现可审计数据配方 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-25-2023-fineweb-refinedweb/index.html) |
-| 26 | day-26-2023-ultrafeedback | 偏好数据底座：64k prompts×4多模型回答，经GPT-4细粒度评价与打分形成可追溯AI反馈池 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-26-2023-ultrafeedback/index.html) |
-| 27 | day-27-2023-oss-instruct | Code合成：80K开源代码片段锚定生成，经去重和benchmark防污染得到约75K条现实、多样、可控的coding SFT数据 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-27-2023-oss-instruct/index.html) |
-| 28 | day-28-2025-deepscaler-openreasoner | 可验证RL数据：v2使用57k题池；v1先在129k上RL 1,100步，再挖出约13k困难尾部继续100步；承接LIMR并为ProRL长程RL提供先行证据 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-28-2025-deepscaler-openreasoner/index.html) |
-| 29 | day-29-2024-swe-gym | 可执行code环境：2,438个真实issue任务封装repo、依赖、单元测试与agent轨迹，把静态样本升级为仓库级可验证交互数据 | A | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-29-2024-swe-gym/index.html) |
-| 30 | day-30-2024-decontamination | 代码防污染：surface-level + semantic-level 双重匹配 train–eval 近重复，保护 HumanEval/MBPP 等 benchmark 的可信度 | A | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-30-2024-decontamination/index.html) |
-| 31 | day-31-2023-doremi | 数据配比：用小 reference/proxy 的跨域 excess loss 学习 domain weights，再重采样给大模型训练，补齐域内过滤之外的 token 预算层 | S | [📖](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-31-2023-doremi/index.html) |
+| 01 | day-01-example-starcoder2 | 入门：600规则扫curation | 示例 | [📖](https://papa-panda.github.io/post-training/ai-data/day-01-example-starcoder2/) |
+| 02 | day-02-2017-influence-functions | 数据归因：定义train→test影响 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/) |
+| 03 | day-03-2020-tracin | 归因工程化：ckpt点积无Hessian，可算self-influence扫脏 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/) |
+| 04 | day-04-2024-less | 选SFT：梯度相似挑5%目标任务数据 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/) |
+| 05 | day-05-2024-datainf | 选LoRA：闭式1秒一条，扫脏 | A | [📖](https://papa-panda.github.io/post-training/ai-data/day-05-2024-datainf/) |
+| 06 | day-06-2023-phi-1 | 合成数据：教科书1B+精筛6B | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-06-2023-phi-1/) |
+| 07 | day-07-2024-llama3 | 预训练瀑布：15.6T 5级过滤+去重+配比 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-07-2024-llama3/) |
+| 08 | day-08-2024-deepseek-v3 | MoE数据配比：14.8T 30%code+FIM | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-08-2024-deepseek-v3/) |
+| 09 | day-09-2024-qwen2.5 | 飞轮数据：18T→1M SFT→多阶段RL数据门禁 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-09-2024-qwen2.5/) |
+| 10 | day-10-2024-llama3.1-3.2 | 后训练数据切分：多轮RS/DPO数据来源 | B | [📖](https://papa-panda.github.io/post-training/ai-data/day-10-2024-llama3.1-3.2/) |
+| 11 | day-11-2025-limr | RL数据：LIM轨迹选1389难例 | A | [📖](https://papa-panda.github.io/post-training/ai-data/day-11-2025-limr/) |
+| 12 | day-12-2024-superfiltering | SFT数据：125M弱模型IFD选7B | B | [📖](https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/) |
+| 13 | day-13-2025-dpo-reward-gap | 偏好数据：gap小难对留10% | B | [📖](https://papa-panda.github.io/post-training/ai-data/day-13-2025-dpo-reward-gap/) |
+| 14 | day-14-2024-starcoder2 | Code数据：600+语言1T清洗+PII | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-14-2024-starcoder2/) |
+| 15 | day-15-2025-deepseek-r1 | RL数据：<10k冷启动合成+可验证奖励数据 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-15-2025-deepseek-r1/) |
+| 16 | day-16-2024-qwen2.5-coder | Code执行数据：parser+exec三级洗5.5T | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-16-2024-qwen2.5-coder/) |
+| 17 | day-17-2025-limo | SFT数据极点：817条认知模板 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-17-2025-limo/) |
+| 18 | day-18-2025-s1 | SFT+TTS数据：1k长链+难度/去重 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-18-2025-s1/) |
+| 19 | day-19-2023-vendi-score | 数据多样性度量：kernel熵公理 | B | [📖](https://papa-panda.github.io/post-training/ai-data/day-19-2023-vendi-score/) |
+| 20 | day-20-2023-deita | 数据质量配方：复杂度×质量×多样6k | B | [📖](https://papa-panda.github.io/post-training/ai-data/day-20-2023-deita/) |
+| 21 | day-21-2022-self-instruct | 合成指令源头：175 种子→52k bootstrap，无外部依赖自举 SFT，合成范式起点 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/) |
+| 22 | day-22-2023-evol-instruct | 指令复杂度演化：52K Alpaca 种子经 4 轮 In-depth/Breadth 演化得 250K（70K 子集与 Vicuna 对比训练） | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/) |
+| 23 | day-23-2023-lima | 对齐极简：1k 条经来源、风格与多样性策展的高质 SFT，验证质量与覆盖优先于规模 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/) |
+| 24 | day-24-2023-semdedup-d4 | 预训练去重：语义近重复删除+原型式多样化剪枝，压缩冗余同时保留长尾覆盖 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/) |
+| 25 | day-25-2023-fineweb-refinedweb | 网页过滤工厂：15T-token逐级过滤、去重与训练消融，把规则清单升级为可复现可审计数据配方 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-25-2023-fineweb-refinedweb/) |
+| 26 | day-26-2023-ultrafeedback | 偏好数据底座：64k prompts×4多模型回答，经GPT-4细粒度评价与打分形成可追溯AI反馈池 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-26-2023-ultrafeedback/) |
+| 27 | day-27-2023-oss-instruct | Code合成：80K开源代码片段锚定生成，经去重和benchmark防污染得到约75K条现实、多样、可控的coding SFT数据 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-27-2023-oss-instruct/) |
+| 28 | day-28-2025-deepscaler-openreasoner | 可验证RL数据：v2使用57k题池；v1先在129k上RL 1,100步，再挖出约13k困难尾部继续100步；承接LIMR并为ProRL长程RL提供先行证据 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-28-2025-deepscaler-openreasoner/) |
+| 29 | day-29-2024-swe-gym | 可执行code环境：2,438个真实issue任务封装repo、依赖、单元测试与agent轨迹，把静态样本升级为仓库级可验证交互数据 | A | [📖](https://papa-panda.github.io/post-training/ai-data/day-29-2024-swe-gym/) |
+| 30 | day-30-2024-decontamination | 代码防污染：surface-level + semantic-level 双重匹配 train–eval 近重复，保护 HumanEval/MBPP 等 benchmark 的可信度 | A | [📖](https://papa-panda.github.io/post-training/ai-data/day-30-2024-decontamination/) |
+| 31 | day-31-2023-doremi | 数据配比：用小 reference/proxy 的跨域 excess loss 学习 domain weights，再重采样给大模型训练，补齐域内过滤之外的 token 预算层 | S | [📖](https://papa-panda.github.io/post-training/ai-data/day-31-2023-doremi/) |
 
 > 算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。
 

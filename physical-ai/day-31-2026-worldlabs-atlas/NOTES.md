@@ -1,6 +1,6 @@
 # Day 31 — World Labs Atlas：首个从零训练的多模态世界模型（最新进展 1/4）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-31-2026-worldlabs-atlas/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-31-2026-worldlabs-atlas/
 
 ## 元信息
 - Title: Atlas: A World Model for Spatial Intelligence

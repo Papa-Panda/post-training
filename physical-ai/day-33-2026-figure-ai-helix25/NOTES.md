@@ -1,6 +1,6 @@
 # Day 33 — Figure AI Helix 2.5：30 间陌生家庭的 56%（最新进展 3/4）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-33-2026-figure-ai-helix25/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-33-2026-figure-ai-helix25/
 
 ## 元信息
 - Title: Helix 2.5: Zero-Shot 30-Home Generalization

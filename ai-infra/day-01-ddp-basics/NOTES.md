@@ -1,6 +1,6 @@
 # Day 1 - DDP basics - Done
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-01-ddp-basics/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-01-ddp-basics/
 
 Date: 2026-08-02 10:30 AM PDT (America/Los_Angeles)
 Status: done

@@ -1,6 +1,6 @@
 # Day 34 — Physical Intelligence π0.7：组合泛化，做没教过的任务（最新进展 4/4）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-34-2026-pi07/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-34-2026-pi07/
 
 ## 元信息
 - Title: π0.7: a Steerable Generalist Robotic Foundation Model with Emergent Capabilities

@@ -1,6 +1,6 @@
 # Day 11 NOTES — Paper2 机械负载 → GPU 热/功耗
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-11-paper2-mech-load/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-11-paper2-mech-load/
 
 Date: 2026-08-11 08:22 PDT (manual today run 2026-08-15,补)  
 Status: done (CPU gloo 验证逻辑，待 H100 NCCL 真机验证 thermal + RAPL + max_memory_allocated)  

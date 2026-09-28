@@ -1,6 +1,6 @@
 # Day16 — DROID: in-the-wild 大规模机器人操作数据集
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-16-2024-droid/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-16-2024-droid/
 
 > Alexander Khazatsky*, Karl Pertsch*（project co-leads）等 / Stanford、UC Berkeley 等 13 所机构，arXiv 2403.12945（2024-03-19；RSS 2024）。机器人数据论文的"田野调查"路线：不追求实验室内的轨迹条数，而追求**场景覆盖**——18 台统一 Franka 硬件栈、50 个采集员、12 个月、在 52 栋建筑的 564 个真实场景（家庭/办公室/实验室）里采集 76k 条轨迹 / 350 小时，全部 CC-BY 4.0 开源。
 

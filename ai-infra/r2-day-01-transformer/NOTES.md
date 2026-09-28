@@ -1,6 +1,6 @@
 # NOTES - r2-Day01 Transformer
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-01-transformer/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-01-transformer/
 
 第二轮 Day1 地基，粗略理解即可
 

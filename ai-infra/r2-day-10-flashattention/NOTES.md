@@ -1,6 +1,6 @@
 # NOTES — r2-Day10 FlashAttention
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-10-flashattention/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-10-flashattention/
 
 ## 准确术语
 

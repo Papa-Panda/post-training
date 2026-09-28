@@ -1,6 +1,6 @@
 # Day14 — π₀.₅: a Vision-Language-Action Model with Open-World Generalization
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-14-2025-pi05-open-world/
 
 > Physical Intelligence, arXiv 2504.16054 (2025-04-22). π₀的开放世界续作：异构 co-training + 高层语义子任务预测 + knowledge insulation，在未见过的真实家庭做长程灵巧操作。
 

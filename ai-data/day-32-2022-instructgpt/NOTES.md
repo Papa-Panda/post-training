@@ -1,6 +1,6 @@
 # Day32 InstructGPT — NOTES
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-32-2022-instructgpt/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-32-2022-instructgpt/
 
 ## 元信息
 - Title: Training language models to follow instructions with human feedback

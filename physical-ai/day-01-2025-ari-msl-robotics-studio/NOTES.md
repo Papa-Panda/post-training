@@ -1,6 +1,6 @@
 # Day 01 — Meta ARI / MSL / Robotics Studio: Physical AGI via Humanoid
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-01-2025-ari-msl-robotics-studio/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-01-2025-ari-msl-robotics-studio/
 
 > 自动生成骨架 2026-08-23，基于 PAPER_TEMPLATE.md，Physical AI 战略起点；非 paper 而是 org / acquisition 解析。
 

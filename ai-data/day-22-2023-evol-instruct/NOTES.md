@@ -1,6 +1,6 @@
 # Paper 模板 - Day 22
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-22-2023-evol-instruct/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/
 
 > 自动生成骨架 2026-08-22，基于 PAPER_TEMPLATE.md，纯 Data 视角；算法只一句带过，不在本轨道展开。
 

@@ -1,6 +1,6 @@
 # Day 07 — H2O: Learning Human-to-Humanoid Real-Time Whole-Body Teleoperation
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-07-2024-h2o-whole-body-control/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-07-2024-h2o-whole-body-control/
 
 ## 元信息
 - Title: Learning Human-to-Humanoid Real-Time Whole-Body Teleoperation (H2O)

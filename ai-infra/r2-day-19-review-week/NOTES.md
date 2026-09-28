@@ -1,6 +1,6 @@
 # r2-Day19 NOTES — 术语、公式核对与上一课/下一课链接
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-19-review-week/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-19-review-week/
 
 ## 术语（准确定义）
 

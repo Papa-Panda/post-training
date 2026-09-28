@@ -1,6 +1,6 @@
 # Day 29 — Safe Robot Learning：约束 MDP / CBF / Shield / Runtime Monitor（安全四层栈）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-29-safe-robot-learning/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-29-safe-robot-learning/
 
 ## 元信息
 - Title: Safe Learning in Robotics: From Learning-Based Control to Safe Reinforcement Learning（主综述，安全分类学与统一比较框架）+ Safe Reinforcement Learning via Shielding（对照：反应式安全修正）+ Control Barrier Function Based Quadratic Programs for Safety Critical Systems（对照：逐时刻安全证书）

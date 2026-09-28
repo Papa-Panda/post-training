@@ -1,6 +1,6 @@
 # Day 3 - Done Date: 2026-08-04 22:10 PDT
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-03-fsdp-perblock/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-03-fsdp-perblock/
 Status: done (CPU verified, CUDA N/A 待H100) ## FSDP per-block 显存
 - DDP 常驻 4P，FSDP 常驻 4P/G，峰值 (P-b)/G + b + (grad+opt)/G
 - block 越小峰值越低，通信启动次数炸，per-block 是甜点

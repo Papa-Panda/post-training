@@ -1,6 +1,6 @@
 # Day 13 — Octo：开放通用机器人策略与可插拔 diffusion readout
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-13-2024-octo/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-13-2024-octo/
 
 ## 元信息
 - Title: Octo: An Open-Source Generalist Robot Policy

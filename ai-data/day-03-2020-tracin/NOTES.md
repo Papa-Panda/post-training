@@ -1,6 +1,6 @@
 # 元信息
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-03-2020-tracin/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/
 - Title: Estimating Training Data Influence by Tracing Gradient Descent (TracIn)
 - Authors / Org: Garima Pruthi, Frederick Liu, Mukund Sundararajan, et al. / Google
 - Link / arXiv: https://arxiv.org/abs/2002.08484

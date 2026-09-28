@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -61,6 +62,9 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
@@ -110,7 +114,7 @@ pre code{background:none;padding:0;color:inherit}
     <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">官方 Repo</a><a href="#sec-8">第二轮复习（2026-09-04）</a><a href="#sec-9">原文链接</a><a href="#sec-10">问答补充（2026-09-04）</a><a href="#sec-11">问答补充（2026-09-11）</a></nav>
   </details>
   <section class="sec" id="sec-0"><blockquote class="pq">
-<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/index.html</p>
+<p>📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
@@ -311,7 +315,7 @@ $$\lambda\to 0,\qquad \lambda\to\infty$$</li>
 <p><strong>临界点不是模型大小，是 (proxy, target) 的关系</strong>：靶集 $\mathcal{V}$ 是否落在 proxy 的 ZPD 内。可操作的 pilot test（跑完整 LESS 前先做）：① 可达性门槛：proxy 在靶难度上测 $\text{pass@k}$ （ $k=10$ 或 $50$ ）； $\approx 0$ 直接判死刑， $\approx 1$ 则信号太弱。② 排名相关性：在 1–2k 候选子集上分别用小 proxy 与 7B 参考算 LESS 分数，看 Spearman 相关性；显著低则梯度几何对不上，transfer 不可信。</p>
 <p><strong>对 coding 1B 的判断</strong>：取决于靶难度。HumanEval-easy 级（基础函数合成），1B code 模型通常 $\text{pass@k} &gt; 0$ ，错误是技能相关的 → 可能够，应用上述测试验证而非直接否定；LiveCodeBench-hard / 竞赛级 $\text{pass@k} \approx 0$ ，正确解在其可达分布外 → 不够。经验法则（待验证的 heuristic，非定理）：proxy 在靶难度上最好有 20%+ 的 $\text{pass@k}$ ；选 proxy 不是越大越好，是选"刚好够得着靶子"的那个。</p>
 <p><strong>知识图谱关系</strong>：Q6 承接 §4.1"target 锚点误设"与 §6 思考题（单均值 + 无 diversity 缺口），并把 Day11 的 outcome-only 盲区与"蒸馏 frontier 数据"逻辑复用到 target 构造；Q7 把 Day11 的 ZPD 从数据选择平移到 proxy 选择，并给出 transfer 可信度的可操作检验。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -322,6 +326,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

@@ -1,6 +1,6 @@
 # 元信息
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-02-2017-influence-functions/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/
 - Title: Understanding Black-box Predictions via Influence Functions
 - Authors / Org: Pang Wei Koh, Percy Liang / Stanford
 - Link / arXiv: https://arxiv.org/abs/1703.04730 / https://proceedings.mlr.press/v70/koh17a.html

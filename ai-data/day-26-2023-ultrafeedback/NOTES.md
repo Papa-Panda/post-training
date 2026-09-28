@@ -1,6 +1,6 @@
 # UltraFeedback: Boosting Language Models with Scaled AI Feedback
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-26-2023-ultrafeedback/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-26-2023-ultrafeedback/
 
 ## 元信息
 - Title: UltraFeedback: Boosting Language Models with Scaled AI Feedback

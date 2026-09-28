@@ -1,6 +1,6 @@
 # NOTES — r2-Day07 CUDA 编程模型与访存映射
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-07-cuda-programming-model/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-07-cuda-programming-model/
 
 ## 准确术语
 

@@ -1,6 +1,6 @@
 # Paper 模板
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-09-2024-qwen2.5/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-09-2024-qwen2.5/
 
 ## 元信息
 - Title: Qwen2.5 Technical Report

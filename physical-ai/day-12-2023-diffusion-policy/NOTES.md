@@ -1,6 +1,6 @@
 # Day 12 — Diffusion Policy：条件动作扩散与 receding-horizon 视觉控制
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-12-2023-diffusion-policy/
 
 ## 元信息
 - Title: Diffusion Policy: Visuomotor Policy Learning via Action Diffusion

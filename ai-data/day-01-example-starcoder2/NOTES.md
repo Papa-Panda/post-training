@@ -1,6 +1,6 @@
 # Day 01 — StarCoder2 / The Stack v2 数据策展入门
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-01-example-starcoder2/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-01-example-starcoder2/
 
 ## 元信息
 - Title: StarCoder 2 and The Stack v2: The Next Generation

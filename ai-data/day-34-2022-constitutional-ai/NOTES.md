@@ -1,6 +1,6 @@
 # Day34 Constitutional AI — NOTES
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-34-2022-constitutional-ai/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-34-2022-constitutional-ai/
 
 ## 元信息
 - Title: "Constitutional AI: Harmlessness from AI Feedback"

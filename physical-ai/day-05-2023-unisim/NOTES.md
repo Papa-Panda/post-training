@@ -1,6 +1,6 @@
 # Day 05 — UniSim：Learning Interactive Real-World Simulators
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-05-2023-unisim/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-05-2023-unisim/
 
 > Day 05 of physical-ai track, following Day04 Genie. Focus on action-conditioned video diffusion as a learned simulator for real-world interaction and policy training.
 

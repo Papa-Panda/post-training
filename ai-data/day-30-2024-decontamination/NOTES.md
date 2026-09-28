@@ -1,6 +1,6 @@
 # Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-30-2024-decontamination/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-30-2024-decontamination/
 
 ## 元信息
 - Title: Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models

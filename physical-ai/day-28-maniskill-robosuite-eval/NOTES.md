@@ -1,6 +1,6 @@
 # Day 28 — ManiSkill3 / robosuite：可复现评测基准（Reproducible Manipulation Benchmarks）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-28-maniskill-robosuite-eval/
 
 ## 元信息
 - Title: ManiSkill3: GPU Parallelized Robotics Simulation and Rendering for Generalizable Embodied AI（主）+ robosuite: A Modular Simulation Framework and Benchmark for Robot Learning（对照）

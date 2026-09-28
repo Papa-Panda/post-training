@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -61,6 +62,9 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
@@ -111,7 +115,7 @@ pre code{background:none;padding:0;color:inherit}
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
-<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/index.html</p>
+<p>📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-08-2024-deepseek-v3/</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
@@ -249,7 +253,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>V3 论文 §4.2 给的具体数字：前 14.3T tokens， $b_i$ 更新速度 0.001；最后 500B tokens 更新速度设为 <strong>0（冻结）</strong>。另外留了一个权重仅 0.0001 的 sequence-level balance loss 做兜底——"just to avoid extreme imbalance within any single sequence"，防止单个序列内出现极端失衡。</p>
 <p>为什么这事值得在数据视角下单拎出来：bias 控制回路是<strong>跟着数据分布学</strong>的——数据里 code 多，code 擅长的 expert 的 $b_i$ 就被调到合适位置。一旦最后 500B 把 $b_i$ 冻结，而此时换入分布不同的 annealing 数据（比如突然加了很多数学），token 的路由分布变了，expert 负载失衡，但<strong>没有任何机制能把它拉回来</strong>（loss 里没有 aux loss，bias 也不更新了）。所以 aux-loss-free 把"负载均衡"这个职责在训练末期<strong>移交给了数据管线</strong>：annealing 窗口的数据域分布必须和之前保持兼容，否则 expert 直接失衡。这就是"架构-数据耦合"最锋利的一个实例。</p>
 <p><strong>关联</strong>：Day 08 DeepSeek-V3 §4.2（aux-loss-free 负载均衡）；与第二轮复习（2026-09-08）思考题 (b)"冻结的路由与换挡的数据"直接呼应——本问答是该思考题的前置机制解释。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -260,6 +264,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

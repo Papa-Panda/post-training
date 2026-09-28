@@ -1,6 +1,6 @@
 # Day 27 — Cosmos：世界基础模型平台（World Foundation Models for Physical AI）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-27-2025-cosmos-world-foundation/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-27-2025-cosmos-world-foundation/
 
 ## 元信息
 - Title: Cosmos World Foundation Model Platform for Physical AI

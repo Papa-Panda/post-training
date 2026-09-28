@@ -1,6 +1,6 @@
 # Day 19 — PPO for Robotics: clipped policy optimization 与 GPU 向量化 rollout 系统
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-19-2017-ppo-robotics/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-19-2017-ppo-robotics/
 
 ## 元信息
 - Title: Proximal Policy Optimization Algorithms（主论文）+ Legged-Gym / RSL-RL（robotics rollout 系统）

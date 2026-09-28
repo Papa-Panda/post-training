@@ -1,6 +1,6 @@
 # Day 6 NOTES - 2026-08-07 08:20 PDT
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-06-paper1-rl-infra/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-06-paper1-rl-infra/
 
 Status: done (离线笔记，H100前定版)
 

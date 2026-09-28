@@ -1,4 +1,4 @@
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/
 
 ## 元信息
 - Title: LESS: Selecting Influential Data for Targeted Instruction Tuning

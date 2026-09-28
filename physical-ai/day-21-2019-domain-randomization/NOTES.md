@@ -1,6 +1,6 @@
 # Day 21 — Domain Randomization / ADR：Solving Rubik's Cube with a Robot Hand
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-21-2019-domain-randomization/
 
 ## 元信息
 - Title: Solving Rubik's Cube with a Robot Hand（Automatic Domain Randomization，ADR）

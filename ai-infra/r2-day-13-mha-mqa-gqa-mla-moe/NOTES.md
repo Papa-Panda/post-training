@@ -1,6 +1,6 @@
 # r2-Day13 NOTES — Attention 变种的数学与账本
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/
 
 记号与 README §0 同一份，这里不重定义，只推导。
 

@@ -1,6 +1,6 @@
 # NOTES — Day 17 Profile Tool
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12b-profile-tool-legacy/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-12b-profile-tool-legacy/
 
 > Connection to Prev: Day16 Monetization Story v1 → Day17 Profile Tool: ROI故事算清了\$/useful但没定位通信是AllReduce还是AllGather热点，需要profiler拆compute vs comm；Day15 Megatron 3D的TP4+PP2决策坑在今天用torch.profiler + gloo all_reduce SUM/2验证 + per-block 32×1.99ms真数解决。
 

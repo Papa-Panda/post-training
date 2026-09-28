@@ -1,6 +1,6 @@
 # Day 25 — Gato：一个网络，604 个任务 — generalist agent 的范式宣言
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-25-2022-gato/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-25-2022-gato/
 
 ## 元信息
 - Title: A Generalist Agent（Gato）

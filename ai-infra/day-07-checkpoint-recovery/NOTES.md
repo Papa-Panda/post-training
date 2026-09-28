@@ -1,6 +1,6 @@
 # Day 7 NOTES - 2026-08-08 14:30 PDT (补)
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-checkpoint-recovery/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-07-checkpoint-recovery/
 
 Date: 2026-08-08 14:30 PDT (补 08-11)
 Status: done (CPU gloo 验证逻辑，待 H100 NCCL 验证 peak mem + DCP throughput)

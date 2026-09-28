@@ -1,6 +1,6 @@
 # Day 20 — RLPD: Efficient Online Reinforcement Learning with Offline Data
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-20-2023-rlpd/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-20-2023-rlpd/
 
 ## 元信息
 - Title: Efficient Online Reinforcement Learning with Offline Data (RLPD — Reinforcement Learning with Prior Data)

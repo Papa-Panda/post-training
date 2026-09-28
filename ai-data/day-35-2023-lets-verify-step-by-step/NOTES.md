@@ -1,6 +1,6 @@
 # Day35 Let's Verify Step by Step — NOTES
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-35-2023-lets-verify-step-by-step/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-35-2023-lets-verify-step-by-step/
 
 ## 元信息
 - Title: "Let's Verify Step by Step"

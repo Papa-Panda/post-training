@@ -1,6 +1,6 @@
 # Paper 模板
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-11-2025-limr/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-11-2025-limr/
 
 ## 元信息
 - Title: LIMR: Less is More for RL Scaling

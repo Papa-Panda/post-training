@@ -1,6 +1,6 @@
 # Day 22 — RMA：Rapid Motor Adaptation for Legged Robots
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-22-2021-rma/
 
 ## 元信息
 - Title: RMA: Rapid Motor Adaptation for Legged Robots

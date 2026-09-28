@@ -1,6 +1,6 @@
 # Day 09 — RT-2 / OpenVLA：把动作变成 token 的 Vision-Language-Action 路线
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-09-2024-rt2-openvla/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-09-2024-rt2-openvla/
 
 ## 元信息
 - Title: RT-2: Vision-Language-Action Models Transfer Web Knowledge to Robotic Control / OpenVLA: An Open-Source Vision-Language-Action Model

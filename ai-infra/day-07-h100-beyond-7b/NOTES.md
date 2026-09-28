@@ -1,6 +1,6 @@
 # NOTES — Large-model FSDP Capacity Planning
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-h100-beyond-7b/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-07-h100-beyond-7b/
 
 ## Audit correction
 

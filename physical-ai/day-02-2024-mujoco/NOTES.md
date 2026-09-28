@@ -1,6 +1,6 @@
 # Day 02 — MuJoCo: Multi-Joint dynamics with Contact
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-02-2024-mujoco/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-02-2024-mujoco/
 
 > Day 02 of ai-physical track, following Day01 ARI/MSL. Focus on fast & accurate contact simulation for robotics.
 

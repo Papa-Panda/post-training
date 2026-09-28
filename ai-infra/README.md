@@ -24,53 +24,53 @@ model computation
 
 | Lesson | Focus | Executable evidence | Status | 阅读版 |
 |---|---|---|---|---:|
-| [`r2-day-01-transformer`](r2-day-01-transformer/README.md) | Decoder dimensions and parameter accounting | Python dimension/parameter model | CPU model | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-01-transformer/index.html) |
-| [`r2-day-02-pytorch-loop`](r2-day-02-pytorch-loop/README.md) | Training-loop state, optimizer, checkpoint | Minimal loop with explicit fallback | CPU path; accelerator profiling pending | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-02-pytorch-loop/index.html) |
-| [`r2-day-03-topo-nccl`](r2-day-03-topo-nccl/README.md) | Topology labels and ring collective cost | Unit-aware $\alpha$ – $\beta$ model and semantic tests | CPU model; NCCL measurement pending | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/index.html) |
-| [`r2-day-04-ddp`](r2-day-04-ddp/README.md) | DDP ownership, data sharding, gradient synchronization | `torchrun` demo plus dependency-free invariants | CPU/Gloo when PyTorch is available | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-04-ddp/index.html) |
-| [`r2-day-05-jax-mesh`](r2-day-05-jax-mesh/README.md) | Mesh and declarative partitioning | JAX/fallback shape model | Multi-device execution pending | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-05-jax-mesh/index.html) |
-| [`r2-day-06-gpu-architecture`](r2-day-06-gpu-architecture/README.md) | Roofline, HBM traffic, shared-memory capacity | Analytical model and six tests | CPU model; CUDA measurement pending | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-06-gpu-architecture/index.html) |
-| [`r2-day-07-cuda-programming-model`](r2-day-07-cuda-programming-model/README.md) | Grid/block/warp, coalescing, bank conflicts | Address model, eight tests, CUDA source | CPU model; CUDA run pending | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-07-cuda-programming-model/index.html) |
+| [`r2-day-01-transformer`](r2-day-01-transformer/README.md) | Decoder dimensions and parameter accounting | Python dimension/parameter model | CPU model | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-01-transformer/) |
+| [`r2-day-02-pytorch-loop`](r2-day-02-pytorch-loop/README.md) | Training-loop state, optimizer, checkpoint | Minimal loop with explicit fallback | CPU path; accelerator profiling pending | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-02-pytorch-loop/) |
+| [`r2-day-03-topo-nccl`](r2-day-03-topo-nccl/README.md) | Topology labels and ring collective cost | Unit-aware $\alpha$ – $\beta$ model and semantic tests | CPU model; NCCL measurement pending | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-03-topo-nccl/) |
+| [`r2-day-04-ddp`](r2-day-04-ddp/README.md) | DDP ownership, data sharding, gradient synchronization | `torchrun` demo plus dependency-free invariants | CPU/Gloo when PyTorch is available | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-04-ddp/) |
+| [`r2-day-05-jax-mesh`](r2-day-05-jax-mesh/README.md) | Mesh and declarative partitioning | JAX/fallback shape model | Multi-device execution pending | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-05-jax-mesh/) |
+| [`r2-day-06-gpu-architecture`](r2-day-06-gpu-architecture/README.md) | Roofline, HBM traffic, shared-memory capacity | Analytical model and six tests | CPU model; CUDA measurement pending | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-06-gpu-architecture/) |
+| [`r2-day-07-cuda-programming-model`](r2-day-07-cuda-programming-model/README.md) | Grid/block/warp, coalescing, bank conflicts | Address model, eight tests, CUDA source | CPU model; CUDA run pending | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-07-cuda-programming-model/) |
 
 ### 全部笔记阅读版索引
 
 | # | 笔记 | 阅读版 |
 |---|---|---|
-| 1 | `day-01-ddp-basics` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-01-ddp-basics/index.html) |
-| 2 | `day-02-fsdp` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-02-fsdp/index.html) |
-| 3 | `day-03-fsdp-perblock` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-03-fsdp-perblock/index.html) |
-| 4 | `day-04-rlhf-vs-agentic-rl` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-04-rlhf-vs-agentic-rl/index.html) |
-| 5 | `day-05-jax-pjit` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-05-jax-pjit/index.html) |
-| 6 | `day-06-paper1-rl-infra` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-06-paper1-rl-infra/index.html) |
-| 7 | `day-07-checkpoint-recovery` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-checkpoint-recovery/index.html) |
-| 8 | `day-07-h100-beyond-7b` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-07-h100-beyond-7b/index.html) |
-| 9 | `day-08-eval-infra` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-08-eval-infra/index.html) |
-| 10 | `day-11-paper2-mech-load` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-11-paper2-mech-load/index.html) |
-| 11 | `day-12-reward-model` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12-reward-model/index.html) |
-| 12 | `day-12b-profile-tool-legacy` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12b-profile-tool-legacy/index.html) |
-| 13 | `day-13-reliability-slo` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-13-reliability-slo/index.html) |
-| 14 | `day-14-pue-cost` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-14-pue-cost/index.html) |
-| 15 | `day-15-megatron-3d` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-15-megatron-3d/index.html) |
-| 16 | `day-16-monetization-v1` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-16-monetization-v1/index.html) |
-| 17 | `r2-day-01-transformer` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-01-transformer/index.html) |
-| 18 | `r2-day-02-pytorch-loop` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-02-pytorch-loop/index.html) |
-| 19 | `r2-day-03-topo-nccl` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/index.html) |
-| 20 | `r2-day-04-ddp` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-04-ddp/index.html) |
-| 21 | `r2-day-05-jax-mesh` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-05-jax-mesh/index.html) |
-| 22 | `r2-day-06-gpu-architecture` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-06-gpu-architecture/index.html) |
-| 23 | `r2-day-07-cuda-programming-model` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-07-cuda-programming-model/index.html) |
-| 24 | `r2-day-08-reduce` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-08-reduce/index.html) |
-| 25 | `r2-day-09-gemm` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-09-gemm/index.html) |
-| 26 | `r2-day-10-flashattention` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-10-flashattention/index.html) |
-| 27 | `r2-day-11-triton--torch.compile` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-11-triton--torch.compile/index.html) |
-| 28 | `r2-day-12-profiling` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-12-profiling/index.html) |
-| 29 | `r2-day-13-mha-mqa-gqa-mla-moe` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/index.html) |
-| 30 | `r2-day-14-fsdp-zero` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-14-fsdp-zero/index.html) |
-| 31 | `r2-day-15-tp-pp-sp-3d-parallel` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/index.html) |
-| 32 | `r2-day-16-mixed-precision-accum-recompute` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-16-mixed-precision-accum-recompute/index.html) |
-| 33 | `r2-day-17-framework-selection` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-17-framework-selection/index.html) |
-| 34 | `r2-day-18-checkpoint-dcp` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-18-checkpoint-dcp/index.html) |
-| 35 | `r2-day-19-review-week` | [阅读](https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-19-review-week/index.html) |
+| 1 | `day-01-ddp-basics` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-01-ddp-basics/) |
+| 2 | `day-02-fsdp` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-02-fsdp/) |
+| 3 | `day-03-fsdp-perblock` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-03-fsdp-perblock/) |
+| 4 | `day-04-rlhf-vs-agentic-rl` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-04-rlhf-vs-agentic-rl/) |
+| 5 | `day-05-jax-pjit` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-05-jax-pjit/) |
+| 6 | `day-06-paper1-rl-infra` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-06-paper1-rl-infra/) |
+| 7 | `day-07-checkpoint-recovery` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-07-checkpoint-recovery/) |
+| 8 | `day-07-h100-beyond-7b` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-07-h100-beyond-7b/) |
+| 9 | `day-08-eval-infra` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-08-eval-infra/) |
+| 10 | `day-11-paper2-mech-load` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-11-paper2-mech-load/) |
+| 11 | `day-12-reward-model` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-12-reward-model/) |
+| 12 | `day-12b-profile-tool-legacy` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-12b-profile-tool-legacy/) |
+| 13 | `day-13-reliability-slo` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-13-reliability-slo/) |
+| 14 | `day-14-pue-cost` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-14-pue-cost/) |
+| 15 | `day-15-megatron-3d` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-15-megatron-3d/) |
+| 16 | `day-16-monetization-v1` | [阅读](https://papa-panda.github.io/post-training/ai-infra/day-16-monetization-v1/) |
+| 17 | `r2-day-01-transformer` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-01-transformer/) |
+| 18 | `r2-day-02-pytorch-loop` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-02-pytorch-loop/) |
+| 19 | `r2-day-03-topo-nccl` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-03-topo-nccl/) |
+| 20 | `r2-day-04-ddp` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-04-ddp/) |
+| 21 | `r2-day-05-jax-mesh` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-05-jax-mesh/) |
+| 22 | `r2-day-06-gpu-architecture` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-06-gpu-architecture/) |
+| 23 | `r2-day-07-cuda-programming-model` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-07-cuda-programming-model/) |
+| 24 | `r2-day-08-reduce` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-08-reduce/) |
+| 25 | `r2-day-09-gemm` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-09-gemm/) |
+| 26 | `r2-day-10-flashattention` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-10-flashattention/) |
+| 27 | `r2-day-11-triton--torch.compile` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-11-triton--torch.compile/) |
+| 28 | `r2-day-12-profiling` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-12-profiling/) |
+| 29 | `r2-day-13-mha-mqa-gqa-mla-moe` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/) |
+| 30 | `r2-day-14-fsdp-zero` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-14-fsdp-zero/) |
+| 31 | `r2-day-15-tp-pp-sp-3d-parallel` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/) |
+| 32 | `r2-day-16-mixed-precision-accum-recompute` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-16-mixed-precision-accum-recompute/) |
+| 33 | `r2-day-17-framework-selection` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-17-framework-selection/) |
+| 34 | `r2-day-18-checkpoint-dcp` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-18-checkpoint-dcp/) |
+| 35 | `r2-day-19-review-week` | [阅读](https://papa-panda.github.io/post-training/ai-infra/r2-day-19-review-week/) |
 
 The full intended sequence is in [`ROADMAP_45D.md`](ROADMAP_45D.md). It is a curriculum map, not a claim that every planned lesson has been implemented.
 

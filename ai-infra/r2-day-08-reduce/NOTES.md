@@ -1,6 +1,6 @@
 # NOTES — r2-Day08 Parallel Reduce 三连
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-08-reduce/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-08-reduce/
 
 ## 准确术语
 

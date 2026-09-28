@@ -1,6 +1,6 @@
 # Day 10 — Habitat 3.0：把 embodied AI 从“独居 agent”推进到人机共居
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-10-2023-habitat-3/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-10-2023-habitat-3/
 
 ## 元信息
 - Title: Habitat 3.0: A Co-Habitat for Humans, Avatars and Robots

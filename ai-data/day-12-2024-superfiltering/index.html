@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{
   --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
@@ -61,6 +62,9 @@ pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overfl
 pre code{background:none;padding:0;color:inherit}
 .katex{font-size:1.05em}
 .katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
 .tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
   border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
 .meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
@@ -111,7 +115,7 @@ pre code{background:none;padding:0;color:inherit}
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
-<p>📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-12-2024-superfiltering/index.html</p>
+<p>📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/</p>
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
@@ -249,7 +253,7 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>Q4（本 chat 追问，2026-09-14）：这个信号是 delta of length？</strong></p>
 <p>回答要点：主信号仍是 $r_i^k$ 本身（短 proxy run 上的 LIM 输入）， $\Delta L$ 的正确定位是零 reward 尾部的 tiebreaker，不是 LIM 的替代品——短窗口里难样本 reward 全零，LIM 不可识别（Day11 proxy 讨论的 blind spot：slow-unlock 与 never-learn 在全零 probe 下同构），而 length 是"reward 为零时仍有读数"的连续信号。三个 caveat：① 两阶段混淆——Fig 3b 先降后升是总体曲线，前段降是 verbosity pruning，短 run 若只覆盖下降段则 $\Delta L$ 符号无判别力，用前先看 proxy 总体 length 曲线过没过拐点；② length 可被 hack—— $\Delta L &gt; 0$ 且 $\Delta r = 0$ 是可疑的（DAPO 要 clip 的东西），必须和 reward 联合读；③ 因果箭头没证明——Day11 已把 Fig 3b 措辞降级， $\Delta L$ 只能当相关性读数。二维判决：r 快涨 → 学得动；r 全零 + length 持续坍缩 → 学不动；r 全零 + length 降后回升 → 候选 late bloomer，不下结论。
 串联注：Q3b 里用户提出的"熵高→尝试不同 output→长度拉伸"正是比裸 $\Delta L$ 更干净的因果链——熵是"尝试"的直接读数，长度只是它的显性表现；但两者共享同一个混淆（发散型高熵 vs 探索型高熵），见 Q3b 红队 (a)。</p></section>
-  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-12-2024-superfiltering/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX 渲染（需联网加载）</div>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-12-2024-superfiltering/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
@@ -260,6 +264,9 @@ document.addEventListener("DOMContentLoaded", function() {
     ],
     throwOnError: false
   });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
   var bar = document.getElementById("progress");
   window.addEventListener("scroll", function() {
     var h = document.documentElement;

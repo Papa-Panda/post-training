@@ -1,6 +1,6 @@
 # Day 11 — π₀：用 flow matching 生成高频连续动作块的 VLA
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-11-2024-pi0-flow-vla/
 
 ## 元信息
 - Title: π₀: A Vision-Language-Action Flow Model for General Robot Control

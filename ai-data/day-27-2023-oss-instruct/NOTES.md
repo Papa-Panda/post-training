@@ -1,6 +1,6 @@
 # Magicoder: Empowering Code Generation with OSS-Instruct
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-27-2023-oss-instruct/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-27-2023-oss-instruct/
 
 ## 元信息
 - Title: Magicoder: Empowering Code Generation with OSS-Instruct

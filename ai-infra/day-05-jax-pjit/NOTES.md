@@ -1,6 +1,6 @@
 # 2026-08-06 JAX pjit - done
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-05-jax-pjit/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-05-jax-pjit/
 
 CPU run after JAX 0.11.0 installed:
 - devices=[CpuDevice(id=0)] count=1, mesh axis='data' size=1

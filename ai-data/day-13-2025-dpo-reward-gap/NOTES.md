@@ -1,6 +1,6 @@
 # Paper 模板
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-13-2025-dpo-reward-gap/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-13-2025-dpo-reward-gap/
 
 ## 元信息
 - Title: Difficulty-Based Preference Data Selection by DPO Implicit Reward Gap

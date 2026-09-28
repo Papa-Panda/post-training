@@ -1,6 +1,6 @@
 # Day 32 — OpenAI GPT-6 Astra：computer-use 旗舰与"AGI era"（最新进展 2/4）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-32-2026-gpt6-astra/
 
 ## 元信息
 - Title: GPT-6 Astra: A new generation of intelligence

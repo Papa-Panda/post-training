@@ -1,6 +1,6 @@
 # Paper 模板
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-12-2024-superfiltering/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/
 
 ## 元信息
 - Title: Superfiltering: Weak-to-Strong Data Filtering for Fast Instruction-Tuning

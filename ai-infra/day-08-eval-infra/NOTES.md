@@ -1,6 +1,6 @@
 # 2026-08-09 Day 08 NOTES — Eval infra 为什么是瓶颈
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-08-eval-infra/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-08-eval-infra/
 
 Date: 2026-08-09 19:26 PDT (America/Los_Angeles)  
 Status: done (CPU gloo 验证逻辑，待 H100 NCCL 真机验证 eval P95 / QPS / GPU 空转美元)  

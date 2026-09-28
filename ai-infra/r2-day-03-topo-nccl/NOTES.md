@@ -1,6 +1,6 @@
 # NOTES — r2-Day03 Topology and Collectives
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-03-topo-nccl/
 
 ## Corrected mental model
 

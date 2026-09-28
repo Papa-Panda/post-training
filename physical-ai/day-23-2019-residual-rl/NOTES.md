@@ -1,6 +1,6 @@
 # Day 23 — Residual RL：Residual Reinforcement Learning for Robot Control
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-23-2019-residual-rl/
 
 ## 元信息
 - Title: Residual Reinforcement Learning for Robot Control

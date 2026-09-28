@@ -1,6 +1,6 @@
 # Day 12 NOTES — Reward Model Calibration
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-12-reward-model/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-12-reward-model/
 
 > Connection to Prev: Day11 Tj_max 82.49°C throttle 0.83% → Day12 σ + |cal-raw| 过滤；Day10 5类失败率 → 不确定性集合；Day08/09 γ*(ΔT)^2 二阶 → ECE/Brier 二阶。
 

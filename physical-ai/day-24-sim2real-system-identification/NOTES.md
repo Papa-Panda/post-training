@@ -1,6 +1,6 @@
 # Day 24 — 系统辨识 + Sim2Real 评估：SimOpt — Closing the Sim-to-Real Loop
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-24-sim2real-system-identification/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-24-sim2real-system-identification/
 
 ## 元信息
 - Title: Closing the Sim-to-Real Loop: Adapting Simulation Randomization with Real World Experience（SimOpt）

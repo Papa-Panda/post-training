@@ -1,6 +1,6 @@
 # r2-Day14 NOTES — FSDP/ZeRO：用通信换显存
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-14-fsdp-zero/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-14-fsdp-zero/
 
 > 符号约定与 README §0 一致： $P$ 参数量， $N$ rank 数，
 > $b_p/b_g/b_o$ 参数/梯度/优化器状态的每参数字节数，

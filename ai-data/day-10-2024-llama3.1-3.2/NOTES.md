@@ -1,6 +1,6 @@
 # Paper 模板 - Day 10 自动骨架
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-10-2024-llama3.1-3.2/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-10-2024-llama3.1-3.2/
 
 ## 元信息
 - Title: Llama 3.1 / 3.2 - Post-training Expansion, Multilingual / Long-Context / Tool Use, Distillation & Pruning for 1B/3B and Vision 11B/90B

@@ -1,6 +1,6 @@
 # Day 4 - Done (补)
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-04-rlhf-vs-agentic-rl/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-04-rlhf-vs-agentic-rl/
 
 Date: 2026-08-05 08:49 PDT (补 08-06)
 Status: done (离线笔记，待真机验证不影响 infra 链路)

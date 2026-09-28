@@ -1,6 +1,6 @@
 # Day 26 — GR00T N1：双系统人形基础模型 + 数据金字塔
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-26-2025-groot-n1/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-26-2025-groot-n1/
 
 ## 元信息
 - Title: GR00T N1: An Open Foundation Model for Generalist Humanoid Robots

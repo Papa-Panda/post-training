@@ -1,6 +1,6 @@
 # Day 30 — Physical AI Eval + Data Flywheel：评测合同 × 安全红线 × 数据飞轮（30 天收官）
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-30-physical-ai-eval-data-flywheel/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-30-physical-ai-eval-data-flywheel/
 
 ## 元信息
 - Title: Physical AI Eval + Data Flywheel — end-to-end synthesis（收官日，无单篇论文）

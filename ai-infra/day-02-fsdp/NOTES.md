@@ -1,6 +1,6 @@
 # Day 2 - FSDP intro - Done
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-02-fsdp/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-02-fsdp/
 
 Date: 2026-08-03 19:07 PDT
 Status: done

@@ -1,6 +1,6 @@
 # Day 06 — DreamerV3：Mastering Diverse Domains through World Models
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-06-2023-dreamerv3/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-06-2023-dreamerv3/
 
 > Day 06 of physical-ai track, following Day05 UniSim. Focus on compact latent dynamics, imagined actor-critic training, scale-robust objectives, and what is still missing for real-robot sim2real.
 

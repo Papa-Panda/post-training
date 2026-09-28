@@ -1,6 +1,6 @@
 # NOTES — Day 15 Megatron 3D Parallelism
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-15-megatron-3d/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-15-megatron-3d/
 
 > Connection to Prev: Day14 Paper3 PUE拆解 1.2576 → Day15 3D Parallelism 单卡182GB OOM需TP4+PP2切到25GB才能跑，PUE优化前置条件；Day13 Tj_max 90.5°C throttle 2.5% 用 TP scatter把720W burst打到520W；Day08/09 async 52%省为PP bubble填充提供位置。
 

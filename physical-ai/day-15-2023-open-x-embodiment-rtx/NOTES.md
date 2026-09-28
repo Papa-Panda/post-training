@@ -1,6 +1,6 @@
 # Day15 — Open X-Embodiment / RT-X: 跨机器人数据规模化
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-15-2023-open-x-embodiment-rtx/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-15-2023-open-x-embodiment-rtx/
 
 > Open X-Embodiment Collaboration（Google DeepMind 牵头，21 institutions），arXiv 2310.08864（2023-10-13，ICRA 2024）。机器人学的"ImageNet 时刻"宣言：把 34 个实验室的 60 个数据集、22 种机器人、100 万+ 轨迹统一成 RLDS schema，用一个 7 维末端执行器动作接口做粗对齐，训练跨机器人通用策略 RT-X。
 

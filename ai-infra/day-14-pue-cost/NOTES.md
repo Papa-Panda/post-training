@@ -1,6 +1,6 @@
 # NOTES — Day 14 Paper3 PUE → \$/useful rollout
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-14-pue-cost/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-14-pue-cost/
 
 ## 3 个 CPU 真数（待H100 NCCL 补 max_memory_allocated + nvidia-smi Tj + RAPL）
 

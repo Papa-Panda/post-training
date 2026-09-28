@@ -1,6 +1,6 @@
 # Day 04 — Genie: Generative Interactive Environments (World Model)
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-04-2024-genie-world-model/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-04-2024-genie-world-model/
 
 > Day 04 of physical-ai track, following Day03 Isaac Lab. First World Model entry.
 

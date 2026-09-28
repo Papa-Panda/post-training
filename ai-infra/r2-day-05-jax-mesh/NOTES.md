@@ -1,6 +1,6 @@
 # NOTES - r2-Day05 JAX Mesh/pjit
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-05-jax-mesh/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-05-jax-mesh/
 
 CPU proxy，待H100验证
 

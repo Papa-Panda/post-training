@@ -1,6 +1,6 @@
 # Day 08 — Humanoid-Gym：Humanoid Locomotion 的 Zero-Shot Sim2Real
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-08-2024-humanoid-gym-locomotion/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-08-2024-humanoid-gym-locomotion/
 
 ## 元信息
 - Title: Humanoid-Gym: Reinforcement Learning for Humanoid Robot with Zero-Shot Sim2Real Transfer

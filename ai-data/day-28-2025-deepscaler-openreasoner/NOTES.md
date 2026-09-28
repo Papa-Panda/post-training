@@ -1,6 +1,6 @@
 # Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-28-2025-deepscaler-openreasoner/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-28-2025-deepscaler-openreasoner/
 
 ## 元信息
 - Title: Open-Reasoner-Zero: An Open Source Approach to Scaling Up Reinforcement Learning on the Base Model

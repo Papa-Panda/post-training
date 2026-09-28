@@ -1,6 +1,6 @@
 # Day 03 — Isaac Lab / Isaac Sim：USD + PhysX + Sim2Real 基座
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-03-2025-isaac-lab/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/day-03-2025-isaac-lab/
 
 > Day 03 of physical-ai track, following Day02 MuJoCo. Focus on how OpenUSD, PhysX, RTX rendering, GPU-resident tensors, and domain randomization form a scalable robot-learning stack.
 

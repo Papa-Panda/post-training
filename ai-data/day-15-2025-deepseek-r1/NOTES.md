@@ -1,6 +1,6 @@
 # Paper 模板 — Day 15 DeepSeek-R1
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-15-2025-deepseek-r1/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-15-2025-deepseek-r1/
 
 ## 元信息
 - Title: DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning

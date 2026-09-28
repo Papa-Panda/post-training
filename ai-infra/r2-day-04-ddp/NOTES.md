@@ -1,6 +1,6 @@
 # NOTES — r2-Day04 DDP
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-04-ddp/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-04-ddp/
 
 ## Audit corrections
 

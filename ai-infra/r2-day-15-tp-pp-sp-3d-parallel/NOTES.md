@@ -1,6 +1,6 @@
 # r2-Day15 NOTES — 术语、公式核对与上一课/下一课链接
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/
 
 ## 术语（准确定义）
 
