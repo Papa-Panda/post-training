@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day37 DAPO — NOTES</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 37</span>
+    <h1>Day37 DAPO — NOTES</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">大纲</a><a href="#sec-4">流程图</a><a href="#sec-5">核心</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句 (1-2句)</a><a href="#sec-9">思考题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-37-2025-dapo/</p>
+</blockquote>
+<!-- viz:stats: AIME24 avg@32 50分 | 训练步数仅50% | DeepSeek-R1-Zero-Qwen-32B 47分 -->
+<div class="viz viz-flow flow"><div class="fnode">web爬取+人工标注</div><div class="farrow">→</div><div class="fnode">答案转整数</div><div class="farrow">→</div><div class="fnode">17K prompts</div><div class="farrow">→</div><div class="fnode">dynamic sampling</div><div class="farrow">→</div><div class="fnode">RL训练</div></div>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">Naive GRPO</div><div class="bartrack"><div class="barfill" style="width:60.0%"></div></div><div class="barval">30</div></div><div class="barrow"><div class="barlabel">+Overlong过滤</div><div class="bartrack"><div class="barfill" style="width:72.0%"></div></div><div class="barval">36</div></div><div class="barrow"><div class="barlabel">+Clip-Higher</div><div class="bartrack"><div class="barfill" style="width:76.0%"></div></div><div class="barval">38</div></div><div class="barrow"><div class="barlabel">+软惩罚</div><div class="bartrack"><div class="barfill" style="width:82.0%"></div></div><div class="barval">41</div></div><div class="barrow"><div class="barlabel">+Token级loss</div><div class="bartrack"><div class="barfill" style="width:84.0%"></div></div><div class="barval">42</div></div><div class="barrow"><div class="barlabel">DAPO</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">50</div></div></div>
+
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>"DAPO: An Open-Source LLM Reinforcement Learning System at Scale"</dd><dt>Authors / Org</dt><dd>Qiying Yu et al. / ByteDance Seed, Tsinghua AIR, HKU</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2503.14476">https://arxiv.org/abs/2503.14476</a></dd><dt>Project page</dt><dd><a href="https://dapo-sia.github.io/">https://dapo-sia.github.io/</a></dd><dt>Date read</dt><dd>2026-09-29</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">rl-data</span><span class="tag">rl-training-data</span><span class="tag">dynamic-sampling</span><span class="tag">overlong-filtering</span><span class="tag">grpo</span><span class="tag">curation</span></div></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">17K</div><div class="l">数学题</div></div></div>
+<p>开源复现 R1 级长 CoT RL 的完整数据+工程 recipe：DAPO-Math-17K（17K 数学题、答案全部改写成整数以便规则奖励）配四个关键技术——dynamic sampling 过滤零梯度 prompt 组、overlong 软惩罚、token 级 policy gradient loss、Clip-Higher 解耦——Qwen2.5-32B 从近 $0\%$ 训到 AIME24 avg@32 50 分，超过 DeepSeek-R1-Zero-Qwen-32B 的 47 分，且只用了 $50\%$ 训练步数。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>大纲</h2>
+<ul>
+<li>问题背景：o1/R1 之后社区复现不了大规模 RL——关键训练细节被藏起；DAPO 开源算法 + verl 训练代码 + 整理好的数据集，目标是可复现的 SOTA</li>
+<li>DAPO 四技术（名字即作用）：</li>
+<li>Clip-Higher：把 PPO/GRPO 的对称 clip 解耦， $\varepsilon_{\text{low}}$ 保持 0.2 、 $\varepsilon_{\text{high}}$ 放到 0.28 ，给低概率"探索 token"留上涨空间，防熵崩塌</li>
+<li>Dynamic Sampling：过滤掉组内全对/全错的 prompt（advantage 为零、纯浪费算力），动态采样直到有效 batch 填满</li>
+<li>Token-Level Policy Gradient Loss：按全部 token 数归一化（ $1/\sum|o_i|$ ），而不是按样本数平均——长 CoT 下短回复会被系统性高估</li>
+<li>Overlong Reward Shaping：截断样本不再一刀切罚到底； 16384 预期长度 + 4096 惩罚缓冲 = 20480 上限，区间内越长罚越重（线性软惩罚）</li>
+<li>数据集 DAPO-Math-17K：web 爬取 + 竞赛官网 + 人工标注；数学答案格式太杂（表达式/公式/数字），用 LLM 把题目改写成"答案是整数"的形式（如 $a+b+c$ ），17K prompts 每个配一个整数答案——全部为了让 rule-based reward 解析不出错</li>
+<li>训练配置：prompt batch 512 、每题采样 16 个回复；mini-batch 512 （每 rollout 步 16 次梯度更新）；lr $1\times 10^{-6}$ 、warmup 20 步；评测 AIME 重复 32 次取 avg@32（temp 1.0 、top-p 0.7 ）</li>
+<li>消融（Table 1，AIME24 avg@32）：Naive GRPO 30 → +Overlong Filtering 36 → +Clip-Higher 38 → +Soft Overlong Punishment 41 → +Token-level Loss 42 → +Dynamic Sampling（DAPO） 50</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>流程图</h2>
+<p><div class="mermaid">graph TD
+    A[web爬取+人工标注] --&gt; B[答案转整数17K题]
+    B --&gt; C[每题采样16回复]
+    C --&gt; D[过滤全对全错组]
+    D --&gt; E[token级loss训练]
+    E --&gt; F[AIME24得50分]
+</div></p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">web/竞赛官网爬取 + 人工标注</div><div class="farrow">→</div><div class="fnode">答案整数化改写</div><div class="farrow">→</div><div class="fnode">DAPO-Math-17K</div></div><div class="viz viz-bars"><div class="barrow"><div class="barlabel">准确率从近</div><div class="bartrack"><div class="barfill" style="width:3.0%"></div></div><div class="barval">0%</div></div><div class="barrow"><div class="barlabel">涨到</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">50%</div></div></div>
+<ol>
+<li><strong>Motivation</strong>: o1 和 DeepSeek R1 证明了大规模 RL 能" elicits 复杂推理行为"（自我验证、迭代修正），但 o1 博客和 R1 技术报告都藏了关键训练细节，社区复现不了。DAPO 的立场是：把四个让大规模 LLM RL 成功的关键技术讲清楚，并把代码（基于 verl）+ 数据集全开源。scope 限定 ai data：这里的四个技术里，两个是纯数据工程（dynamic sampling = 数据过滤、overlong shaping = 奖励/数据处理），一个是数据集本身。</li>
+<li><strong>Data Pipeline</strong>: web/竞赛官网爬取 + 人工标注 → 答案整数化改写 → DAPO-Math-17K（17K prompts × 整数答案）→ RL 训练时 per-prompt 采样 16 个回复 → rule-based correctness reward（整数答案直接可比，parser 不出错）+ 长度软惩罚 → dynamic sampling 过滤 → token 级 loss 更新；评测 AIME24 avg@32。</li>
+<li><strong>答案整数化的动机</strong>：数学答案格式杂（表达式、公式、数字），规则解析器容易误判；借鉴 AIME"答案必为整数"的设计，用 LLM 把原题改写成答案为整数的形式（例：原答案 $\frac{a+\sqrt{b}}{c}$ 改成求 $a+b+c$ ）——用一次 LLM 改写换整个训练期的奖励信号零噪声。</li>
+<li><strong>Dynamic Sampling 算法</strong>：对每个 prompt 采样 $G$ 个输出算 reward，只保留"对错混杂"的组进 buffer（条件 $0&lt;|\{o_i:\text{is\_equivalent}(a,o_i)\}|&lt;G$ ），buffer 攒满 $N$ 才做梯度更新；全对/全错组 advantage 恒为零，训了也白训。</li>
+<li><strong>Overlong 两步走</strong>：先试 Overlong Filtering（截断样本直接 mask 掉 loss）——已显著稳定训练、涨 $30\to 36$ ；再上 Soft Overlong Punishment（公式 13，区间内线性惩罚、超限 -1 ）， $36\to 41$ 。</li>
+<li><strong>Key Tricks</strong>:</li>
+<li><strong>答案整数化</strong>：数据预处理的"一次投入、永久收益"——把奖励噪声在数据源头掐死，而不是在训练里修；</li>
+<li><strong>Dynamic Sampling 的算力账</strong>：过滤零梯度数据意味着要多采样，但论文实测总训练时间没明显增加，反而收敛更快（有效步数少了）——"采样贵、训练更贵"，过滤是划算的；</li>
+<li><strong>Token 级 loss 的长 CoT 意义</strong>：样本级平均会让短回复的每个 token 拿到更大权重；token 级归一化后"长度增长更健康"，训练更稳定（涨点不多但方差小）；</li>
+<li><strong>Clip-Higher 的熵视角</strong>： $\varepsilon_{\text{high}}$ 从 0.2 放到 0.28 后，策略熵上升、采样更多样——长 CoT RL 里探索空间大，对称 clip 会把低概率 token 的上涨空间压死；</li>
+<li><strong>超长上限的工程数</strong>： $16384+4096=20480$ ，KV cache 和显存规划按 20480 算。</li>
+<li><strong>Results</strong>:</li>
+<li>AIME24 avg@32：DAPO 50 vs DeepSeek-R1-Zero-Qwen-32B 47 ，用 $50\%$ 训练步数；准确率从近 $0\%$ 涨到 $50\%$ ；</li>
+<li>消融链（每加一项都涨）： $30\to 36\to 38\to 41\to 42\to 50$ ，其中 dynamic sampling 单项贡献最大（ $42\to 50$ ， $+8$ ）；</li>
+<li>Vanilla GRPO 只到 $30\%$ ——说明 R1 级结果不是"大力出奇迹"，是数据+工程细节堆出来的；</li>
+<li>Token-level loss：涨点小（ $41\to 42$ ）但训练稳定性提升明确。</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：(1) "可验答案"类比：数学靠"答案转整数"拿到零噪声 rule-based reward；代码天然有编译通过/单测通过这种可验信号——code RL 的数据管线可以照抄 DAPO 的整套 recipe（dynamic sampling 滤零梯度组 + overlong 软惩罚 + token 级 loss），verifier 就是整数答案的角色。(2) Dynamic sampling 的过滤思想先行：RL 前先批量跑一遍当前策略，把"全对/全错"的 prompt 标出来——过滤掉的别进 RL（零梯度），难的全错样本回流给 SFT/蒸馏做课程学习；这比"采样时动态过滤"更省 rollout 算力。</li>
+<li>Infra 视角： $512\times 16=8192$ 条 rollout per step 的规模 + verl 框架；dynamic sampling 让每步实际采样量波动（buffer 填满才训），调度器要能处理动态 batch； 20480 token 的生成上限意味着 KV cache 按最长序列规划，overlong 样本是显存杀手——overlong shaping 不只是算法技巧，也是成本控制。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>答案整数化改写题目时，LLM 改写会不会悄悄改变题目难度/分布？论文没给改写前后的难度对比——17K 里有多少是"为凑整数而变简单"的题？</li>
+<li>Dynamic sampling 过滤全对 prompt：SFT 阶段是不是也该干掉"模型已全对"的题？Day33 STaR 恰恰靠"答对题目的 rationalization"扩数据——两者矛盾吗，还是 RL 和 SFT 对"已学会样本"的价值判断本来就不同？</li>
+<li>Soft overlong punishment 的 4096 缓冲是拍脑袋的吗？不同任务的最优"预期长度/缓冲"比例怎么定——coding 里函数长度分布更偏，照搬 $16384+4096$ 合理吗？</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句 (1-2句)</h2>
+<blockquote class="pq">
+<p>Unlike previous works that withhold training details, we introduce four key techniques of our algorithm that make large-scale LLM RL a success.</p>
+<p>If all outputs of a particular prompt are correct and receive the same reward, the resulting advantage for this group is zero.</p>
+</blockquote>
+</section>
+<section class="sec sec-qa" id="sec-9"><h2><span class="n">9</span>思考题</h2>
+<ol>
+<li>DAPO 把数学答案统一转成整数换取 rule-based reward 的零噪声，代价是"题目被改写、答案空间变窄"：coding 里哪些任务有天然可验答案（编译通过/单测），哪些没有？不可验的任务，Day35 的 PRM 式人工 step 标签和 Day36 的 AI 标注哪条路更划算？</li>
+<li>Dynamic Sampling 把全对/全错 prompt（零梯度）挡在训练之外；Day33 STaR 却专门收集"答对的题目"做 rationalization 扩 SFT 数据：两者矛盾吗？RL 和 SFT 对"已学会样本"的价值判断为什么不同？</li>
+</ol></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-37-2025-dapo/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
