@@ -4,7 +4,7 @@
 > Scope：Physical AI 全链路，不谈纯 LLM data curation（那是 ai-data）。
 > 命名对齐 `ai-data/day-01-xxx`，`physical-ai/day-01-xxx` ~ `day-30-xxx`，便于 Day N 直连。
 
-## 第二轮深度复习（3/34）
+## 第二轮深度复习（4/34）
 
 > 复习期：2026-09-22 → 2026-10-29；2026-09-23 → 2026-09-26 先插播 Day31–34 四篇最新进展（World Labs Atlas / GPT-6 Astra / Figure AI / Physical Intelligence π0.7），复习从 2026-09-27 恢复（02/34），一天一篇，只更新已有 NOTES，不新增论文。复习重点不是重述摘要，而是 34 天全路线在手边后重建知识结构、画出跨 Day 连接。
 
@@ -13,6 +13,7 @@
 | 01/34 | 2026-09-22 | 01 | Meta ARI / MSL / Robotics Studio — 修正 Pinto 背景误读（Fauna→Amazon，非 PI）；补 e-Flesh / seed 轮 / capex 同日上调 | ✅ 完成 |
 | 02/34 | 2026-09-27 | 02 | MuJoCo Contact Model — 补 3.8/3.10 版本演进、MJWarp 并入 MJX、Newton 收编为 solver；确立"物理公理层"定位（Day21/24/27/30 皆为其补救工程） | ✅ 完成 |
 | 03/34 | 2026-09-28 | 03 | Isaac Lab / Isaac Sim — 修正论文发表日期与作者（arXiv 2511.04831v1，submitted 2025-11-06，105 位作者）；论文结论官宣 Newton 可微物理集成；确立"规模层"定位（vs Day02 公理层融合） | ✅ 完成 |
+| 04/34 | 2026-09-29 | 04 | Genie 生成式世界模型 — 补 Project Genie 订阅落地（2026-01-29，AI Ultra \$200/月）/ I/O 2026 Street View 集成（2800 亿图）与 Waymo 生产部署 / GDC 官方承认"几分钟崩"+"not yet physics-aware"；确立"生成层"定位（Day02 公理层 / Day03 规模层之上） | ✅ 完成 |
 
 ## 结构
 
