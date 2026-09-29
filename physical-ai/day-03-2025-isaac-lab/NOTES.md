@@ -196,6 +196,8 @@ Isaac Lab 的本质不是"更好的物理引擎"，而是把仿真从"动力学�
 - NVIDIA Research publication page：https://research.nvidia.com/publication/2025-09_isaac-lab-gpu-accelerated-simulation-framework-multi-modal-robot-learning
 - Isaac Lab GitHub：https://github.com/isaac-sim/IsaacLab
 
+相关讨论（Gemini网页版，2026-09-27）：https://gemini.google.com/app/80638fd25b5fe1d3
+
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-03-2025-isaac-lab/NOTES.md
 
 <!-- viz:stats: 8× RTX Pro 6000 | 16,384 env | DextrAH teacher 超 0.9M FPS | Franka cabinet 超 1.6M FPS -->
