@@ -296,3 +296,62 @@ $$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_
 边界也要说清楚：准静态任务 + 高刚度执行器 + 高增益 PD，gap 可以小到忽略；高速动态、接触丰富、柔性/线驱执行器，gap 就是主战场。Figure Helix 进家庭那 56% 的成功率，丢的分大概率也丢在这一层——VLM 知道要拿杯子，执行器在真实接触面前露馅。
 
 **关联**：Day21（ADR）/ Day22（RMA）/ Day24（系统辨识）/ Day02（"准的是求解器，不是参数"）。
+
+### physical AI 部件栈：sense-plan-act 之外还有什么（2026-09-30）
+
+**问**：physical ai 的主要部件是感知 planning（有 simulation 吗）执行？还有别的吗？
+
+**答**：sense-plan-act 是经典答案，但对 physical AI 不完整。完整的栈：
+
+- **感知**：外部（视觉/深度/触觉）+ 本体（编码器/IMU/力矩），输出状态估计和场景表示。
+- **认知**：VLM/VLA 这一层——语义理解、任务分解、语言 grounding（RT-2、π₀、Helix 坐这儿）。经典三件套里没有，但现在是核心。
+- **规划**：任务规划（做什么，常由 VLM 出）+ 运动规划/轨迹优化（怎么动，避障、MPC）。
+- **执行**：低层控制，把轨迹变成扭矩——PD/阻抗、全身控制、locomotion policy。sim2real 的主战场。
+- **仿真/世界模型**（回答"有 simulation 吗"）：仿真不在在线三件套里，它是"第四类"部件——训练时是环境工厂（Isaac/MuJoCo 造数据、训策略），运行时是可选项（learned world model 做预测性规划，digital twin 并行跑做监控）。离线核心、在线可选。
+- **数据飞轮**：部署→收集失败→resimulate/重训→再部署（Day30）。决定系统能不能持续变强。
+- **安全与评估**：safety filter（CBF）、gated deploy、评测。进真实世界尤其是家庭的硬门槛。
+- **硬件**：本体、执行器、传感器、算力——physical 的 physical，上限所在。
+
+一句话：**感知 → 认知 → 规划 → 执行**是在线主链，**仿真/世界模型**是离线训练场（+在线预测器），**数据飞轮 + 安全评估**是让系统敢上线、能进化的外环，**硬件**是地基。34 天路线基本按这个栈排：Day02/03 仿真、Day04/06/27/31 世界模型、Day11–14 VLA、Day15–17 数据、Day19–24 RL/sim2real（执行层）、Day25–30 评估安全飞轮。
+
+**关联**：Day02/03（仿真）/ Day04/06/27/31（世界模型）/ Day11–14（VLA 认知层）/ Day19–24（执行层）/ Day30（飞轮）/ Day32（数字世界的横向对照）。
+
+### 执行层的技术栈：从轨迹到扭矩的链条（2026-09-30）
+
+**问**：执行——低层控制，把轨迹变成扭矩：PD/阻抗、全身控制、locomotion policy，sim2real 的主战场。有哪些技术？
+
+**答**：路线里覆盖执行层的正好是 Day19–24 六连篇，加上 Day02/03 打地基。按"把轨迹变成扭矩"的链条排：
+
+**地基层**
+- Day02 MuJoCo：接触求解器——"准的是求解器，不是参数"，执行层物理正确性的来源。
+- Day03 Isaac Lab：一次跑 16384 个世界，rollout 吞吐层。
+
+**控制本体：两条路线**
+- 经典控制（不学）：PD+前馈、阻抗控制、Whole-Body Control/MPC（MIT Cheetah 系）、ZMP——可解释、有保证，但建模贵、不适应变化。
+- Day19 PPO：sim 里直接训 locomotion/manipulation policy，当前主流配方；Day20 RLPD：离线数据打底 + 在线 RL 微调，加速学习。
+
+**跨 gap 四连发（sim2real 执行层补丁）**
+- Day21 Domain Randomization/ADR：训练时随机化摩擦、质量、执行器参数、延迟——对不确定性鲁棒。
+- Day22 RMA：部署时在线估计环境 extrinsics（负载、摩擦、执行器差异）并实时适应，teacher-student 蒸馏。
+- Day23 Residual RL：经典控制器打底 + 学残差修正——"模型打底、学习补差"。
+- Day24 系统辨识：梯度法/SimOpt 把仿真参数对准真机轨迹——让 sim 更像 real。
+
+一句话串起来：执行层的技术史就是**建模 → 随机化 → 适应 → 辨识 → 残差**，本质是把 gap 从"人的建模负担"转成"数据的学习负担"。
+
+（注："四连发"的组名是聊天里现编的记忆钩子，不是业界术语，见下一条问答。）
+
+**关联**：Day19（PPO）/ Day20（RLPD）/ Day21（DR/ADR）/ Day22（RMA）/ Day23（Residual RL）/ Day24（系统辨识）/ Day02（MuJoCo）/ Day03（Isaac Lab）。
+
+### "跨 gap 四件套"是业界说法吗（2026-09-30）
+
+**问**：跨 gap 四件套，业界有这个说法？
+
+**答**：没有，是聊天里现编的——为了把 Day21–24 串成一组好记，**不是业界术语**，别拿到外面去说。
+
+业界文献里更标准的分法是三个并列支柱：**domain randomization**（让策略鲁棒）、**system identification**（让仿真保真）、**domain adaptation / online adaptation**（部署时对齐或适应）。Residual RL 通常被单算一类，叫 hybrid control 或 residual learning，不会和前三个并列成"四件套"。
+
+所以准确的说法是：这四篇是路线里恰好连着的四种"还债"思路，组名是方便答题的记忆钩子；真要引经据典就按业界三分法说。
+
+（注：这是对上一条问答的术语澄清——原问答的"四连发"表述保留不变，只在此处追加说明。）
+
+**关联**：Day21（DR）/ Day22（RMA）/ Day23（Residual RL）/ Day24（系统辨识）。

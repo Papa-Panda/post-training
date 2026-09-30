@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">疑问</a><a href="#sec-9">下一步</a><a href="#sec-10">速查表</a><a href="#sec-11">连接</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">疑问</a><a href="#sec-9">下一步</a><a href="#sec-10">速查表</a><a href="#sec-11">连接</a><a href="#sec-12">问答补充（2026-09-30）</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -370,7 +370,22 @@ pre code{background:none;padding:0;color:inherit}
 <li>下一篇预告：Day 33 — Figure AI（Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包；2026-09-25）</li>
 </ul>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">92.7%</div><div class="l">ScreenSpot-Pro</div></div><div class="stat"><div class="v">1.9</div><div class="l">倍 Mind2Web 比 GPT-5.6 快</div></div></div>
-<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>π₀</h4><ul><li>50 步连续动作 chunk</li><li>毫秒级控制</li></ul></div><div class="vscol vs-b"><h4>Astra</h4><ul><li>分钟级任务几百步 UI 动作</li><li>控制频率差 3–4 数量级</li></ul></div></div></section>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>π₀</h4><ul><li>50 步连续动作 chunk</li><li>毫秒级控制</li></ul></div><div class="vscol vs-b"><h4>Astra</h4><ul><li>分钟级任务几百步 UI 动作</li><li>控制频率差 3–4 数量级</li></ul></div></div>
+<div class="viz viz-flow flow"><div class="fnode">看屏幕（感知）</div><div class="farrow">→</div><div class="fnode">拆任务（规划）</div><div class="farrow">→</div><div class="fnode">点鼠标调 API（执行）</div></div>
+
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>问答补充（2026-09-30）</h2>
+<h3>GPT-6/Astra 坐在哪一层：数字世界的 sense-plan-act（2026-09-30）</h3>
+<p><strong>问</strong>：gpt 6（接上条——GPT-6 在 physical AI 部件栈里坐哪？）</p>
+<p><strong>答</strong>：Astra 坐在<strong>认知/规划层</strong>，只不过它玩的是数字世界，不是物理世界。它的 computer-use 就是数字世界的 sense-plan-act：看屏幕（感知， $o_t$ 像素+DOM）→ 拆任务（规划）→ 点鼠标/调 API（执行， $a_t$ UI 原语+坐标）。</p>
+<p>Day04 复习里的横向对照说它是"数字世界的 Genie"：两者都是把无标注轨迹（屏幕录像 / 互联网视频）变成可交互环境，区别只在公理层——Astra 的公理是 OS/API，Genie 的公理是物理。</p>
+<p>两个关键区别：</p>
+<ol>
+<li><strong>数字世界没有 sim2real</strong>。Astra 的执行是调 API、点坐标，动作是精确的；物理执行的动作是扭矩，要过摩擦、延迟、接触。所以 computer-use 进展快、机器人慢——不是智能差一截，是执行层在收"物理税"。</li>
+<li><strong>但 infra 同构</strong>。rollout、verifier、数据飞轮、RL 训法这套在两个世界是通的。这正是 Day32 被破例收进路线的原因，也是 post-training / agentic RL infra 方向的立足点：在数字 agent 上练的 infra 肌肉，平移到 physical 时差的主要就是执行层那一坨物理。</li>
+</ol>
+<p>呼应李昊那条：他说的"GPT/Astra-style VLM + robot harness"低成本泛化架构，意思就是把 Astra 这套认知/规划能力（便宜、可 scale）嫁接到机器人执行栈（贵、gap 大）上——赌的是智能层通用化之后，只剩执行层需要啃。</p>
+<p><strong>关联</strong>：Day32 速查表 19–25（数字身体 vs 物理身体）/ Day04（"数字世界的 Genie"横向对照）/ README 问答「李昊对 sim2real gap 的判断及应对（2026-09-29）」/ Day19–24（执行层 gap 连篇）/ Day30（数据飞轮）。</p></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>
