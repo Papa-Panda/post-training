@@ -73,3 +73,5 @@ graph TD
 ## 思考题
 1. DAPO 把数学答案统一转成整数换取 rule-based reward 的零噪声，代价是"题目被改写、答案空间变窄"：coding 里哪些任务有天然可验答案（编译通过/单测），哪些没有？不可验的任务，Day35 的 PRM 式人工 step 标签和 Day36 的 AI 标注哪条路更划算？
 2. Dynamic Sampling 把全对/全错 prompt（零梯度）挡在训练之外；Day33 STaR 却专门收集"答对的题目"做 rationalization 扩 SFT 数据：两者矛盾吗？RL 和 SFT 对"已学会样本"的价值判断为什么不同？
+
+相关讨论（Gemini网页版，2026-09-29）：https://gemini.google.com/app/bc2d5b789b742779
