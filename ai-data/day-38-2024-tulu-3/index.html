@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day38 Tülu 3 — NOTES</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data · Day 38</span>
+    <h1>Day38 Tülu 3 — NOTES</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">大纲</a><a href="#sec-4">流程图</a><a href="#sec-5">核心</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句 (1-2句)</a><a href="#sec-9">思考题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-38-2024-tulu-3/</p>
+</blockquote>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">70B</div><div class="l">开发集均分76.0</div></div></div>
+<div class="viz viz-flow flow"><div class="fnode">2332万prompt池</div><div class="farrow">→</div><div class="fnode">8-gram去污</div><div class="farrow">→</div><div class="fnode">SFT</div><div class="farrow">→</div><div class="fnode">DPO</div><div class="farrow">→</div><div class="fnode">RLVR</div></div>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">8B SFT</div><div class="bartrack"><div class="barfill" style="width:93.2%"></div></div><div class="barval">60.4</div></div><div class="barrow"><div class="barlabel">8B DPO</div><div class="bartrack"><div class="barfill" style="width:99.4%"></div></div><div class="barval">64.4</div></div><div class="barrow"><div class="barlabel">8B RLVR</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">64.8</div></div></div>
+
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>"Tülu 3: Pushing Frontiers in Open Language Model Post-Training"</dd><dt>Authors / Org</dt><dd>Lambert et al. / AllenAI</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2411.15124">https://arxiv.org/abs/2411.15124</a></dd><dt>Date read</dt><dd>2026-09-30</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">rl-data</span><span class="tag">post-training-recipe</span><span class="tag">sft</span><span class="tag">dpo</span><span class="tag">rlvr</span><span class="tag">verifiable-reward</span><span class="tag">decontamination</span><span class="tag">curation</span></div></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">70B</div><div class="l">开发集均分</div></div></div>
+<p>开源后训练落后闭源不是算法问题，是数据配方不透明——Tülu 3 在 Llama 3.1 base 上给出可复现的全配方：939,344 条 SFT（23,327,961 prompt 池中精选 + persona 合成）→ DPO 偏好对（8B 271,409 / 70B 334,302，含 on-policy 采样、GPT-4o 打分）→ RLVR（29,946 道可验数学题 + IF 约束，二值验证器奖励），8-gram 去污做到评测集级别；70B 开发集均分 76.0，超 GPT-4o-mini（69.6）和 Claude 3.5 Haiku（75.3）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>大纲</h2>
+<ul>
+<li>问题背景：开源 post-training 配方落后闭源；训练数据和配方"同时是最关键的部分和透明度最低的部分"——Tülu 3 把权重、数据、代码、完整报告全开源（论文只训了 8B / 70B 两个规模）</li>
+<li>SFT 数据混合（Table 6）：23,327,961 prompt 池 → 实际用 939,344；构成 = 通用（WildChat GPT-4 子集 241,307→用 100,000、OpenAssistant、No Robots）+ 知识（FLAN v2 89,982、SciRIFF）+ 数学（OpenMathInstruct-2 21,972,791→只用 50,000、NuminaMath-TIR）+ 代码（Evol CodeAlpaca 107,276）+ 安全（CoCoNot、WildJailbreak、WildGuardMix 各 5 万/1 万）+ 多语（Aya 100,000）+ persona 合成（GPT-4o-2024-08-06 生成，~250K Persona Hub 人设，产出 Persona MATH 149,960 / Persona IF 29,980 等；Python 用 claude-3-5-sonnet）</li>
+<li>DPO 偏好数据（354,192 实例总量；8B 271,409 对 / 70B 334,302 对）：三阶段——选 prompt → 4 个外部模型 + 1 个 on-policy（当前 SFT 模型）各采样 → GPT-4o-2024-0806 按 4 个维度 1–5 打分，Argilla 二值化取最高为 chosen；用 length-normalized DPO</li>
+<li>RLVR（可验证奖励 RL）：GSM8K Train 7,473 + MATH Train 7,500 + IF 可验约束 14,973 = 29,946 prompts；奖励是二值验证器（答对得 α=10，答错 0；缺 EOS 额外 −10），PPO + KL 惩罚；8B：MATH 42.0→43.7、GSM8K 84.3→87.6、IFEval-strict 81.1→82.4；70B 提升微弱（GSM8K 93.5→93.5 饱和）</li>
+<li>去污（8-gram 匹配）：测试样本 &gt;50% token 与同一训练样本共享 8-gram 判显著重叠；训练集若与任一评测集 &gt;2% 实例重叠即判污染；删掉 NuminaMath-TIR 11.3%（vs MATH）、Evol CodeAlpaca 3.5%（vs HumanEval）、WildChat GPT-4 5.4%（vs 安全评测）；发现 Evol CodeAlpaca–HumanEval 重叠 70.7%、NuminaMath-TIR–MATH 18.2%、LMSys Chat 1M–AlpacaEval 46.5%（后者直接弃用）</li>
+<li>评测设计：开发集（调模型时用）vs 未见集（只评最终模型，开发时绝不看分）；未见集含 MMLU-Pro、GPQA、BigCodeBench、IFEval-OOD（52 约束）、HREF（新）</li>
+<li>没进配方的尝试：Online DPO（200K episodes 数学）、rejection sampling、RM 分数叠加可验奖励、Persona Math/Code 偏好数据——全被判"没可靠提升"</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>流程图</h2>
+<p><div class="mermaid">graph TD
+    A[2332万prompt池] --&gt; B[8-gram去污]
+    B --&gt; C[SFT 93.9万条]
+    C --&gt; D[DPO偏好对]
+    D --&gt; E[RLVR三万可验题]
+    E --&gt; F[70B超mini]
+</div></p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">测试样本 &amp;gt</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">50%</div></div><div class="barrow"><div class="barlabel">训练集与任一评测集重叠 &amp;gt</div><div class="bartrack"><div class="barfill" style="width:4.0%"></div></div><div class="barval">2%</div></div><div class="barrow"><div class="barlabel">际删除：NuminaMath-TIR</div><div class="bartrack"><div class="barfill" style="width:22.6%"></div></div><div class="barval">11.3%</div></div><div class="barrow"><div class="barlabel">Evol CodeAlpaca</div><div class="bartrack"><div class="barfill" style="width:7.0%"></div></div><div class="barval">3.5%</div></div><div class="barrow"><div class="barlabel">WildJailbreak</div><div class="bartrack"><div class="barfill" style="width:3.0%"></div></div><div class="barval">0.7%</div></div><div class="barrow"><div class="barlabel">WildGuardMix</div><div class="bartrack"><div class="barfill" style="width:3.0%"></div></div><div class="barval">1.1%</div></div></div>
+<ol>
+<li><strong>Motivation</strong>: 开源后训练配方落后闭源，根因是"训练数据和配方同时是最关键的部分和透明度最低的部分"。Tülu 3 的立场：把 SFT → DPO → RLVR 三阶段的全部数据配方、去污工具、评测实现、训练代码开源，让社区能复现和改编。scope 限定 ai data：这篇的三个阶段全是数据工程——SFT 混合是数据选择，DPO 是偏好数据生产管线，RLVR 是可验证奖励数据设计。</li>
+<li><strong>Data Pipeline</strong>:</li>
+<li><strong>SFT</strong>：23,327,961 prompt 池 → 精选 939,344 条。池子结构：通用对话（WildChat GPT-4 真实用户对话 241,307→用 100,000、OpenAssistant、No Robots）、知识召回（FLAN v2、SciRIFF、TableGPT）、数学（OpenMathInstruct-2 池 21,972,791 占 94% 但只用 50,000、NuminaMath-TIR 64,312 全用）、代码（Evol CodeAlpaca 107,276）、安全不遵从（CoCoNot 10,983、WildJailbreak / WildGuardMix 各 50,000）、多语（Aya 202,285→用 100,000）、精确指令遵循（Persona IF 29,980）。persona 合成：按 ~250K Persona Hub 人设约束合成，GPT-4o-2024-08-06 生成（数学解用 GPT-4o、Python 程序用 claude-3-5-sonnet），共 ~220K 数学 + ~35K 代码实例。</li>
+<li><strong>DPO</strong>：总量 354,192 实例；最终混合 8B 271,409 对 / 70B 334,302 对。三阶段：(1) 从 SFT 用过/没用过的 prompt + 清洗后 UltraFeedback + IF-augmented prompt 里选；(2) 每个 prompt 由 4 个外部模型（Llama 3.1、GPT-4o、Qwen2.5 等）+ 1 个 on-policy（当前 Tülu SFT 模型）采样回复；(3) GPT-4o-2024-0806 按 helpfulness / instruction-following / honesty / truthfulness 四维度 1–5 打分，Argilla 法取最高为 chosen、低分随机抽为 rejected。训练用 length-normalized DPO。</li>
+<li><strong>RLVR</strong>：allenai/RLVR-GSM-MATH-IF-Mixed-Constraints，GSM8K Train 7,473 + MATH Train 7,500 + IF 可验约束 14,973 = 29,946 prompts（"roughly 30,000 prompts with ground truth labels"）。奖励 = 二值验证器：答对 α=10、答错 0；缺 EOS 额外 −10。数学题验证 = 抽答案精确匹配；IF 约束 = 每个约束模板的专用 verifier 函数。PPO + KL 惩罚，value model 从通用 RM 初始化。</li>
+<li><strong>去污</strong>：8-gram 匹配（Dubey et al. 2024 做法）；测试样本 &gt;50% token 与同一训练样本共享 8-gram 判显著重叠；训练集与任一评测集重叠 &gt;2% 实例即判污染。污染 vs 未见集的整集弃用（如 LMSys Chat 1M、ShareGPT）；污染 vs 开发集的整集删或实例级删。实际删除：NuminaMath-TIR 11.3%、Evol CodeAlpaca 3.5%、WildChat GPT-4 5.4%、WildJailbreak 0.7%、WildGuardMix 1.1%。多轮去污导致中间混合版本"small drops in performance"（Figure 3 caption）。</li>
+<li><strong>评测</strong>：开发集（MMLU、PopQA、TruthfulQA、BBH、DROP、MATH、GSM8K、HumanEval(+)、IFEval、AlpacaEval 2、Tülu3 Safety 六任务均值）vs 未见集（MMLU-Pro、GPQA、AGIEval、Deepmind Mathematics、BigCodeBench、IFEval-OOD、HREF；开发时绝不看未见集分数）。</li>
+<li><strong>Key Tricks</strong>:</li>
+<li><strong>On-policy 偏好数据</strong>：DPO 管线里每个 prompt 必采 1 条当前 SFT 模型的回复——偏好数据不只来自"更强的外部模型"，on-policy 样本让 DPO 学的是"自己错在哪"；</li>
+<li><strong>去污是硬门槛</strong>：Evol CodeAlpaca–HumanEval 70.7% 重叠、NuminaMath-TIR–MATH 18.2%——开源数据集的评测污染比想象中严重得多；宁可掉点分也要做实例级删除；</li>
+<li><strong>RLVR 的验证器即数据</strong>：奖励函数不是模型，是"抽答案精确匹配 + 约束模板 verifier"——数据工作的形态从"标注"变成"写 verifier"；α=10 是 pilot 实验定的，没再调；</li>
+<li><strong>失败清单同样开源</strong>：Online DPO（200K episodes）、rejection sampling、"RM 分数叠加可验奖励"（更差更噪声）、Persona Math/Code 偏好数据（轻微掉均分，只保留 Persona IF）、SFT 训 2 epoch 最优——负结果是配方的一部分；</li>
+<li><strong>开发集/未见集分离</strong>：调参只看开发集，未见集只跑最终模型——防"评测过拟合"的组织纪律。</li>
+<li><strong>Results</strong> (Table 2，开发集均值)：</li>
+<li>8B：Tülu 3 64.8 vs Llama 3.1 8B Instruct 62.2、Qwen 2.5 7B 57.8；AlpacaEval 2 LC 胜率 34.5 vs Llama 24.2；GSM8K 87.6 vs 83.4；MATH 43.7 vs 42.5；</li>
+<li>70B：76.0 vs Llama 3.1 70B 73.4、Qwen 2.5 72B 71.5、GPT-4o-mini 69.6、Claude 3.5 Haiku 75.3；AlpacaEval 2 49.8 vs Llama 33.4、vs GPT-4o-mini 49.7；安全均值 88.3 vs Llama 76.5；</li>
+<li>阶段消融：8B SFT 60.4 → DPO 64.4 → RLVR 64.8；70B 72.6 → 75.9 → 76.0——DPO 贡献最大，RLVR 在 8B 上对数学/IF 有实质提升（GSM8K 84.3→87.6），70B 上已饱和。</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>对你现在 coding data 工作的 1-2 个直接可试的点：(1) On-policy 偏好采样：DPO 数据里每个 prompt 都混入当前 SFT 模型的 1 条采样——code 偏好数据别只用外部强模型（GPT-4o/Qwen）生成，混入自己模型的 on-policy 样本，用可验信号（编译通过/单测通过）做 judge，学的是"自己错在哪"。(2) "写 verifier 代替标注"：RLVR 的数据工作 = 写约束模板的 verifier 函数；code 里 lint 规则、格式约束、单测模板天然就是 verifier——Day37 DAPO 的"答案转整数"和这里的思路同源：把奖励噪声在数据源头掐死。</li>
+<li>Infra 视角：(1) 去污是评测 infra 的前置成本——8-gram 全量训练集 × 评测集比对是固定工程投入，coding 数据里"爬来的代码 vs 评测集"同样要做；(2) 开发集/未见集两套评测、开发时绝不看未见集分数——coding eval harness 设计里 holdout 测试集必须物理隔离，否则分数虚高；(3) Persona Hub 式合成（~250K 人设 × 任务约束）是防合成数据模式塌缩的低成本多样性来源，code 合成 prompt 可照抄。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>SFT 池 23,327,961 里 OpenMathInstruct-2 占 21,972,791（94%）但只用了 50,000——这 50K 的"multi-skill selection"具体采样策略是什么？论文 Table 6 只给了结果，没给选择算法。</li>
+<li>RLVR 的 14,973 道 IF 可验题是怎么从 IFEval 约束模板批量生成的？coding 里"可验约束"（如"函数必须含类型注解"）能不能照抄这套模板→verifier 的管线？</li>
+<li>Persona Math/Code 偏好数据"轻微掉均分"被弃用，但 Persona IF 保留——为什么 IF 类 persona 合成有效、数学/代码无效？是 verifier 质量问题还是任务性质问题？</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句 (1-2句)</h2>
+<blockquote class="pq">
+<p>The underlying training data and recipes for post-training are simultaneously the most important pieces of the puzzle and the portion with the least transparency.</p>
+<p>Do Not Use the Scores from RM — adding RM scores on top of verifiable rewards is worse and noisier.</p>
+</blockquote>
+</section>
+<section class="sec sec-qa" id="sec-9"><h2><span class="n">9</span>思考题</h2>
+<ol>
+<li>Tülu 3 用 8-gram 去污（&gt;50% token 重叠判显著、&gt;2% 判污染），代价是中间版本"small drops in performance"；而 Evol CodeAlpaca–HumanEval 70.7%、NuminaMath-TIR–MATH 18.2% 的重叠说明开源 coding/math 数据污染极重：coding data 里"爬来的代码 vs 评测集"的污染阈值该怎么定？去污的性能代价和"分数虚高"之间怎么做取舍？</li>
+<li>RLVR 在 8B 上 GSM8K 84.3→87.6 有实质提升，70B 上 93.5→93.5 零增益（饱和）；而 Online DPO、rejection sampling 根本没进最终配方：什么信号下 RL 该停、什么信号下该加数据？可验奖励的"天花板"到底是数据集饱和还是模型能力饱和，怎么区分？</li>
+</ol></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-38-2024-tulu-3/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

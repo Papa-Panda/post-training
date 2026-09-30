@@ -48,7 +48,7 @@
 | 35 | Let's Verify Step by Step / PRM 800K step-level 标签 | ✅ 2026-09-27 | [📖](https://papa-panda.github.io/post-training/ai-data/day-35-2023-lets-verify-step-by-step/) |
 | 36 | RLAIF vs. RLHF / AI 反馈偏好数据 recipe（ICML 2024） | ✅ 2026-09-28 | [📖](https://papa-panda.github.io/post-training/ai-data/day-36-2023-rlaif/) |
 | 37 | DAPO / RL 训练期数据工程（dynamic sampling + overlong shaping） | ✅ 2026-09-29 | [📖](https://papa-panda.github.io/post-training/ai-data/day-37-2025-dapo/) |
-| 38 | Tülu 3 / 开源 post-training 全配方（SFT + DPO + RLVR） | ⬜ 待读 | — |
+| 38 | Tülu 3 / 开源 post-training 全配方（SFT + DPO + RLVR） | ✅ 2026-09-30 | [📖](https://papa-panda.github.io/post-training/ai-data/day-38-2024-tulu-3/) |
 | 39 | Kimi k1.5 / long-CoT RL 数据（long2short） | ⬜ 待读 | — |
 
 ## 结构
