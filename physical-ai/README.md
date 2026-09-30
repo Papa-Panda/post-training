@@ -14,6 +14,7 @@
 | 02/34 | 2026-09-27 | 02 | MuJoCo Contact Model — 补 3.8/3.10 版本演进、MJWarp 并入 MJX、Newton 收编为 solver；确立"物理公理层"定位（Day21/24/27/30 皆为其补救工程） | ✅ 完成 |
 | 03/34 | 2026-09-28 | 03 | Isaac Lab / Isaac Sim — 修正论文发表日期与作者（arXiv 2511.04831v1，submitted 2025-11-06，105 位作者）；论文结论官宣 Newton 可微物理集成；确立"规模层"定位（vs Day02 公理层融合） | ✅ 完成 |
 | 04/34 | 2026-09-29 | 04 | Genie 生成式世界模型 — 补 Project Genie 订阅落地（2026-01-29，AI Ultra \$200/月）/ I/O 2026 Street View 集成（2800 亿图）与 Waymo 生产部署 / GDC 官方承认"几分钟崩"+"not yet physics-aware"；确立"生成层"定位（Day02 公理层 / Day03 规模层之上） | ✅ 完成 |
+| 05/34 | 2026-09-30 | 05 | UniSim 条件视频扩散 — 补 ICLR 2024 Outstanding Paper 考证（arXiv v1 无 Kaelbling，v3/正式版加入）；确立"环境层"定位（Day04 隐式 latent action vs Day05 显式条件 action；0.81 的 simulator exploit gap 从未被测量） | ✅ 完成 |
 
 ## 结构
 
