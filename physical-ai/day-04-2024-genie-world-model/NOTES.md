@@ -196,6 +196,8 @@ World Model 是 Physical AI 的另一半，Meta MSL 要做 personal superintelli
 - GDC 2026：相干性衰减与 "not yet physics-aware" 承认：https://www.tweaktown.com/news/110471/genie-3s-ai-generated-worlds-fall-apart-after-a-few-minutes-google-admits/index.html
 - Genie 3 / Marble / Cosmos / Oasis / HY-World 规格对照（2026-09）：https://tech-insider.org/genie-3-vs-marble-vs-nvidia-cosmos-world-models-2026/
 
+相关讨论（Gemini网页版，2026-09-29）：https://gemini.google.com/app/9027732d58c6fa3e
+
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-04-2024-genie-world-model/NOTES.md
 
 <!-- viz:stats: Street View 2800亿张图 · 110国（I/O 2026） | AI Ultra 200美元/月 · 2026-01-29 gated rollout -->
