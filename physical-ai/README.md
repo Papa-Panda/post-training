@@ -356,3 +356,34 @@ $$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_
 （注：这是对上一条问答的术语澄清——原问答的"四连发"表述保留不变，只在此处追加说明。）
 
 **关联**：Day21（DR）/ Day22（RMA）/ Day23（Residual RL）/ Day24（系统辨识）。
+
+### 理解程度自评 + 给 yi jin 的 update（2026-10-01）
+
+**问**：你觉得我现在对 physical AI 有初步理解了吗？想给 yi jin 一个 update（他建议我去做 physical AI）。
+
+**答**：已经过了"初步"线。证据：不是在复述摘要，是在生产 thesis——三层栈（公理/规模/生成）、simulator exploit gap、"仿真不死但裸仿真训练要配 disclosure 和 gate"、latent action 四象限，都是二轮复习里长出来的；能跟李昊对线 execution 层是 gap 主战场（Day21–24 全是还债），是 mechanism 层面的 sparring，不是学生听课。缺的两块：**动手**（没跑过 sim、没摸过真机，execution 层的体感是纸面的）和**产业侧**（deal flow、估值、团队成色）。给 yi jin 的 update 草稿（调子："汇报学习进展 + 对齐职业定位"）：34 篇论文一轮刷完、二轮复习（一天一篇、串联为主）、笔记公开在 GitHub；takeaways：① sim2real 的 gap 没消失，是被压缩到了执行层（执行器/接触/延迟）——DR、RMA、残差、系统辨识那几篇经典工作全是在给这一层还债；② 世界模型这条线是三层栈：生成层管覆盖度（Genie/UniSim）、规模层管吞吐（Isaac）、公理层管正确性（MuJoCo 求解器）；③ 自己的 thesis：仿真不死，但裸仿真训练要配 disclosure 和 gate，simulator exploit gap 到今天没人量过；定位仍按 8 月底定的：主线 post-training / agentic RL infra，physical AI 低成本积累；约 coffee/walk，听听他对后面 6 个月计划的看法。
+
+（注：初稿误把收件人写成李昊、调子是"带问题去聊行业"，用户纠正"不对 是 yi jin"后重拟为汇报调子；mentor 是 yi jin。）
+
+**关联**：Day02（MuJoCo）/ Day03（Isaac Lab）/ Day04（Genie）/ Day21–24（执行层还债）/ Day30（数据飞轮）/ 部件栈问答（2026-09-30）。
+
+### MicroDuck 与 Zinova Labs 的知识库定位（2026-10-01）
+
+**问**：Hugging Face 刚部署的新算法带来 MicroDuck（10 天 150 万播放，https://www.youtube.com/watch?v=RAtzEyGBGFU），还有一家建筑公司 Zinova Labs 在准备建筑机器人数据集（https://www.youtube.com/watch?v=8KDxnT-4zl0）——这两个如何理解？（在现在的知识库里面）
+
+**答**：两个都是知识库里两条主线的现实注脚。
+
+**MicroDuck**：Hugging Face 旗下 Pollen Robotics（2025 年 4 月被收购）2026 年 8 月 27 日发布的 \$399 双足小鸭机器人——25cm、800g、15 个电机，带摄像头、ToF 深度、双 IMU 和能抓东西的喙；首周卖了 1 万多台（约 \$400 万），油管 10 天 150 万播放。关键在技术路线：出厂的每个行为（走路、坐、踢、摔倒爬起）都是 **MuJoCo 里 RL 训出来的神经网络策略，导出成 ONNX**，整套 sim-to-real 工具链 Apache-2.0 开源。
+
+**Zinova Labs**：2026 年 9 月 14 日官宣的 physical AI 公司（CEO Ryan Cox，创始人 Ziyou Xu，团队横跨 CMU/MIT/清华），口号 **"Tool Intelligence——the execution layer for Physical AI"**；演示是用 LimX 的 TRON 2 双臂机器人干 tilt-up 建筑流程：支模板、铺多层钢筋、绑扎——**用人类工地上现成的工具，而不是为机器人造专用工具**，配了个叫 TEISI 的力反馈传感器。原话："Instead of training only in simulations… Every task builds environment perception, force awareness… to build the data and deployment infrastructure."
+
+**在知识库里的位置**：
+
+- MicroDuck = **Day02 + Day19 + Day21–24 的产品化**：MuJoCo（接触求解）→ PPO 训 locomotion → 开源 sim-to-real 栈，一条龙。也是李昊"低成本泛化"论点的活证据：\$399 把实验门槛打穿，1 万台就是 1 万个潜在数据采集节点——硬件便宜化 → 数据规模化。
+- Zinova = **Day15–17（数据）+ Day30（飞轮）的垂直落地**："Tool Intelligence"这个命名跟部件栈（感知/认知/规划/**执行**）完全同构；"不只在仿真里训，扔进真实工作流"正是李昊 takeaway 7（真机+合成数据，不用纯仿真）的翻版；"建 data and deployment infrastructure"就是 Day30 数据飞轮的公司版宣言。按四象限，它坐在"贵但因果保真"那格——建筑数据贵，可每一条都是真金白银的 workflow。
+
+**一句话串起来**：同一个故事的两面——**瓶颈已经从算法转到了数据+部署**。MicroDuck 从硬件侧打（把机器人变便宜，让数据能 scale），Zinova 从数据侧打（去有经济价值的真实场景里收 workflow 数据）。赌的都是同一件事：execution 层啃下来之后，胜负手是数据飞轮转不转得起来。
+
+（注：联系用户的那家建筑公司做数据集，正好落在他的能力圈——data curation + 飞轮——值得认真聊。）
+
+**关联**：Day02（MuJoCo）/ Day19（PPO）/ Day21–24（sim2real 还债）/ Day15–17（数据）/ Day30（数据飞轮）/ 部件栈问答（2026-09-30）。
