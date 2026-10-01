@@ -195,4 +195,6 @@ Day05 路线图指定 UniSim。它把 world model 从“好看的交互视频”
 - arXiv 2310.06114v3（ICLR 2024；作者表 v3 含 Kaelbling）：https://arxiv.org/abs/2310.06114v3
 - ICLR 2024 Outstanding Paper 标注（第三方整理）：https://github.com/utk7arsh/world-models-hub/blob/HEAD/vault/Papers/unisim.md
 
+相关讨论（Gemini网页版，2026-09-30）：https://gemini.google.com/app/69c4007d4e66b962
+
 GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-05-2023-unisim/NOTES.md
