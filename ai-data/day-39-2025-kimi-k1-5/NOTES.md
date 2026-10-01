@@ -1,6 +1,6 @@
 # Day39 Kimi k1.5 — NOTES
 
-> 📖 阅读版：https://htmlpreview.github.io/?https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-39-2025-kimi-k1-5/index.html
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-39-2025-kimi-k1-5/
 
 <!-- viz:stats: 上下文 32k→128k | CoT判分器准确率 98.5 | 测试样例生成 323题 -->
 <!-- viz:flow: 网爬题 → 难度过滤 → 长链暖机 → RL训练 → long2short -->
