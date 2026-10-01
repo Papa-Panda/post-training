@@ -18,6 +18,29 @@
 ## 一句话总结
 DreamerV3 把真实 interaction 压进离散 latent RSSM，在模型想象出的 16-step trajectory 上训练 actor-critic，并用 free bits、KL balancing、symlog/two-hot 与 percentile return normalization 消除跨任务量纲差异；同一套超参覆盖 8 个 domain、150+ tasks，并首次从零、无人工数据/课程地在 Minecraft 收集钻石。
 
+## 大纲
+
+- **固定超参，横扫 8 domains / 150+ tasks**：同一套超参、每个 domain 独立训练 world model——迁移的是 robustness recipe，不是知识（常被误读为"一个通用模型"）。
+- **离散 latent RSSM**：belief state 为 $m_t=(h_t, z_t)$ ，其中 $h_t$ 是确定性 recurrent memory， $z_t$ 是离散随机 latent；真实观测走 posterior 纠偏，无观测时走 prior rollout 做想象。
+- **16 步 latent imagination + imagined actor-critic**：actor / critic 完全在想象轨迹上训练，不解码像素；critic 学 distributional $\lambda$ -return，把 horizon 外的回报 bootstrap 回来。
+- **量纲消除四件套**：free bits + KL balancing（防 latent collapse）、symlog / two-hot（解耦梯度尺度与目标绝对值）、percentile return normalization（抗 outlier、稀疏奖励不放大噪声）、1% unimix（防 KL spike）。
+- **Minecraft 钻石**：100M environment steps、单 GPU 约 9 天、10/10 训练 run 收集钻石，无人工数据/课程（动作空间含 abstract crafting + 加速 block breaking，非原生键鼠）。
+- **边界**：论文无真机闭环（真机证据在家族工作 DayDreamer 2022）；imagination exploit 未被解决；16 步限制 compounding error，不限制 exploitation。
+
+## 流程图
+
+```mermaid
+graph TD
+    A[真实交互] --> B[回放缓冲]
+    B --> C[学 RSSM 世界模型]
+    C --> D[隐状态信念]
+    D --> E[16 步 latent 想象]
+    E --> F[更新 Actor]
+    E --> G[更新 Critic]
+    F --> H[新策略再交互]
+    H --> A
+```
+
 ## 和之前工作的关系
 
 - **接了哪条线：** 接 Day04 Genie / Day05 UniSim 的 learned world model，但从“生成可观看的像素世界”切到“学习只需服务控制的 compact latent dynamics”，重点是高吞吐 imagination 与 policy optimization。
@@ -220,8 +243,8 @@ $$\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow \text{ima
 
 | 维度 | Genie 1 | UniSim | DreamerV3 |
 |---|---|---|---|
-| 数据 | 无动作标签视频 | 多源图像/视频 + 显式动作 | agent replay：$o,a,r,c$ |
-| 状态 | 离散视觉 tokens + 历史 | 最近视频帧 | RSSM belief $(h,z)$ |
+| 数据 | 无动作标签视频 | 多源图像/视频 + 显式动作 | agent replay：\$o,a,r,c\$ |
+| 状态 | 离散视觉 tokens + 历史 | 最近视频帧 | RSSM belief \$(h,z)\$ |
 | 动作 | 无监督 latent code | 语言、相机、机器人动作 | 环境定义 action |
 | transition | ST Transformer + MaskGIT | video diffusion | recurrent latent prior |
 | 输出 | 下一帧视觉 tokens | 下一段视频 | latent、reward、continue |
@@ -292,3 +315,64 @@ $$\boxed{\text{真实交互}\rightarrow\text{latent belief}\rightarrow \text{ima
 
 <!-- viz:flow: 学预测环境的 world model → 模型内大量想象未来 → actor-critic 在想象里更新 -->
 <!-- viz:stats: 1M steps Control Suite | 200M frames Atari | 50M ProcGen -->
+
+## 第二轮复习（2026-10-01）
+
+> 本轮做三处事实考证（Nature 版标题差异、Dreamer 家族真机证据、Dreamer 4 offline 演进）＋一处误读修正（"一个通用模型"实为"一个 recipe"）。核心收获：把 DreamerV3 从"会想象的 RL"重读为"RL 调参税的终结者"——headline 是 16 步想象，ablation 的真正功臣是量纲消除四件套；它和 UniSim 的根本分歧不是"生成 vs 隐式"，而是世界模型应该住在哪。
+
+### 元信息修正
+
+- **Nature 版标题差异**：arXiv 版标题 "Mastering Diverse Domains through World Models"，Nature 2025 版标题实为 **"Mastering diverse control tasks through world models"**（DOI: 10.1038/s41586-025-08744-2；第三方复刻仓库统一引该版本，pages 1–7）。NOTES 初读只记了 DOI，未记标题差异。
+- **"论文无真机"≠"家族无真机"**：DreamerV3 论文的机器人证据确为模拟（Proprio / Visual Control Suite），但 Dreamer 家族 2022 年的 **DayDreamer**（Wu / Escontrela / Hafner / Goldberg / Abbeel，CoRL 2022，arXiv:2206.14176）已把 Dreamer 搬上四台物理机器人：四足 1 小时学会翻身/站立/行走、被推后 10 分钟内适应；机械臂 pick-and-place；轮式机器人纯视觉导航。2025 年 "Dream to Fly" 再用 DreamerV3 训无人机竞速 visuomotor policy，真机 9 m/s 部署。初读"没有真实机器人 sim2real 闭环实验"是对 V3 论文本体的准确陈述，复习补上家族证据链。
+- **后续演进 Dreamer 4（offline, 2025）**：Hafner & Yan 把路线推向纯离线——只用录制数据训出 Minecraft 钻石（>20,000 步鼠标键盘序列），训练期不与游戏交互；架构换成 masked-autoencoder tokenizer + block-causal flow-matching dynamics + bootstrap curriculum + PMPO imagination RL（第三方 PyTorch 复刻 2026-09 更新）。另：Hafner 2026 年 9 月创立 **Embo**，做 world model for humanoid robots（"rehearse before they act"）——Dreamer 路线从论文走向 humanoid 创业。
+- **第三方复刻的 reward-hack 活例**：某独立复刻（ball-in-cup-catch，6 次 imagination-RL run）发现某 seed 的 policy **reward-hack 了自己冻结的 reward model**——imagined return 看起来健康，真实成功率崩塌；且 held-out validation error 反而偏好 exploit 的 checkpoint，只有真实 episode 能暴露。这不是同行评审证据，但它是 imagination exploit 的完美活体标本（见"边界"）。
+
+### 一句话总结
+
+35 天后回看，DreamerV3 的本质不是"会想象的 RL"，而是**把 RL 的调参税降到零的一套量纲消除工程**：离散 latent RSSM 把环境经验压成 control-sufficient belief，16 步想象把昂贵交互换成廉价 latent rollout，而 free bits / KL balancing / symlog-two-hot / percentile return norm 四件套把跨任务 6 个数量级的 signal scale 差异在模块边界处抹平。它的"通用"是 one recipe（同超参、各自训练），不是 one model——这决定了它和 RT-2 / Gato 的"通用"根本不是一回事。
+
+### 和之前工作的关系
+
+- **vs Day05（直接对比：世界模型住在哪）**：Day05 UniSim 把世界模型做成**环境**（policy 之外，RPC boundary）；Day06 把世界模型做成 **RSSM belief state**（policy 训练的内核，actor / critic 活在想象里）；Day34 π₀.₇ 的 BAGEL 是第三种住法——世界模型**内化进 policy**，产出 subgoal 图。三种住法对应三种记忆：UniSim 的 4 帧暴力上下文（窗口外即忘）、Dreamer 的可探查隐状态、BAGEL 的可视化 subgoal 图。"记忆应该住在哪"是 Day04–06–34 一以贯之的暗线，见思考题 (a)。
+- **vs Day19 / Day20（RL rollout 的可信度假设）**：Day19 PPO 的 rollout 假设**环境可信**；Day06 的 imagined rollout 把可信度押在**模型**上——exploit 对象从"环境 bug"变成"模型幻觉"。Day20 RLPD 选"真机 in-the-loop"躲 exploit，Day06 选"生成器 in-the-loop"赌覆盖度：和 Day05 一样的赌注，只是赌注从视频 diffusion 换成了 latent RSSM。DreamerV4 复刻的 reward-hack 证明这笔赌注会输。
+- **vs Day02 / Day03（三层栈：经验层）**：Day02 公理层（接触怎么算对）、Day03 规模层（一次跑 16,384 个世界）、Day06 是**经验层**——从交互数据里学 transition，不需要接触参数。代价：Day24 SimOpt 的 calibration 在这里没有对象——RSSM 的 latent 不可辨识，"系统辨识"退化成"多步预测误差监控"。
+- **vs Day09 / Day10（总览脚手架）**：Day09 RT-2 把 **web 知识**压进 policy token（知识压缩，跨任务迁移），Day06 把**环境经验**压进 latent belief（经验压缩，样本效率）——两种压缩，压缩对象不同，迁移的东西也不同。Day10 Habitat 3.0 是"authoring 出来的世界"，Day06 是"从交互里长出来的世界"——"仿真从哪来"的第三种答案（前两种见 Day05 复习）。
+- **vs Day11–18（分专题：policy 参数化与数据）**：Day11 π₀ 用 flow matching 生成 action chunk，Day06 的 actor 用 REINFORCE estimator 统一连续/离散动作——两种 policy 参数化哲学（"学分布的形状" vs "沿梯度爬"）。数据侧：Day15–17 的 teleop 数据集是**别人收集的**，Day06 吃的是**自己 on-policy 的 replay**——数据飞轮的"自举"版本，不依赖人类标注。
+- **vs Day25–30（physical AGI / eval / safety）**：Day25 Gato 的"通用"是 one policy 跨模态/跨 embodiment，Day06 的"通用"是 one recipe 跨 domain（各自训练）——把两者都叫 generalist 是范畴错误。Day27 Cosmos 是视频世界模型的 infra 化（解码像素），Day06 是 latent 路线的极致（**不解码像素**）——两条路线在此分叉。Day28 四轴下：DreamerV3 的 imagined return 与 real return 之差从未被系统测量——和 Day05 的 0.81 一样，欠了一笔 exploit gap 的债。Day29 的 CBF 安全证书需要显式动力学——RSSM 给不了。Day30 飞轮视角：replay → world model → imagination → policy → 新 replay，**本身就是一个数据飞轮**，只是飞轮转在 latent 里。
+- **vs Day31–34（最新进展）**：Day31 Atlas 的 real-to-sim（手机视频建世界）是**环境侧**的世界模型，Day06 是**训练内核侧**——两者正交，可组合（Atlas 建世界 → Dreamer 在里面想象）。Day32 GPT-6 Astra 的 computer-use 若用 Dreamer 式 imagination：action space 是 GUI 操作、horizon 比 16 步长一个数量级、reward 稀疏——percentile return norm 会是第一个要抄的零件。Day33 Figure Helix 2.5 的 30 家庭 56% 是**真机泛化**的成绩单，Day06 的 Minecraft 钻石是**模拟泛化**的成绩单——两张成绩单不可比，见思考题 (d)。
+
+### 核心
+
+1. **Motivation 深挖：调参税才是敌人**：RL 超参敏感的本质是 signal scale 敏感——reward 量纲、observation 量纲、return 方差跨任务差 6 个数量级，传统做法是每个 domain 调一套 recipe（人力税）。DreamerV3 的回答不是"更好的调参器"，而是**在模块边界把量纲消掉**：symlog / two-hot 解耦梯度尺度与目标绝对值，percentile norm 抗 outlier + 稀疏奖励，free bits 固定 representation 的信息预算（1 nat）。这和 LLM 的"AdamW + 固定 lr schedule 跑所有任务"是同一哲学：**稳定性工程 > 算法创新**。Ablation 佐证：贡献最大的是 KL balancing + free bits（正则化），其次 return norm 与 symexp two-hot——headline 是 imagination，功臣是 normalization。初读把四件套记成了"Trick"，复习正名：它们是**主体**，imagination 只是受益者。
+2. **机制 = belief 压缩 ＋ 短想象 ＋ 长价值的因果链**：(a) belief 压缩—— $m_t=(h_t, z_t)$ ，posterior 用真实观测纠偏，prior 负责无观测 rollout，这是 POMDP belief filtering 的离散可学习版；(b) 短想象——T=16 限制 compounding error（误差随 horizon 指数增长），想象只在 latent 里跑、不解码像素，这是它比 UniSim 便宜两个数量级的根因；(c) 长价值——critic 学 distributional $\lambda$ -return，把 16 步之外的回报 bootstrap 回来，"短想象管执行、长价值管信用分配"的分工。REINFORCE estimator 让连续/离散动作用同一套 actor 更新——不用 reparameterization 的可微假设，这是"一套超参"的技术地基之一。
+3. **"通用"的精确含义**：8 domains / 150+ tasks 是**各自独立训练**的 150+ 个 world model + policy，共享的只有超参和代码。论文从未声称 zero-shot 跨 domain 迁移。把这句话和 Day09 RT-2（一个 policy，web 知识迁移到新任务）、Day25 Gato（一个 policy 跨 embodiment）并排放：三者的"通用"分别是 **recipe 通用 / 知识通用 / embodiment 通用**。误读 Day06 为"通用世界模型"是社区最常见的范畴错误，复习时必须钉死。
+
+### 边界
+
+1. **Imagination exploit 未被解决**：16 步限制的是 compounding error，不是 exploitation——policy 可以专门走 world model 没见过、却被错误预测为高回报的 latent region。DreamerV4 第三方复刻的 reward-hack（imagined return 健康、真实 success 崩塌、held-out validation 反而偏好 exploit checkpoint）是活例。论文没有任何 exploit 测量。
+2. **"通用"无跨 domain 知识迁移证据**：每个 domain 从零训练；Minecraft 钻石 ≠ 通用智能。Day34 π₀.₇ 的组合泛化（做没教过的任务）是 Day06 完全没碰的问题。
+3. **V3 论文本体无真机闭环**：机器人证据全是 Control Suite 模拟；真机证据在家族工作（DayDreamer 2022：四足/机械臂/轮式；Dream to Fly 2025：无人机 9 m/s）。引用"收集钻石"时必须同时引用"模拟内"。
+4. **离散 latent 对连续接触动力学的近似**：categorical + 1% unimix 是为稳定训练设计的，不是为物理 fidelity；contact-rich manipulation 的建模精度论文未验证——Day02 的接触求解器在这里没有对应物。
+5. **Reward / continue 与 transition 联合学习**：policy 可同时 exploit 两个模型；和 Day05"reward 解耦防共同偏差"是相反的设计选择——各有利弊，联合学习省 infra，解耦防共谋。
+6. **固定超参 ≠ 零调参**：论文自己承认 replay ratio、model size（12M→400M）、action repeat 等设置显著改变结果；"一套超参"指跨 domain 不重调，不指这些 knob 不存在。
+
+### 迁移到 post-training / Agentic RL Infra
+
+- **可执行的映射**：把 DreamerV3 的"量纲消除四件套 + 短想象长价值"搬进你的 coding-agent RL infra，做一次 **reward 量纲消除实验**。具体三步：(1) 审计你现有管线：列出所有 reward 信号（编译通过、单测通过率、lint、review 意见……）的量纲与方差，确认跨任务差几个数量级——这就是 DreamerV3 要消的东西；(2) 照抄 percentile return normalization：actor advantage 除以 $max(1, EMA(P95(R)-P5(R)))$ ，先在离线 log 上验证它是否压住 outlier 任务的主导；(3) 对稀疏的"PR 被合入"奖励照抄 symexp-spaced bins + two-hot value head，把 value target 的尺度与绝对值解耦。成功标准：同一套超参在 3 个量纲差异最大的任务上都不发散——这就是你的"one recipe"时刻。另附部署视角：Dreamer 部署时只需要 encoder + posterior + actor（imagination / critic / replay 都可扔），对 agentic RL 意味着"训练时重的 world model，推理时轻的 policy"——和 distillation 同构，规划 serving 成本时可直接套用。
+
+### 思考题（综合 Day04 / Day05 / Day06 / Day09 / Day19 / Day20 / Day24 / Day25 / Day28 / Day33 / Day34）
+
+- **(a) 世界模型应该住在哪**：Day05 把世界模型做成**环境**（policy 之外），Day06 做成 **RSSM belief**（训练内核），Day34 BAGEL **内化进 policy**（产 subgoal 图）。假设你要为 Day33 Figure Helix 2.5 的"30 个陌生家庭"选一种记忆架构：UniSim 的 4 帧暴力上下文（窗口外即忘）、Dreamer 的可探查隐状态、BAGEL 的可视化 subgoal 图——你选哪个？论证必须回答：陌生家庭的泛化瓶颈是"没见过的视觉外观"还是"没见过的任务组合"？进一步：Day34 的组合泛化（做没教过的任务）为什么要求记忆**可审计**——三种住法里哪种最可审计、哪种最不可审计？
+- **(b) Imagination exploit gap 的测量设计**：同一个 policy，在 Dreamer 的 latent 想象、UniSim（Day05）、Isaac Lab（Day03）、真机四个"环境"里测 return，定义 $exploit\ gap=R_{imagined}-R_{real}$ 。Day19 PPO 假设环境可信，Day20 RLPD 用真机躲 exploit，Day24 SimOpt 假设偏差可参数化辨识——但 RSSM 的偏差是 latent 幻觉，不可参数化。设计一个"对抗探针"任务集：故意把 policy 送进 world model 的 OOD latent region，看它是否走向幻觉高回报。DreamerV4 复刻的 reward-hack 告诉你：held-out validation error 会**偏好** exploit 的 checkpoint——那什么样的 metric 才能提前报警？这对 Day28 eval 四轴意味着什么：exploitability 是第五轴，还是 safety 轴的子项？
+- **(c) "通用"的三种含义**：Day06 的通用 = one recipe（同超参、各自训练、无知识迁移），Day09 RT-2 的通用 = one policy（web 知识迁移到新任务），Day25 Gato 的通用 = one policy 跨模态 / embodiment。三者各回答了什么问题？为什么 Day06 的 Minecraft 钻石**不能**类比 RT-2 的涌现？进一步：Day34 π₀.₇ 的组合泛化属于第四种"通用"吗——如果让你给四种通用各起一个精确名字，你会怎么命名？
+- **(d) 调参税 vs 交互税的 trade**：RL 项目总成本 ≈ 环境交互 × 单步成本 + 调参人力 × 试错轮数。Day06 把第二项压到接近零，代价是训练 FLOPs（replay ratio↑、model 12M→400M 单调提升样本效率）。对真机机器人（单步成本极高：硬件磨损、安全员、时间），这个 trade 的最优点在哪——replay ratio 应该往哪个方向推？Day30 飞轮视角：如果飞轮转一圈的成本主要由真机交互决定，Dreamer 式"latent 里多转几圈"是不是最优的数据飞轮形态？对比 Day20 RLPD"真机 in-the-loop"的选择：两种飞轮各在什么单步成本下最优？
+
+参考链接（本轮复习）：
+- Nature 版（标题 "Mastering diverse control tasks through world models"，DOI）：https://doi.org/10.1038/s41586-025-08744-2
+- Dreamer 官方实现（danijar/dreamerv3）：https://github.com/danijar/dreamerv3
+- DayDreamer（2022，真机四机器人，CoRL）：https://arxiv.org/abs/2206.14176
+- Dream to Fly（2025，DreamerV3 无人机竞速真机 9 m/s）：https://overfitted.cloud/pdf/2501.14377
+- Hafner 创立 Embo（world models for humanoid，2026-09 报道）：https://runtimewire.com/article/danijar-hafner-embo-world-models-humanoid-robots
+- DreamerV4 第三方 PyTorch 复刻（含 reward-hack 发现）：https://github.com/vijayabhaskar-ev/dreamer_v4
+
+GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-06-2023-dreamerv3/NOTES.md
