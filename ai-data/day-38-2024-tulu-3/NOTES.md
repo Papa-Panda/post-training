@@ -71,3 +71,5 @@ graph TD
 ## 思考题
 1. Tülu 3 用 8-gram 去污（>50% token 重叠判显著、>2% 判污染），代价是中间版本"small drops in performance"；而 Evol CodeAlpaca–HumanEval 70.7%、NuminaMath-TIR–MATH 18.2% 的重叠说明开源 coding/math 数据污染极重：coding data 里"爬来的代码 vs 评测集"的污染阈值该怎么定？去污的性能代价和"分数虚高"之间怎么做取舍？
 2. RLVR 在 8B 上 GSM8K 84.3→87.6 有实质提升，70B 上 93.5→93.5 零增益（饱和）；而 Online DPO、rejection sampling 根本没进最终配方：什么信号下 RL 该停、什么信号下该加数据？可验奖励的"天花板"到底是数据集饱和还是模型能力饱和，怎么区分？
+
+相关讨论（Gemini网页版，2026-09-30）：https://gemini.google.com/app/21bded1ac781f6f6
