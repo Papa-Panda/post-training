@@ -107,91 +107,139 @@ pre code{background:none;padding:0;color:inherit}
   <header class="hero">
     <span class="kicker">青稞Talk</span>
     <h1>EP068 — slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践</h1>
-    <p class="sub">slime 的立场是：不要为每种 RL 场景（数学、多轮工具调用、fully-async、agent）各 fork 一个框架。它的做法是把复杂性推出框架边界——训练只钉死 Me… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <p class="sub">这是一场「先讲为什么，再讲怎么做」的框架设计 talk：朱子霖从 PyTorch vs TensorFlow 的历史出发，论证 RL 框架的第一性问题不是 kernel 快慢，… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>期号</dt><dd>68</dd><dt>标题</dt><dd>slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践</dd><dt>BV</dt><dd>BV1d14QzoEai（<a href="https://www.bilibili.com/video/BV1d14QzoEai/）">https://www.bilibili.com/video/BV1d14QzoEai/）</a></dd><dt>时长</dt><dd>未确认（2025-08-02 直播安排 10:00–11:00）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>信息来源</dt><dd>论文还原（B站字幕接口在本环境不可达，未能取得 AI 字幕）</dd><dt>讲者</dt><dd>朱子霖（智谱 AI RL Infra 工程师，slime、ring_flash_attention 作者，SGLang、OpenRLHF collaborator）</dd><dt>相关论文</dt><dd>无独立论文；设计博文《slime：为 RL Scaling 设计的 SGLang-Native 后训练框架》<a href="https://thudm.github.io/slime/zh/blogs/introducing_slime.html">https://thudm.github.io/slime/zh/blogs/introducing_slime.html</a> ；讲者文章《RL Scaling 时代，我们需要什么样的 RL 框架呢？》</dd><dt>相关代码</dt><dd><a href="https://github.com/THUDM/slime">https://github.com/THUDM/slime</a></dd></dl>
+  <section class="sec" id="sec-0">
 <blockquote class="pq">
-<p>⚠️ 提炼方式说明：本期字幕未能取得，本纪要根据公开材料还原——青稞Talk 官网预告文 + slime 官方设计博文与仓库 README。官网预告列出的四段提纲（设计框架在设计什么 / RL 框架的相同与不同 / slime 的设计思路与结构 / 下一步优化点）与博文内容对应；视频中的实战细节与 Q&amp;A 未覆盖。</p>
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP068-slime-rl-scaling.html</p>
+<p>「很多的框架是一个算法老师角度来去设计的，然后 RL scaling 这件事情，很多框架可能更重视 RL，我们可能更重视 scaling。」——讲者在 Q&amp;A 中对 slime 与 verl/AReaL 一类框架区别的一句话总结（字幕 71:01–71:09）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>68</dd><dt>标题</dt><dd>slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践</dd><dt>BV</dt><dd>BV1d14QzoEai</dd><dt>时长</dt><dd>01:42:37（正片讲授约 43 分钟 + Q&amp;A 约 53 分钟；2025-08-02 周六上午直播，主持人王过在收尾预告第 67 期为 8 月 5 日、GSPO 为 8 月 7 日，与期号顺序互证）</dd><dt>提炼日期</dt><dd>2026-10-02（字幕升级版，同日）</dd><dt>分享嘉宾</dt><dd>朱子霖（智谱 AI 强化学习 Infra 工程师，slime、ring_flash_attention 作者，SGLang、OpenRLHF 贡献者；字幕中主持人口播姓名作「朱梓琳/朱子琳」、结尾作「紫菱」，均为识别误差，正式名以公开资料为准。讲者自述 2025 年 3–4 月加入智谱，此后约四个月内从零重构出 slime 并承接内部全部纯文本 RL 实验）</dd><dt>相关论文</dt><dd>无独立论文；设计博文《slime：为 RL Scaling 设计的 SGLang-Native 后训练框架》<a href="https://thudm.github.io/slime/zh/blogs/introducing_slime.html">https://thudm.github.io/slime/zh/blogs/introducing_slime.html</a> ；讲者文章《RL Scaling 时代，我们需要什么样的 RL 框架呢？》</dd><dt>相关代码</dt><dd><a href="https://github.com/THUDM/slime">https://github.com/THUDM/slime</a></dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1d14QzoEai/">https://www.bilibili.com/video/BV1d14QzoEai/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP68.txt</code>（2649 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要由 B站 AI 字幕原文（已存档）清洗提炼，<strong>由旧版「论文/博文还原版」升级为字幕实录版</strong>。旧版依据官网预告 + 官方博文 + 仓库 README 还原，其架构性描述（Megatron/SGLang 双原生、参数透传、单入口、同地/解耦与同步/异步可切换）经字幕核对基本属实，本版予以固化；凡仅见于博文、讲授中未展开的细节（如 <code>/abort_request</code> 端点的上游合并、<code>--colocate</code> 等具体参数名）以下标注「博文补充」。字幕专名识别误差较多：slime 作「slam」、SGLang 作「S量/SH浪」、Megatron 作「麦克风/麦克创」、verl 作「WW/VERAL」、AReaL 作「ARREAL」，均按公开资料订正。讲授未给出的数字（如吞吐 A/B 对比）不编造。</p>
 </blockquote>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
-<p>slime 的立场是：<strong>不要为每种 RL 场景（数学、多轮工具调用、fully-async、agent）各 fork 一个框架</strong>。它的做法是把复杂性推出框架边界——训练只钉死 Megatron、生成只钉死 SGLang 且原生透传两者全部参数，数据生成开放为用户自定义接口（经 sgl-router 以 OpenAI 兼容 API 与任意环境交互），框架自身只剩"训练 / 生成 / Data Buffer"一条轻量闭环。这套设计是 GLM 系列（GLM-4.5 起）背后的 RL 训练栈。</p>
+<p>这是一场「先讲为什么，再讲怎么做」的框架设计 talk：朱子霖从 PyTorch vs TensorFlow 的历史出发，论证 RL 框架的第一性问题不是 kernel 快慢，而是<strong>第一天就定死不能轻易更改的骨架</strong>与<strong>算法人力远多于 infra 人力时如何组织协作</strong>；slime 的答案是训练钉死 Megatron、生成钉死 SGLang 并全量透传两边参数，把 rollout 做成朝 OpenAI 兼容 server 打请求的 server-based 形态，框架自身只保留资源编排与数据搬运，从而以四个月、极少人力承接了智谱内部全部纯文本 RL 与 GLM-4.5 的三个 RL 阶段。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
-<h3>背景/问题：框架碎片化是 RL scaling 的隐性税</h3>
-<p>强化学习社区的普遍误解是"不同任务需要不同框架"：一个训数学、一个做多轮工具调用、一个跑 fully-async、一个服务 agent 任务。多框架并行维护意味着 bug 修复要在每个 fork 里挑一遍，漏打补丁直接训练崩溃。slime 官方博文借《The Bitter Lesson》点题：没人会为了一个新数据加载器 fork PyTorch——碎片化的根源是框架<strong>规定</strong>了用户该如何组织应用，为每种推理场景定义通用模板，结果只满足一小部分真实需求。</p>
-<h3>方法/设计：把复杂性转移到用户管道与核心库</h3>
+<h3>骨架先于性能：讲者对「框架在设计什么」的回答</h3>
+<p>讲者先把问题抽离：infra 是物理世界（硬件）与数学逻辑（算法）之间的桥，桥的第一要求是通（正确性），第二是畅（速度）；但这两件事主要由大规模实验验证与 kernel/通信专家决定，框架工程师真正的产出是另外两件：</p>
 <ol>
-<li><strong>单一闭环</strong>：training（Megatron）从 Data Buffer 读数据、训练后同步参数给 rollout（SGLang + sgl-router）；rollout 生成数据（含 reward/verifier 结果）回写 Data Buffer。框架本体只维护这一条路径，rollout-only / train-only 可分离调试。</li>
-<li><strong>数据生成自由度最大化</strong>：slime 内部用 sgl-router 管理所有 SGLang server，对外暴露单一 HTTP 端点；用户注入自定义生成逻辑，复杂 agent 环境直接用 OpenAI 兼容 API 接入，不改环境代码，训练与部署走同一条接口。</li>
-<li><strong>原生透传，不做最低公分母抽象</strong>：Megatron 参数原样透传，SGLang 参数以 <code>--sglang-</code> 前缀透传当前版本支持的全部选项（如 <code>--sglang-enable-dp-attention</code>、<code>--sglang-enable-deepep-moe</code>）。只选一个 rollout 后端的取舍很明确：宁可把 SGLang 的特有能力（RadixAttention 等）用满，也不要为兼容多引擎把能力抽象成公共子集。</li>
-<li><strong>同地/解耦一个开关</strong>：Ray 做资源管理，<code>--colocate</code> 一键切换同 GPU 部署或分开部署；fully-async 不是另一套训练循环，而是换一个 rollout 实现（<code>--rollout-function-path</code> 指向 <code>fully_async_rollout</code>），后台 worker 在训练 step 之间保留预热队列。</li>
-<li><strong>为 RL 特有负载改上游</strong>：权重高频更新（MoE 多种并行策略下的参数更新、桶式参数更新减少开销）与动态采样的 <code>/abort_request</code> 端点（DAPO 类过采样算法中，已采够数据时立即终止进行中的请求、回收部分生成结果）都是推进 SGLang 上游合并的补丁，而不是 slime 私有 hack。</li>
+<li><strong>定骨架</strong>。PyTorch 与 TensorFlow 之争的教训是：动态图 vs 静态图、向后兼容 vs 割裂升级，这些第一天的选择后面花多大力气都抹不平。「我们在设计框架的时候最最重要的一件事情，就是我们最开始定说这个框架是一个什么东西的时候，是要想的足够清楚的」（字幕 17:48–17:55）。</li>
+<li><strong>解决人的问题</strong>。RL 团队的人力结构是「一个团队里面有 30 个算法老师，而只有两个 infra」（字幕 26:17–26:21，讲者的量级示意）；o1 之后每人都有二三十个想试的实验，框架必须让算法同学的一次性实验代码直接跑起来、让社区贡献者愿意进来，同时复用成熟项目止损重复造轮子——讲者概括为开源节流。</li>
 </ol>
-<h3>实验/实战：生产验证而非 benchmark 表</h3>
-<p>slime 的"实验"是生产背书：它是 GLM-4.5、GLM-4.6、GLM-4.7、GLM-5 及后续版本背后的 RL 训练框架（以官方 README 当前口径），验证的是完整 post-training 闭环而非孤立 example。除 RL 外，同一管道以最少额外代码可扩展到 SFT 与 rejection sampling（SGLang 过滤 + Megatron SFT；官方注 SFT 功能为实验阶段）。</p>
-<h3>结论/观点（区分事实与判断）</h3>
+<p>由此他把训练框架史分成三个时代：table-top 时代（PyTorch/HuggingFace 式高自由度，借用杨振宁对高能物理的比喻）、pretrain-scaling 时代（Megatron 式极致正确性与全量优化，「不存在提前优化」）、RL-scaling 时代（o1 之后；实验仍然贵、正确性仍然命门，但算法与任务形态快速发散——GRPO/GSPO 等新算法、多模态、sandbox、agent 环境）。RL 框架的骨架必须同时继承前两个时代：Megatron 的正确性底盘 + PyTorch 时代的灵活性。</p>
+<h3>slime 的骨架：两个钉死、一个放开</h3>
 <ul>
-<li>事实：Megatron + SGLang 双原生、参数全透传、单入口 <code>train.py</code>、双调试模式（<code>--debug-rollout-only</code> / <code>--debug-train-only</code>）都是仓库可验证的工程形态。</li>
-<li>判断（讲者与官方博文的立场）：RL 框架的核心资产是"数据生成接口的自由度"，框架应该停止规定应用形态；"快"之外还要"持续地快"——跟上游 SGLang/Megatron 的演进速度，本身就是框架的性能策略。</li>
+<li><strong>训练钉死 Megatron、生成钉死 SGLang，全参数透传</strong>。SGLang 的全部参数经 slime 原样传入、不做任何修改或过滤，SGLang 新增能力自动注册进来（字幕 33:37–33:50）；Megatron 侧则兼容各团队在 <code>training</code> 入口注册参数的魔改习惯，不侵入 Megatron 本体即可换版本或换内部魔改版（字幕 34:44–34:56）。理由是跟随上游的最佳工况：框架版本被掐死，两个引擎的持续优化红利就吃不到。</li>
+<li><strong>rollout 完全自定义 + server-based engine</strong>。数据生成开放为用户自定义函数：把 SGLang 当 OpenAI 兼容 server 起起来，生成逻辑就是往上打异步 HTTP 请求；多轮、工具调用与单轮在接口上没有区别。讲者明确反对 engine-based（在框架进程里嵌推理引擎、逐个对 generate 接口传参）的旧形态——接口变更即维护负担（字幕 35:20–37:29）。</li>
+<li><strong>同地/分离、同步/异步只是资源排布</strong>。Ray 只做 GPU 资源分配与 rollout 数据搬运：两类排布共享同一套代码（字幕 37:30–38:45）。权重更新与 EP 通信<strong>不</strong>走 Ray——权重走 CUDA IPC / NCCL 直连，rollout 数据只传 token 与 loss mask，单点发给 Megatron 一侧再内部 broadcast，数据量小到 Ray 不会成为瓶颈（字幕 58:24–59:47、75:06–75:41）。这是对「Ray 口碑不好会不会是大坑」一问的正面回答。</li>
+<li><strong>调试纪律</strong>：可只加载 rollout 或只加载训练，rollout 输出可逐条落盘，用固定数据单独验训练侧（字幕 39:04–39:28）。</li>
 </ul>
+<p>这套骨架「涌现」出两个讲者事先没完全预期的能力：其一是<strong>纯异步 agent 方案</strong>——agent 环境完全在框架外自理，只向 SGLang 服务打请求并落盘轨迹，训练侧适时给服务发 pause、更新参数、再 continue（讲者称已给 SGLang 合入 pause/continue 类接口，字幕 98:15–98:23），环境多重、多复杂都不必改 RL 框架；其二是<strong>后训练全程统一</strong>——只用训练侧就是 SFT，只用生成侧加 SFT loss 就是 online rejection sampling，再接上评估，预训练 Megatron 的 checkpoint 可以一路顺到 SFT、RL 与线上 serving 而不换镜像不转格式（字幕 41:52–42:49）。</p>
+<h3>生产验证：四个月从零到 GLM-4.5</h3>
+<p>讲者自述 2025 年 3–4 月加入智谱后从零设计实现，约四个月内 slime 已承接智谱内部日常全部纯文本 RL 实验，并在几千到上万卡规模、GLM-4.5 这一 300 多 B 的 MoE 上做验证；刚发布的 GLM-4.5 35B 与 106B 均由 slime 训练，GLM-4.5 的三个 RL 阶段（通用 RLHF 类训练、reasoning/math/code 的 long-CoT 训练、agent/SWE 任务）全部跑在 slime 上（字幕 09:26–10:01）。他的验证观很明确：框架不能指望别人来吃螃蟹，要先有大规模落地场景再开源；且内外版本保持一致（仅模型未发布期内部封版），开源的意义就在内部实验与外部优化互相反哺。</p>
+<h3>Q&amp;A 中最有信息量的几组判断</h3>
+<ul>
+<li><strong>为什么选 SGLang 而非 vLLM</strong>（字幕 51:22–55:56）：一是大 EP 场景下 MoE 推理性能优势，而 350B 级模型的 RL 推理是最大瓶颈；二是 SGLang 对 server-based 形态的支持更完善；三是国内社区活跃度与 PR 合入力。和上一条呼应：他不相信双后端抽象，「两个人做了完全不同的优化方案，RL 这边需要去给他们找一个交集，结果就是两边的最好优化都没有用上」。</li>
+<li><strong>为什么不上 FSDP/DeepSpeed 后端</strong>（字幕 71:13–72:27 与 44:31–45:21）：短期内不做。写一个 FSDP 后端不难，难的是大规模正确性验证；内部没在用的后端一旦开源出去、出问题反而打破内外互哺。与其多后端，不如把 Megatron 的使用门槛降下来。</li>
+<li><strong>on/off-policy 的工程账</strong>（字幕 63:52–66:05）：纯 on-policy 在长上下文 MoE 上效率不可接受——生成很容易推到 64K/80K，但只有约 1% 的 sample 真正打满长度，MoE 每步又要访问几乎全部参数，等于只买了 HBM 带宽没买算力；「推理一步训一步」若能换成「推理一步训四步」，总时长可减半。拖尾问题用动态采样（过采样 + 全对/全错过滤）加先到先得凑满即停，配合 partial rollout（被截停的半成品下个迭代续推、复用已算部分，字幕 69:52–70:23）回收。</li>
+<li><strong>数值一致性</strong>：训练前用训练引擎把 rollout 的 logprob 重算一遍，可保证每个训练步的「第一步 KL 严格等于零」，这是他们对训推不一致的验收线（字幕 95:06–95:57）。</li>
+<li><strong>权重更新三通道</strong>（字幕 62:11–63:47）：同卡用 update-from-tensor（CUDA IPC 传显存指针）、跨卡用 update-from-distributed（NCCL 广播）、异构/跨集群用 update-from-disk（写共享盘、推理侧自行加载，慢但容错与解耦最好）。</li>
+<li><strong>框架评价标准</strong>（答「NeMo RL 怎么样」，字幕 92:50–93:28）：看它有没有人吃过螃蟹（大规模验证）、能不能保证高性能、骨架是否想清楚——「一个一个滤一下，基本上就是我对一个框架整体感觉」。答「如何深入学习框架」时他推荐读 TensorFlow 1.x 的 C++ 代码与 PyTorch 的 Python 代码，带问题读、做笔记，并直言不太推荐用 AI 工具读代码做深入学习（字幕 79:41–80:48）。</li>
+</ul>
+<h3>下一步（讲授自述 + Q&amp;A 补充）</h3>
+<p>短期：FP8 训练（复用预训练侧经验）、MTP/speculative decoding 进 rollout、降低 Megatron 门槛，以及他点名缺失的一件事——RL 框架之间需要一个像推理侧 R1 serving 基准那样可比的统一 benchmark，现在各家拿各自的设置对轰没有意义（字幕 45:25–46:17）。现状精度口径：训练 BF16 + 推理 FP8（GLM 训练中 rollout 已用 FP8 A8W8，字幕 76:49–77:05），理想是像 DeepSeek R1 那样训推统一 FP8；weight-only INT8/INT4 因每步都要做 calibration、开销太大暂不考虑（字幕 77:09–77:42）。长期：多模态 agent 环境变重后的资源利用、训练与推理异构硬件混布与跨集群、重环境下瓶颈不在 GPU 时的调度（字幕 46:18–48:35）。</p>
 </section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
 <table>
 <thead>
 <tr>
 <th>指标</th>
-<th>基线/对照</th>
-<th>结果</th>
+<th>数值</th>
+<th>来源</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>生产验证</td>
-<td>孤立 example</td>
-<td>GLM-4.5 起多代旗舰模型的 RL 训练框架（官方 README 口径）</td>
+<td>从零构建到承接内部 RL</td>
+<td>约 4 个月（2025 年 3–4 月入职后启动）</td>
+<td>字幕（自述）</td>
 </tr>
 <tr>
-<td>训练入口</td>
-<td>多场景多入口</td>
-<td>单一 <code>train.py</code>，同地/解耦一个 <code>--colocate</code> 开关</td>
+<td>生产验证模型</td>
+<td>GLM-4.5 35B、106B 发布模型由 slime 训练；300 多 B MoE（355B）验证规模，几千至上万卡</td>
+<td>字幕（09:37–10:01、31:04–31:08）</td>
 </tr>
 <tr>
-<td>参数传递</td>
-<td>框架再抽象一层</td>
-<td>Megatron 原样透传 + <code>--sglang-</code> 前缀透传 SGLang 全部参数</td>
+<td>GLM-4.5 的 RL 阶段</td>
+<td>3 个：通用 RLHF 类、reasoning/math/code long-CoT、agent/SWE</td>
+<td>字幕（09:48–10:01）</td>
 </tr>
 <tr>
-<td>框架边界</td>
-<td>内置 agent/环境逻辑</td>
-<td>环境以 OpenAI 兼容 API 经 sgl-router 接入，框架不内置</td>
+<td>权重更新耗时</td>
+<td>355B 模型约 12 分钟/次；4B 量级小模型约 1–2 秒</td>
+<td>字幕（81:39–82:11）；Kimi 内部框架 20 秒更新 1T 模型为他人口径（字幕引用）</td>
+</tr>
+<tr>
+<td>长上下文训练</td>
+<td>内部已跑 128K 的 RL 训练（Megatron context parallel）</td>
+<td>字幕（93:58–94:05）</td>
+</tr>
+<tr>
+<td>生成长度分布</td>
+<td>易推到 64K–80K，但只有约 1% 的 sample 打满长度</td>
+<td>字幕（64:25–64:43）</td>
+</tr>
+<tr>
+<td>多轮工具调用示例</td>
+<td>Search-R1 例约 100 行代码</td>
+<td>字幕（61:18–61:28）</td>
+</tr>
+<tr>
+<td>团队人力结构示意</td>
+<td>约 30 名算法研究员对约 2 名 infra（讲者举例口径）</td>
+<td>字幕（26:17–26:21）</td>
+</tr>
+<tr>
+<td>GLM-4.5 起多代旗舰的 RL 训练框架</td>
+<td>GLM-4.6/4.7/5 等为官方 README 后续口径</td>
+<td>博文补充（讲授时点仅确证 GLM-4.5）</td>
+</tr>
+<tr>
+<td>吞吐 A/B 对比</td>
+<td>讲授未给出（讲者明确反对不可比的跨框架对轰）</td>
+<td>字幕（45:25–46:17）</td>
 </tr>
 </tbody>
 </table>
-<p>说明：本期为设计分享，无统一口径的吞吐对比表；讲者文章与官方博文以架构与生产实践为主，未给出可引用的 A/B 吞吐数字，故不编造。</p>
 </section>
 <section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
 <ul>
-<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
-<li><strong>把"数据生成"与"训练"解耦成 API 边界</strong>：环境/工具/verifier 都走 OpenAI 兼容端点接入，换任务不 fork 框架——这正是 agentic RL infra 最容易长出 fork 尾巴的地方。</li>
-<li>调试纪律值得抄：rollout-only 与 train-only 两个独立调试模式 + 采样数据落盘可复现。RL bug 多数不报错、只静默变差，能把生成与训练分开验是排障地基。</li>
-<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：上游跟随策略（透传参数、基础镜像直接基于 <code>lmsysorg/sglang:dev</code>）把"跟版本"的成本结构性降下来；为 RL 负载缺的功能（权重更新、<code>/abort_request</code>）推回上游合并，比在框架里长期维护私有补丁更划算。</li>
+<li><strong>选框架的四问清单</strong>（可直接借用讲者的评价框架）：骨架第一天是否想清楚、有没有大规模场景吃过螃蟹、核心引擎是否保持在上游最佳工况（参数透传而非掐版本）、数据生成接口是否开放到「算法同学写个函数就能跑」。</li>
+<li>对 agentic RL infra 的直接启示：server-based 边界（OpenAI 兼容 API + 轨迹落盘 + pause/continue 更新）把「环境复杂度」挡在框架之外，这正是 agent 环境只会越来越重的方向上最省人力的切法；权重更新三通道（IPC/NCCL/disk）按容错需求分层也是现成菜单。</li>
+<li>调试纪律照抄：rollout-only / train-only 双模式 + rollout 全量落盘可复现；训推一致性用「第一步 KL 严格为零」做验收线，比事后对曲线便宜。</li>
 </ul>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
 <ul>
-<li>没看懂的 / 想深挖的 1 个问题：fully-async 下 rollout 用旧权重生成的数据，其 off-policy 程度如何量化与设闸？slime 的预热队列机制对 staleness 的控制值得看源码确认。</li>
-<li>本期字幕若后续取得，应回补提纲第 4 段"下一步 RL 框架的潜在优化点"的具体内容。</li>
+<li>fully-async 下的 staleness 如何量化设闸：talk 给了 partial rollout 与 pause/continue 的机制，但旧版纪要的这个问题依然没被讲授正面回答，值得看 slime 源码确认预热队列与版本差控制。</li>
+<li>FP8 训练在 RL 侧的坑（讲者称需长时间研究）与 355B 权重更新 12 分钟的优化路径，talk 只给了方向未给细节。</li>
+<li>官网提纲第 4 段「下一步优化点」在字幕中对应的就是 FP8/MTP/benchmark/异构一节，已基本覆盖；讲者另在 GitHub 仓库置顶了 roadmap issue（字幕 67:49–67:57），可作后续跟踪入口。</li>
 </ul>
 </section>
 <section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
 <blockquote class="pq">
-<p>"我们应该停止尝试用简单的方式来思考心智的内容。"——官方博文引用《The Bitter Lesson》为 slime 的设计立场定调：框架不规定应用形态，把复杂性留给用户管道与核心库。</p>
+<p>「很多的框架是一个算法老师角度来去设计的，然后 RL scaling 这件事情，很多框架可能更重视 RL，我们可能更重视 scaling。」——Q&amp;A 答与 verl/AReaL 的区别（字幕 71:01–71:09）</p>
+<p>「我们在设计框架的时候最最重要的一件事情，就是我们最开始定说这个框架是一个什么东西的时候，是要想的足够清楚的。」——由 PyTorch/TensorFlow 史得出的骨架论（字幕 17:48–17:55）</p>
+<p>「不如说就是认认真真的去投向一方，然后在这一个上面去做十足的纯原生的适配。」——答为什么不做双推理后端抽象（字幕 55:27–55:40，按干净口径转写）</p>
 </blockquote></section>
   <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>

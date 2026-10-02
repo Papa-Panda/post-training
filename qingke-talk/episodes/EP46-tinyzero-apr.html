@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP46 — 从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP46 — 从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化</h1>
+    <p class="sub">两位讲者用两篇早期探索回答同一个问题——推理模型的 test-time 算力还能怎么 scale：TinyZero 先证明「基座能力与任务难度要同步下调」时，3B 模型、约 \… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP46-tinyzero-apr.html</p>
+<p>「我们并没有说有什么魔法在里面……并行所做的事情，其实就是让它能在同样的 context window 以及同样的 latency 里面思考更多。」——第二位讲者答「为什么 APR 效果好这么多」（字幕 57:30–59:11，按干净口径转写）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>46</dd><dt>标题</dt><dd>从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化</dd><dt>BV</dt><dd>BV1rGxyzVE5m</dd><dt>时长</dt><dd>01:13:44（TinyZero 讲授约 15 分钟 + APR 讲授约 36 分钟 + 双人 Q&amp;A 约 22 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>佳怡（TinyZero 部分主讲）与秀宇（APR 部分主讲）；姓名为字幕中的互相称呼（「谢谢佳怡」「我的合作者秀宇」），正式姓名与单位以两篇工作的作者页为准</dd><dt>相关论文</dt><dd>TinyZero（推理模型最小化实现的开源项目，基于 verl 框架）；APR《Adaptive Parallel Reasoning》（talk 当天刚 release，讲者预告「今天或者明天」公开，本纪要未补录未经核实的链接）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1rGxyzVE5m/">https://www.bilibili.com/video/BV1rGxyzVE5m/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP46.txt</code>（1866 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（已存档）清洗提炼。字幕专名识别误差较多：Countdown 任务作「康康down/calm down」、Stream of Search 作「string of search」、Spawn/Join 原语作「SPN/john」，以及「秀宇回来讲讲」等口语误识，均按上下文与公开资料订正；讲授未给出或字幕识别不清的数字（如延迟实验的成功率百分比）不硬写、只标注存疑。论文仅作交叉引用，凡讲授口径与论文可能不同者以字幕为准。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">3B</div><div class="l">模型</div></div><div class="stat"><div class="v">200M</div><div class="l">小模型上以不</div></div></div>
+<p>两位讲者用两篇早期探索回答同一个问题——推理模型的 test-time 算力还能怎么 scale：TinyZero 先证明「基座能力与任务难度要同步下调」时，3B 模型、约 \$30 就能在 Countdown 上复现长思维链的涌现；而 APR 进一步把串行长 CoT 拆成可端到端学习的并行搜索：给模型 Spawn/Join 两个类似操作系统线程的原语，先用符号求解器的演示做监督初始化、再用 GRPO 端到端优化何时并行、开多少线程，在 200M 小模型上以不到串行基线一半的算力追平其 pass@8，并诚实地指出当前 RL 的增益主要来自「测试时用更多算力」，而非同等算力下更聪明的决策。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景：两条新 scaling law 与一个未解的问题</h3>
+<p>第一位讲者先立坐标：预训练 scaling law 已在对数坐标上走了近十个数量级，经济与工程上都越来越难（GPT-4 这一代已停滞近两年）；推理模型打开了两条刚起步的新曲线——train-time compute（RL 投入越多、性能近似 log-linear 提升）与 test-time compute（推理时算力越多、回答越好）。o1 只给了结论没给方法，DeepSeek R1-Zero 才把配方公开：强 base model + RL + rule-based reward，长 CoT 与「aha moment」（自我反思、回溯）自然涌现，RL 步数从 0 到 8000 的过程中精度与每回答 token 数同步爬升。她的问题是：如果想在学术规模上研究这套训练科学，怎么把 R1-Zero 的门槛降下来。</p>
+<h3>TinyZero：最小化实现的关键是任务与模型同步降配</h3>
+<p>TinyZero 的定位是推理模型的最小化实现：不用 671B 的 V3 base（讲者引业界对 R1 训练成本的估算为 10 万到 100 万美元），而是用 3B 模型、约 \$30 成本（约租 10 小时 H200）在 Countdown 任务上复现核心现象——给几个数字（如 19、30、6、55、7）和一个目标数（65），让模型拼出算式；GRPO 训练约 100 步后，模型自发出现先试一个公式、不对再换一个的搜索与回溯行为。</p>
+<p>核心观察有二：</p>
+<ol>
+<li><strong>涌现需要基座能力门槛</strong>。在 Qwen2.5 家族上做规模消融：0.5B 只学会输出格式、拿约 0.1 的格式分就直接给答案；1.5B 起 RL 才能持续涨分并逐步演化出复杂思维链，3B/7B 更明显。所以在 3B 上做 R1 的原始任务不会有涌现，但<strong>同时降低任务复杂度</strong>，涌现性质就回来了——这正是最小化实现能成立、便于快速实验迭代的原因。她引 John Schulman 在 MIT 演讲《Don't Teach, Incentivize》的观点互相印证：RL 能激发什么能力，取决于模型大小能否 pick up 那些启发式模式。</li>
+<li><strong>RL 自己找策略</strong>。不同任务上模型学到的 test-time compute 用法不同：Countdown 上是逐个试候选式子，复杂乘法上是学会用结合律/分配律把式子拆小——不需要人告诉它怎么做。</li>
+</ol>
+<p>下一步的判断：推理模型的训练科学（RL 算法、数据配比）远未定型；RL 框架与基础设施仍欠缺（TinyZero 借用 verl）；多轮工具使用、更多训练环境、从易验证任务走向难验证任务（创意写作类）是明确方向；以及——长 CoT 只是 test-time 算力的一个维度，还有没有别的维度。这直接引出 APR。</p>
+<h3>APR：把串行搜索树拆成可学习的并行线程</h3>
+<p>第二位讲者的问题设定：长 CoT 是串行的，动辄数万 token（举例 Claude 3.7 Sonnet thinking 支持 32K 思维链），延迟高且 context window 永远有上限。自一致性、best-of-n、树搜索等 test-time 并行方法都是推理时拼凑的：各路径互不协调、冗余计算多、没有端到端优化。APR（Adaptive Parallel Reasoning）要让模型<strong>端到端学</strong>会自适应编排串行与并行。</p>
+<p>方法分三层：</p>
+<ol>
+<li><strong>视角</strong>：推理是一棵中间步骤构成的搜索树（沿用 Countdown 上的 Stream of Search 范式，CoLM 2024 oral）；串行 CoT 只是把整棵树序列化展开，于是又长又慢，甚至窗口耗尽还找不到答案。</li>
+<li><strong>原语</strong>：借操作系统多线程概念引入 <strong>Spawn</strong> 与 <strong>Join</strong>。模型在需要时生成子线程：主线程把一段上下文（一条待探索路径的状态）传给每个子线程，子线程只看这部分、彼此独立地用同一个语言模型并行搜索；找到解的子线程通过 Join 把这条简洁的成功路径返回主线程，失败子线程不返回任何内容。主线程最终上下文里只多出「发起点之前的内容 + 成功路径」，大量并行计算被折叠掉，既省窗口又降延迟。子线程可多次发起、无人为障碍（Q&amp;A 确认）。</li>
+<li><strong>训练两阶段</strong>：先 <strong>监督初始化</strong>——在 Countdown 上从零预训练一个 200M 的小模型，用符号求解器合成两类演示：串行版（讲者称 SoS+，对原始 Stream of Search 的改进版）与带 Spawn/Join 的并行混合演示；同时训练<strong>条件化</strong>变体（给 token 预算条件或子线程数条件），以便做计算量控制变量实验。再 <strong>GRPO 端到端 RL</strong>：在监督检查点上以最终答案对错的 0/1 outcome reward（RLVR）继续优化，让模型自己学「何时串行、何时并行、开多少线程」；Q&amp;A 确认这是多智能体式的联合优化——主线程与所有子线程一起做 RL，而非只训主线程。</li>
+</ol>
+<h3>实验：并行的收益能拆成哪几块</h3>
+<ul>
+<li><strong>随算力扩展</strong>：APR 在低算力区（约 2 条子线程）反而略差，讲者归因于「并行性开销」——Spawn/Join 等协调原语本身要生成 token、不直接参与搜索；算力升到 8000 量级后优势显著：用不到串行基线一半的计算量，就达到 SoS+ 做 8 次采样（pass@8 量级）的水平，同等算力下精度增幅很大。串行基线则被 4096 的 context window 卡死，自一致性/pass@n 能涨但幅度有限。</li>
+<li><strong>随窗口扩展</strong>：在每一种 context window 限制下 APR 都优于 SoS——并行把总计算量摊到多条线程各自的窗口里，串行基线必须把整条搜索路径塞进一个窗口。</li>
+<li><strong>RL 的真实作用（讲者最坦白的消融）</strong>：RL 之后精度、总计算量、子线程数全面上升；但当子线程数条件固定在最高档（10 条）时，RL 带来的增益很小。结论原话：RL 的提升「主要是源于它让 supervised training 的 checkpoint 用了更多的在测试时用了更多的计算资源，而并没有让他在相同计算资源的时候做出了多么更优化的更好的决策」（字幕 48:30–48:52）——让 RL 真正搜得更聪明而非只是搜得更多，是他明说的待解问题。</li>
+<li><strong>延迟实测</strong>：理论指标用「最长不可并行段」（所有路径中必须串行执行的最长部分）估计延迟下界；真实部署测在 8×A6000 上（主线程占 1 卡、子线程分到其余卡，模拟 API 服务式并行），基于 SGLang 引擎、未做 KV cache 共享等专门优化；在约 5000 ms 的延迟下成功率大幅提高（具体百分比字幕识别不清，本纪要不收录）。</li>
+</ul>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>RL 是激发还是赋予能力</strong>：讲者明确站乐观派——pass@k 在 k 极大时趋同是概率模型的必然（pass@∞ 本来就是 100%），RL 把原本 pass@1000 甚至 pass@1000 万才出现的东西提前到一次采样里，这就是能力提升；且 TinyZero 的规模消融与 SoS 作者后续关于 Llama/Qwen 基座差异的工作（Qwen 预训练里见过带 verification 结构的数据，Llama 微调补上后 RL 增益同样可观）都证明增益强依赖基座。</li>
+<li><strong>难验证任务怎么办</strong>：两条路——只在数学/代码上训、期待泛化（R1 已有初步迹象，但与 in-distribution 训练有明确 gap）；或回归 reward model，且看好 generative reward model（让模型先 CoT 再打分）的大规模回归。</li>
+<li><strong>简单问题省算力</strong>：本工作未做，但给现成菜单——reward 里加长度惩罚、模型自学会少想、用 length condition 前缀给预算（他们试过效果很好），或外挂分类器给简单题开低预算。</li>
+<li><strong>PRM</strong>：讲者直接表态不看好，「用 PRM 跟 PPO 里面用个 value function 差不多」。</li>
+<li><strong>公平性</strong>：APR 与 SoS 两边模型 context window 都是 4096 且相同（子线线程各自一个同样的 4096 窗口），对比无窗口作弊；实验在 paper 中可查（talk 当天正 release）。</li>
+<li><strong>对下一步的猜测</strong>：工具使用（代码解释器、搜索）接入长 CoT 是确定方向（o3 路线）；并行化这种范式要等长 CoT 的延迟不可忍受时才会成为主流，他们先占位探索。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DeepSeek R1-Zero 的 RL 步数跨度（精度爬升区间）</td>
+<td>0 到 8000 步</td>
+<td>字幕（TinyZero 部分背景）</td>
+</tr>
+<tr>
+<td>业界对 R1 训练成本的估算（讲者引用）</td>
+<td>10 万到 100 万美元</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>TinyZero 复现成本</td>
+<td>3B 模型、约 \$30（约 10 小时 H200 云租金）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>TinyZero 涌现步数</td>
+<td>GRPO 约 100 步后出现搜索/回溯行为</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>基座规模门槛（Qwen2.5 家族）</td>
+<td>0.5B 只拿约 0.1 格式分；1.5B 起 RL 有效、长 CoT 涌现</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>APR 模型规模与窗口</td>
+<td>从零预训练的 200M 模型；主/子线程 context window 均为 4096</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>APR 相对串行基线的算力效率</td>
+<td>不到一半计算量达到 SoS+ 的 pass@8 量级水平</td>
+<td>字幕（子线程数条件化实验）</td>
+</tr>
+<tr>
+<td>RL 增益的归因消融</td>
+<td>固定 10 条子线程条件下 RL 增益很小；增益主因是 test-time 用更多算力</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>延迟实测环境</td>
+<td>8×A6000（主线程 1 卡 + 子线程其余卡），SGLang 引擎；约 5000 ms 延迟下成功率大幅提高（百分比字幕不清，未收录）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对推理/RL 实验设计的直接清单：小规模复现大现象时，<strong>任务难度要与模型规模同步下调</strong>（TinyZero 的方法论）；任何「RL 带来提升」的结论都应配一条固定 test-time 算力的消融，否则分不清是搜得更聪明还是搜得更多（APR 的自拆台消融）。</li>
+<li>Infra 视角的启发：APR 的 Spawn/Join 本质是把 test-time compute 从「单序列长度」扩展到「序列数 × 长度」的二维预算，且只有成功的子线程回写主上下文——这与 rollout 侧的并行采样、部分结果回收是同一种资源观；在推理引擎层他们直接站在 SGLang 上测延迟，fork/join 的 KV 前缀共享是他们明说还没做、留给 infra 的优化点。</li>
+<li>奖励设计菜单（难验证任务）：generative reward model 回归论 + 长度惩罚/length condition 的预算控制，都是可以先在小实验里试的低成本项。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>APR 只在 Countdown 单任务、200M 从零训练的小模型上验证；迁移到预训练大模型与通用任务、以及减少对符号求解器合成演示的依赖（讲者的下一步清单），是这条线能否成立的关键，待 paper 与后续工作确认。</li>
+<li>子线程数超过 10 条后的曲线、以及更丰富的线程间通信范式（讲者提了 auction、p2p 等设想）都未探索。</li>
+<li>讲者预告 APR paper 在 talk 当天/次日 release，本纪要未收录链接；待公开后应回补论文出处与延迟实验的准确百分比。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们并没有说有什么魔法在里面……并行所做的事情，其实就是让它能在同样的 context window 以及同样的 latency 里面思考更多。」——答「为什么 APR 相对串行基线效果好这么多」（字幕 57:30–59:11，按干净口径转写）</p>
+<p>「RL 带来的性能提升主要是源于它让 supervised training 的 checkpoint 在测试时用了更多的计算资源，而并没有让它在相同计算资源的时候做出更优化的决策。」——RL 增益归因消融的自我拆台（字幕 48:30–48:52，按干净口径转写）</p>
+<p>「RL 一定是能非常有效的提高他的能力。」——答「RL 是激发已有能力还是赋予新能力」（字幕 66:21–66:26）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

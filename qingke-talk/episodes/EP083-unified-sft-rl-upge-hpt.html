@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EP083 — 统一 SFT &amp;amp; RL：迈向大语言模型后训练的统一视角</title>
+<title>EP083 — 统一 SFT &amp;amp; RL：迈向大型语言模型后训练的统一视角</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
@@ -106,110 +106,216 @@ pre code{background:none;padding:0;color:inherit}
 <div class="wrap">
   <header class="hero">
     <span class="kicker">青稞Talk</span>
-    <h1>EP083 — 统一 SFT &amp;amp; RL：迈向大语言模型后训练的统一视角</h1>
+    <h1>EP083 — 统一 SFT &amp;amp; RL：迈向大型语言模型后训练的统一视角</h1>
     <p class="sub">SFT 与 RL 不是两种对立范式，而是同一个策略梯度估计器在不同数据分布假设与偏差-方差取舍下的两个实例。论文把这个估计器（UPGE）拆成四个可互换部件——稳定化掩码、参考策… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">Q&amp;amp;A 要点</a><a href="#sec-5">关键数字总表</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句（1-2句）</a></nav>
   </details>
-  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>期号</dt><dd>83</dd><dt>标题</dt><dd>统一 SFT &amp; RL：迈向大型语言模型后训练的统一视角</dd><dt>BV</dt><dd>BV1Gz1MBZEGk（<a href="https://www.bilibili.com/video/BV1Gz1MBZEGk/）">https://www.bilibili.com/video/BV1Gz1MBZEGk/）</a></dd><dt>时长</dt><dd>未确认（2025-10-28 直播安排 20:00–21:00）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>信息来源</dt><dd>论文还原（B站字幕接口在本环境不可达，未能取得 AI 字幕）</dd><dt>讲者</dt><dd>吕兴泰（Xingtai Lv，清华大学二年级博士生，导师周伯文 Bowen Zhou）</dd><dt>相关论文</dt><dd>Towards a Unified View of Large Language Model Post-Training（Xingtai Lv、Yuxin Zuo、Youbang Sun 等，清华大学 + 上海人工智能实验室 + WeChat AI），<a href="https://arxiv.org/abs/2509.04419（2025-09）">https://arxiv.org/abs/2509.04419（2025-09）</a></dd><dt>相关代码</dt><dd><a href="https://github.com/TsinghuaC3I/Unify-Post-Training">https://github.com/TsinghuaC3I/Unify-Post-Training</a></dd></dl>
+  <section class="sec" id="sec-0">
 <blockquote class="pq">
-<p>⚠️ 提炼方式说明：本期字幕未能取得，本纪要根据公开材料还原——青稞Talk 官网预告文 + 对应论文（arXiv:2509.04419）。官网三段核心提纲（后训练算法概览 / 统一理论框架 UPGE / 动态算法 HPT）与论文结构对应；视频实录与 Q&amp;A 未覆盖。本期官网页另提供直播配套 PPT 下载（知识星球），未纳入本纪要。</p>
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP083-unified-sft-rl-upge-hpt.html</p>
+<p>「不管是 SFT 也好，还是 RL 也好，他们彼此的优化目标是一致的，在优化的时候是不冲突的。」——讲者在统一框架推导完成后的定调</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>83</dd><dt>标题</dt><dd>统一 SFT &amp; RL：迈向大型语言模型后训练的统一视角</dd><dt>BV</dt><dd>BV1Gz1MBZEGk</dd><dt>时长</dt><dd>01:37:03（讲授约 58 分钟 + Q&amp;A 约 39 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>吕兴泰（Xingtai Lv，清华大学博士生；主持人开场介绍确认清华博士生身份；官网预告记导师为周伯文 Bowen Zhou，见论文作者页）</dd><dt>相关论文</dt><dd>Xingtai Lv, Yuxin Zuo, Youbang Sun 等，<em>Towards a Unified View of Large Language Model Post-Training</em>，<a href="https://arxiv.org/abs/2509.04419（清华大学">https://arxiv.org/abs/2509.04419（清华大学</a> + 上海人工智能实验室 + WeChat AI）</dd><dt>相关代码</dt><dd><a href="https://github.com/TsinghuaC3I/Unify-Post-Training（基于">https://github.com/TsinghuaC3I/Unify-Post-Training（基于</a> verl 改造，见 Q&amp;A）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1Gz1MBZEGk/">https://www.bilibili.com/video/BV1Gz1MBZEGk/</a></dd><dt>官网预告</dt><dd>青稞Talk 官网第 83 期预告文（链接未确认，仅记期号）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP83.txt</code>（2466 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（经清洗，专名可能有识别误差）撰写。<strong>本期由论文还原版升级为字幕实录版</strong>：此前因字幕不可得，旧版仅据官网预告 + 论文（arXiv:2509.04419）还原；本次取得完整字幕后，讲授与 Q&amp;A 口径已逐条落实，论文-only 的具体数字保留并在关键数字总表中标注来源（字幕 / 论文）。讲者姓名以主持人介绍与论文作者页为准（字幕识别作「吕新泰」）。</p>
 </blockquote>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">7B</div><div class="l">上 AIME</div></div></div>
-<p>SFT 与 RL 不是两种对立范式，而是<strong>同一个策略梯度估计器在不同数据分布假设与偏差-方差取舍下的两个实例</strong>。论文把这个估计器（UPGE）拆成四个可互换部件——稳定化掩码、参考策略分母、优势估计、对数似然梯度——并证明 SFT 只是"优势恒为 1、参考策略取当前策略"的特例。在这个统一视角上长出的算法 HPT 做法极简：按每道题的实时 rollout 正确率逐题门控，做对了就继续 RL 探索、全军覆没才切 SFT 喂示范，在 Qwen2.5-Math-7B 上 AIME 2024 比最强基线高出约 7 个点。</p>
+<p>SFT 与 RL 不是两种对立范式，而是<strong>同一个策略梯度估计器在不同数据分布假设与偏差-方差取舍下的两个实例</strong>。论文把这个估计器（UPGE）拆成四个可互换部件——稳定化掩码、参考策略分母、优势估计、对数似然梯度——并证明 SFT 只是"优势恒为 1、参考策略取当前策略"的特例。在这个统一视角上长出的算法 HPT 做法极简：按每道题的实时 rollout 正确率逐题门控，做对了就继续 RL 探索、全军覆没才切 SFT 喂示范，在 Qwen2.5-Math-7B 上 AIME 2024 比最强基线高出约 7 个点（论文口径）。</p>
 </section>
 <section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
-<h3>背景/问题：SFT-then-RL 流水线的结构性浪费</h3>
-<p>后训练有两类数据：离线示范（人或其他模型写的）喂 SFT，在线 rollout（模型自己生成的）喂 RL。标准做法是串行流水线：先 SFT 抬升能力、再 RL 精修，但资源消耗大、阶段衔接要精细调参；而纯 Zero-RL 对弱模型或难题常因探索不到奖励信号而失效，纯 SFT 又压制探索、易过拟合示范分布。近期 LUFFY（固定比例混离线数据）、SRFT（按熵动态调权重）等混合方法经验上有效，却缺一个理论解释：为什么这两个信号能放进同一个优化过程而不打架？这是本期的立论缺口。</p>
-<h3>方法/设计：UPGE 四部件统一 + HPT 逐题门控</h3>
+<h3>引入：三类范式与三类混合系数方案</h3>
+<p>讲者先梳理后训练的三类范式：RL（效果好、泛化强，但依赖初始模型性能，弱模型上可能越训越差）、SFT（快速拟合目标分布、学领域知识，但限制探索、跨任务易掉分）、SFT→RL 串行流水线（闭源模型标配，但资源消耗大、阶段衔接要精细调参）。由此自然引出问题：既然两者各有优劣，能否结合？讲者指出今年上半年起的混合方法（mix-policy）大体都是把 SFT loss 与 RL objective 加权求和，区别只在系数怎么定，分三类：</p>
 <ol>
-<li><strong>统一估计器（UPGE）</strong>：把 SFT、PPO、GRPO、REINFORCE、CISPO、GSPO、LUFFY、SRFT 的梯度全部写成同一形式，差异只来自四个部件的取值：</li>
-<li><strong>稳定化掩码（stabilization mask）</strong>：PPO 的 clip、CISPO 的掩码等，决定何时关掉当前梯度；</li>
-<li><strong>参考策略分母（reference policy denominator）</strong>：梯度里除以谁的概率——RL 类方法除以 $\pi_{\theta_{\text{old}}}$ ，SFT 除以 $\pi_{\theta}$ 本身，LUFFY/SRFT 的离线项则取 1；</li>
-<li><strong>优势估计（advantage estimate）</strong>：SFT 恒为 1（示范无条件全盘接受），GRPO 用组内标准化奖励，PPO 用 GAE；</li>
-<li><strong>对数似然梯度（likelihood gradient）</strong>：各方法共享的骨架。</li>
+<li><strong>固定系数</strong>：训练全程不变，代表作 LUFFY；</li>
+<li><strong>预定 schedule</strong>：系数按预设曲线变化，讲者举阿里 CHORD 为例（融合系数 $\mu$ 随训练推进按预设形式变化）；</li>
+<li><strong>按指标动态调整</strong>：如 SRFT 按 entropy 动态调权重。</li>
 </ol>
-<p>结论：这些梯度并不冲突，而是对同一目标的不同"带噪测量"，各自有不同的偏差-方差特性——SFT 低方差但有分布偏置，RL 无偏但高方差。这就把"要不要混"从信仰问题变成了估计器设计问题。
-2. <strong>HPT（Hybrid Post-Training）</strong>：混合损失 $\mathcal{L} = \alpha \mathcal{L}_{\text{RL}} + \beta \mathcal{L}_{\text{SFT}}$ ，系数由<strong>每道题的实时 rollout 表现</strong> $P$ （一组采样里 verifier 给出的正确率）门控： $P \le \gamma$ 时 $(\alpha, \beta) = (0, 1)$ 纯 SFT， $P &gt; \gamma$ 时 $(\alpha, \beta) = (1, 0)$ 纯 RL。实验中 Qwen 家族取 $\gamma = 0$ ——一道题 8 次采样一次都没做对，才切去学示范；做对了就继续自我探索。这个二值化的极简实现就是论文主结果的全部"算法"。
-3. <strong>为什么这样切合理</strong>：RL 在"全军覆没"的题目上梯度信号为零（组内优势恒为 0），继续 RL 是空转，此时 SFT 注入的新知识恰好补上探索的前置条件；而模型已能做对的题目，SFT 只会拉低熵、压制探索。门控即"按题难度自适应课程"。</p>
-<h3>实验/实战：数字</h3>
-<p>设置：Qwen2.5-Math-1.5B/7B、LLaMA3.1-8B；GRPO 为 RL 骨架；每题采样 8 条（温度 1.0），最大生成 8192 token；6 个数学基准（AIME 2024/2025、AMC、MATH-500、Minerva、OlympiadBench）+ 2 个 OOD 套件（ARC-c、GPQA-Diamond）；8×A800 80GB。</p>
+<p>讲者顺手补了 on-policy / off-policy 的划分：待训练模型与采样模型是否同一个。SFT 是经典 off-policy（数据由外部模型生成）。真正待回答的问题是：<strong>SFT loss 与 RL loss 形式差异这么大，为什么能放进同一个优化过程而不打架？</strong> 这是全场的主问题。</p>
+<h3>梯度视角：把三类算法逐一求导</h3>
+<p>讲者换视角——不看 loss，看 policy gradient。对 SFT 的交叉熵 loss 求导，得到 $\nabla \log \pi_\theta$ 乘以 $1 / \pi_\theta$ 的形式（loss gradient 与 policy gradient 只差符号）；对简化后的 PPO loss（先略去 KL 约束与熵项，讲者说明这些项最终都可并入 advantage）求导，参数只出现在重要性采样比的分子里，得到带 clip 的同类形式。第三个样本是 mix-policy 方法的 off-policy 部分（以 SRFT 的 loss 为例，LUFFY 形式相近但多一个 policy shaping 修正）：</p>
 <ul>
-<li><strong>Qwen2.5-Math-7B（分布内平均）</strong>：HPT 52.7，超过 LUFFY 49.8、SFT→GRPO 46.5、SFT 44.5、GRPO 43.1；AIME 2024 单项 HPT 33.0 vs LUFFY 26.1（+6.9）、vs SRFT 18.4（+14.6）。OOD 平均 HPT 62.3 同样第一（GPQA 42.9 vs LUFFY 39.4）。</li>
-<li><strong>小模型与跨家族</strong>：Qwen2.5-Math-1.5B 平均 HPT 41.9 vs LUFFY 34.7、SFT 36.9；LLaMA3.1-8B 平均 HPT 18.2 vs LUFFY 13.2、GRPO 9.6——弱底座上差距更大。</li>
-<li><strong>探索不缩水</strong>：Pass@k（k 到 1024）曲线 HPT 最高，不是介于 SFT 与 GRPO 之间；MATH-500 独占解题分析显示 HPT 新解出的题目随难度升高而增多（对 GRPO 为 +58/-15），同时已会题目基本不丢——缓解灾难性遗忘。</li>
-<li><strong>消融结论（论文口径）</strong>：离线数据用 SFT 学优于用 off-policy RL 学；阈值并非越松越好， $\gamma = 0$ 的严格口径在 Qwen 上最好；切到 SFT 的步不需要 rollout，反而省算力。</li>
+<li>off-policy 部分的重要性采样分母 $\pi_\beta$ 是外部强模型（如 DeepSeek-R1）的概率，实践中<strong>从不真正计算，而是直接置 1</strong>。讲者给了两个理由（字幕口径）：其一，开源社区的现成高质量数据只有文本、没有生成时概率，算不了；其二，待训练模型与数据生成模型往往不是同一系列，tokenizer 不对齐，token 无法一一对应，比值根本无从算起。置 1 的合理性在于：这些外部模型输出的本就是其高概率 token，概率天然接近 1。Q&amp;A 中讲者补了他们自己的预实验支撑（字幕口径）：离线数据里 99.8% 的 token 概率大于 0.92、约 80% 大于 0.95，所以置 1 "虽然有点近似，但不是不准确"。</li>
 </ul>
-<h3>结论/观点（区分事实与判断）</h3>
+<p>三种梯度并排后，规律浮现：第一项都是对 $\pi_\theta$ 的求导项，后面都挂着一个类 advantage 项，且<strong>都出现一个分母项</strong>——SFT 是 $\pi_\theta$ ，PPO 是 $\pi_{\theta_{\text{old}}}$ ，SRFT 是 1。统一框架由此呼之欲出。</p>
+<h3>UPGE：四部件统一估计器</h3>
+<p>把上节的大表整理、严谨化，讲者得到统一的梯度形式，由四个部件组成：</p>
+<ol>
+<li><strong>稳定化掩码（stabilization mask）</strong>：由 clip 操作求导而来——clip 区间内函数是 $y = x$ 、导数为 1，区间外是常数、导数为 0，所以 clip 在梯度里等价于一个 0/1 掩码，作用是忽略掉"不安全"的更新、让训练稳定。讲者举例：PPO 的掩码边界恰为 $1 - \epsilon$ 与 $1 + \epsilon$ ；但 DAPO 等工作发现被裁掉的 token 里也有对正确率与熵有益的，于是把上界放大。</li>
+<li><strong>参考策略分母（reference policy denominator）</strong>：讲者特别说明这是一个<strong>泛化定义</strong>，不同于通常所说的 reference policy（RLHF 里防偏离的初始模型）：凡是出现在分母、对梯度起修正/重加权作用的策略都算。取值决定各算法的性格——SFT 与 REINFORCE 取当前策略 $\pi_\theta$ ，效果是模型对低概率的示范 token 给出 $1 / \pi_\theta$ 的大更新、快速学会不熟的 token；PPO 取 $\pi_{\theta_{\text{old}}}$ ，作用是重要性采样修正。</li>
+<li><strong>优势估计（advantage estimate）</strong>：PPO 用 GAE，GRPO 用组内奖励减均值除标准差；SFT 恒为 1（示范无条件全盘接受）。</li>
+<li><strong>对数似然梯度（likelihood gradient）</strong>：各方法共享的骨架，把当前动作与参数更新关联起来。</li>
+</ol>
+<p>统一不止是归纳：讲者从一个 <strong>common objective</strong> 出发做了正向推导——所有后训练算法其实都在做同一件事：提高想要的回复的概率、压低不想要的回复，同时让当前策略接近 behavior policy。把这个目标（success rate 项 + KL 衡量的分布接近项）求导、再把采样分布换到参考策略下（等价于引入重要性采样项），即得 UPGE；推导出的 advantage 天然包含两部分：一部分与 RL 相连（实践中被替换为 advantage 以压方差），另一部分与 SFT 相连（带一个判断参考策略是否等于 behavior policy 的指示项）。最后再把 clip 带来的掩码并回去，四部件齐备。</p>
+<p>两个结论（区分事实与判断）：</p>
 <ul>
-<li>事实：UPGE 的四部件归约覆盖了主流方法的梯度形式（论文 Table 1 给出逐条写法）；HPT 的主结果与消融有完整表格支撑。</li>
-<li>判断（讲者立场）：SFT 与 RL 是互补而非冲突的同一过程的两个面；固定混合比例或僵化训练顺序都是次优的，<strong>按实时表现动态切换</strong>才是与统一理论一致的算法形态。这也解释了一个常见现象——SFT 学到的长链推理模式在切回 RL 后不被遗忘，因为两者本就在优化同一目标。</li>
+<li><strong>事实</strong>：SFT 与 RL 优化的是同一个 common objective，loss 形式只是这个目标的子项表达，所以两者在优化时不冲突——这从理论上解释了 LUFFY、SRFT 这类混合方法为什么能 work。</li>
+<li><strong>判断</strong>：目标相同不等于算法相同；从 UPGE 看，各算法的差异本质是<strong>偏差-方差取舍</strong>（SFT 低方差但有分布偏置，RL 无偏但高方差）。启示是算法设计不应全程用同一种方法，而应<strong>依据当前情形动态选择</strong>——这直接引出 HPT。</li>
+</ul>
+<h3>HPT：按逐题实时表现二值门控</h3>
+<p>HPT（Hybrid Post-Training）的流程（字幕口径）：对每道题 $q$ ，先用当前模型采样 $N$ 次，把每条回复送进 rule-based verifier 打分（对/错），取平均得该题的实时表现 $P$ ；再用阈值 $\gamma$ 门控系数： $P &gt; \gamma$ 时 $(\alpha, \beta) = (1, 0)$ 纯 RL， $P \le \gamma$ 时 $(\alpha, \beta) = (0, 1)$ 纯 SFT；最终 loss 为 $\mathcal{L} = \alpha \mathcal{L}_{\text{RL}} + \beta \mathcal{L}_{\text{SFT}}$ 。</p>
+<p>几个实现口径（字幕）：</p>
+<ul>
+<li><strong>门控是逐题的，不是逐 batch 的</strong>（Q&amp;A 确认）：实验 batch size 128，一个 batch 里可以一部分题走 SFT、另一部分走 RL。</li>
+<li>RL 侧采用 LUFFY 同款的 DAPO-GRPO 变体（舍弃 sequence 的 token-level 平均；字幕作「DOTA 加 GRPO」，按上下文应为 DAPO-GRPO）。</li>
+<li>直觉：RL 在"全军覆没"的题目上组内优势恒为 0、梯度为空转，此时 SFT 注入新知识恰好补上探索前置条件；已能做对的题目继续 RL 自我探索，避免 SFT 拉低熵、压制探索。门控即"按题难度自适应课程"。</li>
+<li>Q&amp;A 中讲者强调门控几乎不引入额外开销：算 $P$ 用的采样与 reward 计算本来就是 GRPO 训练的必经步骤，额外只有求均值与系数判断的逻辑计算；且切到 SFT 的题不需要 rollout，"反而甚至会有一个更高的效率"。</li>
+</ul>
+<h3>实验：设置与主结果</h3>
+<p>设置（字幕口径）：Qwen2.5-Math-1.5B/7B、LLaMA3.1-8B 三个模型；评测为 6 个数学基准（AIME 2024/2025、AMC、MATH-500、Minerva、OlympiadBench）+ 2 个 OOD 套件（ARC-c、GPQA-Diamond）；最长回复 8192；AIME/AMC 等小数据集汇报 avg@32，其余 avg@1。训练数据 follow LUFFY：由 Lumina 数据集筛选难度、再用 DeepSeek-R1 蒸馏思考过程得到的约 46K 条（Q&amp;A 口径）；SFT→GRPO 基线的 SFT 与 RL 数据是不同子集（48K / 46K）。其余细节如每题采样 8 条（温度 1.0）、8×A800 80GB 为论文口径。</p>
+<p>主结果的具体数字讲者在 talk 中只给图表与定性结论（"基本上都要比 baseline 高""比全量先 SFT 后 GRPO 高出不少"），下表沿用旧版论文口径并标注来源：Qwen2.5-Math-7B 分布内平均 HPT 52.7（LUFFY 49.8、SFT→GRPO 46.5、SFT 44.5、GRPO 43.1），AIME 2024 单项 33.0（LUFFY 26.1、SRFT 18.4），OOD 平均 62.3 同样第一；小模型差距更大——1.5B 平均 41.9（LUFFY 34.7、SFT 36.9），LLaMA3.1-8B 平均 18.2（LUFFY 13.2、GRPO 9.6）。讲者的定性解读（字幕口径）：先全量 SFT 再全量 GRPO 这种"死板安排"的 schedule 本身并不有效。</p>
+<h3>分析实验：四个有信息量的观察</h3>
+<ol>
+<li><strong>Pass@k 不缩水</strong>：讲者对比 RLVR 的 "Limits of RLVR" 式质疑（RL 后模型在大 $k$ 下与 RL 前打平，即 RL 不提升能力上限），测了 Pass@1 到 Pass@1024（每题采样 2048 条）：先 SFT 的曲线始终高于纯 GRPO，说明 SFT 引入的外部数据确实能抬升能力上限；HPT（红线）在三张图上基本全程最高，AIME 2025 上起步最低但 Pass@1024 反超——HPT 同时提升 Pass@1 与 Pass@k。</li>
+<li><strong>难题上新解更多、遗忘更少</strong>：MATH-500 五难度等级独占解题分析，HPT 相对 GRPO 额外做对 58 题、做错 15 题，且额外做对数随难度等级升高而增多。逐题轨迹研究（字幕新增细节）：从 MATH 的 L3/L4/L5 各取 85 题共 255 题、训 50 个 epoch 逐题画正确率热图——纯 GRPO 在难题上出现整行白色（8 次采样全错、始终学不会）的连线；HPT 相对 SFT→GRPO 的差值图随训练推进由蓝转红、最终超越，L5 上最明显。</li>
+<li><strong>训练动态自洽</strong>：off-policy 数据占比随训练自动下降（初期模型弱、更多题触发 SFT，后期转 RL），且模型越强拐点越早、占比越低；对照 LUFFY 的占比恒定在 1/8（1 条 off-policy + 7 条 on-policy）。熵全程高于 GRPO（外部数据带来更多可能性）；回复长度先明显上升（SFT 数据最长 8K、长回复占比高）后趋稳，后期以 RL 为主时长度不掉——SFT 学到的长链 pattern 在 RL 阶段被保留、不遗忘。</li>
+<li><strong>消融</strong>：把 HPT 的 SFT 部分换成 off-policy RL 项（或两者并存），1.5B 上纯 SFT 切换最好，7B 上三者差别不大（字幕口径）——讲者据此判断 SFT 与 off-policy RL 在此起的作用相近，最终只保留收敛更快的 SFT 与 on-policy RL 切换。阈值消融： $\gamma$ 越大 SFT 比例越高，但 Qwen 上 $\gamma = 0$ （8 次采样全错才切 SFT）效果最好，即"SFT 不是越多越好"。</li>
+</ol>
+<h3>讲者自陈的边界与未来讨论</h3>
+<p>讲者用三点收尾（字幕口径，区分事实与判断）：</p>
+<ol>
+<li><strong>与产业界的 gap</strong>：mix-policy 方法自今年 3 月起层出不穷、实验上普遍优于 SFT→RL，但主流厂商并未采用。讲者自诊原因（除产业惯性与大规模验证成本外）：这类方法在应用条件上同时受制于 SFT 与 RL——既要求有外来的高质量采样数据，又要求有明确的打分机制（verifier 或 reward model），两个条件同时满足才能用。未来方向：在没有高质量思维链、也没有明确监督信号的场景里做类似处理。</li>
+<li><strong>统一框架的真正作用</strong>：不只是把已有方法归纳成一张表，而是提供"把任意方法拆成四个子模块来分析"的视角，看清每个算法适合什么情形，从而有的放矢地设计新方法。</li>
+<li><strong>mix-policy 后续</strong>：让方法更能被产业界采用、更高效，以及向蒸馏与理论分析方向延伸。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>Q&amp;A 要点</h2>
+<ul>
+<li><strong>门控粒度</strong>：逐题（单条数据）选择 SFT 或 RL；batch 128 内两种数据并存（字幕 64:19 起）。</li>
+<li><strong>额外开销</strong>：可忽略—— $P$ 的计算复用 RL 本就要做的采样与 reward 计算；SFT 步省 rollout，整体甚至比纯 RL 快（但比纯 SFT 慢，讲者明说）。</li>
+<li><strong>骨架可替换</strong>：把 GRPO 换成 PPO 也做过实验，SFT+PPO 组合同样有效；主实验用 GRPO/DAPO-GRPO 只是为了与基线同口径。</li>
+<li><strong>与 CHORD 的区别</strong>：CHORD 是预定 schedule（融合系数 $\mu$ 按预设形式变化）；HPT 是按逐题实时表现做 0/1 选择，且有 UPGE 的统一视角打底；讲者认为效率上 HPT 略好。</li>
+<li><strong>对 Thinking Machines on-policy distillation 的看法</strong>：讲者称分享当天才粗读，"做得非常扎实、非常实用、值得在实际应用时适配"，但认为创新性有限、此前已有类似工作；承诺把该文的分析整理进 PPT 后续分享（对应本仓库 EP125 与 EP154 的 OPD 线）。</li>
+<li><strong>未做的基线</strong>：听众提出"按阈值先全量 SFT 再全量 RL""先 RL 收集错题再 SFT"两种分段方案，讲者均认可为有价值、值得补实验，并给出直观判断：逐题交错切换比整段切换更灵活、更有的放矢，但分段方案在硬件效率上可能有优势。</li>
+<li><strong>实现</strong>：基于 verl 改造——在 RL pipeline 中插入 SFT 数据引入与 $\alpha / \beta$ 判断，实现 SFT 与 RL 的同时更新（代码已开源）。</li>
+<li><strong>MoE 适用性</strong>：本工作只测 dense 模型；讲者认为 MoE 训练不稳定主要源于架构本身（训推不一致等），配上常用稳定 trick 后本算法应可稳定，但未实测。</li>
+<li><strong>DPO 能否替代 SFT</strong>：讲者认为不行——DPO 需要成对偏好数据、条件更苛刻，而此处需要的是让模型获得解难题的基础模仿能力，SFT 足够。</li>
+<li><strong>数据细节</strong>：训练数据 follow LUFFY 的 OpenMath 系列（Lumina 按难度筛选 + DeepSeek-R1 蒸馏思考过程），约 46K 条。</li>
+<li><strong>Pass@1024 是否过大</strong>：讲者认为不大—— $k$ 越大越能检验 RL 是否真的提升能力上限，且沿袭了 "Limits of RLVR" 的设置。</li>
 </ul>
 </section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>关键数字总表</h2>
 <table>
 <thead>
 <tr>
 <th>指标</th>
-<th>基线</th>
-<th>结果（HPT）</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Qwen2.5-Math-7B AIME 2024（avg@32）</td>
 <td>LUFFY 26.1 / SFT→GRPO 25.7</td>
-<td>33.0</td>
+<td>HPT 33.0</td>
+<td>论文</td>
 </tr>
 <tr>
 <td>Qwen2.5-Math-7B 分布内平均</td>
 <td>LUFFY 49.8</td>
-<td>52.7</td>
+<td>HPT 52.7</td>
+<td>论文</td>
 </tr>
 <tr>
 <td>Qwen2.5-Math-7B OOD 平均（ARC-c + GPQA）</td>
 <td>LUFFY 60.1</td>
-<td>62.3</td>
+<td>HPT 62.3</td>
+<td>论文</td>
 </tr>
 <tr>
 <td>Qwen2.5-Math-1.5B 六基准平均</td>
 <td>SFT 36.9 / LUFFY 34.7</td>
-<td>41.9</td>
+<td>HPT 41.9</td>
+<td>论文</td>
 </tr>
 <tr>
 <td>LLaMA3.1-8B 六基准平均</td>
 <td>LUFFY 13.2</td>
-<td>18.2</td>
+<td>HPT 18.2</td>
+<td>论文</td>
 </tr>
 <tr>
 <td>门控阈值 $\gamma$ （Qwen 家族）</td>
 <td>—</td>
 <td>0（8 次采样全错才切 SFT）</td>
+<td>字幕 + 论文</td>
+</tr>
+<tr>
+<td>offline 数据 token 概率分布</td>
+<td>—</td>
+<td>99.8% 大于 0.92、约 80% 大于 0.95</td>
+<td>字幕（Q&amp;A 预实验）</td>
+</tr>
+<tr>
+<td>训练数据规模</td>
+<td>—</td>
+<td>约 46K 条（LUFFY 同款 OpenMath）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>门控粒度 / batch</td>
+<td>—</td>
+<td>逐题门控，batch 128 内 SFT/RL 并存</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>Pass@k 验证范围</td>
+<td>每题采样 2048 条</td>
+<td>$k$ 从 1 到 1024，HPT 全程最高</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MATH-500 相对 GRPO</td>
+<td>—</td>
+<td>额外做对 58 题 / 做错 15 题</td>
+<td>字幕 + 论文</td>
+</tr>
+<tr>
+<td>逐题轨迹研究</td>
+<td>MATH L3/L4/L5 各 85 题</td>
+<td>共 255 题 × 50 epoch</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LUFFY off-policy 占比</td>
+<td>—</td>
+<td>恒定 1/8（1 off + 7 on）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>讲授 + Q&amp;A 时长</td>
+<td>—</td>
+<td>约 58 分钟 + 约 39 分钟（视频总长 5823 秒）</td>
+<td>字幕</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
 <ul>
 <li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
-<li><strong>把 SFT 数据当"救援通道"而不是第一阶段</strong>：训练中按题/任务统计 rollout 通过率，全失败的样本自动路由到示范学习——这对 coding data 尤其直接（单元测试通过率就是现成的 $P$ ）。</li>
-<li>混合训练的旋钮优先级重排：先试逐样本动态门控，最后才考虑全局固定混合比例；UPGE 框架提示，调 mask/分母/优势的取舍本质是偏差-方差工程。</li>
-<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：HPT 的门控信号来自训练内已有的 verifier 结果，不需要额外评测管线；且 SFT 步省 rollout，整体算力低于 SFT→GRPO 串行流水线——"用在线表现调度离线数据"是便宜的自适应。</li>
+<li><strong>把 SFT 数据当"救援通道"而不是第一阶段</strong>：训练中按题/任务统计 rollout 通过率，全失败的样本自动路由到示范学习——这对 coding data 尤其直接（单元测试通过率就是现成的 $P$ ）。讲者的效率论证也成立：门控信号复用 RL 已有的采样与 verifier 结果，几乎零额外成本，SFT 步还省 rollout。</li>
+<li>混合训练的旋钮优先级重排：先试逐样本动态门控，最后才考虑全局固定混合比例；UPGE 框架提示，调 mask/分母/优势的取舍本质是偏差-方差工程。与 CHORD 式预定 schedule 相比，逐题实时门控是讲者验证过的更优默认。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：HPT 的门控信号来自训练内已有的 verifier 结果，不需要额外评测管线；工程实现就是在 verl 的 RL pipeline 里插入 SFT 数据通道与系数判断——"用在线表现调度离线数据"是便宜的自适应。注意讲者自陈的应用前提：高质量外部数据与明确打分机制缺一不可。</li>
 </ul>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
 <ul>
-<li>没看懂的 / 想深挖的 1 个问题：UPGE 是梯度形式的归约，但 SFT 与 RL 的数据分布差异（示范分布 vs 当前策略分布）在这套估计器里只体现在分母与优势上——分布偏移本身（如示范质量参差）如何进入同一框架？值得对照 LUFFY 的 policy shaping 再看。</li>
-<li>本期字幕与配套 PPT 若后续取得，应回补讲者第一段的算法概览与未来研究讨论。</li>
+<li>UPGE 是梯度形式的归约，但 SFT 与 RL 的数据分布差异（示范分布 vs 当前策略分布）在这套估计器里只体现在分母与优势上——分布偏移本身（如示范质量参差）如何进入同一框架？值得对照 LUFFY 的 policy shaping 再看。</li>
+<li>讲者认可但未做的两个基线（按阈值整段 SFT→RL、先 RL 后 SFT 收集错题）值得留意后续版本是否补上——这关系到"逐题交错"相对"分段"的增益到底有多大。</li>
+<li>本期只测了 dense 模型与数学任务；coding / agent 场景（轨迹长、rollout 贵）下逐题门控的采样成本与收益比如何，讲者未展开，是直接可试的迁移点。</li>
 </ul>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句（1-2句）</h2>
 <blockquote class="pq">
-<p>"These approaches are not in contradiction, but are instances of a single optimization process."——论文摘要对全期主题的定调：SFT 与 RL 不是对立面，而是同一优化过程的两个实例。</p>
+<p>「不管是 SFT 也好，还是 RL 也好，他们彼此的优化目标是一致的，在优化的时候是不冲突的。」——讲者总结 UPGE 推导的核心结论（字幕 27:42 附近）</p>
+<p>「我们不应该在整个训练的过程中都使用 SFT，或者都使用 PPO、RL 这种算法，而是依据当前不同的情况，根据这些算法的不同特质去动态地选择。」——讲者从偏差-方差取舍引出 HPT 的判词（字幕 31:45 附近）</p>
 </blockquote></section>
   <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>

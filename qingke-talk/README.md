@@ -21,6 +21,10 @@
 | 75 | FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案 | ✅ 要点已提炼 |
 | 78 | 从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体 | ✅ 要点已提炼 |
 | 83 | 统一 SFT & RL：迈向大语言模型后训练的统一视角 | ✅ 要点已提炼 |
+| 39 | [PRIME: 结合隐式过程奖励的强化学习](episodes/EP39-prime.md) | ✅ 要点已提炼 |
+| 45 | [B-STaR & SimpleRL-Zoo：通过强化学习自我提升推理性能和效率](episodes/EP45-bstar-simplerl-zoo.md) | ✅ 要点已提炼 |
+| 46 | [从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化](episodes/EP46-tinyzero-apr.md) | ✅ 要点已提炼 |
+| 48 | [从 TTS 到 TTRL：无标签数据强化学习探索与展望](episodes/EP48-tts-ttrl.md) | ✅ 要点已提炼 |
 | 59 | [大模型推理强化学习中的熵机制](episodes/EP59-entropy-mechanism-rl.md) | ✅ 要点已提炼 |
 | 62 | [ProRL：延长强化学习训练框架，拓展大语言模型的推理边界](episodes/EP62-prorl.md) | ✅ 要点已提炼 |
 | 67 | [大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展](episodes/EP67-pipeline-parallelism.md) | ✅ 要点已提炼 |
@@ -29,6 +33,8 @@
 | 74 | [ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架](episodes/EP74-roll.md) | ✅ 要点已提炼 |
 | 76 | [NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍](episodes/EP76-nemo-rl.md) | ✅ 要点已提炼 |
 | 80 | [RL for LRMs：探讨面向推理模型的 RL 最新研究](episodes/EP80-rl-for-lrms.md) | ✅ 要点已提炼 |
+| 84 | [SimpleVLA-RL：简单可拓展的VLA强化学习训练](episodes/EP84-simplevla-rl.md) | ✅ 要点已提炼 |
+| 87 | [QeRL：量化技术增强强化学习 Reasoning 探索](episodes/EP87-qerl.md) | ✅ 要点已提炼 |
 | 92 | [RLinf：面向具身智能的"渲训推一体化"开源强化训练框架](episodes/EP92-rlinf.md) | ✅ 要点已提炼 |
 | 101 | MiniMax M2.1：Agent 后训练经验与认知 | ✅ 要点已提炼 |
 | 102 | 从 TRPO 到 SAPO：大模型 RL 算法演进 | ✅ 要点已提炼 |

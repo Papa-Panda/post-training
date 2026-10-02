@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP048 — 从 TTS 到 TTRL：无标签数据强化学习探索与展望</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP048 — 从 TTS 到 TTRL：无标签数据强化学习探索与展望</h1>
+    <p class="sub">讲者把 test-time scaling（TTS）分成只推理不改参数的 TTI 与在测试数据上继续训练的 TTT 两支，指出后者真正的拦路虎是无标签时奖励从哪来；TTRL 的… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP48-tts-ttrl.html</p>
+<p>「实际上我们 TTRL 的核心可能就只有三四行代码。」——讲者介绍 TTRL 算法本体时的原话（字幕 15:31–15:37）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>48</dd><dt>标题</dt><dd>从 TTS 到 TTRL：无标签数据强化学习探索与展望</dd><dt>BV</dt><dd>BV1NA4jz6EQB（<a href="https://www.bilibili.com/video/BV1NA4jz6EQB/）">https://www.bilibili.com/video/BV1NA4jz6EQB/）</a></dd><dt>时长</dt><dd>01:06:02（讲授约 45 分钟 + Q&amp;A 约 20 分钟；视频总时长 3962 秒）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>张开炎（清华大学电子系三年级博士生，导师周博文教授；课题组由周博文教授与丁宁助理教授共同指导；均为字幕自述口径，02:00 前后；字幕中姓名亦转写为「张凯恩」，以自述的「张开炎」为准）</dd><dt>相关论文</dt><dd>TTRL: Test-Time Reinforcement Learning（讲者团队工作；讲授未给编号，此处只录标题）</dd><dt>相关代码</dt><dd>讲者称 TTRL 核心仅三四行代码、可直接集成进现有 RL 训练框架；团队另维护一个跟踪 2025 年以来 RL 提升 LLM 推理工作的 GitHub 仓库（字幕口径：已 500+ stars）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP48.txt</code>（1609 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（已存档）清洗提炼（经人工清洗；个别专名可能有识别误差，如 TTRL 在字幕中多作「TTLL/TTAL」、majority voting 作「模具2TN」、Qwen 作「千万」，均已按上下文校正）。讲授提及但未给确切出处的条目（如个别论文编号、框架名称），以下只按字幕口径转述，不另补造。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者把 test-time scaling（TTS）分成只推理不改参数的 TTI 与在测试数据上继续训练的 TTT 两支，指出后者真正的拦路虎是无标签时奖励从哪来；TTRL 的答案极简：用模型自己多次采样的 majority voting 结果当伪标签，再套回标准 rule-based 0/1 奖励做 RL——伪标签随模型变强而变准，形成自举式持续提升，且训练后单次推理能超过初始模型的投票效果。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：从 TTS 到「测试时能不能直接训练」</h3>
+<p>讲者先立坐标（字幕 02:06–12:58）：</p>
+<ul>
+<li><strong>TTS 的两条路线</strong>。并行搜索路线：采样多个分支、用奖励模型选优（其团队前期工作包括开放域过程奖励模型 OpenPRM、基于 R1-7B 的生成式过程奖励模型、以及 policy/reward 模型组合搜索——曾让 1B 量级小模型经 TTS 超过 405B 大模型；字幕口径）。串行搜索路线：把搜索内化进模型本身（反思、纠错），其公开实现的转折点是 DeepSeek-R1 用 rule-based 奖励 + GRPO 训出长链推理。</li>
+<li><strong>PRIME 的位置</strong>：在 rule-based 奖励之上再叠加隐式过程奖励，给每个 token 更稠密的监督，收敛更快；其 7B 模型当时超过 GPT-4o（字幕口径；PRIME 本身是青稞Talk 早先一期的主题）。</li>
+<li><strong>分布漂移问题</strong>：train-time RL 用有标签数据训练，但训练与测试数据分布不同。自然的问题是：能否直接在 test data 上做 RL，让模型适应测试分布？这就是 test-time training（TTT）的范畴，而核心挑战只有一个——测试数据没有 ground truth，奖励无法估计。讲者据此把 TTS 明确拆成 TTI（test-time inference）与 TTT 两部分，TTRL 做的是后者。</li>
+</ul>
+<h3>方法/设计：TTRL = majority voting 伪标签 + 标准 RL</h3>
+<p>TTRL 的算法本体（字幕 13:47–16:28）：对每个问题采样多个回答，提取各自答案，取出现次数最多的答案作伪标签 $\hat{y}$ ；每个回答的奖励按 rule-based 方式与伪标签比对：</p>
+<p>$$r = \mathbb{1}[\text{答案} = \hat{y}]$$</p>
+<p>得到 0/1 奖励后直接接回标准 RL 训练流程（GRPO、PPO、PRIME 均可，讲者实测三者最终收敛效果差不多）。</p>
+<p>为什么用 majority voting 而不用 Best-of-N / 奖励模型（字幕 14:38–15:31）：Best-of-N 依赖一个固定的外部奖励模型，policy 在训练中不断变强、奖励模型不变，很快会出现 reward hacking，奖励模型帮 policy 选不出好答案；majority voting 完全依赖模型自身，投票能力随训练同步增强，奖励估计不会与被训模型脱节，训练才不崩。讲者原话：核心代码只有三四行，对现有 RL 代码流很容易集成。</p>
+<h3>实验/实战（全部为讲授字幕口径）</h3>
+<ul>
+<li><strong>主结果</strong>：Qwen2.5-Math-7B 在 AIME、AMC、MATH-500 上均显著提升，其中 AIME 最高提升 159%（第一版论文结果）；更新结果显示在 Qwen2.5-32B 上同样能提升，方法可 scale；GPQA（生化物等学科推理）上也能提升（字幕 16:28–17:36）。</li>
+<li><strong>上限分析一：超过自己的投票</strong>。初始模型的 majority voting 效果本身已不错，但 TTRL 训练后模型的<strong>单次推理</strong>准确率能稳定超过初始模型的投票效果；且对训练后模型再做投票还能进一步提升——说明多样性（pass@k 中出现正确答案的比例）被保留甚至随训练上升，是一个持续自净化/自举的过程（字幕 20:44–22:52）。</li>
+<li><strong>上限分析二：与真标签训练的对照</strong>。直接用 ground truth 做 RL 是拿不到的「隐藏上限」；对照训练曲线显示 TTRL 的收敛趋势、尤其初期趋势，与真标签训练非常相近（字幕 22:52–23:45）。</li>
+<li><strong>在测试集上训会不会过拟合</strong>：做了交叉验证——在 AIME 上训、在 AMC/MATH-500 上测（及轮换组合），其他数据集上仍显著提升。讲者引既有结论解释：SFT 更偏记忆答案，RL 学到的是可泛化的解题能力（字幕 17:36–18:46）。一个更反直觉的观察：1.5B base model 在 AIME 上训练时目标任务准确率波动极大（最高约 0.2、最低甚至到 0），但它在 MATH/AMC 上的准确率却稳定提升——「他不断在优化他的解题能力，可能给他更多时间他就能够做对」（字幕 18:46–19:51）。</li>
+<li><strong>为什么能 work 的两点解释</strong>（字幕 23:45–26:15）：其一，majority voting 本身就是模型 TTS 效果的体现，伪标签正确率有 TTS 的多样性打底；其二，即便伪标签偶尔投错，奖励估计仍可达到相当高的准确率——讲者给的示例中估计奖励与真实奖励的一致比例约 62%，再加上 RL 本身对噪声奖励的鲁棒性，足以驱动训练。当然他明确说这只是初步解释，理论分析待后续。</li>
+<li><strong>与 RL 算法的兼容性</strong>：GRPO、PPO、PRIME 上 TTRL 都能把投票转化为有效奖励、收敛到相近效果；讲者顺势表态：RL 算法之间大同小异，顶多在稳定性与资源上权衡，最终收敛效果相近（字幕 19:51–20:35）。</li>
+</ul>
+<h3>局限：TTRL 不是万能神药</h3>
+<p>讲者用一整节讲边界（字幕 20:35–29:41、26:15–29:41）：</p>
+<ol>
+<li><strong>依赖先验</strong>：模型在目标任务上若缺乏先验知识，TTRL 很难训出效果。MATH-500 上按难度系数 1–5 分组训练，难度越高提升幅度越低，模型能力与任务难度 gap 超过阈值后就难以 work。讲者借此呼应尧舜禹的博客观点：RL 由算法、环境、先验三块构成，过去大家只优化算法，如今算法可改进的点已不多，更影响结果的是环境与先验——TTRL 能否 work 同样取决于模型先验。</li>
+<li><strong>超参敏感</strong>：温度、batch size 等超参取得过高或过低都可能不收敛；估计奖励的噪声叠加 RL 本身的训练难度，使 TTRL 比普通 RL 更难训。论文里给了一套通用参数供复现，后续计划结合更新的 RL trick 优化训练过程。</li>
+</ol>
+<h3>展望：经验时代的 RL 与多智能体</h3>
+<ul>
+<li><strong>未来方向</strong>（字幕 29:41–33:47）：TTRL 的收敛上限需要理论分析（对照黄高团队关于「RL 能否超过 base model」的讨论——当采样数 N 足够大时 RL 甚至可能不如 base model，TTRL 的收敛同样待探索）；应用面包括在线流式单样本学习（用 1 条样本反复训 vs 1000 条样本训一遍，后者若成立更有前景）、与自监督/自出题自打分（如 Absolute Zero 式 self-play）的结合、科学发现等场景。</li>
+<li><strong>经验时代框架</strong>（字幕 33:47–38:33）：讲者借 Sutton《欢迎来到经验时代》收束：模拟时代靠沙盒自博弈（AlphaGo/Zero），人类数据时代靠标注（RLHF 一系仍需要人给 ground truth），经验时代则要模型在真实环境中自己产生经验、自己训练。其两条标志：agent 处于动态变化的环境而非静态数据；奖励来源于自身与环境而非人类。TTRL 朝这个时代迈了一小步：关注 test-time training 而非静态刷榜，且证明了 majority voting 这种自身奖励估计是有效的。后续两个关键问题：如何构建可与 agent 持续交互、能给反馈的环境；经验流中的长程记忆与多 agent 协同（对应 OpenAI 五级能力框架的最高级「组织者」）。</li>
+<li><strong>多智能体强化训练框架</strong>（字幕 38:33–42:04）：现有 agent 框架（AutoGen、CAMEL 一类）只支持调用已有模型推理、难做训练；现有 RL 框架又难支持多 agent 训练（交互、集中式打分、信用分配、分布式训练都是问题）。团队基于 OpenRLHF 开发了多智能体强化训练框架（字幕作「MARI/Martin」，名称以其后续开源页为准）。初步结果：未训练的多模型协同推理常常失败、甚至不如单模型 majority voting；训练后在相同推理算力下多智能体上限更高。且多智能体天然更适配 TTRL——多个模型融合投票能缓解单模型的偏差、给出更好的奖励估计；在 DeepSeek-R1 蒸馏 1.5B 上多智能体 TTRL 的提升也验证了这一点（字幕 52:10–53:11 呼应）。</li>
+</ul>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>与 diffusion 等其他模型结合</strong>：TTRL 是与模型无关、与任务相关的方法；关键看任务上能否获得标签——生成类任务没法直接投票，可退一步用奖励模型打分做 test-time 训练，但需针对性处理 reward hacking（字幕 45:36–47:30）。</li>
+<li><strong>为什么不直接拿投票结果做 SFT</strong>：SFT 和 RL 都能提升目标任务，但 SFT 泛化性会降低；RL 能保持并提升其他任务上的泛化（讲者团队内部有初步实验，字幕 49:00–50:22）。</li>
+<li><strong>RL 训完 pass@k 大时不如 base model 怎么办</strong>：讲者判断这与 base model 本身的能力、架构、数据关系更大，单靠调 RL 算法很难本质突破；出路在新架构、数据优化或多智能体（字幕 50:22–51:28）。</li>
+<li><strong>TTRL 仍是 on-policy</strong>：模型自己采样、自己训练，分布保持一致；两个或多个模型交互训练（多智能体 TTRL）可以进一步改进，已有初步实验支持（字幕 51:28–53:11）。</li>
+<li><strong>什么任务上更有效 / 先验如何度量</strong>：仍回到先验是否充足；「如何定量衡量先验、做可预测的 TTRL」是讲者认为很有前景但尚未解决的课题（字幕 53:11–54:39）。</li>
+<li><strong>端侧部署的意义</strong>：把「推理 1000 次才达 90%」的 TTS 计算量通过训练内化成一次推理达标——本质是把 test-time 的多次推理成本转成一次训练成本（字幕 54:56–55:53）。</li>
+<li><strong>给应用方的实操建议</strong>（字幕 62:45–63:54）：先验证在你的场景上 TTS 本身有效，再把 RL 奖励估计部分换成 TTS 方式，大概率能 work；或者先拿少量标注数据在目标场景直接做 RL 验证有效性，再放大到无标注数据做 TTRL。</li>
+<li><strong>硬件要求</strong>：与普通 RL 训练完全一致（只改奖励估计函数）；1.5B 模型讲者称 2–4 张 GPU 可跑，用支持 hybrid engine 的框架（vLLM/OpenRLHF）时显存共享、单卡都可能跑起来（字幕 64:29–65:35）。</li>
+<li><strong>其他领域</strong>：判别式/答案确定的任务（如视觉 grounding）可直接迁移；图像生成可先为场景设计 TTS、TTS 有效则 TTRL 大概率有效；序列推荐同理可先验 TTS。流式单样本场景与 test-time adaptation 相通，是讲者看好的方向（字幕 57:45–61:38）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AIME 最高提升（Qwen2.5-Math-7B）</td>
+<td>初始模型</td>
+<td>+159%</td>
+<td>字幕（16:43–16:50）</td>
+</tr>
+<tr>
+<td>适用模型规模</td>
+<td>7B 主结果</td>
+<td>32B 上同样有效</td>
+<td>字幕（16:56–17:12）</td>
+</tr>
+<tr>
+<td>示例中奖励估计与真实奖励一致比例</td>
+<td>—</td>
+<td>约 62%</td>
+<td>字幕（25:29–25:49）</td>
+</tr>
+<tr>
+<td>1.5B base 在 AIME 上训练</td>
+<td>目标任务准确率</td>
+<td>波动大，最高约 0.2、最低至 0；但 MATH/AMC 稳定提升</td>
+<td>字幕（18:46–19:25）</td>
+</tr>
+<tr>
+<td>MATH-500 难度分组</td>
+<td>难度系数 1–5</td>
+<td>提升幅度随难度升高递减</td>
+<td>字幕（26:42–27:15）</td>
+</tr>
+<tr>
+<td>团队 RL 算法跟踪 GitHub 仓库</td>
+<td>—</td>
+<td>500+ stars</td>
+<td>字幕（10:07–10:25）</td>
+</tr>
+<tr>
+<td>前期 TTS 组合搜索结果</td>
+<td>405B 大模型</td>
+<td>1B 量级小模型经 TTS 超过之</td>
+<td>字幕（05:29–05:55）</td>
+</tr>
+<tr>
+<td>1.5B TTRL 训练硬件</td>
+<td>—</td>
+<td>2–4 卡可跑（与普通 RL 同要求）</td>
+<td>字幕（64:56–65:13）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的直接可试点：</li>
+<li><strong>伪标签奖励是一个可复用的 infra 模式</strong>：凡是「TTS 在该任务上有效」（采样多次投票能选对），就能把 RL 的奖励估计模块换成 TTS 投票，在无标注的线上/测试分布数据上继续训——讲者给的验证顺序是先在少量标注数据上证明 RL 在该场景有效，再放大到无标注数据。</li>
+<li><strong>奖励估计与策略共进化</strong>：majority voting 相比固定外部奖励模型的关键优势是奖励信号随 policy 同步变强、天然抗 reward hacking；在设计自奖励/self-training 管线时，「奖励源是否随被训模型一起进化」应作为一等设计约束。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：TTRL 把测试时算力从「推理时 N 次采样」转成「训练时一次内化」，端侧/在线场景的成本结构随之改变（N 次推理成本 → 一次训练 + 一次推理）；同时它对训练 infra 的要求为零增量——只替换奖励估计函数，rollout/训练引擎与超参体系全部沿用，是「算法创新以最小侵入接入现有 RL 框架」的范例。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>多数票伪标签的收敛上限：训练后单次推理超过初始投票，但随着投票数 N 增大，RL 模型与 base model 的差距如何变化（讲者引黄高团队结论称大 N 时 RL 可能反而不如 base model）——TTRL 的自举循环是收敛到固定点还是会自我强化错误共识，需要理论与更长训练的实证。</li>
+<li>先验的定量度量：TTRL 成败取决于模型在目标任务上的先验，但讲者承认目前没有可操作的先验度量来预判「这个任务能不能 TTRL」；这是把方法从经验变成工程流程的关键缺口。</li>
+<li>多智能体 TTRL 的信用分配与成本：多模型融合投票确实给出更好的奖励估计，但多 agent 训练的集中式打分、信用分配在讲授中只给了框架级描述，具体算法与算力开销待其开源后核对。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「实际上我们 TTRL 的核心可能就只有三四行代码……就是说我们针对他的每个回复，一系列的多个回复，我们提取答案，然后通过答案进行一个投票，选出出现次数最多的一个答案作为一个伪标签。」——讲者介绍 TTRL 算法本体（字幕 15:31–15:49）</p>
+<p>「如果我们始终需要人的经验来作为指导的话，最终他其实是很难去做 scalable 的；但如果我们能够让模型它基于从环境或从自身去获得奖励去训练，那么他就能够实现模型持续的一个进化。」——讲者论经验时代 RL 的奖励来源（字幕 35:29–35:49）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

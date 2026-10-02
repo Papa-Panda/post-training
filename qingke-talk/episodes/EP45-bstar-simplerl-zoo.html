@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP45 — B-STaR &amp;amp; SimpleRL-Zoo：通过强化学习自我提升推理性能和效率</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP45 — B-STaR &amp;amp; SimpleRL-Zoo：通过强化学习自我提升推理性能和效率</h1>
+    <p class="sub">曾伟豪把 self-training 的成败归结到两个随训练漂移的能力——模型的探索能力（自己生成多样、高质量 response）与外部 reward 的利用能力（从候选里挑出… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP45-bstar-simplerl-zoo.html</p>
+<p>「我们只有有了不断会有更高质量的合成数据、更 high quality 的 response，我们才能去推进我们的模型不断的去变强。」——讲者在讲 self-training 瓶颈时的判断</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>45（B站标题为「青稞Talk 45期」）</dd><dt>标题</dt><dd>B-STaR &amp; SimpleRL-Zoo：通过强化学习自我提升推理性能和效率</dd><dt>BV</dt><dd>BV1d7pYzbE1C</dd><dt>时长</dt><dd>01:11:59（讲授约 54 分钟 + Q&amp;A 约 17 分钟；字幕末条 4311 秒）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>曾伟豪（香港科技大学，博士在读；研究方向为大模型 post-training 与 reasoning；字幕中自述姓名；B站字幕主持人介绍时将姓名识作「邓伟豪」，以讲者自述为准）</dd><dt>相关论文</dt><dd><em>B-STaR: Monitoring and Balancing Exploration and Exploitation in Self-Taught Reasoners</em>（ICLR 2025，arXiv:2412.17256）；<em>SimpleRL-Zoo: Investigating and Taming Zero Reinforcement Learning for Open Base Models in the Wild</em>（arXiv:2503.18892）</dd><dt>相关代码</dt><dd>github.com/hkust-nlp/simpleRL-reason（讲者称 GitHub 约 4000 star）；B-STaR 代码见 github.com/mistobaan/b-star</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1d7pYzbE1C/">https://www.bilibili.com/video/BV1d7pYzbE1C/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP45.txt</code>（1736 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文清洗提炼，来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如主持人介绍讲者时作「邓伟豪」、SimpleRL-Zoo 在字幕中作「simple21zoom/simple IO zoom」，均以讲者自述与论文为准）。论文（arXiv:2412.17256、arXiv:2503.18892）仅作元信息交叉核对；凡数值未在字幕口播中给出明确数值的，以下写明（字幕口径）不硬凑数字。</p>
+<p>关联：本期是青稞Talk 早期一期把「传统 self-improving」和「zero RL」并到同一讲的分享；讲者本人的判断框架（自动监测并平衡 exploration / exploitation）是 B-STaR 和 SimpleRL-Zoo 的共线。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">7B</div><div class="l">base</div></div></div>
+<p>曾伟豪把 self-training 的成败归结到两个随训练漂移的能力——模型的探索能力（自己生成多样、高质量 response）与外部 reward 的利用能力（从候选里挑出对的）——并用 B-STaR 在每轮迭代自动调温度、采样数与 reward 阈值去最大化一个「平衡分」（balance score）保住这两个能力不要饱和；再往前推到更 online 的 zero RL，他给出 SimpleRL/SimpleRL-Zoo：在 7B base 上只用 8000 条开源数学数据 + 规则奖励即可涌现 long CoT 的三段式学习曲线，并在跨模型动物园里给出一套（含 format reward 是毒药、数据难度要匹配基座）能跨模型复用的经验配方。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>先分清：RL 在这里是数据合成策略，不是 teacher 的替代品</h3>
+<p>讲者开头先给了一个分类。post-training 合成数据只有三条来源：更强的 teacher（你总得先有更强的模型——对最前沿的实验室不可用）、更弱的 teacher（需要 student 本身是极强的 base）、以及模型用自身生成再过滤的 self-training。他把 RL 定位为「一种形式的数据合成策略」：相比 SFT 的模仿学习（通常难以超越 teacher），RL 鼓励自由探索、上限更高，但真正的前提条件是能持续产出高质量数据——这也是他整场反复追问的：「self training 中哪一步是最关键的？」</p>
+<p>答案落在 filter 这一步：合成数据跑多快，取决于监督信号能不能持续区分出「更好」的 response。讲者并给了一条从 offline 到 online 的演化谱系：self-improving 的迭代越快（每个 iteration 生成更少、更新更频繁），它就越像 online RL。</p>
+<h3>前置发现：传统 self-improving 很快饱和，而且不是靠更强 PRM 能救的</h3>
+<p>讲者做了一组小型前置实验：在 GSM8k 与 MATH 上用两种监督信号——只看 final answer 的 rule-based reward，以及 final answer + 额外训的 process-based reward model——按训练步数跟踪 benchmark 表现。结论是（字幕口径）：无论哪种监督信号，性能都很快饱和，看不出随 compute 线性增长的 scaling 趋势。他提醒这是 DeepSeek-R1 之前那套比较 offline 的自改进设定；但它把讲者推去追问：到底是哪些因素卡住了 scaling？</p>
+<h3>两个能力：exploration 与 exploitation 的动态失衡</h3>
+<p>讲者把 self-improving 的动力学拆成两个量。<strong>探索能力（exploration）</strong>是模型自己经多次 sampling 生成多样、高质量 response 的能力；<strong>利用能力（exploitation）</strong>是外部 reward 从 K 个候选里至少筛中 S 个正确 response 的能力（他用统计指标 reward 的利用率去量）。两者都会随迭代动态变化——模型分布变、探索路径随之变；reward 的利用率也会变。</p>
+<p>他给出两条训练曲线观察（字幕口径，为图表描述，未给出精确数值）：</p>
+<ol>
+<li>探索能力：初期快速上升，随后饱和、甚至下滑。讲者直言「模型自身的探索能力，有时候已经决定了算法的上限」。</li>
+<li>利用能力：整体也趋向饱和，且水平长期低于探索能力——也就是说真正卡住训练的不是生成，而是筛。</li>
+</ol>
+<p>只有两者平衡，self-improving 才 work；一般设定下很难自动达成平衡，这是讲者为 B-STaR 准备的问题背景。</p>
+<h3>B-STaR：用 Query Effect / Balance Score 自动调参，而非手动 schedule</h3>
+<p>问「什么样的训练数据算好？」讲者给了两条原则：筛出的正确 response 绝对数量要够多（否则训练数据不够），且它们在所选数据中的占比要够高（否则 noisy 数据会污染训练）。他据此定义了 query 级的指标（论文称 balance score，讲者口播称 Query Effect）：左边约束每道 query 被选中的正确 response 数 $N'_i$ 的绝对规模，右边约束它在候选中的占比；两头都高，这道 query 才是对当前 policy 有贡献的数据。</p>
+<p>有了这个可量化的目标，B-STaR 的做法就是在每次迭代里把目标最大化：随当前 policy 与 reward 的状态，动态调整 rollout 温度、sampling 数与 reward 阈值（具体阈值在论文里是每轮用小量子集先搜再推广到全量）。讲者强调这与旧 self-improving 把超参写死（静态黑盒）有本质区别。</p>
+<p>效果（字幕口径，图表展示未口播三位有效数字）：在 MATH 等数学推理与 APPS 代码推理上，相对包括 online FT、STaR/ReST-EM、Iterative RFT 在内的经典 self-improving 基线有大幅提升，且训练曲线在演示的步数范围内保持上行、没有过早饱和。他还展示了探索能力指标 pass@32（32 次 rollout 中至少一次正确）在 B-STaR 下同样保持良好、没有走弱。</p>
+<p>一个有趣的自发现象：被自动搜出的温度不是常数——训练早期自动选到较低的约 $T \approx 0.5$ 左右，后期逐渐拉高。讲者把这解释为算法在后期更愿意扩大探索空间。sampling 数因当时算力没动，但他说消融显示更大的 sampling 数带来更好的 balance score 与最终性能。</p>
+<h3>SimpleRL：8000 条数据 + rule-based reward 即可在 7B 上涌现推理</h3>
+<p>第二部讲 zero RL。讲者先展示用 DeepSeek-R1 案例：不经任何 SFT、从 base 直接做 RL，long CoT 与 self-reflection（如「wait, let me make sure」）是训练中涌现出来的，不需要 tree search 或 reward model。</p>
+<p>SimpleRL 是他们抢在 R1 开源前（约 2024 年 11 月已跑通）的复现实验。设置（字幕口径）：</p>
+<ul>
+<li>基座：Qwen2.5-Math-7B base，直接从 base 训，零 SFT；</li>
+<li>数据：仅 8000 条开源数学数据，不做生成与精筛；</li>
+<li>奖励：rule-based 三段式——答案对 +1，格式对但答案错 -0.5，格式错 -1；</li>
+<li>算法：早期用 PPO 并保留 value / reference 组件；规则奖励替换掉了 reward model。</li>
+</ul>
+<p>作为对照讲者点名了两条同期路线的资源开销（字幕口径）：RStar-Math 用了约 7M 条 SFT 数据 + RL 阶段 300 万数据 × 16 次 rollout；PRIME 用了 23 万 SFT + 15 万 RL 数据。SimpleRL 合计仅 8000 条 × 每次 rollout 8 次。讲者称结果比 base 约 +20 个绝对点（字幕口径，展示图表）、与 Qwen 官方 instruct 模型相当、与 PRIME 相当，并且在 AIME 上 SFT 反而会损害成绩，而 RL 能实现从易到难的泛化。</p>
+<p>训练动态被讲者拆成三段：length 先快速下跌（格式对齐阶段）、随后 length 与 accuracy 同步回升、在第三阶段 length 还在涨但 accuracy 不动——他事后把这段解读为无有效探索、只长冗余词。这张曲线日后被许多复现研究复述为对 RL 的工作机制画像；讲者给自己的处方是后期应加大温度或最大 rollout 数以维持真实探索。</p>
+<h3>SimpleRL-Zoo：把配方搬到动物园，用新指标判断「真变长」</h3>
+<p>讲者随后指出在 Qwen 上做的实验有特殊性：Qwen 预训练可能混入过 post-training 数据与反思行为。为回答「能否在野生 base 上复现」，SimpleRL-Zoo 扩展到 Qwen2.5 0.5B–32B、Mistral-7B、Llama-3.1-8B、DeepSeek-Math-7B、Mistral-Small-24B 等（字幕口径）。他称在这一系列上都观测到 accuracy 与 response length 同步提升，而 Stanford 团队在 Llama-3.1 上没看到（引讲者口径，未做交叉核对）。</p>
+<p>讲者提出两个比 length 更真实的指标：截断比例（clip ratio，过长被 budget 截掉的 response 比例）与未截断的平均长度。在他举的例子里 Mistral-7B 的「变长」是不健康的——clip ratio 极高、绝大多数 response 被截断；而其它模型 clip ratio 保持低位。</p>
+<p>他借 Stanford 的认知行为分类法统计 backtracking、verification、enumeration（穷举）与 subgoal setting 四种行为：Mistral-7B 四种基本无变化，而 Llama-3.1、DeepSeek-Math-7B、Mistral-Small-24B 会在 RL 里逐渐发育；Mistral-Small-24B 的 backtracking 从近零提升到约 +50% 左右（字幕口径）。对 Qwen2.5 的 7B/32B 这些行为较平稳，讲者的解释是 MATH 数据对它们已经太简单，不需要复杂或新策略。</p>
+<p>pass@k 争论上他正面回应：DeepSeek 团队论文里 RL 模型在 pass@k 上并未超过 instruct；而 SimpleRL-Zoo 在 AMP/AIME/AMC/MATH500 上测得 pass@k 随训练步数持续抬升（展示了 K 从 1 到 128 的曲线），他借此主张 RL 是在系统性提升 reasoning 能力而非只移动概率质量。</p>
+<h3>动物园的三条经验法则</h3>
+<ol>
+<li><strong>format reward 会毒害弱基座</strong>。对比 format reward 的有无实验里，Qwen2.5-7B 与 Llama-3-8B 都出现负面影响（字幕口径）；Llama-3.1-8B 一度直接把 accuracy 打到零。讲者的解释是早期用格式约束硬掰输出方式会约束探索、对弱 base 伤害最大。</li>
+<li><strong>数据难度要匹配基座能力</strong>。Mistral-7B 在 GSM8K 级简单数据上最稳健、面对 MATH Level 3–5 难度即退化弃答；Qwen2.5-7B 需要 Level 3–5 才激发长链与性能提升。讲者建议用 pass@k 落到合适区间去为不同模型定量划分难度带。</li>
+<li><strong>pre-SFT 冷启动可能会反噬</strong>。在 RL 前插入 short-CoT SFT（0、100、500 步对比）里，讲者称没有 SFT 的 base 上限最高、长度增长最积极，SFT 越深探索被限制得越狠（字幕口径）。Q&amp;A 里他把缓解办法指向长 CoT 冷启动：R1-Zero 的长 CoT 数据冷启动反而可能小幅强化探索。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标 / 观察</th>
+<th>字幕口径</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SimpleRL 训练数据</td>
+<td>8000 条开源数学数据，零 SFT</td>
+<td>字幕（方法部分）</td>
+</tr>
+<tr>
+<td>SimpleRL 基座</td>
+<td>Qwen2.5-Math-7B base</td>
+<td>字幕（方法/实验）</td>
+</tr>
+<tr>
+<td>SimpleRL 规则奖励</td>
+<td>对 +1 / 格式对答案错 -0.5 / 格式错 -1</td>
+<td>字幕（方法部分）</td>
+</tr>
+<tr>
+<td>Single rollout 数</td>
+<td>每条数据 rollout 8 次</td>
+<td>字幕（对比表）</td>
+</tr>
+<tr>
+<td>RStar-Math 资源（对比）</td>
+<td>SFT 7M、RL 300 万 × 16 rollout</td>
+<td>字幕（对比表）</td>
+</tr>
+<tr>
+<td>PRIME 资源（对比）</td>
+<td>SFT 23 万、RL 15 万</td>
+<td>字幕（对比表）</td>
+</tr>
+<tr>
+<td>SimpleRL 相对 base 的幅度</td>
+<td>约 +20 个绝对点（图表口播）</td>
+<td>字幕（实验结果）</td>
+</tr>
+<tr>
+<td>B-STaR 自动温度</td>
+<td>训练早期约 $T \approx 0.5$ ，后期自动拉高</td>
+<td>字幕（配置可视化）</td>
+</tr>
+<tr>
+<td>SimpleRL 课程资源（Q&amp;A）</td>
+<td>早期 PPO 约 2 天、4 节点；GRPO 后小模型单卡数小时</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>SimpleRL-Zoo 动物园规模</td>
+<td>Qwen2.5 0.5B–32B、Mistral-7B、Llama-3.1-8B、DeepSeek-Math-7B、Mistral-Small-24B</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>pass@k 跨度</td>
+<td>K 从 1 到 128 的变化曲线</td>
+<td>字幕（pass@k 部分）</td>
+</tr>
+<tr>
+<td>simpleRL-reason GitHub</td>
+<td>约 4000 star（讲者口述）</td>
+<td>字幕（开场介绍）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>把 self-training 看作「两个能力都要监控」的事情：只追 accuracy 会把探索能力饱和误读为算法瓶颈；至少同时给出 pass@k 与 clip ratio 两条轨迹，再下结论。</li>
+<li>B-STaR 的自动调参思路直接就是一条工程处方：在 zero RL 里用「当前 policy 与 reward 的实际配对状态」实时调温度与阈值，比拍一个静态 schedule 更划算，且讲者的观察是这条调参本身就能再换出更好的性能。</li>
+<li>对做 RL 数据的人最实用的启示：数据难度要相对于 policy 而言。讲者的说法是看 pass@k 在什么区间——太难的题对他来说等同没信号、太简单等同只给捷径。难度评定应随 policy 能力动态标注，而非一次性打标。</li>
+<li>format reward 与短 CoT 冷启动都要警惕：看似无害的「对齐格式」与「热身一下」，对 RL 里对弱基座可能是把探索空间收紧的隐性约束。默认关闭、先跑 baseline，再以实验说服自己加回来。</li>
+<li>长度不能当第一信号：讲者的 length 与 clip ratio 两报一的办法很便宜——被截断的样本比例如果开始上升，length 上涨大概率是垃圾增长、不是更长的思维链。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>B-STaR 的 balance score 精确定义（对 $N'_i$ 的惩罚项形式与温度/阈值的自动搜索细节）讲者说要看论文；纪要按口播只给出概念框架，具体数学形式未从字幕确立。</li>
+<li>pass@k「大幅抬升」是讲者用曲线主张系统性提升，但讲者没有在正片里给出基座对比表的三位有效数字（GRAM8K / MATH500 / AIME24 的 percent），做成笔记时适合再打开论文核对。</li>
+<li>SimpleRL-Zoo 关于「Stanford 在 Llama-3.1 上未看到正向结果、我们让它 work 了」的差异来自讲者单方叙述，后续若要引用需另行核对 Stanford 文章的具体设置差在哪里。</li>
+<li>pre-SFT 冷启动伤害探索是讲者较强的判断，但他给出的对比是 short-CoT SFT；long-CoT 冷启动缓解只是「当前在跑实验」的预告语气，未定案。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们只有有了不断会有更高质量的合成数据、更 high quality 的 response，我们才能去推进我们的模型不断的去变强。」——讲者在界定 self-training 真正的瓶颈（字幕 07:18–07:28）</p>
+<p>「RL 它其实可以被当成一种形式的数据合成策略，它可以帮助我们去克服人类数据的限制。」——讲者对 RL 与数据工程之间关系的总结（字幕 06:55–07:07）</p>
+<p>「response length 它仅仅是一个很表层的 metric，我们应该去关注更多更真实的、更能反映模型 reasoning 变化的 metric，让我们能让整个过程变得更加白盒。」——SimpleRL-Zoo 新指标提出时讲者的话（字幕 47:21–47:38）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP039 — PRIME: 结合隐式过程奖励的强化学习</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP039 — PRIME: 结合隐式过程奖励的强化学习</h1>
+    <p class="sub">这期讲 PRIME 怎么把过程奖励接进在线 RL：核心是先用 DPO 式的隐式奖励参数化（只用 outcome label 训练），让一个结果奖励模型免费吐出逐 token 的… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP39-prime.md</p>
+<p>「我们这个方法其实是非常的通用的，你只要有一个模型，不论它是 base model 还是 SFT model，你就可以直接对它用 PRIME 进行计算。」——讲者在总结中对 PRIME 适用范围的概括（字幕约 38:11–38:25）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>39</dd><dt>标题</dt><dd>PRIME: 结合隐式过程奖励的强化学习</dd><dt>BV</dt><dd>BV1UaPNecEcW</dd><dt>时长</dt><dd>56:21（讲授约 39 分钟 + Q&amp;A 约 17 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>崔干渠（上海人工智能实验室青年科学家；字幕自述，「甘渠」为口播识别，以公开资料为准）</dd><dt>相关论文</dt><dd>PRIME: Process Reinforcement through Implicit Rewards（上海人工智能实验室），<a href="https://arxiv.org/abs/2502.01456">https://arxiv.org/abs/2502.01456</a> （2025-02）；前置工作 Implicit PRM / implicit process reward 相关预印本（2024-12，讲者口径）</dd><dt>相关代码</dt><dd>数据、代码、模型全部开源（讲者口径；具体仓库地址未在 talk 中点名）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1UaPNecEcW/">https://www.bilibili.com/video/BV1UaPNecEcW/</a></dd><dt>官网期号</dt><dd>39（预告链接未确认，仅标期号）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP39.txt</code>（1418 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（已存档）清洗提炼（经人工清洗；个别专名可能有识别误差，PRM 在字幕中作「PM/P2M」、verifier 作「Wi-Fi」、implicit PRM 作「in place CPRM」，均以论文为准）。凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期讲 PRIME 怎么把过程奖励接进在线 RL：核心是先用 DPO 式的隐式奖励参数化（只用 outcome label 训练），让一个结果奖励模型免费吐出逐 token 的过程奖励；PRIME 在此之上用 REINFORCE leave-one-out 的框架，每步同时在线更新 PRM 与 policy，并把 PRM 输出当作 reward（不是 value）加进每个 token 的优势估计，结果是同等数据下收敛更快、数据效率显著高于纯 outcome reward，且能和 REINFORCE/GRPO/PPO 任意组合。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：过程奖励在 RL 里为什么一直没用起来</h3>
+<p>讲者先引用 DeepSeek-R1 论文中专门的 "unsuccessful attempts" 一节，指出 PRM 在 RL 中面临两个关键挑战：</p>
+<ol>
+<li><strong>过程奖励本身难定义</strong>。推理过程的"步骤"并不自然存在——o1/R1 的思考过程无法干净地切成 step，强制模型生成 step 1/step 2 标签或用换行符切分都不自然；且用"这一步绝对的正确与否"当奖励会带来 reward hacking：模型重复输出"1+1=2"这类正确但无用的废话，PRM 给高分、但对解题毫无帮助。</li>
+<li><strong>PRM 很难在线更新</strong>。固定不更新的 PRM 必然被 policy 过拟合、发生 reward hacking（OpenAI 2022 年的结论：reward model 给出的分数继续涨，真实 reward 却放缓甚至下降）；而在线更新的成本极高——步骤级标签获取昂贵（OpenAI 雇人标了约 80 万条），已有把 PRM 接入 PPO 的工作估算约 50 倍计算开销；DeepSeek 用 MCTS 自动估步骤正确性的方案同样有噪声、开销大。所以 DeepSeek 最终没有把 PRM 用进 R1。</li>
+</ol>
+<h3>方法/设计：隐式 PRM + PRIME 的在线闭环</h3>
+<ul>
+<li><strong>隐式 PRM（前置工作）</strong>：换一个奖励参数化——把完整回复的奖励定义为两个语言模型的 log-likelihood 之比（与 DPO 的奖励定义一致）。这个参数化带来一个关键好处：Q 值有闭式解。由 Q 值可得在 $t$ 与 $t-1$ 两个时刻 Q 的差值，这正是该步的过程奖励。于是只需要在 outcome label 上训练一个 ORM（cross-entropy 或 DPO loss 均可），推理时按公式即得每个 token 的过程奖励——不需要任何步骤级数据、不需要额外训练，计算开销也远低于 MCTS 估计：讲者口径，以约 1/40 的开销得到与 MCTS 相当的结果，以约 1/10 的开销得到更好的 PRM（在 BoN 场景验证）。</li>
+<li>这样的过程奖励奖励的是"在解题道路上更进一步"的 progress，而不是每步的绝对正确与否，且天然是逐 token 粒度、可以任意组合成想要的粒度——同时化解了定义难与切分难两个问题。</li>
+<li><strong>PRIME 算法</strong>：每步迭代收集 rollout → outcome verifier 给分 → 用这个分数更新隐式 PRM，同时 PRM 给每个 token 打过程分 → 两个分数一起更新 policy。优势估计用 REINFORCE leave-one-out（与 GRPO 思想相近：组内 reward 减去其余样本均值作 baseline）；与纯 outcome reward 的区别只在于：outcome-only 时所有 token 的优势完全一致，PRIME 则在每个 token 的优势上多加了 PRM 给出的过程项。</li>
+<li>PRM 的更新信号就是 outcome verifier 的分数，与 policy 更新并行、每步都发生——讲者强调这一步"必不可少"：不更新，算法完全拿不到收益。</li>
+</ul>
+<h3>实验/实战：数字按字幕口径</h3>
+<ul>
+<li><strong>主实验</strong>（数学 + 代码，SFT 后 RL）：加入过程奖励后收敛速度大加快，达到相似性能只用约 40% 的数据；同等步数下最终模型比纯 outcome reward 训练高约 7%（字幕口径）；都训 240 步时 PRIME 比纯 outcome 高约 4 个点；继续训到约 600 步性能仍在提升，数学性能超过 GPT-4o、Llama-3.1 70B、Qwen2.5-Max 7B（字幕口径）。</li>
+<li><strong>PRM 在线更新消融</strong>：用约几十万条数据离线训练好的 PRM，若不在线更新，分类准确率随 policy 漂移持续下跌、性能不理想；直接用 SFT 模型初始化 PRM、只在当前 policy 的 rollout 上训练的曲线，分类准确率从约 50%（随机）升到约 75%，效果最好——预先用更多数据训 PRM 反而不如它（绿线涨幅更小）。讲者的解释是只在自身 rollout 上训练的 PRM 对当前分布最熟悉，且最省（不需要收集额外数据）。</li>
+<li><strong>与任意 RL 算法组合</strong>：把过程奖励项分别加到 REINFORCE、GRPO、PPO 上，三者都有稳定提升。</li>
+<li><strong>当 reward 用还是当 value 用</strong>：一个易被忽略的关键消融——把隐式 PRM 输出当 value（作 baseline）用时，包括加 linear head 的 value model 在内，几种变种都没有收益（这与 DeepSeek、Cohere 论文中"value model 没用"的观察一致）；只有当 reward 用才 work。Q&amp;A 中讲者进一步解释差别在 return 的定义：当 reward 时，return 里包含 PRM 对整条回复的过程分总和；当 value 时则不包含——数学上只差了 PRM 总分一项，但对训练效果影响重大，讲者推测与 reward shaping 有关。</li>
+<li><strong>Zero 实验</strong>（直接从 base model 做 PRIME）：从 Qwen2.5-Max 7B base 出发涨得非常快，但约 50 步就难再涨、与 test 波动吻合；SFT 初始化的模型后期可能反超。32B base 上收益更大：只需 16 步 RL 的 test accuracy 就超过其 instruct 版本，约 100 步时还在涨、涨了 10 个点以上，与 DeepSeek 的大模型收益更高结论一致。</li>
+<li><strong>数据效率对比</strong>：最终 7B 模型数学平均约 +16.7% 绝对提升（字幕口径），AIME 2024 从 3.3% 提升到 26.7%（字幕口径）；对比 Qwen-Max 的 instruct 模型，PRIME 只用约 1/10 的 SFT 数据（约 20 万；且可能都不必要）、没有用任何额外 RM（对方用了 72B 的 RM），每条 query 的 rollout 次数也远少。代码上力扣、LiveCodeBench 也各提了约 10 个点（Q&amp;A 字幕口径）。</li>
+</ul>
+<h3>结论/观点（讲者明确判断）</h3>
+<ul>
+<li>PRIME 把 outcome label 里隐含的信用分配免费地摊到每个 token 上，是通用的插件式方法：只要有一个 outcome reward（数学校验、代码 test case 等），就能转成稠密的过程奖励；base model 或 SFT model 出发都可以，与 REINFORCE/GRPO/PPO 任意组合。数据、代码、模型全部开源。</li>
+<li>关于上限（Q&amp;A）：讲者的判断是理论上 dense reward 不改变上限——唯一的外部监督仍是 outcome label、PRM 没有引入额外监督，所以 optimal policy 不变；变化的是"能不能达到"：更快、更稳地逼近上限，在数据量受限（更难任务、更少数据）时尤其重要。</li>
+<li>讲者坦承的应用边界：目前验证集中在 coding 与数学等可验证任务上；文科理解类问题难以有标准答案、选择题又容易蒙，噪声大，这类任务可能最终还是要依赖强的 reward model 做 RL。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>过程奖励估计相对 MCTS 的开销</td>
+<td>MCTS 估计</td>
+<td>约 1/40 开销可相当；约 1/10 开销可更好</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>把 PRM 接入 PPO 的此前工作估算开销</td>
+<td>普通 RL</td>
+<td>约 50 倍计算开销</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>OpenAI 步骤级标注规模</td>
+<td>—</td>
+<td>约 80 万条人工标注</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>同等性能所需数据量</td>
+<td>纯 outcome reward</td>
+<td>只用约 40% 的数据</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>同等步数下最终模型相对提升</td>
+<td>纯 outcome reward</td>
+<td>约 7%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>240 步时相对提升</td>
+<td>纯 outcome reward</td>
+<td>高约 4 个点</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>在线更新 PRM 的分类准确率变化</td>
+<td>初始约 50%（随机）</td>
+<td>升到约 75%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Zero 设置（7B base）饱和点</td>
+<td>—</td>
+<td>约 50 步后难再涨</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>32B base 超过自身 instruct 版本所需 RL 步数</td>
+<td>—</td>
+<td>只需 16 步</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>7B 模型数学平均绝对提升</td>
+<td>SFT 模型</td>
+<td>约 16.7%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>AIME 2024 准确率</td>
+<td>3.3%</td>
+<td>26.7%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>SFT 数据量</td>
+<td>Qwen-Max 百万量级 + 72B RM</td>
+<td>约 20 万条、无额外 RM（约 1/10）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>一个 step 的构成（7B 实验）</td>
+<td>—</td>
+<td>256 prompt × 4 response = 1024 rollout，global batch 256，即 4 次梯度更新，约 15 分钟/step（8 卡，旧框架）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的直接可试的点：如果已有 outcome verifier（单测、答案匹配），可以先零成本尝试"隐式奖励参数化 + 过程分摊"这类稠密化手段，而不必先投入步骤级标注或单独训练 PRM；且消融提醒：把 PRM 输出当 value 用大概率无效，要当 reward 项明确加进 return。</li>
+<li>Infra 视角：PRM 在线更新是流水线设计的一票否决项——PRM 的训练数据必须是当前 policy 的 rollout，固定 PRM 的离线打分服务架构会系统性翻车（准确率随漂移下跌）；同时 PRM 与 policy 同步更新意味着训练编排里要预留两条更新链路的资源与调度。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>隐式 PRM 最终仍只受 outcome label 监督，"结果正确但过程错误"的高分路径（如碰巧蒙对）如何被压制？讲者的回答偏直觉（正确答卷共享的步骤模式会被自动总结出来），但 process reward 的噪声上限与对训练的影响量级未量化。</li>
+<li>PRIME 的过程分与任务难度的关系：32B 上 16 步超 instruct 很有冲击力，但这与"base 本底已强、RL 只需解锁"如何区分，talk 未给出 pass@k 式的分解证据。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们这个方法其实是非常的通用的，你只要有一个模型，不论它是 base model 还是 SFT model，你就可以直接对它用 PRIME 进行计算。」——讲者总结（字幕约 38:11–38:25）</p>
+<p>「如果我们不去对这个 PM（PRM）去进行更新呢，这个算法其实就完全不能取得任何的收益。」——讲者点明在线更新是 PRIME 的一票否决项（字幕约 26:01–26:08）</p>
+<p>「理论上它的上限可能是不变的，但是实际中加了 dense reward，它在效率、以及在数据的这种高效性上（有帮助）。」——Q&amp;A 中讲者对"dense reward 是否抬升上限"的判断（字幕约 53:34–54:21 附近，口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

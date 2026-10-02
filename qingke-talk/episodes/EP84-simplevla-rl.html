@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP084 — SimpleVLA-RL：简单可拓展的 VLA 强化学习训练</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP084 — SimpleVLA-RL：简单可拓展的 VLA 强化学习训练</h1>
+    <p class="sub">受 DeepSeek-R1 启发，讲者团队把"只给问题、只给 0/1 结果奖励"的 rule-based RL 直接搬到 VLA 上：策略就是 OpenVLA-OFT，轨迹级二… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP84-simplevla-rl.html</p>
+<p>「我们想将这种 rule-based 的强化学习引入到 VLA 中，通过简单的 0/1 奖励信号，实现高成功率、摆脱数据稀缺性、提高泛化性的效果。」——讲者（字幕 09:45–10:04）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>84</dd><dt>标题</dt><dd>SimpleVLA-RL：简单可拓展的 VLA 强化学习训练</dd><dt>BV</dt><dd>BV1dm1jBWEXJ</dd><dt>时长</dt><dd>01:01:11（3671 秒；讲授约 37 分钟 + Q&amp;A 约 24 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>李浩然（清华大学一年级博士生，清华 C3I 实验室，导师周博文教授、丁宁教授联合指导；字幕自述，实验室名识别作「C3I」）</dd><dt>相关论文</dt><dd>SimpleVLA-RL: Scaling VLA Training via Reinforcement Learning（讲者团队工作；arXiv 编号以论文页为准）</dd><dt>相关代码</dt><dd>基于 verl 二次开发（继承 HybridFlow 通信与高效训练框架，新增 VLA 训练支持与多仿真环境并行交互式生成）；π0.5（diffusion 动作头）支持开发中，talk 时代码尚未推送</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1dm1jBWEXJ/">https://www.bilibili.com/video/BV1dm1jBWEXJ/</a></dd><dt>官网预告</dt><dd>官网 EP84（链接未确认，仅记期号）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP84.txt</code>（1682 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP84，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 RoboTwin 字幕作「robot 1.0/2.0」、RDT 作「朱娟老师那边的 RDT」，均以论文与公开资料为准）。凡数值均按字幕口径，与论文版出入以论文为准。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>受 DeepSeek-R1 启发，讲者团队把"只给问题、只给 0/1 结果奖励"的 rule-based RL 直接搬到 VLA 上：策略就是 OpenVLA-OFT，轨迹级二元奖励广播到每个 action token 做组内相对优势（GRPO 系），再加三件探索设计（升温采样、动态采样过滤、调高 clip 上限）。结果是仿真是本已很高的 LIBERO 仍从 91 提到 99、RoboTwin 从约 40 提到 70，只用 2% 演示数据（每任务 1 条轨迹）加 RL 能反超全量数据 SFT（50→96）；且全程只在仿真训练、零真机数据，真机成功率仍从 17% 涨到 38.5%。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">SFT</div><div class="farrow">→</div><div class="fnode">RL</div><div class="farrow">→</div><div class="fnode">再 SFT 交替，如 RL-100</div></div>
+<h3>背景/问题：VLA 的模仿学习困在数据上</h3>
+<p>VLA 的主流范式是遥操收集数据 + SFT 模仿学习，有两个病灶（讲者举例：锅的位置因食物分量不同而偏低，SFT 训出的铲子只会在空气里挥舞）：① <strong>空间理解不足</strong>——只学到"看到这个画面就挥铲子"，没理解为什么；② <strong>泛化差</strong>——换锅的颜色、食物、背景，任务就可能完全失败。根源是模仿学习严重依赖数据多样性，而机器人数据极度稀缺：讲者对比了数据规模量级——π0 的数据比 GPT-2 少约 50 倍，GPT-2 又比 Llama-3 少约 2000 倍（字幕口径）；遥操要专业人员一对一带设备演示，难以 scale。讲者的解法不是继续降数据成本，而是换学习方式：像 R1 那样让模型自己交互、自己采数据，只给最简单的 0/1 结果奖励——RL 恰好同时治"要人遥操"和"泛化差"两个痛点。</p>
+<h3>方法/设计：简单到刻意与 R1 同构</h3>
+<p>算法流程就是 GRPO 的原样移植：</p>
+<ol>
+<li><strong>Rollout</strong>：在 GPU 上并行开 8 个仿真环境（组大小 8），同一初始状态出发，OpenVLA-OFT（Llama-2 主干 + 视觉编码器 + 动作头）按温度采样生成 action token，环境执行、状态更新，单任务最多 200 步，超时判失败。</li>
+<li><strong>奖励</strong>：轨迹成功则整条轨迹每个 action token 奖励为 1，失败全为 0——轨迹级二元奖励直接广播成 token 级奖励。</li>
+<li><strong>更新</strong>：组内算相对优势，做 GRPO 式更新。讲者强调"simple"就是刻意不引入过程奖励、不手写 reward 函数：所有任务都有成功/失败标准，省掉逐任务 reward 工程（手写 reward 单个任务不难，但多任务持续扩展时工程量不可承受）。</li>
+</ol>
+<p>三个探索导向的小设计（讲者明确点名）：</p>
+<ul>
+<li><strong>采样温度从 1.0 提到 1.6</strong> ，效果明显上升；</li>
+<li><strong>动态采样（dynamic sampling）</strong>：过滤全对/全错的无梯度组，直到收集到的都是有对有错的组；</li>
+<li><strong>调高 clip 上限</strong>（字幕口径：区间由 0.8–1.2 改到上限 1.3），鼓励给低概率动作更多提升空间。</li>
+</ul>
+<p>框架建在 verl 之上二次开发：继承其 HybridFlow 通信与训练框架，新增多仿真环境并行采样与交互式生成，从"训练+推理"变成"训练+推理+渲染"一体。训练配置口径：7B 的 OpenVLA-OFT 用 8 张 A800/A100 可训。</p>
+<h3>实验/实战：关键数字（字幕口径）</h3>
+<ul>
+<li><strong>仿真主结果</strong>：LIBERO 从 91 提到 99（基线已很高的情况下基本拉满）；RoboTwin 1.0 从 40 提到 70，2.0（按任务长度分短/中/长程）总体同样 40→70。讲者诚实标注：任务越长，仅靠结果奖励的提升幅度越低。</li>
+<li><strong>真机 sim-to-real</strong>：全程零真机数据——仿真收集 1000 条轨迹做单任务 SFT，再在 1000 个场景中做 RL；部署到松灵 Piper 双臂平台实测：SFT 模型真机成功率约 17% ，RL 后 38.5% ，超过 RDT 基线的约 23.5% （而 SFT 起点本身还不如 RDT）。另有一组未上 slide 的实验：每任务仅 20 条真机数据 SFT，效果与 1000 条仿真轨迹相当，仿真 RL 的最终效果甚至更好。</li>
+<li><strong>数据效率</strong>：LIBERO-Long 上模拟数据稀缺——每任务只用 1 条轨迹（总量 2%）做 SFT，再加 RL： 50 → 96 ，反超用全部 500 条轨迹 SFT 的效果。</li>
+<li><strong>泛化对比</strong>：留一任务设定（9 个任务训练、1 个未见任务测试）：继续 SFT 会灾难性遗忘到成功率 0，RL 则未见任务性能不降甚至略升。</li>
+<li><strong>RL 何时失败</strong>：讲者给出明确判据——<strong>上限由初始模型能力决定，不由数据量或训练时长决定</strong>。0 条轨迹的 base 模型在 RoboTwin 五个任务上成功率全为 0，RL 提升也是 0（roll 不出成功轨迹就无从学起）；100 条轨迹 SFT 的弱模型 7.3 → 25.4（+18.1），1000 条的强模型 28.2 → 50——初始越强，RL 后上限越高。</li>
+</ul>
+<h3>行为涌现：探索"意外"学到的推送策略</h3>
+<p>Case study：演示数据里"把罐子放到锅旁"从来都是先抓起再移动，但 RL 训练中模型偶尔没抓准、把罐子碰着推了过去，任务照样完成、奖励同为 1，于是"推"这个演示数据之外的策略被学了下来。讲者强调机制不黑箱：温度采样产生多样轨迹 + 二元奖励不区分完成方式 = 探索能发现演示外解法。但也有边界：SFT 数据越多、模型越"记住"标准动作，探索性越低、越不涌现；且当前 base（OpenVLA-OFT）能力弱，只出现"推"这类低级泛化，更高级的涌现要等更强的 base model。</p>
+<h3>结论/观点（区分事实与判断）</h3>
+<ul>
+<li>事实：上述成功率变化、数据效率与泛化对比均为字幕口径的实验陈述。</li>
+<li>判断（讲者立场）：① 仿真中大规模 RL 再迁移真机是可行路径——真机 RL 的真瓶颈是采样效率（并行 8 个环境只要多开进程，真机并行 100 台机械臂不现实）；② RL 不会无限训下去：持续 online RL 会收敛在约 60%–70%，瓶颈不在"某些 seed 永远采不到成功"（实测几乎所有 seed 都采出过成功 case），更像是模型容量与轨迹质量问题，"某种程度上仍是黑箱"；③ 过程奖励不是必需，结果奖励"优化起来其实还好"。</li>
+</ul>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>Diffusion 动作头怎么做 RL</strong>：论文版没做，但团队已在对 π0.5（flow matching 动作头）做：难点是 ODE 过程除初始噪声外无随机性、log-prob 是常数没有梯度；解法照 Flow-GRPO，把 ODE 改成 SDE、每步加高斯噪声， log-prob 即该正态密度，均值是模型输出的速度场。talk 时代码已写完、实验在跑，尚未推送，之后会更新到框架。</li>
+<li><strong>交互式/迭代 RL</strong>（SFT→RL→再 SFT 交替，如 RL-100）：可以用且有持续提升价值；逆强化学习（IRL）在 VLA 领域目前没人做，但讲者认为值得试（反推出的稠密过程奖励正对长程任务的胃口）。</li>
+<li><strong>温度调大不会格式崩坏</strong>：VLA 只生成 256 个 action token 中的采样，格式被天然锁死；动作不合理只会换来 0 奖励被压低概率。</li>
+<li><strong>同步 rollout 的等待成本</strong>：同步训练下先完成的 episode 要等未完成的；但任务步数上限 200、多数 140–160 步完成，等待不久。</li>
+<li><strong>效率瓶颈</strong>：rollout 的仿真渲染——A100 上 GPU 光追/渲染效率不如 4090，大部分时间花在渲染而非训练。</li>
+<li><strong>没有机械臂能不能发论文</strong>：纯仿真可发 ICLR/ICML 类会议；机器人浓度高的会议（如 RSS 一类）通常要求真机实验。</li>
+<li><strong>同步 vs 异步框架的计划</strong>：后续会补 PPO、离线 RL 等算法支持。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>机器人 vs 文本数据规模</td>
+<td>π0 数据量 vs GPT-2</td>
+<td>约差 50 倍（GPT-2 vs Llama-3 约 2000 倍）</td>
+<td>字幕（背景节）</td>
+</tr>
+<tr>
+<td>LIBERO 成功率</td>
+<td>SFT 约 91</td>
+<td>99</td>
+<td>字幕（仿真结果）</td>
+</tr>
+<tr>
+<td>RoboTwin 1.0 / 2.0 成功率</td>
+<td>约 40</td>
+<td>约 70</td>
+<td>字幕（仿真结果）</td>
+</tr>
+<tr>
+<td>真机成功率（零真机数据训练）</td>
+<td>SFT 约 17%（RDT 基线约 23.5%）</td>
+<td>RL 后 38.5%</td>
+<td>字幕（真机结果）</td>
+</tr>
+<tr>
+<td>数据效率（每任务 1 条轨迹，2% 数据）</td>
+<td>SFT 约 50</td>
+<td>SFT+RL 96（反超全量 SFT）</td>
+<td>字幕（分析实验）</td>
+</tr>
+<tr>
+<td>RL 上限 vs 初始能力</td>
+<td>100 条轨迹 SFT 7.3；1000 条 28.2</td>
+<td>RL 后 25.4；50</td>
+<td>字幕（分析实验）</td>
+</tr>
+<tr>
+<td>持续 online RL 收敛点</td>
+<td>起点约 20% 的任务</td>
+<td>约 60%–70% 封顶，不到 100%</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>探索设计</td>
+<td>温度 1.0；clip 0.8–1.2</td>
+<td>温度 1.6；clip 上限 1.3</td>
+<td>字幕（方法节）</td>
+</tr>
+<tr>
+<td>训练配置</td>
+<td>OpenVLA-OFT 7B</td>
+<td>8 张 A800/A100；组大小 8；单任务上限 200 步</td>
+<td>字幕（方法/Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>"初始能力决定 RL 上限"值得当体检项</strong>：开 RL 前先测 base 在目标任务的非零成功率分布；roll 不出成功轨迹的任务，加数据量、加训练时长都没用，先补 SFT 把能力垫到能偶尔成功。</li>
+<li><strong>二元轨迹奖励广播到 token 级 + 组内相对优势</strong>是长程稀疏奖励下最省工程的基线：先证明结果奖励能学动，再考虑过程奖励的增量价值——讲者的长程退化曲线（任务越长、结果奖励提升越低）正好给出"何时该上过程奖励"的经验判据。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：具身 RL 的 rollout 瓶颈不在训练而在<strong>渲染吞吐</strong>，且同步训练的等待被任务步数上限天然收敛——对照 LLM 侧的长尾 straggler 问题，具身侧用"步数上限 + 同步屏障"的简单组合就把问题压住了，代价是截断长任务的学习信号。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>π0.5 diffusion 动作头的 RL（ODE→SDE）talk 时尚在跑实验、代码未推送；其效果与稳定性待论文/代码更新后核对。</li>
+<li>"持续 RL 收敛在 60%–70%"的瓶颈归因（容量？轨迹质量？）讲者自认黑箱；与 EP62 ProRL"长程 RL 持续涨"的结论对照，差异可能来自具身任务的成功判据更硬、探索空间更窄，值得专门对照。</li>
+<li>字幕口径的 RoboTwin 40→70 与 LIBERO 91→99 需与论文版核对（尤其 2.0 的长程子集数字未在字幕中单独给出）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们完全可以在仿真中去大规模 scaling 这个强化学习，然后把它迁移到真机上。」——讲者论 sim-to-real 路径（字幕 20:47–21:59）</p>
+<p>「（RL 的）效果上限不是由 seed 的多少、也不是由训练时间决定的，而是由模型初始能力决定的。」——讲者论 RL 何时失败（字幕 30:10–30:18）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
