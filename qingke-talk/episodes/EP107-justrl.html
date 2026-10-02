@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP107 — JustRL: 用"最笨"的 RL 方法刷新 1.5B 推理模型新基线</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP107 — JustRL: 用"最笨"的 RL 方法刷新 1.5B 推理模型新基线</h1>
+    <p class="sub">JustRL 主张做减法：从 PPO 的四模型一路减到只剩 policy 的最简 GRPO，只保留 clip-higher 一个熵保护技巧、单阶段训练、固定超参，在两个 1.5… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP107-justrl.html</p>
+<p>「一个东西达成了完美，并不是说它没有更多东西可以加了，而是没有什么东西是可以拿走的。」——讲者开场引用的动机，字幕口径</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP107</dd><dt>标题</dt><dd>JustRL: 用"最笨"的 RL 方法刷新 1.5B 推理模型新基线</dd><dt>BV</dt><dd>BV155fZBKE64</dd><dt>时长</dt><dd>01:05:22（总时长 3922 秒；讲授约 38 分钟 + Q&amp;A 约 27 分钟，字幕口径）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>何炳祥（清华大学计算机系 2024 级直博生，导师刘志远；字幕开场自述：<code>[00:13] 我是何炳祥</code>、<code>[00:17] 2024级直博</code>（字幕作「直播」）、<code>[00:18] 我导师是刘志远教授</code>）</dd><dt>相关论文</dt><dd>JustRL（讲授中称模型与代码已开源；论文编号以论文页为准）</dd><dt>相关代码</dt><dd>已开源（讲者称训练脚本拟近期补开源，与 verl 基本无区别，字幕口径）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV155fZBKE64/">https://www.bilibili.com/video/BV155fZBKE64/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP107.txt</code>（1460 条，末条 3919.72 秒）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（已存档）提炼，来源标注「字幕」。字幕为中文讲授的机器识别文本，专名误差较多，如 verl 在字幕中作「word」、DAPO 作「double」、GRPO 作「GGRPO/IO」等，均按上下文还原；关键数字均为讲授口径，未与论文逐项核对，凡不确定处已注明。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>JustRL 主张做减法：从 PPO 的四模型一路减到只剩 policy 的最简 GRPO，只保留 clip-higher 一个熵保护技巧、单阶段训练、固定超参，在两个 1.5B 基座上用约一半算力做到了与多阶段、重技巧方法 comparable 甚至局部领先的效果；讲者真正的论点不是「简单必然更好」，而是每个新 trick 都新增一个可调参数、即新增一个不稳定来源，所以应先立一个足够强的最简 baseline，再谈加法。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景：trick 在堆叠，验证成本在爆炸</h3>
+<p>讲者先铺背景：2025 年是 reasoning 之年，RL 的「large scale」主要 scale 在 training step 上，但训练极贵——即便只剩一个 policy 模型，1.5B 模型在他们的设置下（32 张 80GB 卡、batch size 64、每题 rollout ， $N = 8$ ，、上下文 16K）每步仍需约 5 分钟，字幕口径。</p>
+<p>与此同时 trick 不断堆叠：长度控制、熵控制、难度采样、KL 及其 reset、多阶段训练各成一类，且每个 trick 内部还继续分化（如长度控制就有给零分、filter、显式 penalty 等变体）。相关工作（如 trick-or-trap 类消融研究、「计算量的艺术」类 scaling 研究，后者据称用了至少 40 万 GPU hours）说明：这些技巧在原场景有效，但换基座、换数据集、换超参就可能失效。讲者的核心判断是：<strong>每个新 trick 至少新增一个可调参数，可调参数就是潜在的不稳定来源</strong>，而普通研究者没有算力把每个 trick 都验证一遍——他们实测一个 trick 的消融要用 32 张卡跑约两周、且分歧往往在约 2000 步后才出现（字幕口径）。</p>
+<p>由此引出问题设定：能否先建一个足够强、足够简单的 baseline，再在其上检验每个 trick 到底解决了什么问题。</p>
+<h3>方法：减到只剩一个 policy + clip-higher</h3>
+<p>简化路径是逐步删模型：PPO 有 policy、reference、reward、value 四个模型；GRPO 删掉 value；再删 reference（即不要 KL 正则）、把 reward model 换成可验证奖励后，只剩一个 policy 模型占显存。</p>
+<p>最终 recipe（讲者强调甚至称不上 recipe）：</p>
+<ul>
+<li>单阶段训练，全程不分 stage；</li>
+<li>唯一的熵保护是 clip-higher，参数 0.28 直接沿用、未调（讲者理由：长程 RL 常伴熵坍塌，需要保留探索能力）；</li>
+<li>不做 dynamic sampling、不调温度/KL/长度，无显式长度惩罚（超长样本因 verifier 取不到答案自然得零分，构成隐式惩罚）；</li>
+<li>固定超参；框架用 verl，数据用 DAPO-Math 17K 重复 100 遍（实际未跑完），只需 ground truth 答案，不需要专家 CoT 轨迹；</li>
+<li>两个基座：DeepSeek-R1-Distill-Qwen-1.5B（较弱）与 OpenMath-Nemotron-1.5B（较强，字幕音译），均为已做过 SFT 的模型。</li>
+</ul>
+<p>评测上讲者刻意求全：9 个数学评测集，报告 pass@1；小题量集（如 AIME）每题采样 32 次取平均，大题量集取 4 次；verifier 用 rule-based，并在 rule 判错时加 model-based verifier 做二次确认以减少假阳性（仅评测用，训练不用）。</p>
+<h3>实验：comparable 的效果，一半的算力</h3>
+<ul>
+<li>较弱基座：4380 步 checkpoint，9 个基准平均 54.87 分（字幕口径），与当时最强方法 comparable；在 6 个 benchmark 上初步领先。对比 ProRL v2 的九阶段训练与动态超参，JustRL 只用单阶段，且算力约为其一半（ProRL 主要把算力花在把 rollout $N$ 拉到 512 上）。</li>
+<li>较强基座：3440 步 checkpoint，平均 64.32 分（字幕口径），轻微超过 QUEST 类方法（对方用专家 CoT 前缀做 hint 构造课程学习），在 5 个 benchmark 上领先，算力同样约为一半。</li>
+<li>两个 checkpoint 步数不同，是为了让总 token budget comparable（把 dynamic sampling 的约 50% filter ratio 折算进去后，开 dynamic sampling 的 token 生成量约翻倍，字幕口径）。</li>
+</ul>
+<p>训练动态（字幕口径）：仅 clip-higher 就使熵保持在较高位置不坍塌（讲者提醒此结论对 MoE 等更敏感场景不保证）；reward 正常爬升至约 0.4 后进入平台，继续训到 5000 步无明显再涨；平均长度从初始约 8K 自行降到 4–5K，无需显式长度惩罚，与「doing less penalty」类工作的结论相近。</p>
+<p>一个评测坑：训练曲线上的 validation 曾报到 58 分（AIME），离线复测只有约 52 分、复现不出 58/73 的曲线分数，讲者怀疑是 verl 0.2.0 在线评测时多 benchmark 互相影响，最终以离线评测为准报告。</p>
+<h3>消融：两个「合理改进」都让效果变差</h3>
+<p>讲者只做了两个消融（成本所限）：</p>
+<ol>
+<li>在超长零分基础上加显式 overlong penalty（对接近末尾的 token 加线性惩罚）；</li>
+<li>再换上更鲁棒的 verifier。</li>
+</ol>
+<p>两者都使效果变差：加 penalty 后平台期提前，加鲁棒 verifier 后前期提分困难。且分歧在接近 2000 步才出现——讲者由此强调，消融跑不够步数会得出不可靠结论。讲者也承认 penalty 的窗口（2K 还是 1K）没调过，不排除是参数问题，但「验证一个参数就要再跑约两周」正是问题本身。</p>
+<p>讲者对局限很坦白：结论只在两个 1.5B 基座、一个数学场景上成立；换 coding、换数据集、换基座未必成立；简单也不意味着容易改进，看似合理的改进可能反而变糟，而原因（参数？数据？verifier 设计？）尚不清楚。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>基座弱还适用吗</strong>：先验弱的 base 模型可能本就不需要熵正则（初始熵已足够高，强行探索易崩）；本工作的基座是大规模 SFT 后模型，初始熵约 0.6–0.7，所以需要防熵下降。同一组参数照搬大概率不一样，但「按基座熵水平决定要不要加熵保护」这一思想可迁移。</li>
+<li><strong>超参怎么选的</strong>：直接参考 verl 已有脚本和团队此前工作的 setting，基本照抄未调。</li>
+<li><strong>为什么 32 卡 all-in 而不拆分跑多个实验</strong>：目标不是挑最优 setting——挑不完，且挑出的最优换场景就失效；学术界现有算力也支撑不起全面搜索，所以一路跑到底。</li>
+<li><strong>step 定义</strong>：每步 256 个 query、 $N = 8$ ，、minibatch 64，即 4 次 off-policy 更新；被问到 512 query/16 次更新时，讲者判断 off-policy 程度越大效果未必越好。</li>
+<li><strong>后续方向</strong>：在 scalable RL 上继续，关注稠密/process reward 如何可扩展地获得、以及无监督奖励（讲者判断不能只靠模型内在奖励，天花板有限，需要外部环境反馈）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>训练硬件</td>
+<td>32 张 80GB 显卡，单模型 all-in</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>单步耗时</td>
+<td>约 5 分钟（batch 64、 $N = 8$ ，、16K 上下文）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>每个基座训练时长</td>
+<td>至少 15 天（32 卡）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>clip-higher 参数</td>
+<td>0.28（沿用未调）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>训练数据</td>
+<td>DAPO-Math 17K 重复 100 遍，未跑完</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>较弱基座结果</td>
+<td>4380 步，9 基准平均 54.87</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>较强基座结果</td>
+<td>3440 步，9 基准平均 64.32</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>相对算力</td>
+<td>约为 ProRL v2 / QUEST 类方法的 1/2</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>reward 平台</td>
+<td>约 0.4，训至 5000 步无明显再涨</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>平均输出长度</td>
+<td>初始约 8K → 4–5K（无显式惩罚）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>基座初始熵</td>
+<td>约 0.6–0.7</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>消融成本</td>
+<td>单个消融 32 卡约 1–2 周，分歧约 2000 步后出现</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>在线/离线评测差</td>
+<td>训练曲线 58 分 vs 离线约 52 分（AIME）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>先立最简 baseline 再加 trick：把每个新技巧当作「新增一个可调参数 = 新增一个不稳定来源」，要求它在最简 baseline 上证明增量价值，而不是在已堆满技巧的系统上比 SOTA。</li>
+<li>消融要跑够步数：本期两个消融的分歧都在约 2000 步后才出现，短跑消融的结论不可信；排消融计划时按「周」而不是「百步」估算。</li>
+<li>熵保护先行：在 SFT 后模型上做长程 RL，仅 clip-higher（0.28，未调）就足以防熵坍塌，可作为加更复杂熵控制前的默认项。</li>
+<li>评测纪律：在线 validation 与离线复测可能不一致（本期差出约 6 分），报告数字以统一脚本的离线复测为准；verifier 的假阳性要用二次确认压，但只放评测、别放训练（慢）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>「简单为什么有效」讲者明确说不清楚：是数据、基座还是 verifier 设计在起作用，未做归因；这也是他自认的最大局限。</li>
+<li>结论仅覆盖 1.5B + 数学 + 两个 SFT 后基座，向 coding、更弱基座、MoE 的迁移性未验证。</li>
+<li>overlong penalty 的窗口参数未调，不能排除「penalty 本身有效、只是参数不对」。</li>
+<li>想复现的话可查 JustRL 开源模型与代码（讲者称训练脚本拟补开源）；论文中的完整超参表与本纪要的字幕口径可交叉核对。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「并不是说他没有更多东西可以加了，而是说还有什么东西是不能拿走的。」——讲者开场谈「完美」的定义（字幕 <code>[00:44]-[00:49]</code> 口径）</p>
+<p>「可能简单就还是足够的。」——讲者在结尾对全场工作的收束（字幕 <code>[65:12]</code> 附近口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP104 — The Prism Hypothesis 视觉统一表征假说：从语义到像素的统一自编码（UAE）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP104 — The Prism Hypothesis 视觉统一表征假说：从语义到像素的统一自编码（UAE）</h1>
+    <p class="sub">讲者提出「棱镜假说」：像自然光过棱镜分解到各频段一样，把各模态统一到一个频域（非时间线性）表征里——低频承载语义理解、高频承载像素细节；据此构建以 DINOv2 初始化、把特征… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP104-prism-hypothesis-uae.html</p>
+<p>「深沉（生成）和理解是可以统一在一起的，偏向全局和偏向细节的特征是可以在频率的表征里被完美统一在一起的。」——讲者对 Prism 假说验证结论的判词（字幕识别「深沉」即「生成」）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP104（官网预告期号；见下方编号说明）</dd><dt>标题</dt><dd>The Prism Hypothesis 视觉统一表征假说：从语义到像素的统一自编码（UAE）</dd><dt>BV</dt><dd>BV1X1zjBPErQ</dd><dt>时长</dt><dd>00:33:46（字幕末条 2023.2 秒；讲授约 16 分钟 + Q&amp;A 约 17 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>范伟辰（字幕自述；主持人称「范伟陈」为识别差异，以自述为准；南洋理工大学 MMLab，刘子伟老师博士生）</dd><dt>相关论文</dt><dd>The Prism Hypothesis / UAE（讲授称已开源、近期有较大持续更新；讲授未给出编号与版本，以论文原文为准）；后续版本 UAE-plus（字幕作「U1plus」）</dd><dt>相关代码</dt><dd>讲授称工作已在讲授页面链接开源（字幕口径）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1X1zjBPErQ/">https://www.bilibili.com/video/BV1X1zjBPErQ/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/UAE">https://qingkeai.online/blog/UAE</a> （2026-01-20）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP104.txt</code>（675 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>🔢 编号说明：本仓库台账中该 BV 的旧标题为 B104《WARM/上海AI Lab：预训练与后训练对感知的影响，Diffusion VLA》，与视频实际内容（The Prism Hypothesis / UAE）完全不符；官网 EP104 预告标题与视频内容一致，故按官网编号 EP104 落稿，台账旧标题视为过时残留。主持人仅出现在 Q&amp;A 衔接、未报期号，编号依据为官网预告映射 + 内容互证。</p>
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（已存档）清洗提炼。字幕识别误差较多（如「Prism」作「prison」、「UAE」作「UVE/UEE」等，DINOv2、CLIP、SD-VAE、RAE 等专名亦多处误识），均按上下文还原；个别专名以论文与公开资料为准。凡讲授口径与论文版可能不同者，标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者提出「棱镜假说」：像自然光过棱镜分解到各频段一样，把各模态统一到一个频域（非时间线性）表征里——低频承载语义理解、高频承载像素细节；据此构建以 DINOv2 初始化、把特征分解到 N 个频段再 IFFT 回来的统一自编码器 UAE，在只用 ImageNet 训练的条件下同时保住理解（linear probing 不掉）与重建/生成能力，并以 UAE-plus 把 latent 从「扩大 N 倍」改成固定 256 个 token 的频段分配解决效率问题。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>动机：时间线性表征不适合图像</h3>
+<p>讲授从电影《降临》的外星语言切入（字幕口径）：人类语言是时间线性的（须按固定顺序阅读、天然带前后因果），适合自然语言；而象形文字式的非时间线性表征天然具全局性与对称性、可并行阅读，更适合图像、视频这类关系错综复杂的模态。当前视觉语言模型长在语言模型之上，表征被迫是时间线性的，处理图像天然低效。讲者的换思路是：把所有模态统一到一个非时间线性的频域表征（unified latent spectrum），把它当作一种「为计算机多线程本质设计的新语言」——模型不必借助自然语言也能学习世界知识。</p>
+<p><strong>棱镜假说（The Prism Hypothesis）</strong>由此得名：各种模态像自然光透过棱镜一样，被分解到不同频段上，在同一频域空间里统一学习。实现路线有两条：其一是构建统一自编码器、在统一空间里学习（本期工作）；其二是把各模态不经预编码器直接送入模型、让它隐式学出非时间线性表征——讲者顺带介绍同组 NEO 是后一路线（原生多模态、直接处理原始图像输入）的第一个工作（字幕口径）。</p>
+<h3>假说验证：低频管语义、高频管细节</h3>
+<p>构建模型前先做两个频域分析实验（字幕口径）：</p>
+<ol>
+<li><strong>频段能量分布</strong>：把 DINOv2、CLIP（偏理解）与 SD-VAE（偏重建）三种预训练编码器的特征分解到各频段看能量分布——偏理解的编码器能量主要集中在低频，偏重建的编码器中高频能量更均匀。讲者据此把两类编码器看作「抽象语义特征」与「复杂像素特征」的代表，说明两种细粒度的表征在频域上可以既统一又可区分。</li>
+<li><strong>滤波-检索实验</strong>：对 DINOv2 特征加滤波器后做 text-to-image retrieval——cutoff 在 0 到 0.2 的低频区间时精度变化非常大；过了 0.4 的中高频区间，滤波对整体精度几乎没影响。</li>
+</ol>
+<p>结论：<strong>低频偏向理解与整体语义，中高频偏向像素细节、决定生成/重建类下游任务</strong>。这条分工是后面整个模型设计的支点。</p>
+<h3>UAE：统一自编码器怎么搭</h3>
+<p>结构（字幕口径）：以 DINOv2 初始化 encoder，把 DINO 特征分解到 N 个频段、再做 IFFT 回到时域；只在最低频段加 semantic loss 约束，保证低频的语义能力不丢失（理由是偏理解编码器的有用信息集中在低频）。维度代价：单个 DINO 特征是 $768 \times 16 \times 16$ ，UAE 的 latent 变成 $768 \times 16 \times 16 \times N$ ，扩大 N 倍——讲者当场承认这会给下游生成任务带来额外开销，并预告在下一版本已解决。</p>
+<p>实验（字幕口径，均未口播具体数值）：</p>
+<ul>
+<li><strong>重建</strong>：在 ImageNet（in-domain）与 COCO（out-of-domain）上对比同样以 DINOv2 初始化的基线（如 RAE 一系；字幕专名识别不稳），UAE 有非常大/非常明显的提升；与使用更大 DINOv2-L 的 UniFlow 类工作相比，UAE 另训了一个同 encoder 初始化的版本、精度略好于对方。可视化上，UAE 对文字细节（标志牌、书页文本）、人脸、浪花与食物细节的保持明显优于 RAE、SD-VAE 类传统 VAE。</li>
+<li><strong>生成</strong>：用预训练好的 UAE 训一个下游 DiT 生成模型，gFID 比 RAE 略差、Inception Score 超过 RAE（字幕口径）；当前主要弊端仍是 latent 扩大 N 倍带来的训练效率问题。</li>
+<li><strong>语义保持</strong>：在 ImageNet 上做 linear probing——RAE 因冻结 DINO encoder，其 probing 精度即原始 DINO 精度；UAE 经过自编码训练后 probing 精度不丢失，而一些其他模型掉得明显。这被讲者用作「低频保语义」的直接证据。</li>
+</ul>
+<p>消融（字幕口径）：比较原始 DINO 精度、只用最低频段做 linear probing、所有频段 concat 做 linear probing，三者总体无明显差别，甚至只用最低频段（band 0）的精度比全频段 concat 还高——说明分类决定性信息基本都在最低频段里。t-SNE 可视化显示 UAE 的 latent 比原始 DINO 特征更可分。</p>
+<h3>UAE-plus：把「扩大 N 倍」改掉</h3>
+<p>原始 UAE 的构造是：对每个频段生成 mask 抠出对应频段、每个频段 token 再 IFFT 回时域，于是有 N 个频段就得到 N 份时域特征，latent 必然扩大 N 倍，低效。UAE-plus（字幕作「U1plus」）改成不再回时域、直接保留频域设计：每个 token 对应一个频段，固定总长 256 个 token（即 $16 \times 16$ 的空间展开，字幕口径），N 个频段平均分配到这 256 个 token 上，下游任务不再增加额外开销。</p>
+<p>验证结果出乎意料（字幕口径）：UAE-plus 只用 DINOv2-B（Base）就已远远超过用 DINOv2-L 的 UAE，且 in-domain 与 out-of-domain 上提升都非常明显。</p>
+<p>频段切分的细节（Q&amp;A，字幕口径）：</p>
+<ul>
+<li>UAE-plus 的频段分配不是严格均匀的。严格均匀时很多高频频段根本用不到（大多数自然图像并不占满每个频段），浪费参数；他们先统计大量图像的频谱分布再调整，高频部分设计得小一些，具体方案会在后续文章更新。</li>
+<li>低频/高频边界在 UAE 一版里是经验定的：用 text-to-image retrieval 实验中精度陡降的转折点（约 0.2）作为低频分界，semantic loss 就加在这段上；中频与高频没有严格切分。UAE-plus 不再硬分语义/重建的约束范围，改成整体的 soft 方式（字幕口径「soft bus 的 boss」应为 soft loss 类表述，按上下文还原）。</li>
+<li>频段划多划少对重建影响不大，主要影响下游：频段画得越细，生成模型越容易学（可以先建模低频、再建模高频，收敛更快）。</li>
+</ul>
+<h3>定位与后续计划</h3>
+<p>讲者对这项工作的总结定位是：已经证明生成与理解可以统一在同一个频域表征里。后续 UAE-plus 想做的是真正的「latent 语言模型」：加入文本、音频、视频等更多模态，基于这套 token 设计做 next-token prediction，把现在 VLM 做的事情在这个 latent space 里从 scratch 重做一遍（字幕口径）。Q&amp;A 补充：动态分辨率会考虑（当前为与 RAE 类工作可比固定在 256 与 512 两个分辨率）；把 UAE 当多模态大模型骨架、把 VLA 的 action 也统一进来是明确希望——action 序列本质上对应视频/3D 序列、同样有频谱特性，用自然语言转述 action 才丢掉了这个特性（字幕口径）。</p>
+<p>其他 Q&amp;A 判断（字幕口径）：</p>
+<ul>
+<li>换 encoder（SigLIP 等）：目前还没做，后面会考虑；与对齐程度更高的 encoder 组合（如 InternViT 一系）精度最高，但为了直接对齐 RAE 的比较口径先用了 DINOv2。</li>
+<li>推理速度/显存：重建任务上与 RAE 相当（分频段与合成占的开销不大）；但这一代模型的 latent 普遍至少 $768 \times 256$ 量级，比 SD-VAE 大很多，下游训练显存更高——「这是大家都有的一个问题」。</li>
+<li>边缘情况稳定性：大量文本、精细人脸等 out-of-domain 场景（训练只用 ImageNet、无 OCR 数据）表现更稳，讲者认为这从一个角度证明 UAE 输出更稳定。</li>
+<li>OCR：文本重建确实比 SD-VAE 强、泛化性也好；但「OCR 本身就是一种把文字写进图片的直接统一方式，和象形文字类似」，UAE 路线是想在 latent space 里做、而不是这么直接地做（字幕口径）。</li>
+<li>数据压缩：观众问 UAE 作数据压缩模型，讲者回应这可能是下一步任务之一，欢迎社区尝试（字幕口径）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>滤波-检索实验低频敏感区</td>
+<td>cutoff 0–0.2</td>
+<td>精度变化非常大（低频决定语义检索）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>滤波-检索实验高频区</td>
+<td>cutoff &gt; 0.4</td>
+<td>滤波对整体精度几乎无影响</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>DINO 特征维度</td>
+<td>—</td>
+<td>$768 \times 16 \times 16$</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>UAE latent 维度</td>
+<td>DINO 特征</td>
+<td>扩大 N 倍（N 为频段数）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>UAE-plus token 总长</td>
+<td>—</td>
+<td>固定 256 个 token，频段平均分配</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Linear probing（只用 band 0）</td>
+<td>全频段 concat</td>
+<td>精度不低于、甚至略高于全频段</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>生成验证（DiT 下游）</td>
+<td>RAE</td>
+<td>gFID 略差、Inception Score 超过（数值未口播）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>UAE-plus vs UAE</td>
+<td>DINOv2-B vs DINOv2-L</td>
+<td>更小 encoder 即远远超过（数值未口播）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>实验分辨率</td>
+<td>—</td>
+<td>固定 256 与 512 两档</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+<p>注：讲授对重建/生成指标只给结论性口径（「非常大的提升」「略好于」），未口播具体数值，表中不补论文数字。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「低频语义、高频细节」的频段分工可以直接迁移到多模态 infra 的 token 预算分配：压缩/缓存/渐进传输时优先保低频 token，高频按下游任务（重建、OCR、细节问答）按需加载——UAE-plus 的「按数据频谱统计非均匀分配频段」就是这件事在表征层的做法，和 KV cache 的非均匀预算是同一思路。</li>
+<li>表征层消融纪律值得借：先用频段能量分布 + 滤波-检索这类零训练实验把假说钉死，再搭模型；且消融做到了「只用 band 0 vs 全频段 concat」这种能证伪自己的对照（结果是 band 0 不更差，分工假说才算成立）。</li>
+<li>Infra 视角：统一表征路线的成本不在推理 FLOPs（与 RAE 相当），而在 latent 体积（ $768 \times 256$ 量级起步）带来的下游训练显存——评估统一理解/生成架构时，应把「latent 尺寸 × 下游训练规模」作为一等成本项，而不是只看单次推理速度。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>低频与中高频的边界目前是经验转折点（约 0.2），讲者承认 UAE-plus 改用 soft 方式后尚无严格数学定义；频谱投影的严格数学描述是他们下一个版本关注的问题，值得追论文更新。</li>
+<li>讲授所有重建/生成对比都只有结论口径、无具体数值，且训练仅 ImageNet 规模；UAE-plus「更小 encoder 大幅超过」的量级与在文本到图像生成（T2I）规模上的表现需要查论文核对。</li>
+<li>讲者自己指出当前还不是「真正的文本」进入统一表征：文本、音频、视频如何分配频段、action 这类无显频谱特性的序列怎么并进来，都只是方向性表述，是这条路线最大的未证部分。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「如果我们人是单线程的话，但是计算机它是多线程的……它其实也是可以理解自然界各种现象的，因此模型是可以不借助自然语言来学习知识的。」——讲授提出棱镜假说前的动机陈述（字幕 [03:55]–[04:15]，按干净口径转写）</p>
+<p>「生成和理解是可以统一在一起的，偏向全局和偏向细节的特征，是可以在我们提到的这种频率的表征里边被完美统一在一起的。」——讲者对 UAE 验证结论的总结（字幕 [14:47]–[15:05]，识别词「深沉」按上下文还原为「生成」）</p>
+<p>「OCR 直接把文字写在了图片里边，这其实是和象形文字很类似的感觉……我们的做法更多是想弄到一个 latent space 来做，而不是这么直接的来做。」——Q&amp;A 谈 OCR 与统一表征两条路线的关系（字幕 [32:09]–[32:56]，按干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

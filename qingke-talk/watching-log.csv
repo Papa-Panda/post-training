@@ -101,18 +101,18 @@ No,Title,BV,Duration,Date,Status,Notes
 100,2025 “青稞” AI 嘉年华（第100期特辑）,,,2025-12-28,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
 101,MiniMax M2.1：Agent 后训练经验与认知,BV1H8iCBEEgT,,2026-01-06,要点已提炼,episodes/EP101-minimax-m21-agent-posttraining.md
 102,从 TRPO 到 SAPO：大模型 RL 算法演进,,,2026-01-10,要点已提炼,episodes/EP102-trpo-sapo.md
-103,Decoupled DMD & DMDR: 在扩散模型步数蒸馏的实践及 Z-Image-Turbo 应用,,,2026-01-13,todo,official-only（官网有预告，B站合集无对应视频）
-104,The Prism Hypothesis 视觉统一表征假说：从语义到像素的统一自编码（UAE）,,,2026-01-20,todo,official-only（官网有预告，B站合集无对应视频）
+103,Decoupled DMD & DMDR: 在扩散模型步数蒸馏的实践及 Z-Image-Turbo 应用,BV1ZzrHB8ESf,00:44:22,2026-01-13,要点已提炼,episodes/EP103-decoupled-dmd-dmdr.md
+104,The Prism Hypothesis 视觉统一表征假说：从语义到像素的统一自编码（UAE）,BV1X1zjBPErQ,00:33:46,2026-01-20,要点已提炼,episodes/EP104-prism-hypothesis-uae.md
 105,InternVLA-A1，虚实贯通：理解、生成、执行一体化的具身操作大模型,,,2026-01-27,todo,official-only（官网有预告，B站合集无对应视频）
 106,"GDPO：解决 GRPO 在多奖励 RL 训练中的""优势崩溃""问题",,,2026-01-30,todo,official-only（官网有预告，B站合集无对应视频）；原备注：conflict: B站标题为 Intern-S1，与官网枚举 GDPO 冲突，待终裁（官网标题保留）
-107,"JustRL: 用""最笨""的 RL 方法刷新 1.5B 推理模型新基线",,,2026-02-03,todo,official-only（官网有预告，B站合集无对应视频）
+107,"JustRL: 用""最笨""的 RL 方法刷新 1.5B 推理模型新基线",BV155fZBKE64,01:05:22,2026-02-03,要点已提炼,episodes/EP107-justrl.md
 108,BOAD：引入多臂老虎机，自动化搜索层级结构的多 Agent 架构设计,,,2026-02-28,todo,official-only（官网有预告，B站合集无对应视频）
-109,线性轨迹：揭示 LLM 强化学习中的高效捷径,,,2026-03-03,todo,official-only（官网有预告，B站合集无对应视频）
-110,Dr. Kernel：突破大模型 GPU Kernel 生成的多轮 RL 训练瓶颈,,,2026-03-07,todo,official-only（官网有预告，B站合集无对应视频）
+109,线性轨迹：揭示 LLM 强化学习中的高效捷径,BV1sdPAzjEbX,01:00:21,2026-03-03,要点已提炼,episodes/EP109-rlvr-linearity.md
+110,Dr. Kernel：突破大模型 GPU Kernel 生成的多轮 RL 训练瓶颈,BV1WWNwzVERN,01:09:08,2026-03-07,要点已提炼,episodes/EP110-dr-kernel.md
 111,RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统,BV1W6c6z3E1F,00:51:10,2026-03-10,要点已提炼,episodes/EP111-rlinf-user.md
 112,"EditReward：当 AI 学会""审美""，可控多模态生成的下一代范式",BV11zwxzzEyS,00:46:33,2026-03-14,要点已提炼,episodes/EP112-editreward.md
 113,面向对象的 Agent Infra 新范式：有状态运行时管理的设计与工程实践（CaveAgent）,,,2026-03-17,todo,official-only（官网有预告，B站合集无对应视频）
-114,从 VGGT 到 PAGE-4D：动态世界中的 3D 感知统一框架,,,2026-03-20,todo,official-only（官网有预告，B站合集无对应视频）
+114,从 VGGT 到 PAGE-4D：动态世界中的 3D 感知统一框架,BV1hmwfzGEQB,00:48:07,2026-03-20,要点已提炼,episodes/EP114-vggt-page4d.md
 115,WideSeek-R1：通过多智能体 RL 探索大模型的广度扩展（Width Scaling）,,,2026-03-24,todo,official-only（官网有预告，B站合集无对应视频）
 116,"RISE: 组合式世界模型，在""想象""中实现机器人策略的自主进化",BV1rnXhB9Ekf,01:11:16,2026-03-28,要点已提炼,episodes/EP116-rise.md
 117,OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾,,,2026-03-31,todo,official-only（官网有预告，B站合集无对应视频）
