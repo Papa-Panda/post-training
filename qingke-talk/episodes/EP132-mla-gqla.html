@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP132 — 从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP132 — 从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制</h1>
+    <p class="sub">MLA 把计算强度精心压在 H100 的 roofline 拐点上，但换到算力被砍的 H20、开 MTP 多 token 解码或开 tensor parallel 时就会掉进算… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP132-mla-gqla.html</p>
+<p>「（GQLA）同一个预训练模型，我可以同时针对旗舰卡算力很强，也可以针对入门卡……两种卡我都能适配。」——讲者讲 GQLA 两种推理形态切换时的判词（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP132</dd><dt>标题</dt><dd>从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制</dd><dt>BV</dt><dd>BV1E4jF6kETQ</dd><dt>时长</dt><dd>01:14:03（讲授约 60 分钟 + Q&amp;A 约 14 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>字幕自述为北京大学毕业、曾在腾讯实习、近期在小红书做基模，模型结构方向有七篇顶会文章（字幕口径；开场姓名在字幕中未清晰识别，全名以官网预告与论文作者页为准）</dd><dt>相关论文</dt><dd>本讲串起三条工作线——GQLA 结构本身、把已有 GQA / MLA 模型转成 GQLA 的转换方法（讲者称 TransGQLA / TransMLA 一系，字幕多作「trans t q l a / TRANSSUMT」）、以及长上下文稀疏注意力的分层选择方法（字幕作「HASA」）；具体论文题名与编号以论文原文为准</dd><dt>相关代码</dt><dd>字幕未给出仓库地址；讲者提到转换代码以 offload 方式实现、显存占用很少但速度偏慢，分布式逐层转换尚未实现（字幕口径）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1E4jF6kETQ/">https://www.bilibili.com/video/BV1E4jF6kETQ/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP132.txt</code>（1598 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP132，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 MLA 在字幕中多作「MRA / M2A」、GQLA 作「GQRA / JQRA」、RoPE 作「rope / 肉rope」、DSA 作「DISA / DICA」、prefill 作「PERFEELING」、decode 作「抵扣」，均以论文与公开资料为准）。凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>MLA 把计算强度精心压在 H100 的 roofline 拐点上，但换到算力被砍的 H20、开 MTP 多 token 解码或开 tensor parallel 时就会掉进算力瓶颈；GQLA 的改动只有一处——压缩后的 latent 表示还原时不还原成 MHA 形态、而是还原成 GQA 形态——于是同一个权重可以等价地在「省显存的 MQA 吸收形态」与「省计算的 GQA 形态」之间自由切换，再配一套把市面 GQA / MLA 模型低损转成 GQLA 的转换方法（相似度分组 + 损失感知低秩压缩 + RoPE 位置信息分离），做到不从头训练、按硬件选形态。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>为什么只盯着显存与带宽：roofline 视角</h3>
+<p>讲者先立坐标系。LLM 推理分 prefill（并行处理整段输入，计算瓶颈）与 decode（逐 token 生成，每步要把全部历史 KV 调出来，访存瓶颈）两阶段；KV cache 必须存下来，FlashAttention 只能压计算过程中的显存、压不掉 KV cache 本身。过去约 20 年里 GPU 浮点算力涨了约 1 万倍、带宽涨了不到 100 倍（字幕），所以优化的主战场是访存。用「算力除以带宽」得到计算强度，即每搬一个字节要做多少次浮点运算；把模型的计算强度标在 roofline 图上，就能看它先撞带宽墙还是算力墙。MHA 的 KV 太多、先撞带宽墙；GQA 靠多 query 头共享 KV 头缓解；MLA 进一步把 KV 压成一个低维 latent 表示，训练时还原成 MHA 形态保证表达力，推理时把升维矩阵吸收进 query、退化成 MQA 形态省显存——两种形态等价切换，是 MLA 的关键。</p>
+<p>MLA 在 DeepSeek V2 / V3 的典型配置下（字幕口径：128 个头、latent 维度 512、每头 128 维、RoPE 部分 64 维），计算强度约 242 ，恰好压在 H100 约 295 的拐点下方（字幕）。问题是「压得太准」：硬件一变，拐点就变。</p>
+<h3>MLA 的三个不适配：H20、MTP、TP</h3>
+<p>讲者列了 MLA 的三处硬伤。第一，H20 这类卡带宽与 H100 相近、算力被砍约 7 倍、拐点只剩约 37（字幕），MLA 吸收形态把每头维度从 128 撑到 576 ，计算量翻数倍，直接撞算力墙。第二，开 MTP / 投机并行解码时，几个 token 的访存几乎不变、计算量翻几倍，MLA 在 H100 上理论 2 倍加速缩到约 1.2 倍（字幕）。第三，tensor parallel 按头切分时，每个头都要用一份完整 latent 表示，切得越多、MLA 省显存的优势越消失，而 GQA 的每组 KV 独立、天然适配 TP。</p>
+<h3>GQLA：还原成 GQA 形态，多一条推理路径</h3>
+<p>GQLA 的改动被讲者称为「非常简单」：latent 表示升维还原时，不还原到与 query 同样多的头，而是还原成更少的 KV 头（即 GQA 形态）。训练好的同一个模型因此有两条等价推理路径：强算力卡用吸收后的 MQA 形态（与 MLA 在 H100 上完全重叠、同样压住拐点），算力受限卡用 GQA 形态（计算强度与 GQA 一致）。以 H20 实测口径，GQLA 用 GQA 形态比 MLA 吸收形态快约 3.4 倍（字幕）。配置上讲者推荐 128 个 query 头、8 个 KV 头、并行解码 2 个 token（字幕作「128 / 8 / MTP 开 2」），理由是还原的头越多、表达力保持越好；代价是 GQA 形态比原生 GQA 多了 RoPE 维度（64 维 RoPE + 128 维 NoPE 共 192 维），计算与访存都略大、会慢一些，但多出的容量可经后训练转成能力——讲者举蚂蚁模型从 2.0 到 2.5 用很少 token、省约 15 倍训练开销而能力更强为例（字幕，Q&amp;A 口径）。</p>
+<h3>转换方法一：头合并 + 相似度分组 + 损失感知压缩（MLA → GQLA）</h3>
+<p>从头训不可接受，所以要把已有模型转过来。第一步是「头合并」：把多个头拼成一个维度更大的头，用分块对角的 0/1 投影矩阵把每个 query 组只取回自己那份 KV，这一步严格等价；但合并后维度变大、计算强度虚高、显存没省，所以必须接着做低秩压缩，去掉头之间的冗余——压缩有损，目标是把损失压到能靠少量微调恢复。两个关键 trick：按 KV 头相似度分组（越相似的头压到一起损失越小），以及不用纯参数 SVD / PCA 、而用考虑全部 token 对最终 loss 影响的方式定压缩（字幕提及 Hessian 一类做法）。实验在 GLM 30B-A3B 与 DeepSeek 3.1 上做（字幕）：直接转会掉点，每加一个 trick 都有明显提升；讲者强调在大模型上不用这两个 trick「完全无法接受」。对提问「不压缩行不行」，讲者答得很明确：不压缩则计算量涨、缓存不变，任何卡上都没有速度收益，压缩是必需的。</p>
+<h3>转换方法二：跨过 RoPE 做压缩（GQA → GQLA）</h3>
+<p>GQA 转 GQLA 的难点是 RoPE：矩阵吸收要求中间不能有非线性 / 旋转操作，而 GQA 每个头每个维度都带位置编码。解法分三步。先是重排（字幕作「roll rope」）：利用「query 与 key 相乘对顺序不变」这一性质，把相同频率的维度聚到一起——同一频率内乘一个矩阵再乘其逆可以跨过 RoPE 做等价压缩，于是位置信息被集中到第一个头，其余维度去掉位置信息后与 NoPE 部分联合低秩压成 latent 。再是频率折叠：只按相同频率压缩时、高压缩率下损失反而大，把相邻频率一起折叠压缩，引入少量频率损失换更大的压缩损失下降，讲者给出经验点是约四个频率折叠成一个时效果最好（字幕）。最后是 KV 范数平衡：去掉位置信息后 K 与 V 的 norm 差异大、低秩分解会被大的一方主导，用 query 乘系数、key 乘其倒数（结果不变）把两者 norm 拉平。这条线的前身工作（字幕作 TransMLA）把 LLaMA 转 MLA 时，同期另一方法初始掉约 20 个点、他们只掉 1 点几个（字幕）；该方法已被蚂蚁 2.5T 模型采用把 GQA 转成 MLA（字幕）。</p>
+<h3>稀疏注意力：从 DSA 的 indexer 瓶颈到分层选择 HSA</h3>
+<p>后半讲换到 token 维度的稀疏。DeepSeek 的 DSA 逐 token 选 top-k 、粒度细、效果好，但 indexer 本身是 $O(N^2)$ 开销（字幕）：64K 上下文下 indexer 占 5.6 毫秒、真正打分只占 1.6 毫秒（字幕），长上下文里 indexer 成为瓶颈。讲者的 HSA 做两阶段分层选择：先按块粗选出重要块，再把入选块内的 token 汇到一起逐 token 精选出 top 2048 ；无论序列多长，后段都固定成「8K 选 2K」，对硬件优化友好。无训练直接套用时，HSA 选出的 token 与 DSA 逐 token 选出的重叠度短序列 90% 以上、长序列 85% 以上（字幕）；固定 8K 预算最高约 3.5 倍加速，88K 长度端到端比 FlashMLA 实现约 1.6 倍（字幕，讲者自陈对比实现未充分优化）；把 DeepSeek V3.2 的 DSA 无训练换成 HSA 能基本维持效果，GLM-5 上甚至略高（字幕），而纯 block 稀疏会掉很多。讲者也给了稀疏方法的表达力排序：同样 KV 开销下，静态稀疏弱于线性（低秩 memory）、弱于动态稀疏，所以他押注动态稀疏、并把 HSA 定位成 block 与 token 之间的平衡点。</p>
+<h3>Q&amp;A 散点</h3>
+<ul>
+<li><strong>compute-bound 就一定好吗</strong>：不是。需要的计算超出硬件能力很多倍时会被算力「蚌住」、速度不再提升；换 GQA 形态把算力降下来，带宽能力才被释放。</li>
+<li><strong>与标准 GQA 的延迟差异</strong>：拐点位置相同，但 GQLA 多 RoPE 维度、单步计算访存略大而略慢，换来的是跨硬件适配与更强的可训练容量。</li>
+<li><strong>转换的工程性</strong>：所有层可独立转换，大模型（如 600B 级）可用 offload 以很少显存完成，只是慢；逐层分布式会快很多但代码还没写。</li>
+<li><strong>与 IndexCache 的区别</strong>：那是跨层复用同一份 token 选择；HSA 假设的是长文本里重要 token 成块连续出现，两者正交。</li>
+<li><strong>国产卡</strong>：HSA 已适配、GQLA 未适配；讲者判断国产卡浮点不弱、主要卡在 HBM 带宽，可能反而适合 MQA 形态，但未实测。</li>
+<li><strong>为什么不做线性模型</strong>：旗舰模型上效果优先于速度，动态稀疏表达力最强且其效率平衡还没做完，这是他当前押注。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPU 算力 vs 带宽的长期增速</td>
+<td>近 20 年带宽涨幅</td>
+<td>算力约 1 万倍，带宽不到 100 倍</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>DeepSeek 系 MLA 计算强度</td>
+<td>H100 拐点约 295</td>
+<td>约 242 ，压在拐点下方</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>H20 的 roofline 拐点</td>
+<td>H100 约 295</td>
+<td>约 37（算力被砍约 7 倍）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GQLA 在 H20 的推理速度</td>
+<td>MLA 吸收形态</td>
+<td>GQA 形态约快 3.4 倍</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>开 MTP 后 MLA 的实际加速</td>
+<td>理论 2 倍</td>
+<td>缩到约 1.2 倍</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GQLA 推荐配置</td>
+<td>—</td>
+<td>128 个 query 头 / 8 个 KV 头 / 并行解码 2 token</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>转换实验模型</td>
+<td>—</td>
+<td>GLM 30B-A3B、DeepSeek 3.1</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GQA→MLA 转换的初始掉点对比</td>
+<td>同期方法约掉 20 点</td>
+<td>本方法约掉 1 点几</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>蚂蚁 2.0→2.5 的训练开销</td>
+<td>常规重训</td>
+<td>约省 15 倍且能力更强（Q&amp;A 口径）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>DSA indexer 开销（64K 上下文）</td>
+<td>实际打分 1.6 毫秒</td>
+<td>indexer 5.6 毫秒</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>HSA 与 DSA 的 top-k 重叠度</td>
+<td>无训练直接替换</td>
+<td>短序列 90% 以上，长序列 85% 以上</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>HSA 端到端加速（88K 长度）</td>
+<td>FlashMLA 实现</td>
+<td>约 1.6 倍；固定 8K 预算最高约 3.5 倍</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>选注意力结构先算计算强度、再对目标硬件的 roofline 拐点：同一个权重在不同卡上该走吸收形态还是分组形态，是部署期可切换的决策，不必在训练期一次定死；做推理框架时把「形态切换」做成配置项，比为每种卡各训一个模型便宜得多。</li>
+<li>结构转换的通用配方可迁移到其他压缩任务：先找严格等价的变换（头合并、顺序重排），再把不可避免的有损压缩集中到一处，并用「按相似度分组 + 按 loss 影响定压缩方向」压损失——比直接 SVD / PCA 掉点小得多。</li>
+<li>稀疏注意力的 indexer 本身可能比 attention 更贵：长上下文优化要先测 indexer 占比；「粗筛成固定候选集再精选」把 $O(N^2)$ 选 token 变成常数规模精选，是可套到任何 top-k 选择模块上的分层套路。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>GQLA 的论文题名、arXiv 编号与开源情况字幕均未给出，HSA 在 GLM-5 / DeepSeek V3.2 上的完整评测表（哪些 benchmark、掉点分布）也只口播结论，需回论文核对。</li>
+<li>讲者说 GQLA 已在一些企业初步使用、团队内部也在做预训练验证，但未给从头训 GQLA 与转出来的 GQLA 之间的效果差距；「转换 + 少量微调恢复」到底需要多少 token，字幕只说「很少」，无具体数。</li>
+<li>频率折叠「约四个折一个最好」是在 LLaMA 3 8B 一类模型上观察到的平衡点，换头数、换 RoPE 基频后是否仍成立，未展开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「（GQLA）同一个预训练模型，我可以同时针对旗舰卡算力很强，也可以针对入门卡……两种卡我都能适配。」——讲者讲两种推理形态切换（字幕约 26:09–26:22 ，干净口径转写）</p>
+<p>「静态稀疏弱于线性，（线性）弱于动态稀疏……所以我目前会关注这个（动态稀疏）。」——讲者给稀疏方法表达力排序时的判词（字幕约 71:40–71:56 ，干净口径转写）</p>
+<p>「如果你非常快，但是你完不成我的任务，你不管多快、多便宜我都不会用，所以保效果比较重要。」——讲者解释为何押注逐 token 动态稀疏（字幕约 72:44–73:00 ，干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

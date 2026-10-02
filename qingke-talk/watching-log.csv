@@ -88,16 +88,16 @@ No,Title,BV,Duration,Date,Status,Notes
 87,QeRL：量化技术增强强化学习 Reasoning 探索,BV1iAkDBrEVt,00:57:46,BV1iAkDBrEVt,要点已提炼,episodes/EP87-qerl.md
 88,UniLat3D：几何–外观统一VAE的单阶段 3D 生成框架,BV1qDC7BWEBo,00:49:31,2025-11-11,要点已提炼,episodes/EP88-unilat3d.md
 89,Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架,BV1JRCyBiEp2（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2025-11-15,要点已提炼,episodes/EP89-generative-rlhf-v.md
-90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,BV1xNynB1Emx,,2025-11-18,todo,
+90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,BV1xNynB1Emx,01:12:52,2025-11-18,要点已提炼,episodes/EP90-shotbench.md
 91,KTransformers，在大模型微调与推理中的系统化实践,BV18wUPBEE4r,00:55:02,2025-11-22,要点已提炼,episodes/EP91-ktransformers.md
 92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",BV1mfSjBDEnS,01:00:57,2025-11-25,要点已提炼,episodes/EP92-rlinf.md
-93,通过量化与稀疏性实现高效注意力机制（SageAttention）,,,2025-11-29,todo,official-only（官网有预告，B站合集无对应视频）
+93,通过量化与稀疏性实现高效注意力机制（SageAttention）,BV1d8UfB2EpP,02:00:47,2025-11-29,要点已提炼,episodes/EP93-quant-sparse-attention.md
 94,RLinf-VLA 实践：从零上手 VLA（OpenVLA）强化学习,,,2025-12-02,todo,official-only（官网有预告，B站合集无对应视频）
 95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2025-12-06,要点已提炼,episodes/EP95-pi-rl.md
 96,Fast-dLLM v2：高效训练推理的块扩散大语言模型框架,,,2025-12-09,todo,official-only（官网有预告，B站合集无对应视频）
 97,从 BF16 到 FP16：如何解决RL训练-推理不匹配问题,,,2025-12-13,todo,official-only（官网有预告，B站合集无对应视频）
 98,SANA-Series：探索图像视频扩散模型的高效设计与加速,,,2025-12-16,todo,official-only（官网有预告，B站合集无对应视频）
-99,TRPO重生：大模型时代的信任域策略优化,,,2025-12-20,todo,official-only（官网有预告，B站合集无对应视频）
+99,TRPO重生：大模型时代的信任域策略优化,BV1UgrKBNEJc,01:02:29,2025-12-20,要点已提炼,episodes/EP99-trpo-rebirth.md
 100,2025 “青稞” AI 嘉年华（第100期特辑）,,,2025-12-28,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
 101,MiniMax M2.1：Agent 后训练经验与认知,BV1H8iCBEEgT,,2026-01-06,要点已提炼,episodes/EP101-minimax-m21-agent-posttraining.md
 102,从 TRPO 到 SAPO：大模型 RL 算法演进,,,2026-01-10,要点已提炼,episodes/EP102-trpo-sapo.md
@@ -130,9 +130,9 @@ No,Title,BV,Duration,Date,Status,Notes
 129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,01:10:07,2026-06-06,要点已提炼,episodes/EP129-arpo-aepo-agent-world.md
 130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,2026-06-09,todo,official-only（官网有预告，B站合集无对应视频）
 131,UniRL：面向统一多模态模型的分布式 RL 后训练框架,,,2026-06-13,todo,official-only（官网有预告，B站合集无对应视频）
-132,从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制,,,2026-06-16,todo,official-only（官网有预告，B站合集无对应视频）
+132,从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制,BV1E4jF6kETQ,01:14:03,2026-06-16,要点已提炼,episodes/EP132-mla-gqla.md
 133,VeRL-Omni：基于VeRL及vLLM-Omni构建的面向多模态生成模型的开源 RL 后训练框架,BV1BAj96ZE9f,01:11:26,2026-06-23,要点已提炼,episodes/EP133-verl-omni.md
-134,DPA & LLaVA-HUD v4：多模态大模型的深度预对齐与高效视觉编码优化,BV1UHTq6MEwe,,2026-06-30,todo,unnumbered-video；B站视频无期号
+134,DPA & LLaVA-HUD v4：多模态大模型的深度预对齐与高效视觉编码优化,BV1UHTq6MEwe,01:07:34,2026-06-30,要点已提炼,episodes/EP134-dpa-llava-hud.md
 135,如何设计一个好的自回归 VLA：从问题构建到工程落地的探索之旅,,,2026-07-04,todo,official-only（官网有预告，B站合集无对应视频）
 136,PithTrain：Agent 时代的 MoE 训练框架设计,,,2026-07-11,todo,official-only（官网有预告，B站合集无对应视频）
 137,Kinema4D：面向时空具身仿真的运动学 4D 世界建模,,,2026-07-15,todo,official-only（官网有预告，B站合集无对应视频）
@@ -206,4 +206,4 @@ B146,MatAnyone 2: Consistent Memory for Temporally Consistent Video Matting Anyt
 B147,字节跳动 CV 大模型 （Semi Analysis）,BV1Bw8m6GEd7,,,todo,bilibili-only；B147 Semi Analysis 与官网147 latent space 优化 主题完全不同
 B148,Rethinking Noisy Label：哭泣猫猫头,BV1me896CEkR,,,todo,bilibili-only；B148 Noisy Label 与官网148 TriAttention 主题完全不同
 B150,从如何生成到如何验证：生成式推荐的可控建模,BV1jotD65EGU,,,todo,bilibili-only；B150 生成式推荐 与官网150 SIM1 主题完全不同
-B151,AI4AI at Test-Time：从推理时思考到推理时训练,BV1Wet26CEgH,,,todo,bilibili-only；B151 AI4AI at Test-Time 与官网151 Harness-AI4AI 同属 AI4AI 大题但为不同 talk
+B151,AI4AI at Test-Time：从 Harness 看 AI4AI 如何实现以及未来,BV1Wet26CEgH,01:11:12,,要点已提炼,episodes/EP151-ai4ai-test-time.md

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP99 — TRPO重生：大模型时代的信任域策略优化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP99 — TRPO重生：大模型时代的信任域策略优化</h1>
+    <p class="sub">讲者从大模型 RL 的三个 off-policy 来源（训推不一致、MoE 路由不连续、异步训推陈旧）出发，回到 2002 年 Kakade &amp;amp; Langford 的 … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP99-trpo-rebirth.html</p>
+<p>「我们没有办法拿到 $\pi_\theta$ 的采样，我们只有 $\pi_{roll}$ 的采样。」——讲者对全场问题的出发点概括（字幕口径，约 32 分钟处）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP99</dd><dt>标题</dt><dd>TRPO重生：大模型时代的信任域策略优化</dd><dt>BV</dt><dd>BV1UgrKBNEJc</dd><dt>时长</dt><dd>01:02:29（总时长 3749 秒；讲授约 51 分钟 + Q&amp;A 约 11 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>李英儒（字幕开场自述「我叫李英儒」；主持人致谢作「映入博士」，单位与头衔字幕未自述，以公开资料为准）</dd><dt>相关论文/文献（均为讲授中点名，编号以原文为准）</dt><dd></dd><dt>Kakade &amp;amp; Langford（2002）</dt><dd>surrogate objective 与 performance difference lemma 的源头（讲者反复强调「一阶近似 2002 年就提出来了」）</dd><dt>TRPO（2015）</dt><dd>信任域策略优化，讲者称其为「影响了深度强化学习十年发展最重要的算法基础」</dd><dt>PPO（2017）</dt><dd>对 TRPO 的非精确近似（token 级 clipping）</dd><dt>讲者 2019 年工作</dt><dd>把 action 级 conditional divergence 改为 state-action joint distribution divergence（字幕口径，会议名识别不清）</dd><dt>讲者团队 2025 年 9 月博客</dt><dd>训推不一致导致 RL 训练崩溃的分析（分 part 1/2/3，字幕口径；本 talk 的内容「beyond 这个 blog 很多」，配套论文讲者称近期会放出）</dd><dt>相关代码</dt><dd>verl 与 slime 中均已实现讲者所讲的 rollout correction / sequence 级 masking（讲者口径；verl 文档有 rollout correction 一节与推荐参数）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP99.txt</code>（1202 条，末条 3745.16 秒）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP99，已存档）清洗提炼。AI 字幕识别误差较多：rollout policy 在字幕中作「row/roll/派柔」等，surrogate objective 作「三炮/sarrogate」等，K1 estimator 作「k one s mor」等，均按上下文还原为通用术语；个别专名（如讲者 2019 年工作的会议名、其团队一篇相关论文名、采用其方法的公司名）字幕识别不清，正文只记脉络、不写死。凡讲授口径的数字与事件均标注「字幕」来源。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者从大模型 RL 的三个 off-policy 来源（训推不一致、MoE 路由不连续、异步训推陈旧）出发，回到 2002 年 Kakade &amp; Langford 的 surrogate objective 与 performance difference lemma、2015 年 TRPO 的 sequence 级信任域这条理论主线，论证 PPO 的 token 级 clipping 在长 horizon 下既挡不住负 advantage 大 ratio 的梯度、又管不了被污染的后续 context；解法是回到 sequence 级：用 K1 估计（平均 log ratio、长度无关）度量整条序列的漂移，超阈值就整条 mask/reject，从而近似恢复 TRPO 式的单调改进保证，该实现已进入 verl 与 slime 并解决了公开的训练崩溃 issue。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 大模型时代的三个 off-policy 来源</h3>
+<p>讲者先把问题摆出来：采样分布与更新策略不一致这件事在经典 RL 里就有，但大模型给了它三种新形态。</p>
+<ol>
+<li><strong>训练/推理引擎不一致</strong>。训练与推理用两个引擎，即便参数相同，算出的 log-prob 也不同。根源是浮点加法没有结合律，加上训练与推理的 kernel 优化方式不一致；在自回归范式下每步误差被逐步放大，长 context 下更严重。讲者团队 2025 年 9 月写过博客专门 demystify 这件事导致的训练崩溃（字幕口径）。</li>
+<li><strong>MoE 路由的不连续性</strong>。Router 的 top-k 选择是非连续函数，logit 的微小扰动就可能让选中的 expert 组合突变，同一 token 在不同 expert 下的概率可以从 0.9 跳到 0.001（字幕口径示例）。这不是随机噪声，而是由非连续性决定的跳变，会造出非常奇怪的 importance ratio。</li>
+<li><strong>异步训推的策略陈旧</strong>。Agentic RL 要求训推分离加速，rollout 生成时所用的策略可能已经离最新更新的参数很远，rollout 分布与当前策略之间天然有 gap。</li>
+</ol>
+<p>三者的共同数学本质：<strong>在分布偏移下做策略优化</strong>——给定任意两个 off-policy 的策略，如何稳定地提升性能。</p>
+<h3>2. 理论回溯：从 2002 年的 surrogate objective 到 TRPO</h3>
+<p>讲者用自回归生成的记号重述了这条主线（不用 MDP 术语，用 LM 的记号）：prompt $x$ 采样后生成长度为 $T$ 的 response，reward 一般是 terminal reward；优化目标 $J(\pi_\theta)$ 是期望回报。问题在于拿不到 $\pi_\theta$ 本人的采样，只有 $\pi_{roll}$ 的采样。</p>
+<ul>
+<li><strong>为什么 sequence 级 importance sampling 不行</strong>：sequence 级 ratio 是每个 token 级 ratio 的连乘，两个分布稍远方差就爆炸。能用的只有 token 级修正。</li>
+<li><strong>Surrogate objective（2002，Kakade &amp; Langford）</strong>：从 $\pi_{roll}$ 采样轨迹，只对单个 token 做 importance weighting，配合 $\pi_{roll}$ 分布下的 advantage function，得到替代目标 $L$ 。Schulman 等人后续沿用了这套目标。</li>
+<li><strong>一阶近似的含义</strong>：在 $\pi_\theta = \pi_{roll}$ 的点上， $L$ 与原始目标 $J$ 的函数值和梯度都一致（是 $J$ 在该点的切平面）。所以在足够小的范围内提升 $L$ 就能提升 $J$ ——问题只剩下：这个「足够小」到底是多大。</li>
+<li><strong>Performance difference lemma（同为 2002 年）给出了误差的量法</strong>： $J$ 与 $L$ 的差主要来自 context 分布（即状态分布）的偏移。把偏移累积起来有两种界：按 token 级 divergence 累积会得到 $T^2$ 阶的误差（每步一个 $T$ 、再对 $T$ 步求和）；按 sequence 级 divergence 界定则省掉一个 $T$ 因子。今天的 sequence 长度已经到几万甚至几十万 token（字幕口径），token 级的界要求单步漂移小到不现实，否则优化替代目标对原始目标毫无保证——讲者直言，没有保证就「不能期待它一直往上涨」，崩溃是迟早的事。</li>
+<li><strong>单调改进的机制</strong>：只要保证 $L$ 减去误差界这个下界函数非负且被提升，就能保证 $J(\pi_{new}) \ge J(\pi_{roll})$ 。这正是优化里的 majorization-minimization 套路：每步构造新的下界函数、最大化它、再在新点重构。讲者强调 TRPO（2015）就是这个思想在深度 RL 里的落地：在 sequence 级 KL 定义的信任域内最大化 surrogate objective。注意他特别点出 TRPO 用的是 sequence 级（joint state-action 分布）的散度——他自己 2019 年的工作也论证过 joint divergence 优于 action 级 conditional divergence（字幕口径）。</li>
+</ul>
+<p>讲者还埋了一条关键线索：可以把散度改写成<strong>与 $T$ 无关的量</strong>——平均到每步的 divergence。这个量后面成为其方法能处理长 context 的支点。</p>
+<h3>3. PPO 为什么在大模型上不够用</h3>
+<p>TRPO 要算信任域需要共轭梯度、海森矩阵与线搜索，计算复杂，于是 PPO 用 token 级 clipping 做近似，其隐含假设是：<strong>token 级 clipping 能起到 sequence 级信任域的作用</strong>。讲者指出这个假设在大模型时代有两处失效：</p>
+<ol>
+<li><strong>负 advantage + 大 ratio 不被截断</strong>。PPO 的 clip 只在 advantage 为正且 ratio 超上界、或 advantage 为负且 ratio 超下界时归零梯度；但 advantage 为负而 ratio 很大的 token 完全可能出现（MoE 路由突变就会造出来），这类 token 不被 clip、带着巨大的梯度进更新，造成很不稳定的训练。讲者说他们自己的相关论文讲过这件「一个梯度弄炸训练」的事（字幕口径，论文名识别不清）。</li>
+<li><strong>Context contamination（上下文污染）</strong>。就算在第 $k$ 个 token 处把漂移过大的 token mask 掉，它后续生成的整段 context 都已经是受这个偏移点影响的 off-policy 产物；只 mask 单点、不处理后续轨迹，等于在已被污染的 context 上继续优化。本质仍是单步漂移沿时间累积的老问题。</li>
+</ol>
+<h3>4. 解法：sequence 级 masking 把信任域硬执行回来</h3>
+<p>讲者的方法回到 TRPO 的精神，但换上便宜的执行方式：</p>
+<ul>
+<li><strong>度量</strong>：需要高效估计 sequence 级 KL。方案是用 K1 estimator——本质是平均 log ratio（sequence ratio 连乘后取几何平均），天然长度无关（length-invariant）：长短序列都可比，且计算几乎没有额外开销，不需要 TRPO 式的二阶计算。K2、K3 estimator 也可考虑，各有取舍（字幕口径，未展开）。</li>
+<li><strong>执行</strong>：若一条序列的 K1 估计超出信任域阈值 $\delta$ ，就把整条序列 mask/reject 出梯度——「超出 trust region 就不要把它算进 gradient」。只在漂移被 bound 住的样本上优化替代目标，就能近似恢复下界非负、单调改进的保证；这是 PPO 给不了的。</li>
+<li><strong>来历与验证</strong>：这个方案最早出现在其团队博客发出后第二周（2025 年 9 月，字幕口径），公开层面解决了 verl 里 Megatron 训练崩溃的 issue（9 月底，字幕口径），对 MoE 与 dense 模型都用过，主治训推不一致类的 off-policy。实现已进入 verl 与 slime；讲者称某做 Devin 的 agent 公司（字幕作「DAVIN」，应指 Cognition）采用并验证了 BF16 下的稳定性，英伟达的博客也提到过这个工作（均为字幕口径）。</li>
+<li><strong>与 GSPO 的关系</strong>：K1 的几何平均形式与 GSPO 的 sequence 级 ratio 有表面相似，但讲者强调 motivation 非常不一样——他这条线是从信任域理论推出来的。</li>
+</ul>
+<h3>5. Q&amp;A 要点</h3>
+<ul>
+<li><strong>MDP 里 context 算什么</strong>：在大模型自回归建模下，整个 context 就是当前状态，下一个 token 是 action，状态转移是确定的。</li>
+<li><strong>阈值怎么选</strong>：讲者建议可试 0.99 到 1.01 之间（字幕口径），并指路 verl 文档 rollout correction 一节有推荐值。</li>
+<li><strong>一阶近似能否升二阶</strong>：原理上可以，但要高效地算曲率才 make sense；目前他们的做法是先用 sequence 级 masking 做快速且有效的硬信任域执行。</li>
+<li><strong>奖励设计类问题</strong>（多目标按难易拆奖励模型等）：讲者明确划界——那与今天讲的训练稳定性正交，不在此讨论。</li>
+<li><strong>内部实验结果</strong>：被问到某些内部对比，讲者表示试过但暂不方便分享，原则上「答案是 OK 的」（字幕口径）。</li>
+</ul>
+<h3>6. 讲者的阅读建议</h3>
+<p>他最后给的历史文献清单很明确：不要只从 PPO 那篇文章开始学 RL——「应该去把 02 年和 15 年这两篇 paper 都看一遍」，加上 17 年的 PPO。一阶近似、surrogate objective、performance difference lemma 全是 2002 年就有的东西，今天大模型 RL 的诸多「新问题」是这些老工具在长 horizon 下的重新显形。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标/事项</th>
+<th>数值/口径</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Surrogate objective 与 performance difference lemma 提出年份</td>
+<td>2002 年（Kakade &amp; Langford）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>TRPO / PPO 提出年份</td>
+<td>2015 年 / 2017 年</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>讲者 joint divergence 相关工作年份</td>
+<td>2019 年</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Token 级误差界随 horizon 的累积阶</td>
+<td>$T^2$ 阶（sequence 级界省一个 $T$ 因子）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>单步 token 漂移在长序列上的复合</td>
+<td>每步偏 $\epsilon$ ，整体偏 $\epsilon$ 的 $T$ 次方量级</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>现代任务 sequence 长度量级</td>
+<td>几万至几十万 token</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MoE 路由突变的概率跳变示例</td>
+<td>同一 token 概率 0.9 → 0.001</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>训推不一致博客发布时间</td>
+<td>2025 年 9 月（分 part 1/2/3）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Sequence 级 masking 方案出现时间</td>
+<td>博客发出后第二周；verl 崩溃 issue 于 9 月底解决</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>K1 阈值经验建议</td>
+<td>0.99–1.01 之间试（具体见 verl 文档）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>本期字幕规模</td>
+<td>1202 条，末条 3745.16 秒 / 总时长 3749 秒</td>
+<td>字幕存档实测</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>把「信任域」当成 RL infra 的一等公民</strong>：训推不一致、MoE 路由跳变、异步陈旧本质都是同一个分布漂移量在变大。工程上与其逐个打补丁，不如在框架里常驻一个 sequence 级漂移度量（平均 log ratio，几乎零成本）+ 超阈整条 reject 的硬执行，并监控被 reject 的比例作为训练健康度指标。</li>
+<li><strong>Review PPO/GRPO 类实现时先查两个口子</strong>：负 advantage 且 ratio 极大的 token 是否仍在回传梯度；被 mask 的 token 之后同轨迹的 token 是否还在被优化。这两点是 token 级近似与 sequence 级信任域之间最实际的差。</li>
+<li><strong>长 horizon 场景优先 sequence 级量</strong>：任何随 $T^2$ 涨的误差界在几万 token 的 agentic 任务上都会失效；做算法选型时先问一句「这个量的界与序列长度是什么关系」。</li>
+<li>本期与本仓库的 verl/slime 相关期互为上下文：讲者明言该 rollout correction 已在 verl 与 slime 落地，做框架对比时可直接对照实现。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>K1、K2、K3 三种 KL estimator 的取舍讲者没有展开（各自的偏差/方差特性、什么场景换哪个），他只说「大家都可以去考虑 connection to theory」；其配套论文放出后值得对照补齐。</li>
+<li>Sequence 级整条 reject 会丢掉长轨迹里后段仍可用的样本，样本效率代价有多大、被 reject 比例的典型量级是多少，talk 中没有给数字；verl 文档的推荐配置与 issue 讨论是下一步核查点。</li>
+<li>讲者 2019 年 joint divergence 工作与本方法的完整谱系、以及他提到的「把整套方法统一起来的一个命名」（字幕作「how precision making」，识别不清）要等论文放出后才能写准。</li>
+<li>异步框架下 rollout 陈旧度如果远超阈值，整条 reject 与 partial 更新（如只用前若干 token）的边界在哪里，talk 未涉及。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「我非常希望大家去了解一下这个事情……应该去把 02 年和 15 年这两篇 paper 都看一遍。」——讲者收尾的阅读建议（字幕约 47 分钟处，按干净口径转写）</p>
+<p>「它不会往上涨的话，也就意味着它是有可能会崩溃的……因为你没有做到一个有效的纠正。」——讲者解释无保证的替代目标优化为何必然不稳定（字幕约 57 分钟处）</p>
+<p>「如果我超出了这个 trust region，我就不要把它算进 gradient 里面了。」——讲者对 sequence 级 masking 的一句话定义（字幕约 45 分钟处）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
