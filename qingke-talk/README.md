@@ -21,6 +21,15 @@
 | 75 | FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案 | ✅ 要点已提炼 |
 | 78 | 从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体 | ✅ 要点已提炼 |
 | 83 | 统一 SFT & RL：迈向大语言模型后训练的统一视角 | ✅ 要点已提炼 |
+| 59 | [大模型推理强化学习中的熵机制](episodes/EP59-entropy-mechanism-rl.md) | ✅ 要点已提炼 |
+| 62 | [ProRL：延长强化学习训练框架，拓展大语言模型的推理边界](episodes/EP62-prorl.md) | ✅ 要点已提炼 |
+| 67 | [大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展](episodes/EP67-pipeline-parallelism.md) | ✅ 要点已提炼 |
+| 69 | [GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习](episodes/EP69-gspo.md) | ✅ 要点已提炼 |
+| 71 | [RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题](episodes/EP71-rlpr.md) | ✅ 要点已提炼 |
+| 74 | [ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架](episodes/EP74-roll.md) | ✅ 要点已提炼 |
+| 76 | [NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍](episodes/EP76-nemo-rl.md) | ✅ 要点已提炼 |
+| 80 | [RL for LRMs：探讨面向推理模型的 RL 最新研究](episodes/EP80-rl-for-lrms.md) | ✅ 要点已提炼 |
+| 92 | [RLinf：面向具身智能的"渲训推一体化"开源强化训练框架](episodes/EP92-rlinf.md) | ✅ 要点已提炼 |
 | 101 | MiniMax M2.1：Agent 后训练经验与认知 | ✅ 要点已提炼 |
 | 102 | 从 TRPO 到 SAPO：大模型 RL 算法演进 | ✅ 要点已提炼 |
 | 111 | RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统 | ✅ 要点已提炼 |
@@ -31,7 +40,9 @@
 | 133 | VeRL-Omni：基于VeRL及vLLM-Omni构建的面向多模态生成模型的开源 RL 后训练框架 | ✅ 要点已提炼 |
 | 140 | DRIFT：在线自进化后训练框架 | ✅ 要点已提炼 |
 | 145 | JitRL——无需梯度更新的即时强化学习 | ✅ 要点已提炼 |
+| 129 | [从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径](episodes/EP129-arpo-aepo-agent-world.md) | ✅ 要点已提炼 |
 | 152 | 如何在真实 Coding Agent Harness 中接入 RL？ | ✅ 要点已提炼 |
+| 153 | [EnvHarness，Agent 和环境如何"左脚踩右脚"实现自进化](episodes/EP153-envharness.md) | ✅ 要点已提炼 |
 | 154 | Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe | ✅ 要点已提炼 |
 | 155 | SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战 | ✅ 要点已提炼 |
 | 156 | 聊聊自我改进、递归自我改进（RSI），以及与自博弈的关系 | ✅ 要点已提炼 |

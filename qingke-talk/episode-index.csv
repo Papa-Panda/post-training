@@ -1,4 +1,4 @@
-期号,标题,BV号,B站期号,B站标题,时长,发布日期,来源URL,字幕可得性,备注
+﻿期号,标题,BV号,B站期号,B站标题,时长,发布日期,来源URL,字幕可得性,备注
 1,SceneTex：高质量三维室内场景纹理图生成,BV1qKeyzdEVp,1,SceneTex:高质量三维室内场景纹理图生成,,2024-04-10,https://qingkeai.online/blog/afIinc7i,unknown,
 2,ChatDev：大语言模型驱动的多智能体协作与演化,BV15oe2z8EiH,2,ChatDev——大语言模型驱动的多智能体协作与演化,,2024-04-15,https://qingkeai.online/blog/WAspaTRh,unknown,
 3,从 3D LLM 到 MultiPLY，3D 具身基础模型的构建,BV18se2zHEzc,3,从 3D LLM 到 MultiPLY ，3D 具身基础模型的构建,,2024-04-19,https://qingkeai.online/blog/NCQ35M6F,unknown,
@@ -57,28 +57,28 @@
 56,InternVL3：多模态通用感知大模型,BV18K4szzERi,56,InternVL3，GPT-4o开源平替：探索多模态通用采集大模型的技术演进与应用探索,,2025-06-21,https://qingkeai.online/blog/KN7MemLi,unknown,title-reworded
 57,Fast-dLLM：无需重训的扩散大语言模型推理加速,BV1qs4uz3EXL,57,Fast-dLLM：无需重训的扩散大语言模型推理加速,,2025-06-24,https://qingkeai.online/blog/tFYMAGAQ,unknown,
 58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,BV1Bp4uzkEHG,58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,,2025-06-28,https://qingkeai.online/blog/xysVAAMV,unknown,
-59,大模型推理强化学习中的熵机制,BV1Bp4uzkECF,59,大模型推理强化学习中的熵机制,,2025-07-01,https://qingkeai.online/blog/9Zw0v3WS,unknown,
+59,大模型推理强化学习中的熵机制,BV1Bp4uzkECF,59,大模型推理强化学习中的熵机制,,2025-07-01,https://qingkeai.online/blog/9Zw0v3WS,yes,
 60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,BV1Zs4uz3E16,60,Satori-SWE：用进化测试时间缩放让小语言模型解决复杂软件工程,,2025-07-05,https://qingkeai.online/blog/wONnpLLa,unknown,title-reworded
 61,GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架,BV1SA4CzWEph,61,GUI-Reflection：让多模态 GUI 智能体获得担忧错误能力的训练框架,,2025-07-08,https://qingkeai.online/blog/kqPOLMYb,unknown,
-62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,BV1mP4CzXE9a,62,ProRL : 延长强化学习训练框架，拓展大语言模型的推理边界,,2025-07-12,https://qingkeai.online/blog/NWQcL3AE,unknown,
+62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,BV1mP4CzXE9a,62,ProRL : 延长强化学习训练框架，拓展大语言模型的推理边界,,2025-07-12,https://qingkeai.online/blog/NWQcL3AE,yes,
 63,ChatRex & RexSeek & RexThinker：结合多模态大语言模型的目标检测模型构建,BV1uA4CzsETk,63,ChatRex / RexSeek / Rex-Thinker：结合多模态大语言模型的目标检测模型构建,,2025-07-15,https://qingkeai.online/blog/UujZkgxy,unknown,
 64,MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力,BV1MP4Cz9EGg,64,MindCube：空间智能的实现路径，激发VLM构建创造性空间心理模型的能力,,2025-07-19,https://qingkeai.online/blog/knbA36br,unknown,
 65,Hi3DGen：法线为桥，为高清三维几何生成另辟蹊径,BV1qk4QzfEv4,65,Hi3DGen：法线为桥，为高清三维几何生成另辟蹊径,,2025-07-22,https://qingkeai.online/blog/08sWux5J,unknown,
 66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,BV1Br4Qz8EpF,66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,,2025-07-26,https://qingkeai.online/blog/eg3bNJK4,unknown,
-67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,BV1v14QzoEZf,67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,,2025-08-05,https://qingkeai.online/blog/jnaBZmD6,unknown,
+67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,BV1v14QzoEZf,67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,,2025-08-05,https://qingkeai.online/blog/jnaBZmD6,yes,
 68,slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践,BV1d14QzoEai,68,slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践,,2025-08-02,https://qingkeai.online/blog/B8jp4Hnm,unknown,
-69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,BV1UC4az4EiU,69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,,2025-08-07,https://qingkeai.online/blog/PO5IkeL7,unknown,
+69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,BV1UC4az4EiU,69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,,2025-08-07,https://qingkeai.online/blog/PO5IkeL7,no,字幕接口多次串台不可得，已用论文还原（2026-10-02）
 70,Evaluation Agent：面向视觉生成模型的高效可提示的评估框架,BV1SC4az4Ehn,70,Evaluation Agent：面向视觉生成模型的高效可提示的评估框架,,2025-08-09,https://qingkeai.online/blog/TzZBDJIW,unknown,
-71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,BV1cF4Yz2E5z,71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,,2025-08-12,https://qingkeai.online/blog/FI5P67lj,unknown,
+71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,BV1cF4Yz2E5z,71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,,2025-08-12,https://qingkeai.online/blog/FI5P67lj,yes,
 72,Clothed Human Body Fitting: A Journey to ETCH,BV1rF4Yz1ENZ,72,ETCH: 通过等变紧度向量将人体拟合推广到穿衣人体的方法,,2025-08-16,https://qingkeai.online/blog/TBcYgpyb,unknown,title-reworded
 73,从BLIP3o到BLIP3o-NEXT：迈向统一生成与理解的多模态大模型,BV1s4WkzMEYF,73,从BLIP3o到BLIP3o-NEXT：迈向统一生成与理解的多模态大模型,,2025-08-19,https://qingkeai.online/blog/tyisDOXc,unknown,
-74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,BV1y4WkzME92,74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,,2025-08-23,https://qingkeai.online/blog/rTh5T7KC,unknown,
+74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,BV1y4WkzME92,74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,,2025-08-23,https://qingkeai.online/blog/rTh5T7KC,no,字幕接口多次串台不可得，已用论文还原（2026-10-02）
 75,FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案,BV1J6WyzTEJP,75,FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案,,2025-08-30,https://qingkeai.online/blog/K0s67zdv,unknown,
-76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,BV1qNWyzcEuv,76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,,2025-09-06,https://qingkeai.online/blog/Zn9bKeVw,unknown,
+76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,BV1qNWyzcEuv,76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,,2025-09-06,https://qingkeai.online/blog/Zn9bKeVw,yes,
 77,"Theory of Agent: From Definition, to Behavior and Objective",BV1dHWEzWETN,77,"Theory of Agent: From Definition, to Behavior and Objective",,2025-09-09,https://qingkeai.online/blog/pQoR2e6f,unknown,same
 78,从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体,BV1sxWgzUEZo; BV1sBsFz9EVw,78,从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体,,2025-09-18,https://qingkeai.online/blog/5C987qKz,unknown,dup: 同一 talk 重复上传，两个 BV 均保留
 79,“知人者智”：以用户为中心的智能体交互与训练,BV18tsFzhE35,79,UserRL & UserBench “知人者智”：以用户为中心的智能体交互与训练,,2025-10-18,https://qingkeai.online/blog/9cmmfzfR,unknown,title-reworded
-80,RL for LRMs：探讨面向推理模型的 RL 最新研究,BV1b9sGzwEAc,80,RL for LRMs：探讨面向推理模型的 RL 最新研究,,2025-10-21,https://qingkeai.online/blog/0h3Cm8Bi,unknown,
+80,RL for LRMs：探讨面向推理模型的 RL 最新研究,BV1b9sGzwEAc,80,RL for LRMs：探讨面向推理模型的 RL 最新研究,,2025-10-21,https://qingkeai.online/blog/0h3Cm8Bi,yes,
 81,MemGen：生成式隐式记忆，Agent Memory 的第三种可能,BV1wMWEzPEUD,81,MemGen：生成式隐式记忆，Agent Memory 的第三种可能,,2025-10-16,https://qingkeai.online/blog/WNgkCY75,unknown,
 82,OpenCUA：用于构建 Computer-Use Agent 的开源框架,BV14isozHErN,82,OpenCUA：用于构建 Computer-Use Agent 的开源框架,,2025-10-25,https://qingkeai.online/blog/OpenCUA,unknown,
 83,统一 SFT & RL：迈向大型语言模型后训练的统一视角,BV1Gz1MBZEGk,83,统一 SFT & RL：迈向大型语言模型后训练的统一视角,,2025-10-28,https://qingkeai.online/blog/nZxilbl5,unknown,
@@ -90,7 +90,7 @@
 89,Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架,BV1JRCyBiEp2,89,Generative RLHF-V： 面向多模态 RLHF 的人类意图对齐框架,,2025-11-15,https://qingkeai.online/blog/dU5ROQAj,unknown,
 90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,BV1xNynB1Emx,90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,,2025-11-18,https://qingkeai.online/blog/1IkXN0iq,unknown,
 91,KTransformers，在大模型微调与推理中的系统化实践,BV18wUPBEE4r,91,KTransformers，在大模型微调与推理中的系统化实践,,2025-11-22,https://qingkeai.online/blog/KTransformers,unknown,
-92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",BV1mfSjBDEnS,92,RLinf：面向具身智能的“渲训推一体化”开源强化训练框架,,2025-11-25,https://qingkeai.online/blog/RLinf,unknown,
+92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",BV1mfSjBDEnS,92,RLinf：面向具身智能的“渲训推一体化”开源强化训练框架,,2025-11-25,https://qingkeai.online/blog/RLinf,yes,
 93,通过量化与稀疏性实现高效注意力机制（SageAttention）,,,,,2025-11-29,https://qingkeai.online/blog/SageAttentionV1-V2-V3%EF%BC%89,unknown,official-only（官网有预告，B站合集无对应视频）
 94,RLinf-VLA 实践：从零上手 VLA（OpenVLA）强化学习,,,,,2025-12-02,https://qingkeai.online/blog/RLinf-VLA,unknown,official-only（官网有预告，B站合集无对应视频）
 95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix,95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,,2025-12-06,https://qingkeai.online/blog/%CF%80_RL,unknown,
@@ -127,7 +127,7 @@
 126,STream3R & 4RC: 面向几何与运动理解的流式前馈 3D/4D 重建,BV11gGt6pEKw,126,,,2026-05-19,https://qingkeai.online/blog/STream3R%264RC,yes,有B站视频（后补枚举确认）
 127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,,,,,2026-05-26,https://qingkeai.online/blog/%CE%B4-mem,unknown,official-only（官网有预告，B站合集无对应视频）
 128,MinT: 面向百万级 LoRA 策略的训练与推理基础设施,BV1j67H6TEKL,128,,,2026-06-02,https://qingkeai.online/blog/MinT,yes,有B站视频（后补枚举确认）；原备注：conflict: B站 EP128 含两个不同 talk（见 128(B站) 两行），本行（官网 MinT）与 B站视频的对应关系待终裁
-129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,128,ARPO & AEPO：智能体强化学习算法的最新进展,,2026-06-06,https://qingkeai.online/blog/ARPO-AEPO-Agent-World,unknown,numbering-conflict; title-reworded；numbering-conflict: B站期号 128 ≠ 官网期号 129；字幕接口连续串台，字幕版延后
+129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,128,ARPO & AEPO：智能体强化学习算法的最新进展,,2026-06-06,https://qingkeai.online/blog/ARPO-AEPO-Agent-World,yes,字幕第4轮 harvest 经浏览器内主题校验通过（2026-10-02），已做字幕实录版纪要
 130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,,,2026-06-09,https://qingkeai.online/blog/ZEDA-Talk,unknown,official-only（官网有预告，B站合集无对应视频）
 131,UniRL：面向统一多模态模型的分布式 RL 后训练框架,,,,,2026-06-13,https://qingkeai.online/blog/UniRL,unknown,official-only（官网有预告，B站合集无对应视频）
 132,从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制,,,,,2026-06-16,https://qingkeai.online/blog/GQLA-talk,unknown,official-only（官网有预告，B站合集无对应视频）
@@ -151,7 +151,7 @@
 150,SIM1：物理一致世界模型如何实现可扩展机器人学习,,,,,2026-09-01,https://qingkeai.online/blog/SIM1%26GAUGE,unknown,official-only（官网有预告，B站合集无对应视频）
 151,从 Harness 看 AI4AI 如何实现,,,,,2026-09-05,https://qingkeai.online/blog/Harness-AI4AI,unknown,official-only（官网有预告，B站合集无对应视频）
 152,如何在真实 Coding Agent Harness 中接入 RL？,BV1AJYx6wEpo,152,Lego：面向真实 Coding Agent 场景的数据合成与 Harness 对齐,,2026-09-08,https://qingkeai.online/blog/Lego-RL-Talk,yes,title-reworded
-153,"EnvHarness，Agent 和环境如何""左脚踩右脚""实现自进化",BV1ZqYX6YE3T,153,EnvHarness: 左脚踩右脚，左手画彩虹,,2026-09-12,https://qingkeai.online/blog/EnvHarness-Talk,unknown,title-reworded
+153,"EnvHarness，Agent 和环境如何""左脚踩右脚""实现自进化",BV1ZqYX6YE3T,153,EnvHarness: 左脚踩右脚，左手画彩虹,,2026-09-12,https://qingkeai.online/blog/EnvHarness-Talk,yes,title-reworded
 154,Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe,BV1WbeS6KEFf,154,Rethinking On-Policy Distillation of Large Language Models,01:24:51,2026-09-17,https://qingkeai.online/blog/Rethinking-OPD-talk,yes,
 155,SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战,BV1creh6LEu6,155,SkyRL：模块化 RL 后训练框架设计， 与 397B Office Work Agent 的 RL 训练实战,01:28:18,2026-09-19,https://qingkeai.online/blog/SkyRL,no,
 156,聊聊自我改进、递归自我改进（RSI），以及与自博弈的关系,BV1PZhs6bEsy,156,从 SPIRAL、SPICE 到 SPADE：大模型 RL 后训练从自博弈走向递归自我改进,,2026-09-23,https://qingkeai.online/blog/Exploring-Self-Play-Towards-Recursive-Self-Improvement,yes,title-reworded

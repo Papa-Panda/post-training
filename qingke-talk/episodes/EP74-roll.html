@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP74 — ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP74 — ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架</h1>
+    <p class="sub">ROLL 是阿里开源的大模型 RL 训练库，把"多模型、多阶段"流水线拆成单控制器 + Parallel Worker 抽象：Rollout Scheduler 做样本级生命周… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP74-roll.html</p>
+<p>"The in-house training of a Mixture-of-Experts (MoE) model with over 200B total parameters using ROLL successfully scales to thousands of GPUs for around two weeks without interruption, demonstrating its scalability and fault tolerance." —— ROLL 论文 Abstract，本期框架的生产级自证</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>74</dd><dt>标题</dt><dd>ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架</dd><dt>BV</dt><dd>BV1y4WkzME92（B站有视频；字幕接口多次返回串台字幕、无法验证，未能取得可用字幕）</dd><dt>直播时间</dt><dd>2025-08-23 10:00–11:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>王维埙（淘天集团未来生活实验室算法专家，ROLL 项目负责人之一）、熊绍潘（爱橙科技智能引擎算法平台大模型强化学习框架工程师，ROLL 核心开发成员）；官网预告嘉宾介绍</dd><dt>相关论文</dt><dd>Weixun Wang, Shaopan Xiong, Gengru Chen 等（ROLL Team），<em>Reinforcement Learning Optimization for Large-Scale Learning: An Efficient and User-Friendly Scaling Library</em>，<a href="https://arxiv.org/abs/2506.06122（2025-06-06）">https://arxiv.org/abs/2506.06122（2025-06-06）</a></dd><dt>相关代码</dt><dd><a href="https://github.com/alibaba/ROLL（Apache">https://github.com/alibaba/ROLL（Apache</a> 2.0；官网预告与论文首页均给出）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/rTh5T7KC">https://qingkeai.online/blog/rTh5T7KC</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期 B站有视频，但字幕接口多次返回与视频无关的串台字幕（无法通过标题/时长校验），未能取得可用字幕。本纪要根据该期对应的公开材料还原——官网预告（含讲者与提纲）+ ROLL 论文原文（arXiv:2506.06122）。讲授提纲以官网预告为准，架构与实验结论以论文为准。<strong>非逐字稿</strong>：talk 现场演示与问答未覆盖，实际内容可能与论文有出入。若日后取得字幕，应以字幕修订本纪要。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>ROLL 是阿里开源的大模型 RL 训练库，把"多模型、多阶段"流水线拆成单控制器 + Parallel Worker 抽象：Rollout Scheduler 做样本级生命周期调度（可动态加请求、中止请求、异步算奖励），Environment/Reward Worker 独立伸缩支撑多轮 agentic RL，AutoDeviceMapping 让同一批设备被不同阶段灵活共享；论文用多域 RLVR 与 Sokoban/FrozenLake/WebShop 三个 agentic 任务验证，并以 200B+ MoE 模型在数千 GPU 上约两周不间断训练证明其扩展性与容错。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">训练成功率 16.8%</div><div class="farrow">→</div><div class="fnode">26.0%，验证成功率 13.3%</div><div class="farrow">→</div><div class="fnode">35.2%，有效动作率 43.6%</div><div class="farrow">→</div><div class="fnode">73.4%</div></div>
+<h3>背景/问题：LLM RL 训练框架难在哪</h3>
+<p>按官网预告提纲，讲授分三部分：LLM RL 训练框架的难点、ROLL 的主要设计思路与实现（RLVR 训练流程、Agentic RL 的设计思路）、应用实践。论文 §1–§2 把难点讲得很清楚：</p>
+<p>一个标准 RL 迭代要管最多四个模型（Actor、Critic、Ref、Reward）并编排三个阶段——<strong>生成</strong>（Actor 采样，agentic 场景下还要多轮与环境交互）、<strong>推理</strong>（Critic/Ref/Reward 对生成结果做前向、算监督信号）、<strong>训练</strong>（Actor/Critic 更新参数再同步回生成侧）。各阶段的计算特征完全不同（prefill 计算密集、decode 访存密集、环境交互吃 CPU），模型规模与并行策略也各异，系统层面的核心矛盾是：资源怎么分、阶段怎么拼、样本长尾怎么处理、实验怎么快速改。</p>
+<p>ROLL 的定位（论文 Abstract、§1）是同时服务三类用户：要低成本、容错的大规模训练的 <strong>tech pioneers</strong>；要对训练工作流灵活控制的<strong>开发者</strong>（把样本路由到指定环境、奖励和设备）；要敏捷实验的<strong>研究者</strong>。它构建在 Ray 之上，整合 Megatron-Core、DeepSpeed 做训练，vLLM、SGLang 做生成。</p>
+<h3>方法/设计：单控制器 + Worker 抽象 + 样本级调度</h3>
+<p>论文 §3–§4 的模块划分（也是讲授第二部分的主体）：</p>
+<ol>
+<li><strong>单控制器 + Parallel Worker 抽象（§4.1、§4.3）</strong>：沿用 HybridFlow 的混合编程模型，在单个控制器内写 RLHF、RLVR、agentic RL 三种流水线。执行侧把同角色的一组 worker 抽象为 Parallel Worker / Cluster：Actor Worker（可兼任 Ref）、Critic Worker、Reward Worker（支持规则验证、沙箱执行、LLM-as-a-Judge 三种奖励计算）、Environment Worker（多轮环境交互）。</li>
+<li><strong>Parallel Strategy 与 Data Transfer（§4.1）</strong>：训练侧 5D 并行（DP/PP/TP/CP/EP）+ ZeRO2/3 与 offload；生成侧用 vLLM/SGLang。阶段间数据用 Transfer Protocol 重分片（reshard），参数同步走 ModelUpdateGroup（NCCL、分桶广播），训练 worker 把参数按桶广播给生成 worker。</li>
+<li><strong>Rollout Scheduler：样本级生命周期管理（§4.1、§4.3）</strong>：这是 ROLL 相对同类框架最有辨识度的设计。多数框架按 batch 处理生成，长尾样本拖垮整批利用率；ROLL 以<strong>单个样本</strong>为粒度动态调度——样本一完成就立即触发奖励计算（去掉生成与奖励之间的同步屏障）、持续按实时需求派发新样本、达到有效梯度样本数阈值后主动 abort 其余生成。这套机制让 dynamic sampling（过采样后过滤掉准确率 0/1 的样本）显著加速：异步奖励、动态加请求、按需中止三件事都建立在样本级控制上。</li>
+<li><strong>Agentic RL 支持（§3.4）</strong>：多轮 agent-环境交互（设计受 RAGEN 启发）、环境按样本规模伸缩（sample-wise environment scaling）、环境执行与 Actor 生成异步并行，减少 GPU 空等。Environment Worker 通常是 CPU 密集型，ROLL 把它们分布到资源池里避免与 GPU 侧互相干扰；样本可按需路由到不同 Reward/Environment Worker 组合。</li>
+<li><strong>AutoDeviceMapping + Resource Pool（§4.1、§4.3）</strong>：用户自定义设备分配，同一块设备可被不同阶段的多个模型共享（例如把生成阶段的一部分 GPU 临时分给训练阶段），而不是像早期框架那样阶段间独占分区。</li>
+</ol>
+<h3>实验/实战（论文 §5）</h3>
+<p><strong>RLVR 管线（§5.1）</strong>：多域数据（数学 DeepMath-103K 抽 5000 条、代码 KodCode 抽 2000 条、通用域多数据集清洗），域采样比数学/代码/通用为 40%/30%/30%，奖励用规则验证 + 代码沙箱 + LLM-as-a-Judge。底座 Qwen2.5-7B-Base 平均准确率从 0.18 升至 0.52（2.89×，Fig.3），其中数学 0.20→0.53、代码 0.13→0.41；MoE 底座 Qwen3-30B-A3B-Base 从 0.27 升至 0.62（2.30×，Fig.4），波动比 dense 大但全程无崩溃（论文 §5.1）。优化用 PPO loss + REINFORCE 回报算优势（不用 GAE）。</p>
+<p><strong>Agentic 管线（§5.2）</strong>：三个环境都拿 Qwen2.5-0.5B-Instruct 起步（WebShop 用 Qwen2.5-7B-Instruct）：</p>
+<ul>
+<li><strong>Sokoban（§5.2.1）</strong>：8 GPU、rollout batch 1024。训练成功率 16.8%→26.0%，验证成功率 13.3%→35.2%，有效动作率 43.6%→73.4%（Fig.5），且能迁移到 FrozenLake。</li>
+<li><strong>FrozenLake（§5.2.2）</strong>：训练成功率 16.8%→峰值 26.0%（+55%），有效动作率 69.1%→88.8%；只在 FrozenLake 上训练，SimpleSokoban 验证成功率也能到 23.8%，有跨环境迁移（Fig.6）。</li>
+<li><strong>WebShop（§5.2.3）</strong>：序列长 8192、每条轨迹上限 50 步。训练/验证成功率从 37% 升到 85% 以上，平均完成步数从 7 步以上降到约 4 步（Fig.7）。</li>
+</ul>
+<p><strong>规模自证（Abstract）</strong>：内部用 ROLL 训练 200B+ 总参数 MoE 模型，在数千 GPU 上连续运行约两周不中断——这是框架容错与扩展性的主要证据，论文正文未给吞吐/扩展效率数值表。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RLVR 平均准确率（Qwen2.5-7B-Base，多域）</td>
+<td>0.18</td>
+<td>0.52（2.89×）</td>
+<td>论文 §5.1、Fig.3</td>
+</tr>
+<tr>
+<td>RLVR 平均准确率（Qwen3-30B-A3B-Base，MoE）</td>
+<td>0.27</td>
+<td>0.62（2.30×），全程无崩溃</td>
+<td>论文 §5.1、Fig.4</td>
+</tr>
+<tr>
+<td>Sokoban 成功率（训练 / 验证，Qwen2.5-0.5B-Instruct）</td>
+<td>16.8% / 13.3%</td>
+<td>26.0% / 35.2%；有效动作率 43.6%→73.4%</td>
+<td>论文 §5.2.1、Fig.5</td>
+</tr>
+<tr>
+<td>WebShop 任务成功率（Qwen2.5-7B-Instruct）</td>
+<td>37%</td>
+<td>85% 以上；平均步数由 7 步以上降至约 4 步</td>
+<td>论文 §5.2.3、Fig.7</td>
+</tr>
+<tr>
+<td>大规模容错验证</td>
+<td>—</td>
+<td>200B+ MoE、数千 GPU、约两周不间断训练</td>
+<td>论文 Abstract</td>
+</tr>
+</tbody>
+</table>
+<p>注：论文未给出与 verl/OpenRLHF 等框架的同条件吞吐对比表，本纪要不做跨框架效率推断。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>样本级 rollout 调度是治长尾的正解</strong>：把生成调度粒度从 batch 降到单样本（完成即算奖励、按需加请求、够数即 abort），在样本难度悬殊的代码/agentic 数据上直接提升 GPU 利用率，也是实现 dynamic sampling 的前提。自研框架时优先抄这条，而不是先调并行参数。</li>
+<li><strong>Environment/Reward Worker 独立 worker 化 + 设备映射可共享</strong>：环境交互是 CPU 密集、奖励计算形态多变（规则/沙箱/LLM judge），把它们做成可独立伸缩、可按样本路由的 worker，并允许设备跨阶段共享，比阶段独占分区的资源弹性好得多。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：</li>
+<li>三类用户分层（大规模容错 / 灵活控制 / 快速实验）是框架定位的好框架：评估 RL 框架时先问它优先服务哪一类，再看模块取舍是否对得上。</li>
+<li>200B+ 模型数千卡两周不间断是"生产级"的硬门槛证据；做框架选型时，容错（断点续训、worker 故障隔离）应和吞吐一起列入验收项，而不是事后补丁。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：论文未报告与 verl、OpenRLHF 在相同模型与硬件下的吞吐/扩展效率对比，Rollout Scheduler 的样本级调度收益也只以 dynamic sampling 的定性加速呈现——实际选型前需找第三方基准或自测数据补齐。</li>
+<li>现场内容不可还原：王维埙、熊绍潘的讲授侧重（预告提纲中「应用实践」具体案例）与现场问答无法从论文推知；字幕若后续可取得，应以字幕为准修订本纪要。</li>
+<li>环境伸缩的上限未明：sample-wise environment scaling 在环境本身很重（如带沙箱的代码执行）时能伸到多大、成本如何，论文未给量级数据。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"the Rollout Scheduler offers fine-grained management of each sample's lifecycle during the rollout stage" —— 论文 Abstract，ROLL 相对 batch 级框架的核心差异点</p>
+<p>"ROLL caters to three primary user groups: tech pioneers aiming for cost-effective, fault-tolerant large-scale training, developers requiring flexible control over training workflows, and researchers seeking agile experimentation." —— 论文 Abstract，框架的三类用户定位</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

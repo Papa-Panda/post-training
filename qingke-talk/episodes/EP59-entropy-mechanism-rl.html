@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>青稞Talk EP59：大模型推理强化学习中的熵机制</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>青稞Talk EP59：大模型推理强化学习中的熵机制</h1>
+    <p class="sub">RL 训推理模型训不动、训不长的关键阻碍是 entropy collapse：熵在训练早期迅速耗尽，性能随之饱和；讲者给出熵与性能的经验定律、协方差机制解释，并提出只改约十行代… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">提炼方式说明</a><a href="#sec-3">一句话总结</a><a href="#sec-4">核心</a><a href="#sec-5">关键数字总表</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP59-entropy-mechanism-rl.html
+「（强化学习训练中）entropy 很快就会降到一个接近零的值，performance 的提高也随之来到了一个瓶颈，也就是说，performance 的提高和 entropy 的降低是同时进行的。」——讲者开场陈述核心现象（字幕 [11:35]–[11:53]）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP59（官网期号 EP59；B站合集视频标题与内容一致）</dd><dt>标题</dt><dd>大模型推理强化学习中的熵机制</dd><dt>BV</dt><dd>BV1Bp4uzkECF</dd><dt>时长</dt><dd>3630 秒（约 60 分钟）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>讲者</dt><dd>北京大学博士（主持人开场介绍作「张宇纯」，席间称「雨辰博士」，结尾致谢作「张雨辰」；字幕 ASR 姓名写法不一，此处以「张雨辰」记并存疑）。本工作由上海人工智能实验室、清华大学、UIUC、北京大学、南京大学、香港中文大学六家机构合作完成（字幕 [03:31]–[03:41] 自述）。</dd><dt>相关论文</dt><dd><em>The Entropy Mechanism of Reinforcement Learning for Reasoning Language Models</em>（对应方法 Clip-Cov / KL-Cov；arXiv 编号字幕未给出，未编造）</dd><dt>相关代码</dt><dd>方法已合入 verl 框架，切换 loss_mode 即可使用（字幕口径）</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>提炼方式说明</h2>
+<p>本纪要基于 B站 AI 字幕清洗提炼，非逐字稿；专有名词（人名、机构名、模型名）可能有识别误差，关键数字均标注字幕出处。原始字幕存档见 <code>transcripts/EP59.txt</code>（共 1433 条，末条 3614.96 秒）。</p>
+</section>
+<section class="sec sec-lede" id="sec-3"><h2><span class="n">3</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">32B</div><div class="l">AIME24</div></div></div>
+<p>RL 训推理模型训不动、训不长的关键阻碍是 entropy collapse：熵在训练早期迅速耗尽，性能随之饱和；讲者给出熵与性能的经验定律、协方差机制解释，并提出只改约十行代码的 Clip-Cov / KL-Cov 两种干预，在 32B 上把 AIME24 拉高约 15%。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心</h2>
+<h3>1. 背景/问题：熵崩塌是 RL scaling 的拦路虎</h3>
+<p>OpenAI 的技术报告宣称 RL 可以用更多训练算力换更好性能，但开源复现普遍训几百步就饱和。讲者在 11 个开源模型（4 个模型家族，含 Qwen、Llama、DeepSeek 等，字幕 [11:20]–[11:33]）上复现实验，发现一个共同现象：训练中策略熵（entropy）迅速趋近于零，性能提升同步到达瓶颈——两者不是巧合，而是强耦合。数据点很刺眼：前 200 步熵已消耗 73%（只剩 27%），而性能已完成总提升的 76%；到 600 步熵只剩 6%，性能完成 93%（字幕 [11:58]–[12:12] 起）。换句话说，RL 的「有效训练」几乎全发生在熵耗尽之前，之后再堆步数基本是空转。</p>
+<h3>2. 经验定律：性能上限在训练前就被熵决定</h3>
+<p>讲者拟合出熵 $H$ 与性能 $R$ 的经验关系：</p>
+<p>$$R = -A e^{H} + B$$</p>
+<p>其中 $A$ 、 $B$ 为拟合常数。含义是：性能随熵下降而上升，但熵耗尽（ $H \to 0$ ）时的性能上限在训练开始前就由初始条件决定。更实用的一点：只用前 15% 训练步的数据拟合这条曲线，就能预测最终性能，数学任务平均误差 0.9%、代码任务 1.2%（字幕口径）。这给 RL 训练提供了一个早期止损/调参的量化工具——不用训完就知道这轮配置的天花板。</p>
+<h3>3. 机制：谁在杀死熵？——log-prob 与 advantage 的协方差</h3>
+<p>为什么熵会单调崩塌？讲者从策略梯度的更新式出发推导出：每一步熵的变化量，与该步各 token 处 log-probability（或 probability）与 advantage 的协方差正相关。直觉是：</p>
+<ul>
+<li>「高概率 token + 高 advantage」：模型反复强化已经很确信的 token，分布更尖锐 → 熵下降；</li>
+<li>「低概率 token 意外拿到高 advantage」：冷门 token 被抬起来，分布被摊平 → 熵上升。</li>
+</ul>
+<p>正常训练里前者占绝对主导，所以熵一路向下。讲者还用题目难度验证了这条机制：rollout 8 次正确率分别为 0.125、0.5、0.875 的题目上，测得的协方差随难度变化与理论预测吻合（难度越大、协方差越低）。熵不是玄学指标，而是可以被 advantage 分布定量解释的量。</p>
+<h3>4. 传统方法为何失效</h3>
+<ul>
+<li><strong>熵正则</strong>：系数极度敏感。字幕口径下，系数从 0.001 降到 0.0001 几乎无变化，再调大熵直接冲过初始值且不带任何性能收益——没有可用的甜点区。</li>
+<li><strong>与 reference policy 的 KL 惩罚</strong>：能把熵保住，但代价是性能下降。讲者称之为「假阳性」：它只是限制了策略更新幅度，熵高是因为模型没怎么动，而不是探索得更好。</li>
+</ul>
+<p>结论：熵要「对症」维持，而不是靠全局正则硬撑。</p>
+<h3>5. 方法：盯住极少数极端 token——Clip-Cov 与 KL-Cov</h3>
+<p>机制分析给出关键洞察：熵的变化被极少数高协方差 token 主导。字幕数据：占 0.02% 的极端 token，其协方差均值达 5.6，而全体 token 的均值只有 0.003，相差数千倍（字幕 [27:54]–[28:05]）。也就是说，不是所有 token 在杀熵，是极少数离群 token 在主导。于是两种干预都只动这些 token：</p>
+<ul>
+<li><strong>Clip-Cov</strong>：在协方差处于极端区间（字幕口径约 1–5）的 token 中，随机抽取一小部分（字幕口径约 0.02%–0.2%），直接 clip 掉它们的梯度、不参与更新（字幕 [30:47]–[31:13]）。</li>
+<li><strong>KL-Cov</strong>：对高协方差位置施加 rollout policy 与待更新 policy 之间的 KL 惩罚，讲者称其在实验中更稳定有效（字幕 [31:17] 起）。</li>
+</ul>
+<p>两种方法改动量都只有约十行代码，已合入 verl，切换 loss_mode 即可启用，默认参数即论文参数（论文发出约一个月后合入，字幕口径）。</p>
+<h3>6. 实验结果</h3>
+<p>干预后 response length 显著变长、熵被维持在可控高位而不再崩塌。规模效应明显：32B 上的增益远大于 7B（讲者解释为大模型探索空间更大、更受益于熵维持）。字幕给出的 32B 数字：AIME24 提升约 15%，AIME25 提升字幕作「10% 4.6」、口径含糊，此处记为约 10% 并存疑（字幕 [34:38]–[34:47]）。对比参照是 DAPO 的 Clip-Higher 技巧（字幕作「double」，即把 clip 区间从 0.8–1.2 放宽到 0.8–1.28）——那是全局放宽，Clip-Cov/KL-Cov 是按协方差定点干预，粒度完全不同。</p>
+<h3>7. 结论/观点（含 Q&amp;A）</h3>
+<ul>
+<li>「健康的熵」没有绝对数值标准，但经验上不应超过初始熵；熵是训练状态的仪表盘，不是越高越好。</li>
+<li>与 Qwen 团队 forking tokens 工作的区别：协方差是概率与 advantage 的联合量，不能只看 token 自身的熵；且高协方差的主力其实是低概率、低 advantage 的 token（讲者在 Q&amp;A 中自我修正了早先表述，字幕 [40:41]–[40:53]）。</li>
+<li>熵不能简单用训练 step 代替做性能预测——不同配置下熵的消耗速度不同，这正是经验定律要用 $H$ 而非步数做自变量的原因。</li>
+<li>对 pass@k 定义的能力上限，讲者本人持保留意见：pass@k 测的是采样覆盖，不等同于模型能力的真实边界。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>复现实验规模</td>
+<td>11 个开源模型、4 个模型家族</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>前 200 步熵消耗 / 性能完成度</td>
+<td>熵耗 73%（剩 27%）/ 性能完成 76%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>600 步时熵剩余 / 性能完成度</td>
+<td>熵剩 6% / 性能完成 93%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>经验定律拟合范围与预测误差</td>
+<td>前 15% 步拟合；数学 0.9%、代码 1.2%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>极端 token 占比与协方差均值</td>
+<td>0.02% 的 token 均值 5.6 vs 全体 0.003（数千倍）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Clip-Cov 抽取比例</td>
+<td>约 0.02%–0.2% 的高协方差 token（口径存疑）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>32B AIME24 提升</td>
+<td>约 +15%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>32B AIME25 提升</td>
+<td>约 +10%（字幕作「10% 4.6」，存疑）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>熵正则系数敏感区间</td>
+<td>0.001 → 0.0001 几乎无变化</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>难度验证 rollout 正确率档位</td>
+<td>0.125 / 0.5 / 0.875（各 rollout 8 次）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>给自己的 GRPO/RL 训练加一条监控：逐步记录策略熵与「log-prob × advantage 协方差」的分布，熵崩塌前先看到的是协方差极端值的累积；用前 15% 步拟合 $R = -A e^{H} + B$ 做早期天花板预测，决定是否值得继续烧算力。</li>
+<li>Infra 视角：Clip-Cov/KL-Cov 已在 verl 里以 loss_mode 形式提供，接入成本约等于改一行配置；做 RL 框架选型/二次开发时，熵与协方差应作为一等公民指标进 tracing，而非只看 reward 曲线。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>协方差的「极端区间」与抽取比例在不同基座/任务上是否需要重调？字幕只给了数学/代码场景，回论文查超参敏感性表。</li>
+<li>AIME25 的 +10.4.6 到底是哪个口径（绝对分还是相对提升），需回论文核对后再引用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句</h2>
+<blockquote class="pq">
+<p>「数据是可以用完的，但是数据背后的奖励是用不完的。」（引丁宁老师语，字幕 [06:02]–[06:07]）</p>
+<p>「（KL 正则保住熵是）假阳性，只是限制了更新。」（大意，字幕原话以字幕存档为准）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP71 — RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP71 — RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题</h1>
+    <p class="sub">RLVR 的判定靠规则验证器或者外置判分模型：规则覆盖不了自然语言的表达多样性，判分模型要标注、拖慢系统。RLPR 换个思路——把参考答案拼到模型自己的推理链后面，用策略模型本… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP71-rlpr.html</p>
+<p>「我们不再是把语言模型当成一个专有任务的 actor，而是利用语言模型本身生成文本的概率——这就是它从随机初始化起一直优化的统一任务，next token prediction。」（出自讲者总结 RLPR 为何不死板一段，语义据字幕）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>71</dd><dt>标题</dt><dd>RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题</dd><dt>BV</dt><dd>BV1cF4Yz2E5z</dd><dt>时长</dt><dd>01:14:10（主讲约 41 分钟 + Q&amp;A 约 33 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>于天宇（清华大学自然语言处理实验室 THUNLP；研究方向：多模态大模型；字幕中主持人介绍为「于天宇博士」，讲者属 THUNLP，相关既往工作含 TCRL 等）</dd><dt>相关论文</dt><dd>RLPR（本期主讲工作，arXiv 号字幕未报，待补录）；对照工作：同期方法 VeriFree（字幕作「very free」，用 likelihood 奖励加辅助损失）、General Reasoner（字幕作「general reader」，即通用验证器路线）</dd><dt>相关代码</dt><dd>讲者称 RLPR 本身的实现不开源说明不明确（字幕未明确提及开源），训练框架使用 verl（Q&amp;A 中讲者确认 rule/verl 口径——字幕作「VERL，效率比较高的一个框架」）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1cF4Yz2E5z/">https://www.bilibili.com/video/BV1cF4Yz2E5z/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP71.txt</code>（1917 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP71，已存档）清洗提炼，来源为 AI 字幕原文（经清洗，专名可能有识别误差，如 RLPR 在字幕中多作「RLPL/LPR/LP」、VeriFree 作「very free」、General Reasoner 作「general reader」、PRIME 作「prime」、Minerva Math 作「minimal mass」、Qwen 作「千万/千位」，均按公开资料与语境校订）。凡关键数字均为字幕口径；讲者明确以 avg@k 多次评测汇报，部分数字口播取整，与论文表格可能有出入。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>RLVR 的判定靠规则验证器或者外置判分模型：规则覆盖不了自然语言的表达多样性，判分模型要标注、拖慢系统。RLPR 换个思路——把参考答案拼到模型自己的推理链后面，用策略模型本身对这段参考答案各 token 的平均概率当奖励：正确答案在模型自己「想通了」的推理后面概率更高，错误的推理会让概率塌陷至一个「sink」。在这个连续奖励上再做两件事——减掉空推理基线消掉风格与模型偏好造成的系统偏差、用组内奖励标准差替代 0/1 准确率做样本过滤——拿到一条不需要验证器、不需要判分模型、只用模型自己 next-token 预测能力的通用领域 RL 奖励管线，效果与稳定性全面超过同期 likelihood 奖励路线（VeriFree）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景：为什么 RLVR 推不出数学代码之外</h3>
+<p>讲者把 RLVR 的三种既有验证方式各判了一遍：</p>
+<ol>
+<li><strong>规则验证器</strong>（正则抽取 + 符号等价匹配）：每个领域都要单独编写规则，数学要处理 5.0 与 5、代码要跑编译与测试；且规则本身有长尾覆盖问题——比如「A×B 与 B×A 等价」这条，在矩阵乘法里是没有交换律的，规则写不对就误判；</li>
+<li><strong>外置判分模型</strong>（General Reasoner 一类）：需要大量人工标注训练一个判分器，判分器一进系统，RL 管线的复杂度与时延都被抬高；</li>
+<li><strong>共同问题</strong>：两者都处理不好自然语言表达的灵活性与多样性。讲者现场给了一个例子：一道酸碱强弱排序题，正确答案可以用 <code>&lt;</code> 分隔、逗号或顿号——都对，但规则和判分模型会把与参考字面不同的正确输出判错（字幕中记作「CBAD 式输出被判错」）。</li>
+</ol>
+<p>核心洞察随之而来：语言模型自回归地给整个序列打概率，「模型在想通之后、输出正确答案的概率」本身就是一个连续的正确性指示。讲者在白板上演示了酸碱排序例子：推理顺序排对的那条回答，参考答案的概率平滑；排反了的那条，在参考答案对应的位置出现一个明显的概率 sink——这个下降就是信号。</p>
+<h3>方法：参考概率奖励 + 纠偏 + 标准差过滤</h3>
+<p><strong>奖励定义</strong>。给定题目 $x$ 、模型生成的思考过程 $z$ 与最终答案，把答案替换成参考答案 $y^*$ ，整段序列送回策略模型本身，取参考答案每个 token 概率的算术平均作奖励 $R$ 。</p>
+<p>为什么是算术平均而不是 likelihood（乘积）？讲者给了个三 token 的小例子：第一个 token 经常是「冒号」一类的不可控低概率 token（0.001 与 0.05 在直觉上是同样的「不太可能说」，但乘积会把两个回答的奖励拉出 5 倍差距），likelihood 被单个低概率 token 主导，既不鲁棒又高方差；而算术平均对离群 token 天然钝感。消融里把算术平均换回 likelihood，掉点明显——讲者解释说奖励质量指标上差异不大，但训练跑几百步，一次坏奖励就足以污染一轮更新。</p>
+<p><strong>纠偏（减基线）</strong>。概率得分不只受 $z$ 的好坏影响，还受答案风格、模型当下表达偏好等「未观测潜变量」影响（有的模型爱列点、有的爱长句）。处理方法：把 $z$ 拿掉、直接算参考答案在空上下文下的得分 \$R'\$ ，两式相减才得到最终奖励 $\hat{R}$ —— $z$ 的贡献被从风格基线里剥出来。公式骨架：</p>
+<p>$$\hat{R} = R(x, z, y^*) - R(x, \varnothing, y^*)$$</p>
+<p><strong>标准差过滤</strong>。PRIME 的 prompt filtering / DAPO 的 dynamic sampling 靠「一组 rollout 全对或全错就丢」保 batch 里有学习信号，但那依赖 0/1 奖励。RLPR 的奖励是连续的，于是把过滤标准换成组内奖励的标准差：std 太小（大家都高或都低、题目过易过难）就丢掉，保留难度适中的样本持续学。</p>
+<p>奖励计算的职责最终还是策略模型自己承担：讲者建议不用额外引入大模型打奖励，「0.5B 模型就用 0.5B 自己打，7B 就用 7B」，零新增系统开销。另外 Q&amp;A 中交代实现细节：think 用尖括号、最终答案用 <code>&lt;answer&gt;</code> 标签包住，正则抽出答案段做替换，计算成本只是一次前向。</p>
+<h3>实验：三个模型家族 + 与 VeriFree 对比 + 奖励质量</h3>
+<p><strong>主实验</strong>（字幕口径）。在 Gemma、Llama、Qwen 三个系列上与 RLVR 同超参对照训练：RLPR 在通用能力上比 RLVR 额外多涨点，其中一个系列 +1.4 点、Llama +4 点、Qwen 亦约 +1.4 点（字幕口述略有含糊，此处按其顺序记录），计入数学能力后结论一致。</p>
+<p><strong>与同期工作 VeriFree 对比</strong>（同训练规格）：某个 QA 任务上高约 8 个点，Minerva Math 高 7.5 个点；平均通用任务高 3.5 个点，通用+数学共 7 个 benchmark 高出近 4 个点。稳定性对比更有意思：双方都换三组不同提示词（如 R1 式、Qwen-Math 式）重跑，RLPR 的三条训练曲线挤在窄带里而 VeriFree 明显发散；答案长度行为上 VeriFree 出现「三组平行线」、RLPR 一致——讲者归因于 likelihood 建模的乘积结构对低概率 token 的敏感，以及 VeriFree 需额外辅助损失维持训练。</p>
+<p><strong>奖励质量（ROC-AUC）</strong>（把奖励当「对/错」分类器、用人工复核标签测其排序能力）：规则奖励在数学上做到 0.95 左右但通用域大幅衰减；通用验证器经训练能比规则在通用域高约 8~10 个点但数学上并无优势；likelihood 数学 0.95、通用约 0.8；RLPR 在通用域把奖励质量做到 0.9 以上（Q&amp;A 口径作「90 多」），且 0.5B 的小策略模型已经足够、7B 更高、72B 边际收益有限。评测协议上所有 benchmark 报告 avg@k，AIME 这种 30 题的小集测 16 次取平均——讲者称这样做之后先前文献里那种 AIME 涨跌剧烈的现象消失了，结果是稳定抬升。</p>
+<p><strong>与 RLVR 互补性的一个小实验</strong>：在 PRIME 数据上把连续的 PR 信号与 0/1 VR 相加融合，SimpleQA（字幕作「sim m q a」）约 +4 点、Minerva 约 −1 点——简单的 advantage 相加融合不是全面提升，讲者判断融合方向有空间但需要更好的融合方式。</p>
+<h3>讨论：三个「更本质的问题」与 Q&amp;A 要点</h3>
+<p>讲者在主讲末尾把工作放回更大的问题清单，有三个值得记：</p>
+<ol>
+<li><strong>Data scaling</strong>：现在 RL 训练常常几千步跑十几个 epoch 的固定 prompt 集，「瓶颈到底在数据不够，还是数据的作用没被发挥出来」未定；RLPR 能 unlock 数学/代码/rules 覆盖不到的数据，这个问题在 RLPR 之后更值得重问。</li>
+<li><strong>Effective exploration</strong>：用 pass@1024 这类严格标准去衡量，RL 训练后模型「能解决的题集」几乎不变，涨的全是 pass@1。原因是探索被模型先验约束——训练得 loss 越低越采不出新路径。先验与探索的矛盾是公开的争议点，讲者未给解法，明说这是个值得讨论的方向。</li>
+<li><strong>效率</strong>：RL 继承了预训练与 SFT 的低效又加上同步开销，数据可 scale、exploration 可放宽之后，训练速度会先撞墙。</li>
+</ol>
+<p>Q&amp;A 中讲者明确给出的边界：依赖参考答案是方法的固有限制，没有参考答案的任务（如 deep research 报告）RLPR 不适用，无监督路线（TTRL、entropy reward 一类）上限目前不高；参考答案长几十到一百词都能训，关键看其是否唯一、是否有指示价值；完全没见过的垂直领域 RLPR 训不动（模型拿不到正奖励），需要先补 mid-training；chain-of-thought 的思考过程在 RLPR 里不直接提供奖励信号（只有最终答案被评估），讲者认为刻意约束过程好比「手把手教小孩骑车，可能学得更慢」；关于「和 SFT 的本质区别」：RLPR 与 RLVR 同构，都是序列级 outcome reward 做策略更新，完全不需要 $z$ 的逐 token 标签——需要高质量数据的只有 $y^*$ 这一个点。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<p>以下均为字幕口径，未与论文表格逐项核对。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>对照</th>
+<th>RLPR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通用能力（vs RLVR，同超参）</td>
+<td>基线</td>
+<td>额外 +1.4 ~ +4 点（因模型系列而异）</td>
+</tr>
+<tr>
+<td>对 VeriFree：某 QA 任务</td>
+<td>VeriFree</td>
+<td>+约 8 点</td>
+</tr>
+<tr>
+<td>对 VeriFree：Minerva Math</td>
+<td>VeriFree</td>
+<td>+7.5 点</td>
+</tr>
+<tr>
+<td>对 VeriFree：7 个 benchmark 平均</td>
+<td>VeriFree</td>
+<td>+近 4 点（通用单独 +3.5）</td>
+</tr>
+<tr>
+<td>奖励 ROC-AUC：数学</td>
+<td>规则 0.95</td>
+<td>0.95 量级</td>
+</tr>
+<tr>
+<td>奖励 ROC-AUC：通用域</td>
+<td>likelihood 约 0.8</td>
+<td>0.9 以上</td>
+</tr>
+<tr>
+<td>PR+VR 融合（PRIME 数据）</td>
+<td>纯 VR</td>
+<td>SimpleQA 约 +4、Minerva 约 −1</td>
+</tr>
+<tr>
+<td>AIME 评测协议</td>
+<td>单次</td>
+<td>avg@16</td>
+</tr>
+<tr>
+<td>likelihood vs 算术平均小例</td>
+<td>3-token</td>
+<td>乘积可使两回答奖励差 5 倍</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的直接可试点：</li>
+<li>「把参考答案拼到自己推理后面、取概率均值减空推理基线」是一条极廉价的通用域奖励管线——只多一次前向（还可与训练前向合并），且不需要养任何外置判分模型。在自家领域里先按讲者的方法测一下 ROC-AUC：若奖励质量能到 0.9 上下，再考虑上 RL；</li>
+<li>标准差过滤是 prompt filtering 在连续奖励世界里的等价物，已有的 GRPO 训练里只要组内 std 太小的 prompt 换个实现就能丢，是一行级改造；</li>
+<li>评测协议直接抄：小 benchmark reporting avg@k（AIME 测 16 次）能消掉很多「涨跌剧烈」的假象，做 RL 实验时尤其值得。</li>
+<li>Infra 视角的启发：</li>
+<li>奖励计算零新增组件（策略模型自打）意味着 verl 里 RLPR 只是把 reward function 从「规则函数」换成「模型内嵌前向统计」，对现有 RL infra 改造成本最低；对比之下外置判分模型要付常驻推理服务与版本对齐的成本；</li>
+<li>likelihood 类连续奖励的稳定性风险值得注意：如果自己在训通用域 RL，用乘积形式前先想好低概率 token 的钝化（算术平均、clip、或 top-prob 截断），不然每次坏奖励都可能污染掉一整轮更新。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>ROC-AUC 从 0.9 再往上（如提升 5 个点）到底能换多少最终能力，讲者自己也说这条「奖励质量—最终能力」的量化关系还没人测过。下一步如果想深挖：以 0.5B/7B/72B 三个奖励强度（讲者口径三者差异不大）为自变量做一次控制变量实验，直接回答「reward 还要不要继续卷」。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们并没有把语言模型当成一个特定任务的实施模型——评估概率这件事，就是语言模型从随机初始化起、一直在优化的统一任务。」</p>
+<p>「你把这道题解出来，靠的不是模仿别人怎么写解答，而是让模型自己探索出他输出得出来的路径，再用这个能力教他这道题该答 A 还是答 B。」</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

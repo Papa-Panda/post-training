@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP153 — EnvHarness：Agent 与环境如何「左脚踩右脚」实现自进化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP153 — EnvHarness：Agent 与环境如何「左脚踩右脚」实现自进化</h1>
+    <p class="sub">黄承松的 Environment Harness 给「静态环境」加一层可编程外壳：用 Stage / Contract / Chain 三类不改 task 与 verifier… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">关键数字总表</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP153-envharness.html</p>
+<p>「环境就是训练数据。只要环境不撒谎，我们就可以像扩展数学公理一样扩展训练信号。」——讲者自进化观点的点题句（字幕口径归纳）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>153</dd><dt>标题</dt><dd>EnvHarness：Agent 与环境如何「左脚踩右脚」实现自进化</dd><dt>BV</dt><dd>BV1ZqYX6YE3T</dd><dt>时长</dt><dd>01:08:03</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>黄承松（Google 实习期间完成本工作；此前做自演化系列 R-Zero / G-Zero；字幕 [43:14] 主持人致谢时点名，姓名口径以论文作者页为准）</dd><dt>相关论文</dt><dd><em>Environment Harness</em>（副标题字幕作 "Awaking static words for agent learning"，拼写以论文页为准；代码与 24 点 playground 已开源，链接以论文/官网页为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1ZqYX6YE3T/">https://www.bilibili.com/video/BV1ZqYX6YE3T/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP153.txt</code>（1506 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP153，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如论文副标题、playground 演示的牌面数字在字幕中多处破碎，均已标注字幕口径或略去）。凡讲授口径与论文版可能不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>黄承松的 Environment Harness 给「静态环境」加一层可编程外壳：用 Stage / Contract / Chain 三类不改 task 与 verifier 的组件调难度、改观测、拼长程，再让 Environment Rigger 这个 agent 读 policy 轨迹、写 harness 代码、以 0.4–0.6 成功率带做闭环 accept/reject/refine——实证仅 50 个 SWE-Lite 基础环境迭代改造后训练效果超过 300 个真实环境，而每个改造环境的成本最低约 \$0.5 、仅为人造环境的四十分之一。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>出发点：训练信号的天花板是环境</h3>
+<p>讲者的切入点是 agent 训练里一个常被忽视的不对称：policy 在学，环境却是死的。由此有三态失效——任务太难则 policy 永远采不到正确轨迹、无梯度可言；太易则全解、无信号；更麻烦的是难度会随 policy 变强而失效。环境合成每域单独设计 pipeline、成本高且不迁移；人工造环境贵得离谱：Terminal-Bench 每个环境约 15.9 小时（制作 7–8 小时 + 人工验证约 3 小时、可达三轮），约 100 个环境近 1400 小时；Apex Agents 33 个环境每个约 500 小时、共约 16000 小时。在 outcome-only reward 下，这意味着 GRPO 的组内经常全错或全对、没有可用信号。讲者把问题归到：训练用的「数据」是环境，而环境是唯一没有跟着 agent 一起变的变量。</p>
+<h3>环境的定义：只改三件套中的壳，不改任务与验证器</h3>
+<p>讲者把环境拆为三件套：<strong>task</strong>（要完成什么）、<strong>sandbox</strong>（初始状态、action space、可观测信息、状态转移，即一个马尔可夫式的环境定义）、<strong>verifier</strong>（判定成败）。Environment Harness 的铁律是：<strong>绝不改 task 与 verifier</strong>。理由很硬——改了 verifier，就无法保证 reward 仍然正确，这是所有环境合成方法的通病。Harness 的定位是类比 Agent Harness（skill / memory / context control 之于 LLM 本身）：在环境外面加一层可控、可定制的壳，不动底层。这层壳由三个组件构成：</p>
+<ol>
+<li><strong>Stage（开局布置）</strong>：在 policy 开始行动之前，由另一个 agent 用环境原生的合法 action 预先改变初始状态。可以调难：把要洗的杯子藏进抽屉并关上，于是 policy 多学「找—开—取」这段前置行为；也可以调易：预先把杯子拿好，缩短有效 horizon。代码环境同理：删一行、改一行代码即改变开局。</li>
+<li><strong>Contract（行为约束）</strong>：对 action / observation / transition 施加 filter。讲者举例：禁掉 <code>goto</code> 这类直达动作，只留前后左右移动，逼出导航能力；或把 clean 升格为含「拿起+清洗」的高层 wash 动作、缩短 action 序列；transition 层可以规定「当前结果已注定无法达标就直接报错」；observation 层可以让 agent 只看到操作过程而非真实状态。本质上它是在 model 输出与环境 action 之间插一层 bridge/filter。</li>
+<li><strong>Chain（任务拼图）</strong>：把多个环境串联/拼成有向图——完成 A 跳到 B，跨 web / code / 现实环境，带记忆与语义信息一起过去；可以约定全部完成才算过，或完成一半给半分。目的是造出真实工作区里那种 long-horizon 任务。</li>
+</ol>
+<p>组件组合<strong>有序、不可交换</strong>：先用 Contract 禁掉加法、再 Stage 就不能靠加法改初始状态；反过来先 Stage 再 Contract 则可以。24 点例子（6666）把三者串了一遍：Stage 先把前两个 6 相乘，初始状态变成 [36, 6, 6]（字幕作「30 666」，按字面理解应为 36、6、6），horizon 立刻变短；Contract 禁掉加法，逼出非平凡解法；Chain 规定做完 6666 跳到 3388 继续。</p>
+<h3>Environment Rigger：写 Harness 的代理与闭环判据</h3>
+<p>光有组件不够，还得有人决定给哪个环境加什么。<strong>Environment Rigger</strong> 是另一个 agent（LLM），工作流是：读 policy 在环境里的轨迹 → 对照模板写出 harness 代码草稿 → 拼回环境让 policy 重跑 → 按客观条件判断是否 accept / reject / refine。它可以一次写 stage+contract 的组合，要求也可以全交 rigger 自定。讲者给了真实工程味很重的例子：SWE 场景里 agent 总在提交前不跑 unit test，harness 就规定「不跑 unit test 提交即判失败」——这是把缺陷诊断直接写成环境约束。</p>
+<p>采纳判据讲者讲得很直白：5 次 rollout 里对 2 次或 3 次，即成功率落在 <strong>0.4–0.6</strong> 区间。理由是 GRPO 类算法在正确率约 50% 时训练信号最有用；且所有 benchmark 共用这一个固定区间，不逐个调。他原话是「选五这个数字没有别的原因，就是写了五」。Rigger 的候选接受率约 40%–60%（不同 benchmark 在 30%–80% 之间）；产不出组件时回退原环境继续训。</p>
+<h3>实证：50 个基础环境迭代改造 &gt; 300 个真实环境</h3>
+<p>主实验是 skill optimization（从轨迹里蒸馏 skill 的 harness-optimization 流程），覆盖 coding、office QA（表格类）、document QA 等域，结论：EnvHarness 改造过的环境能给出比真实环境更好的训练信号，因为改造是针对当前 policy 的能力分布与缺陷定制的。关键的可迁移证据两条：</p>
+<ol>
+<li><strong>下游无污染</strong>：SWE-Lite 的 50 个基础环境上多轮迭代 EnvHarness，训练效果超过 300 个真实环境；评测在未加 harness 的 held-out 测试集（SWE-bench Verified 类）上做，不存在对 harness 本身过拟合的问题。Chain 蒸馏出的 skill 多在教 agent「如何适应一个更新更好的环境」，迁移到无 chain 的真实环境仍有效且省训练步数。</li>
+<li><strong>增益主要来自诊断而非堆数据/堆难度</strong>（论文实验）：同样的「加更多数据」曲线打不过 harness 曲线——harness 是在具体失败模式上动手脚，不是把分布平移。</li>
+</ol>
+<p>还有一条容易被低估的机制论证：难任务上把 rollout 次数从 8 加到 80，弱模型可能照样采不出正样本；harness 给 hint、甚至让 rigger 看到 ground-truth 轨迹都<strong>不产生 off-policy 问题</strong>——因为训练仍在（改过的）新环境上 on-policy 地进行。这与「拼正确轨迹进 GRPO rollout」有本质区别。</p>
+<h3>成本账：把昂贵的人造环境变成同模型自产</h3>
+<p>成本口径（字幕）：rigger 与 policy 用<strong>同一个 base model</strong>（排除「强模型蒸馏弱模型」这个混杂因素）；用便宜的 Gemini Flash Lite 时，每个改造环境的成本约 \$0.5 ，同一预算可造约 2000 个定制环境；即使用最贵的 Opus 类模型，每个也仅约 \$40 ，是人造环境约 \$1600（按 \$100/小时、Terminal-Bench 约 16 小时）的大约 1/40 。更重要的是它能给已在 Terminal-Bench 上无信号可拿的强模型（如 Opus 5）造出可训练的难度——成本不是唯一卖点，信号覆盖才是。</p>
+<h3>讲者自陈的三条局限</h3>
+<ol>
+<li><strong>规模成本仍不便宜</strong>：覆盖上万任务时逐实例生成、成本线性（缓解路线是 harness 跨同类环境复用或对环境/harness 聚类）。</li>
+<li><strong>只适用于可 reset 的模拟/sandbox 环境</strong>：真实世界不可逆操作（杯子砸碎、钱已花出）不适用；机器人场景仅限 simulator 侧。</li>
+<li><strong>语义型 Chain 暂未打通</strong>：rigger 还没法知道另一个环境里装了什么，长上下文塞多环境 rollout 会让模型「胡言乱语」；可行解是给 rigger 配专用 harness、按需读 rollout 文件；当前 rigger 实际只自选 stage 与 contract 两类组件。</li>
+</ol>
+<h3>Q&amp;A 精华</h3>
+<ul>
+<li><strong>接口门槛</strong>：只需环境支持 gym 式三操作 reset / step / evaluate，绝大多数 benchmark 都满足（forecasting 这类与时间强相关的除外）。</li>
+<li><strong>reward 安全</strong>：task 与 verifier 不变、且有 verify 闭环兜底，改造必然留有正确轨迹，信号始终正确。</li>
+<li><strong>基模门槛</strong>：方法跨模型迁移（Gemini Flash 系、Qwen、Claude Sonnet 4.6 都有提升；Opus 5 在 SWE-bench Verified 已近满分，故图中用 SWE-Pro 的 4.8 代替），唯一要求是基模要能写代码，因为 harness 本身以代码存在。</li>
+<li><strong>自进化观</strong>（与其 R-Zero 一脉相承）：data-driven 自进化是靠谱的——环境即训练数据，如数学从公理演绎扩展；但存在经验上的饱和上限：50 个 SWE-Lite 环境迭代到某点就上不去，原因未知。</li>
+<li><strong>额外用途</strong>：harness 可以 block shortcut / reward hacking 提升泛化；整套方法也可反过来用于 benchmark 增强；或针对性上采样某类环境做能力保持（如只留 coding 环境并放大）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>可迁移</h2>
+<ul>
+<li>评估 RL 环境/数据 pipeline 的一张问卷：信号是否有随 policy 强度自适应调节的机制？没有的话，天花板就是环境本身。EnvHarness 给出的最小实现是：改初始状态、改可用动作集、改观测、拼任务图，四种变换都不得触碰 verifier。</li>
+<li>「诊断优先于堆数据」是可直接借用的实验纪律：先看 policy 的失败轨迹再决定加什么训练变换，而不是先把数据量/难度拉满——讲者用对照曲线把增益归因在诊断一侧，这对自己的 RL 数据工作是同样的提醒。</li>
+<li>on-policy 纯净性的一条设计判据：想把 ground truth / hint 注进训练时，先问注入发生在「环境侧」还是「轨迹侧」——前者（EnvHarness 式）保持 on-policy，后者（拼轨迹）会引入 off-policy 偏差。</li>
+<li>成本结构类比：环境侧自动化的边际成本（\$0.5–\$40/个）比人造（\$1600/个）低一到三个数量级，与「模型自产数据」替代「人工标注」的量级关系一致；定预算时可以按这个量级先算上界。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>疑问 / 下一步</h2>
+<ul>
+<li>50→300 的对比基线（300 个真实环境的来源与构造方式）与各域的完整数字需回论文核对；字幕只给了结论与 SWE 口径。</li>
+<li>饱和上限的成因讲者明说未知：是环境信息量上限、rigger 诊断上限还是 policy 容量上限，三者的区分实验值得等后续版本。</li>
+<li>语义 Chain 一旦打通（rigger 能索引跨环境语义），long-horizon 训练信号的形态会变；当前实现里 chain 还只能靠人工拼或模板，属半成品能力，下结论时勿当已完成功能引用。</li>
+<li>讲者正在求职 RSI / Agentic RL 方向（字幕自述），后续版本是否继续迭代此线，取决于其去向。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>人造环境成本（Terminal-Bench 2.0）</td>
+<td>约 15.9 小时/个，约 100 个环境近 1400 小时；按 \$100/小时 约 \$1600/个</td>
+<td>—</td>
+<td>字幕（背景+成本部分）</td>
+</tr>
+<tr>
+<td>人造环境成本（Apex Agents）</td>
+<td>33 个环境，每个约 500 小时，共约 16000 小时</td>
+<td>约 \$1.6M（按 \$100/小时）</td>
+<td>字幕（成本部分）</td>
+</tr>
+<tr>
+<td>EnvHarness 改造单个环境成本</td>
+<td>Gemini Flash Lite</td>
+<td>约 \$0.5/个；同预算约 2000 个</td>
+<td>字幕（成本部分）</td>
+</tr>
+<tr>
+<td>EnvHarness 改造单个环境成本（最贵口径）</td>
+<td>Opus 类最贵模型</td>
+<td>约 \$40/个，为人造的 1/40</td>
+<td>字幕（成本部分）</td>
+</tr>
+<tr>
+<td>基础环境效率</td>
+<td>50 个 SWE-Lite 环境 + 多轮迭代 EnvHarness</td>
+<td>效果超过 300 个真实环境（下游 SWE-bench Verified）</td>
+<td>字幕（主实验）</td>
+</tr>
+<tr>
+<td>Rigger 成功率判据</td>
+<td>5 次 rollout 对 2 或 3 次</td>
+<td>落在 0.4–0.6 区间</td>
+<td>字幕（Rigger 闭环）</td>
+</tr>
+<tr>
+<td>Rigger 候选接受率</td>
+<td>不同 benchmark</td>
+<td>约 40%–60%（区间 30%–80%）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>接口要求</td>
+<td>Gym 式三操作</td>
+<td>reset / step / evaluate</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「这套东西你可以理解成把 data augmentation 扩展到了环境上：环境就是训练数据。」——讲者答「这不就是课程学习吗」（字幕 [57:14–57:32] 口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

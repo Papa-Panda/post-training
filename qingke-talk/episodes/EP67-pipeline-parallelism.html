@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP67 — 大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP67 — 大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展</h1>
+    <p class="sub">讲者把流水线并行（PP）的四大缺陷拆成一条逻辑链：先用 B/W 分离把 backward 拆成「算输入梯度（B）」和「算参数梯度（W）」两段可独立调度的 pass，消除流水线气… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP67-pipeline-parallelism.html</p>
+<p>「在 PP 里面，activation memory 无法通过加设备摊薄——每个设备的持有量由构造单元的生命周期决定；那我们就去缩短生命周期（V 形排布、BW 分离），或者干脆把长寿命的那一份 activation 搬去 CPU（选择性 offload），这两条路走通之后，PP 的内存甚至可以做到比 TP 还低。」（本期核心框架，语义据字幕）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>67</dd><dt>标题</dt><dd>大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展</dd><dt>BV</dt><dd>BV1v14QzoEZf</dd><dt>时长</dt><dd>01:37:28（主讲与答疑交织进行）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>万欣怡（新加坡国立大学在读博士，CIAI Lab（Sea 旗下独立 AI 研究院）；字幕中主持人介绍与称呼均为「万欣怡」，讲者自述单位为 CIAI Lab 与 NUS）</dd><dt>相关论文</dt><dd>（均为 Sea AI Lab / NUS 方向的连续工作，字幕未给 arXiv 号，链接待补）</dd><dt></dt><dd>Zero Bubble Pipeline Parallelism（ZB，下称「ZB 流水线」）</dd><dt>Pipeline Parallelism with Controllable Memory（V 形 schedule 家族</dt><dd>V-min / V-half / V-ZB）</dd><dt></dt><dd>Pipeline Offload（选择性 activation offload，实现线性扩展）</dd><dt></dt><dd>Vocabulary Parallelism（词表并行）</dd><dt>相关代码</dt><dd>讲者称四篇工作均已开源；ZB 已被 Megatron-LM、PyTorch、DeepSpeed、PaddlePaddle 等框架集成（字幕口径），DeepSeek V3 的 DualPipe 由 ZB 的 B/W split 与 Chimera schedule 叠加而成，团队后续贡献的 DualPipe V 已被 DeepSeek 接受并挂在其仓库首页</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1v14QzoEZf/">https://www.bilibili.com/video/BV1v14QzoEZf/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP67.txt</code>（1968 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP67，已存档）清洗提炼，来源为 AI 字幕原文（经清洗，专名可能有识别误差，如 Zero Bubble 的两个 schedule 在字幕中作「ZBH1/ZBH2」、Chimera 作「camera」、Megatron 作「MCTRL/麦克创」、Sea Sailor 模型作「C罗二」等，均按公开资料校订）。凡关键数字均出自字幕口径，与论文版可能有出入。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者把流水线并行（PP）的四大缺陷拆成一条逻辑链：先用 B/W 分离把 backward 拆成「算输入梯度（B）」和「算参数梯度（W）」两段可独立调度的 pass，消除流水线气泡（ZB）；再提出「构造单元生命周期（lifespan）÷ 重复间隔（interval）」的峰值内存公式，用 V 形排布把 lifespan 压到原来的 1/3（Controllable Memory）；再用 CPU offload 选择性搬走长寿命分片的 activation、拿到超线性收益，让每卡 activation 随设备数线性下降（Pipeline Offload）；最后把词表（embedding/LM head）计算均分到所有设备、用 online softmax 把同步移出关键路径，治首尾设备的负载不均（Vocabulary Parallelism）——合起来是一套「用 PP 替代 TP」的完整主张。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景：PP 好在哪、坏在哪</h3>
+<p>讲者先横向对比四种并行：DP 简单但训不了超单卡模型；TP 通信量大、跨不了节点；ZeRO/FSDP 是 DP 的改进，参数通信频繁、节点多时性能受限。PP 的核心优势是通信量最低、天生适合多节点，所以称它是「跨节点并行的首选策略」。但 PP 有四个硬伤，本期四篇工作正好一一对应：</p>
+<ol>
+<li><strong>气泡</strong>：流水线首尾填充期 GPU 空转，外加各设备负载不均时的「不均匀气泡」；</li>
+<li><strong>激活内存大且不随设备数下降</strong>：见下一节的推导，这是 PP 最反直觉的性质；</li>
+<li><strong>负载不均衡</strong>：词表计算压在首尾设备上（见 Vocabulary Parallelism 一节）；</li>
+<li><strong>不能线性扩展</strong>：加再多设备，每卡 activation 不变（由第 2 点直接推出）。</li>
+</ol>
+<p>一个常被忽略的推导值得单独记下：设设备数为 $D$ ，第一个设备要连续跑 $D$ 次 forward 才等到第一次 backward，每次 forward 只产生全模型 $1/D$ 的 activation，于是它手里攥着 $D \times (1/D) = 1$ 份全量模型 activation——<strong>parameter 随层数切分摊薄了，activation 却没有</strong>。这就是为什么「模型大了之后没办法只用 PP 训练」，也是整场的出发点。</p>
+<p>经验配比上讲者也给了口径（问答环节）：先开 DP，只有模型大到单卡放不下才动 TP/PP；TP 限于机内（一般 8 卡），开满还爆内存再上 PP 做跨节点；最后用 DP 横向扩数据。序列长度超过 64K 才需要认真考虑 sequence parallelism。</p>
+<h3>工作一：Zero Bubble——把 backward 拆成 B 和 W</h3>
+<p>关键观察是 backward 里两个矩阵乘法可以解耦：对一个线性层，forward 是一个 matmul，backward 是两个——算输入梯度（下称 B）和算参数梯度（下称 W）。流水线里上游设备只需要 B 的结果就能继续往前传，W 只被本设备自己的 optimizer 用。框架默认把两者塞在同一个 backward 调用里，ZB 把它们拆开、先算 B 传给上游、W 往后挪一位再算，得到两个 schedule：</p>
+<ul>
+<li><strong>ZBH1</strong>：气泡降到 GPipe 基线的 1/3（字幕口径），峰值内存与 1F1B 基线相同；</li>
+<li><strong>ZBH2</strong>：继续挪 W，气泡清零（需要先跑 \$2D - 1\$ 个 pass 把流水线填满），代价是 activation 累积翻倍到 2 倍峰值内存。</li>
+</ul>
+<p>大模型训练实测加速约 30%（字幕口径）。讲者特意强调 B/W 分离本身是通用技巧，不必照搬 ZB 的编排——套到任何 schedule 上都有可观收益。Zero Bubble 也因此被公认为社区里第一个把流水线气泡做到零的方案。</p>
+<blockquote class="pq">
+<p>一个容易被追问的工程细节（讲者在答疑里回答）：ZBH2 的甘特图允许每个设备的 optimizer step 异步，是因为 Adam 类 optimizer 逐参数独立；但 grad clipping 与 NaN/Inf 检查需要全局信息。论文的做法是先按「训练稳定后 clip/NaN 极少触发」的假设推进 optimizer step，在下一个 iteration 做后验检查，若发现越界就 rollback optimizer step 与已跑的 forward 重做。</p>
+</blockquote>
+<h3>工作二：Controllable Memory——峰值内存由 lifespan 决定</h3>
+<p>这篇给出了整场最有价值的分析框架。把一个 micro-batch 在所有设备上的全部 forward/backward 看成一个「构造单元」（building block），它以固定间隔（interval）周期性重复。峰值内存可以写成：</p>
+<p>$$M_{peak} = \frac{L}{I} \times M_{mb}$$</p>
+<p>其中 $L$ 是构造单元的生命周期（lifespan，一个 micro-batch 从 forward 到 backward 释放 activation 的时间跨度）、 $I$ 是重复间隔、 $M_{mb}$ 是单个 micro-batch 的 activation。直觉：forward 与 backward 隔得越久，中间穿插的 micro-batch 越多，峰值越高。</p>
+<p>降内存就是缩短 $L$ ，两招叠加：B/W 分离只等 B 不等 W，关键路径变短；V 形排布把层按「第 1 层和第 8 层放同一设备」的对折方式切成 $2D$ 段、每设备放两段，使第一个 backward 再次大幅提前。数值上 lifespan 从 1F1B 基线的 $3D$ 降到 BW 分离后的 $2D$ 、再到 V 形的 $D$ ——<strong>峰值内存只要基线的 1/3</strong>。由此得到一个可调家族（相对 1F1B 基线）：</p>
+<ul>
+<li><strong>V-min</strong>：内存 1/3（讲者称已证明这是不用 offload/recompute 时纯调度的下界），气泡约为基线的 2/3；</li>
+<li><strong>V-half</strong>：内存 1/2，气泡 1/2；</li>
+<li><strong>V-ZB</strong>：内存与基线相同、气泡为零——即同样零气泡，内存只有 ZBH2 的一半。</li>
+</ul>
+<p>讲者称这一族推进了吞吐—内存的 Pareto frontier，而且 V 形排布是「free lunch」：不是拿内存换吞吐，而是既省又快。</p>
+<h3>工作三：Pipeline Offload——让 PP 的 activation 也能线性扩展</h3>
+<p>为什么 V-min 的 1/3 内存还不够？因为 TP 用 $D$ 个设备时 activation 是 $M/D$ ，而 PP 恒为 $M$ （V-min 也还有 $M/3$ ）——要在内存上追平 8 路 TP，PP 得做到 $M/8$ 以下。问题出在峰值公式里的 $L$ 不随 $D$ 变小。解法：既然 lifespan 长既是祸（内存高）也是福（有足够时间把 activation 搬去 CPU 再搬回来），就用 CPU offload 把长寿命分片的 activation 挪走，等效缩短它在 GPU 上的存活。</p>
+<p>可行性由一个比值决定， $K = T_{offload} / T_{compute}$ ，而 $K$ 与 hidden size 和序列长度成反比：模型越大、序列越长，offload 越划算。在 A100 上以约 200 TFLOPS 算力、PCIe 约 15 GB/s 估算（字幕口径），hidden 约 8K（对应 30B 量级模型）以上、或序列长 32K 以上时可以全量 offload 而不损性能（实测降速小于 1%）；且所有情形下 $K &lt; 2$ ，即至少能 offload 一半。</p>
+<p>选择性 offload 有超线性收益：不同模型分片的 lifespan 不等，先搬最长的那个。实测设置中（每设备 16 个分片）offload 掉一半分片，剩余内存只有约 25%，而非线性预期的 50%。综合下来每卡 activation 大致为 $M/4 \sim M/6$ ，全量 offload 时：</p>
+<p>$$M_{per\,GPU} = \frac{M}{V \times D}$$</p>
+<p>其中 $V$ 是每设备的分片数、 $D$ 是设备数——此时 PP 的 activation 反而比 TP 更低。讲者自述这个结论「有些颠覆认知」：对比实验里全量 offload 的纯 PP 方案内存比 TP8 更少、吞吐还更高；半量 offload 内存约为 TP 的 2 倍但吞吐也更高。</p>
+<h3>工作四：Vocabulary Parallelism——把词表均分给所有设备</h3>
+<p>decoder-only 模型有 input embedding 和 output embedding 两个词表，通常被塞在第一个和最后一个设备上。讲者估算社区词表规模多在 1~3 个 transformer layer 的计算量（字幕口径），即尾设备负载是别人的 2~3 倍，流水线被拖出气泡。靠重排 transformer layer 摊平也行不通：层数是整数切不碎，且「计算拍平了内存就不平，内存拍平了计算就不平」。</p>
+<p>方案是把词表切成 $D$ 份分到每个设备。但词表计算里横着一个 softmax cross-entropy，它要求对全词表 logits 做同步——这正是朴素切分做不了的原因。解法借 FlashAttention 的 online softmax 思路：先在本地算局部 softmax 并完成 backward 的两个 matmul，最后再做一次轻量同步并修正输入梯度与参数梯度，把同步移出关键路径。词表主计算称 S-pass、同步修正称 T-pass，依赖关系理清（S 依赖最后一层 forward 完成、跑在最后一层 backward 之前）后即可并入流水线调度。</p>
+<h3>结论/观点：社区采纳与未尽问题</h3>
+<p>讲者把四篇的分工收束为：前两篇把 PP 的吞吐与内存推到纯调度的极限，Vocabulary Parallelism 治负载不均，Pipeline Offload 治不扩展，「我们希望社区里面能够用 PP 替代 TP」。采纳情况（字幕口径）：DeepSeek V3 的 DualPipe = ZB 的 B/W split + Chimera（对折一半即 V-ZB 的特例），后续团队用 V 形 schedule 免掉 Chimera 的一份参数拷贝，成果被 DeepSeek 接受命名为 DualPipe V；PyTorch 集成了 ZBH1 及与 interleaved 结合的 ZBV；Sea 自家东南亚语言模型 Sea Sailor 用 ZBV + Vocabulary Parallelism 训练。</p>
+<p>剩下的坑讲者也列了：纯 PP 设备数不能超过层数；ZB 类策略需要 $2D$ 个 micro-batch 喂饱，长序列训练 micro-batch 本来就少，会成为瓶颈；推理侧 PP 延迟高、KV cache 生命周期长，所以推理里 PP 总是最后才用。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<p>以下均为字幕口径，未与论文版核对。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线（1F1B）</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ZBH1 气泡</td>
+<td>1</td>
+<td>1/3（峰值内存不变）</td>
+</tr>
+<tr>
+<td>ZBH2 气泡</td>
+<td>1</td>
+<td>0（峰值内存 2 倍）</td>
+</tr>
+<tr>
+<td>ZB 大模型训练加速</td>
+<td>—</td>
+<td>约 30%</td>
+</tr>
+<tr>
+<td>V-min 峰值内存</td>
+<td>1</td>
+<td>1/3（气泡约 2/3）</td>
+</tr>
+<tr>
+<td>V-half 峰值内存</td>
+<td>1</td>
+<td>1/2（气泡 1/2）</td>
+</tr>
+<tr>
+<td>V-ZB 峰值内存</td>
+<td>1</td>
+<td>1（气泡 0，为 ZBH2 的一半）</td>
+</tr>
+<tr>
+<td>Construct-unit lifespan</td>
+<td>$3D$</td>
+<td>V 形排布后 $D$</td>
+</tr>
+<tr>
+<td>选择性 offload（一半分片，16 分片设置）</td>
+<td>剩 50%</td>
+<td>剩约 25%</td>
+</tr>
+<tr>
+<td>每卡 activation（offload 实践）</td>
+<td>$M$</td>
+<td>约 $M/4 \sim M/6$</td>
+</tr>
+<tr>
+<td>词表计算量</td>
+<td>1 个 transformer layer</td>
+<td>约 1~3 个 layer</td>
+</tr>
+<tr>
+<td>参数+优化器内存经验系数</td>
+<td>—</td>
+<td>约 12（ZeRO 经验式）~16（Megatron 混合精度） bytes/param</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 RL infra/训练框架工作的直接可试点：</li>
+<li>峰值 activation 的 <code>lifespan/interval</code> 公式是一个通用体检工具：你自己的 PP schedule 里哪一份 activation 活得最久、活着期间穿插了多少个 micro-batch，算出来就知道峰值从哪来、该先 offload 哪段；</li>
+<li>B/W 分离不依赖 ZB 的具体编排，现成框架（Megatron/PyTorch 已集成）里可以直接开；训 RL 的 rollout+train 流水线时，「先传 B、W 延后」同样能提前释放上游等待。</li>
+<li>Infra 视角的启发：</li>
+<li>「省内存 = 提升吞吐」是讲者反复强调的一句：省下的内存可以涨 batch size 提计算密度，或者省掉 TP 这类高通信策略本身就是加速；</li>
+<li>PP 的选型启发式（DP 打底 → 机内 TP → 跨机 PP → DP 扩数据，64K+ 序列才上 SP）可以直接写进并行度调参 checklist；</li>
+<li>offload 的可行性比值 $K$ 随 hidden/seq 反比下降——长序列 RL 训练（大 seq）恰好落在全量 offload 不亏的区间，这个结论值得在自己的长上下文 RL 场景里实测一遍。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>ZB 家族需要 $2D$ 个 micro-batch 喂饱流水线，而长序列 RL 场景 micro-batch 数量稀缺（讲者自己列的坑）：在 RL 训练（rollout 长度大、micro-batch 少）中，V-min 这类 1/3 内存但带气泡的配置与 ZBH2 这类零气泡但 2 倍内存的配置，哪个实际 MFU 更高？下一步可找一篇在 RL 框架（如 verl/slime）里实测 PP schedule 的工作对照。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「省内存就等于提升吞吐。」</p>
+<p>「对于流水线并行来讲，activation memory 你用更多的设备是不会降低每个设备上的数量的。」</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

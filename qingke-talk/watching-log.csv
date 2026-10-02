@@ -57,28 +57,28 @@ No,Title,BV,Duration,Date,Status,Notes
 56,InternVL3：多模态通用感知大模型,BV18K4szzERi,,2025-06-21,todo,title-reworded
 57,Fast-dLLM：无需重训的扩散大语言模型推理加速,BV1qs4uz3EXL,,2025-06-24,todo,
 58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,BV1Bp4uzkEHG,,2025-06-28,todo,
-59,大模型推理强化学习中的熵机制,BV1Bp4uzkECF,,2025-07-01,todo,
+59,大模型推理强化学习中的熵机制,episodes/EP59-entropy-mechanism-rl.md,要点已提炼,2025-07-01,todo,RL熵塌缩的协方差机制（Clip-Cov/KL-Cov）与熵-奖励经验定律
 60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,BV1Zs4uz3E16,,2025-07-05,todo,title-reworded
 61,GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架,BV1SA4CzWEph,,2025-07-08,todo,
-62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,BV1mP4CzXE9a,,2025-07-12,todo,
+62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,episodes/EP62-prorl.md,要点已提炼,2025-07-12,todo,ProRL长程RL配方：动态采样+周期性重置，1.5B在3000步持续扩边界
 63,ChatRex & RexSeek & RexThinker：结合多模态大语言模型的目标检测模型构建,BV1uA4CzsETk,,2025-07-15,todo,
 64,MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力,BV1MP4Cz9EGg,,2025-07-19,todo,
 65,Hi3DGen：法线为桥，为高清三维几何生成另辟蹊径,BV1qk4QzfEv4,,2025-07-22,todo,
 66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,BV1Br4Qz8EpF,,2025-07-26,todo,
-67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,BV1v14QzoEZf,,2025-08-05,todo,
+67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,episodes/EP67-pipeline-parallelism.md,要点已提炼,2025-08-05,todo,流水线并行四部曲：B/W分离、V形调度、offload与词表并行
 68,slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践,BV1d14QzoEai,,2025-08-02,要点已提炼,episodes/EP068-slime-rl-scaling.md
-69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,BV1UC4az4EiU,,2025-08-07,todo,
+69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,episodes/EP69-gspo.md,要点已提炼,2025-08-07,todo,GSPO：把GRPO重要性采样从token级改为序列级，复苏MoE长训稳定性（论文还原）
 70,Evaluation Agent：面向视觉生成模型的高效可提示的评估框架,BV1SC4az4Ehn,,2025-08-09,todo,
-71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,BV1cF4Yz2E5z,,2025-08-12,todo,
+71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,episodes/EP71-rlpr.md,要点已提炼,2025-08-12,todo,RLPR：用参考答案概率做通用领域连续奖励，绕开PRM与likelihood陷阱
 72,Clothed Human Body Fitting: A Journey to ETCH,BV1rF4Yz1ENZ,,2025-08-16,todo,title-reworded
 73,从BLIP3o到BLIP3o-NEXT：迈向统一生成与理解的多模态大模型,BV1s4WkzMEYF,,2025-08-19,todo,
-74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,BV1y4WkzME92,,2025-08-23,todo,
+74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,episodes/EP74-roll.md,要点已提炼,2025-08-23,todo,ROLL生产级RL框架：样本级rollout调度与agentic环境管理（论文还原）
 75,FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案,BV1J6WyzTEJP,,2025-08-30,要点已提炼,episodes/EP075-flashrl-tis.md
-76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,BV1qNWyzcEuv,,2025-09-06,todo,
+76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,episodes/EP76-nemo-rl.md,要点已提炼,2025-09-06,todo,NeMo RL实录：671B MoE权重refit三级优化约15倍与FP8生成排期
 77,"Theory of Agent: From Definition, to Behavior and Objective",BV1dHWEzWETN,,2025-09-09,todo,same
 78,从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体,BV1sxWgzUEZo; BV1sBsFz9EVw,,2025-09-18,要点已提炼,episodes/EP078-llm-rl-to-agentic-rl.md
 79,“知人者智”：以用户为中心的智能体交互与训练,BV18tsFzhE35,,2025-10-18,todo,title-reworded
-80,RL for LRMs：探讨面向推理模型的 RL 最新研究,BV1b9sGzwEAc,,2025-10-21,todo,
+80,RL for LRMs：探讨面向推理模型的 RL 最新研究,episodes/EP80-rl-for-lrms.md,要点已提炼,2025-10-21,todo,面向推理模型的RL综述：奖励设计、策略优化与采样策略全景
 81,MemGen：生成式隐式记忆，Agent Memory 的第三种可能,BV1wMWEzPEUD,,2025-10-16,todo,
 82,OpenCUA：用于构建 Computer-Use Agent 的开源框架,BV14isozHErN,,2025-10-25,todo,
 83,统一 SFT & RL：迈向大型语言模型后训练的统一视角,BV1Gz1MBZEGk,,2025-10-28,要点已提炼,episodes/EP083-unified-sft-rl-upge-hpt.md
@@ -90,7 +90,7 @@ No,Title,BV,Duration,Date,Status,Notes
 89,Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架,BV1JRCyBiEp2,,2025-11-15,todo,
 90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,BV1xNynB1Emx,,2025-11-18,todo,
 91,KTransformers，在大模型微调与推理中的系统化实践,BV18wUPBEE4r,,2025-11-22,todo,
-92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",BV1mfSjBDEnS,,2025-11-25,todo,
+92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",episodes/EP92-rlinf.md,要点已提炼,2025-11-25,todo,RLinf具身版：M2Flow可编程执行流与弹性异构调度
 93,通过量化与稀疏性实现高效注意力机制（SageAttention）,,,2025-11-29,todo,official-only（官网有预告，B站合集无对应视频）
 94,RLinf-VLA 实践：从零上手 VLA（OpenVLA）强化学习,,,2025-12-02,todo,official-only（官网有预告，B站合集无对应视频）
 95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix,,2025-12-06,todo,
@@ -127,7 +127,7 @@ No,Title,BV,Duration,Date,Status,Notes
 126,STream3R & 4RC: 面向几何与运动理解的流式前馈 3D/4D 重建,,,2026-05-19,要点已提炼,episodes/EP126-stream3r-4rc.md
 127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,,,2026-05-26,todo,official-only（官网有预告，B站合集无对应视频）
 128,MinT: 面向百万级 LoRA 策略的训练与推理基础设施,BV1j67H6TEKL,00:54:29,2026-06-02,要点已提炼,episodes/EP128-mint-lora.md
-129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,,2026-06-06,todo,字幕接口连续串台（3次诱饵），字幕版延后重试；暂缓
+129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,episodes/EP129-arpo-aepo-agent-world.md,要点已提炼,2026-06-06,todo,ARPO/AEPO熵驱动分支搜索与Agent-World环境自动合成
 130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,2026-06-09,todo,official-only（官网有预告，B站合集无对应视频）
 131,UniRL：面向统一多模态模型的分布式 RL 后训练框架,,,2026-06-13,todo,official-only（官网有预告，B站合集无对应视频）
 132,从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制,,,2026-06-16,todo,official-only（官网有预告，B站合集无对应视频）
@@ -151,7 +151,7 @@ No,Title,BV,Duration,Date,Status,Notes
 150,SIM1：物理一致世界模型如何实现可扩展机器人学习,,,2026-09-01,todo,official-only（官网有预告，B站合集无对应视频）
 151,从 Harness 看 AI4AI 如何实现,,,2026-09-05,todo,official-only（官网有预告，B站合集无对应视频）
 152,如何在真实 Coding Agent Harness 中接入 RL？,BV1AJYx6wEpo,01:17:09,2026-09-08,要点已提炼,episodes/EP152-lego-rl.md
-153,"EnvHarness，Agent 和环境如何""左脚踩右脚""实现自进化",BV1ZqYX6YE3T,,2026-09-12,todo,title-reworded
+153,"EnvHarness，Agent 和环境如何""左脚踩右脚""实现自进化",episodes/EP153-envharness.md,要点已提炼,2026-09-12,todo,EnvHarness：给静态环境加可演化外壳，50个环境胜过300个真实环境
 154,Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe,BV1WbeS6KEFf,01:24:51,2026-09-17,要点已提炼,episodes/EP154-rethinking-on-policy-distillation.md
 155,SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战,BV1creh6LEu6,01:28:18,2026-09-19,要点已提炼,episodes/EP155-skyrl-397b-agent-rl.md
 156,聊聊自我改进、递归自我改进（RSI），以及与自博弈的关系,BV1PZhs6bEsy,01:01:52,2026-09-23,要点已提炼,episodes/EP156-spiral-spice-spade-rsi.md

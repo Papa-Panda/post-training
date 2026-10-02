@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP92 — RLinf：面向具身智能的「渲训推一体化」开源强化训练框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP92 — RLinf：面向具身智能的「渲训推一体化」开源强化训练框架</h1>
+    <p class="sub">林浩系统介绍了 RLinf 的设计：用 M2Flow（宏观→微观流转换）把「怎么写工作流」与「怎么调度执行」解耦，靠 Worker / WorkerGroup + DataCh… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP92-rlinf.html</p>
+<p>「灵活性即效率：只有把工作流的宏观描述与微观执行解耦，系统才能在异构负载之间自由重排。」——讲者对 RLinf 设计哲学的概括（字幕口径归纳，原话见正文）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>92</dd><dt>标题</dt><dd>RLinf：面向具身智能的「渲训推一体化」开源强化训练框架</dd><dt>BV</dt><dd>BV1mfSjBDEnS</dd><dt>时长</dt><dd>01:00:57（讲授约 32 分钟 + Q&amp;A 约 28 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>林浩（RLinf 核心 maintainer；字幕中机构名作「无恩星穹」，识别不清，以官方仓库组织页为准）</dd><dt>相关代码</dt><dd>RLinf 开源仓库（GitHub，讲者未逐字念出仓库地址；投稿时以青稞 Talk 描述区链接为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1mfSjBDEnS/">https://www.bilibili.com/video/BV1mfSjBDEnS/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP92.txt</code>（1196 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP92，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如框架名在字幕中作「阿令F」、M2Flow 作「m to flow」、π0.5 作「派林」，均已按公开资料订正，讲者机构名除外）。凡讲授口径与官方文档可能不同，以下标注（字幕口径）。</p>
+<p>关联：本期与 EP111《RLinf-USER》同属 RLinf 系列，前者讲框架本体（系统设计），后者讲使用与生态；两篇互补。RLinf 定位与 verl / slime 等 LLM RL 框架的差异在于：它从一开始就把模拟器、真机与异构加速器当作一等公民，而不是把环境当作 rollout 的附属进程。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>林浩系统介绍了 RLinf 的设计：用 M2Flow（宏观→微观流转换）把「怎么写工作流」与「怎么调度执行」解耦，靠 Worker / WorkerGroup + DataChannel 三件套抽象、弹性流水线与自动上下文切换两大机制、以及基于性能分析的子图调度，让同一套代码能在 GPU / NPU / 机械臂混布的集群上跑具身与 reasoning 两类 RL，字幕口径下训练吞吐为现有 SOTA 系统的 1.1×–2.13× 。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">数据进 DataChannel</div><div class="farrow">→</div><div class="fnode">rollout 组件生成</div><div class="farrow">→</div><div class="fnode">inference 组件算 log-prob</div><div class="farrow">→</div><div class="fnode">actor 训练组件更新</div><div class="farrow">→</div><div class="fnode">权重回写，循环往复</div></div>
+<h3>背景：具身 RL 的负载为什么和 LLM RL 不一样</h3>
+<p>讲者先立论：具身智能是通往 AGI 的核心路径之一，但它的数据瓶颈最重——真机采集贵（一台机械臂数十万元量级，字幕口径），可扩展的仿真数据是关键路径。他引用 Physical Intelligence 创始人在今年 7 月会议上的判断：面向具身的大规模 RL 训练框架目前仍是空白，RLinf 就是来填这个空的。</p>
+<p>具身 RL 的系统难点不在模型，而在<strong>负载异构</strong>：</p>
+<ol>
+<li><strong>环境是 GPU 渲染/物理模拟，不是张量计算</strong>。模拟器吃渲染与显存而非算力，单卡上堆多个模拟器时耗时不随数量线性增长，与 LLM 训练的计算画像完全不同。</li>
+<li><strong>真机是独立硬件</strong>。机械臂控制器跑实时内核、与 GPU 驱动不兼容，推理要贴近机器人满足实时性，训练可能在云端大显存机器上，两者天然跨机。</li>
+<li><strong>算法流程分叉大</strong>。reasoning 侧是 generation → inference → training 的迭代环；具身/agentic 侧多出模拟器或工具服务（如 search server、MCP 云服务），且 PPO 一类算法还要 reference / reward / critic 多模型并存，各自可能都要训练。</li>
+</ol>
+<p>现存系统的两种典型形态都有病：<strong>共享式</strong>（组件共置同卡）省资源但长尾生成时利用率低、上下文切换开销大；<strong>分离式</strong>（如 AReaL、AsyncFlow 一类异步流水）缓解长尾但吃硬件、没有异步算法配合时闲置严重。讲者的结论是：没有万金油排布，系统必须把排布本身变成可搜索的自由度。</p>
+<h3>设计理念：灵活性即效率</h3>
+<p>RLinf 的核心命题是把灵活性当作效率的来源：执行模式越不固定，调度与优化空间越大，越能适配未来新场景/新算法/新负载。反面的顾虑是灵活性带来复杂性、用户配错反而更慢——解法是让用户只写宏观工作流，复杂性由系统在编译期与运行期吸收。</p>
+<h3>M2Flow：宏观工作流 → 微观执行流</h3>
+<p>编程模型叫 M2Flow（Macro-to-Micro Flow Transformation，字幕作「m to flow」）。用户写的是宏观流：组件之间数据怎么走。系统像编译器一样，在执行前与执行中把宏观流分解、重组为优化后的微观执行流。讲者展示的 reasoning RL 工作流（GRPO 风格）在 RLinf 里是一个约七行的函数：数据进 DataChannel → rollout 组件生成 → inference 组件算 log-prob → actor 训练组件更新 → 权重回写，循环往复；具身 online RL 是模拟器与 rollout 组件多轮交互产数据、再统一交给 actor 训练，代码同样不超过十行。</p>
+<p>三个核心抽象：</p>
+<ol>
+<li><strong>Worker</strong>：一个 RL 组件就是一個 Worker 子类，核心逻辑写在一个函数里；Worker 只对接 input/output channel，不需要知道上下游是谁，天然异步。</li>
+<li><strong>WorkerGroup</strong>：<code>create_group</code> + <code>launch</code> 按 placement 策略在一组进程上启动同一 Worker；组句柄继承 Worker 的全部公共方法，一次调用等价于在所有进程上以 SPMD 方式调用同一函数，调用本身异步、返回句柄，用 <code>wait</code> 语义同步并取回返回值。</li>
+<li><strong>DataChannel</strong>：组件间的数据通道，带负载均衡语义，多个消费者之间保持公平服务。</li>
+</ol>
+<p>Placement 是这套抽象的关键自由度：任意 Worker 可以部署在集群任意节点的任意硬件上——GPU、NPU、机械臂都是一等硬件资源，在 YAML config 里改一两行即可。讲者提到已与华为合作在昇腾 NPU 上跑通 reasoning RL；未来场景完全可以 NPU 做推理、GPU 做渲染、纯 CPU 跑 robot control。</p>
+<h3>两大机制 + 一个调度器</h3>
+<ol>
+<li><strong>弹性流水线</strong>：通过调节组件间传递的数据粒度来调节流水线粒度——上游攒满整个 batch 再发就没有流水，上游每做完一个 global-batch 的子块就下发，下游立刻开工、上游同时做下一块，粒度越细流水越深。取舍要同时看性能（加速器利用率、流水气泡）与算法语义（基于 batch 的归一化要求拿到完整 batch），这些约束由调度器统一处理。</li>
+<li><strong>自动上下文切换</strong>：核心是分布式硬件锁。Worker 拿到锁时自动 load 模型与显存资源、释放时 offload；锁与 channel 里的数据流信息配合做优先级管理，避免死锁与无谓的反复 load/unload。这实现的是加速器的时间分片复用；空间上不同 Worker 分布在不同硬件，两种维度混合即任意时空调度组合。</li>
+<li><strong>基于性能分析的调度</strong>：把整体工作流图切成子图，逐子图求最优：调度器基于各硬件上的性能建模比较时间/空间两种调度方案，组合各子图最优解得到全局执行方案。Q&amp;A 中讲者补充说明：组件间策略构建是「近似穷举 + 剪枝」，显存等硬约束会先剪掉不可行分支，并非全空间暴力搜索。</li>
+</ol>
+<p>底层通信是自适应通信层：同机零拷贝 IPC、跨机走加速器 CCL，另提供任意 Worker 间的 send/receive 原语——写明 group 名与组内 rank 即可，不需要像 torch.distributed 那样手动建/毁 process group，连接管理全自动。</p>
+<h3>后端与异构支持</h3>
+<ul>
+<li>训练/推理组合两套支持较好：Megatron + SGLang/vLLM，以及 FSDP + HuggingFace（字幕口径）。</li>
+<li>基于 Megatron 的动态 batching 已在 reasoning 侧落地（不是规划中功能）。</li>
+<li>异构硬件：GPU、昇腾 NPU、机械臂统一 placement；最小调度粒度是单张卡，多个进程也可共享一张卡，即粒度可以细到亚卡级、由用户自定义。</li>
+<li>真机：支持多台真机并行 RL（近期合入）。配置方式是在 YAML 里定义 node group（子集群），把每台机器人的 IP、相机等信息登记为 hardware 字段，再把 environment worker placement 到这些节点上；真机与 GPU 在系统眼里是同等级硬件资源，扩展方式一致。</li>
+</ul>
+<h3>性能与实测口径</h3>
+<p>讲者给出与现有 SOTA RL 系统的对比：不同集群规模、reasoning 与具身模型上，RLinf 整体训练吞吐高出 1.1×–2.13× ；用 RLinf 训练的模型在相应数据集上达到 SOTA（均为字幕口径，讲者未逐项念出基线名与数据集名）。合作团队在 RLinf 上做的 VLA / π 类模型的 RL 训练也达到 SOTA 效果，算法细节留待后续专场。</p>
+<h3>Q&amp;A 精华</h3>
+<ul>
+<li><strong>模型服务与训练服务部署</strong>：推理组件就是 RLinf 内的一个组件，可同机、可跨机、甚至云端训练 + 端侧推理；仿真训练主要吃 GPU，真机训练另需机械臂资源。</li>
+<li><strong>π 类模型显存与时长</strong>：A100/H100 均测过；显存推荐 80GB ，40GB 也能跑，需调低 environment 数量与训练 micro-batch ；π 模型收敛时长讲者凭印象答「几天量级」（字幕口径，未给确数）。</li>
+<li><strong>worker 并行不用 Ray 怎么实现</strong>：进程 launch 到节点这一步用 Ray 的 node-level placement，但通信、组件管理、硬件/资源管理都是 RLinf 自研调度层，不依赖 Ray 的 placement group。</li>
+<li><strong>模拟器与推理 worker 配比</strong>：讲者经验值是 LIBERO 场景下模拟器 : 推理 worker 约 2 : 1 比较好（字幕口径）；具身侧自动配比还在开发中。reasoning 侧已有弹性伸缩解决配比问题：rollout 进入长尾阶段时下调 rollout worker 数、扩 training 侧，不必一开始就把配比调准。</li>
+<li><strong>FSDP 能否弹性伸缩</strong>：理论上可以，团队未实测，目前主要支持 Megatron 侧；FSDP 下每卡训练前 gather 完整模型（取决于 sharding strategy），八卡训练会在每卡加载分片后 gather。</li>
+<li><strong>GPU 利用率低怎么办</strong>：显存允许时调大 batch size 或 environment 数量；rollout 慢通常时间花在模拟器一侧，先把 env 数量拉上去。π0.5 微调支持尚未正式上线，RL 过程中利用率低适用同一思路。</li>
+<li><strong>自定义算法/环境改哪里</strong>：环境定义在 <code>environment/</code> 目录、算法在 <code>algorithms/</code> 目录，文档有专章；八卡卡编译、四卡正常一例讲者未遇过，建议查是否有其他任务共用后四卡或调整 placement 到后四卡验证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>整体训练吞吐</td>
+<td>现有 SOTA RL 系统</td>
+<td>高出 1.1×–2.13×</td>
+<td>字幕（性能对比）</td>
+</tr>
+<tr>
+<td>reasoning RL 工作流代码量</td>
+<td>RLinf 宏观流描述</td>
+<td>约 7 行一个函数</td>
+<td>字幕（编程模型演示）</td>
+</tr>
+<tr>
+<td>π 类模型训练显存</td>
+<td>推荐配置</td>
+<td>80GB 推荐；40GB 可跑（降 env 数/micro-batch）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>π 模型收敛时长</td>
+<td>A100/H100，四卡量级</td>
+<td>「几天左右」（讲者凭印象）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>LIBERO 模拟器 : 推理 worker 配比</td>
+<td>讲者经验值</td>
+<td>约 2 : 1</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>最小调度粒度</td>
+<td>单卡</td>
+<td>单卡；多进程可共享一卡（亚卡级）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>支持较好的后端组合</td>
+<td>—</td>
+<td>Megatron+SGLang/vLLM；FSDP+HF</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「灵活性即效率」对 RL infra 选型的直接含义：评估一个框架时，先看它把 placement / 粒度 / 共置与否做成了可搜索自由度还是写死模式——前者在负载画像变化（长尾变重、模拟器变多）时不用改用户代码就能重排，这是 RLinf 相对固定执行模式框架的结构性优势。</li>
+<li>Worker 只对接 channel、不认识上下游，是把「算法逻辑」与「部署拓扑」解耦的最小接口；自己写多组件训练脚本时可借用这个纪律：组件签名里不出现拓扑信息，拓扑集中在一份 placement 配置里。</li>
+<li>配比经验可先抄：具身任务先按模拟器 : 推理 ≈ 2 : 1 起步，rollout 慢先加 env 数量而不是先动模型侧；reasoning 侧则把弹性伸缩（长尾时缩 rollout、扩 training）当默认能力索取。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>1.1×–2.13× 的基线名单、数据集与集群规模讲者未逐项展开，需对照 RLinf 论文/仓库 benchmark 页核对后再引用。</li>
+<li>基于性能分析的调度在多大的工作流图上仍可行：子图切分与近似穷举的规模上限、性能建模的误差来源，讲者未展开。</li>
+<li>讲者机构名（字幕「无恩星穹」）与 RLinf 官方组织页待核对；EP111《RLinf-USER》应有交叉信息可互证。</li>
+<li>reasoning 侧弹性伸缩的触发信号（长尾检测口径、扩缩幅度）与 FSDP 侧落地时间，值得跟踪仓库 release notes。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「将灵活性视为效率的关键：通过最大化灵活性，能够同时拓展系统的调度和优化空间，这是固定执行模式下没有办法实现的。」——讲者阐述 RLinf 设计理念段落（字幕 [12:14–12:26] 口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
