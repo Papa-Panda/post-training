@@ -16,6 +16,7 @@
 | 04/34 | 2026-09-29 | 04 | Genie 生成式世界模型 — 补 Project Genie 订阅落地（2026-01-29，AI Ultra \$200/月）/ I/O 2026 Street View 集成（2800 亿图）与 Waymo 生产部署 / GDC 官方承认"几分钟崩"+"not yet physics-aware"；确立"生成层"定位（Day02 公理层 / Day03 规模层之上） | ✅ 完成 |
 | 05/34 | 2026-09-30 | 05 | UniSim 条件视频扩散 — 补 ICLR 2024 Outstanding Paper 考证（arXiv v1 无 Kaelbling，v3/正式版加入）；确立"环境层"定位（Day04 隐式 latent action vs Day05 显式条件 action；0.81 的 simulator exploit gap 从未被测量） | ✅ 完成 |
 | 06/34 | 2026-10-01 | 06 | DreamerV3 latent RSSM + imagined actor-critic — 补 Nature 版标题差异（control tasks）/ DayDreamer 2022 真机四机器人 / Dreamer 4 offline 演进 / imagination exploit 第三方活例；确立"经验层"定位（one recipe 跨 domain，各自训练非 one model；"通用"=recipe 通用 ≠ 知识通用） | ✅ 完成 |
+| 07/34 | 2026-10-02 | 07 | H2O 人形全身遥操作 — 校准 IROS 2024 (oral) 场地与 OmniH2O/HOVER 谱系；sim-to-data 可行性过滤 + 特权训练/可部署观测非对称设计；修正"单 RGB"叙事（root 速度仍靠 50 Hz MoCap） | ✅ 完成 |
 
 ## 结构
 
