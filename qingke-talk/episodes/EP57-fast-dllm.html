@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP57 — Fast-dLLM：无需重训的扩散大语言模型推理加速</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP57 — Fast-dLLM：无需重训的扩散大语言模型推理加速</h1>
+    <p class="sub">扩散大语言模型（dLLM）推理慢在两处：双向注意力让标准 KV Cache 用不了、一步并行解码多个 token 又掉质量。Fast-dLLM 全程不训练：一是块级近似 KV … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP57-fast-dllm.html</p>
+<p>"Experimental results on LLaDA and Dream models across multiple LLM benchmarks demonstrate up to 27.6× throughput improvement with minimal accuracy loss, closing the performance gap with autoregressive models and paving the way for practical deployment of Diffusion LLMs." —— 论文 Abstract 对整体结果的总结</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>57</dd><dt>标题</dt><dd>Fast-dLLM：无需重训的扩散大语言模型推理加速</dd><dt>BV</dt><dd>BV1qs4uz3EXL（B站有视频，但全站无任何字幕轨：浏览器内 4 次检查字幕列表均为空，已确认字幕不可得）</dd><dt>时长</dt><dd>00:48:50（2930 秒）</dd><dt>直播时间</dt><dd>2025-06-24 20:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>吴成岳（香港大学 MMLab 博士生，导师罗平、王文平；论文一作；官网预告嘉宾介绍）</dd><dt>相关论文</dt><dd>Chengyue Wu, Hao Zhang, Shuchen Xue 等（香港大学 / NVIDIA / MIT），<em>Fast-dLLM: Training-free Acceleration of Diffusion LLM by Enabling KV Cache and Parallel Decoding</em>，<a href="https://arxiv.org/abs/2505.22618（v3,">https://arxiv.org/abs/2505.22618（v3,</a> 2025-07-03）</dd><dt>相关代码</dt><dd><a href="https://github.com/NVlabs/Fast-dLLM">https://github.com/NVlabs/Fast-dLLM</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/tFYMAGAQ">https://qingkeai.online/blog/tFYMAGAQ</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本纪要<strong>非逐字稿</strong>。本期 B站视频无字幕轨（已 4 次复核确认），本纪要据该期对应的公开材料还原——官网预告（讲者与三段提纲：扩散大语言模型推理难点 / 分块 KV 缓存与置信度感知并行解码 / LLaDA 与 Dream 上的性能验证）+ Fast-dLLM 论文原文（arXiv:2505.22618）。talk 现场发挥、演示与 AMA 环节未覆盖，若现场口径与论文冲突无法核知；所有实验数字均为论文口径，逐项标注出处。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>扩散大语言模型（dLLM）推理慢在两处：双向注意力让标准 KV Cache 用不了、一步并行解码多个 token 又掉质量。Fast-dLLM 全程不训练：一是块级近似 KV Cache（块内复用、块边界刷新，另有 prefix+suffix 的 DualCache 版），二是置信度阈值并行解码——根因定位为「条件独立假设破坏 token 间依赖」，解法是只解置信度过阈值的 token。两者叠加在 LLaDA / Dream 上达到最高 27.6 倍端到端加速，准确率损失在 1–2 个点内。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：dLLM 的并行潜力被推理层锁住</h3>
+<p>扩散 LLM（LLaDA、Dream 一类 masked diffusion 模型）理论上能一步生成多个 token，但开源实现实际推理速度反而落后自回归模型（论文 §1）。两个结构性原因：</p>
+<ol>
+<li><strong>没有 KV Cache</strong>：双向注意力下，每一步去噪所有位置互相 attend，KV 随上下文变化，没法像 AR 模型那样增量缓存，前缀计算每步重算。</li>
+<li><strong>并行解码掉质量</strong>：MDM 反向过程默认每步只改一个 token（ $\tau$ -leaping 近似才允许多 token 并行）；一旦一步采样多个 token，条件独立假设会破坏 token 间依赖——论文 §2.2 的例子：两个空位可以填 "full house"，独立采样却可能拼出 "high house"。并行的 token 越多，问题越严重（论文称之为 "Curse of Parallel Decoding"）。</li>
+</ol>
+<h3>方法/设计：块级近似缓存 + 置信度门控并行</h3>
+<p><strong>（1）块级 KV Cache（论文 §3.2）</strong>：按 block 生成。生成当前 block 前，先算好并缓存其余 block 的 KV；block 内多步复用同一份缓存；block 完成后统一重算全部缓存。依据是 KV 激活在相邻步之间高度相似，所以「近似缓存」在实践中几乎无损。DualCache 进一步把 prefix 与（masked 的）suffix 都缓存，复用更彻底。</p>
+<p><strong>（2）置信度感知并行解码（论文 §3.3）</strong>：不用 LLaDA 式的固定 top-k 个 token/步，改成动态规则：只解置信度超过全局阈值 $\tau$ 的 token。置信度低的 token 恰是最可能互相依赖、需要上下文先定下来的位置，先跳过、等周围信息落实后再解——直接对症「条件独立破坏依赖」这个根因。论文后续版本还补了 factor-based 变体（按因子控制每步 token 数），吞吐比阈值版再高 1.4–1.5 倍（论文 Table 11）。</p>
+<p>关键超参很省：缓存 block size 常用 32，置信度阈值常用 0.9（论文 §4.1）；全部 training-free，不动模型权重。</p>
+<h3>实验/实战（论文 §4）</h3>
+<p>设置：NVIDIA A100 80GB，模型为 LLaDA-Instruct、LLaDA-1.5、Dream-Base（多模态另测 LLaDA-V），基准 GSM8K、MATH、HumanEval、MBPP，生成长度 256/512（消融至 1024）。</p>
+<ul>
+<li><strong>单项收益</strong>：只加 KV Cache 普遍 2–3.6 倍；只加并行解码常见 4–6 倍区间随长度增长（论文 §4.2）。</li>
+<li><strong>叠加收益（LLaDA）</strong>：GSM8K 长度 512 达 11.0 倍吞吐（3.2 → 35.3 tok/s），准确率 77.5 → 77.2；GSM8K 长度 256 为 8.1 倍（6.7 → 54.4 tok/s)，准确率 79.3 → 78.5；MBPP 长度 512 为 9.2 倍（论文 Table 1）。</li>
+<li><strong>长生成上限</strong>：8-shot、生成长度 1024 下 DualCache 达 27.6 倍端到端加速（0.7 → 19.3 tok/s)，且加速随长度单调放大（256 时 9.4 倍、512 时 15.8 倍）（论文 Table 5）。</li>
+<li><strong>多模态</strong>：LLaDA-V 在 MathVista 上 9.9 倍、MathVerse 上 8.5 倍，准确率基本持平甚至略升（论文 Table 3）。</li>
+<li><strong>代价面</strong>：论文自己点明高 batch 下 dLLM 仍追不上 AR 模型的吞吐，因为解码是 full attention、更吃算力（论文 §4.3 末段）。</li>
+</ul>
+<h3>结论/观点（论文口径，非 talk 现场原话）</h3>
+<ul>
+<li>dLLM 落地的瓶颈主要在推理系统不在模型：缓存近似 + 依赖感知的并行解码能把与 AR 的速度差距大体抹平，且零训练成本。</li>
+<li>并行解码的正确打开方式是「只解有把握的 token」，而不是固定步幅；条件独立假设是质量退化的根因诊断，后续同类加速工作基本围绕这一诊断展开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>端到端最高加速</td>
+<td>vanilla LLaDA</td>
+<td>27.6 倍（8-shot、长度 1024、DualCache）</td>
+<td>论文 Abstract、Table 5</td>
+</tr>
+<tr>
+<td>GSM8K 长度 512（LLaDA）</td>
+<td>3.2 tok/s、准确率 77.5</td>
+<td>35.3 tok/s（11.0 倍）、准确率 77.2</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>GSM8K 长度 256（LLaDA）</td>
+<td>6.7 tok/s、准确率 79.3</td>
+<td>54.4 tok/s（8.1 倍）、准确率 78.5</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>MBPP 长度 512（LLaDA）</td>
+<td>4.3 tok/s</td>
+<td>39.5 tok/s（9.2 倍）</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>单项：KV Cache</td>
+<td>无缓存</td>
+<td>普遍 2–3.6 倍</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>单项：并行解码</td>
+<td>1 token/步</td>
+<td>常见 4–6 倍，随长度增长</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>LLaDA-V 多模态</td>
+<td>Full Steps</td>
+<td>MathVista 9.9 倍、MathVerse 8.5 倍</td>
+<td>论文 Table 3</td>
+</tr>
+<tr>
+<td>准确率损失</td>
+<td>全部设置</td>
+<td>1–2 个点内，部分设置略升</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>常用超参</td>
+<td>—</td>
+<td>block size 32、置信度阈值 0.9</td>
+<td>论文 §4.1</td>
+</tr>
+</tbody>
+</table>
+<p>注：以上均为论文口径；talk 现场演示的具体数字无法核知。官网预告摘要称「1024 token 长文本 27.6 倍、266 秒压至 12 秒、准确率损失 2% 以内」，与论文 Table 5 的 27.6 倍结论一致。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>「只解高置信 token」是可移植的解码调度原则</strong>：任何并行/投机解码场景，先想清楚质量退化的根因是否「独立假设破坏依赖」，再用置信度门控而非固定步幅；这与 RL rollout 中 speculative decoding、block-wise 生成的调参是同一类问题。</li>
+<li><strong>近似缓存的关键是定位「相邻步高相似」的张量</strong>：Fast-dLLM 在块内冻结 KV 是近似推理能落地的形态，做 inference 优化时可以先量化 KV 跨步漂移再决定缓存粒度；</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：</li>
+<li>training-free 的系统优化在部署侧最友好（不碰权重、不重走训练验收）；评估新模型时应先把「推理层未优化」从「模型不行」里剥离。</li>
+<li>加速比随长度/prefill 增长（9.4 → 27.6 倍）提示评测必须按长度分层报，短样本调通的结论不能外推长生成。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：DualCache 冻结 suffix 的 KV 在生成极长、全局依赖强的文本（如跨 block 的指代一致性）上误差如何累积，论文只给了基准分数，没有 failure case 分析；现场若演示过长文本生成，值得回看。</li>
+<li>讲者现场内容不可还原：若 B站后续补挂字幕轨，应以字幕为准修订本纪要。后续同系工作（Fast-dLLM v2，arXiv:2509.26328，改为轻量微调的 block-diffusion 模型路线）与本期的 training-free 路线是可对照的两条演进线。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"we identify the root cause of generation quality degradation in parallel decoding as the disruption of token dependencies under the conditional independence assumption." —— 论文 Abstract，本期方法论的出发点诊断</p>
+<p>"The issue is more problematic when a large number of tokens are unmasked simultaneously in a single step." —— 论文 §2.2（Curse of Parallel Decoding），并行解码的边界判断</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

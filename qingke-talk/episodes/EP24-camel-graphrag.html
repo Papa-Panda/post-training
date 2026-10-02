@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP24 — 使用 CAMEL Agents 构建 GraphRAG 及应用实践</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP24 — 使用 CAMEL Agents 构建 GraphRAG 及应用实践</h1>
+    <p class="sub">这期用 CAMEL 回答了两个问题：多智能体 role-playing 不只是「能完成任务」，它还是一个能自动产数据、产结构的引擎——一边生成可微调模型的对话数据，一边用 Kn… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP24-camel-graphrag.html</p>
+<p>「智慧的力量来源于我们广泛的多样性，而不是某一个单一的完美的准则。」——讲者转引 Marvin Minsky《心智社会》的判词，作为多智能体的立论起点（字幕 02:09–02:21）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>24（官网第 24 期）</dd><dt>标题</dt><dd>使用 CAMEL Agents 构建 GraphRAG 及应用实践</dd><dt>BV</dt><dd>BV1feNZeYEbm</dd><dt>时长</dt><dd>00:49:57（讲授约 39 分钟 + Q&amp;A 约 10 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>范文栋（字幕开场自述；CAMEL-AI 多智能体开源框架核心贡献者）</dd><dt>相关论文</dt><dd>CAMEL role-playing 框架及 CAMEL 数据集相关工作（讲者以框架与项目页为准）</dd><dt>相关代码</dt><dd>CAMEL-AI 开源社区（GitHub）；文中另提到 CRAB 跨平台 agent benchmark（开源）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP24.txt</code>（1166 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP24，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 CAMEL 在字幕中多作「cameo / camera / KCAO」，NebulaGraph 作「内部拉 graph / NEBAGGRAPH」，AutoGen 作「auto jin」，Ollama 作「欧拉码」，均已按公开资料校正）。讲授中的演示以屏幕内容为主者，纪要只取讲者口播结论。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期用 CAMEL 回答了两个问题：多智能体 role-playing 不只是「能完成任务」，它还是一个能自动产数据、产结构的引擎——一边生成可微调模型的对话数据，一边用 Knowledge Graph Agent 把文本抽成实体与关系；再把图检索与向量检索拼起来做 GraphRAG，补上传统向量 RAG 切块丢指代、丢关系的短板。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>框架立论：从「心智社会」到 agent scaling law</h3>
+<p>讲者先铺三段背景：Minsky《心智社会》（1986）里 agent 是「没有思想的进程」，单个简单、成群才涌现智慧；强化学习里的 agent 靠试错改策略但泛化受限（AlphaGo 下不了象棋）；生成式 AI 之后，Lilian Weng 的范式把 LLM agent 拆成 memory / tools / planning + 大脑（LLM），自然语言进出带来泛化。讲者还抛出一个假说式类比：他称之为 agent 的 scaling law——模型参数量对应 agent 数量，训练对应与环境交互，训练过程沉淀为 memory / interaction，暗示多智能体系统可能是模型能力见顶后的下一条扩展曲线（字幕 11:47–12:14）。</p>
+<h3>CAMEL role-playing：对话既是执行也是数据</h3>
+<p>CAMEL 的核心模块是 role-playing：用户给一个 idea / task，先定义 AI user（出需求，如股票交易员）与 AI assistant（解问题，如 Python 程序员）两个角色，经 task agent 把任务具象化后，两边交替对话直到一方说出任务完成标记。现场演示了两段：牛津大学年龄计算（search + math 工具分工）和 Pygame 寻宝游戏（一指令一代码步步推进）。</p>
+<p>两个经验证据值得记：一是裁判对比实验——人类裁判认为 CAMEL agents 更好的场景占 76.3%，GPT-4 作裁判时占 73%（字幕 18:03–18:51）。二是<strong>对话数据可以反哺训练</strong>：框架自动生成数据（AI Society 设定：50 种 assistant 角色 × 50 种 user 角色 × 10 类 task；代码设定：20 种编程语言 × 50 个领域 × 50 种 task），微调后模型在讲者演示的数学领域对比中由 8:7 翻成 3:16 压倒性领先（字幕 19:04–20:38）。讲者称 Hugging Face 上有 180+ 个模型用了 CAMEL 数据集，MPT-30B、M4（字幕音译）亦在其列。Q&amp;A 中他明确框架定位「更加专注于 bot、data generation 方向」，与 AutoGen 各有侧重（字幕 46:33–46:54）。</p>
+<h3>GraphRAG：为什么需要图，以及图怎么让 agent 自己建</h3>
+<p>传统向量 RAG 的毛病讲者给得很具体：切块会切断指代——柏林介绍的第二块里「it / the city」到底指谁，块内看不出来（字幕 21:55–22:35）；企业数据里产品间的上下位、替代关系，向量检索同样捞不回来。GraphRAG 把 entity 与 relationship 存进图数据库，检索能拿到全局与关系信息。</p>
+<p>但手工建图成本高（专家逐条找实体、关系再入库），CAMEL 的解法是定义一个 <strong>Knowledge Graph Agent</strong>：给它角色、抽取任务（抽所有 node 与 relation）和结构化输出格式加示例，让 agent 直接把文本变成结构化数据。检索侧的 workflow 是双路拼装：向量路按 query embedding 捞语义块，图谱路抽 query 的实体去图里匹配关系，两路结果合并给 agent 回答——讲者口径是「vector retrieval 偏向语义检索，knowledge graph 偏向 relationship 检索」，且两路各有优劣、结合最好（字幕 26:00–28:08）。演示案例是一个端到端任务：给一个人名，agent 自己去搜索、抓网页、写出一篇报告，再从报告自动抽出知识图谱（含被引申出的关联实体信息）。</p>
+<p>Q&amp;A 里对数据可信度的回答很务实：agent 生成的图数据当然有幻觉，可以再引一个 critic agent 复核（成本更高）或人类专家复核；框架支持人工删改任意 entity / relationship（字幕 40:44–41:25）。被问到因果关系能否抽，答：改 Knowledge Graph Agent 的 prompt 即可，当前 prompt 只 focus 在 relationship 与 entity（字幕 44:04–44:26）。</p>
+<h3>周边与边界</h3>
+<ul>
+<li>商业化载体 Agent AI 两件产品：Agent Bot（定位 knowledge generation、能调工具跨系统、支持 Slack / Discord / Telegram 等部署）和 Agent Data（用框架生成合成数据做 RAG / 微调）。均属「正在进行」口径。</li>
+<li>CRAB（Cross-platform Agent Benchmark）：用基准测不同 LLM / VLM 的能力差，任务天生跨平台（如打开 Slack 看消息、总结后发给手机联系人），多智能体底座由 CAMEL 提供。</li>
+<li>工具调用成本判断：工具本身执行成本低，schema 只有在被调用时才读入，讲者认为「成本可以接受」（字幕 44:51–45:14）。工具 / 函数规模化靠在研的 CAMEL Scale 项目（未上线）。</li>
+<li>本地模型支持 Ollama / vLLM 调用（Q&amp;A 确认）；对 SGLang 直言不了解、CAMEL 暂未支持，欢迎提 issue——这类坦白边界在纪要里如实保留。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>人类裁判偏好 CAMEL agents 的场景占比</td>
+<td>76.3%</td>
+<td>字幕（18:19–18:27 实验口径）</td>
+</tr>
+<tr>
+<td>GPT-4 裁判偏好 CAMEL agents 的场景占比</td>
+<td>73%</td>
+<td>字幕（18:36–18:46 实验口径）</td>
+</tr>
+<tr>
+<td>框架数据设定（AI Society）</td>
+<td>50 assistant 角色 × 50 user 角色 × 10 类 task</td>
+<td>字幕（19:04–19:17）</td>
+</tr>
+<tr>
+<td>框架数据设定（代码）</td>
+<td>20 种编程语言 × 50 个领域 × 50 种 task</td>
+<td>字幕（19:17–19:22）</td>
+</tr>
+<tr>
+<td>微调效果演示（数学领域模型对比得分）</td>
+<td>8:7 → 3:16（加入对应数据微调后）</td>
+<td>字幕（20:13–20:32）</td>
+</tr>
+<tr>
+<td>使用 CAMEL 数据集的 Hugging Face 模型数</td>
+<td>180+</td>
+<td>字幕（20:47–20:53 讲者口述）</td>
+</tr>
+<tr>
+<td>社区贡献者数（讲者致谢口径）</td>
+<td>51 位 PR 贡献者</td>
+<td>字幕（39:01–39:06）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>「生成数据 → 微调」闭环是最便宜的 agent 增值路径</strong>：role-playing 副产的对话数据能把开源模型在单一领域从五五开打到压倒性领先。给 coding agent 做轨迹数据采集时，这套「定义角色对 → 自动对话 → 筛轨迹微调」可以直接借。</li>
+<li><strong>图检索与向量检索是互补不是替代</strong>：语义相似找向量、关系推理找图，两路结果合并喂模型。内部知识库（代码关系、服务依赖、产品上下位）属于典型关系密集型数据，先用 agent 自动抽图再双路检索，比全量向量化更能答全局问题。</li>
+<li><strong>结构化抽取靠 prompt 三件套</strong>：角色 + 抽取范围（node / relation）+ 输出格式与示例。抽错时先加 critic 或人工复核，不要先怀疑模型。</li>
+<li><strong>多智能体框架选型先看侧重</strong>：讲者自陈 CAMEL 侧重 bot 与 data generation。选型时按「我要的是协作执行、数据生成、还是流程控制」分流，而不是只看 star 数。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>裁判实验（76.3% / 73%）的任务集与样本量讲授未展开，这两个百分比的适用边界需回 CAMEL 论文核对。</li>
+<li>GraphRAG 的双路 workflow 讲授以 demo 为主，没有给出与纯向量检索的定量对比（准确率 / 召回）；落地前要自备评测集，别直接采用定性结论。</li>
+<li>180+ 模型使用 CAMEL 数据集为讲者口述数字，引用时注明出处口径。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「智慧的力量来源于我们广泛的多样性，而不是某一个单一的完美的准则。」——字幕 02:09–02:21（讲者转引《心智社会》）</p>
+<p>「vector retrieval 更加偏向于语义的一个检索，knowledge graph 更加偏向于 relationship 信息的一个检索。」——字幕 27:52–27:59（双路检索的定位判词）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

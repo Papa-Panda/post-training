@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP20 — S-LoRA：实现多 LoRA 大模型的高效并行化推理</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP20 — S-LoRA：实现多 LoRA 大模型的高效并行化推理</h1>
+    <p class="sub">S-LoRA 把多租户 serving 拆成一个显存问题加一个算子问题：所有 adapter 平时躺在 CPU 内存、只把当前 batch 用到的搬上 GPU，KV cache… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP20-s-lora.html</p>
+<p>「S-LoRA 主要是为了高效部署上千个 LoRA adapter 所提出来的一个系统……相比同期的别的推理系统，可以达到将近四倍左右吞吐量的提升，并且它能承载 100 倍数量的 LoRA adapters。」——讲者开场定调（字幕口径，专名已校正）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>20</dd><dt>标题</dt><dd>S-LoRA：实现多 LoRA 大模型的高效并行化推理</dd><dt>BV</dt><dd>BV1mDaYzuEqK</dd><dt>时长</dt><dd>01:00:14</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>字幕中未自述姓名（自述为 UC Berkeley 在读博士生，研究方向为 LLM 推理加速；论文一作为 Ying Sheng，姓名对应以论文作者页为准）</dd><dt>相关论文</dt><dd>Ying Sheng, Shiyi Cao, Dacheng Li, et al., <em>S-LoRA: Serving Thousands of Concurrent LoRA Adapters</em>，<a href="https://arxiv.org/abs/2311.03285">https://arxiv.org/abs/2311.03285</a> （MLSys 2024）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1mDaYzuEqK/">https://www.bilibili.com/video/BV1mDaYzuEqK/</a></dd><dt>官网预告</dt><dd>青稞Talk 官网第 20 期预告（链接未确认，略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP20.txt</code>（1183 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP20，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名有识别误差，如 LoRA 在字幕中作「LAURA」、S-LoRA 作「SLAURA/SLOL」、adapter 作「ADAPTTER/debtor」、vLLM 作「VRM/V2M」、Punica 作「普妮卡」，均已按论文与公开资料校正）。论文（arXiv:2311.03285）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>S-LoRA 把多租户 serving 拆成一个显存问题加一个算子问题：所有 adapter 平时躺在 CPU 内存、只把当前 batch 用到的搬上 GPU，KV cache 与 adapter 权重共用一个以 hidden size 为页大小的 Unified Memory Pool 动态配比，再用异构 batching 的自定义 kernel 对付「同一 batch 里 rank 各不相同、权重还不连续存放」的计算；结果是单卡可挂数千个 adapter 而吞吐几乎不降（字幕口径约 4 倍于对照系统、承载量约 100 倍）。讲授后半还引出了多租户公平调度这一后续问题，并给出 Virtual Token Counter 的 max-min 公平解法（字幕口径）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：每人一份模型为什么不行</h3>
+<p>服务商想给每个用户提供定制化服务（个人助手的人格与偏好、企业在自有数据上的微调、把长文档微调成 adapter 当检索的替代品，字幕口径），但给每人部署一份大模型不经济：单个用户的请求是稀疏的，大部分时间在空转。讲者的解法是共享一份基座模型、每个用户只维护一个 LoRA adapter，请求随之变成「基座加 adapter」的二元组，serving 系统要解决的是如何同时、高效地跑成百上千个 adapter。</p>
+<h3>规模感：adapter 小到可以「不心疼」地存</h3>
+<p>LoRA adapter 只有两个 $H \times r$ 的小矩阵：以 $H = 4096$ 、 $r = 16$ 计，单层 adapter 不过零点几 MB（字幕口径），这决定了它可以全量放在 CPU 内存里、按需上卡。真正的瓶颈随之转移：adapter 数量一大，它们在 GPU 上与 KV cache 抢显存——显存被 adapter 占死，batch 就上不去，吞吐就上不去。讲者把问题归结为两个挑战：大量 adapter 的存储层级安排，以及 rank 异构时批量矩阵乘怎么做。</p>
+<h3>系统设计三件套</h3>
+<ol>
+<li><strong>存储层级</strong>：全部 adapter 存 CPU 内存，仅当前 batch 需要的搬到 GPU；adapter 尺寸小，搬运通信可以被计算重叠掉，不构成额外关键路径成本（字幕口径）。</li>
+<li><strong>Unified Memory Pool</strong>：KV cache 与 adapter 权重放进同一个分页内存池，页大小取两者的公共维度 hidden size $H$ ——一个 token 的 KV 占一页、一个 adapter 占 $r$ 页，两类张量在池内交错、非连续存放，配比随负载动态伸缩（请求集中时多给 KV、请求分散时多给 adapter），避免固定分区两头浪费（字幕口径）。</li>
+<li><strong>异构 batching kernel</strong>：基座计算与 adapter 计算分开走；adapter 部分是大量小矩阵向量乘，且每个矩阵 rank 不同、还分散在内存池里，现成的 batched GEMM 用不了。讲者的做法是借助索引表定位每个 adapter 的页，再在一个 thread block 内完成一个 $H$ 维向量乘（decode 阶段口径，prefill 类似）。Q&amp;A 确认该 kernel 是在 Punica 的 BGMV kernel 之上改写、对齐 unified memory pool 的（字幕口径）。</li>
+</ol>
+<p>补充：张量并行沿 Megatron 式策略，adapter 部分的通信与基座通信做融合，额外开销很小；实验在 LLaMA-30B / 70B、10-100 个 adapter 上验证（字幕口径，setting S5 / S6）。</p>
+<h3>实验：adapter 从 5 个加到 2000 个，吞吐基本不掉</h3>
+<p>主实验在单 GPU 上设五个 setting（基座 hidden size 不同、adapter rank 从单一到 8-64 混合不等，字幕口径），adapter 数量从 5 一直扫到 2000：S-LoRA 吞吐相比同期系统约 4 倍提升，且 adapter 数量增长时吞吐下降可忽略；对照方案（字幕提及的 naive 方案等）在 adapter 增多时会直接显存溢出。消融最说明问题的是 unified memory：adapter 很少时开不开差别不大，数量一大，不开的吞吐明显塌下去——因为被浪费的显存本可以给 KV cache 换更大 batch（字幕口径）。讲者也提醒对照口径是论文提交当时的状态，其后 vLLM 等系统已陆续补上多 adapter 支持（字幕口径）。</p>
+<h3>后续问题：多租户公平调度</h3>
+<p>讲授后半把问题从「跑得动」推进到「分得公道」：FCFS 会让高频用户饿死低频用户，per-user rate limit 能隔离却浪费产能（讲者给的算例：系统容量 20k token/s，四个用户各限 5k，实际只服务掉 14k，字幕口径）。目标是 max-min 公平：先给所有人等额份额，再把富余产能均分给没吃饱的人，如此迭代。落到 LLM serving 有三个传统调度没有的难点：输出长度事先未知、input 与 output token 成本不同且 output 成本随生成长度变化、preemption 在 KV cache 搬运下代价太大不能频繁做（字幕口径）。讲者的解法 Virtual Token Counter 是后续工作：给每个用户（或每个 adapter）维护一个虚拟计数器，decode 每步按一个与输入输出长度相关的 cost function 累加，进 batch 时永远优先 counter 最低的用户；用户离开后回归时，把其 counter 抬升到当前活跃用户的最小值，防止「回归用户」瞬间变成激进客户端。讲者称其有理论分析保证任意时间窗内两用户所得服务之差有常数界（字幕口径）。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>现在能直接用吗</strong>：讲者坦承 S-LoRA 仓库已不活跃维护，定位是研究原型；相关能力应去看 vLLM 与 SGLang，两者都已（在与其团队协作集成后）支持多 LoRA serving（字幕口径）。</li>
+<li><strong>与 Punica 的区别</strong>：kernel 部分本就建立在 Punica 的 BGMV 之上，Punica 的贡献在 kernel 优化，S-LoRA 想推的是「内存管理加 batching」的一整套 serving recipe，各组件要合在一起才有最高吞吐（字幕口径）。</li>
+<li><strong>多 adapter 的延迟代价</strong>：对比 0 个与 200 个 adapter 的延迟曲线，增加很少、近似常数（字幕口径）。</li>
+<li><strong>adapter 权重从哪来</strong>：直接用 HuggingFace PEFT 就能微调得到，serving 系统不关心训练侧细节（字幕口径）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>吞吐量</td>
+<td>同期推理系统</td>
+<td>约 4 倍提升</td>
+<td>字幕（讲授与结果部分）</td>
+</tr>
+<tr>
+<td>可承载 adapter 数量</td>
+<td>同期系统</td>
+<td>约 100 倍，实测扫到 2000 个仍不降吞吐</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>单层 adapter 体积</td>
+<td>$H = 4096$ 、 $r = 16$</td>
+<td>约 零点几 MB</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>公平调度算例</td>
+<td>系统容量 20k token/s，4 用户各限速 5k</td>
+<td>rate limit 实际仅服务 14k token/s</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>张量并行验证</td>
+<td>LLaMA-30B / 70B</td>
+<td>10-100 个 adapter</td>
+<td>字幕（setting S5 / S6）</td>
+</tr>
+<tr>
+<td>多 adapter 延迟</td>
+<td>200 个 vs 0 个 adapter</td>
+<td>增加很少，近似常数</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 serving 架构的直接启发：KV cache 与权重类张量共用一个分页池、按公共维度定页大小，是把 PagedAttention 的思想从单类张量推广到多类张量；凡是「很多小权重加一份大权重」的工作负载（adapter、多租户微调模型、MoE 专家缓存）都可借这套配比方式。</li>
+<li>对评测自动化的启发：吞吐结论必须连同 adapter 数量与 rank 分布一起报——同一系统在 5 个与 2000 个 adapter 下是两个系统；做 serving 基准时应把「并发 adapter 数」当作与 batch size 同级的扫描维度。</li>
+<li>Infra 视角的组织结论（讲者 Q&amp;A 口径）：研究原型 kernel 最终要活下去得进入 vLLM / SGLang 这类主线引擎；自研系统验证 recipe、主线系统承接维护，是这类系统的现实生命周期。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Unified Memory Pool 的页取 $H$ 是对当前 LoRA 形状的巧合式对齐；若 adapter 形式变化（如对 FFN 与 attention 分别用不同 rank、或换到非 LoRA 的 PEFT 形式），页大小与索引机制要怎么改，讲授未展开。</li>
+<li>Virtual Token Counter 的 cost function 在讲授中只给了「与输入输出长度相关」的定性描述，具体形式与常数界证明在后续工作论文里，需回原文核对。</li>
+<li>讲者提到 S-LoRA 已与 vLLM / SGLang 做集成；两引擎当前版本的多 adapter 显存管理是否已完整吸收 unified memory 的设计，值得在选型前实测对齐。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们并不是想为每一个人提供一个 dedicated GPU……这样是非常不经济的。」——讲者对多租户 serving 问题的定性（字幕口径）</p>
+<p>「所有人都没有 get starvation，并且请求多的用户也相应地 receive 到了多一点的 service……系统的 throughput 能达到整个系统 maximum 的 capacity。」——讲者对 max-min 公平调度目标状态的描述（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

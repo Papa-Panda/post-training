@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP10 — PiSSA：收敛快、误差小的大模型参数高效微调方法</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP10 — PiSSA：收敛快、误差小的大模型参数高效微调方法</h1>
+    <p class="sub">PiSSA 与 LoRA 架构完全相同，只改初始化：对预训练权重做 SVD，把 top- $r$ 主奇异值构成的成分放进可训练的 adapter 、把其余残差冻结为新的基座，等… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP10-pissa.html</p>
+<p>「PiSSA 它 fine-tune 原始模型的主奇异值的部分，然后它冻结的是那 noise 的一部分……它的收敛速度会很快，最后效果也会很好。」——讲者对方法的总结判词（字幕口径，专名已校正）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>10</dd><dt>标题</dt><dd>PiSSA：收敛快、误差小的大模型参数高效微调方法</dd><dt>BV</dt><dd>BV118e9zwEeu</dd><dt>时长</dt><dd>01:20:41</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>孟凡旭（北京大学；字幕自述研究方向为模型压缩、高效训练与高效推理）</dd><dt>相关论文</dt><dd>Fanxu Meng, Zhaohui Wang, Muhan Zhang, <em>PiSSA: Principal Singular Values and Singular Vectors Adaptation of Large Language Models</em>，<a href="https://arxiv.org/abs/2404.02948">https://arxiv.org/abs/2404.02948</a></dd><dt>相关代码</dt><dd><a href="https://github.com/GraphPKU/PiSSA">https://github.com/GraphPKU/PiSSA</a> （已合入 HuggingFace PEFT，字幕口径）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV118e9zwEeu/">https://www.bilibili.com/video/BV118e9zwEeu/</a></dd><dt>官网预告</dt><dd>青稞Talk 官网第 10 期预告（链接未确认，略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP10.txt</code>（1758 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP10，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名有识别误差，如 LoRA 在字幕中作「LAURA」、PiSSA 作「披萨」、QPiSSA 作「Q披萨」、全参数微调作「富凡顿/负反吞」、残差矩阵 $W^{res}$ 作「w rise」、MetaMathQA 作「mate max」、Gemma 作「JA」，均已按论文与公开资料校正）。论文（arXiv:2404.02948）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>PiSSA 与 LoRA 架构完全相同，只改初始化：对预训练权重做 SVD，把 top- $r$ 主奇异值构成的成分放进可训练的 adapter 、把其余残差冻结为新的基座，等于让微调一开始就沿着模型「主要功能的方向」更新，绕开 LoRA 高斯加零初始化带来的「梯度一个为零、一个是随机方向」的冷启动病；其量化版 QPiSSA 因为只需量化已经去掉主成分的残差，初始量化误差比 QLoRA 小约五分之一（字幕口径）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：参数高效微调要解决的是显存账</h3>
+<p>全参数微调直接但贵：讲者引论文口径指出，微调 65B 模型需要约 780GB 显存、170B 模型约 1.2TB（字幕口径），对多数实验室不现实。LoRA 的假设是微调前后的权重变化 $\Delta W$ 低秩，于是冻结基座、只训练两个小矩阵 $A$ 与 $B$ 的乘积，训完还能合并回基座、推理零额外分支。但讲者的切入点是：LoRA 的毛病不在结构，在初始化。</p>
+<h3>LoRA 的初始化病：梯度「又小又慢又乱」</h3>
+<p>LoRA 的 $A$ 用高斯初始化、 $B$ 用零初始化，保证插入瞬间不改变模型输出；讲者当场对两个矩阵求导指出后果：初始时刻一个矩阵的梯度恒为零，另一个的梯度由随机方向决定——「一个是零、一个是随机方向」，合起来就是「又小又慢又乱」。实证上就是 loss 曲线前 100 步几乎不降、梯度范数全程偏小（字幕口径，见 LLaMA-2-7B 实验段）。讲者的定性判断是：LoRA 冻结了原模型的能力，却在拿噪声和零去拟合增量，所以收敛慢、终点也差。</p>
+<h3>PiSSA 方法：训主成分，冻残差</h3>
+<p>对每个待微调权重矩阵 $W$ 做奇异值分解：</p>
+<p>$$W = U \Sigma V^\top$$</p>
+<p>取 top- $r$ 主奇异值与其奇异向量初始化 adapter ：</p>
+<p>$$A = U_{[:r]} \Sigma_{[:r]}^{1/2}, \qquad B = \Sigma_{[:r]}^{1/2} V_{[:r]}^\top$$</p>
+<p>剩余部分构成冻结的残差矩阵：</p>
+<p>$$W^{res} = U_{[r:]} \Sigma_{[r:]} V_{[r:]}^\top$$</p>
+<p>初始化时 $W^{res} + AB = W$ ，模型输出与原模型逐点一致，训练中只更新 $A$ 与 $B$ ——即只微调原权重的主成分。由于 $A$ 与 $B$ 不再是噪声与零，初始梯度既大且方向对齐模型的主要功能，梯度范数的形状与全参数微调高度相似（字幕口径）。工程上唯一新增步骤是一次快速 SVD，几秒量级（字幕口径：rank 16 约 6 秒），架构与训练代码与 LoRA 完全复用。</p>
+<h3>QPiSSA：量化误差为什么天然更小</h3>
+<p>QLoRA 把基座做 4-bit NF4 量化、adapter 保持高精度；讲者指出它的一个结构性事实：初始化时 adapter 为零，所以 QLoRA 的初始量化误差就等于「直接把原模型 4-bit 量化」的误差，一点没省。QPiSSA 改变量化对象——只量化残差 $W^{res}$ ：主奇异值已经被抽走，残差的奇异值量级小得多（讲者给的印象量级：原始矩阵奇异值从约 20 往下，误差矩阵从约 0.5 往下，字幕口径），且残差分布更接近高斯分布，更贴合 NF4 按正态分位数划格子的假设，于是格子利用率更高、误差更小。在 LLaMA-2-7B、LLaMA-3-8B、LLaMA-3-70B 三个模型上，QPiSSA 相对直接 4-bit 量化减少约 20% 量化误差，且在每一类层（注意力 QKVO、MLP gate/up/down）上都优于专门做误差修正的 LoftQ（字幕口径）。推论是：4-bit 的 QPiSSA 训出的模型效果可以超过不量化的 LoRA，A100 才训得动的模型用 3090 就能训（字幕口径）。</p>
+<h3>实验：收敛速度与终点双测</h3>
+<p>讲者用三层证据：玩具实验（两层 MLP、手写数字奇偶划分预训练/微调）直观展示 PiSSA 收敛略快于全参数微调、LoRA 全程落后；主实验在 LLaMA-2-7B 上以 rank 128、MetaMathQA-395K 数据、batch size 128、3 个 epoch 对比（字幕口径），PiSSA 的 loss 全程贴近甚至低于全参数微调，GSM8K 上从 1000 步到 9000 步持续领先 LoRA、部分点超过全参数微调，讲者引为「直接超了 LoRA 约 11%」（字幕口径）。任务面覆盖 5 个生成任务（数学、代码、对话类）与 8 个语言理解任务，模型面从 7B 到 LLaMA-3-70B、含 MoE 结构，结论一致（字幕口径）。消融确认三点：训练主奇异值优于训练中间或最小奇异值（loss 与准确率双测）；rank 越大初始量化误差越小、rank 128 时效果接近全参数微调；PiSSA 偶胜全参数微调，讲者的解释是全参数微调在简单微调任务上过参数化、更难调。</p>
+<h3>工程使用：零代码切换与四种保存法</h3>
+<p>PiSSA 已合入 HuggingFace PEFT（字幕口径），在 LoRA 配置里把初始化方式设为 PiSSA 即可，其余代码不动；讲者团队也在 HuggingFace 上放了预初始化好的模型（字幕口径：上月下载量约 2700 次），含 LLaMA-3-70B、Qwen2-72B 的量化版，约 30GB 可下载。实践参数： $\alpha$ 与 $r$ 保持一致（缩放系数为 1）、dropout 建议设 0（主成分被丢弃会伤效果）；不要直接丢弃 $W^{res}$ ，它量级虽小但删掉损失很大。保存有四条路：合并成单分支模型（推理快、存储大）、存 adapter 本体（每次加载重做 SVD）、利用 $\Delta W$ 可写成 rank 翻倍的普通 LoRA 无损转存（可与多个 adapter 共挂同一基座），以及讲者最推荐的分开保存，即只存 $W^{res}$ 与 adapter 两部分（存储小、加载不重算 SVD）（字幕口径）。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>对 SVD 数值稳定性/奇异值分布的依赖</strong>：权重越低秩，收敛快与量化误差小的收益越明显；低秩性不显著时也仍有收益，因为训的始终是最重要的那部分（字幕口径）。</li>
+<li><strong>数据分布长期漂移</strong>：训好的 PiSSA 可以合并回模型、转成 LoRA 形式、或多个 adapter 共挂；后续继续训可以继承主奇异值部分、逐步加大 rank，不需要定期从头重训（字幕口径）。</li>
+<li><strong>过拟合/欠拟合</strong>：与一切 PEFT 相同，由 rank 与数据量匹配决定；任务难就加大 rank，数学任务上 rank 到 128 才追平全参数微调，有的任务 rank 4-8 就够（字幕口径）。</li>
+<li><strong>实验模型都是 base 版而非 chat 版</strong>，为了看各类基础能力；chat 版在其 HuggingFace 仓库中另行提供（字幕口径）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全参数微调 65B 模型显存需求</td>
+<td>—</td>
+<td>约 780GB</td>
+<td>字幕（引 LoRA 论文口径）</td>
+</tr>
+<tr>
+<td>全参数微调 170B 模型显存需求</td>
+<td>—</td>
+<td>约 1.2TB</td>
+<td>字幕（引 QLoRA 论文口径）</td>
+</tr>
+<tr>
+<td>主实验设置</td>
+<td>LoRA / PiSSA 同 rank 128</td>
+<td>LLaMA-2-7B，MetaMathQA-395K，batch 128，3 epoch</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GSM8K 相对提升</td>
+<td>LoRA</td>
+<td>约 +11%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>QPiSSA 初始量化误差</td>
+<td>直接 4-bit 量化</td>
+<td>减少约 20%（LLaMA-2-7B / LLaMA-3-8B / LLaMA-3-70B）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>快速 SVD 初始化开销</td>
+<td>—</td>
+<td>几秒量级（rank 16 约 6 秒）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>预初始化模型下载</td>
+<td>HuggingFace</td>
+<td>上月约 2700 次（讲者口径）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>量化版大模型体积</td>
+<td>LLaMA-3-70B / Qwen2-72B</td>
+<td>约 30GB 可下载</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 PEFT 选型的直接清单：初始化不是免费细节——LoRA 的高斯加零初始化决定了它前若干步在「挣扎」，凡是已有 LoRA 流水线，把初始化换成 PiSSA 是几秒成本、代码不变的替换，值得作为默认项做一次 A/B。</li>
+<li>对量化微调的启发：量化误差的大头来自权重的主成分；先把主成分抽到高精度 adapter 、只量化残差，是比事后误差补偿（LoftQ 式）更前置的解法，这一「先分解、再量化低价值部分」的次序可迁移到其他压缩场景。</li>
+<li>Infra 视角：PiSSA 训完可无损转成 rank $2r$ 的普通 LoRA，意味着训练侧的方法创新不必要求推理/serving 侧改任何接口——新方法若能保持与既有 adapter 格式兼容，落地摩擦会小一个量级。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>GSM8K「超 LoRA 约 11%」是相对百分比还是准确率点数，字幕未说清；需要回论文表格对齐口径（论文口径可另查 Mistral-7B 上的对应数字，不与字幕混用）。</li>
+<li>PiSSA 冻结残差的前提是「微调增量主要落在主成分方向」；在增量本身需要改动残差方向的任务（如学习全新格式/语言）上，这个假设何时失效，讲授未展开。</li>
+<li>讲者提到可以在 $W^{res}$ 上加 dropout 做进一步压缩，只是设想、未给实验；是否值得试取决于残差信息的实际冗余度。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「一个是零、一个是随机方向……就又小又慢又乱。」——讲者对 LoRA 初始梯度的判词（字幕口径）</p>
+<p>「我们这个 PiSSA 其实一直在找一个更全局一些的最优点。」——讲者对 PiSSA 与 LoRA 优化轨迹差异的总结（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

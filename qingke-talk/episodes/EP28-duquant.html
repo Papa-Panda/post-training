@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP28 — DuQuant：基于正交变换实现大型语言模型的 SOTA 级 4 bit 量化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP28 — DuQuant：基于正交变换实现大型语言模型的 SOTA 级 4 bit 量化</h1>
+    <p class="sub">DuQuant 先把既有方法在 4 bit 翻车的原因定位到 FFN down-projection 输入层的 massive outlier，再用两级正交变换——基于 out… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP28-duquant.html</p>
+<p>「我们会进一步发现 massive outlier 它其实会在这个 FFN module 的第二个层、就是 down projection 的这个输入层……这个是我们一个比较重要的一个发现，也是 motivate 我们去提出两个正交变换来解决这个问题。」——讲者陈述 DuQuant 的立论起点（字幕 20:40–21:15）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>28</dd><dt>标题</dt><dd>DuQuant：基于正交变换实现大型语言模型的 SOTA 级 4 bit 量化</dd><dt>BV</dt><dd>BV16CaRzWEvx</dd><dt>时长</dt><dd>01:01:44（总时长 3704 秒；讲授约 47 分钟 + Q&amp;A 约 12 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>本期讲者（字幕未自报姓名；自述来自香港城市大学，导师孙正南、魏莹；工作为中科院自动化所、香港城市大学、清华大学、浙江大学合作，正式作者信息以论文作者页为准）</dd><dt>相关论文</dt><dd><em>DuQuant: Distributing Outliers via Dual Transformation for Superior Quantization</em>（NeurIPS 2024 oral；讲者字幕自述 oral），arXiv:2406.11235</dd><dt>相关代码</dt><dd>已开源（讲者欢迎在 GitHub 提 issue；talk 中亦提及团队 KV cache 方向的 AttentionKV 工作）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV16CaRzWEvx/">https://www.bilibili.com/video/BV16CaRzWEvx/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP28.txt</code>（1450 条，带时间戳，02:12–61:38）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP28，已存档）清洗提炼（经人工清洗；个别专名可能有识别误差，如字幕中「地球矿/丢油矿/DIO框」为 DuQuant、「欧米矿/OMEIQU」为 OmniQuant、「q a road/QA6」为 QuaRot、「spring框」为 SpinQuant、「autumn」为 Atom、「VK test two」为 WikiText-2，均以论文与公开资料为准）。讲者未逐项口播的表格细数字不在此臆测；凡引论文口径处会特别标注。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">7B</div><div class="l">模型单卡</div></div></div>
+<p>DuQuant 先把既有方法在 4 bit 翻车的原因定位到 FFN down-projection 输入层的 massive outlier，再用两级正交变换——基于 outlier 先验构造的 block-wise 旋转，加 zigzag 通道重排——同时平滑 activation 与 weight 两个曲面，于是最朴素的 RTN 就能在 W4A4 上打出 SOTA 精度，且 7B 模型单卡 50 秒量化完毕、不需要 GPTQ 兜底。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景与量化设定</h3>
+<p>讲者先铺了 PTQ（post-training quantization）的完整设定：训练好的全精度模型 + 少量 calibration 数据、无梯度训练（区别于 QAT）；DuQuant 采用均匀量化 + 非对称量化（硬件友好），activation 按 per-token、weight 按 per-channel 分配 scale 与 zero point，且把 KV cache、query、hidden states 等所有 activation 一并量化。基础量化公式是 min-max 形式：</p>
+<p>$$Q(x) = \mathrm{clamp}\left( \left\lfloor \frac{x}{\Delta} \right\rceil + z, 0, 2^b - 1 \right), \quad \Delta = \frac{x_{\max} - x_{\min}}{2^b - 1}$$</p>
+<p>其中 $\Delta$ 是步长、 $z$ 是 zero point。后面所有问题都出在同一个地方： $x_{\max}$ 被极端值撑爆后， $\Delta$ 变大，有限的整数格点被少数 outlier 独占。</p>
+<h3>两类 outlier，以及 down-projection 的新定位</h3>
+<p>讲者严格区分了两种 outlier。<strong>Normal outlier</strong>：少数 channel 在所有 token 上都显著大（SmoothQuant 图中那种），per-token 量化时每列的 scale 都被它拉大。<strong>Massive outlier</strong>：数值极端（可超过 1000、甚至 5000），但只集中在极少数 token 上，典型出现在起始的 BOS token 附近；这一现象来自《Massive Activations in Large Language Models》（COLM）与讲者参与的 KV cache 工作。</p>
+<p>DuQuant 的关键新观察是把定位粒度推进了一步：massive outlier 明确出现在 <strong>FFN 第二层 down-projection 的输入</strong>，而此前工作只定位到 transformer block 的输出层。讲者称这是整个工作的 motivation 起点——它能解释为什么 SmoothQuant 与 OmniQuant 在这一层、进而在 4 bit 下集体表现不好。</p>
+<h3>为什么旧方法恰好在这一层失效</h3>
+<p>讲者逐个拆解了基线在 down-projection 输入上的失败模式：</p>
+<ul>
+<li><strong>SmoothQuant</strong> 把该层的量化难度往 weight 转移时，由于 outlier 值特别大，转移因子 $S$ 也特别大，结果在原本平坦的 weight 上<strong>人为制造出新的 outlier</strong>，反而增加 weight 的量化难度；且 massive 值经转移后仍有约 100（原约 1000），难以消除。</li>
+<li><strong>OmniQuant / FLAQuant</strong> 这类可学习方法在这一层会遇到梯度更新不稳定，实践中直接丢弃了该层的可学习参数，等于绕开问题。</li>
+</ul>
+<p>结论：4 bit 量化精度差不是「比特不够」，而是这一层的数值 landscape 没人处理过。</p>
+<h3>方法一：基于 outlier 先验的 block-wise 旋转</h3>
+<p>第一级变换是旋转：用正交矩阵把 outlier 能量分摊到邻近 channel。由于理想正交矩阵不可得，DuQuant 用先验知识贪心地构造：先定位最大的 outlier channel（取该列在所有 token 上的最大值、再 argmax 得列号），用列置换把这一列换到第一列，与一个「第一行均匀分布」的初始旋转矩阵相乘，使最大通道被均匀分摊到其他列；再重复旋转多步，取整体 outlier 最小的一步。为控制开销，旋转是 block-wise 的，最终采用 128 个 channel 一个 block。</p>
+<p>正交变换的关键性质是输出不变性：线性层 $X \cdot W$ 在激活侧右乘 $R$ 、在权重侧左乘 $R^{\top}$ 之后，计算结果严格等价：</p>
+<p>$$X \cdot W = (X \cdot R) \cdot (R^{\top} \cdot W)$$</p>
+<p>讲者特别点出：这套变换同时作用在 $X$ 与 $W$ 上，所以它不只平滑 activation，也平滑 weight——这是后面「不需要 GPTQ」的原因。</p>
+<h3>方法二：zigzag 通道重排（permutation）</h3>
+<p>Block-wise 旋转留下残余问题：被旋转过的 block 整体仍明显大于其他 block，分布跨 block 不均。第二级变换是通道置换：按每列最大值从高到低排队，用 zigzag 顺序（像按身高排队、先递减到最后一个 block、再折返回来）把大 channel 分散到不同 block，使 block 间均值与方差尽量接近，再做第二次旋转即可进一步压低 outlier。消融对比很说明问题：不用置换最差，随机置换已有大幅提升，zigzag 再进一步，而模拟退火学出的置换性能无明显优势、速度却慢得多——最终选 zigzag，只存 channel id，实现开销可忽略。</p>
+<p>完整流水线是：先做 SmoothQuant 式对角变换把难度从 activation 转移一部分，再旋转 → 置换 → 旋转（讲者的默认配置是旋转两次、置换一次），并可选用 OmniQuant 的 LWC（learnable weight clipping）在部分情形再提一点。可视化结果：LLaMA-1-65B 的 normal outlier 被压到很平；量级约 800 的 massive outlier 经两级变换后降到易于量化的平面。</p>
+<h3>实验：W4A4 是主战场，且校准数据没想象中重要</h3>
+<p>实验覆盖 LLaMA 1/2/3、Vicuna、Mistral，任务含 perplexity、commonsense QA、MMLU、MT-Bench 与 LongBench（解码 3500 步测长文本生成）。讲者的主结论是：</p>
+<ul>
+<li>在重点的 W4A4 设定下 DuQuant（含 LWC 变体）明显优于既有基线；以难量化著称的 LLaMA3（8B 与 70B）上相对 Atom 等方法优势依然显著；Vicuna 在 MT-Bench 上甚至与 FP16 模型用 GPT-4 打分对比时仍保持竞争力。</li>
+<li>LongBench 上量化后的 Vicuna 7B/13B 相比 FP16 只掉约 2–3 个点（字幕口径）。</li>
+<li><strong>量化耗时极小</strong>：因为变换已把 weight 一并平滑，权重侧只需 RTN、不必跑 GPTQ，单卡 A100 上 50 秒即可完成 7B 模型量化。</li>
+<li>一个讲者自己觉得有趣的发现：calibration 数据换成「从词表随机生成的 128 条 2048 长度序列」，性能基本不变。他的推论是 outlier 更多是模型自身的固有属性、与校准数据关系不大，这意味着 <strong>data-free 量化</strong>（无需真实数据，利好隐私场景）可能成立。</li>
+<li>与最接近的 QuaRot 对比：DuQuant 速度略慢、但精度更好且显存占用相当；变换带来的额外推理开销约 10%（Q&amp;A 口径），讲者判断在可接受范围。置换只做一次的理由是：两次置换 perplexity 无明显变化、性能劣化却更多。</li>
+</ul>
+<h3>Q&amp;A 与讲者的自我定位</h3>
+<ul>
+<li>与同期工作 SpinQuant 的区别被专门澄清：SpinQuant 是在 QuaRot 的 Hadamard 矩阵上做可学习化且依赖 GPTQ；DuQuant 是用 outlier 先验构造旋转、不依赖 GPTQ，也不认为两者「撞车」（投稿与挂 arXiv 时间相近，本质不同）。讲者还委婉质疑了 SpinQuant 在 MacBook 上测速的可比性。</li>
+<li>LLaMA3 量化下降更明显，讲者归因于词表变大等新特性，提到把旋转矩阵完全可训练的工作在 LLaMA3 上有提升。</li>
+<li>4 bit 是否到头：讲者认为 W4A4 的 W/A 量化仍会继续做（4 bit 乘法最好加速），weight-only 方向则已走向二值化；与 QAT 结合在资源允许时是值得考虑的进一步提升路径。</li>
+<li>硬件落地现状坦白：TensorRT 一类推理栈的支持还没有做完，旋转与置换矩阵 fuse 进 kernel 是 decoding 继续加速的方向。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>massive outlier 量级</td>
+<td>普通激活值</td>
+<td>超过 1000、甚至 5000，且只集中在少数 token</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>SmoothQuant 转移后的残值</td>
+<td>原约 1000</td>
+<td>仍约 100，难以消除</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>旋转 block 大小</td>
+<td>—</td>
+<td>128 个 channel 一个 block</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>默认流水线配置</td>
+<td>—</td>
+<td>旋转 2 次 + 置换 1 次；可选 LWC</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>7B 模型量化耗时</td>
+<td>依赖 GPTQ 的方法更慢</td>
+<td>单卡 A100 约 50 秒（权重侧只需 RTN）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LongBench 长文本生成</td>
+<td>FP16 Vicuna</td>
+<td>量化后约低 2–3 个点</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>calibration 数据</td>
+<td>128 条 WikiText-2</td>
+<td>换成随机生成数据，性能基本不变</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>变换的推理额外开销</td>
+<td>无变换基线</td>
+<td>约 +10%，与 QuaRot 相当</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>硬件对比（prefill 速度 / decoding 显存）</td>
+<td>QuaRot</td>
+<td>速度略慢、精度更好、显存相当</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「先定位最难的那一层，再设计变换」是可直接抄的排障顺序：做任何 W/A 低比特量化前，先按层扫描 activation 的最大值分布，找出 massive outlier 的具体落点（很可能在 down-projection 输入），再决定变换与 scale 策略，而不是全局调参。</li>
+<li>正交变换的「输出不变、只改数值 landscape」思路可迁移到训练与推理两侧的数值治理：凡是形如 $X \cdot W$ 的线性层，都可以在不改变函数的前提下重新分配 outlier 能量；做 rollout 量化或 FP8 训练前的 activation 平滑时可先试这一类无训练变换。</li>
+<li>Calibration 数据的结论（outlier 近似是模型固有属性、随机数据可替代）值得在自己的 PTQ 流程里复验：若成立，校准环节可省去真实数据准备，尤其适合拿不到用户数据的部署场景。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Massive outlier 为何集中在 down-projection 输入，讲者给的是定位而非机制解释：它与 attention sink / BOS 的关系、是否随模型家族（大词表 LLaMA3）系统性增强，值得追问与实测。</li>
+<li>旋转矩阵若改为全程可训练（讲者提到这类工作在 LLaMA3 上更好），与 DuQuant 的先验构造能否叠加，稳定性与耗时如何，未在 talk 中展开。</li>
+<li>Data-free 量化的边界条件只在一个随机数据实验中验证：对更新的模型（MoE、大词表）是否仍成立，需要在自己的模型上复验后再依赖。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们会进一步发现 massive outlier 它其实会在这个 FFN module 的第二个层、就是 down projection 的这个输入层……也是 motivate 我们去提出两个正交变换来解决这个问题。」——讲者陈述立论起点（字幕 20:40–21:15）</p>
+<p>「欢迎大家使用 DuQuant 作为一个 baseline，在后面的工作中打败它，或者提出更好的解决方案。」——讲者收尾（字幕 61:26–61:33）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

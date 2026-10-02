@@ -19,22 +19,28 @@
 | 49 | verl 源码解读与 HybridFlow 编程范式讲解 | ✅ 要点已提炼 |
 | 68 | slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践 | ✅ 要点已提炼 |
 | 75 | FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案 | ✅ 要点已提炼 |
+| 77 | [Theory of Agent: From Definition, to Behavior and Objective](episodes/EP77-theory-of-agent.md) | ✅ 要点已提炼 |
 | 78 | 从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体 | ✅ 要点已提炼 |
 | 83 | 统一 SFT & RL：迈向大语言模型后训练的统一视角 | ✅ 要点已提炼 |
+| 10 | [PiSSA：收敛快、误差小的大模型参数高效微调方法](episodes/EP10-pissa.md) | ✅ 要点已提炼 |
 | 13 | [LLaMA Factory：从预训练到RLHF，大模型高效训练框架](episodes/EP13-llama-factory.md) | ✅ 要点已提炼 |
 | 33 | [XGrammar：高效实现 LLM 灵活且可移植的结构化生成](episodes/EP33-xgrammar.md) | ✅ 要点已提炼 |
 | 42 | [COAT：显存高效的 FP8 训练，实现高效深度学习](episodes/EP42-coat.md) | ✅ 要点已提炼 |
 | 41 | [PC-Agent：面向复杂 PC 任务的多模态智能体框架](episodes/EP41-pc-agent.md) | ✅ 要点已提炼 |
 | 44 | [InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建](episodes/EP44-infercept-preble-cognify.md) | ✅ 要点已提炼 |
+| 38 | [Satori：通过训练 LLM 做自回归搜索来增强推理能力](episodes/EP38-satori.md) | ✅ 要点已提炼 |
 | 39 | [PRIME: 结合隐式过程奖励的强化学习](episodes/EP39-prime.md) | ✅ 要点已提炼 |
 | 45 | [B-STaR & SimpleRL-Zoo：通过强化学习自我提升推理性能和效率](episodes/EP45-bstar-simplerl-zoo.md) | ✅ 要点已提炼 |
 | 46 | [从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化](episodes/EP46-tinyzero-apr.md) | ✅ 要点已提炼 |
 | 48 | [从 TTS 到 TTRL：无标签数据强化学习探索与展望](episodes/EP48-tts-ttrl.md) | ✅ 要点已提炼 |
+| 53 | [Chain-of-Model（模型链）：引入因果建模的大模型 Scaling 结构](episodes/EP53-chain-of-model.md) | ✅ 要点已提炼 |
+| 57 | [Fast-dLLM：无需重训的扩散大语言模型推理加速](episodes/EP57-fast-dllm.md) | ✅ 要点已提炼 |
 | 58 | [Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台](episodes/EP58-virtual-community.md) | ✅ 要点已提炼 |
 | 61 | [GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架](episodes/EP61-gui-reflection.md) | ✅ 要点已提炼 |
 | 59 | [大模型推理强化学习中的熵机制](episodes/EP59-entropy-mechanism-rl.md) | ✅ 要点已提炼 |
 | 60 | [Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型做 SWE](episodes/EP60-satori-swe.md) | ✅ 要点已提炼 |
 | 62 | [ProRL：延长强化学习训练框架，拓展大语言模型的推理边界](episodes/EP62-prorl.md) | ✅ 要点已提炼 |
+| 66 | [SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架](episodes/EP66-simoe.md) | ✅ 要点已提炼 |
 | 67 | [大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展](episodes/EP67-pipeline-parallelism.md) | ✅ 要点已提炼 |
 | 69 | [GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习](episodes/EP69-gspo.md) | ✅ 要点已提炼 |
 | 71 | [RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题](episodes/EP71-rlpr.md) | ✅ 要点已提炼 |

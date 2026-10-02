@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP66 — SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP66 — SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架</h1>
+    <p class="sub">讲者接续「LM upcycling（把 dense 模型升级改造成稀疏 MoE）」这条线，指出已有方法的两个缺陷——升级位置靠经验手动选择、专家间「专业化 vs 协作」的平衡点… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP66-simoe.html</p>
+<p>「我们希望它能根据我们选定的下游 domain 数据，给定一个最优的升级改造方法，而不会像传统方法一样依赖于经验化的参数选择。」——讲者在动机部分给出的判词</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>66</dd><dt>标题</dt><dd>SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架</dd><dt>BV</dt><dd>BV1Br4Qz8EpF</dd><dt>时长</dt><dd>01:20:48（讲授约 67 分钟 + Q&amp;A 约 10 分钟；开头因讲者掉线中断约 18 分钟，字幕存档原样保留）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>陈世双博士（主持人介绍字幕作「陈世双」，另有「陈胜庄/陈胜张」等识别变体；研究方向为分布外下游任务上基座模型的泛化与适配；正式姓名与单位以论文作者页为准）</dd><dt>相关论文</dt><dd>SIMoE 工作（ACL 2025，讲者在 talk 开头说明为 ACL 2025 成果）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1Br4Qz8EpF/">https://www.bilibili.com/video/BV1Br4Qz8EpF/</a></dd><dt>官网预告</dt><dd>官网第 66 期（链接未确认，仅记期号）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP66.txt</code>（1442 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP66，已存档）清洗提炼（经人工清洗；个别专名可能有识别误差，如 SIMoE 在字幕中作「SIME/SMOE/SMME」、稀疏在字幕中常作「系数」、正交在字幕中作「雾/ fog」等，均以论文与公开资料为准）。凡讲授口径以下均按字幕转写整理。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者接续「LM upcycling（把 dense 模型升级改造成稀疏 MoE）」这条线，指出已有方法的两个缺陷——升级位置靠经验手动选择、专家间「专业化 vs 协作」的平衡点靠手工设计；SIMoE 把这两件事都改成优化问题：用可学习的稀疏 mask 自动决定在哪些参数上做专家化，用参数共享加正交（orthogonal）penalty 去逼近专家分工的最优平衡，并用 Lagrangian 形式把最终稀疏度做成可控量，从而在同等 compute 下把 upcycling 的 performance 推得更靠左上。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">sparsity 约束设</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">75%</div></div><div class="barrow"><div class="barlabel">（即只保留</div><div class="bartrack"><div class="barfill" style="width:33.3%"></div></div><div class="barval">25%</div></div></div>
+<h3>背景：upcycling 是什么，为什么值得做</h3>
+<p>upcycling 指把一个预训练好的 dense LM 转换成稀疏混合专家（SMoE）模型的过程：dense 结构里只有一个 FFN 层，SMoE 把 FFN 换成由 $M$ 个专家组成的模块，路由器输出权重 $\alpha$ ，对每个输入只激活 top-1/top-2 个专家子集，因此同等参数规模下训练开销大幅下降。</p>
+<p>但从零训练一个大 SMoE 仍然非常贵。upcycling 的做法是两阶段：先训一个小模型，再把它放大成同样大小的 upcycled SMoE，第二阶段的计算成本远小于从零训练。讲者把这类方法的工作坐标系定为一张二维图：横轴是 compute cost，纵轴是 average downstream performance，所有方法都在争「把点往左上推」。</p>
+<h3>现有方法的两个缺陷</h3>
+<ol>
+<li><strong>手动升级位置选择</strong>。既有 sparse upcycling 的做法是把 FFN 层复制 $M$ 份做初始化，再继续训练；也有工作选择 attention 层、或全模型都做专家化。但选哪一部分升级完全依赖经验先验：同样一个模型里，参数与参数之间对性能的影响 sensitivity 差异很大——讲者举例：upcycle FFN 层可能对某几个任务收益好，对另一些任务（如 medical、chat）就不如 upcycle attention。手动选择的结果好坏，取决于你的先验是否恰好对上目标任务。</li>
+<li><strong>专业化与协作的平衡靠手工</strong>。设专家总数为 $M$ ，这 $M$ 个专家之间存在最优平衡点：shared expert（恒定激活、与输入无关）通过知识迁移促进协作、还能提升训练稳定性，但强行共享会稀释专业化，极端时所有专家学成一样的东西，变成纯冗余；另一极端是 BTX（branch-train-mix），让 $M$ 个专家各自在单个领域数据上独立训到最优，再合并——但专家间的表征可能相互冲突，merge 阶段会付出性能代价。</li>
+</ol>
+<h3>方法：三件套</h3>
+<p><strong>（1）把「在哪里升级」变成稀疏优化问题</strong>。核心 idea 是给每个参数附加一个可学习的 0/1 binary mask，mask 决定该参数是否被专家化；这样「what to upcycle」就被写成一个 sparsity-constrained optimization。但若在每个参数上都 attach mask，专家参数量会是原模型的 $M$ 倍，不可扩展。讲者采用 structured sparsity：把 mask 从参数级降到 neuron（输入维度）级——对每个输入维度做 mask，mask 开销降为原来的 $1/M$ ，而表达能力损失很小（masking neurons 是稀疏优化里常见且有效的做法）。</p>
+<p>建模上，每个专家从一组共享基底参数 $\theta$ 里靠自己的 mask 选一个子集；由于作用对象是 linear 层，在参数空间做加权和与在输出空间做加权和等价，因此 SMoE 的 forward 可以写成「路由器权重对专家参数先加权求和、再过线性层」的形式。专家参数是相对预训练参数 $\theta_{pre}$ 的稀疏增量而非直接替换，这样可以保留预训练学到的通用表征、避免灾难性遗忘；随着稀疏化推进，越来越多参数回到零，通用表征的收益与训练稳定性都会更好，而可训练参数量不变。</p>
+<p><strong>（2）用共享加正交 penalty 平衡协作与专业化</strong>。协作的一侧：所有专家共享同一组基底参数、各自用 mask 取子集，共享哪些参数完全由优化决定，不再手工指定 shared expert，也不再手工假定「code 和 math 应当共享专家」。专业化的一侧：对 $M$ 个 mask 施加正交约束（orthogonal penalty）——把 $M$ 个 mask 排成矩阵，自乘后减去单位矩阵，取其可导的 penalty 近似；这相当于在协作与专业化之间做拔河，用 penalty 把平衡点交给优化去找。</p>
+<p><strong>（3）用 Lagrangian 把稀疏度变成可控量</strong>。常见的把 penalty 乘一个系数 $\beta$ 加进 loss 的做法，问题是最终模型到底多稀疏不可控。但实际部署需要可控的稀疏度（类比传统 SMoE 的 top-1/top-2 固定激活）。讲者把问题写成约束优化：minimize loss，subject to 最终 sparsity 达到目标值 $\tau$ （如 25%）；约束本身不可导，做法是 simultaneous gradient ascent/descent——训练中控制稀疏强度的乘子逐步增大，把不必要的参数逐个「剪」掉；一旦 sparsity 越过目标 $\tau$ ，稀疏项归零，只剩下正交约束与主 loss。这样既保证最终激活比例达标，又不在达标后继续牺牲性能。</p>
+<p>实验设置：专家上限 $M = 8$ （受算力所限未到 32/64），sparsity 约束设为 75%（即只保留 25% 激活参数，与「8 个专家激活 1–2 个」量级对齐，保证与基线可比）；底座模型是 Llama 3 与 Llama 3.1（3B 与 8B 两个规模），所有基线用同一配置公平对比。</p>
+<h3>实验结果</h3>
+<p>讲者报告了三组结果：</p>
+<ol>
+<li><strong>SNI（SuperNaturalInstructions）跨任务泛化</strong>。按原论文划分，在 64 个 task category 上训练、在未见过的 12 个 task category 上测试（每个 category 内部还有大量具体任务，报告 micro 平均）。SIMoE 相对 fine-tuning 基线平均提升约 2.5 个百分点（3B）与约 1.6 个百分点（8B），在 12 个 category 中至少 7 个达到最优。</li>
+<li><strong>Tulu V3 大规模 SFT benchmark</strong>（约 900K 数据点，覆盖 MMLU、 BBH 、 GSM8K 、 HumanEval 、 AlpacaEval 、 safety 等多个领域）。SIMoE 的 average performance 对比 Tulu V3 原始 SFT 模型与 BTX 基线都有提升；讲者强调的更大亮点在效率侧：得益于参数共享与结构化稀疏，训练 GPU memory 与发布出去的最终模型参数量，相比传统 upcycling 都有至少两位数的改善，最大可达约 42% 的提升。</li>
+<li><strong>可解释性分析</strong>。按数据集聚类专家激活模式，直觉上相关的 domain（如 Persona-GSM 、 OpenMathInstruct 这类数学数据）确实激活了相似的专家组合，knowledge recall 、 instruction following 、 general 、 safety 也各自分成可解释的簇。稀疏模式可视化显示，学出来的升级位置不贴合任何一种手工策略（既不是只 upcycle FFN 、也不是只 upcycle attention），其中 LayerNorm 这类归一化层保留了明显更多的非零专家参数。引入正交 penalty 后，专家间参数共享降到约 10% 左右，而本应相关的专家对（如 code 与 math 对应的一对专家）仍保持更高的 overlap ，即知识迁移被保留下来。</li>
+</ol>
+<h3>消融与超参</h3>
+<p>四个消融变体：(A) 手动只 upcycle FFN 层；(B) 去掉正交 penalty；(C) 去掉稀疏 penalty（即不学升级策略、手动选位置）；(D) 路由粒度（按 token 路由 vs 按整句 instance 路由）。结论：完整 SIMoE 最优； A 与 C 说明「不学升级策略、手动选择」对 performance 的影响最大。超参敏感性上，正交 penalty 系数 $\beta$ 与目标稀疏度 $\tau$ 取中间值最好——极端值要么把表达能力约束太死，要么共享过多导致 model collapse。</p>
+<h3>结论与边界（讲者自述）</h3>
+<p>讲者总结 SIMoE 的定位：efficient 、 effective ，且不需要根据经验选择专家、也不需要经验式设计模型架构（"without manual integration"）。他在 limitations 部分坦白了两个短板：其一，多模态（视觉+语言）上未验证——团队早先的视觉工作 SMAT 在纯视觉任务上验证过框架的适配性，但多模态这块还缺失；其二，缺少理论框架解释「为什么 SIMoE 比普通 SMoE 泛化更好、为什么稀疏与正交 penalty 能带来下游收益」，这仍是开放问题。</p>
+<p>Q&amp;A 中讲者还澄清了一个常见误解：SIMoE 的推理期路由与传统 SMoE 完全一样——路由器根据 token（或句子）表征输出 $M$ 维权重，对专家输出做加权组合；差别只在架构（差值式参数共享）与「在参数层面做稀疏激活」而非在专家层面选 top-k ，最终激活比例仍可控在 25% 、 10% 等水平，并可通过调节目标稀疏度在不同 scale 与 performance 之间做 tradeoff 。关于专家任务边界，他回应说任务边界完全清晰是完全专业化的极端，少量 overlap 反而带来 knowledge transfer ，只要不共享到 model collapse ；他认为由优化（参数共享 + 正交 penalty + 下游任务学习）得到的参数共享与专家边界「理论上」是最优 configuration 。关于计算与内存节省的来源，他算了一笔账：传统 sparse upcycling 升级后有 $M$ 份 FFN 拷贝，而 SIMoE 所有专家共享同一套基底参数，相当于近乎 $M$ 倍的参数量削减，专业化完全靠 mask 实现。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>专家数上限 $M$</td>
+<td>32/64 未做到（算力所限）</td>
+<td>8</td>
+<td>字幕（实验设置部分）</td>
+</tr>
+<tr>
+<td>目标稀疏度</td>
+<td>传统 SMoE 约 8 选 1–2</td>
+<td>保留约 25% 激活参数</td>
+<td>字幕（实验设置部分）</td>
+</tr>
+<tr>
+<td>SNI 跨任务泛化提升（3B）</td>
+<td>fine-tuning 基线</td>
+<td>约 +2.5 个百分点</td>
+<td>字幕（结果部分）</td>
+</tr>
+<tr>
+<td>SNI 跨任务泛化提升（8B）</td>
+<td>fine-tuning 基线</td>
+<td>约 +1.6 个百分点</td>
+<td>字幕（结果部分）</td>
+</tr>
+<tr>
+<td>SNI 未见任务夺冠 category 数</td>
+<td>共 12 个未见 category</td>
+<td>至少 7 个最优</td>
+<td>字幕（结果部分）</td>
+</tr>
+<tr>
+<td>效率改善（显存/参数量）</td>
+<td>传统 upcycling</td>
+<td>至少两位数，最大约 42%</td>
+<td>字幕（结果部分）</td>
+</tr>
+<tr>
+<td>正交 penalty 后的专家参数共享</td>
+<td>无正交 penalty</td>
+<td>降至约 10%</td>
+<td>字幕（可视化分析部分）</td>
+</tr>
+<tr>
+<td>Tulu V3 数据量</td>
+<td>—</td>
+<td>约 900K 条</td>
+<td>字幕（数据介绍部分）</td>
+</tr>
+<tr>
+<td>SNI 训练/测试划分</td>
+<td>64 个 category 训练</td>
+<td>12 个未见 category 测试</td>
+<td>字幕（数据介绍部分）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>把「模型 surgery 的位置选择」从人工先验改成带预算约束的可学习 mask，是一个可以复用到很多架构设计问题的范式：先把设计问题写成 sparsity-constrained optimization，再用结构化稀疏（neuron 级 mask）把搜索空间压到可扩展的规模，最后用 Lagrangian 乘子把「预算」做成硬约束而不是软系数——这套三步比调一个 $\beta$ 系数更能保证部署侧的资源可控性。</li>
+<li>「共享基底 + 各自 mask 子集」给 MoE/adapter 类系统提供了一种省内存的专家实现：部署时只存一套 base 参数加 $M$ 个近乎免费的二值 mask，专家数可以扩得很大而参数量不涨；对想在小集群上试多专家系统的团队，这是比「复制 $M$ 份权重」友好得多的起点。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>40% 量级的效率改善与 1.6–2.5 个点的性能提升是在 Llama 3/3.1 的 3B/8B 规模上得到的；放大到 70B+ 或专家数 $M = 32/64$ 时，neuron 级 mask 的表达能力是否还够用、优化稳定性如何，讲者没有给出证据。</li>
+<li>讲者明确承认缺少理论解释：为什么「把升级位置学出来」比手工选 FFN/attention 好、正交 penalty 为什么提升泛化，目前只有经验结果；若要迁移到多模态或 RL post-training 的可学习结构选择上，这个理论空白会成为第一个要补的洞。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们最终想要达到的状况是：能根据我们选定的 downstream domain 数据，给定一个最优的升级改造方法，而不会像传统方法一样依赖于经验化的参数选择。」——讲者谈自动专家发现的动机</p>
+<p>「由优化（参数共享 + 正交 penalty + 下游任务学习）得到的参数共享与专家边界，理论上就是最优的 configuration。」——讲者在 Q&amp;A 中回应「如何保证专家任务边界清晰」</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

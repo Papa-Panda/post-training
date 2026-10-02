@@ -8,25 +8,25 @@
 7,MixEval：混合评测数据集来拟合大语言模型的人类评估,BV1une9zMEKF,7,MixEval：混合评测数据集来拟合大语言模型的人类评估,,2024-05-24,https://qingkeai.online/blog/bFcqmQLm,unknown,
 8,VideoBooth：文本和图像提示共同驱动的视频生成,BV1une9zME2m,8,VideoBooth：文本和图像提示共同驱动的视频生成,,2024-05-29,https://qingkeai.online/blog/TbrXq9DX,unknown,
 9,具身多模态大模型的视觉表征预训练研究,BV1s8e9zwE8E,9,具身多模态大模型的视觉表征预训练研究,,2024-06-06,https://qingkeai.online/blog/sU4h1Cud,unknown,
-10,PiSSA：收敛快、误差小的大模型参数高效微调方法,BV118e9zwEeu,10,PiSSA：收敛快、误差小的大模型参数高效微调方法,,2024-06-13,https://qingkeai.online/blog/LYU9gKur,unknown,
+10,PiSSA：收敛快、误差小的大模型参数高效微调方法,BV118e9zwEeu,10,PiSSA：收敛快、误差小的大模型参数高效微调方法,,2024-06-13,https://qingkeai.online/blog/LYU9gKur,yes,
 11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,BV1JfeXzpEtr,11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,,2024-06-17,https://qingkeai.online/blog/FcxgKwGE,unknown,
 12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,BV1LYaYzQEbs,12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,,2024-06-27,https://qingkeai.online/blog/QkbCPwju,unknown,
 13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,BV1jbYNzyEaw,13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,,2024-07-08,https://qingkeai.online/blog/WOxVxnOQ,yes,
-14,Mobile-Agent：基于多模态Agent架构的手机智能体,BV1obYNzCE1b,14,Mobile-Agent：基于多模态Agent架构的手机智能体,,2024-07-11,https://qingkeai.online/blog/OIvDzf1g,unknown,
+14,Mobile-Agent：基于多模态Agent架构的手机智能体,BV1obYNzCE1b,14,Mobile-Agent：基于多模态Agent架构的手机智能体,,2024-07-11,https://qingkeai.online/blog/OIvDzf1g,yes,
 15,MiniCPM-V：端侧可用的GPT-4V级多模态大模型,BV1tLPEzfEDD,15,MiniCPM-V：端侧多模态大模型前沿进展,,2024-07-15,https://qingkeai.online/blog/KDbvDrbk,unknown,title-reworded
 16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,BV1MDaYzgEYV,16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,,2024-07-23,https://qingkeai.online/blog/oniCA9sE,unknown,
 17,SEED-Story：生成长篇图文故事的多模态大型语言模型,BV1MDaYzgEt1,17,SEED-Story：生成长篇图文故事的多模态大型语言模型,,2024-07-30,https://qingkeai.online/blog/sHeMFZpu,unknown,
 18,InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界,BV1mDaYzuEif,18,InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界,,2024-08-06,https://qingkeai.online/blog/HAeP8cFV,unknown,
-19,AWQ：激活值感知的LLM低位权重量化,BV1mDaYzuE7o,19,AWQ：激活值感知的LLM低位权重量化,,2024-08-14,https://qingkeai.online/blog/I9rP7Fze,unknown,
-20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,BV1mDaYzuEqK,20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,,2024-08-26,https://qingkeai.online/blog/WWMdgnGp,unknown,
+19,AWQ：激活值感知的LLM低位权重量化,BV1mDaYzuE7o,19,AWQ：激活值感知的LLM低位权重量化,,2024-08-14,https://qingkeai.online/blog/I9rP7Fze,yes,
+20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,BV1mDaYzuEqK,20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,,2024-08-26,https://qingkeai.online/blog/WWMdgnGp,yes,
 21,SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎,,,,,2024-09-03,https://qingkeai.online/blog/1npUmMSk,unknown,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
 22,mPLUG-Owl3：探索长序列模型架构的通用多模态大模型,BV1KsYVzJEUg,22,mPLUG-Owl3：探索长序列模型架构的通用多模态大模型,,2024-09-10,https://qingkeai.online/blog/qxzxzdSy,unknown,
 23,CogVideoX 视频生成开源模型上手实践,BV1PbYVz2E6d,23,CogVideoX 视频生成开源模型上手实践,,2024-09-23,https://qingkeai.online/blog/TatTPYRN,unknown,
-24,使用CAMEL Agents构建GraphRAG及应用实践,BV1feNZeYEbm,24,使用 CAMEL Agents 构建 GraphRAG 及应用实践,,2024-09-26,https://qingkeai.online/blog/LHUf2ERJ,unknown,
+24,使用CAMEL Agents构建GraphRAG及应用实践,BV1feNZeYEbm,24,使用 CAMEL Agents 构建 GraphRAG 及应用实践,,2024-09-26,https://qingkeai.online/blog/LHUf2ERJ,yes,
 25,LLMC：大语言模型的量化基准,BV1SjNzeAEXe,25,LLMC：大语言模型的量化基准,,2024-10-11,https://qingkeai.online/blog/ChEcUDRG,unknown,
 26,VITA：开源交互式多模态基础大模型,,,,,2024-10-14,https://qingkeai.online/blog/MVlAV8qB,unknown,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
 27,GenAD & Vista：构建通用可泛化的自动驾驶世界模型,BV1bJYVzXET3,27,GenAD & Vista：构建通用可泛化的自动驾驶世界模型,,2024-10-17,https://qingkeai.online/blog/DHD1mUop,unknown,
-28,DuQuant：基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,BV16CaRzWEvx,28,DuQuant： 基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,,2024-11-05,https://qingkeai.online/blog/UbktbTc7,unknown,
+28,DuQuant：基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,BV16CaRzWEvx,28,DuQuant： 基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,,2024-11-05,https://qingkeai.online/blog/UbktbTc7,yes,
 29,VILA^2：视觉语言模型能力的自我提升,BV1cHYNzJE77,29,VILA^2 :视觉语言模型能力的自我提升,,2024-11-23,https://qingkeai.online/blog/MwbjbN0r,unknown,
 30,OminiParser：基于纯视觉的 GUI Agent,,,,,2024-11-30,https://qingkeai.online/blog/ZXoBVSOE,unknown,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
 31,Rectified Flow：矫正流生成式模型的概念及应用实践,BV1pqHezrED5,31,Rectified Flow：矫正流生成式模型的概念及应用实践,,2024-12-14,https://qingkeai.online/blog/p4ihiAxr,unknown,
@@ -36,7 +36,7 @@
 35,Tuning-Free Enhence：通过噪声初始化和采样轨迹优化增强预训练扩散模型,BV1DjNzeAEEm,35,Training-Free Enhancement：通过噪声初始化和采样轨迹优化增强预训练扩散模型,,2024-12-28,https://qingkeai.online/blog/pgjLLiWn,unknown,
 36,Follow Family：可控视频生成方法探索与应用,BV1ZeNZeYEfe,36,Follow Family：可控视频生成方法探索与应用,,2025-01-04,https://qingkeai.online/blog/BdxcY3s4,unknown,
 37,Motion Dreamer：面向自动驾驶与物理世界对齐的视频生成模型,BV1feNZeYETq,37,Motion Dreamer：面向自动驾驶与物理世界对齐的视频生成模型,,2025-01-14,https://qingkeai.online/blog/JI3qsqlP,unknown,
-38,Satori：通过训练LLM做自回归搜索来增强推理能力,BV1WiHezGEQN,38,Satori：通过训练LLM做自回归搜索来增强推理能力,,2025-02-15,https://qingkeai.online/blog/GGb7jjqN,unknown,
+38,Satori：通过训练LLM做自回归搜索来增强推理能力,BV1WiHezGEQN,38,Satori：通过训练LLM做自回归搜索来增强推理能力,,2025-02-15,https://qingkeai.online/blog/GGb7jjqN,yes,
 39,PRIME: 结合隐式过程奖励的强化学习,BV1UaPNecEcW,39,PRIME: 结合隐式过程奖励的强化学习,,2025-02-22,https://qingkeai.online/blog/HplSqVTp,yes,
 40,基于 LightLLM 的 DeepSeek R1/V3 模型部署实战,BV1xWREYrEJm,40,基于 LightLLM 的 DeepSeek R1/V3 模型部署实战,,2025-03-08,https://qingkeai.online/blog/TwA01Fiz,unknown,
 41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,BV1WiHezGEm7,41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,,2025-03-15,https://qingkeai.online/blog/XjvRAotX,yes,
@@ -51,11 +51,11 @@
 50,MoLE & SpeCache：大语言模型端侧部署的架构与算法,BV1yA4jzzEmf,50,MoLE & SpeCache：大语言模型端侧部署的架构与算法,,2025-05-22,https://qingkeai.online/blog/8uT5oYsx,unknown,
 51,EraseAnything: 在 Flux 等先进文生图架构的概念擦除方法,BV1sA4jzzE5V,51,EraseAnything:在 Flux 等先进文生图架构的概念擦除方法,,2025-05-26,https://qingkeai.online/blog/zxC2lLpK,unknown,
 52,Sparse VideoGen：无需重新训练的 DiTs 推理加速框架,BV1xw4jzgENr,52,Sparse VideoGen：无需重新训练的视频扩散 Transformer 推理加速框架,,2025-05-29,https://qingkeai.online/blog/b1YU6dUf,unknown,
-53,Chain-of-Model（模型链）：引入因果建模，全新的大模型 Scaling 结构,BV18K4szzEzT,53,Chain-of-Model （模型链）：引入因果建模，全新的大模型 Scaling 结构,,2025-06-09,https://qingkeai.online/blog/4veHofOA,unknown,
+53,Chain-of-Model（模型链）：引入因果建模，全新的大模型 Scaling 结构,BV18K4szzEzT,53,Chain-of-Model （模型链）：引入因果建模，全新的大模型 Scaling 结构,,2025-06-09,https://qingkeai.online/blog/4veHofOA,yes,
 54,BAGEL：统一生成理解的多模态基础模型,BV1t34szKEUc,54,BAGEL：统一生成理解的多模态基础模型,,2025-06-12,https://qingkeai.online/blog/3QQvHWtu,unknown,
 55,生成模型中的极简概念擦除,BV1b34szKETU,55,生成模型中的极简概念,,2025-06-16,https://qingkeai.online/blog/AWXXEt1V,unknown,
 56,InternVL3：多模态通用感知大模型,BV18K4szzERi,56,InternVL3，GPT-4o开源平替：探索多模态通用采集大模型的技术演进与应用探索,,2025-06-21,https://qingkeai.online/blog/KN7MemLi,unknown,title-reworded
-57,Fast-dLLM：无需重训的扩散大语言模型推理加速,BV1qs4uz3EXL,57,Fast-dLLM：无需重训的扩散大语言模型推理加速,,2025-06-24,https://qingkeai.online/blog/tFYMAGAQ,unknown,
+57,Fast-dLLM：无需重训的扩散大语言模型推理加速,BV1qs4uz3EXL,57,Fast-dLLM：无需重训的扩散大语言模型推理加速,,2025-06-24,https://qingkeai.online/blog/tFYMAGAQ,no,B站视频无字幕轨（浏览器内4次检查确认），已用论文还原（2026-10-02）
 58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,BV1Bp4uzkEHG,58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,,2025-06-28,https://qingkeai.online/blog/xysVAAMV,yes,
 59,大模型推理强化学习中的熵机制,BV1Bp4uzkECF,59,大模型推理强化学习中的熵机制,,2025-07-01,https://qingkeai.online/blog/9Zw0v3WS,yes,
 60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,BV1Zs4uz3E16,60,Satori-SWE：用进化测试时间缩放让小语言模型解决复杂软件工程,,2025-07-05,https://qingkeai.online/blog/wONnpLLa,yes,title-reworded
@@ -64,7 +64,7 @@
 63,ChatRex & RexSeek & RexThinker：结合多模态大语言模型的目标检测模型构建,BV1uA4CzsETk,63,ChatRex / RexSeek / Rex-Thinker：结合多模态大语言模型的目标检测模型构建,,2025-07-15,https://qingkeai.online/blog/UujZkgxy,unknown,
 64,MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力,BV1MP4Cz9EGg,64,MindCube：空间智能的实现路径，激发VLM构建创造性空间心理模型的能力,,2025-07-19,https://qingkeai.online/blog/knbA36br,unknown,
 65,Hi3DGen：法线为桥，为高清三维几何生成另辟蹊径,BV1qk4QzfEv4,65,Hi3DGen：法线为桥，为高清三维几何生成另辟蹊径,,2025-07-22,https://qingkeai.online/blog/08sWux5J,unknown,
-66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,BV1Br4Qz8EpF,66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,,2025-07-26,https://qingkeai.online/blog/eg3bNJK4,unknown,
+66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,BV1Br4Qz8EpF,66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,,2025-07-26,https://qingkeai.online/blog/eg3bNJK4,yes,
 67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,BV1v14QzoEZf,67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,,2025-08-05,https://qingkeai.online/blog/jnaBZmD6,yes,
 68,slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践,BV1d14QzoEai,68,slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践,,2025-08-02,https://qingkeai.online/blog/B8jp4Hnm,yes,
 69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,BV1UC4az4EiU,69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,,2025-08-07,https://qingkeai.online/blog/PO5IkeL7,no,字幕接口多次串台不可得，已用论文还原（2026-10-02）
@@ -75,7 +75,7 @@
 74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,BV1y4WkzME92,74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,,2025-08-23,https://qingkeai.online/blog/rTh5T7KC,no,字幕接口多次串台不可得，已用论文还原（2026-10-02）
 75,FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案,BV1J6WyzTEJP,75,FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案,,2025-08-30,https://qingkeai.online/blog/K0s67zdv,yes,
 76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,BV1qNWyzcEuv,76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,,2025-09-06,https://qingkeai.online/blog/Zn9bKeVw,yes,
-77,"Theory of Agent: From Definition, to Behavior and Objective",BV1dHWEzWETN,77,"Theory of Agent: From Definition, to Behavior and Objective",,2025-09-09,https://qingkeai.online/blog/pQoR2e6f,unknown,same
+77,"Theory of Agent: From Definition, to Behavior and Objective",BV1dHWEzWETN,77,"Theory of Agent: From Definition, to Behavior and Objective",,2025-09-09,https://qingkeai.online/blog/pQoR2e6f,yes,same
 78,从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体,BV1sxWgzUEZo; BV1sBsFz9EVw,78,从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体,,2025-09-18,https://qingkeai.online/blog/5C987qKz,yes,dup: 同一 talk 重复上传，两个 BV 均保留
 79,“知人者智”：以用户为中心的智能体交互与训练,BV18tsFzhE35,79,UserRL & UserBench “知人者智”：以用户为中心的智能体交互与训练,,2025-10-18,https://qingkeai.online/blog/9cmmfzfR,no,title-reworded；字幕接口多次串台不可得，已用论文还原（2026-10-02）
 80,RL for LRMs：探讨面向推理模型的 RL 最新研究,BV1b9sGzwEAc,80,RL for LRMs：探讨面向推理模型的 RL 最新研究,,2025-10-21,https://qingkeai.online/blog/0h3Cm8Bi,yes,

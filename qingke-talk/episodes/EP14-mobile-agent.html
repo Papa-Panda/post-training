@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP14 — Mobile-Agent：基于多模态 Agent 架构的手机智能体</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP14 — Mobile-Agent：基于多模态 Agent 架构的手机智能体</h1>
+    <p class="sub">Mobile-Agent 证明了一条「只靠截图操作手机」的纯视觉路线：V1 用单个多模态大模型加 OCR/SAM 两个 grounding 工具补齐坐标定位短板、靠反思机制纠错… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP14-mobile-agent.html</p>
+<p>「纯视觉它是比较灵活的，不会受系统影响，以及 APP 里边权限的影响，所以它是更加的通用的。」——讲者解释为什么坚持只靠截图操作手机（字幕 45:58–46:05）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>14（官网第 14 期）</dd><dt>标题</dt><dd>Mobile-Agent：基于多模态 Agent 架构的手机智能体</dd><dt>BV</dt><dd>BV1obYNzCE1b</dd><dt>时长</dt><dd>00:54:21（讲授约 41 分钟 + Q&amp;A 约 13 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>Mobile-Agent 团队成员（通义实验室 mPLUG 系列团队；字幕全程未口播姓名，以官网预告为准）</dd><dt>相关论文</dt><dd>Mobile-Agent V1 / V2（arXiv 均已挂出，讲者在 talk 中指引到项目页与论文）</dd><dt>相关代码</dt><dd>GitHub 开源（V1、V2 均已开源；talk 时约 2.3K stars），并集成进 ModelScope-Agent</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP14.txt</code>（1259 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP14，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 Mobile-Agent 在字幕中多作「目标 agent / MOBII 镜」、GPT-4V 作「GB4V / GB 思维」、mPLUG 作「安 plug」、ModelScope 作「摩大 / 莫斯科 agent」，均已按公开资料校正）。凡讲授中只在幻灯片表格出现、未口播的评测数值，本纪要不抄录、不臆测。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Mobile-Agent 证明了一条「只靠截图操作手机」的纯视觉路线：V1 用单个多模态大模型加 OCR/SAM 两个 grounding 工具补齐坐标定位短板、靠反思机制纠错；V2 因长图文交错序列和单一 agent 职责过载，拆成规划 / 决策 / 反思三 agent 分工，并用外部操作知识（说明书）注入补模型没见过的 APP 场景。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>问题定义：为什么手机 agent 必须同时会感知、规划、反思</h3>
+<p>讲者先给大模型智能体的通用定义（能观察环境、做出行动以达成目标的自主实体，具备 profile / memory / planning 能力），再收窄到手机场景。手机 UI 与通用界面不同：要知道哪里能点、哪里要滑、搜索框在哪。完成一句指令往往需要 5–15 步连续操作，中间点错一步就会卡死。因此手机 agent 需要三种能力各就其位：<strong>感知</strong>（理解 UI、定位坐标）、<strong>规划</strong>（多步任务的全局安排）、<strong>反思</strong>（判断这一步是否做错、整体任务是否完成）。这三件事后来恰好对应了 V2 的三个 agent。</p>
+<p>纯视觉是刻意的路线选择：只依赖手机截屏，不依赖 XML 等系统级数据，因为后者「不灵活并且权限要求比较高」。讲者在 Q&amp;A 里把这条路线类比为类似特斯拉的纯视觉路线：能力上限在模型本身，模型持续变强，路线就持续受益（字幕 45:51–46:27）。</p>
+<h3>V1：单 agent + grounding 工具补短板</h3>
+<p>V1（讲者称 2024 年 1 月发布，早于苹果 6 月的 Siri 升级发布；苹果多篇手机 UI 工作引用了 Mobile-Agent）是单个多模态大模型的观察—思考—行动循环：输入历史操作截图、全局指令与当前截图，先描述界面，再思考下一步，最后调用工具执行。动作空间只有 7 个：点击文本、点击图标、打字、上滑、下滑、返回上一界面、返回桌面 / 结束（具体枚举以开源框架为准，讲者称可自行扩展）。</p>
+<p>关键工程判断是<strong>当时的多模态大模型（包括 GPT-4V）grounding 能力都很弱</strong>——知道该点哪个按钮，但给不出准确坐标。解法是外挂两个工具：带 bounding box 坐标的 OCR、图标分割工具（SAM）。流程是模型先描述界面可能要点的区域，再按指令调 OCR / SAM 拿到候选坐标，最后由模型裁决出精确点击点。反思能力在 V1 里已内建：showcase 中第 2 步点错后，agent 判断出当前这步做错、重新决策，才最终完成六步任务（字幕 16:05–16:43）。这说明在这种设定里，「能判断自己错了」不是锦上添花，而是任务能否完成的分界线。</p>
+<h3>V2：为什么拆成三个 agent</h3>
+<p>V2 的核心变化是把单 agent 扩展为多 agent 架构，动机有二（字幕 21:17–22:59）：</p>
+<ol>
+<li><strong>序列太长</strong>。单 agent 要把全部历史记在上下文里，历史是图文交错格式；讲者给的 case 是七步操作后上下文已约 12K 图文交错 token，多模态长序列对模型压力很大。</li>
+<li><strong>职责过载</strong>。一个 agent 同时做 planning、决策、反思和记忆，步数越多压力越大。</li>
+</ol>
+<p>拆分后的三 agent 各司其职：<strong>规划 agent</strong> 记录已完成哪些步骤、记住关键信息（跨 APP 操作要带的 key information），并给出当前步应该做什么操作；<strong>决策 agent</strong> 把规划给出的意图落到具体动作（点哪个坐标、还是滑动）；<strong>反思 agent</strong> 对照操作前后的截图与全局指令，判断这一步是否正确——错了就退回上一步，对了就继续，或判定全局指令已完成则结束。讲者强调拆分后每个 agent 的压力大大减小，长序列下性能保持稳定，而 V1 随序列变长性能明显衰减（ablation 中三个 agent 逐个去掉都会掉性能，讲者只给定性结论）。</p>
+<p>配套的还有一条很实用的能力：<strong>knowledge 注入</strong>。模型没见过的新 APP、复杂 APP，靠预训练知识覆盖不了，可以把操作指南、说明书类专家知识放进 instruction 帮它完成任务；评测中加 knowledge 后性能进一步提升（字幕 26:08–27:01）。Q&amp;A 里这也是答「图标没文字找不到」的官方解法——人工干预 / 说明书注入（字幕 41:40–42:11）。</p>
+<h3>评测与骨干选型</h3>
+<p>评测是真机动态评测（非静态截图评判）：基于安卓模拟器（暂只支持安卓与鸿蒙，讲者公开招募 iOS 同学），含 5 个系统级应用 + 5 个第三方应用，中文、英文两种设定。指标三类：完成率（0/1）、步级完成度（如十步完成七步记 0.7）、决策与反思 accuracy。结论口径（讲者只说定性）：V2 相比 V1 提升明显；对序列长度更稳；骨干对比中「效果最好的还是 GPT-4V」，showcase 均出自 GPT-4V。讲者明确承认与 GPT-4V 的差距是当前最大约束之一——成本高、传输慢，正因如此在做 V3。</p>
+<h3>边界与下一步</h3>
+<ul>
+<li><strong>纯视觉路线的上限系于骨干模型</strong>：讲者自承其他通用开源模型与 GPT-4V「差距还是比较明显的」。V3 的做法是基于 mPLUG-Owl2 做手机场景预训练数据 + SFT，目标是一个 7B 量级、自研开源、可与 GPT-4V comparable 的专用模型（字幕 38:20–38:44、44:17–44:34）。</li>
+<li><strong>部署形态</strong>：连电脑只是为了用安卓模拟器这一体验方式；本质只需要拿到截屏与操作权限（安卓端 App 已做 demo），模型可端可云（字幕 44:41–45:28）。仅支持安卓 / 鸿蒙，iOS 能力待补。</li>
+<li><strong>动态评测 vs 静态评测</strong>：动态评测能考反思（做错能续走），静态截图评测考不了；V3 可能会加静态评测只看每步操作准确率（字幕 50:08–50:53）。</li>
+<li>同一套纯视觉方案已往 PC 场景迁（论文搜索下载、钉钉发新闻、编辑 Word），但讲者判断 PC 难度更大（键鼠操作 + 更大的图）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>V2 中单任务七步操作后的上下文规模</td>
+<td>约 12K 图文交错 token</td>
+<td>字幕（21:17–22:28 讲授口径）</td>
+</tr>
+<tr>
+<td>动作空间规模（V1）</td>
+<td>7 类动作（点击文本 / 图标、打字、上下滑、返回、结束等）</td>
+<td>字幕（12:57–13:33）</td>
+</tr>
+<tr>
+<td>评测应用构成</td>
+<td>5 个系统级 + 5 个第三方应用，中英文两种设定</td>
+<td>字幕（24:37–25:28）</td>
+</tr>
+<tr>
+<td>GitHub stars（talk 时）</td>
+<td>约 2.3K（V1 / V2 均开源）</td>
+<td>字幕（08:53–09:06）</td>
+</tr>
+<tr>
+<td>骨干模型对比结论</td>
+<td>GPT-4V 最好，其余通用模型差距明显（无口播数值）</td>
+<td>字幕（28:11–28:22、44:04–44:08）</td>
+</tr>
+<tr>
+<td>任务步数规模感</td>
+<td>一句指令常需 5 / 10 / 15 步</td>
+<td>字幕（08:14–08:26）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>grounding 短板用工具补而不是等模型变强</strong>：先让模型说出「大概要点哪些区域」，再用 OCR / 分割工具给候选坐标让模型裁决——这套「模型出意图、工具出坐标」的分工，今天做任何 GUI agent 都能直接复用，且工具可替换（Q&amp;A 确认 OCR 工具可自选）。</li>
+<li><strong>长程 agent 的上下文账要先算</strong>：七步就约 12K 图文交错 token，逼出了「规划 / 决策 / 反思拆 agent + 只留关键信息进 memory」的设计。做多步 agent 前先估单步上下文成本与步数上限，再决定单 agent 还是拆分。</li>
+<li><strong>反思是完成率的分界线不是装饰</strong>：反思 agent 只做一件事——比对前后截图 + 全局指令，判对 / 判错 / 判完成。把它设成独立、便宜的一步，比让主 agent 顺带反思更可靠。</li>
+<li><strong>未见场景靠知识注入别靠换模型</strong>：新 APP 先给操作说明书进 instruction，是当场可用的兜底手段。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲者对 V2 vs V1 的提升只给「比较明显」的定性口径；评测表具体数字（单 APP / 跨 APP、中英文各自完成率）talk 未口播，需看 V2 论文表格核对。</li>
+<li>GPT-4V 之外开源骨干的实际差距到了哪一步、V3 自研模型（mPLUG-Owl2 + 手机场景 SFT）是否已发布并兑现 comparable 目标，值得回访项目页确认。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「纯视觉它是比较灵活的，不会受系统影响，以及 APP 里边权限的影响，所以它是更加的通用的。」——字幕 45:58–46:05（路线选择判词）</p>
+<p>「因为你点错了，其实就会卡在那，并且永远不可能正确地完成这个整体的操作。」——字幕 16:21–16:27（解释为什么反思能力对手机 agent 是刚需）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
