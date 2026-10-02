@@ -11,7 +11,7 @@
 10,PiSSA：收敛快、误差小的大模型参数高效微调方法,BV118e9zwEeu,10,PiSSA：收敛快、误差小的大模型参数高效微调方法,,2024-06-13,https://qingkeai.online/blog/LYU9gKur,unknown,
 11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,BV1JfeXzpEtr,11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,,2024-06-17,https://qingkeai.online/blog/FcxgKwGE,unknown,
 12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,BV1LYaYzQEbs,12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,,2024-06-27,https://qingkeai.online/blog/QkbCPwju,unknown,
-13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,BV1jbYNzyEaw,13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,,2024-07-08,https://qingkeai.online/blog/WOxVxnOQ,unknown,
+13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,BV1jbYNzyEaw,13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,,2024-07-08,https://qingkeai.online/blog/WOxVxnOQ,yes,
 14,Mobile-Agent：基于多模态Agent架构的手机智能体,BV1obYNzCE1b,14,Mobile-Agent：基于多模态Agent架构的手机智能体,,2024-07-11,https://qingkeai.online/blog/OIvDzf1g,unknown,
 15,MiniCPM-V：端侧可用的GPT-4V级多模态大模型,BV1tLPEzfEDD,15,MiniCPM-V：端侧多模态大模型前沿进展,,2024-07-15,https://qingkeai.online/blog/KDbvDrbk,unknown,title-reworded
 16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,BV1MDaYzgEYV,16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,,2024-07-23,https://qingkeai.online/blog/oniCA9sE,unknown,
@@ -31,7 +31,7 @@
 30,OminiParser：基于纯视觉的 GUI Agent,,,,,2024-11-30,https://qingkeai.online/blog/ZXoBVSOE,unknown,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
 31,Rectified Flow：矫正流生成式模型的概念及应用实践,BV1pqHezrED5,31,Rectified Flow：矫正流生成式模型的概念及应用实践,,2024-12-14,https://qingkeai.online/blog/p4ihiAxr,unknown,
 32,LLMC：大语言模型压缩工具的开发实践,BV1BeNZeeEQy,32,LLMC：大语言模型压缩工具的开发实践,,2024-12-16,https://qingkeai.online/blog/vZl6i18W,unknown,
-33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,BV1WiHezGEWU,33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,,2024-12-21,https://qingkeai.online/blog/vfFYmL5i,unknown,
+33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,BV1WiHezGEWU,33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,,2024-12-21,https://qingkeai.online/blog/vfFYmL5i,no,字幕接口多次串台不可得，已用论文还原（2026-10-02）
 34,K-Sort Arena：视觉生成模型的高效人类偏好竞技场,BV1EeNZeeENy,34,K-Sort Arena：视觉生成模型的高效人类偏好竞技场,,2024-12-24,https://qingkeai.online/blog/pIwqg68c,unknown,
 35,Tuning-Free Enhence：通过噪声初始化和采样轨迹优化增强预训练扩散模型,BV1DjNzeAEEm,35,Training-Free Enhancement：通过噪声初始化和采样轨迹优化增强预训练扩散模型,,2024-12-28,https://qingkeai.online/blog/pgjLLiWn,unknown,
 36,Follow Family：可控视频生成方法探索与应用,BV1ZeNZeYEfe,36,Follow Family：可控视频生成方法探索与应用,,2025-01-04,https://qingkeai.online/blog/BdxcY3s4,unknown,
@@ -40,9 +40,9 @@
 39,PRIME: 结合隐式过程奖励的强化学习,BV1UaPNecEcW,39,PRIME: 结合隐式过程奖励的强化学习,,2025-02-22,https://qingkeai.online/blog/HplSqVTp,yes,
 40,基于 LightLLM 的 DeepSeek R1/V3 模型部署实战,BV1xWREYrEJm,40,基于 LightLLM 的 DeepSeek R1/V3 模型部署实战,,2025-03-08,https://qingkeai.online/blog/TwA01Fiz,unknown,
 41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,BV1WiHezGEm7,41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,,2025-03-15,https://qingkeai.online/blog/XjvRAotX,unknown,
-42,COAT：显存高效的 FP8 训练，实现高效深度学习,BV1REpYzZE19,42,COAT：显存高效的 FP8 训练，实现高效深度学习,,2025-03-22,https://qingkeai.online/blog/btZmNLny,unknown,
+42,COAT：显存高效的 FP8 训练，实现高效深度学习,BV1REpYzZE19,42,COAT：显存高效的 FP8 训练，实现高效深度学习,,2025-03-22,https://qingkeai.online/blog/btZmNLny,yes,
 43,VideoGrain：基于扩散模型的多粒度视频编辑的探索与应用,BV1REpYzZEWy,43,VideoGrain：基于扩散模型的多粒度视频编辑的探索与应用,,2025-03-29,https://qingkeai.online/blog/ZktwYaEY,unknown,
-44,InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建,BV1d7pYzbEif,44,InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建,,2025-04-04,https://qingkeai.online/blog/e2vhtnM7,unknown,
+44,InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建,BV1d7pYzbEif,44,InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建,,2025-04-04,https://qingkeai.online/blog/e2vhtnM7,yes,
 45,B-STaR & SimpleRL-Zoo：通过强化学习自我提升推理性能和效率,BV1d7pYzbE1C,45,B-STaR & SimpleRL-Zoo：通过强化学习自我提升推理性能和效率,,2025-04-19,https://qingkeai.online/blog/b-star-simplerl-zoo-tong-guo-qiang-hua-xue-xi-zi-wo-ti-sheng-tui-li-xing-neng-he-xiao-lu,yes,
 46,从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化,BV1rGxyzVE5m,46,从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化,,2025-04-22,https://qingkeai.online/blog/vbiYimAk,yes,
 47,Free4D：无需微调的 4D 场景生成新框架,BV1sPxyzUEeU,47,Free4D：无需微调的 4D 场景生成新框架,,2025-04-26,https://qingkeai.online/blog/KCFpxQXU,unknown,
@@ -58,7 +58,7 @@
 57,Fast-dLLM：无需重训的扩散大语言模型推理加速,BV1qs4uz3EXL,57,Fast-dLLM：无需重训的扩散大语言模型推理加速,,2025-06-24,https://qingkeai.online/blog/tFYMAGAQ,unknown,
 58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,BV1Bp4uzkEHG,58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,,2025-06-28,https://qingkeai.online/blog/xysVAAMV,unknown,
 59,大模型推理强化学习中的熵机制,BV1Bp4uzkECF,59,大模型推理强化学习中的熵机制,,2025-07-01,https://qingkeai.online/blog/9Zw0v3WS,yes,
-60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,BV1Zs4uz3E16,60,Satori-SWE：用进化测试时间缩放让小语言模型解决复杂软件工程,,2025-07-05,https://qingkeai.online/blog/wONnpLLa,unknown,title-reworded
+60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,BV1Zs4uz3E16,60,Satori-SWE：用进化测试时间缩放让小语言模型解决复杂软件工程,,2025-07-05,https://qingkeai.online/blog/wONnpLLa,yes,title-reworded
 61,GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架,BV1SA4CzWEph,61,GUI-Reflection：让多模态 GUI 智能体获得担忧错误能力的训练框架,,2025-07-08,https://qingkeai.online/blog/kqPOLMYb,unknown,
 62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,BV1mP4CzXE9a,62,ProRL : 延长强化学习训练框架，拓展大语言模型的推理边界,,2025-07-12,https://qingkeai.online/blog/NWQcL3AE,yes,
 63,ChatRex & RexSeek & RexThinker：结合多模态大语言模型的目标检测模型构建,BV1uA4CzsETk,63,ChatRex / RexSeek / Rex-Thinker：结合多模态大语言模型的目标检测模型构建,,2025-07-15,https://qingkeai.online/blog/UujZkgxy,unknown,
@@ -84,16 +84,16 @@
 83,统一 SFT & RL：迈向大型语言模型后训练的统一视角,BV1Gz1MBZEGk,83,统一 SFT & RL：迈向大型语言模型后训练的统一视角,,2025-10-28,https://qingkeai.online/blog/nZxilbl5,yes,
 84,SimpleVLA-RL：简单可拓展的VLA强化学习训练,BV1dm1jBWEXJ,84,SimpleVLA-RL：简单可拓展的VLA强化学习训练,,2025-11-01,https://qingkeai.online/blog/AfnEva2g,yes,
 85,OpenMoE 2: Sparse Diffusion Language Models,BV1rg1sBQESS,85,OpenMoE 2: Sparse Diffusion Language Models,,2025-11-04,https://qingkeai.online/blog/Xxewk2v0,unknown,
-86,从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术,BV1Ks1UB8E4J,86,从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术,,2025-11-06,https://qingkeai.online/blog/3JmVmLq8,unknown,
+86,从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术,BV1Ks1UB8E4J,86,从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术,,2025-11-06,https://qingkeai.online/blog/3JmVmLq8,yes,
 87,QeRL：量化技术增强强化学习 Reasoning 探索,BV1iAkDBrEVt,87,RL 训练框架：QeRL，量化技术增强强化学习 Reasoning 探索,,2025-11-08,https://qingkeai.online/blog/XoswnRzk,yes,
 88,UniLat3D：几何–外观统一VAE的单阶段 3D 生成框架,BV1qDC7BWEBo,88,UniLat3D：几何–外观统一VAE的单阶段 3D 生成框架,,2025-11-11,https://qingkeai.online/blog/gPGZHHbf,unknown,
-89,Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架,BV1JRCyBiEp2,89,Generative RLHF-V： 面向多模态 RLHF 的人类意图对齐框架,,2025-11-15,https://qingkeai.online/blog/dU5ROQAj,unknown,
+89,Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架,BV1JRCyBiEp2,89,Generative RLHF-V： 面向多模态 RLHF 的人类意图对齐框架,,2025-11-15,https://qingkeai.online/blog/dU5ROQAj,no,字幕接口多次串台不可得，已用论文还原（2026-10-02）
 90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,BV1xNynB1Emx,90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,,2025-11-18,https://qingkeai.online/blog/1IkXN0iq,unknown,
-91,KTransformers，在大模型微调与推理中的系统化实践,BV18wUPBEE4r,91,KTransformers，在大模型微调与推理中的系统化实践,,2025-11-22,https://qingkeai.online/blog/KTransformers,unknown,
+91,KTransformers，在大模型微调与推理中的系统化实践,BV18wUPBEE4r,91,KTransformers，在大模型微调与推理中的系统化实践,,2025-11-22,https://qingkeai.online/blog/KTransformers,yes,
 92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",BV1mfSjBDEnS,92,RLinf：面向具身智能的“渲训推一体化”开源强化训练框架,,2025-11-25,https://qingkeai.online/blog/RLinf,yes,
 93,通过量化与稀疏性实现高效注意力机制（SageAttention）,,,,,2025-11-29,https://qingkeai.online/blog/SageAttentionV1-V2-V3%EF%BC%89,unknown,official-only（官网有预告，B站合集无对应视频）
 94,RLinf-VLA 实践：从零上手 VLA（OpenVLA）强化学习,,,,,2025-12-02,https://qingkeai.online/blog/RLinf-VLA,unknown,official-only（官网有预告，B站合集无对应视频）
-95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix,95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,,2025-12-06,https://qingkeai.online/blog/%CF%80_RL,unknown,
+95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix,95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,,2025-12-06,https://qingkeai.online/blog/%CF%80_RL,no,字幕接口多次串台不可得，已用论文还原（2026-10-02）
 96,Fast-dLLM v2：高效训练推理的块扩散大语言模型框架,,,,,2025-12-09,https://qingkeai.online/blog/Fast-dLLM-v2,unknown,official-only（官网有预告，B站合集无对应视频）
 97,从 BF16 到 FP16：如何解决RL训练-推理不匹配问题,,,,,2025-12-13,https://qingkeai.online/blog/Precision-RL,unknown,official-only（官网有预告，B站合集无对应视频）
 98,SANA-Series：探索图像视频扩散模型的高效设计与加速,,,,,2025-12-16,https://qingkeai.online/blog/SANA-Series,unknown,official-only（官网有预告，B站合集无对应视频）

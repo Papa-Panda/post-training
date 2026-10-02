@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP33 — XGrammar：高效实现 LLM 灵活且可移植的结构化生成</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP33 — XGrammar：高效实现 LLM 灵活且可移植的结构化生成</h1>
+    <p class="sub">这期讲的是如何把「用上下文无关文法（CFG）约束 LLM 输出格式」这件事做到几乎零开销：XGrammar 把词表 token 分成绝大多数可预检的「上下文无关 token」和… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP33-xgrammar.html</p>
+<p>"XGrammar can achieve up to 100x speedup over existing solutions. Combined with an LLM inference engine, it can generate near-zero overhead structure generation in end-to-end low-LLM serving." —— XGrammar 论文 Abstract</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>33（官网期，B站合集有对应视频 BV1WiHezGEWU）</dd><dt>标题</dt><dd>XGrammar：高效实现 LLM 灵活且可移植的结构化生成</dd><dt>BV</dt><dd>BV1WiHezGEWU（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）</dd><dt>直播时间</dt><dd>2024-12-21 11:00–12:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>董易昕（卡内基梅隆大学计算机科学系一年级博士生，导师陈天奇；官网预告嘉宾介绍）</dd><dt>相关论文</dt><dd>Yixin Dong, Charlie F. Ruan, Yaxing Cai, Ruihang Lai, Ziyi Xu, Yilong Zhao, Tianqi Chen，<em>XGrammar: Flexible and Efficient Structured Generation Engine for Large Language Models</em>，<a href="https://arxiv.org/abs/2411.15100（v3,">https://arxiv.org/abs/2411.15100（v3,</a> 2025-05-12；MLSys 2025）</dd><dt>相关代码</dt><dd><a href="https://github.com/mlc-ai/xgrammar（论文称核心">https://github.com/mlc-ai/xgrammar（论文称核心</a> C++ 约 12,000 行；已集成 MLC-LLM、SGLang、vLLM、TensorRT-LLM）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/vfFYmL5i">https://qingkeai.online/blog/vfFYmL5i</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期 B站有视频，但字幕接口多次返回其他视频的串台字幕、无法验证，未能取得可用字幕。本纪要根据该期对应的公开材料还原——官网预告（含讲者与提纲）+ XGrammar 论文原文（arXiv:2411.15100）。讲授提纲以官网预告为准，方法与实验数字以论文为准。现场演示与 AMA 环节未覆盖；若后续取得可验证字幕，应以字幕为准修订。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期讲的是如何把「用上下文无关文法（CFG）约束 LLM 输出格式」这件事做到几乎零开销：XGrammar 把词表 token 分成绝大多数可预检的「上下文无关 token」和极少数需要运行时结合完整栈状态判断的「上下文相关 token」，前者预计算进自适应 token mask 缓存，后者用持久化执行栈加速检查，再与推理引擎协同把文法计算和 GPU 执行重叠，最终在 CFG 掩码生成上比既有方案快最高 100 倍、端到端结构化生成近零额外开销。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：灵活的结构化生成为什么慢</h3>
+<p>按官网预告提纲，讲授分三块：结构化生成方法概述及挑战、XGrammar 引擎本身、应用实践。论文 §1 把痛点讲得很清楚：</p>
+<ul>
+<li>Agent、函数调用、代码生成等场景要求 LLM 输出严格符合 JSON、SQL 或领域 DSL 等格式，主流做法是约束解码（constrained decoding）——每步把不符合文法的 token 的 logit 置为 $-\infty$ 。</li>
+<li>要表达任意嵌套结构需要上下文无关文法（CFG），其执行依赖下推自动机（PDA）的栈状态。问题有三（论文 §1）：词表可达 128K，每个 token 都要在运行时对整个词表逐一解释文法；栈状态的组合无法预先穷举缓存；LLM 的 token 边界与文法字符边界不对齐，一个 token 可能跨越多个文法元素、触发递归或弹栈。</li>
+<li>既有方案（Outlines、llama.cpp 文法引擎、lm-format-enforcer 等）要么只支持正则、要么运行时全词表检查，开销不可忽略，且 batch 越大 CPU 侧文法处理越成为瓶颈（论文 §4.2）。</li>
+</ul>
+<h3>方法/设计：把「大多数 token」变成查表</h3>
+<p>XGrammar 用字节级下推自动机解释 CFG，核心洞察（论文 §3、Fig.1）是按「校验时需要多少上下文」把 token 分成两类：</p>
+<ul>
+<li><strong>上下文无关 token</strong>（绝大多数）：匹配过程只在当前规则内部推进或展开子规则，只依赖栈顶节点即可判定合法性。因此可以对每个自动机节点预先算好这类 token 的合法性，存入以栈顶节点为键的<strong>自适应 token mask 缓存</strong>（§3.1）。缓存还按 accept-heavy / reject-heavy 自适应选择存储格式（只存较小的子集，必要时用 bitset），Llama-3.1 + JSON 文法下把缓存内存从 160 MB 压到 0.46 MB。</li>
+<li><strong>上下文相关 token</strong>（极少数）：匹配会走完当前规则、需要回看整个栈才能判定。JSON 文法下这类 token 只有 1134 / 128K，不到 1%（§3.1）。</li>
+</ul>
+<p>在此之上再叠三层优化：</p>
+<ul>
+<li><strong>上下文扩展</strong>（§3.2）：预计算每条规则结束后父规则可接受的「扩展后缀」，在预处理阶段就多拒绝一批上下文相关 token，JSON 文法下把其数量再降 90%（1134 → 120）。</li>
+<li><strong>持久化执行栈</strong>（§3.3）：把多条并行栈和历史栈组织成一棵树，栈只是树上的一条路径，分叉时只分裂分支、回滚只需改指针（常数时间）。配合按字典序检查 token 并回滚到公共前缀，预处理阶段需检查的字符量降到 30%。这一设计还天然支持投机解码、Tree-of-Thought 这类需要状态分叉/回滚的应用。</li>
+<li><strong>PDA 结构优化与引擎协同</strong>（§3.4–3.5）：规则内联、节点合并等编译器式优化；文法引擎与推理引擎协同设计，把掩码计算与 GPU 执行重叠，掩码生成不再串行卡在关键路径上。</li>
+</ul>
+<h3>实验/实战（论文 §4）</h3>
+<p>掩码生成效率（§4.1，Llama-3.1-8B-Instruct，对比 Outlines v1.0、llama.cpp 文法引擎、lm-format-enforcer v0.10.9）：XGrammar 在所有任务上延迟最低，JSON Schema 与 CFG（无约束 JSON）每 token 低于 40 µs，XML 与 Python DSL 低于 200 µs；相对各任务最强基线，JSON Schema 最高 3 倍、CFG 超过 100 倍加速。</p>
+<p>消融（§4.3，Table 3）最能说明各优化的贡献量级：裸 PDA 基线每 token 65.776 ms，加节点合并降到 38.280 ms，加自适应 token mask 缓存直接降到 0.154 ms（单步 248.6 倍），再加规则内联 0.035 ms、上下文扩展 0.018 ms——<strong>缓存是数量级来源，其余是锦上添花</strong>。</p>
+<p>端到端服务（§4.2）：与推理引擎集成后结构化输出的 token 速率最高达既有方案的 80 倍；同在 SGLang 上，XGrammar 的每输出 token 时间（TPOT）在 Llama-3.1 8B 上为 6.8 ms，而 Outlines 为 44.2 ms（Table 1）；在 MLC-LLM 上开关 XGrammar 的 TPOT 几乎不变（6.2 → 6.3 ms，Table 2），即「近零开销」。下游质量上，函数调用的语法正确率从 62% 提升到 100%，XML 代码生成从 80% 提升到 100%（§4.4，Table 4）。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CFG 掩码生成每 token 延迟</td>
+<td>既有最强基线</td>
+<td>最高 100 倍以上加速；JSON/CFG 低于 40 µs/token</td>
+<td>论文 §4.1、Fig.9</td>
+</tr>
+<tr>
+<td>消融：裸 PDA → +自适应缓存</td>
+<td>65.776 ms/token</td>
+<td>0.154 ms/token（单步 248.6 倍）</td>
+<td>论文 §4.3、Table 3</td>
+</tr>
+<tr>
+<td>上下文相关 token 占比（Llama-3.1 + JSON 文法）</td>
+<td>1134 / 128K（&lt;1%）</td>
+<td>上下文扩展后降至 120（再降 90%）</td>
+<td>论文 §3.1、§3.2</td>
+</tr>
+<tr>
+<td>Mask 缓存内存</td>
+<td>160 MB</td>
+<td>0.46 MB（0.2%）</td>
+<td>论文 §3.1</td>
+</tr>
+<tr>
+<td>端到端 TPOT（SGLang，Llama-3.1 8B）</td>
+<td>Outlines 44.2 ms</td>
+<td>XGrammar 6.8 ms</td>
+<td>论文 §4.2、Table 1</td>
+</tr>
+<tr>
+<td>开启 XGrammar 的端到端开销（MLC-LLM）</td>
+<td>TPOT 6.2 ms</td>
+<td>6.3 ms（近零开销）</td>
+<td>论文 §4.2、Table 2</td>
+</tr>
+<tr>
+<td>结构化输出语法正确率</td>
+<td>函数调用 62%、XML 80%</td>
+<td>均为 100%</td>
+<td>论文 §4.4、Table 4</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>约束解码是 agent 数据管线的标配而非可选项</strong>：函数调用/XML 等结构化输出的语法正确率从 62–80% 到 100% 的差距，意味着用 XGrammar 这类引擎在 rollout/数据合成阶段做文法约束，可以直接砍掉一整类格式错误样本与后处理清洗成本；且它已是 vLLM/SGLang/TensorRT-LLM 的默认后端，接入成本低。</li>
+<li><strong>「预检绝大多数、运行时只算少数」是通用加速范式</strong>：把判定拆成 context-independent（可缓存）与 context-dependent（运行时算）两类，同样适用于 RL 采样里的格式校验、工具参数 schema 校验等热路径。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：</li>
+<li>CPU 侧文法处理会随 batch 增大成为服务瓶颈（论文 §4.2 对 vLLM 的观察）——评估结构化生成方案时要看大 batch 下的 TPOT 曲线，而不是只看单请求延迟。</li>
+<li>持久化栈带来的状态分叉/回滚能力与投机解码、树搜索采样天然契合：在 RL rollout 里做 tree-based 探索时，约束状态可以随分支一起分裂，不必每条分支重跑文法。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：上下文扩展依赖「规则结束后的可接受后缀」可静态提取，遇到高度递归或语义约束（如 JSON Schema 的跨字段依赖）时上下文相关 token 占比会涨到多少、缓存还够不够用，论文只给了 JSON/XML/DSL 三个文法，值得在真实 agent 工具 schema 上实测。</li>
+<li>现场内容不可还原：讲者现场的应用实践演示与问答无法从论文推知；官网提纲第三部分「XGrammar 应用实践」的具体案例未覆盖。</li>
+<li>后续版本：XGrammar-2（arXiv:2601.04426，面向 agentic LLM 的动态结构化生成）已发表，与本期讲的初版的关系值得对照，本纪要未展开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"We precompute the token correctness for all context-independent tokens and store them in an adaptive token mask cache." —— 论文 §1，整个系统的核心机制一句话</p>
+<p>"enabling XGrammar enhances output quality with nearly zero overhead in TPOT." —— 论文 §4.2 对 Table 2 的总结，也是「灵活且可移植」之外第三个卖点的证据</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

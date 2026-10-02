@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP44 — InferCept、Preble&amp;amp;Cognify：面向下一代 AI Agent 工作流系统的构建</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP44 — InferCept、Preble&amp;amp;Cognify：面向下一代 AI Agent 工作流系统的构建</h1>
+    <p class="sub">讲者把 agent 上生产拆成三层基础设施问题：调优层靠 Cognify 的分层自适应搜索，在几美元、几十分钟内替人工找 agent 工作流的好配置；serving 层靠 Pr… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP44-infercept-preble-cognify.html</p>
+<p>「它们（AI agent）非常容易演示，但极其、极其难以投入生产。」——讲者开场诊断（字幕 03:43 附近，经清洗）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>44（官网期号：44）</dd><dt>标题</dt><dd>InferCept、Preble&amp;Cognify：面向下一代 AI Agent 工作流系统的构建</dd><dt>BV</dt><dd>BV1d7pYzbEif</dd><dt>时长</dt><dd>00:57:18</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>加州大学教授、其实验室负责人（字幕自述：15 年系统与基础设施经验，早年做数据中心与云计算，近约 5 年转向 ML 系统；实验室名与创业公司名字幕作「Wolab」「JC AI」，识别结果未经确证，本文不硬写其姓名）</dd><dt>相关论文/工作</dt><dd>Cognify（agent 工作流自动调优，字幕称已开源）、Preble（ICLR 2025，分布式长共享前缀 serving；字幕口径）、InferCept（发表于 2024 年的会议，字幕口径）——三篇均为讲者实验室工作；编号信息本文不臆测</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1d7pYzbEif/">https://www.bilibili.com/video/BV1d7pYzbEif/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP44.txt</code>（1314 条，末条 3429.46 秒）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文清洗提炼。本期为英文讲授 + AI 中文字幕：开头约 75 秒与结尾 Q&amp;A 段是碎片化的英译中残句、不可直接引用，文中引述均来自讲授本体部分（浏览器侧已核对中段内容确为本 talk）；系统名与专名均可能有识别误差，凡字幕口径与常见写法不同皆标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者把 agent 上生产拆成三层基础设施问题：调优层靠 Cognify 的分层自适应搜索，在几美元、几十分钟内替人工找 agent 工作流的好配置；serving 层靠 Preble 的前缀感知分布式调度，把大量共享的长 prompt 的重复 prefill 变成可复用的缓存调度问题；拦截层靠 InferCept 在工具/数据调用打断生成时，用统一的「GPU 浪费」度量在丢弃重算、保留显存、换出 CPU 三种 KV 策略之间逐请求动态选择。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>问题定位：agent 的生命周期瓶颈不在写代码那一段</h3>
+<p>讲者开场给出一组口径数字：企业通常一个月内能做出 agent demo，但约有 80% 的项目从未进入生产，进入生产平均约需九个月；与咨询公司交流得知，把 demo 做成生产系统要多花至少五倍时间（字幕口径）。demo 易、生产难的原因有二：一是推理成本在涨——训练成本在降，但多步 agent（客户案例中单系统已超过 80 步模型/工具调用）让推理成本持续攀升；二是 agent 的开发生命周期（构逻辑、备数据、写 evaluator、反复调优、上 serving、加监控、再回炉）里，框架工具只覆盖了上半段，后半段的调优、部署、拦截处理才是真正耗时之处。本期的三件工作正好对应后半段的三处。</p>
+<h3>Cognify：把 agent 调优自动化成一个分层搜索问题</h3>
+<p>调优的困难在于搜索空间组合爆炸：一个只有 3 次 LLM 调用的小工作流，假设有 12 个配置维度、每个维度 3 个选项，全空间就有几十万种组合；按每次执行约 \$10/百万 token 的口径估算，穷举成本约 \$55,300、耗时数周（字幕口径）。而实际问题只需要：能否用很少的试验（哪怕 8–10 次）、\$5 以内、30 分钟以内，找到足够好的配置？</p>
+<p>Cognify 的做法叫自适应分层搜索（Adaptive Hierarchical Search）：把配置维度按抽象层级分成三层——顶层是<strong>架构调整</strong>（改工作流结构，如任务分解、任务合并）、中层是<strong>步骤配置</strong>（每步换模型、重写代码）、底层是<strong>权重/提示词配置</strong>（推理提示、few-shot 示例等）。分层之后每个候选只需在低维子空间里比较，搜索效率远高于在完整高维空间里跑贝叶斯优化（讲者明言贝叶斯优化在高维下效果差）。预算按层级复杂度分配；在提示词层使用 successive halving（字幕音作「成功哈维」）淘汰较差的半数候选、把剩余预算追加给表现更好的分区。系统会返回一整条 Pareto 前沿，而不是单一最优解，由用户按质量/成本/延迟的偏好自选。</p>
+<p>成绩（字幕口径）：在六类工作负载（RAG 问答、text-to-SQL、数据可视化、多智能体金融分析、代码生成、BIG-Bench 一类任务）上，质量最高提升 2.8 倍、延迟最高降低 2.7 倍、成本最高节省 10 倍；整个搜索只花约 \$1.5–10、8–42 分钟，耗时约为对比优化工具（如 DSPy 类工具，字幕作「DS」）的一半且结果更好。text-to-SQL 示例里，一个候选把质量再抬高 15 个百分点的同时把成本与延迟大幅压低，另一个候选质量涨幅最大（46%）但成本/延迟收益较小——这正是要返回 Pareto 前沿的原因。</p>
+<p>讲者据此主张造 agent 的第三条路线：既非全手工调参，也非让 LLM 一次性生成整个 agent，而是<strong>人写初始工作流（生产环境必须把业务逻辑先钉住）、机器自动调优</strong>，并称这条路线「至少目前已在生产环境中使用」。</p>
+<h3>Preble：长共享 prompt 是一个分布式缓存调度问题</h3>
+<p>第二部分换到 serving：agent 时代的 prompt 不再是短问题，而是系统提示 + 工具说明 + few-shot + 长文档/长视频块的复合体。讲者在五类工作负载（工具型问答、具身 agent、程序生成、视频分块问答、长文档问答）上的观察是：prompt/output 长度比非常高，且<strong>超过 80% 的 prompt 内容在至少两个请求之间共享</strong>。</p>
+<p>今天的分布式 serving 对此不敏感：轮询式调度把共享同一前缀的请求打散到不同 GPU，每块 GPU 都要重算前缀。应该做的事，是把请求发往已经缓存了其前缀 KV 的 GPU；但盲目追逐缓存又会让持有热门前缀的 GPU 过载。Preble 的核心是 E² 算法（字幕口径，exploit/explore 双策略）：比较共享前缀长度与请求独有部分的长度——共享前缀更长就<strong>利用</strong>（发往已缓存该前缀的 GPU，省重复计算），更短就<strong>探索</strong>（发往负载较轻的 GPU 做均衡）；某个前缀过于热门时，系统自动把该前缀再平衡迁移到其他 GPU。负载度量不是简单的队列长度，而是由三部分累加：当前运行中的 batch、为给新请求腾显存需驱逐的 KV 占用、运行当前请求的成本；选总成本最低的 GPU。架构上是两级调度：全局调度器（重写，维护全局前缀树矩阵与再平衡器）+ 每 GPU 本地调度器（公平队列），本地完成调度后回传负载更新。系统建于 SGLang 之上。</p>
+<p>成绩（字幕口径，个别数字字幕语序混乱、仅供参考）：相比基线，平均延迟下降约 1.5–14 倍区间、P99 延迟下降约 2–10 倍。讲者说该工作 2024 年 5 月发布后，Anthropic、OpenAI 等生产系统都开始支持前缀共享与更便宜的共享计费；还有一篇最佳论文级工作直接受 Preble 启发（实验室名与机构名字幕识别不清，本文不写）。</p>
+<h3>InferCept：工具调用打断生成时，KV 缓存该怎么办</h3>
+<p>第三部分处理 tool/data 调用（今天即 MCP 服务器调用）。讲者先给出真实工作负载画像：六组真实场景（数学、QA、虚拟环境、聊天、图像生成、文本转语音），单请求有约 2–28 次工具调用，上下文可长到每请求约 20 MB 量级（字幕口径）。</p>
+<p>问题在于：今天的 serving 系统（如 vLLM 一类）不处理这种拦截——工具调用被当作请求结束，全部 KV 缓存直接丢弃，工具结果回来后再把整个前缀重算一遍；讲者口径是这会浪费最高约 40% 的 GPU 资源，并在端到端延迟上再加约 40% 的开销（字幕口径）。InferCept 给出三条可选策略及各自的权衡：</p>
+<ul>
+<li><strong>丢弃重算</strong>：生成期间显存可借给别的请求，但返回时要全量重算 KV——单次重算可超过 200 ms（字幕口径），并让并发请求等待时间变长；</li>
+<li><strong>保留显存</strong>：免于重算，但被占住的 GPU 显存会让其他请求无显存可跑；</li>
+<li><strong>换出到 CPU</strong>：受限于 PCIe 带宽，换入换出要等带宽，且带宽要在多个等待请求间分配。</li>
+</ul>
+<p>InferCept 把三种策略统一到一个度量——<strong>GPU 浪费</strong>：被占用（或被浪费重算所耗）的显存量乘以占用时间；每个请求按估算浪费最小者选策略。三种策略各自也做了优化：丢弃侧做分块重算（逐块重算 token 以复用空闲算力）、换出侧做分层流水线换出（逐层换出与前向重叠），并以「谁的保留/丢弃浪费最大」为优先级分配稀缺的 PCIe 带宽。结果（去年工作，字幕口径）：在 6B 与 13B 模型、六种工具混合负载上，请求率（吞吐）达基线的 1.6–2 倍，延迟改善约 1.3–12 倍区间。</p>
+<h3>讲者的总判断</h3>
+<p>2025 年是「agent 的元年」：开发框架与工具集已经很多（如 LangChain 一类，字幕作「长链」），但真正能投入生产的 serving 内核仍缺位——调优自动化、长共享前缀的分布式调度、工具拦截下的 KV 管理这三块，正是其实验室跨层补齐的对象。</p>
+<h3>Q&amp;A 说明（字幕限制）</h3>
+<p>结尾 Q&amp;A 段（约 47:14 起）字幕为严重碎片化的英译中残句，无法据此提炼具体问答内容；个别可辨片段涉及多目标优化算法、调度器可扩展性等话题，但不足以归纳为讲者观点，本文不臆造。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值/口径</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>公司做出 agent demo 的周期</td>
+<td>约 1 个月</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>从未进入生产的 agent 项目比例</td>
+<td>约 80%</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>demo 转生产的额外时间倍数</td>
+<td>至少 5 倍（进入生产平均约 9 个月）</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>客户案例中的单 agent 步数</td>
+<td>超过 80 步</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>调优全空间估算（12 维 × 3 选项 ÷ 3 步工作流）</td>
+<td>几十万次执行，约 \$55,300、耗时数周</td>
+<td>字幕（讲授；组合量级）</td>
+</tr>
+<tr>
+<td>Cognify 目标预算</td>
+<td>\$5 以内、30 分钟内</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>Cognify 质量提升上限</td>
+<td>2.8 倍</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>Cognify 延迟降低上限</td>
+<td>2.7 倍</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>Cognify 成本节省上限</td>
+<td>10 倍</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>Cognify 实际搜索开销</td>
+<td>约 \$1.5–10、8–42 分钟</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>Prompt 在 ≥2 个请求间共享的比例</td>
+<td>超过 80%</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>Preble 平均延迟改善</td>
+<td>约 1.5–14 倍区间（字幕语序混乱，存疑）</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>Preble P99 延迟改善</td>
+<td>约 2–10 倍区间（字幕语序混乱，存疑）</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>真实负载单请求工具调用次数</td>
+<td>约 2–28 次</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>工具拦截下当前系统浪费的 GPU 资源</td>
+<td>最高约 40%</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>外加端到端延迟开销</td>
+<td>约 40%</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>InferCept 吞吐（请求率）</td>
+<td>基线的 1.6–2 倍</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>InferCept 延迟改善</td>
+<td>约 1.3–12 倍区间</td>
+<td>字幕（讲授）</td>
+</tr>
+<tr>
+<td>单次全量重算 KV 的耗时</td>
+<td>超过 200 ms</td>
+<td>字幕（讲授）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 agent serving 的一个直接清单：上生产前过三件事——(1) 调优预算：先手动钉住工作流结构，再用分层搜索（架构/步骤/提示词三层，提示词层用 successive halving）自动找配置，并保留 Pareto 前沿而非单最优点；(2) 前缀调度：统计请求间 prompt 共享率，若共享超过半数，把调度目标从「负载均衡」改成「缓存亲和性 × 负载」的联合度量，且要给热门前缀留自动再平衡的口子；(3) 工具拦截：统计每次工具调用造成的 KV 浪费显存×时间，丢弃、保留、换出三者按请求逐个算账，不要全局写死一种。</li>
+<li>InferCept 的「GPU 浪费」是很好用的统一记账单位：把显存占用时间做成成本函数后，很多 serving 取舍（重算 vs 占用 vs 换出带宽）都能归一到同一把尺子上，比拍脑袋选策略稳健。</li>
+<li>Cognify 的层级抽象对 RL/post-training 调参同样成立：结构性改动（数据/算法骨架）、步骤级改动（模型/并行策略）、连续/文本级改动（提示、超参）本就该有不同的搜索预算与淘汰节奏；把 successive halving 只放在最便宜的一层，符合「越便宜的试验跑得越多」的原则。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲者姓名与实验室、创业公司名称在字幕中识别不清（字幕作「Wolab」「JC AI」），三篇工作的投稿信息也只有年份口径（Preble 为 ICLR 2025、InferCept 为 2024 年会议）；如需引用，建议按系统名（Cognify / Preble / InferCept）到论文库核对作者与官方数字后再落笔。</li>
+<li>Preble 的延迟倍数在字幕中语序混乱（「一倍，五倍到十四倍」等），本文已标注存疑；若要引用具体倍数应查论文原文。</li>
+<li>Q&amp;A 段字幕不可用，讲者对多目标优化、调度扩展性的具体回答未能提炼；若后续拿到可用的英文转写或论文，可补记。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「它们非常容易演示，但极其、极其难以投入生产。」——讲者谈 AI agent 的现状（字幕 03:43 附近，经清洗）</p>
+<p>「我们看到 2025 年将是代理的元年。」——讲者总结（字幕 46:26 附近，经清洗）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

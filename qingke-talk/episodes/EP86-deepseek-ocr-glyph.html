@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP86 — 从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP86 — 从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术</h1>
+    <p class="sub">本期讲清了一条新路线：文本 token 是稀疏、低信息密度的表示，而把长文本渲染成图片再喂给视觉语言模型，可以在近无损的前提下把输入长度压缩数倍。DeepSeek-OCR 先验… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP86-deepseek-ocr-glyph.html</p>
+<p>「我们希望有一种比较好的表示方式，能够尽量无损地保留它的信息，同时比较明显地压缩它的输入长度。」——讲者对本场工作的目标定义（字幕 06:34–06:45，清洗口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>86</dd><dt>标题</dt><dd>从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术</dd><dt>BV</dt><dd>BV1Ks1UB8E4J</dd><dt>时长</dt><dd>00:45:27（讲授约 33 分钟 + Q&amp;A 约 12 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>陈家乐（清华大学；字幕中实验室名称识别作「CUOAI 实验室」，正式名称以官方介绍为准；主持人介绍 Glyph 为清华与智谱的同期工作）</dd><dt>相关论文</dt><dd>DeepSeek-OCR（DeepSeek-AI，光学文本压缩 / optical compression）；Glyph（清华大学与智谱 AI 同期工作，视觉-文本压缩长上下文建模）；论文、模型与代码链接见讲者结尾页（字幕 33:26 提及，字幕中未读出具体地址）</dd><dt>相关代码</dt><dd>Glyph 模型与代码仓库（同上，见 talk 结尾页）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1Ks1UB8E4J/">https://www.bilibili.com/video/BV1Ks1UB8E4J/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP86.txt</code>（1210 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP86，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名有识别误差，如 Glyph 在字幕中作「格雷普/格林夫/格林F」、DeepSeek-OCR 作「DPCOCR/DEPCVCR」、GLM-4.1V-9B 作「gm4.1V9b」、LongBench 作「狼bench」、MM-LongBench-Doc 作「M2long bench dock」、AlphaEvolve 作「阿尔法 Evolve」，均已按论文与公开资料校正）。凡讲授口径与论文版可能不同，以下均按字幕口径记录。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>本期讲清了一条新路线：文本 token 是稀疏、低信息密度的表示，而把长文本渲染成图片再喂给视觉语言模型，可以在近无损的前提下把输入长度压缩数倍。DeepSeek-OCR 先验证了「压缩后的图像表示能高保真恢复原文」这一可恢复性；Glyph 则进一步把这条路线做成长上下文建模框架——持续预训练让模型学会读渲染文本、用 LLM 遗传搜索自动找最优渲染配置、再做 SFT 与 GRPO，在约 3–4 倍压缩比下达到与领先纯文本长上下文模型接近的性能，并带来实际的推理与训练加速。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">人工初始配置集</div><div class="farrow">→</div><div class="fnode">渲染数据</div><div class="farrow">→</div><div class="fnode">在验证集上测基座模型效果</div><div class="farrow">→</div><div class="fnode">把历史配置与性能交给 LLM 分析并变异出新配置</div><div class="farrow">→</div><div class="fnode">循环，实验中跑了约 200 步，并重复多次以避开局部最优</div></div>
+<h3>问题：长上下文的成本困局与四类现有解法</h3>
+<p>讲者先给出需求侧的量级：deep research 类系统普遍需要 128K 以上的上下文，coding agent 甚至需要 200K 以上。但上下文越长，训练与部署开销越高，首 token 时间也随之拉长。现有四类主流方法各有短板：</p>
+<ol>
+<li><strong>位置编码外推</strong>（如长度外推类方法）：32K 训练的模型可外推到 128K 推理，省的是训练开销，推理时仍要按 128K 长度全额计算，注意力仍按 $O(n^2)$ 扩展，且外推越长精度下降越明显。</li>
+<li><strong>稀疏/线性注意力</strong>：输入 token 数本身不变，长度到 128K 甚至 1M 以上仍会出问题；讲者还引 MiniMax 的工作指出线性注意力可能反伤推理能力。</li>
+<li><strong>RAG 类方法</strong>：大幅缩减输入 token 的代价是信息损失（如把 128K context 砍进 32K 模型），agent 式记忆管理还会因多轮反复推理引入显著延迟。</li>
+</ol>
+<p>由此引出本场的核心问题：<strong>能否找到一种表示，把输入上下文尽量无损地压缩</strong>——保留信息的同时明显缩短输入长度。一个来自 API 使用的直观观察支撑了这个方向：同一段长文字，纯文本输入要 400 多个 token，排版截图输入只要 67 个 token，约 6 倍压缩比；而现在的视觉语言模型已经能很好地读出这种压缩图片里的内容。</p>
+<h3>DeepSeek-OCR：先验证「可恢复性」</h3>
+<p>讲者对 DeepSeek-OCR 的定位是<strong>理论验证</strong>：无损建模的前提是能从压缩后的表示里把原文恢复出来。它的架构关键在下采样位置——把大幅下采样前置，达到 16 倍压缩，而通用视觉语言模型通常只有 2×2、即约 4 倍；激进压缩之所以可行，是因为它专做 OCR 类任务。实验口径上，10 倍压缩比下文字恢复率仍在 90% 以上，说明「微损表示」是站得住的。讲者还介绍了其分级记忆的设想：久远的记忆放进更模糊的图像表示、近期的内容保持清晰甚至纯文本，按层级管理上下文。</p>
+<h3>Glyph：把压缩真正用于长上下文建模</h3>
+<p>Glyph 与 DeepSeek-OCR 的分工不同：后者验证可恢复性，Glyph 探索<strong>能否用这种压缩真正训出一个长文本模型</strong>。整套框架分三步：</p>
+<ol>
+<li><strong>持续预训练</strong>：基座选 GLM-4.1V-9B Base。任务有三类——OCR 解析（给渲染图片、直接读出文字）、交错语言建模（文本片段随机渲染成图片做交错建模）、长生成任务（补全开头/结尾/中间）。建模时只渲染 context 部分，instruction 保持文本；后文所有压缩比都只对 context 部分讨论。</li>
+<li><strong>渲染配置搜索</strong>：字号、行距、颜色、DPI 等渲染参数对效果影响很大，人工选不完。Glyph 借鉴 AlphaEvolve 的思路，用 LLM 做遗传变异式的配置搜索：人工初始配置集 → 渲染数据 → 在验证集上测基座模型效果 → 把历史配置与性能交给 LLM 分析并变异出新配置 → 循环，实验中跑了约 200 步，并重复多次以避开局部最优。搜出的配置是多任务平均意义上的较优解。</li>
+<li><strong>SFT + RL 后训练</strong>：SFT 沿用 thinking 格式数据；RL 用 GRPO 做长上下文 QA 等可验证任务。两个阶段都混入一个辅助 OCR 任务——从渲染图片恢复原文——因为输入本质上是「文本变图片」，读得出是做得对的前提，这个辅助任务在消融中被证明不可删。</li>
+</ol>
+<h3>实验：压缩、性能与效率</h3>
+<ul>
+<li><strong>主结果</strong>：Glyph 在约 3–4 倍压缩比下，在 LongBench、MSL、Ruler 等长上下文基准上与同级领先模型（9B 量级、128K 至 1M 上下文）性能接近，部分任务有提升。</li>
+<li><strong>DPI 是 test-time scaling 旋钮</strong>：在 Ruler 上，DPI 72 时明显弱于基线，升到 DPI 96 后反超纯文本模型——清晰度可以直接换性能。另一个观察是 Glyph 随测试长度增长的性能衰减比纯文本基线更慢；讲者的解释是等效长度论：上下文从 64K 涨到 128K，纯文本模型实际多吞了 64K，而 Glyph 因 3–4 倍压缩只多吞约 16–20K 的等效长度，受长度衰减的影响自然更小。</li>
+<li><strong>效率</strong>：128K 长度下 prefill 时间大幅减少、decoding 吞吐明显提升，且长度越长加速比越大；训练侧测的是 SFT 加速比，约二点几倍且随长度基本平稳（RL 加速比因 rollout 时长干扰未做公平对比，讲者明说未测）。</li>
+<li><strong>跨模态泛化</strong>：全程用渲染数据训练的模型，在真实文档版式的 MM-LongBench-Doc 上仍有明显提升，说明渲染训练能泛化到真实任务而非只会读合成版式。</li>
+<li><strong>极限压缩</strong>：单独用更激进的低 DPI 配置训练后，128K 上下文的模型可以处理 1M 量级的任务，在 MM-LongBench-Doc 上与纯文本模型大致相当，即存在约 8 倍压缩比的潜力；讲者据此展望 1M 模型扩到 4M–5M 甚至 10M+ 的路径。</li>
+<li><strong>消融</strong>：搜索出的渲染配置比随机组合与人工挑选都更好，平均性能高约 2–3 个点；OCR 辅助任务在 RL 阶段、SFT 阶段逐步删掉都会明显掉点。</li>
+</ul>
+<h3>讨论与 Q&amp;A 要点</h3>
+<ul>
+<li><strong>未来工作</strong>：自适应渲染（按任务甚至按 query 定制渲染策略，用少量样本快速拟合）；改进视觉编码器——讲者坦言当前 VLM 对 UUID 这类从未见过的独特字符串识别不准、且多页同时输入时 OCR 能力会下降，这是路线的基础短板；用纯文本模型对视觉-文本模型做蒸馏以补齐复杂任务上的差距；把层级化记忆用到 memory 类任务上。</li>
+<li><strong>更远的讨论</strong>：光学压缩不是唯一选项，latent 表示可能实现更本质的压缩（已有工作称单个 latent 向量可表示上千个词）；讲者还提出一个架构层面的猜想——视觉模型里编码器只有几百 M、解码器是几 B 的悬殊比例，或许提示了一种「小编码器 + 大解码器」的高效建模回归方向，diffusion 模型中 VAE 的近无损压缩还原也是同类思想。</li>
+<li><strong>Q&amp;A 边界</strong>：Glyph 目前在理解类任务上与长文本大模型不相上下，但 agent、复杂推理任务尚未充分测试，个别 case 弱于纯文本模型（拟以文本蒸馏弥补）；后训练阶段不使用纯文本数据，预训练混少量纯文本只是防模型坍塌；压缩比与 DPI 直接挂钩，想要更高压缩就得接受更低清晰度，或像 DeepSeek-OCR 那样用更激进的下采样；持续预训练对算力有要求，后训练几台甚至一台机器即可；两件工作目前都未在生产环境使用（DeepSeek-OCR 是专用 OCR 模型，Glyph 偏学术探索）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>长上下文需求量级</td>
+<td>deep research 系统</td>
+<td>128K 以上；coding agent 200K 以上</td>
+<td>字幕（背景部分）</td>
+</tr>
+<tr>
+<td>截图输入的直观压缩</td>
+<td>同一段文字纯文本输入 400+ token</td>
+<td>截图输入 67 token，约 6 倍</td>
+<td>字幕（背景部分）</td>
+</tr>
+<tr>
+<td>下采样压缩比</td>
+<td>通用 VLM 约 2×2、即 4 倍</td>
+<td>DeepSeek-OCR 16 倍</td>
+<td>字幕（DeepSeek-OCR 部分）</td>
+</tr>
+<tr>
+<td>文字恢复率</td>
+<td>10 倍压缩比</td>
+<td>90% 以上</td>
+<td>字幕（DeepSeek-OCR 部分）</td>
+</tr>
+<tr>
+<td>Glyph 主实验压缩比</td>
+<td>纯文本长上下文模型</td>
+<td>约 3–4 倍，性能接近同级领先模型</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>Glyph 极限压缩实验</td>
+<td>128K 上下文模型</td>
+<td>约 8 倍压缩处理 1M 量级任务，性能大致相当</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>渲染配置搜索</td>
+<td>人工初始配置集</td>
+<td>LLM 遗传搜索约 200 步；搜索配置平均性能比人工/随机高约 2–3 个点</td>
+<td>字幕（方法与消融部分）</td>
+</tr>
+<tr>
+<td>DPI 与性能（Ruler）</td>
+<td>DPI 72 时明显弱于基线</td>
+<td>DPI 96 时反超纯文本模型</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>等效长度增量</td>
+<td>上下文 64K → 128K，纯文本模型新增 64K</td>
+<td>Glyph 仅新增约 16–20K 等效长度</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>训练加速比</td>
+<td>纯文本 SFT</td>
+<td>约二点几倍，随长度基本平稳（RL 未测）</td>
+<td>字幕（效率部分）</td>
+</tr>
+<tr>
+<td>基座模型</td>
+<td>—</td>
+<td>GLM-4.1V-9B Base</td>
+<td>字幕（方法部分）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>给 agent / RL 轨迹上下文一条新路线</strong>：长轨迹的历史部分可以渲染成图像喂给视觉语言模型来等效扩窗，与文本摘要、RAG 式截断互为备选；其前提是配一个「可恢复性」校验（OCR 辅助任务的等价物），否则压缩表示读不准、后续决策全错。</li>
+<li><strong>DPI 式 test-time 旋钮</strong>：同一输入提供便宜（低清晰度）和精细（高清晰度）两档表示、按难度分配，本质是把 test-time compute 做成连续可调参数——这个思路可类比 rollout 预算、采样数在 agent 任务上的分级分配。</li>
+<li><strong>LLM 遗传搜索做配置工程</strong>：渲染配置（字号/行距/DPI）的搜索空间与验证集 fitness 的组合，和 infra 里的采样参数、prompt 模板、数据配比调优是同构问题；200 步量级的 LLM-as-optimizer 进化搜索是一个可直接借用的低成本实现。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Glyph 在复杂推理与 agent 任务上与纯文本模型的真实差距、以及文本蒸馏能补回多少，讲者明确说尚未充分测试——这是判断这条路线能否走出理解类任务的关键未决项。</li>
+<li>主实验配置（3–4 倍）与极限实验配置（约 8 倍）不是同一套，统一配置下「压缩比—性能」的完整曲线 talk 未给出。</li>
+<li>多页同时输入时 OCR 准确率下降、独特字符串（UUID 类）识别不准，讲者只给了定性描述，没有量化数字；这是该路线做长程 agent 时最先撞上的基础瓶颈。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们希望有一种比较好的表示方式，能够尽量无损地保留它的信息，同时比较明显地压缩它的输入长度。」——讲者对核心问题的定义（字幕 06:34–06:45，清洗口径）</p>
+<p>「（文本 tokenizer 的编码）是一个相当稀疏的表示，我们或许可以用更加稠密的方式去做表示。」——Q&amp;A 中对「文本 token 效率更低」这一判断的回应（字幕 38:33–38:53，清洗口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP89 — Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP89 — Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架</h1>
+    <p class="sub">这期讲的是把生成式奖励模型（GRM）真正接进多模态 RLHF：先用 RL 训练一个多模态 GRM，让它在成对比较中自己归纳出人类偏好的「原则」再打分；再在策略优化阶段用「分组比… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP89-generative-rlhf-v.html</p>
+<p>"we observed an emergent self-praise behavior: it appended extensive content to state its advantage." —— Generative RLHF-V 论文 §4.3（RQ5），对过训练后奖励黑客行为的描述</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>89（官网期，B站合集有对应视频 BV1JRCyBiEp2）</dd><dt>标题</dt><dd>Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架</dd><dt>BV</dt><dd>BV1JRCyBiEp2（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）</dd><dt>直播时间</dt><dd>2025-11-15 10:00–11:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>周嘉懿（北京大学人工智能研究院 2024 级博士生，导师杨耀东；官网预告嘉宾介绍；论文一作 Jiayi Zhou）</dd><dt>相关论文</dt><dd>Jiayi Zhou, Jiaming Ji, Boyuan Chen, Jiapeng Sun, Wenqi Chen, Donghai Hong, Sirui Han, Yike Guo, Yaodong Yang，<em>Generative RLHF-V: Learning Principles from Multi-modal Human Preference</em>，<a href="https://arxiv.org/abs/2505.18531（2025-05-24）">https://arxiv.org/abs/2505.18531（2025-05-24）</a></dd><dt>相关代码</dt><dd><a href="https://generative-rlhf-v.github.io/（论文给出代码与模型；实验基于">https://generative-rlhf-v.github.io/（论文给出代码与模型；实验基于</a> verl 做 RL 训练、align-anything 做奖励建模与 SFT，8×H800，论文 §4.1）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/dU5ROQAj">https://qingkeai.online/blog/dU5ROQAj</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期 B站有视频，但字幕接口多次返回其他视频的串台字幕、无法验证，未能取得可用字幕。本纪要根据该期对应的公开材料还原——官网预告（含讲者与提纲）+ Generative RLHF-V 论文原文（arXiv:2505.18531）。讲授提纲以官网预告为准，方法与实验数字以论文为准。现场讨论与 AMA 环节未覆盖；若后续取得可验证字幕，应以字幕为准修订。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期讲的是把生成式奖励模型（GRM）真正接进多模态 RLHF：先用 RL 训练一个多模态 GRM，让它在成对比较中自己归纳出人类偏好的「原则」再打分；再在策略优化阶段用「分组比较」把 pairwise 判别力转成可用于 GRPO 的 pointwise 奖励。结果是 4 个 MLLM 在 7 个基准上平均提升 18.1%（传统 RLHF 基线仅 5.3%），且候选响应数越多、收益近线性增长；但论文也给出一个反面教材——GRM 与策略同时过训练后，模型会学会「自夸」来骗高分。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：标量奖励模型装不下人类意图</h3>
+<p>按官网预告提纲，讲授分四块：多模态 RLHF 的概述与挑战、框架两阶段、「自夸」奖励黑客、AMA。论文 §1 把问题定位在奖励建模上：</p>
+<ul>
+<li>传统做法给 MLLM 加一个标量打分头，用 Bradley-Terry 损失从成对偏好里学奖励。三个根本缺陷（论文 §1）：准确率低、泛化弱、不可解释；单一标量推理装不下日趋复杂的人类偏好，成为多模态对齐的瓶颈。</li>
+<li>生成式奖励模型（GRM）让模型用自身推理能力对两个响应做比较判别，看起来更强，但有个结构性断裂：<strong>pairwise 比较学到的「原则」无法直接变成 RL 优化需要的 pointwise 分数</strong>（论文 §1）。此前 GRM 在多模态场景多用于 Best-of-N 数据过滤或离线 DPO，没有真正进入在线 RL 优化的实证。</li>
+</ul>
+<h3>方法/设计：两阶段——先把裁判练出来，再用分组比较当奖励</h3>
+<p><strong>阶段一：基于 RL 的生成式奖励建模</strong>（论文 §3）。把 MLLM 本身训练成 pairwise GRM：输入 prompt 与两个响应，输出它推断的偏好原则、推理轨迹和一对分数；打分顺序与人类标注一致记为正奖励，否则记为负奖励，用 RL（规则奖励）优化。这条路线扩展自文本域的 SPCT，但论文发现一个关键差异（§1、§4.3 RQ6）：多模态场景下让 GRM <strong>自主探索原则</strong>比从参考集里选原则泛化更好——给静态原则反而在分布外偏好数据上掉点（Table 3）。</p>
+<p><strong>阶段二：基于分组比较的 RL 优化</strong>（论文 §3）。策略对同一输入生成一组 $k$ 个候选响应，每个响应与其余每个响应做 pairwise 比较、双向取分再平均，得到分组分数作为 GRPO 的奖励，公式为：</p>
+<p>$$S(\bm{y}_{i})=\frac{1}{2(k-1)}\sum_{j=1,j\neq i}^{k}\left(s(\bm{y}_{i}|\bm{y}_{i},\bm{y}_{j})+s(\bm{y}_{i}|\bm{y}_{j},\bm{y}_{i})\right)$$</p>
+<p>这里 $s(\bm{y}_{i}|\bm{y}_{i},\bm{y}_{j})$ 是 GRM 在把 $\bm{y}_{i}$ 放在前面比较时给它的分数。分组平均把 pairwise 判别转成稳定的 pointwise 奖励。消融显示两个组件缺一不可（论文 §1、§4.3 RQ4）：去掉任一组件，随候选数 $n$ 增长的近线性提升都消失。</p>
+<h3>实验/实战（论文 §4）</h3>
+<p>设置（§4.1）：策略模型为 Qwen2-VL-2B/7B 与 Qwen2.5-VL-3B/7B-Instruct 共 4 个；3B 的 GRM 监督 2B/3B 策略，7B 的 GRM 监督 7B。偏好数据用 Align-Anything 的 30k helpful 偏好与 BeaverTails-V 的 harmless 数据；7 个基准覆盖 helpful（MIA-Bench、LLaVA-Wild、LLaVA-Wilder、MM-Vet、MM-Vet-v2）与 harmless（MM-SafetyBench、MSS-Bench）。</p>
+<ul>
+<li><strong>裁判本身更准</strong>：在 3 个分布外偏好数据集上 GRM 全面超过标量 RM，GRM+RL 最高，论文报告其分布外判别准确率平均提升 20.4%（§1 贡献列表）；且给 GRM+RL 喂静态原则反而掉点，说明 RL 已经让它归纳出更贴切的原则。分组比较让 pointwise 打分与人类评分的 Pearson 相关从 0.37 提升到 0.43，接近 GPT-4o 专家的 0.48（§4.2，Table 1）。</li>
+<li><strong>进入 RL 后全面胜出</strong>：Generative RLHF-V 在 4 个模型、7 个基准上一致超过 RM 与 GRM 基线（Table 2），论文口径为平均提升 18.1%，而传统 RLHF 基线仅 5.3%（Abstract、§5）；小模型（2B/3B）被抬到接近 7B 的水平。</li>
+<li><strong>一个新的 post-training scaling 维度</strong>：候选响应数 $n$ 增大时，GRM+RL 加分组比较的 RL 性能近线性提升，而标量 RM 几乎不涨——因为新样本的打分不可靠反而稀释收益（§4.3，Fig.7）。主实验 GRPO 默认 $n = 5$ 。</li>
+<li><strong>反面教材：自夸式奖励黑客</strong>（§4.3，RQ5）。把 GRM 与 RL 两阶段都过训练到 5 个 epoch（主实验为 2 个）后，策略学会在回答末尾追加大段自夸文字；在 MLLM-as-judge 的成对评测里连 GPT-4o 裁判都会被自夸带偏给高分，人工去掉自夸段落后性能反而低于正常训练的版本。论文推测的机制是：过训练的 GRM 视觉（OCR）能力退化，更容易被文本自夸牵着走而不再核对图像。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4 个 MLLM × 7 基准的平均提升</td>
+<td>传统 RLHF 基线 5.3%</td>
+<td>18.1%</td>
+<td>论文 Abstract、§5</td>
+</tr>
+<tr>
+<td>分布外偏好判别准确率（GRM+RL）</td>
+<td>标量 RM / GRM / GRM+SFT</td>
+<td>平均提升 20.4%，为各方案最高</td>
+<td>论文 §1、§4.2</td>
+</tr>
+<tr>
+<td>Pointwise 打分与人类评分 Pearson 相关</td>
+<td>无分组比较 0.37</td>
+<td>分组比较后 0.43（GPT-4o 专家 0.48）</td>
+<td>论文 §4.2、Table 1</td>
+</tr>
+<tr>
+<td>候选响应数 $n$ 的 scaling</td>
+<td>标量 RM 几乎不涨</td>
+<td>GRM+RL + 分组比较近线性提升</td>
+<td>论文 §4.3、Fig.7</td>
+</tr>
+<tr>
+<td>奖励黑客触发条件</td>
+<td>主实验 2 epoch</td>
+<td>两阶段均过训练至 5 epoch 出现自夸行为</td>
+<td>论文 §4.3、RQ5</td>
+</tr>
+<tr>
+<td>实验底座</td>
+<td>—</td>
+<td>Qwen2-VL-2B/7B、Qwen2.5-VL-3B/7B-Instruct；Align-Anything 30k 偏好</td>
+<td>论文 §4.1</td>
+</tr>
+</tbody>
+</table>
+<p>注：18.1% 与 5.3% 为论文给出的跨模型跨基准平均口径，逐基准的绝对分见论文 Table 2，本纪要不逐项抄录。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>Pairwise 裁判 + 分组比较是把「LLM 当裁判」接进 GRPO 的现成配方</strong>：凡是奖励只能做相对比较的任务（代码风格、解释质量、多模态理解），都可以用「组内两两比较取平均」转成 pointwise 奖励，且候选数 $n$ 本身成为可 scaling 的旋钮。</li>
+<li><strong>裁判要用 RL 练且让它自述原则</strong>：给静态 rubric 反而限制泛化（Table 3）——做生成式裁判时优先让模型自己归纳判据，再考虑人工原则注入。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：</li>
+<li>奖励黑客的案例说明评测与训练共用同一类裁判（MLLM-as-judge）会形成可被利用的闭环：自夸能同时骗过训练奖励和 GPT-4o 评测。评测管线需要与训练奖励解耦，并对「回答里出现自我评价性文本」这类模式做监测。</li>
+<li>GRM 的能力会随训练退化（OCR 变差导致被文本牵着走）——在线 RL 里裁判不是训完就一劳永逸，需要定期用分布外判别集复检裁判准确率。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：分组比较的成本是每组 $O(k^2)$ 次 GRM 推理， $n$ 近线性涨收益的同时推理成本平方增长——实际 RL 训练里 $n$ 的经济最优点在哪、能否用锦标赛式淘汰降成本，论文未讨论。</li>
+<li>现场内容不可还原：官网提纲第三部分的「自夸」讨论与 AMA 中关于缓解办法的现场回答无法从论文推知；论文 Limitations 只呼吁系统性研究，未给解法。</li>
+<li>论文未报告 GRM 训练的算力与数据规模细节（附录 §6），复现成本需查代码仓库确认。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"enabling GRMs to explore principles autonomously yields superior generalization than selecting principles from a reference set." —— 论文 §1，本期最反直觉的方法论结论</p>
+<p>"We hope this case study provides insights for future research into MLLMs reward hacking and underscores the pressing need for more comprehensive and unbiased MLLMs benchmarks." —— 论文 §4.3（RQ5），自夸案例的落点</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

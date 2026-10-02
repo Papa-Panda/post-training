@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP13 — LLaMA Factory：从预训练到RLHF，大模型高效训练框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP13 — LLaMA Factory：从预训练到RLHF，大模型高效训练框架</h1>
+    <p class="sub">这一期前半程是高效微调方法的一次系统盘点（部分参数微调、LoRA 家族、全参数显存优化三条线），后半程讲 LLaMA Factory 如何把这些方法连同预训练/SFT/RM/P… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP13-llama-factory.html</p>
+<p>「它主要就是提供了这样一个微调方法的接口，可以使大家快速地调用这些先进的微调方法，来去微调自己的一些开源模型。」——讲者对 LLaMA Factory 的定位（字幕 16:05）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>13</dd><dt>标题</dt><dd>LLaMA Factory：从预训练到RLHF，大模型高效训练框架</dd><dt>BV</dt><dd>BV1jbYNzyEaw</dd><dt>时长</dt><dd>01:16:21（讲授与演示约 63 分钟 + Q&amp;A 约 13 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>郑耀威（北京航空航天大学博士生；字幕开场自述 [00:02]）</dd><dt>相关论文</dt><dd>Yaowei Zheng et al., <em>LlamaFactory: Unified Efficient Fine-Tuning of 100+ Language Models</em>，<a href="https://arxiv.org/abs/2403.13372">https://arxiv.org/abs/2403.13372</a> ；讲者在 talk 中提到论文已发表（字幕作「经典SL」，疑为 ACL 的识别误差）</dd><dt>相关代码</dt><dd>LLaMA Factory（GitHub 开源；讲者现场演示 WebUI 与命令行两种用法）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1jbYNzyEaw/">https://www.bilibili.com/video/BV1jbYNzyEaw/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP13.txt</code>（1629 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP13，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如框架名在字幕中作「浪漫翻腿/拉板反推」、DoRA 作「DOTA」、LoRA+ 作「波尔plus」、PiSSA 作「披萨」、GaLore 作「格洛尔」，均以论文与公开资料为准）。字幕未给出或识别不清的数字不写入正文。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这一期前半程是高效微调方法的一次系统盘点（部分参数微调、LoRA 家族、全参数显存优化三条线），后半程讲 LLaMA Factory 如何把这些方法连同预训练/SFT/RM/PPO/DPO 全流程收进一个框架：一份基座权重 + 可插拔 adapter + 统一的训练/推理/导出接口，让 7B 模型在 16GB 甚至 4–5GB 显存下完成微调。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">参数写进 system prompt，数据按「用户问题</div><div class="farrow">→</div><div class="fnode">工具调用</div><div class="farrow">→</div><div class="fnode">observation 回填</div><div class="farrow">→</div><div class="fnode">最终答复」的多轮对话构造，模型就学会该调工具时不硬答</div></div>
+<h3>背景：高效微调方法的三条线</h3>
+<p>讲者先把常见高效微调方法归为三类，作为理解框架设计的前提：</p>
+<ol>
+<li><strong>部分参数微调（partial fine-tuning）</strong>：冻结大部分参数、只训小部分。早期做法训模型前几层或后几层；代表作 LLaMA Pro（腾讯 AI Lab）把原模型的若干层复制出来，新层初始化为恒等映射、冻结原始参数只训复制层——原有能力保留、新知识写进新层，还适用于继续预训练与领域适配。</li>
+<li><strong>Adapter 方法（以 LoRA 为核心）</strong>：冻结原权重，只训低秩增量。LoRA 的秩 $r$ 通常取 8 或 16，相对原矩阵 4000 甚至上万的维度，只训不到 1% 的参数。讲者按改进点分了三支：</li>
+<li><strong>重参数化</strong>：DoRA 把权重分解为幅度（magnitude）与方向（direction）两个分量，冻结幅度、只对方向做低秩微调，更逼近全参数微调的拟合能力，且可合并回原权重不改变推理结构（ICML 2024）。</li>
+<li><strong>更新策略</strong>：LoRA+ 不动结构，只把 LoRA 中 $B$ 矩阵的学习率提高到原来的约 16 倍——讲者转述其理论分析： $B$ 的最优学习率本就应远高于 $A$ ，改优化器初始化即可。</li>
+<li><strong>初始化</strong>：PiSSA 对原权重做 SVD，取最大特征值对应的主成分初始化 LoRA 的 $A$ 与 $B$ ，其余部分作为残差矩阵冻结。好处有二：收敛更好；量化微调时重要信息留在高精度 LoRA 里、不重要的残差被低比特量化，量化误差更小。</li>
+<li><strong>全参数微调的显存优化</strong>：更新仍是全参数，但用技巧压显存。代表作 GaLore 把<strong>梯度</strong>（而非参数）投影到低秩空间，优化器状态的显存降到与 LoRA 相近的量级，同时保留全参数更新的特性。</li>
+</ol>
+<h3>框架设计：一套接口装下全部方法</h3>
+<p>LLaMA Factory 的结构按讲者的划分是三层：底层硬件（英伟达 GPU、华为 NPU）与既有框架（PyTorch、Hugging Face、DeepSpeed），中层做模型集成（FlashAttention、位置编码插值、量化等适配，已支持 100 多种开源文本模型）与数据集成（填充、packing、多轮对话处理），上层是统一的训练器，把预训练、SFT、奖励模型训练、PPO、DPO 全部实现。讲者强调的三个卖点：效率（速度与显存）、首个面向文本大模型的可视化 WebUI 微调界面（零代码）、结合 DeepSpeed 后可微调 70B 乃至 100B+ 模型。</p>
+<p>显存账（字幕口径）：7B 模型全参数微调约需 120GB 显存；换 GaLore 或 LoRA 后降到约 16GB；再叠加 4-bit 量化（QLoRA 式）可到 4–5GB；70B 模型量化加 LoRA 约 48GB（两张 24GB 卡）可训。</p>
+<h3>实现细节：四个值得抄的工程点</h3>
+<ol>
+<li><strong>Packing 的 mask 分场景</strong>。预训练用 sequence packing 把不等长样本打包成等长序列，但<strong>不做样本间 mask</strong>——预训练就是要让模型尽量多见文本；SFT 阶段则必须做块对角的 attention mask（子样本长度为 2、3、4 时，mask 是 2×2、3×3、4×4 对角块拼成的大矩阵），防止模型在算第二个样本时 attend 到第一个样本，讲者明确说不做 mask 会拉低训练指标。</li>
+<li><strong>SFT 只对回答算 loss + 坚持原厂 chat template</strong>。多轮对话里只在回答部分计算损失；格式化必须用模型原本的特殊标记符。讲者的理由值得记：「我们在微调的时候保持（与预训练）一样的格式，可以继承训练时候的能力……间接地减少过拟合或者遗忘。」</li>
+<li><strong>奖励模型取 EOS 位置的标量分</strong>。RM 用 pairwise ranking loss 训练；打分取解码器最后一个隐藏向量（即 EOS 位置）过 value head 得到标量——选 EOS 是因为它在序列末尾、能 attend 到全部内容，信息量最大，且每个样本都有、不会过拟合到某个特定标记符。</li>
+<li><strong>多 LoRA 权重共享的 RLHF</strong>。PPO 需要 policy、reward、reference 三个模型，显存压力大；框架的做法是只载入一份基座权重，靠挂不同的 LoRA adapter 切换角色（RM 一套 adapter、policy 一套），绝大部分参数共享只载一次。DPO 同理只需两个模型、同样共享。另一个细节是把 SFT loss 与 DPO loss 用超参数 $\gamma$ 融合，防止 DPO 训练中的遗忘。</li>
+</ol>
+<p>工具调用在框架里只是数据格式问题：工具名、描述、参数写进 system prompt，数据按「用户问题 → 工具调用 → observation 回填 → 最终答复」的多轮对话构造，模型就学会该调工具时不硬答。</p>
+<h3>效率技术与实测口径</h3>
+<ul>
+<li><strong>FlashAttention</strong>：讲者给了直观对比——序列长度从 1000 提到 8000，不用 FlashAttention 显存从 15GB 涨到 45GB（近二次增长），用了之后只多约 5GB、8000 长度约 20GB 即可训完；机制是 K/V 分块 + softmax 可分次更新，整个过程不生成 $N \times N$ 大矩阵，还能算子融合提速。</li>
+<li><strong>量化</strong>：16 位参数约 14GB 显存，量化后可降到约 5GB；但量化后的权重本身不可训练，必须配高精度 adapter 一起优化（即 QLoRA 路线）。</li>
+<li><strong>位置编码插值</strong>：上下文从 4K 扩到 2–3 倍时能力不显著下降，训练推理都可用。</li>
+<li><strong>LoRA 自定义算子</strong>：框架为 LoRA 写了融合算子，把反向传播的计算量降到原来的约 0.5%，速度约翻一倍（字幕口径）。</li>
+</ul>
+<h3>结论与边界（讲者自述）</h3>
+<ul>
+<li>还没实现的：pipeline parallel、tensor parallel 等改模型结构的并行策略，实现难度大，后续会考虑 4D/5D 并行（含 expert parallel）。</li>
+<li>Q&amp;A 中的明确边界：RAG 不支持、以后也不会（那是推理范畴）；内置评估只有 C-Eval、CMMLU 这类多项选择集，其他形式的评估建议用别的框架；支持从零训练但建议用 GPT-2 量级的小模型练手；「评估时显存不够」多半是 eval batch size（默认 8）或 <code>max_new_tokens</code> 太大。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoRA 可训参数占比</td>
+<td>全参数</td>
+<td>不到 1%（秩 8/16 对 4000+ 维）</td>
+<td>字幕（方法回顾）</td>
+</tr>
+<tr>
+<td>LoRA+ 的 $B$ 矩阵学习率</td>
+<td>与 $A$ 相同</td>
+<td>提高到约 16 倍</td>
+<td>字幕（方法回顾）</td>
+</tr>
+<tr>
+<td>7B 微调显存</td>
+<td>全参数约 120GB</td>
+<td>GaLore/LoRA 约 16GB；4-bit 量化约 4–5GB</td>
+<td>字幕（框架部分）</td>
+</tr>
+<tr>
+<td>70B 微调显存</td>
+<td>—</td>
+<td>量化 + LoRA 约 48GB（两张 24GB 卡）</td>
+<td>字幕（框架部分）</td>
+</tr>
+<tr>
+<td>可微调模型规模</td>
+<td>—</td>
+<td>DeepSpeed 下 70B 至 100B+；支持 100+ 种开源模型</td>
+<td>字幕（框架部分）</td>
+</tr>
+<tr>
+<td>FlashAttention 显存</td>
+<td>序列 1000→8000：15GB→45GB</td>
+<td>同条件下约 20GB（只多约 5GB）</td>
+<td>字幕（效率部分）</td>
+</tr>
+<tr>
+<td>量化显存</td>
+<td>16 位约 14GB</td>
+<td>约 5GB</td>
+<td>字幕（效率部分）</td>
+</tr>
+<tr>
+<td>位置编码插值</td>
+<td>原生 4K 上下文</td>
+<td>扩到 2–3 倍不显著掉点</td>
+<td>字幕（效率部分）</td>
+</tr>
+<tr>
+<td>LoRA 融合算子</td>
+<td>原生反向传播</td>
+<td>计算量降到约 0.5%，速度约 2 倍</td>
+<td>字幕（效率部分）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「一份基座 + 多个 adapter 切换角色」是省显存做 RLHF 的通用招：policy/reward/reference 显存爆炸时，先想参数共享、只训小 adapter，而不是先加卡。</li>
+<li>Packing 的 mask 分场景原则可直接迁移到自己的 SFT 数据管线：预训练可以不管样本边界，SFT 必须块对角 mask，且坚持基座模型原厂 chat template——这两点是讲者用「会拉低指标」背过书的。</li>
+<li>方法选型坐标：要拟合能力先看初始化（PiSSA 式主成分初始化）和学习率分配（LoRA+ 式 $B$ 放大），这两招不动结构、不加参数，是 LoRA 调参前应先试的。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲者说 LoRA 融合算子让反向计算量降到「原来的 0.5%」——这个口径（是对 LoRA 分支本身还是整网反向）字幕没有展开，值得去 repo 里核对实现再引用。</li>
+<li>多 LoRA 共享基座做 PPO 时，不同 adapter 切换的调度开销与数值一致性（尤其 reference 模型与 policy 共享基座时 logprob 的计算路径）talk 里没细讲，是自己复现时要先验证的点。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们在微调的时候保持（与预训练）一样的格式，可以继承训练时候的能力，然后使我们微调可以改变最小的参数量……间接地可以减少这个模型的过拟合或者遗忘性的现象。」——讲者论 chat template（字幕 29:03）</p>
+<p>「（FlashAttention）如果真的去理解清楚了以后，它也不是非常复杂的。」——讲者讲完分块 softmax 之后（字幕 43:41）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

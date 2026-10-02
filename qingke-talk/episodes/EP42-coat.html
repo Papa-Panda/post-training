@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP42 — COAT：显存高效的 FP8 训练，实现高效深度学习</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP42 — COAT：显存高效的 FP8 训练，实现高效深度学习</h1>
+    <p class="sub">COAT 瞄准的是 FP8 训练里一直没人省的那块显存：不只算子用 FP8 加速，而是把优化器状态和激活也都压成 FP8 存。关键发现是这两类张量的数值分布与权重完全不同——优… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP42-coat.html</p>
+<p>「我们去优化的目标，也是希望减少 activation 和 optimizer states 的显存占用——比如说将它们 quant 到 FP8 的格式，这样就能很好地减小训练当中的显存占用。」——讲者提出 COAT 的动机（字幕 08:59）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>42</dd><dt>标题</dt><dd>COAT：显存高效的 FP8 训练，实现高效深度学习</dd><dt>BV</dt><dd>BV1REpYzZE19</dd><dt>时长</dt><dd>00:47:01（讲授约 42 分钟 + Q&amp;A 约 4 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>徐浩诚（加州大学伯克利分校一年级博士生；清华姚班本科；导师朱军、陈建飞；本工作为其在 NVIDIA 实习期间与韩松合作；均为字幕自述 [03:17]）</dd><dt>相关论文</dt><dd>Haocheng Xu et al., <em>COAT: Compressing Optimizer States and Activations for Memory-Efficient FP8 Training</em>，<a href="https://arxiv.org/abs/2410.19313">https://arxiv.org/abs/2410.19313</a> （COAT 即 Compressing Optimizer states and Activations for FP8 Training 的缩写，字幕作「code / Fps s training」为识别误差）</dd><dt>相关代码</dt><dd>COAT（开源实现；讲者 Q&amp;A 提到与 Transformer Engine 均为静态计算图）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1REpYzZE19/">https://www.bilibili.com/video/BV1REpYzZE19/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP42.txt</code>（943 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP42，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 COAT 在字幕中作「code/cos」、quantization 作「框太」、E4M3 作「ECM3」，均以论文为准）。误差数值一项字幕作「MIC/MICE」，应为 MSE，已在表中注明。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>COAT 瞄准的是 FP8 训练里一直没人省的那块显存：不只算子用 FP8 加速，而是把<strong>优化器状态</strong>和<strong>激活</strong>也都压成 FP8 存。关键发现是这两类张量的数值分布与权重完全不同——优化器状态的组内动态范围太小、FP8 的 256 个刻度只用到约 20 个，需要先用扩张函数把动态范围撑开再量化；激活则大头在非线性层，需要混合粒度的量化粒度与一条全 FP8 的精度流。结果是与 BF16 近乎无损、显存约降到 1/1.54、还能跑起 BF16 会 OOM 的配置。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">反量化</div><div class="farrow">→</div><div class="fnode">FP32 更新动量与权重</div><div class="farrow">→</div><div class="fnode">再量化</div></div>
+<h3>背景：显存到底被谁吃掉</h3>
+<p>讲者先算显存账。模型相关张量里，每个参数要存 FP32 master weight（4 字节）、AdamW 的一阶与二阶动量（各 4 字节）、FP32 梯度（4 字节），合计 16 字节/参数——7B 模型就是一百多 GB，单卡根本训不起来（字幕 [05:53]；Q&amp;A 中讲者补了一笔：混合精度下还有一份 BF16 权重副本 2 字节，slide 未计入）。另一部分是 activation，随 batch size 与序列长度涨。FSDP 这类分片能把优化器状态、梯度、权重摊到多卡（16 卡就除以 16），但卡数越少这部分越致命，而且分片之后 activation 的占比反而更高。结论：<strong>activation 与 optimizer states 是显存的两大头</strong>，这正是 COAT 的优化对象。</p>
+<p>对照组是 NVIDIA Transformer Engine：它用 FP8 主要是<strong>加速计算</strong>，并不以省显存为目标。COAT 的理想账是：优化器状态从 FP32 压到 FP8 省 75%，activation 从 BF16 压到 FP8 省一半，两者叠加显存大降（字幕口径约 75% 的理想空间，实际端到端约 1.54 倍）。</p>
+<h3>方法一：优化器状态量化——先扩张动态范围，再量化</h3>
+<p>难点先行：现成的 per-group 量化（每 128 个元素共享一个 scale factor）套到优化器状态上效果很差。讲者的可视化显示，各量化组内最大值/最小值的比值（dynamic range）非常小：二阶动量常小于 10，一阶动量也大不到哪去；而 E4M3 本身的动态范围约 $2 \times 10^{5}$ 。结果是 FP8 的 256 个可表示值只用到约 20 个，可能只用满 8 个 bit 中的 4–6 个，量化误差自然高。</p>
+<p>解法是量化前先做<strong>动态范围扩张</strong>：对组内元素施加保号幂函数</p>
+<p>$$f(x) = \mathrm{sgn}(x) \cdot |x|^{K}$$</p>
+<p>当 $K &gt; 1$ 时，组内最大值与最小值的比值被放大为原来的 $K$ 次幂。 $K$ 不用调参：令扩张后的动态范围恰好等于 E4M3 的动态范围， $K$ 可解析算出，并被 fuse 进量化 kernel、每个 optimizer step 在线计算。由于二阶动量的动态范围比一阶更小，它算出的 $K$ 也更大（字幕口径：二阶约 5–15，一阶约 1–3）。整条 optimizer step（反量化 → FP32 更新动量与权重 → 再量化）融合成单个 kernel，显存中始终只躺 FP8 版本，没有 FP32 峰值。</p>
+<p>误差证据：讲者用 AdamW 实际更新项 $m / \sqrt{v}$ 的量化误差来衡量（这是真正进到参数更新里的量），全用 E4M3 无扩张时 MSE 为 20.1，加扩张后降到 12.3；格式选择上，一阶动量用 E4M3 + 扩张最好，二阶动量 E4M3 与 E5M2 都可以、但扩张不可省。（E4M3 最大可表示 448，E5M2 约 5.7 万但精度更粗，字幕 [11:44]。）</p>
+<h3>方法二：激活量化——大头在非线性层，要混合粒度</h3>
+<p>第二个发现：以往 FP8 工作多只量化 linear 层（因为计算在那里），但 activation 的构成恰恰相反——以 LLaMA 式 transformer 做 breakdown，非线性层占 activation 的 60%–70%，linear 层只有约 30%。只省 linear 层等于只省了小头。</p>
+<p>COAT 的设计是两件套：</p>
+<ol>
+<li><strong>FP8 precision flow</strong>：每一层的输入与输出都保持 FP8 精度。既然输入本来就是 FP8，backward 需要存的张量直接存 FP8 输入即可，activation 显存先天减半；量化/反量化 kernel 还能与相邻层 fuse 掉，没有额外 overhead。</li>
+<li><strong>Mixed granularity（混合粒度）</strong>：linear 层计算密集，用 per-tensor 量化（对硬件友好）；非线性层用更细的 per-group 量化压误差。但实验给出一条硬边界：<strong>LayerNorm 的输入不能用 per-block 量化</strong>——用 4×4 block 量化 LayerNorm 输入时，量化误差随层数累积、显著高于其他方案；其余层用 per-group 还是 per-block 差别不大，最终方案是所有层统一 per-group。</li>
+</ol>
+<p>linear 层还有一个加速技巧叫 <strong>group scaling</strong>：per-tensor 量化需要先对整个张量做 max reduction 才能定 scale，单独起一个 kernel 开销大（Transformer Engine 的 delayed scaling 用过去约 100 步的历史估 scale，实现复杂且可能伤精度）。COAT 把 reduction 拆成两步：先在组内（组大小 $G$ ）求最大值（这一步可 fuse 进上一个 kernel），再对缩小后的张量做全局 max。量化环节因此加速 5 倍（小张量）到 14 倍（大张量）， $G = 16$ 时理论上限是 16 倍。</p>
+<h3>实验：无损、省显存、能跑起 OOM 的配置</h3>
+<ul>
+<li><strong>精度</strong>：两个规模的 LM 从零预训练（讲者口径：较大者 250B tokens、每 batch 约 4M tokens，约 6–7 万步；1B 模型 300B tokens），training loss、perplexity、下游任务均与 BF16 非常接近；MATH 微调与 BF16 无 degradation，与 Transformer Engine 相当；VILA-1.5 7B 视觉语言模型 SFT 同样近乎无损。</li>
+<li><strong>单层效率</strong>：不同序列长度/hidden size/batch size 下，加速 1.4–1.5 倍、显存降 1.65 倍。</li>
+<li><strong>端到端</strong>：7B/13B/30B 上验证，显存约降 1.54 倍；省出的显存可以开更大的 batch，而 batch 越大 FP8 的加速收益越高，形成正循环。讲者举例：2 张 GPU 训 7B 时 BF16 直接 OOM、COAT 可以；13B 在 2 卡、30B 在单机 8 卡下同样是「BF16 做不了全参数微调、COAT 能做」。</li>
+</ul>
+<h3>Q&amp;A 边界（讲者自述）</h3>
+<ul>
+<li>FP8 optimizer 与 FP8 activation 是两个独立模块，可单独使用都有收益。</li>
+<li>FP8 optimizer <strong>只省显存、不加速计算</strong>：计算大头在 linear 层，optimizer step 本身很快。</li>
+<li>与 torch.compile 的关系：讲者称 TE「目前不支持」的原因自己也不确定；COAT 与 TE 的计算流程都是静态的，原理上应与 torch.compile 兼容，但团队没实测过——引用时注意这是判断而非实测。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型相关显存</td>
+<td>每参数 FP32 权重 + 两动量 + FP32 梯度</td>
+<td>16 字节/参数，7B 约一百多 GB</td>
+<td>字幕（背景部分）</td>
+</tr>
+<tr>
+<td>优化器状态量化</td>
+<td>FP32 存储</td>
+<td>FP8 省 75% 显存</td>
+<td>字幕（背景部分）</td>
+</tr>
+<tr>
+<td>激活量化</td>
+<td>BF16 存储</td>
+<td>FP8 省一半显存</td>
+<td>字幕（背景部分）</td>
+</tr>
+<tr>
+<td>FP8 刻度利用率</td>
+<td>per-group 直接量化</td>
+<td>256 个可表示值只用到约 20 个</td>
+<td>字幕（方法一）</td>
+</tr>
+<tr>
+<td>扩张指数 $K$</td>
+<td>一阶动量</td>
+<td>约 1–3；二阶动量约 5–15</td>
+<td>字幕（方法一）</td>
+</tr>
+<tr>
+<td>更新项量化误差</td>
+<td>无扩张 MSE 20.1</td>
+<td>加扩张后 12.3</td>
+<td>字幕（方法一）</td>
+</tr>
+<tr>
+<td>激活构成</td>
+<td>linear 层约 30%</td>
+<td>非线性层占 60%–70%</td>
+<td>字幕（方法二）</td>
+</tr>
+<tr>
+<td>group scaling 加速</td>
+<td>单 kernel 做 per-tensor reduction</td>
+<td>量化环节快 5–14 倍（ $G = 16$ ，上限 16 倍）</td>
+<td>字幕（方法二）</td>
+</tr>
+<tr>
+<td>单层效率</td>
+<td>BF16</td>
+<td>加速 1.4–1.5 倍、显存降 1.65 倍</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>端到端显存</td>
+<td>BF16</td>
+<td>约降 1.54 倍（7B/13B/30B）</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>预训练规模</td>
+<td>BF16 对照</td>
+<td>250B / 300B tokens 两档，均近乎无损</td>
+<td>字幕（实验部分）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>给自己的训练框架做 FP8 省显存时，先 profiling 再下手：FSDP 分片后优化器状态不再是大头，activation 才是；而 activation 里非线性层占 60%–70%，只量化 matmul 输入输出等于没省到大头。</li>
+<li>「量化前先适配分布」是可迁移的一般原则：目标张量的组内动态范围远小于 FP8 刻度范围时，先做保号幂扩张这类单调变换把刻度用满，比换格式（E4M3/E5M2）更管用；且扩张指数可以像 COAT 这样按组在线解析求解、不引入调参。</li>
+<li>省显存的价值不只是省卡：显存换 batch、batch 换低精度加速收益，这条正循环在决定是否上 FP8 训练时应纳入核算。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>扩张函数对动量做非线性变换后，AdamW 的偏差校正与有效步长是否仍严格等价，讲者只给了 $m / \sqrt{v}$ 的误差证据，没有展开理论——自己在长训练里用之前，值得先小规模复现验证 loss 曲线。</li>
+<li>实验最大规模只到 30B（字幕口径），且都在 Hopper FP8 语境下；70B+ 与 MoE 架构上 per-group + 扩张的误差累积是否仍可控，talk 未覆盖。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「（之前的很多工作）只关注了 linear layer 的 quantization，因为 linear layer 占据了绝大多数的 compute；但是我们发现 non-linear layer 其实才是占据更多 activation 的这一部分。」——讲者论激活量化的着力点（字幕 24:51）</p>
+<p>「（FP8）optimizer 的话，它能节省显存，但是不能加速——因为主要的计算都发生在 linear 层上。」——Q&amp;A 中讲者的明确边界（字幕 43:49）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
