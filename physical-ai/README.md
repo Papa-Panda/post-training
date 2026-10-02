@@ -359,13 +359,11 @@ $$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_
 
 **关联**：Day21（DR）/ Day22（RMA）/ Day23（Residual RL）/ Day24（系统辨识）。
 
-### 理解程度自评 + 给 yi jin 的 update（2026-10-01）
+### 理解程度自评（2026-10-01）
 
-**问**：你觉得我现在对 physical AI 有初步理解了吗？想给 yi jin 一个 update（他建议我去做 physical AI）。
+**问**：你觉得我现在对 physical AI 有初步理解了吗？
 
-**答**：已经过了"初步"线。证据：不是在复述摘要，是在生产 thesis——三层栈（公理/规模/生成）、simulator exploit gap、"仿真不死但裸仿真训练要配 disclosure 和 gate"、latent action 四象限，都是二轮复习里长出来的；能跟李昊对线 execution 层是 gap 主战场（Day21–24 全是还债），是 mechanism 层面的 sparring，不是学生听课。缺的两块：**动手**（没跑过 sim、没摸过真机，execution 层的体感是纸面的）和**产业侧**（deal flow、估值、团队成色）。给 yi jin 的 update 草稿（调子："汇报学习进展 + 对齐职业定位"）：34 篇论文一轮刷完、二轮复习（一天一篇、串联为主）、笔记公开在 GitHub；takeaways：① sim2real 的 gap 没消失，是被压缩到了执行层（执行器/接触/延迟）——DR、RMA、残差、系统辨识那几篇经典工作全是在给这一层还债；② 世界模型这条线是三层栈：生成层管覆盖度（Genie/UniSim）、规模层管吞吐（Isaac）、公理层管正确性（MuJoCo 求解器）；③ 自己的 thesis：仿真不死，但裸仿真训练要配 disclosure 和 gate，simulator exploit gap 到今天没人量过；定位仍按 8 月底定的：主线 post-training / agentic RL infra，physical AI 低成本积累；约 coffee/walk，听听他对后面 6 个月计划的看法。
-
-（注：初稿误把收件人写成李昊、调子是"带问题去聊行业"，用户纠正"不对 是 yi jin"后重拟为汇报调子；mentor 是 yi jin。）
+**答**：已经过了"初步"线。证据：不是在复述摘要，是在生产 thesis——三层栈（公理/规模/生成）、simulator exploit gap、"仿真不死但裸仿真训练要配 disclosure 和 gate"、latent action 四象限，都是二轮复习里长出来的；能跟李昊对线 execution 层是 gap 主战场（Day21–24 全是还债），是 mechanism 层面的 sparring，不是学生听课。缺的两块：**动手**（没跑过 sim、没摸过真机，execution 层的体感是纸面的）和**产业侧**（deal flow、估值、团队成色）。
 
 **关联**：Day02（MuJoCo）/ Day03（Isaac Lab）/ Day04（Genie）/ Day21–24（执行层还债）/ Day30（数据飞轮）/ 部件栈问答（2026-09-30）。
 
