@@ -22,6 +22,17 @@
 | 77 | [Theory of Agent: From Definition, to Behavior and Objective](episodes/EP77-theory-of-agent.md) | ✅ 要点已提炼 |
 | 78 | 从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体 | ✅ 要点已提炼 |
 | 83 | 统一 SFT & RL：迈向大语言模型后训练的统一视角 | ✅ 要点已提炼 |
+| 1 | [SceneTex：高质量三维室内场景纹理图生成](episodes/EP01-scenetex.md) | ✅ 要点已提炼 |
+| 2 | [ChatDev：大语言模型驱动的多智能体协作与演化](episodes/EP02-chatdev.md) | ✅ 要点已提炼 |
+| 3 | [从 3D LLM 到 MultiPLY，3D 具身基础模型的构建](episodes/EP03-3d-llm-multiply.md) | ✅ 要点已提炼 |
+| 4 | [Mini-Gemini：挖掘多模态视觉语言大模型的潜力](episodes/EP04-mini-gemini.md) | ✅ 要点已提炼 |
+| 5 | [3D-VLA：构建生成式三维具身世界模型](episodes/EP05-3d-vla.md) | ✅ 要点已提炼 |
+| 6 | [实时渲染 3DGS 中的反走样及逆渲染应用](episodes/EP06-3dgs.md) | ✅ 要点已提炼 |
+| 7 | [MixEval：混合评测数据集来拟合大语言模型的人类评估](episodes/EP07-mixeval.md) | ✅ 要点已提炼 |
+| 8 | [VideoBooth：文本和图像提示共同驱动的视频生成](episodes/EP08-videobooth.md) | ✅ 要点已提炼 |
+| 9 | [具身多模态大模型的视觉表征预训练研究](episodes/EP09-embodied-multimodal-pretraining.md) | ✅ 要点已提炼 |
+| 11 | [LLaMA Pro：扩展 Transformer 块优化的大型语言模型继续预训练](episodes/EP11-llama-pro.md) | ✅ 要点已提炼 |
+| 12 | [VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架](episodes/EP12-villager-agent.md) | ✅ 要点已提炼 |
 | 10 | [PiSSA：收敛快、误差小的大模型参数高效微调方法](episodes/EP10-pissa.md) | ✅ 要点已提炼 |
 | 13 | [LLaMA Factory：从预训练到RLHF，大模型高效训练框架](episodes/EP13-llama-factory.md) | ✅ 要点已提炼 |
 | 33 | [XGrammar：高效实现 LLM 灵活且可移植的结构化生成](episodes/EP33-xgrammar.md) | ✅ 要点已提炼 |

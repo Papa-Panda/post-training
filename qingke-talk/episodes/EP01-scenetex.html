@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP01 — SceneTex：高质量三维室内场景纹理图生成</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP01 — SceneTex：高质量三维室内场景纹理图生成</h1>
+    <p class="sub">把纹理生成从「逐物体」升到「整场景」：输入场景几何 + 文本提示，直接生成全局一致的场景级纹理。方法是多分辨率纹理场（2D UV 空间的 hash-grid 多尺度特征）+ i… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP01-scenetex.html</p>
+<p>「我们有一种方法可以直接对这个场景，整个生成一个完整的纹理图。」——讲者在开场定义问题时给出的解法方向</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP01（青稞Talk 首期）</dd><dt>标题</dt><dd>SceneTex：高质量三维室内场景纹理图生成</dd><dt>BV</dt><dd>BV1qKeyzdEVp</dd><dt>时长</dt><dd>00:57:27（共 3447 秒）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>字幕中未自述姓名（开场仅称「分享一下我们在 CVPR 2024 上做的一个新的工作」，姓名以官网预告为准）</dd><dt>相关论文</dt><dd>SceneTex，CVPR 2024 Highlight（讲者口述，正式题名与作者以论文页为准）；讲者此前有 ICCV 的 Text2Tex 工作</dd><dt>相关代码</dt><dd>已开源（讲者 Q&amp;A：「我们这个算法已经开源」，repo 地址待从论文页补录）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1qKeyzdEVp/">https://www.bilibili.com/video/BV1qKeyzdEVp/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP01.txt</code>（1262 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP01，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如方法名在字幕中作「syntax」、纹理场作「纹理厂」，3D-FRONT 作「three d front」，均以论文与公开资料为准）。论文仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>把纹理生成从「逐物体」升到「整场景」：输入场景几何 + 文本提示，直接生成全局一致的场景级纹理。方法是多分辨率纹理场（2D UV 空间的 hash-grid 多尺度特征）+ instance-aware 的 cross-attention 纹理解码器，再以 VSD（variational score distillation）全局优化，用 CLIP / Inception Score 与用户研究双轨评测，定性与定量都明显优于 inpainting 系（Text2Tex 等）与隐空间优化系（Latent-Paint）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 背景/问题：逐物体的传统管线贵、乱、难改</h3>
+<p>传统管线是先把场景拆到每个物体，逐个设计纹理再贴回场景背景。讲者列了三个痛点：</p>
+<ol>
+<li><strong>昂贵耗时</strong>：每件家具都要重复设计一遍，雇三维设计师成本很高；</li>
+<li><strong>外观不一致</strong>：逐物体独立生成，物体之间风格不协调（欧式家具放进中式客厅）；</li>
+<li><strong>难修改</strong>：客户一句「看着不协调但说不出哪不协调」，就要推倒逐物体重做。</li>
+</ol>
+<p>学界现有纹理生成只做物体级，两条路线各有硬伤：</p>
+<ul>
+<li><strong>Inpainting 系</strong>（Text2Tex、TEXTure、Text2Tex Fusion）：拿现成 2D diffusion 从多视角往 3D 面上投，不需训练，但有局部/全局不一致（左右两侧纹理对不上）和伪影；搬到场景上还会出现接缝线（seam）、风格不一致、loop closure（绕一圈回不到起点外观）三类问题，因为场景难以布密集相机阵列。</li>
+<li><strong>隐空间优化系</strong>（Latent-Paint）：在 latent 里用 SDS 类损失优化、再解码回 RGB，全局一致，但高频信息在 encode/decode 中丢失，出现「补丁状」色块伪影；场景上还会凭空生出几何不存在的物体（灯、沙发犄角）、收敛慢。</li>
+</ul>
+<p>讲者据此定下四个目标：任意位置高清真实、全局视角与几何一致、无接缝与拉伸、大小物体保真度均匀。对应的两个技术手段：<strong>全局优化</strong>（解决 seam 与 stretch）+ <strong>灵活的多尺度表征</strong>（解决尺度不一致）。</p>
+<h3>2. 方法/设计：多分辨率纹理场 + cross-attention 解码 + VSD 全局优化</h3>
+<ul>
+<li><strong>多分辨率纹理场（Multi-Resolution Texture Field）</strong>：借 Instant-NGP 的 hash grid 思路但搬到 2D UV 空间。对任一 UV 坐标，在每个尺度（讲者举例 4×4、8×8、16×16 的网格分辨率）上取邻近四格特征做双线性插值，多尺度拼接成 UV embedding——粗尺度管颜色与整体纹理，细尺度管高频细节。</li>
+<li><strong>Instance-aware cross-attention 解码器</strong>：解决「同一物体左右两边互不可见」的一致性问题。利用已知的 instance mask，在 UV island 上预先采样一批固定锚点作为全局信息；解码当前点时把它作 query、锚点作 key/value 做 cross-attention，加 skip connection，再经一层小 MLP 映射到 RGB。这样当前点「看不见其他区域也知道它们长什么样」，物体内风格一致。不同物体之间的一致性讲者坦承是「比较隐式的处理」：尽量用广角镜头在一个 view 里框进更多物体，多 view 覆盖后自然一致。</li>
+<li><strong>优化目标</strong>：渲染出的 RGB 经预训练 SD 的 VAE encoder 编 latent，与文本提示、depth map 一起进 VSD 模块（SDS 变种）算 loss，梯度回传更新纹理场。多相机视角循环优化直至全局收敛。几何条件目前只用了 depth（讲者承认这是较弱的约束）。</li>
+</ul>
+<h3>3. 实验/实战</h3>
+<ul>
+<li><strong>评测设置（字幕口径）</strong>：10 个 3D-FRONT 场景 × 每场景 2 种纹理 = 20 个场景，每场景随机渲染 200 个视角，共 4000 张图跑 CLIP Score（与文本提示的相似度）和 Inception Score（真实感），两者都是越高越好；讲者自评这类自动指标「就像体脂秤，只能给大概参考」。</li>
+<li><strong>用户研究</strong>：每场景随机取 10 个 view 给专家用户打分，两个维度各 1–5 分：真实感/一致性，以及与文本提示的契合度；结果均优于所有文本驱动基线（含 MVDiffusion）。</li>
+<li><strong>定性对比</strong>：Latent-Paint 在场景上「一眼假」且糊；MVDiffusion 有接缝与视角死角；Text2Tex 分辨率尚可但接缝、伪影明显，物体表面不平滑；SceneTex 更真实自然。</li>
+<li><strong>三项消融</strong>：① 直接优化 RGB 纹理图（不用纹理场）会产生波纹状假纹理；② 去掉多分辨率后大物体（沙发、墙面、地面）会出现「想生成复杂纹理又生成不出来」的波纹；③ 去掉 cross-attention 解码器，同一块地毯在不同 view 下红白不一致。</li>
+<li><strong>应用展示</strong>：同场景风格化（巴洛克 / 波西米亚 / 法式田园 / 日式）；与 MeshGPT 类几何生成方法串联做「从无到有」；在 ScanNet 真实重建场景上重纹理化，精度远高于相机原图；室外铁匠铺建筑生成雪天外观。</li>
+<li><strong>算力口径（Q&amp;A）</strong>：分辨率拉满（渲染 768×768）时 VSD 需要多次前传 + LoRA + ControlNet，约 15 小时 / 场景（A6000）；降质量后 2080 也能跑（约 10G 显存可用）。</li>
+</ul>
+<h3>4. 结论/观点（事实 vs 观点分开标注）</h3>
+<p>讲者自陈的两个局限（事实层面的自评）：</p>
+<ol>
+<li><strong>光影 baked-in</strong>：生成结果里带固定的光照效果，不能像白模纹理那样下游再加任意光效与材质——讲者希望下一步改用基于物理渲染的方法，这是他认为数字资产能被游戏/电影下游直接利用的前提。</li>
+<li><strong>几何幻觉</strong>：VSD 先验会把几何上不存在的东西「合理地」加出来（空柜子上方生出一盏灯，因为 SD 认为该风格的场景就该有灯）——这属于先验幻觉，讲者给的缓解方向是把 depth 换/叠加成约束更强的 normal、canny edge 等条件。</li>
+</ol>
+<p>观点层面：讲者认为这类「场景级整体生成」才是纹理生成的正确粒度，逐物体路线在风格一致性上没有出路；但对细粒度语义控制（「绿色的桌子、红色的椅子」）他承认目前做得不好，因为生成时没有对纹理图的语义做约束。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>评测规模</td>
+<td>—</td>
+<td>10 场景 × 2 纹理 × 200 视角 = 4000 张图</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>自动指标</td>
+<td>Text2Tex / Latent-Paint / MVDiffusion 等</td>
+<td>CLIP Score 与 Inception Score 均「大大优于之前所有方法」（未给具体分值）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>用户研究</td>
+<td>同上</td>
+<td>真实性与文本契合两项 1–5 分均优于所有基线（具体分值字幕未给）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>单场景生成耗时</td>
+<td>—</td>
+<td>约 15 小时（A6000，768×768 全拉满）；2080 降质可跑</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>多尺度表征应对尺度悬殊的对象集合</strong>：粗尺度编码整体结构、细尺度编码高频，这套「分层特征 + 双线性插值拼接」与 coding 数据里按仓库/文件/函数分层做上下文索引是同构的思路——先粗粒度定位、再细粒度取细节。</li>
+<li><strong>用固定锚点 + cross-attention 把全局信息塞进局部决策</strong>：与 RL infra 里用小型全局状态汇总（如归一化统计量、全局 critic）约束局部更新的做法可类比：当前更新点看不见全局，但可以通过一组固定「参考点」获得全局一致性信号。</li>
+<li><strong>评测纪律值得抄</strong>：自动指标（CLIP/IS）只作一阶筛查，最终结论靠人评的真实感与任务契合双轨——对应到后训练评测，就是自动 benchmark 与人工偏好评测不能互相替代。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>细粒度语义控制（指定某张椅子红色）在纹理场里如何加约束？讲者说目前没做——可能的路径是把 instance 级语义条件注入 cross-attention 的 key/value，值得对照论文实现细看。</li>
+<li>VSD 的幻觉问题本质是先验压过几何约束，和 LLM 里「先验压过上下文证据」的幻觉同源：depth 这种弱条件不够，normal/canny 更强——这条「约束强度阶梯」值得在别的生成任务里复用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们有一种方法可以直接对这个场景，整个生成一个完整的纹理图。」——开场定义问题时的解法方向</p>
+<p>「像体脂秤一样，它只能给一个大概的参考，它不能告诉一个绝对的好坏。」——讲者谈自动评测指标时的自我提醒</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

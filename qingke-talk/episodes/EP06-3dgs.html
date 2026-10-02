@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP6 — 实时渲染 3DGS 中的反走样及逆渲染应用</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP6 — 实时渲染 3DGS 中的反走样及逆渲染应用</h1>
+    <p class="sub">针对 3DGS 在变分辨率/变焦渲染时出现模糊与锯齿的问题，讲者主线工作 Analytic-Splatting 把像素响应从「中心一点采样」改成「像素窗口内高斯信号的解析积分」… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP06-3dgs.html</p>
+<p>"solving the integral of Gaussian signals within the pixel window area as intensity responses is crucial for both anti-aliasing and capturing details." —— Analytic-Splatting 论文 §1，点明本期反走样主线的问题定性</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>6（官网期与 B站合集期号一致，Talk06）</dd><dt>标题</dt><dd>实时渲染 3DGS 中的反走样及逆渲染应用</dd><dt>BV</dt><dd>BV1NntyzRExN（有 B站视频，但视频无自有字幕轨：浏览器内约 25 次抓取只返回空字幕列表或串台字幕，故本纪要走论文还原路线）</dd><dt>时长</dt><dd>01:06:03</dd><dt>直播时间</dt><dd>2024-05-21（周二）19:00–20:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>梁智灏（华南理工大学几何感知与智能实验室博士，导师贾奎；Analytic-Splatting 工作于腾讯 AI Lab 实习期间完成；官网预告嘉宾介绍 + 论文作者页）</dd><dt>相关论文</dt><dd></dd><dt>Zhihao Liang, Qi Zhang, Wenbo Hu, Ying Feng, Lei Zhu, Kui Jia, Analytic-Splatting</dt><dd>Anti-Aliased 3D Gaussian Splatting via Analytic Integration</em>，<a href="https://arxiv.org/abs/2403.11056（v2,">https://arxiv.org/abs/2403.11056（v2,</a> 2024-04-03）</dd><dt>Zhihao Liang, Qi Zhang, Ying Feng, Ying Shan, Kui Jia, GS-IR</dt><dd>3D Gaussian Splatting for Inverse Rendering</em>，<a href="https://arxiv.org/abs/2311.16473（v3,">https://arxiv.org/abs/2311.16473（v3,</a> 2024-03-28）</dd><dt>相关代码</dt><dd>Analytic-Splatting <a href="https://github.com/lzhnb/Analytic-Splatting">https://github.com/lzhnb/Analytic-Splatting</a> ；GS-IR <a href="https://github.com/lzhnb/GS-IR">https://github.com/lzhnb/GS-IR</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/t9m9Uukj">https://qingkeai.online/blog/t9m9Uukj</a></dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1NntyzRExN/">https://www.bilibili.com/video/BV1NntyzRExN/</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期 B站视频无自有字幕轨（字幕接口只回空列表或他视频的串台字幕，已多轮抓取确认），无法逐字还原。本纪要根据该期对应的公开材料还原——官网预告（含讲者与四点讲授提纲）+ 讲者两篇论文原文。提纲第 3 节「3DGS 反走样」以 Analytic-Splatting（arXiv:2403.11056）为主线详写；第 2 节「逆渲染」以 GS-IR（arXiv:2311.16473）为据压缩呈现；第 1 节（从 NeRF 到 3DGS 的方法概述）与第 4 节（落地难点及未来方向探讨）没有独立的书面材料，只交代脉络、不虚构讲者具体表述。特别说明取舍：<strong>Mip-Splatting（Zehao Yu 等）不是讲者团队的工作</strong>，在本期中只是 Analytic-Splatting 的对比基线，纪要按这个定位处理，不与主线混写。现场 Q&amp;A 与讲者口头发挥未覆盖。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>针对 3DGS 在变分辨率/变焦渲染时出现模糊与锯齿的问题，讲者主线工作 Analytic-Splatting 把像素响应从「中心一点采样」改成「像素窗口内高斯信号的解析积分」：用条件 logistic 函数近似高斯 CDF、以 CDF 差分得到窗口积分，再对投影协方差做特征对角化把二维积分拆成两个一维积分乘积，同时放进颜色与透射率计算——抗走样与保细节兼得，在多尺度协议下全面超过 3DGS 与 Mip-Splatting；同场的另一条线 GS-IR 则把 3DGS 第一次引入逆渲染，用深度推导的法线正则与烘焙遮挡体积完成材质/光照分解，速度比 NeRF 式逆渲染快一个量级。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：3DGS 为什么一变倍率就露馅</h3>
+<p>按官网预告，讲授分四段：（1）从 NeRF 到 3DGS 的三维重建渲染方法概述；（2）基于物理的逆渲染框架 GS-IR；（3）实现 3DGS 反走样的 Analytic-Splatting；（4）3DGS 落地难点及未来方向探讨。</p>
+<p>走样的根源在 3DGS 的像素着色方式（Analytic-Splatting 论文 §3）：3DGS 把每个像素当作一个孤立的点，只取投影 2D 高斯在<strong>像素中心</strong>处的值作为该像素的强度响应。当相机距离、焦距或输出分辨率改变时，像素在世界空间覆盖的足迹（footprint）随之改变，但中心采样对这种变化不敏感——采样带宽受限，混叠不可避免：拉近时出现细长高斯与锯齿，拉远时发糊（论文 Abstract、§1）。论文给出的两个候选修法都不理想：超采样（论文中基线 3DGS-SS：先以 2 倍分辨率渲染再平均池化，§5.2）计算代价高；同期最强的 Mip-Splatting 用预滤波（3D 平滑 + 2D Mip 滤波，本质是把窗口当成一个低通高斯核与信号做卷积）压制高频，代价是过平滑、细节丢失（论文 §1、§2 的定位）。讲者的判断是：<strong>正解既不是采更多点、也不是先把高频滤掉，而是老老实实把窗口内的积分算出来</strong>。</p>
+<h3>方法/设计：Analytic-Splatting 如何把积分闭式化</h3>
+<p>从一维情形出发（论文 §4.1）：高斯信号 $g(x)$ 在窗口 $[x_{1}, x_{2}]$ 内的积分等于其累积分布函数（CDF）之差 $G(x_{2}) - G(x_{1})$ ；但高斯 CDF 就是误差函数 erf，没有闭式解。论文用一个「条件 logistic 函数」 $S(x)$ 解析近似标准高斯的 CDF（Eq. 9）：</p>
+<p>$$S(x)=\frac{1}{1+\exp\left(-1.6 \cdot x-0.07 \cdot x^{3}\right)}$$</p>
+<p>对任意标准差 $\sigma$ ，把自变量按 $1/\sigma$ 缩放即可适配；于是窗口宽为 1 的积分直接写成 $S(u+\frac{1}{2}) - S(u-\frac{1}{2})$ （Eq. 11）。这个近似单调、关于 $(0, \frac{1}{2})$ 中心对称、可求导，能直接进入可微渲染管线反向传播。</p>
+<p>二维情形的障碍是投影 2D 高斯的协方差含交叉相关项，二重积分不可直接解（论文 §4.2）：论文对 $\hat{\Sigma}$ 做特征分解，把像素积分域旋转到两个特征向量构成的坐标系（这一步引入可控的近似，见下文误差分析），二维高斯随之拆成两个独立的一维高斯，窗口积分变成两个一维 CDF 差分的乘积：</p>
+<p>$$\mathcal{I}_{g}^{\text{2D}}(\bm{u}) \approx 2\pi \sigma_{1} \sigma_{2} \left[ S_{\sigma_{1}}(\tilde{u}_{x}+\frac{1}{2})-S_{\sigma_{1}}(\tilde{u}_{x}-\frac{1}{2}) \right] \left[ S_{\sigma_{2}}(\tilde{u}_{y}+\frac{1}{2})-S_{\sigma_{2}}(\tilde{u}_{y}-\frac{1}{2}) \right]$$</p>
+<p>实现上只动一处：把这个积分响应 $\mathcal{I}_{g}^{\text{2D}}$ 替换掉原 3DGS 着色公式里的中心采样值，同时进入颜色累积与透射率 $T_{i}$ 的计算（Eq. 15），渲染结果便天然随像素足迹变化。工程基底是原版 3DGS + 自定义 CUDA shading 模块，训练参数、训练日程与损失函数与 3DGS 完全相同（论文 §5.2）——即改动集中在 shading 一个环节，不动表示与优化。与 Mip-Splatting 的本质区别也在这里：<strong>它不压制高频成分，而是按像素足迹做真实的面积积分</strong>，所以保细节（论文 §1）。</p>
+<h3>实验/实战：Analytic-Splatting（多尺度训练与测试，MTMT）</h3>
+<ul>
+<li><strong>近似误差先行验证（§5.1）</strong>：在 3DGS 训练实际维持的 $\sigma \in [0.3, 6.6]$ 范围内，条件 logistic 对 CDF 与窗口积分的近似误差以 $10^{-4}$ 量级呈现，显著优于其他近似方案； $\sigma$ 越小（即信号越高频）优势越明显，这正是它保细节的数学来源。把积分域旋转 $0^{\circ}$ 到 $45^{\circ}$ 会略微增大误差，但仍优于其他方案（Fig. 4、Fig. 5）。</li>
+<li><strong>多尺度 Blender 合成集（Table 1）</strong>：平均 PSNR 35.03，对比 3DGS 的 29.77 与 Mip-Splatting 的 34.56；平均 LPIPS 0.018（Mip-Splatting 0.019、3DGS 0.040）；在走样最严重的 1/8 分辨率下 PSNR 36.00 对 3DGS 的 27.98，低分辨率端差距最大。</li>
+<li><strong>多尺度 Mip-NeRF 360（Table 2）</strong>：平均 PSNR 29.51，优于 3DGS (27.63) 与 Mip-Splatting (29.12)，是可实时渲染方法中最好的；仅低于 Zip-NeRF (30.58) ——但 Zip-NeRF 非实时且渲染阶段用超采样（论文 §5.2 正文）。平均 LPIPS 0.123，对 Mip-Splatting 的 0.134。</li>
+<li><strong>2 倍超分辨率设置（Table 3，Mip-NeRF 360）</strong>：平均 PSNR 26.90，依次高于 3DGS-SS (26.68)、Mip-Splatting (26.46)、3DGS (25.95)，说明积分响应在放大渲染时同样保细节，而预滤波路线在该设置下垫底于超采样，印证了过平滑的代价。</li>
+</ul>
+<h3>逆渲染支线：GS-IR（提纲第 2 节，压缩呈现）</h3>
+<p>GS-IR 解决的是另一个问题：给定未知光照下拍摄的多视图图像，把场景分解为几何（法线）、材质（反照率/金属度/粗糙度，Cook-Torrance BRDF 模型）与环境光照，进而支持重光照与材质编辑；论文自述这是把 3DGS 引入逆渲染的第一件工作（§1）。把 3DGS 搬进逆渲染有两个天然障碍，各对应一个设计：</p>
+<ul>
+<li><strong>法线不可信</strong>：3DGS 的自适应密度控制使几何松散、原生不出合理法线。GS-IR 用深度推导（depth-derivation）正则去优化每个高斯所存的法线，其中深度由线性插值策略生成；消融（Table 3）显示该策略的法线平均角度误差（MAE）为 4.948，远优于体积累积深度的 16.347，且避免了体积累积的漂浮问题与峰值选择的圆盘状走样（disc aliasing）。</li>
+<li><strong>遮挡算不了</strong>：前向 splatting 不能像光线追踪那样追踪遮挡。GS-IR 借鉴实时渲染里的 Indirect Lighting Cache，把遮挡烘焙进一个遮挡体积（occlusion volume）做缓存，用它建模间接光照；消融（Table 4）显示去掉遮挡或去掉间接光都会拉低新视角合成 PSNR（完整模型 35.333，去遮挡 34.997，去间接光 35.186，TensoIR-Synthetic）。</li>
+</ul>
+<p>效果定位（论文 §5.1 与 Table 2）：在 TensoIR-Synthetic 上，GS-IR 的新视角合成与反照率质量优于基线方法，重光照仅次于 TensoIR，法线重建略逊于 TensoIR，但平均训练时间相对基线方法约有 5 倍加速；在真实场景 Mip-NeRF 360 上，新视角 PSNR 为 25.381，低于专职新视角合成的 3DGS (27.21) ——这部分差距买来的是材质/光照分解能力；其训练约 45 分钟，对比 Mip-NeRF 360 的约 48 小时（Table 2）。论文同时自述局限：球谐只能表达低频，遮挡体积目前只建模间接光的漫反射项，镜面间接项未解，后续方向是屏幕空间全局光照（SSGI）（§6）。</p>
+<h3>结论/观点</h3>
+<ul>
+<li>对反走样：像素不是点而是一块面积，强度响应应该是窗口内的信号积分；高斯是连续函数，这个积分可以被解析近似到可用的精度——这是 Analytic-Splatting 相对超采样（贵）与预滤波（糊）的核心主张（论文 §1）。</li>
+<li>对逆渲染：瓶颈不在「要不要光线追踪」，而在表示与遮挡建模；前向 splatting + 预烘焙缓存能把 NeRF 式逆渲染的速度拉进实用区间（GS-IR §1、§5.1）。</li>
+<li>提纲第 1 节（方法概述串讲）与第 4 节（落地难点与未来方向）属于讲者的现场内容，没有书面出处，本纪要只记其存在、不复述具体观点（见疑问节）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>条件 logistic 对高斯 CDF 的近似误差</td>
+<td>蒙特卡洛/卷积等其他近似方案</td>
+<td>误差以 $10^{-4}$ 量级呈现且最小， $\sigma$ 越小优势越大</td>
+<td>论文 §5.1、Fig. 4</td>
+</tr>
+<tr>
+<td>多尺度 Blender 平均 PSNR</td>
+<td>3DGS 29.77 / Mip-Splatting 34.56</td>
+<td>Analytic-Splatting 35.03</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>同上 1/8 分辨率 PSNR</td>
+<td>3DGS 27.98</td>
+<td>Analytic-Splatting 36.00</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>多尺度 Blender 平均 LPIPS</td>
+<td>3DGS 0.040 / Mip-Splatting 0.019</td>
+<td>Analytic-Splatting 0.018</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>多尺度 Mip-NeRF 360 平均 PSNR</td>
+<td>3DGS 27.63 / Mip-Splatting 29.12</td>
+<td>Analytic-Splatting 29.51（实时方法中最好；Zip-NeRF 30.58 非实时）</td>
+<td>论文 Table 2、§5.2</td>
+</tr>
+<tr>
+<td>2 倍超分 Mip-NeRF 360 平均 PSNR</td>
+<td>3DGS 25.95 / Mip-Splatting 26.46 / 3DGS-SS 26.68</td>
+<td>Analytic-Splatting 26.90</td>
+<td>论文 Table 3</td>
+</tr>
+<tr>
+<td>GS-IR 法线平均角度误差（MAE）</td>
+<td>体积累积深度 16.347</td>
+<td>线性插值深度推导 4.948</td>
+<td>GS-IR Table 3</td>
+</tr>
+<tr>
+<td>GS-IR 新视角 PSNR（TensoIR-Synthetic）</td>
+<td>去遮挡 34.997 / 去间接光 35.186</td>
+<td>完整模型 35.333</td>
+<td>GS-IR Table 4</td>
+</tr>
+<tr>
+<td>GS-IR 新视角 PSNR（Mip-NeRF 360）</td>
+<td>3DGS 27.21（无分解能力）</td>
+<td>GS-IR 25.381，训练约 45 分钟（Mip-NeRF 360 约 48 小时）</td>
+<td>GS-IR Table 2</td>
+</tr>
+<tr>
+<td>GS-IR 训练速度</td>
+<td>NeRF 式逆渲染基线</td>
+<td>平均训练时间约 5 倍加速</td>
+<td>GS-IR §5.1</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>凡是「点采样代替面积积分」的地方都会在变倍率时露馅</strong>：多分辨率评测、不同设备像素比的预览、缩略图金字塔、跨分辨率推理 serving。用 3DGS（或任何 splatting/点式表示）做重建与数据生成时，评测协议应单独设多尺度/多距离档位，单分辨率 PSNR 会系统性掩盖走样问题；Analytic-Splatting 的 MTMT 协议（同时在全分辨率到 1/8 分辨率上训练与测试）是现成模板。</li>
+<li><strong>「用闭式近似换数值采样」是一个可复用的数值技巧</strong>：条件 logistic 近似 erf/CDF 这一套（解析、可导、误差 $10^{-4}$ 量级）不只用于高斯泼溅——任何软光栅化、概率渲染或需要对窗口做平滑积分的可微管线，都可以用类似的闭式 CDF 近似替代高倍率超采样，把 $O(N)$ 次采样换成 $O(1)$ 次函数求值。</li>
+<li><strong>「贵在线计算就烘焙成缓存」与「能解析就别采样」是同一课的两种形态</strong>（Infra 视角）：GS-IR 把前向渲染算不了的遮挡预烘焙成体积缓存，Analytic-Splatting 把超采样换成解析积分；两者都是在为实时性让路时，先分清哪部分计算可以预计算、哪部分可以闭式化，再决定剩下的采样预算花在哪。放到 ML infra 里，这与「把逐样本的昂贵计算摊销为离线特征/缓存、用闭式近似替代蒙特卡洛估计」是同构的取舍。</li>
+<li><strong>超采样基线要算全账</strong>：论文中 3DGS-SS（2 倍分辨率渲染 + 平均池化）的质量仍不及解析积分，但显存与算力开销随分辨率平方增长；凡是系统里用「提高采样率」兜底画质的地方，都值得先问一句有没有解析或预滤波的替代式。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>现场内容不可还原：提纲第 1 节的方法史串讲与第 4 节「落地难点及未来方向探讨」是讲者的口头内容，尤其第 4 节（显存、速度、真实数据的坑）对做工程的人可能最有价值，但无书面材料，只能等字幕/录像可得时补录，现阶段不臆测。</li>
+<li>Analytic-Splatting 把积分域旋转到特征向量坐标系引入额外近似，误差随旋转角度（ $0^{\circ}$ 到 $45^{\circ}$ ）略增（论文 §5.1）；对强各向异性的细长高斯，这项误差在什么条件下会反噬渲染质量，论文给了误差曲线但没有逐角度的渲染质量消融。</li>
+<li>Analytic-Splatting 在已核对的表格里没有给出渲染帧率与显存的定量对比（只说明实时性继承自 3DGS 这一路方法、Zip-NeRF 非实时）；相对原版 3DGS 的实际速度折损，落地前需自行实测。</li>
+<li>GS-IR 的主对比表（Table 1，TensoIR-Synthetic 上与 TensoIR 等方法的逐项数值）本纪要只转述了论文 §5.1 的定性结论与 5 倍速度口径，逐方法数字未转写；若后续要做逆渲染方案横向选型，需回读 Table 1 原表。</li>
+<li>本纪要只覆盖 2024 年 5 月 talk 时点的工作状态；3DGS 反走样与逆渲染在 2024 年之后的后续演进不在本期范围。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"3DGS treats each pixel as an isolated, single point rather than as an area, causing insensitivity to changes in the footprints of pixels." —— Analytic-Splatting 论文 Abstract，一句话点清走样的病根</p>
+<p>"Inspired by the 'Indirect Lighting Cache' used in real-time rendering, we attempt to bake the occlusion into volumes for caching." —— GS-IR 论文 §1，用实时渲染的工程传统解决前向 splatting 算不了遮挡的问题</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

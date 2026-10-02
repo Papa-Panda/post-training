@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP02 — ChatDev：大语言模型驱动的多智能体协作与演化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP02 — ChatDev：大语言模型驱动的多智能体协作与演化</h1>
+    <p class="sub">把一家虚拟软件公司装进 LLM 里：按瀑布模型切「交流链」，每节链上由 instructor/assistant 两角色对话完成子目标，靠角色化 prompt、记忆流、自反思解… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP02-chatdev.html</p>
+<p>「我们其实是智能体的 CEO，或者说'老板'。」——讲者钱程谈多智能体组织结构时的定位</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP02</dd><dt>标题</dt><dd>ChatDev：大语言模型驱动的多智能体协作与演化</dd><dt>BV</dt><dd>BV15oe2z8EiH</dd><dt>时长</dt><dd>00:49:23（共 2963 秒）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>钱程（清华大学自然语言处理实验室 THUNLP 博士后，字幕中自述）</dd><dt>相关论文</dt><dd>ChatDev 与 Co-Learning（经验式共学习）两项工作（讲者末段给出论文与开源项目汇总页，链接待从仓库页补录）</dd><dt>相关代码</dt><dd>ChatDev 已开源，开源项目统一集成在一个仓库，另有 Web 端体验；基座默认 ChatGPT，经 API 调用</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV15oe2z8EiH/">https://www.bilibili.com/video/BV15oe2z8EiH/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP02.txt</code>（1194 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP02，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 ChatDev 在字幕中作「cher dive / TRADAVE / chi dave」，均以论文与公开资料为准）。论文仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>把一家虚拟软件公司装进 LLM 里：按瀑布模型切「交流链」，每节链上由 instructor/assistant 两角色对话完成子目标，靠角色化 prompt、记忆流、自反思解决跑题与幻觉；再往上加一层 Co-Learning（共同彩排—捷径经验—共同推理）让智能体跨任务积累经验、走捷径。讲者自己的结论很克制：ChatDev 当时把代码写对的概率约 50%，幻觉仍是这个方向最大的问题。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 背景/问题：为什么要多智能体</h3>
+<p>讲者的出发点是知识分布：不同 LLM 训练出的知识不一样，群体协作可以把不同模型的知识做汇总与优势互补，而语言（自然语言与编程语言）是承载各类知识、搭建协作桥梁的天然媒介。复杂任务（如「开发一个五子棋游戏」）交给这样一个群体，用类似生产流水线的方式完成。</p>
+<p>讲者把多智能体构建拆成两个层次的关键问题：</p>
+<ul>
+<li><strong>智能个体</strong>：需要在基座模型之外补记忆、规划、工具、语言交互能力（复杂场景还要视觉感知）；</li>
+<li><strong>智能群体</strong>：需要共同目标、组织结构（谁是谁的上级、合作还是竞争）、以及在静态组织结构之上的动态路由——组织是静态的图，路由是在图上做序列决策。</li>
+</ul>
+<h3>2. 方法/设计：交流链 + 三个节点机制 + Co-Learning</h3>
+<p><strong>ChatDev 的组织形式是「交流链」</strong>：按瀑布模型把软件开发拆成设计、编码、测试、文档四个阶段；多智能体交互被简化为两两交互（如 CTO 先与程序员交互定方案，程序员再与设计师交互）。每节链上设两个角色：<code>instructor</code>（指导者，抛意见、布置任务，像教师）和 <code>assistant</code>（助理员，生成当前节点的解决方案，像学生），多轮对话共同定下子目标（如软件形态、用什么编程语言），方案由外层框架从对话中抽出。</p>
+<p>每节链的节点靠三个机制跑稳：</p>
+<ol>
+<li><strong>角色化</strong>：用 prompt engineering 把大模型复刻成 CEO/CTO/程序员/设计师/评审/测试员等职能角色；讲者举例：把角色定义成细致的 Python 程序员，它就更容易发现 Python 的 bug（也可以用 fine-tune 注入角色，不限于 prompt）。</li>
+<li><strong>记忆流</strong>：每轮交互把前文上下文完整喂回，智能体感知全部聊天过程再决策（CEO 问「用什么语言」、CTO 答 Java 太复杂、最终定 Python，这类共识靠上下文维持）。</li>
+<li><strong>自反思</strong>：agent 不听话时会一直礼貌问好或 say goodbye；解法是把整段对话喂给 assistant，让它自己总结「到底达成了什么结论」，用类似文本摘要的机制抽取结论，截断跑题。</li>
+</ol>
+<p><strong>幻觉缓解靠「角色翻转」</strong>：不让测试员直接命令程序员改代码，而是程序员先提问、测试员给定位与修改意见，意见再喂回程序员改代码——本质是把改 bug 变成一条 CoT：先定位、再推理、再执行。讲者特意把词从「消除」改成「缓解」：幻觉不太可能百分之百消除。</p>
+<p><strong>演化层是 Co-Learning（经验式共学习）</strong>，受人类学习（彩排—积累教训—迁移）启发，与协作层正交：</p>
+<ul>
+<li><strong>共同彩排</strong>：在历史任务上重走执行轨迹。一次任务执行被组织成「任务执行轨迹图」：instruction 存在边上，solution（代码版本）存在节点上，状态从空版本一步步演进。</li>
+<li><strong>捷径式经验</strong>：经验被显式定义为从 $V_1$ 跳到 $V_4$ ，乃至从 $V_0$ 一步到 $V_5$ 的捷径，把中间没必要的尝试替换掉。存储分工是共学习的要害：instructor 存「看到什么 solution 就该给什么指导」（key 是节点），assistant 存「拿到什么指导就生成什么 solution」（key 是边/instruction）——单方记忆不行，节点和边必须共同记住。</li>
+<li><strong>共同推理</strong>：新任务推理时，instructor 先查自己的记忆库让指导更精确，assistant 再查自己的记忆库生成更好的解，两边都被经验增强。</li>
+</ul>
+<h3>3. 实验/实战</h3>
+<ul>
+<li><strong>自主性观察</strong>：设计与编码阶段智能体全程无人类参与，自主讨论目标用户、数据管理、UI 与可配置化；评审/测试多轮迭代中，软件版本会从 error 逐渐转向 success，编译成功率逐步提高；但也有代码在已编译成功后又被改错的情况，所以做法上可在编译成功时直接停止当前轮交互。</li>
+<li><strong>规模的坦白</strong>：演示 case 是词典、名片生成器这类小软件；讲者明确说自主开发软件的类型与规模还比较小，中/大规模是未来目标，并列出四件事——写对（无 bug）、写快、写长（模块化层次分解，目前还没有对应工作）、写齐（与需求对齐），期待一到五年内做成。</li>
+<li><strong>现状数字（Q&amp;A 字幕口径）</strong>：ChatDev 写对代码的概率大概 50% 左右。</li>
+</ul>
+<h3>4. 结论/观点（事实 vs 观点分开标注）</h3>
+<ul>
+<li>讲者的核心判断（观点）：LLM agent 方向起来还不到一年，多智能体系统更只有约半年，成熟度很低、研究空白很大；未来最需要解决的问题是幻觉——生成式模型逐 token 采样会采到低频 token，这是幻觉的本质来源。</li>
+<li>工程事实（Q&amp;A 确认）：review 是静态 debug（靠模型看代码找错，如没 import 的模块），test 是动态 debug（借编译器）；框架支持把整条链配置化改造成别的领域（如新闻编辑室：换角色与子步骤即可）；基座经 API 调用，本地跑 Python 即可，换本地开源模型官方未适配（社区用 LiteLLM 接入）；Linux/Mac/Windows 均可直接跑，担心生成代码安全性可开 Docker 模式；讲者称目前没发现基座模型故意写恶意代码。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ChatDev 代码写对概率</td>
+<td>—</td>
+<td>约 50%（字幕口径，Q&amp;A）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>交流链阶段数</td>
+<td>—</td>
+<td>设计、编码、测试、文档 4 个阶段</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>演示软件规模</td>
+<td>—</td>
+<td>词典、名片生成器等小型软件</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>组织结构静态、路由动态</strong>这对概念可以直接搬到多 agent 编排系统（包括 agent harness）：先定死组织图与职责边界，再在图上做动态调度决策，比边跑边改组织稳定得多。</li>
+<li><strong>「经验 = 从中间版本直达终版的捷径」</strong>是个很实用的经验存储形式：对 coding agent 来说，存「什么问题给什么修复」与「什么指导生成什么代码」的双边键值对，比存原始轨迹更省、迁移更稳——和经验回放里存压缩转移而非全轨迹同理。</li>
+<li><strong>自反思截断跑题</strong>：给长对话加一个周期性的「总结当前结论」步骤，是低成本防跑偏手段，对长程 rollout 的 prompt 设计也适用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Co-Learning 的捷径经验怎么判定「中间尝试确实没必要」？字幕只给了轨迹图的存储形式，没有讲捷径的筛选标准（比如按成功率还是按版本相似度）——值得回论文里看经验抽取的具体判据。</li>
+<li>讲者说组织结构是静态图，那任务规模变化时图要不要重构（7 个、70 个、700 个 agent 的管理）？这一格 talk 没展开，是规模化的核心问题。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们其实是智能体的 CEO，或者说'老板'。」——谈多智能体组织结构时讲者的定位</p>
+<p>「幻觉不太可能百分之百被消除，所以我们可能只能说通过这样的形式尽可能减少。」——讲者对幻觉缓解的克制表述</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

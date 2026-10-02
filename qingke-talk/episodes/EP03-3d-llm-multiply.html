@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP03 — 从 3D LLM 到 MultiPLY，3D 具身基础模型的构建</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP03 — 从 3D LLM 到 MultiPLY，3D 具身基础模型的构建</h1>
+    <p class="sub">讲者沿一条主线串起自己的四件工作：先为 3D 世界建一个「可增量构建、可 attend、可回传梯度」的内部表征（neural field），再让大语言模型在这个表征上做开放词表… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP03-3d-llm-multiply.html</p>
+<p>「构建一个能在 3D 环境中进行理解、探索，然后互动的大模型特别的重要。」——讲者开场立论（字幕 01:06 起）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>3</dd><dt>标题</dt><dd>从 3D LLM 到 MultiPLY，3D 具身基础模型的构建</dd><dt>BV</dt><dd>BV18se2zHEzc</dd><dt>时长</dt><dd>00:54:42（总时长 3282 秒；讲授约 35 分钟 + Q&amp;A 约 19 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>字幕中未自报姓名（以官网预告与论文作者页为准）；讲授内容为讲者本人系列工作：NeurIPS 2022 的 neural descriptor field 工作、CVPR 2023 的开放词表 3D field、3D LLM、MultiPLY、3D-VLA</dd><dt>相关论文</dt><dd>讲授中点名的自有工作包括 neural descriptor field（NeurIPS 2022）、3D LLM、MultiPLY、3D-VLA（具体 arXiv 编号以论文页为准，本纪要不凭记忆硬填）</dd><dt>相关代码</dt><dd>字幕中未给出</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV18se2zHEzc/">https://www.bilibili.com/video/BV18se2zHEzc/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP03.txt</code>（1073 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP3，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如「大圆模型」应为「大语言模型」、world model 字幕作「word model」、affordance 字幕作「AFFORDANCE」、neural descriptor field 字幕作「neural descript field」，均以论文与公开资料为准）。凡数字仅采用字幕明确口播者；讲者口播含糊处（如世界模型消融「高几十个点」）按字幕口径标注、不做精化。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者沿一条主线串起自己的四件工作：先为 3D 世界建一个「可增量构建、可 attend、可回传梯度」的内部表征（neural field），再让大语言模型在这个表征上做开放词表推理与规划（3D LLM），进而让模型通过触觉、听觉、温度等交互通道主动向环境取信息（MultiPLY），最后用 diffusion 式世界模型先想象未来状态、再反推当前动作（3D-VLA）。核心判断是：2D 视觉语言模型缺的不是识别能力，而是没有 grounded 在 3D 物理世界上的表征，物理常识、功能可供性（affordance）与 3D 空间关系都无法从 2D 图片里长出来。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>为什么必须有 3D 内部表征</h3>
+<p>讲者先复盘人类的做法：探索环境、收集观察、在脑中压缩出一个 internal representation（心理学家所说的 mental model），之后所有推理、规划、动力学预测都在这个内部模型里进行。由此他给 3D 表征定了四条硬要求：</p>
+<ol>
+<li><strong>增量构建</strong>：像人一样走一步看一步，而不是一次性把整个场景吐出来；</li>
+<li><strong>编码整个场景</strong>，不是停留在单个物体的表示；</li>
+<li><strong>可交互</strong>：需要时能 attend 到某个具体物体甚至某个局部（如椅子腿的底部）取出特征；</li>
+<li><strong>连续可导</strong>：后续推理、规划、动力学预测的 loss 能回传来修正表征本身。</li>
+</ol>
+<p>传统表示（point cloud、voxel grid、3D mesh）四条全不满足：它们是显式的一次性整体表示、以物体级为主、取不出局部特征、下游 loss 也回传不回去。</p>
+<h3>第一件工作：用 neural field 做内部表征</h3>
+<p>讲者在 NeurIPS 2022 的工作中用 neural descriptor field 承载这个表征：空间中每一点都有一个 descriptor vector，想了解哪里就 query 哪里的特征。他类比说，这就像用手去摸某一点、把触觉特征取回来——query 机制本身就是「人与环境交互」的数学形式。因为每点的特征可导，concept grounding、推理等下游任务的 loss 能回传 refine 这个 field，感知模块不再是与任务无关的前置黑盒。</p>
+<p>这直接对治了 neuro-symbolic 路线的老毛病：先感知分割、再符号推理的流水线里，推理出错（比如说某个物体「有三条腿」）的信息回传不到感知模块，感知也不知道当前任务需要它看什么。</p>
+<p>到 CVPR 2023，讲者把这条线推向开放世界：agent 先探索环境收集多视图观察，用 CLIP 特征经 2D-3D 对齐 loss 投影进 3D，得到一个开放词表的 3D field，再用语言做 grounding / attention 把 3D 语义分割出来。</p>
+<h3>第二件工作：3D LLM——在 3D 表征上做推理与规划</h3>
+<p>神经符号方法虽然透明、错误可定位，但 operator 要人为定义，问题一旦 parse 不进预定义算子集就答不了。3D LLM 的目标是换成更灵活、更开放的推理：把多视图特征经 CLIP embedding 投影成 3D 内部表征，再用 Perceiver 框架通过 MLP 把 3D 特征与语言模型对接。</p>
+<p>当时没有现成的 3D 语言数据，讲者用三路 prompting 造数据：</p>
+<ol>
+<li>把场景 bounding box 喂给 ChatGPT 配 few-shot 示例，让它生成问答对；</li>
+<li>caption-based：让 BLIP 就某个角度提问作答，再把各角度信息整合成整个场景的描述；</li>
+<li>把已有 captioning 数据改写成问答对。</li>
+</ol>
+<p>在这个底座上 3D LLM 能做 3D detection、3D 空间中的规划（比如「打扫房间该做什么」）、房间探索（一步步增量建表征、判断沙发不在当前房间、经走廊继续找）、具身对话、grounding 问答与 3D captioning。</p>
+<p>但 3D LLM 是黑盒，可能幻觉；神经符号透明却死板。讲者的折中是让大模型在推理过程中把中间步骤显式 decode 出来：先框出面包的 bounding box，再框出它右边的物体，最后回答那是沙拉——既保留神经符号的可解释与组合性，又保留大模型的灵活性。</p>
+<h3>第三件工作：MultiPLY——让模型主动向环境取信息</h3>
+<p>MultiPLY 针对的是多感官交互：视觉之外，人还有触觉、听觉（环境声与敲击声）、温度等通道。现有做法（如 ImageBind 式）把所有模态都映射到 image 上，讲者认为这不合理：两个长得一模一样的杯子，一个塑料一个陶瓷，只有摸一下、敲一下才能分辨材质。</p>
+<p>MultiPLY 的两个关键设计：</p>
+<ul>
+<li><strong>交互式数据引擎</strong>：仍用 ChatGPT 从房间 bounding box 生成任务并拆解成步骤，但每一步都放一个真正的具身 agent 进模拟器（Habitat 框架，自研触觉与音频模拟器）执行，由环境返回真实 feedback 作为下一步的 ground truth 输入。讲者强调这一步的验证过程正是 MultiPLY 的 prompting 优于 3D LLM 与 LLaVA 的地方——ChatGPT 生成的内容对不对，不靠人工核查，靠 agent 实跑验证。通过这种方式收集了 50 万条数据，覆盖 captioning、QA、具身对话、导航、物体操作、工具使用等任务。</li>
+<li><strong>Concept graph 表征</strong>：整个点云作为输入太占空间；人对房间先只有粗略表征，被要求细看时才走近细看，触觉、声音也都是交互时才获得。于是 MultiPLY 把环境组织成动态图：每个物体是一个 node，带各类属性（讲者举例含声音等信息），模型与 node 交互时才把更多信息取回来。</li>
+</ul>
+<p>运行时 MultiPLY 以 concept graph 编码的对象表示、环境声音与问题为输入，逐步输出推理步骤或动作：听到微波炉响就走过去、找到后进一步观察、伸手摸、把感官数据 append 回大模型，再结合全部历史判断「这个东西还很热，不能吃」。讲者举例：模型可以通过敲击杯子判断材质，再把符合条件的杯子取回来；也可以做导航、重排、QA 与工具使用。</p>
+<h3>第四件工作：3D-VLA——世界模型先想象，再行动</h3>
+<p>最后一部分把 dynamics 接进来。讲者心目中的世界模型有三要素：对 3D 环境的内部表征、预测并模拟未来发生什么、用预测的未来指导当下的推理与规划。3D-VLA 的结构是：取 3D 表征输入，用 diffusion model 设想一个目标状态（把设想出的未来图像 / 点云放回大模型），最后生成控制动作。训练上 diffusion model 先单独预训练学会「联想未来」，再把它的 decoder 与大模型接起来；大模型带类似 RT-2 的 action token 输出机器人动作变化。</p>
+<p>讲者给出三类验证：模拟中做 manipulation、真实世界中预测未来状态（如先模拟出「抽屉关上后应该是什么样」再执行）、以及长时程任务（先把易拉罐拿到百事可乐旁边，再把它放倒）。Q&amp;A 中他补充：3D-VLA 在真实数据上 fine-tune 以弥合 sim-to-real gap；在 rebuttal 阶段加的消融显示，加世界模型比不加在任务执行上高出「几十个点」（字幕口径，讲者未给出精确数值，本纪要不精化）。</p>
+<h3>未来：生成式的大世界 + 生成式 agent</h3>
+<p>收尾展望是：用 diffusion 生成非常大的 3D 场景乃至 virtual community，同时生成其中的人物、动画与人-环境交互，得到近乎无限的 3D 世界数据，并把多感官数据包含进去，进而研究社会智能（social intelligence）。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>3D LLM 的输入到底是什么</strong>：用的是 voxel-based neural field，实际以点云形式输入——在环境中采样约 10000 个点（字幕口径），取每个点 query 到的 NeRF feature 作为输入。</li>
+<li><strong>从 2D LMM 到 3D LMM 的瓶颈</strong>：多一个维度后信息量暴涨，位置信息尤其难学：2D 只需几百个 location token，3D 可能需要几万个，整个预测过程更难。</li>
+<li><strong>目前能生成的空间尺度</strong>：主要是室内环境，一个房间或两到三个房间拼起来；应对更复杂机理的两条路——借长上下文把复杂信息全 encode 进去，或借 MultiPLY 式「增量探索 + 按需取回」的 ReAct 式检索。</li>
+<li><strong>具身大模型的根本难点不在模型</strong>：各家对具身智能的定义、环境、机械臂形态、动作空间全不统一（他举 Google RT-2 在自家旧办公室采的数据换到新办公室就不能用为例），如何统一所有数据集是当前最难解的问题。</li>
+<li><strong>世界模型里的物理一致性怎么保证</strong>：讲者认为当前 Sora 一类视频生成模型很难做到真正物理一致；两条办法——喂足够多物理正确的数据让模型自己学，或注入物理先验约束（如不碰撞、不穿模），乃至把经典物理模型嵌入生成过程。</li>
+<li><strong>真实世界具身数据集该采什么</strong>：移动小车载机械臂进房间探索，可同时拿到导航、高层 planning 数据与低层 control 示范；他提到 Open X-Embodiment 一类工作已经在做类似的事。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MultiPLY 交互数据规模</td>
+<td>ChatGPT 生成任务 + agent 在模拟器中实跑验证</td>
+<td>50 万条</td>
+<td>字幕（MultiPLY 数据一节）</td>
+</tr>
+<tr>
+<td>3D LLM 输入采样点数</td>
+<td>在环境中采样的点云点数</td>
+<td>约 10000 个点</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>当前空间尺度</td>
+<td>单房间到多房间拼接</td>
+<td>1 个房间，或 2–3 个房间</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>世界模型消融收益</td>
+<td>不加世界模型的 action prediction</td>
+<td>高出约几十个点（讲者未给精确值）</td>
+<td>字幕（Q&amp;A，rebuttal 消融）</td>
+</tr>
+<tr>
+<td>3D 位置信息 token 量级</td>
+<td>2D 场景约几百个</td>
+<td>3D 需几万个（量级对比）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+<p>注：本场讲授以方法与定性演示为主，讲者没有口播系统性的 benchmark 对比表；上表只收字幕明确给出的数字，不从论文回填。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对后训练 / 数据工作的直接启发：MultiPLY 的数据引擎本质上是「LLM 造任务、agent 在环境里实跑、环境 feedback 当标签」的自验证数据飞轮——任务正确性不靠人工标注，靠可执行性验证。这与 coding data 里「生成题目 + 沙箱执行 + 用执行结果当监督」是同构的，且讲者明确说这正是它比纯 ChatGPT prompting 数据更可靠的原因。</li>
+<li>Infra 视角看「表征四要求」：增量构建、可局部 attend、可导回传、可扩展到全场景——这组约束放在任何要承载下游 RL / 规划的状态表示上都成立；尤其「下游 loss 能回传修正表征」一条，等价于要求感知与策略不要做成不可微的硬流水线。</li>
+<li>3D-VLA 的「先想象目标状态、再出动作」与生成式规划（先采样目标、再反推动作）在结构上互通；讲者补充的世界模型消融收益（字幕口径约几十个点）提示：给 agent 加一个廉价的未来预测头，收益可能先于换更大的策略模型出现。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲者对 sim-to-real 的处理是「在真实数据上 fine-tune 弥合一部分 gap」，但真实多模态数据（触觉、声音）的采集成本与模拟器保真度之间的账没有展开；他自己也判断未来真实世界多模态数据会更多，这个比例拐点在哪值得追踪。</li>
+<li>Concept graph 以物体为 node 的组织方式在物体数量大、关系稠密的真实场景里如何扩展，讲授中没有给出复杂度口径；与长上下文路线（把一切 encode 成超长 token）的取舍，他列为开放问题。</li>
+<li>3D LLM 用 ChatGPT 造数据的三路 prompting 里，问答对的正确性在 MultiPLY 之前没有验证环节；这批数据的错误率与对最终模型的污染程度，讲授中未量化（这正是他后来在 MultiPLY 里补上 agent 验证的动机）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「构建一个能在 3D 环境中进行理解、探索，然后互动的大模型特别的重要。」——讲者开场立论（字幕 01:06 起，按干净口径转写）</p>
+<p>「因为我不知道这个东西它生成到底是正确还是错误的，所以我就让一个真正的 embodied robot 在 simulator 中去执行这些任务，然后确保这些任务都是可执行的，然后是对的。」——Q&amp;A 论 MultiPLY 的 prompting 为何优于 3D LLM 与 LLaVA（字幕 38:53 起）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

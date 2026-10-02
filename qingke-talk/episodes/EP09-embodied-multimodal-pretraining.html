@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP09 — 具身多模态大模型的视觉表征预训练研究（MPI）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP09 — 具身多模态大模型的视觉表征预训练研究（MPI）</h1>
+    <p class="sub">这一期先把具身多模态大模型按「高层 planner」与「端到端控制」两条路线盘清，再顺到讲者自己的 MPI：通用视觉预训练（对比学习、MAE 这类）被平移进机器人领域，恰恰缺了… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP09-embodied-multimodal-pretraining.html</p>
+<p>「我们对于这样一个视觉的 encoder，它的一个表征能力的不同，是否会影响到它最终多模态的模型在操作任务上的一个表现？」——讲者全场的研究出发问题</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>9</dd><dt>标题</dt><dd>具身多模态大模型的视觉表征预训练研究</dd><dt>BV</dt><dd>BV1s8e9zwE8E</dd><dt>时长</dt><dd>01:00:01</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>曾佳（字幕自述：上海人工智能实验室青年研究员，博士毕业于上海交通大学；姓名以论文作者页为准）</dd><dt>相关论文</dt><dd>MPI，<em>Learning Manipulation by Predicting Interaction</em>（RSS 2024；字幕自述「重稿于 RSS 2024」）</dd><dt>相关代码</dt><dd>未在字幕中给出</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1s8e9zwE8E/">https://www.bilibili.com/video/BV1s8e9zwE8E/</a></dd><dt>官网期号</dt><dd>9</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP09.txt</code>（1204 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP09，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如「具身」作「巨生/聚生」、「PaLM-E」作「pm e」、「RT-2」作「阿里two」、「EmbodiedGPT」作「EMBEDEDGBT」、「DistilBERT」作「distar bird」、「referring expression grounding」作「reference expression grinding」、「UniPi」作「unit pie」，均以论文与公开资料为准）。凡讲授口径与论文版可能不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这一期先把具身多模态大模型按「高层 planner」与「端到端控制」两条路线盘清，再顺到讲者自己的 MPI：通用视觉预训练（对比学习、MAE 这类）被平移进机器人领域，恰恰缺了对操作数据特异性的利用——MPI 只做两件事，给 Ego4D 三个关键帧（初始/过渡/终止状态）让模型重建中间过渡帧（how to interact），并在重建出的帧上定位手与物体的交互位置（where to interact），下游只留 encoder，在 Franka 真机 15 个任务上相对此前最强的 MVP 取得约 64% 的成功率相对提升。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：多模态大模型看不懂细粒度视觉线索</h3>
+<p>讲者先用两个例子立问题。关笔记本电脑的简单场景里，GPT-4V 能判断「机械臂正在压、还没完全闭合」并给出下一步动作；但换到复杂厨房场景、目标物体细粒度且像素占比小时，同一个模型只回答「这些图看起来都很相似、没观察到显著动作」。结论很直接：当前多模态大模型对细粒度视觉线索的抓取能力不够，正适合用视觉表征预训练去补。</p>
+<p>在此之前，讲者把同期的具身大模型按输出形态分了工：PaLM-E、EmbodiedGPT 是高层 planner——大模型输出文本级步骤分解，再喂给 low-level policy；RT-2、Robot Flamingo 是端到端控制——RT-2 靠替换低频词表直接输出机器人控制指令。两条线都会依赖 ViT 编码视觉，而且 EmbodiedGPT、Robot Flamingo 用的就是冻结的 DINO ViT。由此推出全场的问题：视觉 encoder 的表征好坏，到底多影响最终操作表现？</p>
+<h3>相关工作画像：通用预训练平移进机器人，缺了交互与时序</h3>
+<p>讲者把「人类操作视频预训练视觉表征、再迁移到机器人操作」这条线按时间梳了一遍，并点出共同的偷懒之处：</p>
+<ul>
+<li><strong>R3M</strong>（CoRL 2022，字幕口径）：Ego4D 上做对比学习，两组 pair——视频-文本配对，以及同视频内时序更近的两帧表征应更接近。抓的是高层语义。</li>
+<li><strong>MVP</strong>：把 MAE 搬进机器人 in-domain 数据，像素级细粒度抓取更强。</li>
+<li><strong>Voltron 类/watch</strong>（RSS 2023 best paper finalist，字幕作「watch」）：language-conditioned MAE 加 language generation 混合训练，前者保低层像素、后者提语义理解，两个层面各补一块。</li>
+<li><strong>GR-1</strong>（字节）：Ego4D 视频预测预训练，讲者提醒它严格说不算 encoder 表征预训练。</li>
+</ul>
+<p>讲者的总批评是：这些方法本质上是把通用视觉的预训练配方平移过来，没有针对操作场景做特异性设计——视频里最有价值的两样东西，<strong>交互性特征和时序特征</strong>，都没有被专门挖出来。MPI 就是冲这个缺口做的。</p>
+<h3>方法：只问两个问题，「怎么交互」与「在哪交互」</h3>
+<p>对 Ego4D 每个 clip 取三个关键帧：动作发生前的 initial state、完成后的 final state、进行中的 transition state。预训练任务只有两件：</p>
+<ol>
+<li><strong>How to interact</strong>：给初始状态与终止状态，让模型把中间的过渡帧重建出来——「完成这个状态切换需要什么样的动作」，就藏在过渡帧长什么样里。</li>
+<li><strong>Where to interact</strong>：在自己预测出的过渡帧上，定位此时手与物体发生交互的位置（detection query 输出框，类似 visual grounding 过程）。</li>
+</ol>
+<p>架构上，双帧过同一个 ViT 后有 deformable-attention 的时序融合模块（字幕作「Deformer attention」），随后的 token aggregation 成全局语义 token；文本走 DistilBERT、与视觉流完全解耦，所以下游可以不输入语言。Decoder 两条头（prediction transformer 与 detection transformer）之间有双向 attention，让「在哪」与「怎么做」互相支持。训练完下游只保留 encoder 那一半，decoder 整段丢弃。讲者明确提过消融：decoder 若换成简单 MLP 代替这套结构，预训练效果大打折扣——这套 decoder 不是配菜，表征质量靠它逼出来。</p>
+<h3>实验：真机、仿真、grounding 三条线都显著优于前作</h3>
+<ul>
+<li><strong>Franka 真机</strong>：15 个任务（5 个复杂厨房场景 + 10 个基础操作）上，相比此前最强的 MVP 成功率相对提升约 64%（字幕口径）；少量 demonstration 做模仿学习即可完成取刀、揭锅盖、挪锅这类精细操作。</li>
+<li><strong>鲁棒性测试</strong>：换背景（雏菊换玫瑰）、换交互主体材质（塑料锅换木质锅），R3M 抓取出现明显偏差、MPI 仍能完成。</li>
+<li><strong>失败分析</strong>（复杂厨房 5 个任务、100 次测试）：17 次失败是定位错误，其中 10 次由遮挡造成；83 次定位成功里还有 9 次是抓取动作本身没抓准。定位仍是主要瓶颈，且大半与遮挡有关。</li>
+<li><strong>仿真与 grounding</strong>：Franka Kitchen 五个任务平均成功率显著优于 R3M、Voltron 类与 ImageNet 预训练的对照；在 referring expression grounding（给语言、标出对应动作位置）上同样显著好于之前方法。</li>
+</ul>
+<h3>下一步判断：视觉表征只是下限，长时序任务需要视觉 planner</h3>
+<p>讲者把局限说得相当直白：视觉预训练解决的是「看懂」，真正的长时序任务（如零件组装）由多道工序组成、工序间有依赖（抽屉不开够大就放不进工件），现有模型缺自我评估与自我校正，做不对前序条件的满足。他看好的方向是分层结构：video diffusion 模型当 visual planner，把子任务的中间状态以图像形式画出来，low-level policy 跟着视觉指令走——本质是把 policy 从 behavior cloning 换成 inverse dynamics（给「当前观测 + 期望下一状态」求动作），学习难度显著下降。他用「带配图说明书比纯文本说明书好学」作比，这条思路 UniPi 一脉也在用。Q&amp;A 里他顺带确认：单靠视觉表征预训练解决不了未见过的长时序交互任务，自我评价能力缺失是卡点；可解释性他倾向于靠 VLM 输出文本级规划来兜，而不是给黑盒模型本身做解释。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>预训练数据</td>
+<td>Ego4D hand-and-object 子集</td>
+<td>约 14 万量级的 clip，经清洗</td>
+<td>字幕（方法）</td>
+</tr>
+<tr>
+<td>真机任务数</td>
+<td>Franka 机械臂</td>
+<td>15 个（5 复杂厨房 + 10 基础操作）</td>
+<td>字幕（实验）</td>
+</tr>
+<tr>
+<td>成功率提升</td>
+<td>之前最强基线 MVP</td>
+<td>相对 +64%（成功率口径）</td>
+<td>字幕（实验）</td>
+</tr>
+<tr>
+<td>失败构成</td>
+<td>厨房 5 任务 100 次测试</td>
+<td>17 次定位失败（10 次遮挡）、83 次定位成功中 9 次抓取动作失误</td>
+<td>字幕（实验）</td>
+</tr>
+<tr>
+<td>三/多模态对照</td>
+<td>PaLM-E 规模</td>
+<td>约 540B LLM + 约 22B ViT（讲者转述）</td>
+<td>字幕（引入，现作 PaLM-E 的「540 比例/22 比例」转写）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>表征任务要和下游动作对齐，而不是借通用配方</strong>：MPI 的两个目标分别对应「动作长什么样」与「接触点在哪」，都是下游 policy 真正要用的信息。给视觉 encoder 设计预训练时，先问下游要消费表征的哪一部分，比直接套对比学习/MAE 的默认配方更对路。</li>
+<li><strong>decoder 丢弃前先验证它确实在出力</strong>：讲者的消融结论是把重建/grounding 换简单 MLP 后预训练效果大打折扣。预训练 head 的复杂度花在哪、丢弃后还剩多少，都值得在正式投入前单独开关一次。</li>
+<li><strong>失败分析按「定位 vs 执行」二分</strong>：17 次定位失败（10 次遮挡）对 9 次抓取失误，直接告诉你下轮该投入在遮挡鲁棒性而不是动作精度，这套归类比平均成功率更能指导排期。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>遮挡占了定位失败的大半（10/17），MPI 的双帧时序融合对持续遮挡是否有效，字幕里没有单独消融。</li>
+<li>visual planner 路线在讲授时还停在「在 Voltron 类基座上做初步试验」，没有给出 planner 误画关键帧时 policy 如何纠偏的机制，自评/自校正仍是开口问题。</li>
+<li>success rate 的 64% 相对提升只给了相对口径，没有报各方法的绝对成功率与样本量，跨论文对比时需要回原文核对。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「但是这里我们就有个思考，就是说我们感觉不管是像 R3M、MVP、Voltron 也好，他们都像是把这种可能在通用视觉里面用的比较多的这种预训练方式，给它挪到这样一个机器人的 policy learning 这个领域里面来了。」——讲者点出前作共同缺口（字幕 19:57–20:14 附近，干净口径转写）</p>
+<p>「如果现在给你一个纯文本的一个这样的说明书，其实你是不是那么能够清晰的知道到底应该怎么样去执行、怎么去操作的？但是如果这个说明书上也有一些这种配图，你要按照这个配图去一步一步的执行的话，对于你来说学习使用这样一个产品的一个难度是显著的降低的。」——讲者解释为什么要用视觉 planner 而非文本 planner（字幕 42:43–43:18 附近）。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

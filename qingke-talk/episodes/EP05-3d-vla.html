@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP5 — 3D-VLA：构建生成式三维具身世界模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP5 — 3D-VLA：构建生成式三维具身世界模型</h1>
+    <p class="sub">这期把 3D-LLM 从「能看懂三维场景」推进到「能想象动作执行后的三维世界、再据此行动」：讲者用现成模型链（深度估计 + 光流 + 分割 + GPT-4V）把无 3D 信息的… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP05-3d-vla.html</p>
+<p>「当这个模型有了想象最终状态这样的能力的时候，它其实就是一个世界模型。」——讲者对 3D-VLA 的定性判词（字幕 10:12 附近）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>5</dd><dt>标题</dt><dd>3D-VLA：构建生成式三维具身世界模型</dd><dt>BV</dt><dd>BV1Loe2z8EFW</dd><dt>时长</dt><dd>00:59:44（讲授约 38 分钟 + Q&amp;A 约 21 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>甄浩宇（上海交通大学人工智能专业大四；在 MIT-IBM Watson AI Lab 访问半年；字幕自述姓名与经历，正式头衔以论文作者页为准）</dd><dt>相关论文</dt><dd>Haoyu Zhen, Xiaowen Qiu, Peihao Chen, Jincheng Yang, Xin Yan, Yilun Du, Yining Hong, Chuang Gan, <em>3D-VLA: A 3D Vision-Language-Action Generative World Model</em>（ICML 2024），<a href="https://arxiv.org/abs/2403.09631">https://arxiv.org/abs/2403.09631</a></dd><dt>相关代码</dt><dd><a href="https://github.com/UMass-Embodied-AGI/3D-VLA">https://github.com/UMass-Embodied-AGI/3D-VLA</a> （讲者 Q&amp;A 称代码将随更大规模重训练分阶段放出：先 embodied diffusion model，再整个模型）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1Loe2z8EFW/">https://www.bilibili.com/video/BV1Loe2z8EFW/</a></dd><dt>官网预告</dt><dd>青稞Talk 官网第 5 期（链接略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP05.txt</code>（918 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP5，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名有识别误差，如 3D-LLM 在字幕中作「CDLM / three d l m」、3D-VLA 作「CDVA / CDBLA / 顺DBLA」、ZoeDepth 作「ZEDEPTH」、RAFT 作「rap」、InstructPix2Pix 作「inside a pks to pick」、ScanNet 作「SKYNET」、Objaverse 作「object verse」、FLAN-T5 作「布雷弗兰T5」、drawer 作「java / 招儿」、MIT-IBM Watson AI Lab 作「vs AI live」，均以论文与公开资料为准）。论文（arXiv:2403.09631）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期把 3D-LLM 从「能看懂三维场景」推进到「能想象动作执行后的三维世界、再据此行动」：讲者用现成模型链（深度估计 + 光流 + 分割 + GPT-4V）把无 3D 信息的 Open X-Embodiment 机器人视频提升为带点云与指令标注的具身指令微调数据，再通过一组 interactive tokens 把 3D 语言模型与 embodied diffusion 模型（图像 / 点云两路）拼成一个生成式世界模型，并用消融证明「先想象最终状态」确实能反哺语言理解与机械臂抓取——同时坦白其控制精度、物理理解与长时记忆都还远未达标。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">探索环境</div><div class="farrow">→</div><div class="fnode">构建 3D 表征</div><div class="farrow">→</div><div class="fnode">基于表征推理</div><div class="farrow">→</div><div class="fnode">规划步骤</div><div class="farrow">→</div><div class="fnode">想象执行后的目标状态</div><div class="farrow">→</div><div class="fnode">真正执行</div></div>
+<h3>引入：为什么需要一个「能想象」的三维基础模型</h3>
+<p>讲者先给人类与物理世界交互的分解：探索环境 → 构建 3D 表征 → 基于表征推理 → 规划步骤 → 想象执行后的目标状态 → 真正执行 → 执行改变场景、回到重新探索。这条循环里，前作 3D-LLM 只覆盖了「探索、表征、推理、规划」，缺的正是<strong>想象（goal imagination）与动作（action）</strong>两环；补上想象，模型才配称世界模型。讲者给世界模型下了一个三要素定义：对三维世界构建表征的能力、预测未来事件的模拟能力、推理与规划能力——3D-VLA 的全部功夫都压在中间这一项上。</p>
+<h3>前作 3D-LLM 的管线与四条局限</h3>
+<p>3D-LLM 的做法是：对三维场景渲染多视角图像，用 CLIP 提取特征，再把 CLIP 特征投影回 3D 空间得到 3D feature，与问题一同喂给 LLM，训练其中的 perceiver / conformer 类模块来回答「椅子在哪里」这类问题。讲者自陈其四条局限（字幕口径）：</p>
+<ol>
+<li><strong>数据集过拟合与幻觉</strong>：主要在 ScanNet 与 Objaverse 等场景 / 物体数据集上训练，对新场景会产生「桌子是棕色的」式幻觉；</li>
+<li><strong>低层任务打不过专用方法</strong>：定位、导航这类任务上传统专用方法效果更好；</li>
+<li><strong>黑盒</strong>：给 3D feature 与问题直接出答案，无法解释为什么；</li>
+<li><strong>天然缺机器人能力</strong>：训练数据里没有抓取这类任务，无法直接充当机器人的 foundation model。</li>
+</ol>
+<h3>数据：把 2D 机器人视频「提升」成 3D 指令数据</h3>
+<p>训练世界模型需要带 3D 信息的大数据集，但 2023 年 9 月发布的 Open X-Embodiment（34 个机构共建）只有视频与指令标注、没有 3D。讲者的解法是整条 off-the-shelf 模型链（字幕口径）：</p>
+<ul>
+<li><strong>ZoeDepth</strong> 逐帧估深度，再投影成点云，得到每帧的 3D 信息；</li>
+<li><strong>RAFT 光流</strong>区分静止背景与运动部分——动的部分必然是机械臂或被抓取物体，用来 refine 数据；</li>
+<li><strong>Grounded SAM</strong> 拿目标物体的 mask；</li>
+<li><strong>GPT-4V</strong> 生成多样化语言数据；再为每个任务定义模板，模板数据构成 Embodied Instruction Tuning Dataset 的主体。</li>
+</ul>
+<p>讲者强调两个数据事实：其一，单视角点云的质量已经足够看出场景深度变化与机械臂、物体的相对位置；其二，机器人数据是<strong>长尾分布</strong>——RT-1（Fractal）约 70K 条轨迹量级最大（字幕口径），不少数据集不到 1K 条，这直接构成后文的数据上限问题。</p>
+<h3>架构：interactive tokens 拼起语言模型与扩散模型</h3>
+<p>3D-VLA 的交互协议由一组新增 token 定义（字幕口径）：</p>
+<ul>
+<li><strong>scene token</strong>：把 3D feature 夹在两个 scene token 之间注入，处理 interleaved 的 3D-语言数据；</li>
+<li><strong>object token / location token</strong>：表示物体及其位置（定位靠输出 3 个 location token，即离散化坐标点，映射回真实 3D 空间）；</li>
+<li><strong>多模态（modality）token</strong>：告诉解码端当前要生成哪个模态的 goal state——图像走 InstructPix2Pix 式 image diffusion，点云走魔改的 Point-E；</li>
+<li><strong>action token</strong>：沿用 RT-1 / RT-2 的做法，把机械臂 7 自由度动作空间离散化。</li>
+</ul>
+<p>推理时的闭环是：用户输入 3D feature → 模型自行决定输出 / 想象最终状态 → 调 diffusion 模型生成 goal state → goal state 再喂回输入 → 模型据此输出 action 执行抓取。</p>
+<p>训练分三阶段（字幕口径）：<strong>阶段一</strong>单独训练 embodied diffusion 模型（以初始状态 + 指令为条件生成最终状态，图像与点云各一个）；<strong>阶段二</strong>沿用 3D-LLM 的训练法，但把场景 / 物体数据换成具身指令微调数据，训练 interactive tokens 并学会 robot control 与 manipulation 任务；<strong>阶段三</strong>用一个 projector 把 LLM 输出映射为 diffusion 模型的 condition，并用 LoRA 微调 diffusion 模型完成拼接。</p>
+<h3>实验：想象能力真的有用吗</h3>
+<p>讲授给出的定量口播不多，结论以定性对比为主（字幕口径）：</p>
+<ul>
+<li><strong>语言与定位任务</strong>：在自建数据集上与微调的 FLAN-T5 及若干 zero-shot 模型对比，3D-VLA 在 action 序列理解、任务分解（把目标拆成 4 步）、首尾帧问答、bounding box 检测与描述等任务上显著占优；</li>
+<li><strong>先预测 bbox 再生成有增益</strong>：让模型先预测场景物体的 bounding box、再输出最终状态，goal generation 质量更好；讲者同时提醒 CLIP 分数在 robotics 领域并不实用，如何设计更好的 goal generation 指标是 future work；</li>
+<li><strong>消融（核心证据）</strong>：在 what-if query 式语言任务与 RLBench manipulation 上，「先用 goal generation 想象最终状态再回答 / 行动」的结果优于不用想象；用 Open X 上预训练的 checkpoint 也优于 from scratch。失败案例也被如实归因：put knife 提升不大是因为会与场景碰撞，属于仿真环境问题而非模型问题；take umbrella 与 pick up cup 则明显受益于「想象后知道目标物在哪、是哪个」。</li>
+</ul>
+<p>讲者展示的涌现行为值得一提：对训练中没见过的 drawer，模型能在纹理与物理有扭曲的情况下定位 plate、想象出合理的抽屉结构——讲者的判断是「尽管 texture 或者物理上是错的，这样的图依然可以指导模型去预测 action」。但长时任务暴露记忆短板：把茶包放进抽屉再关上、打开后茶包消失——模型记不住被遮挡物体的存在。</p>
+<h3>讲者自陈的三条局限</h3>
+<ol>
+<li><strong>控制不精准</strong>：LLM 输出 action token 的形式把空间切成 ， $256^3$ ，个离散点，抓不了很小的木块，也做不了「用杆推动物块到目标位置」的细节任务；</li>
+<li><strong>diffusion 模型不懂物理</strong>：会把勺子「移除」而非放到毛巾上，不知铁锅是硬的、毛巾是软的，texture 也无法保持一致——讲者明言连 Sora 也有类似问题；</li>
+<li><strong>真实数据太脏</strong>：深度相机点云噪声大，真机部署的功夫不在跑通模型，而在处理 3D 数据（他们最终剔除桌面与背景点云才让模型收敛）；加上机器人数据集长尾、低清（如 BC-Z 人眼都难辨认物体），数据质量是整个社区的长路。</li>
+</ol>
+<p>后续计划（字幕口径）：在 DROID 等带多视角深度的数据上重训练 3D-VLA；跟进 Figure 01 式人形 / 移动机器人应用；给模型加 video diffusion（1.5 版）；探索多 agent 交互。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>刚体 / 柔体的影响</strong>：RLBench 多为刚体任务，软体效果未知；diffusion 模型本身不理解材质（会把锅当软体、毛巾当刚体），是世界模型要补的课。同组 Robot Dreamer（字幕称 ICML 2024）在做视频扩散处理软体 / 平面物体。</li>
+<li><strong>仿真到真机的鸿沟</strong>：仿真数据干净、容易刷高分；真机难在预测 action 与真实三维空间的对齐、noisy depth 处理与专家数据的手工采集——「在 simulator 里给一个任务瞬间收集 1 万个 sample，真机只能手动收集或写 hard code」（字幕口径）。</li>
+<li><strong>goal imagination 与思维链的关系</strong>：讲者认同它就是多模态版 chain-of-thought——先输出最终状态的 goal，再基于 goal 执行；同期 Minecraft 方向的 MineDreamer 也是同一思想。</li>
+<li><strong>打不过专用小模型怎么办</strong>：讲者坦承 grounding / navigation 等低层能力短期内超不过专精模型（专用 transformer 多视角方法简单任务可刷到 90 以上，语言模型大概只有 70–80 的级别，字幕口径）；工作的意义是把这些能力装进一个 general purpose model，而不是单项夺冠。</li>
+<li><strong>为什么不用 Gaussian Splatting 提特征</strong>：速度账算不过来——单场景特征提取要 20–30 分钟量级，foundation model 需要百万级数据支撑，乘起来不可行；单场景理解 / 抓取场景下它效果很好、值得尝试。</li>
+<li><strong>2D 到 3D 能否与空间理解解耦</strong>：完全可以，PointLLM 式从点云出发训练点云语言模型就是另一条路；3D-LLM 借 2D 纯粹是因为 VLM 先验强、能显著提分。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open X-Embodiment 最大单一数据集（RT-1 / Fractal）</td>
+<td>其他数据集多不足 1K 条</td>
+<td>约 70K 条轨迹量级</td>
+<td>字幕（数据部分）</td>
+</tr>
+<tr>
+<td>动作空间离散化粒度</td>
+<td>连续 7 自由度动作</td>
+<td>， $256^3$ ，个离散点</td>
+<td>字幕（局限部分）</td>
+</tr>
+<tr>
+<td>任务分解示例步数</td>
+<td>单步目标描述</td>
+<td>拆成 4 个步骤</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>低层 grounding / navigation 能力</td>
+<td>专用小模型简单任务 90 分以上</td>
+<td>语言模型约 70–80 分量级</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>仿真单任务专家数据采集</td>
+<td>真机需手动 / hard code 采集</td>
+<td>仿真可瞬间收集约 1 万个 sample</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>Gaussian Splatting 单场景特征提取耗时</td>
+<td>3D-VLA 特征管线约 5 秒量级</td>
+<td>约 20–30 分钟量级</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>3D-VLA 定量实验表</td>
+<td>讲授未逐项口播完整数值表</td>
+<td>仅定性结论：优于微调 FLAN-T5 与 zero-shot 模型</td>
+<td>字幕（实验部分）</td>
+</tr>
+</tbody>
+</table>
+<p>注：3D-VLA 论文（arXiv:2403.09631）有完整的 RLBench 等定量表格，讲授现场未逐项口播，本表只收字幕明确给出的数字。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>「先想象终局再行动」是一条可迁移的推理时脚手架</strong>：在 agent 任务里先让模型显式生成目标状态（goal state / 终局描述）再规划动作，等价于多模态 chain-of-thought；对纯文本 agent 同理——先写「完成态应该长什么样」再执行，能给后续验证留一个可比对的锚点。讲者的消融（想象反哺语言理解与抓取）是这条经验的直接证据。</li>
+<li><strong>数据管线的组织方式</strong>：当目标模态数据不存在时，用一串 off-the-shelf 模型（深度、光流、分割、VLM 描述）把已有数据「提升」到目标模态，再用任务模板兜住主体分布——这与用强模型给弱模态数据打标、合成训练集的工程套路同构，关键在每一步都留可视化校验（讲者反复展示点云可视化来证明 lift 质量）。</li>
+<li><strong>评测指标要怀疑现成货</strong>：讲者明言 CLIP 分数在 robotics 里不实用；迁移到任何新领域，先验证指标与真实目标的相关性，再拿它做优化信号，否则会优化出指标好看、任务没做成的模型。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲授未口播 RLBench 等 benchmark 的具体成功率数字，3D-VLA 相对专用 VLA 方法（如 RT-2、OpenVLA 一代）的定量差距需回论文表格核对；讲者在 Q&amp;A 已承认低层能力打不过专精模型，这条边界在新一代 VLA 上是否还成立值得追踪。</li>
+<li>「被遮挡物体消失」的长时记忆失败，讲者归为 future work；后续的视频扩散（1.5 版）与多 agent 交互能否补上物体恒存性，没有给出机制层面的方案。</li>
+<li>真机部署靠「剔除桌面与背景点云」才收敛，这说明 3D feature 对噪声的鲁棒性是落地瓶颈；DROID 重训练后这条是否改善，值得等其开源新版验证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「当这个模型有了想象最终状态这样的能力的时候，它其实就是一个世界模型。」——讲者界定 3D-VLA 与 3D-LLM 分界的判词（字幕 10:12 附近）</p>
+<p>「其实在 real world 中，功夫并不是把（模型）下载了部署、或者把这个跑通，而是怎么去处理我们的 3D data。」——讲者谈真机落地的真实成本（字幕 34:55 附近，按干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

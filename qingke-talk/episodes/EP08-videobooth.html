@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP08 — VideoBooth：文本和图像提示共同驱动的视频生成</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP08 — VideoBooth：文本和图像提示共同驱动的视频生成</h1>
+    <p class="sub">VideoBooth 解决纯文本控制的视频生成无法定制主体外观的问题：用户给一段文字加一张主体参考图，模型生成既符合文字动作、又保持这只具体主体 appearance 的视频；… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP08-videobooth.html</p>
+<p>「至于说他只比如他的鼻子这里、眼睛这里它的花纹具体是长什么样的，很多网络不知道。」——讲者谈 coarse 层 CLIP 特征为什么不够、必须再补 fine 层细粒度注入</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>8</dd><dt>标题</dt><dd>VideoBooth：文本和图像提示共同驱动的视频生成</dd><dt>BV</dt><dd>BV1une9zME2m</dd><dt>时长</dt><dd>00:38:06</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>南洋理工大学博士生（字幕未口播姓名；自述导师为刘子伟老师与李建勤老师；正式姓名以论文作者页为准）</dd><dt>相关论文</dt><dd>VideoBooth（CVPR 2024；字幕自述发表于 CVPR 2024，与上海 AI Lab、北京大学合作）</dd><dt>相关代码</dt><dd>推理代码已开源；数据与训练代码讲者称将陆续同步到 GitHub（字幕口径）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1une9zME2m/">https://www.bilibili.com/video/BV1une9zME2m/</a></dd><dt>官网期号</dt><dd>8</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP08.txt</code>（820 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP08，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如「video booth」在字幕中统一作「video boost/boos」、「coarse-to-fine」作「cost to find」、「cross-frame attention」作「cross fattention」、「UNet」作「unit」、「ELITE」作「依赖」、「WebVid」疑作「YYD」，均以论文与公开资料为准）。凡讲授口径与论文版可能不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>VideoBooth 解决纯文本控制的视频生成无法定制主体外观的问题：用户给一段文字加一张主体参考图，模型生成既符合文字动作、又保持这只具体主体 appearance 的视频；方法是 coarse-to-fine 双层注入（CLIP 图像特征经 MLP 对齐文本空间给高层语义，UNet 特征经 cross-frame attention 给低层细节），并且训练也必须两阶段，否则强细粒度特征会让语义层学不到有意义的表征、采样时 appearance 直接崩掉。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：为什么只用文字定制不了主体</h3>
+<p>文字驱动的视频生成效果已经很好，但定制化场景里不够用。讲者用「一只具体的狗在笼子里吃零食」举例：把文字改成对这只狗外貌的长篇枚举（耳朵、花纹等属性逐条写）再生成，结果只是大致相似、并不是那只狗。原因是两条：一张图片的属性根本无法用文字枚举完整；现有模型对长文本里各项 attribute 的捕捉也不精准。更直接的办法就是把图片本身送进去——文字管动作、图片管 appearance，两路一起驱动生成。</p>
+<p>任务定义就是：给一段文字和一张主体 reference 图，输出同时符合文字内容与图片 appearance 的视频。讲者演示了同一只狗喝水/游泳/在公园/望车窗，以及同一动作换不同熊猫主体，两种维度都能保持主体特征。</p>
+<h3>方法：coarse-to-fine 双层注入</h3>
+<p>基座是经典 UNet 式视频 diffusion，每个 block 有三类 attention：cross-frame attention（用第 0 帧与前一帧做 key/value 保帧间连续性）、cross attention（接收文本的 CLIP embedding）、temporal attention（捕捉合理动作）。VideoBooth 在此之上加两条注入支路：</p>
+<ol>
+<li><strong>Coarse 层（语义）</strong>：冻结的 CLIP image encoder 提取图像特征，经 MLP 映射到文本空间，与文本 embedding 拼接后一起送入 cross attention。CLIP 靠图文联合训练天然有图文理解能力，这支负责告诉网络「这只狗大概长什么样」的高层概念。</li>
+<li><strong>Fine 层（细节）</strong>：CLIP 把图片压成一维向量会丢 spatial 信息，花纹、鼻子眼睛长什么样都不知道。所以再用 image prompt 过 UNet 提特征（这类特征本来就保留 spatial 信息），作为额外的 key/value 注入 cross-frame attention，让生成过程回看参考图的低层 appearance 来 refine 细节。</li>
+</ol>
+<p>可训练的只有两处：CLIP 特征到文本空间的 MLP，以及两个 attention 里的 KV projection。</p>
+<p>cross-frame attention 还做了额外设计：先用 image prompt 作为额外 key/value 更新第 0 帧，再用已更新过的第 0 帧特征去更新后续帧，把参考图信息先固化到第一帧、再传播出去。</p>
+<h3>训练也必须 coarse-to-fine：顺序错了语义层就废了</h3>
+<p>这是讲者全场最强调的工程发现。image prompt 的 UNet feature 是非常强的 visual cue：如果两支一开始就合在一起训，网络直接抄 fine 层答案，coarse 层学到「完全没有意义的表征」，训练 loss 还是能降得很小——因为 diffusion 训练是加噪还原，加噪并没有完全破坏原图信息，fine 支等于自带答案。但真正 sampling 是从纯高斯噪声开始的，没有语义层锚点，网络直接生成一个不相关的物体，fine 层再 refine 也无从下手。</p>
+<p>所以训练分两阶段：先只训 MLP 与 KV projection 让语义层立住，再加入 attention 注入模块学细节。消融三连证实了这条链：</p>
+<ul>
+<li>只有 coarse：种类、花纹大概能给，土司帽（字幕词）这类具体细节搬不过来。</li>
+<li>只有 fine：直接把第一帧抄过来，后续帧完全靠第一帧 propagate，细节照样崩。</li>
+<li>非 coarse-to-fine 训练：表现与「只有 fine」几乎相同——后几帧 appearance 直接崩掉，反证语义层在混训里确实学空了。</li>
+</ul>
+<p>这个结论值得单独记：<strong>训练 loss 低不等于采样能用，强支路会把弱支路的梯度信号吃光</strong>，这是多条件注入时很通用的一种失败模式。</p>
+<h3>定性对比与局限</h3>
+<p>当时视频领域还没有现成的 customized 生成基线，讲者把三个图像方法（Textual Inversion、DreamBooth、ELITE）搬上视频基座改造后作对比。反直觉的现象是：fine-tuning 类的 Textual Inversion / DreamBooth 反而更差。讲者的解释是：图像设置里能找同一物体在不同场景的大量照片，网络能抽象出表征；视频设置里很难凑齐同一物体不同动作的视频，只能把长视频切段训练，fine-tune 就 overfit 到见过的场景，生成时偏差大。</p>
+<p>VideoBooth 自身的局限：生成动作的 pose 有时会像 image prompt 的 pose（数据集把每段视频第一帧抠前景当 reference，训练对本身就很像），训练时用随机 masking 做 augmentation 缓解；想让 pose 真正自由还需要 image-to-3D 做 novel view 扩增（讲者列为思路）。另外训练数据（字幕作「YYD」，应为 WebVid 类）motion 偏小，动作幅度大的长视频受基座限制。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>风格与背景</strong>：风格迁移暂不做，只保主体内容一致；给图的背景会被抠掉，只保前景，背景多样性靠文本控制。</li>
+<li><strong>图文不一致怎么办</strong>：管线里「a dog」这个词会被 image prompt 的 embedding 直接替换掉，所以不存在图文打架；动态能力减弱确实存在，一半是数据集 motion 小、一半是 UNet 基座长视频算力限制。</li>
+<li><strong>计算成本</strong>：相对基模型几乎不加额外成本；长视频/高分辨率的上限还是基座本身，讲者认为方法可迁移到 DiT 架构。</li>
+<li><strong>应用</strong>：现有小规模数据上泛化偏弱（人体结构保持不好），大规模高质量数据上才有内容创作潜力；真要定制动作仍需关键点/骨骼这类显式控制补进来。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>训练阶段数</td>
+<td>一次混训（语义层学空，采样崩）</td>
+<td>2（先语义层，后细粒度注入）</td>
+<td>字幕（方法/消融）</td>
+</tr>
+<tr>
+<td>可训练参数</td>
+<td>全网可训</td>
+<td>仅 MLP + 两个 attention 的 KV projection，CLIP image encoder 冻结</td>
+<td>字幕（方法）</td>
+</tr>
+<tr>
+<td>额外计算成本</td>
+<td>基座 UNet 模型</td>
+<td>讲者称相较基模型「没有引入很多额外计算成本」</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>数据开源时间</td>
+<td>推理代码已开源</td>
+<td>数据约两周、训练代码约下月同步 GitHub</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+<p>注：本期以定性演示与消融为主，字幕未给任何 benchmark 数值，本表不编造量化指标。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>条件注入的 curriculum 原则</strong>：多路条件强度差异大时，先让弱支路（语义锚点）单独站住再放进强支路，否则强支路会靠「抄答案」把训练信号吃掉。这是「训练 loss 正常、采样失败」的一个很具体的成因模板，比笼统说分布偏移有用。</li>
+<li><strong>reference 传播的最简结构</strong>：先更新第 0 帧再向后 propagate，是把静态条件缝进时序模型的最小改动；任何图生视频/条件视频生成任务都可先试这种「锚点帧先固化」的做法再谈复杂机制。</li>
+<li><strong>消融设计顺序</strong>：单 coarse、单 fine、非分阶段训练，三格消融直接把「配合方式」和「模块本身」分开验证，比堆模块加表格更省轮次。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>pose 锁定问题最终解得怎么样：novel view 扩增（image-to-3D）是讲者给的思路，但字幕未提后续验证结果。</li>
+<li>coarse 层把主体词 embedding 直接替换掉，等于默认图文主体永远一致；真实用户给错主体词时（猫图配「狗」文本）行为边界是什么，字幕只答了「暂不存在此问题」，未做过压力测试。</li>
+<li>训练数据 motion 小是事实，但 mask augmentation 对「生成时只见 partial view」有帮助、对 pose 解锁是否同等有效，没有数字支撑。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「如果我们直接把这两个部分合在一起训练，那么他得到的结果就是说我这边的这个 coarse level 的这个 image embedding，就会学到一些完全没有意义的表征。」——讲者解释为什么训练必须分阶段（字幕 15:34–15:45 附近，干净口径转写）</p>
+<p>「那我们在做真正的做 sample 的时候，我们其实是完全从一个高斯噪声来开始做 sampling 的。」——紧接其后点出训练与采样的不对称：训练里抄得到的答案，采样时根本不在场。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

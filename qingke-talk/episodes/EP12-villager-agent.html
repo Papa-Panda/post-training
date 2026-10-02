@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP12 — VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP12 — VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架</h1>
+    <p class="sub">固定流水线（MetaGPT 式 SOP）和圆桌长对话（AgentVerse 式多轮讨论）这两类多智能体框架，前者让没活的 agent 闲置、且串并行无法混排，后者在长对话里会不… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP12-villager-agent.html</p>
+<p>「我们统计出来，大概有 58% 的超过三轮的长上下文对话，会导致虚假信息的填充。」——讲者在 Q&amp;A 中给出的幻觉统计（字幕 57:07–57:15）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>12</dd><dt>标题</dt><dd>VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架</dd><dt>BV</dt><dd>BV1LYaYzQEbs</dd><dt>时长</dt><dd>01:03:09（总时长 3789 秒；讲授约 54 分钟 + Q&amp;A 约 9 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>董玉博（浙江大学；字幕自述实验室作「CCIRIER」未确证，论文单位为 ReLER, CCAI, Zhejiang University）</dd><dt>相关论文</dt><dd>Yubo Dong, Xukun Zhu, Zhengzhe Pan, Linchao Zhu, Yi Yang, <em>VillagerAgent: A Graph-Based Multi-Agent Framework for Coordinating Complex Task Dependencies in Minecraft</em>，ACL 2024 Findings，<a href="https://arxiv.org/abs/2406.05720">https://arxiv.org/abs/2406.05720</a></dd><dt>相关代码</dt><dd>已开源（论文注明 GitHub 开源；讲者在幻灯片给出链接）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1LYaYzQEbs/">https://www.bilibili.com/video/BV1LYaYzQEbs/</a></dd><dt>官网期号</dt><dd>青稞Talk EP12（12 期）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP12.txt</code>（1427 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP12，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如「Village bench」即论文的 VillagerBench、「a h verse/AJ的verse」为 AgentVerse、「JPT4」为 GPT-4、「jimmie pro」为 Gemini Pro、「JLM4」为 GLM-4、「五压制」为 Voyager、「cheat del」为 ChatDev、「metal GB t」为 MetaGPT、「baby a h i」为 BabyAGI，均以论文与公开资料为准）。论文（arXiv:2406.05720）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+<p>说明：本期前半程是多智能体框架综述（agent 四模块 profile/memory/planning/action，及斯坦福小镇 Generative Agents、AgentVerse、ChatDev、Voyager 等工作的串讲，约占讲授前 37 分钟），后半程才是 VillagerBench 与 VillagerAgent 本身；下文对综述部分只做压缩交代，重心放在讲者自家工作。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>固定流水线（MetaGPT 式 SOP）和圆桌长对话（AgentVerse 式多轮讨论）这两类多智能体框架，前者让没活的 agent 闲置、且串并行无法混排，后者在长对话里会不断生成虚假信息并叠成错误决策。VillagerAgent 的解法是把任务分解成有向无环图：LLM 顺序生成子任务并声明各自的直接前置依赖，控制器按「前置已完成 + 哪个 agent 当下最合适」动态派活，全局状态管理器持续汇总反思与经验。在自建的 Minecraft 基准 VillagerBench 上，它在完成度与执行效率上明显超过 AgentVerse，且只改两个 prompt 文件就迁移到 Overcooked-AI 并超过 ProAgent 等基线。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>现有框架的两个病</h3>
+<ol>
+<li><strong>固定流程</strong>：AgentVerse 是「招聘专家 → 多轮讨论 → 并行执行 → 评估反馈」的固定环，MetaGPT 是产品经理 → 架构师 → 项目经理的固定 SOP。问题是有的 agent 在某些环节根本没任务却被流程绑住闲置；且任务结构被框架写死，需要串行的因果推理与需要并行的执行无法在同一结构里混排。</li>
+<li><strong>长对话幻觉</strong>：AgentVerse 式多轮讨论第一轮没问题，轮次拉长后 agent 开始生成不存在的信息来续对话，虚假信息 → 虚假决策 → 执行失败 → 幻觉继续堆叠。讲者的定位很明确：多智能体间的长上下文对话是幻觉的显著来源（见关键数字）。</li>
+</ol>
+<h3>VillagerBench：为「复杂依赖」设计的评测</h3>
+<p>在 Minecraft 里建三个任务族，专考空间/因果/时间依赖：</p>
+<ul>
+<li><strong>建造</strong>：100 多个建筑蓝图，难度从 10 个方块到上百个方块不等；方块有方向与依赖关系，agent 要自己采集/合成材料、自己决定搭建顺序；</li>
+<li><strong>从农场到餐桌（烹饪）</strong>：100 个任务，最难的两个是合成蛋糕与兔肉堡。给的不是成品原料而是活兔子、甘蔗、牛——需要什么中间材料得自己往上游追；箱子里的东西打开前不可知，逼 agent 动态调整；</li>
+<li><strong>密室逃脱</strong>：考单步精确协调，如两个 agent 须在两秒内同时踩上两个触发板开门；设计了十几个原子合作任务，并按 agent 数量定义了 25 个合作关卡（字幕口径）。</li>
+</ul>
+<p>指标三件套：任务完成度（监测目标完成数计）、执行效率（执行时间）、负载平衡度（负载均衡优于不均衡）。</p>
+<h3>VillagerAgent：四个组件</h3>
+<ol>
+<li><strong>任务分解器</strong>：利用 LLM 自回归生成的因果性——要求它从前往后生成子任务序列，每个子任务标明自己的<strong>直接前置任务</strong>，据此机械地构出 DAG；无前置或前置已全部完成的子任务进入就绪状态；</li>
+<li><strong>Agent 控制器</strong>：按就绪状态 + 各 agent 当前能力、手头物品与状态，动态把子任务分配给最合适的 agent（谁空闲、谁手里有牛奶/铁桶就派谁）；</li>
+<li><strong>状态管理器</strong>：全局汇总每个 agent 的状态、观测、行为与任务进度，用 reflection 把信息提炼到更高层次；成功经验存入经验管理器，下次遇到类似任务时作为 few-shot 参考喂回任务分解器；</li>
+<li><strong>基础 agent</strong>：每个设计了 40 多种 API（递送/丢弃物品、开箱、合成、熔炉烹饪、拉杆交互等）。</li>
+</ol>
+<p>动态更新机制是关键细节：某个子任务执行失败，就删减相关子节点、把信息回传控制器与分解器，只对下游<strong>重新生成</strong>子图——图是随执行不断往下更新的，而非开局一次规划到底。</p>
+<h3>结果</h3>
+<ul>
+<li>三个任务各测 100 个，基座模型对比：GPT-4 大部分指标最好，GLM-4 次之，Gemini Pro 明显较弱（字幕口径）；</li>
+<li>与 AgentVerse 详细对比：VillagerAgent 在完成度与执行效率上明显提升，讲者归因于避开了长对话幻觉；按「完成度/效率 ÷ token 用量」的性价比口径也更省（具体数值在论文中，talk 未展开）；</li>
+<li>迁移性：只改两个 prompt 文件把框架放进 Overcooked-AI（双人协作），VillagerAgent + GPT-4 超过传统算法、强化学习方法与 ProAgent，尤其中间那个较复杂的任务优势明显。</li>
+</ul>
+<h3>边界与 Q&amp;A</h3>
+<ul>
+<li><strong>规模拐点</strong>：agent 数从 3 扩到 8 性能仍升，<strong>超过 8 个后完成度与效率显著下降</strong>，瓶颈是上下文长度下多 agent 的控制问题，未解决；</li>
+<li><strong>幻觉机制</strong>（Q&amp;A 重点）：统计上超过三轮的长上下文对话约 58% 会出现虚假信息填充；对策是双重的——不用长对话、也不一次性生成很长的任务链，而是「拆成近处的几个任务，按反馈不断更新迭代」；</li>
+<li><strong>异构模型分工</strong>：不同规模模型适合不同任务（小模型响应快，在密室逃脱这类实时任务上反而占优）；他的建议是强模型（GPT-4）做任务分解、弱模型（GPT-3.5）做执行与环境信息更新，省钱又提速；</li>
+<li><strong>落地三关</strong>（被问真实生产环境）：安全性第一（agent 可能做出预期外动作，他举的例子是任务里要捕猎兔子、也可能对人「捕猎」）、API 延迟、以及可解释性——执行失败时要知道为什么失败、该怎么调；</li>
+<li>讲者自列的未竟方向：&gt;8 agent 的控制、失败可解释性、多智能体与 RL/微调结合、蒸馏量化到嵌入式。论文 Limitations 亦自承 VillagerBench 上整体完成率仍低（论文口径）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>长对话幻觉率</td>
+<td>超过三轮的多智能体长上下文对话</td>
+<td>约 58% 出现虚假信息填充</td>
+<td>字幕（57:07–57:15）</td>
+</tr>
+<tr>
+<td>建造任务规模</td>
+<td>蓝图难度 10 到上百方块</td>
+<td>100+ 个蓝图</td>
+<td>字幕（40:05–40:10）</td>
+</tr>
+<tr>
+<td>烹饪任务规模</td>
+<td>最难为蛋糕、兔肉堡</td>
+<td>100 个任务</td>
+<td>字幕（41:33）</td>
+</tr>
+<tr>
+<td>密室逃脱设计</td>
+<td>两秒内双 agent 同步触发等</td>
+<td>十几个原子合作任务、25 个合作关卡</td>
+<td>字幕（42:06–42:16）</td>
+</tr>
+<tr>
+<td>测试规模</td>
+<td>三个任务</td>
+<td>各 100 个测试</td>
+<td>字幕（50:08–50:13）</td>
+</tr>
+<tr>
+<td>基座模型对比</td>
+<td>Gemini Pro / GLM-4 / GPT-4</td>
+<td>GPT-4 最好，Gemini Pro 明显较弱</td>
+<td>字幕（50:14–50:39）</td>
+</tr>
+<tr>
+<td>单 agent API 数</td>
+<td>递送、开箱、合成、熔炉等</td>
+<td>40+ 种</td>
+<td>字幕（44:38–45:05）</td>
+</tr>
+<tr>
+<td>agent 数拐点</td>
+<td>3 → 8 个 agent</td>
+<td>超过 8 个后完成度与效率显著下降</td>
+<td>字幕（52:02–52:13）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>编排结构选型</strong>：给多智能体/多步骤 LLM 流水线选结构时，固定 SOP 与自由长对话都有结构性缺陷；「DAG + 就绪节点动态调度」是可直接借用的中间形态——依赖关系显式化之后，串并行混排、失败局部重规划、负载均衡都自然成立。做 agent infra 的任务编排层时，这是比 roundtable chat 更可控的原语。</li>
+<li><strong>幻觉控制的工程纪律</strong>：58% 这个数字的用法不在精确，而在方向——共享长对话上下文是幻觉放大器。对应到系统设计：agent 间通信尽量走结构化短消息 + 全局状态汇总，而不是把全部历史塞进每个 agent 的上下文；规划只规划「近处几步」，靠反馈滚动更新。</li>
+<li><strong>异构模型分工是成本杠杆</strong>：强模型只做分解/规划、弱模型做执行/状态更新，在他这里是明确的省钱提速手段；评测框架里把「哪个环节用哪个模型」做成可配置项，比全程一个模型更 realistic。</li>
+<li><strong>评测指标设计</strong>：完成度之外加执行效率与负载平衡度——多 agent 系统只看成功率会掩盖「一个 agent 干完、其余闲置」这类编排失败。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>
+<blockquote class="pq">
+<p>8 个 agent 的扩展性是公开未解项：上下文长度之外，状态管理器的全局汇总本身会不会先成为瓶颈，talk 没给数据。</p>
+</blockquote>
+</li>
+<li>整体完成率仍低（论文自承）：DAG 编排改善的是相对 AgentVerse 的增量，离「能用」还有多远、各任务族的绝对完成度数值 talk 未逐项口播，需回论文表格核对。</li>
+<li>泛化只在 Overcooked-AI 上验过（同为具身协作环境）；代码生成、写作这类非具身任务上 DAG 分解是否还成立，讲者明确没测。</li>
+<li>DAG 的正确性依赖 LLM 声明的前置关系靠谱：前置标错时系统如何检错、回滚，talk 只讲了执行失败后删节点重生成，没讲依赖本身标错的情形。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们不建议使用长上下文的一个对话……把这个任务拆解成近处的几个任务，然后让他不断地根据未来的反馈去更新迭代这个任务，会产生一个更好的效果。」——Q&amp;A 谈幻觉来源与对策（字幕 57:18–57:47 节录）</p>
+<p>「（多智能体的）安全性事实上是目前没有研究到的……一定要考虑它是否会产生一些意想之外的执行结果。」——Q&amp;A 谈真实生产环境落地（字幕 61:55–62:11 节录）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

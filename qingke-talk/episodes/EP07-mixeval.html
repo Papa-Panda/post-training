@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP7 — MixEval：混合评测数据集来拟合大语言模型的人类评估</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP7 — MixEval：混合评测数据集来拟合大语言模型的人类评估</h1>
+    <p class="sub">这期解决的是「用什么尺子量模型」的问题：讲者先用数据证明现有 benchmark 的 query 分布普遍又偏又窄、与人类偏好的排名相关度普遍低于 0.8，再提出 MixEva… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP07-mixeval.html</p>
+<p>「（评测数据集的）分布要正，才能够准确地反映（模型）被部署到真实世界以后的表现怎么样。」——讲者论证 benchmark query 分布的判词（字幕 25:13 附近）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>7</dd><dt>标题</dt><dd>MixEval：混合评测数据集来拟合大语言模型的人类评估</dd><dt>BV</dt><dd>BV1une9zMEKF</dd><dt>时长</dt><dd>00:58:59（讲授约 50 分钟 + Q&amp;A 约 9 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>未在字幕中自报姓名（自述为新加坡国立大学博士后，MixEval 为其博后期间完成的工作；论文一作 Jinjie Ni，NUS，正式头衔以论文作者页为准）</dd><dt>相关论文</dt><dd>Jinjie Ni, Fuzhao Xue, Xiang Yue, Yuntian Deng, Mahir Shah, Kabir Jain, Graham Neubig, Yang You, <em>MixEval: Deriving Wisdom of the Crowd from LLM Benchmark Mixtures</em>（NeurIPS 2024），<a href="https://arxiv.org/abs/2406.06565">https://arxiv.org/abs/2406.06565</a></dd><dt>相关代码</dt><dd><a href="https://github.com/Psycoy/MixEval">https://github.com/Psycoy/MixEval</a></dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1une9zMEKF/">https://www.bilibili.com/video/BV1une9zMEKF/</a></dd><dt>官网预告</dt><dd>青稞Talk 官网第 7 期（链接略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP07.txt</code>（1151 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP7，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名有识别误差，如 Chatbot Arena 在字幕中作「TAPORINA / 恰波尔瑞纳 / CHERRA」、Spearman 相关作「Spacman / spare」、MMLU 作「IMU / MMU」、GPT 作「GDP / GBT」、NeurIPS 作「MIPS」、Arena-Hard 作「云南hard」、WinoGrande 作「We no grad」、BoolQ 作「补cu」、WildChat 作「WECHAT / y chat」、ShareGPT 作「CIGBT / 下GP」，均以论文与公开资料为准）。论文（arXiv:2406.06565）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期解决的是「用什么尺子量模型」的问题：讲者先用数据证明现有 benchmark 的 query 分布普遍又偏又窄、与人类偏好的排名相关度普遍低于 0.8，再提出 MixEval——从互联网爬取约一百万条真实用户 query，据此去已有 benchmark 题库里逐条匹配最像的题目重组评测集，并用模型错误率构造更难的 MixEval-Hard、用动态刷新防污染，最终得到与 Chatbot Arena 人类排名相关度最高（字幕口径：居各评测集前二）、成本却低一两个数量级的 ground-truth 评测；附带一个有意思的结论：人类偏好主要由预训练能力决定，后训练的影响远小于通常想象。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：评测的三难</h3>
+<p>讲者把现状摆成三组矛盾。<strong>标准答案型 benchmark</strong>（MMLU、GSM8K、GPQA 等）可复现、可重跑，但题目容易被塞进训练集刷分，且 query 分布与真实用户需求对不上。<strong>Chatbot Arena 式人类评测</strong>靠实时用户交互投票，很难 hack，是社区最信赖的尺子，但不可复现、且贵——两个版本测一个模型都要约 \$3,000（字幕口径），分数稳定要 3–5 天、5–6 万张人类投票。<strong>LLM-as-judge 型</strong>（Arena-Hard、MT-Bench）省了人力，但抽出的 query 子集本身有偏（专挑难的），裁判模型又有已被反复证明的倾向性。MixEval 的立题就是：能不能用有标准答案、可复现的评测，逼近人类偏好的排名？</p>
+<h3>先诊断：现有 benchmark 的分布有多偏</h3>
+<p>讲者对 29 个数据集的 query 做了降维可视化（字幕口径），三条发现构成本文的经验地基：</p>
+<ol>
+<li><strong>分布位置揭示来源</strong>：真实用户数据（ShareGPT、WildChat、Arena conversations、自爬 web query）分布广，标准答案型 benchmark 大多挤在很窄的区域；连 DROP、WinoGrande 这类号称多领域的数据集，其 query 分布都只落在一个小角落，甚至比 GSM8K 这类单领域数据集还窄——「多领域」名不副实。</li>
+<li><strong>用户群体决定偏差</strong>：query 在图上越靠上越技术化（写代码、数学、物理），靠下是生活、娱乐、语法类。Arena 类平台的技术用户占比明显更高，所以在它上面测出的排名天然偏向技术问题表现；真实世界的大多数用户问题其实集中在中间偏左——不是直接写代码或解数学题。</li>
+<li><strong>分布广度与人类相关度正相关</strong>：大多数数据集与 Chatbot Arena 的 Spearman 排名相关低于 0.8；多领域数据集中 13 个里有 10 个相关度大于 0.5，单领域数据集 8 个里只有 1 个。结论：query 覆盖面越广、分布越接近真实用户，排名越接近人类偏好。</li>
+</ol>
+<h3>方法：三步造出 MixEval</h3>
+<p><strong>第一步，按真实分布重组题库。</strong> 先从互联网爬取用户 instruction（约一百万条量级，字幕口径；自建内部 benchmark 校验其抽取准确率，回归 / 精准度约 98%–99%，字幕 ASR 此处不清晰、按上下文读作此数），并验证爬到的 web query 分布与 ShareGPT 等真实用户数据相对象。然后对每条用户 query，从汇总的 benchmark 池子里检索最相似的一条已有题目，构成新评测集——题目自带标准答案，所以可复现；分布由真实用户决定，所以贴近人类需求。实际只需几千条用户 query 就能组出评测集。</p>
+<p><strong>第二步，用错误率造难题版。</strong> 初版 MixEval 上 GPT-4、Claude 一级模型已能到约 88 分（字幕口径），区分度将耗尽。于是按「一道题被多少模型做错」给题目打难度分，抽难題子集，同时用拒绝采样保持原分布，得到 MixEval-Hard：分布还是正的，难度提上去了，与人类评测的相关度反而更高——讲者强调难度本身就是与人类排名相关度的关键变量。</p>
+<p><strong>第三步，动态刷新防污染。</strong> 静态集迟早被塞进训练集，MixEval 定期换掉 query 重新匹配；两个版本之间模型分数方差只有约 0.36–0.37（0–100 尺度），一般不超过 0.5 分，足够稳定；更新可在一分钟内完成（Hard 版要先测几个模型估难度，稍慢但可接受）。</p>
+<h3>为什么粗放混合没用：关键消融</h3>
+<p>讲者特意做了一个反面对照（字幕口径）：把各数据集<strong>按数据量混合</strong>或<strong>均匀混合</strong>，与人类评测的相关度基本没有提升，按量混合甚至不比均匀混合好（那点分数还是被体量大的 MMLU、GSM8K 拉起来的）。有效的是<strong>逐条 query 级的匹配</strong>——让每条评测题都对应一个真实用户需求的位置。这条消融是 MixEval 区别于「把几个 benchmark 拼盘」的核心论证。</p>
+<h3>结果与两个附带发现</h3>
+<ul>
+<li><strong>有效性</strong>：拆开看每个源 benchmark，用 MixEval 匹配重组后，与 Arena（多语言版与英文版两个口径）的相关度都有非常明显的提升；MixEval 与 MixEval-Hard 居所有评测集与人类相关度的前两位（字幕口径）。</li>
+<li><strong>模型性价比曲线</strong>：在 MixEval-Hard 上，最好的 GPT-4 与 Claude 也只有约 63–64 分，Llama-3 约 55–56 分（字幕口径），提升空间还很大；开源模型（横轴激活参数量）与闭源模型（横轴 API 价格）的分数都呈 log-linear 饱和曲线，闭源更明显；Llama-3 是开源里的异类，性价比已可与部分闭源模型相比。</li>
+<li><strong>base model 也能测，且预训练说了算</strong>（讲者认为最有意思的分析）：Chatbot Arena 上只有 chat model，没法直接验 base model；但在 MixEval 上，base 与 chat 的排名相关高达 0.95（字幕口径），例外只是被重度后训练过的小模型（Llama-3 8B、Llama-2、Gemma 2B 一档）。由此推出：<strong>人类偏好主要来自预训练决定的能力，后训练影响相对小、小模型上才明显</strong>；「Arena 排名只反映会不会聊天」这个流行质疑不成立——问题都解决不了的模型，人类不会给高偏好。这对模型内测的直接价值是：后训练之前就能用 MixEval 较准地预估人类偏好排名。</li>
+</ul>
+<h3>成本口径</h3>
+<p>讲者把评测成本拆成 inference cost（按 query 数与平均生成 token、GPT-3.5 Turbo 价格估算）与 judge cost（统一用 GPT-3.5 做 model-based parsing，比规则解析更稳、不会系统性压低某些模型的排名）两部分，再与 Arena 按 MTurk 人力价折算的投票成本对比。结论：MixEval 测一个模型只需数分钟级时间（字幕作「34 分钟」，按上下文与论文口径应为 3–4 分钟量级，此处以字幕标注为准）、约 MMLU 评测时间的 6% 量级（论文口径），对 Arena 的 \$3,000 是数量级碾压。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>数据泄露了 benchmark 还有说服力吗</strong>：讲者区分对外排名与内部开发——泄露影响的是外界对排名的认知，但开发者自己知道有没有作弊，内测时这些数据集照样有意义、照样该用；说服力变小不等于归零。</li>
+<li><strong>chat 与 base 评测的实际差异</strong>：主要在输出格式——base model 不会按格式输出，需要 few-shot in-context learning 教它格式再解析结果，除此之外差距不大；这也是 Arena 测不了 base model、而 MixEval 可以的原因。</li>
+<li><strong>跨数据集公平性怎么保证</strong>：他们不在每个数据集上自测，而是只从 Open LLM Leaderboard、OpenCompass、Chatbot Arena 三个官方榜单取分数、同一数据集只用一个来源，保证 setting 一致；实际判分统一用 GPT-3.5 parsing 消除解析偏差。</li>
+<li><strong>想自己设计评测集怎么办</strong>：讲者的回答很直接——这套方法「过段时间就会放出来，可以直接抄作业」；讲授时论文刚投 NeurIPS（字幕作「MIPS」），代码约一周后公开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chatbot Arena 测一个模型的成本</td>
+<td>两个版本口径</td>
+<td>约 \$3,000</td>
+<td>字幕（引入部分）</td>
+</tr>
+<tr>
+<td>Chatbot Arena 分数稳定所需</td>
+<td>人类投票量</td>
+<td>约 5–6 万票、3–5 天</td>
+<td>字幕（引入部分）</td>
+</tr>
+<tr>
+<td>现有 benchmark 与人类排名的 Spearman 相关</td>
+<td>多数数据集</td>
+<td>普遍低于 0.8</td>
+<td>字幕（诊断部分）</td>
+</tr>
+<tr>
+<td>相关度大于 0.5 的数据集占比</td>
+<td>多领域 13 个 vs 单领域 8 个</td>
+<td>10 个 vs 1 个</td>
+<td>字幕（诊断部分）</td>
+</tr>
+<tr>
+<td>爬取的真实用户 query 量级</td>
+<td>实际用几千条组集</td>
+<td>约 100 万条</td>
+<td>字幕（方法部分）</td>
+</tr>
+<tr>
+<td>顶级模型在初版 MixEval 的分数</td>
+<td>GPT-4 / Claude 级</td>
+<td>约 88 分（饱和预警）</td>
+<td>字幕（方法部分）</td>
+</tr>
+<tr>
+<td>MixEval-Hard 顶级模型分数</td>
+<td>Llama-3 约 55–56 分</td>
+<td>GPT-4 / Claude 约 63–64 分</td>
+<td>字幕（结果部分）</td>
+</tr>
+<tr>
+<td>动态更新的版本间分数差</td>
+<td>0–100 尺度</td>
+<td>方差约 0.36–0.37，一般不超过 0.5 分</td>
+<td>字幕（方法部分）</td>
+</tr>
+<tr>
+<td>base vs chat 模型排名相关</td>
+<td>重度后训练小模型除外</td>
+<td>约 0.95</td>
+<td>字幕（结果部分）</td>
+</tr>
+<tr>
+<td>MixEval-Hard 与 Chatbot Arena 的相关</td>
+<td>各评测集最高</td>
+<td>0.96（MixEval 为 0.93）</td>
+<td>论文 arXiv:2406.06565（讲授只说居前二，未口播此数）</td>
+</tr>
+</tbody>
+</table>
+<p>注：讲授中另有「MixEval 测一个模型约数分钟」的口播，字幕作「34 分钟」，按论文「MMLU 时间与成本的 6%」口径应为 3–4 分钟量级，本纪要按字幕原样标注、不替讲者改数。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>评测集先做分布体检，再看分数</strong>：把自家 eval 的 query 做一次主题 / 难度分布画像，与真实用户（或线上流量）的分布对象，是比多跑几个 benchmark 更优先的事。DROP 式「号称多领域、实际窄分布」的坑，在内部评测集里同样常见。</li>
+<li><strong>判分通道要统一且抗格式偏差</strong>：统一用一个 model-based parser 判分、不用各数据集自带的规则解析，避免系统性压低某些输出风格的模型——这条对 RL 训练里的自动 verifier / reward 打分同样成立：解析偏差会被 policy 直接学成风格偏置。</li>
+<li><strong>防污染靠动态刷新而非藏题</strong>：留 test set 不公开的老办法已被「拿 GPT-4 生成答案再训练」绕过；定期换 query 并实测版本间方差（小于 0.5 分才算稳），是一套可直接搬到内部基准维护的协议。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>MixEval 的相关度是在 chat model 上对 Arena 校准的；讲者用 base/chat 排名相关 0.95 论证可测 base model，但 base model 的「人类偏好」本身没有直接的人类标注可对照，这条外推的强度取决于那个 0.95 是否在新一代模型上保持，值得用论文后续版本核对。</li>
+<li>query 匹配依赖 benchmark 池子的覆盖面：真实用户 query 里若有一大片在现有题库中找不到近似题（讲授未展开这部分占比），重组后的分布正不正会被题库上限反噬；这是把该方法搬到垂直领域（如代码、agent 轨迹评测）时要先测的量。</li>
+<li>难度用「模型错误率」定义会随模型代际漂移：今天的 Hard 难题在下一代模型上变易，动态刷新能换 query，但难度标尺本身需要周期性重标定，讲授没有给出重标定的频率建议。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「（评测数据集的）分布要正，才能够准确地反映（模型）被部署到真实世界以后的表现怎么样。」——讲者论证 benchmark query 分布的判词（字幕 25:13 附近，按干净口径转写）</p>
+<p>「如果一个模型连问题都不能很好地解决，他再会聊天，人类也不会对他有特别高的倾向性。」——讲者反驳「Arena 只测会不会聊天」的结论句（字幕 49:32 附近）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

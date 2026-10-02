@@ -1,16 +1,16 @@
 No,Title,BV,Duration,Date,Status,Notes
-1,SceneTex：高质量三维室内场景纹理图生成,BV1qKeyzdEVp,,2024-04-10,todo,
-2,ChatDev：大语言模型驱动的多智能体协作与演化,BV15oe2z8EiH,,2024-04-15,todo,
-3,从 3D LLM 到 MultiPLY，3D 具身基础模型的构建,BV18se2zHEzc,,2024-04-19,todo,
-4,Mini-Gemini：挖掘多模态视觉语言大模型的潜力,BV15oe2z8Eyx,,2024-04-24,todo,
-5,3D-VLA：构建生成式三维具身世界模型,BV1Loe2z8EFW,,2024-05-10,todo,
-6,实时渲染 3DGS 中的反走样及逆渲染应用,BV1NntyzRExN,,2024-05-21,todo,
-7,MixEval：混合评测数据集来拟合大语言模型的人类评估,BV1une9zMEKF,,2024-05-24,todo,
-8,VideoBooth：文本和图像提示共同驱动的视频生成,BV1une9zME2m,,2024-05-29,todo,
-9,具身多模态大模型的视觉表征预训练研究,BV1s8e9zwE8E,,2024-06-06,todo,
+1,SceneTex：高质量三维室内场景纹理图生成,episodes/EP01-scenetex.md,要点已提炼,2024-04-10,todo,SceneTex：整场景纹理场的全局一致生成与VSD优化
+2,ChatDev：大语言模型驱动的多智能体协作与演化,episodes/EP02-chatdev.md,要点已提炼,2024-04-15,todo,ChatDev实录：瀑布交流链与角色翻转缓解幻觉
+3,从 3D LLM 到 MultiPLY，3D 具身基础模型的构建,episodes/EP03-3d-llm-multiply.md,要点已提炼,2024-04-19,todo,3D LLM到MultiPLY：neural field表征与环境反馈造数据
+4,Mini-Gemini：挖掘多模态视觉语言大模型的潜力,episodes/EP04-mini-gemini.md,要点已提炼,2024-04-24,todo,Mini-Gemini：固定token预算下patch-informing提多模态质量
+5,3D-VLA：构建生成式三维具身世界模型,episodes/EP05-3d-vla.md,要点已提炼,2024-05-10,todo,3D-VLA：off-the-shelf模型链造3D具身数据再训世界模型
+6,实时渲染 3DGS 中的反走样及逆渲染应用,episodes/EP06-3dgs.md,要点已提炼,2024-05-21,todo,Analytic-Splatting解析积分抗3DGS走样与GS-IR逆渲染（论文还原）
+7,MixEval：混合评测数据集来拟合大语言模型的人类评估,episodes/EP07-mixeval.md,要点已提炼,2024-05-24,todo,MixEval：逐条匹配真实query重组评测集对齐人类偏好
+8,VideoBooth：文本和图像提示共同驱动的视频生成,episodes/EP08-videobooth.md,要点已提炼,2024-05-29,todo,VideoBooth：两阶段训练防语义层被UNet特征抄答案
+9,具身多模态大模型的视觉表征预训练研究,episodes/EP09-embodied-multimodal-pretraining.md,要点已提炼,2024-06-06,todo,MPI视觉预训练：重建过渡帧与手物交互点定位
 10,PiSSA：收敛快、误差小的大模型参数高效微调方法,episodes/EP10-pissa.md,要点已提炼,2024-06-13,todo,PiSSA：只改LoRA初始化，主奇异值进adapter近似全参梯形
-11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,BV1JfeXzpEtr,,2024-06-17,todo,
-12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,BV1LYaYzQEbs,,2024-06-27,todo,
+11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,episodes/EP11-llama-pro.md,要点已提炼,2024-06-17,todo,LLaMA Pro：恒等复制扩块继续预训练，容量胜LoRA
+12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,episodes/EP12-villager-agent.md,要点已提炼,2024-06-27,todo,VillagerAgent：DAG动态派活避开长对话幻觉
 13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,episodes/EP13-llama-factory.md,要点已提炼,2024-07-08,todo,LLaMA Factory实录：高效微调三条线与RLHF多LoRA显存方案
 14,Mobile-Agent：基于多模态Agent架构的手机智能体,episodes/EP14-mobile-agent.md,要点已提炼,2024-07-11,todo,Mobile-Agent实录：纯视觉路线与反思agent分工
 15,MiniCPM-V：端侧可用的GPT-4V级多模态大模型,BV1tLPEzfEDD,,2024-07-15,todo,title-reworded
