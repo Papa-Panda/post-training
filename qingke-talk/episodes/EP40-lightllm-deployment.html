@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP40 — 基于 LightLLM 的 DeepSeek R1/V3 模型部署实战</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP40 — 基于 LightLLM 的 DeepSeek R1/V3 模型部署实战</h1>
+    <p class="sub">LightLLM v1.0.0 的主线是把框架开销压到只剩推理本身：用共享内存 Req 对象 + ctypes 直读消灭进程间序列化，用调度/预处理/后处理与推理的折叠提高 G… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP40-lightllm-deployment.html</p>
+<p>「（我们的调度方案）几乎是最安全、而且能把显存利用满的一种调度方案。」——讲者白世豪讲峰值显存估计调度时的判词（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP40</dd><dt>标题</dt><dd>基于 LightLLM 的 DeepSeek R1/V3 模型部署实战</dd><dt>BV</dt><dd>BV1xWREYrEJm</dd><dt>时长</dt><dd>00:55:43（讲授约 46 分钟 + Q&amp;A 约 9 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>白世豪（LightLLM 团队；字幕开场自述姓名，单位字幕未自述，以项目公开资料为准）</dd><dt>相关论文</dt><dd>LightLLM 输出长度预测调度相关论文（讲者称已被录用、当时网上尚搜不到，名称将在交流群公布；以公开资料为准）</dd><dt>相关代码</dt><dd>LightLLM 开源仓库（讲者口播 GitHub 仓库与团队技术博客地址，博客会连载优化方案与量化工具 LLMC 的更新）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1xWREYrEJm/">https://www.bilibili.com/video/BV1xWREYrEJm/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP40.txt</code>（1261 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP40，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 LightLLM 在字幕中多作「net mv/LETTM/莱塔M」、router 作「root」、detokenizer 作「DECO」、CUDA graph 作「克拉grab」，均以项目公开资料为准）。本期标题虽为 DeepSeek 部署实战，讲授主体实为 LightLLM v1.0.0 新版本特性、PD 分离原型与 DeepSeek 系列专项优化三块，部署命令与性能对比在后半程。凡讲授口径与官方文档不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>LightLLM v1.0.0 的主线是把框架开销压到只剩推理本身：用共享内存 Req 对象 + ctypes 直读消灭进程间序列化，用调度/预处理/后处理与推理的折叠提高 GPU 利用率，再用「历史分布预测输出长度 + 按请求退出时刻算 batch 峰值显存」的调度在安全与利用率间取最优；面向 DeepSeek 的部分则给出 MLA 在 prefill 用解压缩方案、decode 用 Q 吸收方案的分工结论，并已跑通 PD 分离原型（同等机器口径下 decode 时延 P25/P50 约从 160ms 降到 100ms，字幕口径）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>架构回顾与 v1.0 的通信改造：进程间只传一个 req id</h3>
+<p>LightLLM 一贯的设计原则是轻量、可读、扩展性高，v0 时代的两个关键特性是多进程架构 + 异步 CPU/GPU 处理，以及按 batch 峰值显存（而非进入时刻显存）估算的调度策略（page size 取 1 也是为这套调度服务）。旧架构的问题在高并发下暴露：三进程间靠 ZMQ 通信，序列化/反序列化开销大；调度与推理串行，拖低 GPU 利用率。</p>
+<p>v1.0 的解法是引入可跨进程读取的 Req 对象：把采样参数、token id 等请求信息放进基于共享内存的结构体，进程间只传 req id，各进程用 Python ctypes 接口直接从内存读对象，序列化开销基本归零（代价是 ctypes 调用本身不如 Python 原生接口快，讲者判断已不构成瓶颈）。HTTP server、router、detokenizer 之间改用共享内存循环队列传信号；router 与 model RPC 之间也不再传 input ids 等大字段——model RPC 常驻等待 event，router 调度后只置位标志即触发推理。讲者提到 SGLang 团队解决同类问题的方式是把 router 与 model 进程「缩在一起」并按 TP 份数复制 router，LightLLM 因请求对象已在共享内存，无需这一步。</p>
+<h3>折叠：把调度与前后处理的时间藏进推理</h3>
+<p>除调度与推理折叠（推理 batch $i$ 的同时调度 batch $i+1$ ）外，v1.0 还实现了更激进的版本：把推理前的元数据打包预处理、推理后的后处理也折叠进推理时间。该模式尚未默认开启（测试不充分），讲者建议感兴趣者在代码里手动打开；在高并发、请求输入输出都很短的场景（推理本身开销小、处理开销占比高）下收益最大。</p>
+<h3>调度：输出长度预测 + 峰值显存估计（全场最有方法论含量的一段）</h3>
+<p>单机场景下（PD 不分离、KV cache 容量有限）调度策略直接决定 SLA 约束下的吞吐。讲者先摆出两种极端：</p>
+<ul>
+<li><strong>保守式</strong>：按 max_tokens 预留显存，能放下才准入——绝不逐出请求，但 GPU 利用率低；</li>
+<li><strong>激进式</strong>：先放进来再说，显存不够就暂停/逐出部分请求事后重算——利用率满，但被逐出请求的用户体验受损。</li>
+</ul>
+<p>LightLLM 的方案分两半。其一是<strong>输出长度预测</strong>：观察 OpenAI 等公开数据发现，相邻时间窗口内的输出长度分布相对稳定（对话数据更稳，API 数据对角线相关性也成立），于是用历史请求输出长度分布，在每个调度步对 batch 内每个未结束请求重新采样其剩余长度——从「大于当前已输出长度」的条件分布里采样，预测值大概率大于真实剩余长度、又远小于预设 max_tokens，并随生成推进不断收窄。其二是<strong>峰值显存估计</strong>：一个 batch 的真实峰值不是各请求显存的简单相加，而是出现在某个请求退出时刻；把各请求按预计退出时刻排序，逐个时刻累加存活请求的占用取最大值，即得该 batch 整个执行期的显存峰值——这是精确估计，不会因多放请求导致暂停或逐出。配合 page size 等于 1 的细粒度管理，效果是「几乎最安全、且能把显存利用满」。实验对比表（字幕口径，具体数值在 slide 上未逐一口播）显示：相对激进调度峰值显存略低，但请求逐出率大幅下降；长输出的 decode-heavy 场景收益最明显，长输入短输出的对话场景各策略差别不大。讲者还指出这套调度可随线上分布漂移在保守与激进两端自动退化适配。相关论文已被录用（Q&amp;A 中讲者说当时网上还搜不到，年后才中，细节待交流群公布）。</p>
+<h3>张量管理器：让同 shape 张量跨层共用一块显存</h3>
+<p>推理时显存吃满后，PyTorch 默认分配器因碎片化导致张量分配效率骤降。LightLLM 的张量管理器替换了 torch 的默认分配函数，手法是接管引用计数：把推理中每层同 shape 张量手动计数、令其永不归零，从而让每一层都复用同一块地址调用自有 alloc。收益最大的场景是 prefill 阶段且显存用得很满时。同一机制还优化了 CUDA graph 的显存：按 batch 从大到小捕获 graph 时，小 batch 的张量与大 batch 共用同一块地址，所有 graph 在显存上只剩 graph 本身的开销——于是 decode 侧可以放心开很多 graph（服务 100–200 并发时显存依然够用）。讲者把框架显存优化归为两块：prefill 的张量复用 + decode 的 graph 显存共享。</p>
+<h3>量化支持：layer 级混合精度 + 在线量化</h3>
+<p>LightLLM 自称提供业内较丰富的量化支持，并适配了 vLLM、TensorRT-LLM 等框架的量化格式（字幕口径）。两个实用点：加载浮点模型时若配置指定了量化类型但无量化信息，可在线做 min-max 量化（讲者认为 INT8/W8A8 这类精度足够）；配置文件支持 layer 级混合部署——例如 W8A8 时发现某些层敏感，可单独把 down 层等敏感层排除在量化外或指定其他比特，与 BF16 混合，日志会打印每层的量化设置方便 debug。</p>
+<h3>PD 分离原型：master 注册制 + KV 只传缺失部分</h3>
+<p>PD 分离目前是原型实现：启动 master 节点后，prefill 与 decode 节点主动上报注册，master 据此动态增删 P/D 节点；各节点定期向 master 汇报 KV cache 负载，供请求分配时调度（当前调度方法还比较初级，讲者明确邀请社区贡献 PD 调度策略）。请求侧流程：P 节点推理后创建一个 KV 传输子进程，先与 D 节点协商——双方都维护 KV cache，D 侧已有部分则只传缺失部分，长文本场景省传输；短文本可省略协商直接传。讲者坦白原型未充分优化，但 SLA 收益已可见：对比实验为 1P1D（两台机器）跑 100 并发 vs PD 不分离（一台机器）跑 50 并发，PD 分离的 decode 时延明显更低，P25/P50 口径约 100ms 对 160ms（字幕口径）；Q&amp;A 中讲者解释了并发数为何不同——1P1D 用 16 卡对 1PD 的 8 卡，等机器口径下若用 2 个 PD 实例则只需各跑 50 并发、时延只会更好。他对 PD 分离的定位是：P/D 解耦后调度策略选哪种对 SLA 的影响都大幅减小，因为 prefill 与 decode 已不再互相干扰。扩缩容实践上一般按固定 P:D 比例进行。</p>
+<h3>DeepSeek 专项：MLA 的 prefill/decode 分工与算子负载均衡</h3>
+<p>MLA 部分讲者系统比较了四种方案（KV 存压缩或解压缩 × attention 时是否做 Q 吸收/权重融合）：矩阵吸收会把 attention 的 head dim 从 128 涨到 576，prefill 计算量显著变大；decode 本身计算密度低，各方案计算量差别不大。结论是分工：<strong>prefill 存压缩 KV、解压后再做 attention（方案二）；decode 存压缩 KV、直接用 Q 吸收（方案三）</strong>——兼顾 KV 占用小与计算量小。算子侧对 MHA decode 做了负载均衡改进：原实现按 max request length 划 block，请求长短不均时浪费严重，改按设备 SM 数量对不同长度请求做负载均衡，极端长短不均场景有明显收益（slide 对比，字幕口径）。此外也提及 MoE 模型的推理优化，具体细节让观众看博客与代码。</p>
+<h3>部署与性能对比、路线图</h3>
+<p>部署支持单机、双机直至多机。单机关键参数是 CUDA graph 的 max batch size（默认 100，即捕获 1–100 的 graph；得益于张量管理器，graph 显存开销可控）；双机需另设 master 地址与各 rank 编号，四机类推。性能对比（讲者注明是两周前测的版本，对比对象为当时的 vLLM 与 TensorRT-LLM 0.17.0，均已继续迭代）：100 并发、输入长度服从均值 128 的高斯分布一类设置下 LightLLM 有微小领先，讲者归因于框架开销已被折叠殆尽——「开销基本都在推理层」。路线图：正在接入 DeepSeek 官方的 DP+EP（含 DP+TP+EP）部署方案，预计一到两个月完成通信计算折叠；PD 分离后续做高阶调度（处理 P/D 峰值时序错位）与异构方案（P、D 可用不同并行策略与量化方案）；也提到 GEMM 与通信折叠、micro-batch 计算分析等方向在实践中。团队自陈精简，迭代速度有限，呼吁社区共建。</p>
+<h3>Q&amp;A 散点</h3>
+<ul>
+<li><strong>PD 分离为何也能降 prefill 时延</strong>：prefill 是计算密集型，100 并发下排队处理（默认 chunk 16K）会拉长首字延迟，独立 P 节点后排队可控。</li>
+<li><strong>PD 分离 vs 传统 chunked prefill</strong>：讲者坦承没做过数据对比；混合执行也能降 decode 时延，但理想情况下 P/D 物理分开 SLA 体验更好，后续会补对比。</li>
+<li><strong>MLA 两阶段可否混合执行</strong>：两阶段存的都是压缩 KV，只是 attention 函数不同，开两个流异步跑即可混合。</li>
+<li><strong>H20 能否跑</strong>：可以（单卡 90 多 GB 显存），但团队没有 H20 机器、未测性能。</li>
+<li><strong>两台机器吞吐</strong>：两台 A100 级机器略逊于单台 H200（跨机 RDMA 开销），但基本同级；等 DP+EP 接入后会放多机 H200/H100 数据。</li>
+<li><strong>多机部署细节</strong>：用 torch distributed，需手动传 master_addr（NCCL 不提供现成的通讯组 IP 获取接口）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PD 分离 decode 时延（P25/P50）</td>
+<td>PD 不分离 1 台机 50 并发约 160ms</td>
+<td>1P1D 2 台机 100 并发约 100ms</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MLA 矩阵吸收的 head dim 变化</td>
+<td>原始 128</td>
+<td>涨到 576，prefill 计算量显著上升</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MLA 方案结论</td>
+<td>四方案对比</td>
+<td>prefill 用解压缩方案、decode 用 Q 吸收方案</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>CUDA graph 默认 max batch size</td>
+<td>—</td>
+<td>100（捕获 1–100 的 graph）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>性能对比设置</td>
+<td>vLLM / TensorRT-LLM 0.17.0（两周前版本）</td>
+<td>100 并发、输入长度均值约 128 分布下 LightLLM 微小领先</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>输出长度预测调度的实验结论</td>
+<td>激进调度（高逐出率）/保守调度（低利用率）</td>
+<td>峰值显存略低于激进调度、逐出率大幅下降</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>DeepSeek 官方 DP+EP 接入预计时间</td>
+<td>—</td>
+<td>一到两个月</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>H20 部署可行性</td>
+<td>—</td>
+<td>单卡 90 多 GB 显存可跑，未实测性能</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「按退出时刻算 batch 峰值显存 + 条件分布预测剩余长度」是一套可移植的准入控制：任何 KV cache 受限的推理服务（包括自研 rollout 引擎）都能用它替代 max_tokens 预留或先到先得，把「不逐出」与「高利用率」同时拿到；对 RL rollout 这种输出长度方差极大的负载尤其对症。</li>
+<li>框架开销优化的顺序值得抄：先消灭序列化（共享内存对象 + 只传 id），再做调度/前后处理与计算的折叠，最后才抠算子——LightLLM 的对比优势主要来自前两步而非 kernel。</li>
+<li>PD 分离的 KV 协商「只传缺失部分」与 P/D 异构（不同并行/量化策略）是做 disaggregated serving 时值得预留的接口；且讲者判断解耦后调度策略的重要性下降，资源应先投在传输与配比上。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>输出长度预测依赖「相邻时间窗口分布稳定」这一经验观察；负载突变（如 RL 训练中 prompt 分布随轮次漂移）时预测失效的幅度和逐出率回升曲线，讲授未给。</li>
+<li>PD 分离原型的 master 调度目前较初级：P 与 D 的峰值天然错位（P 先峰值、D 后峰值），讲者列为待解的高阶调度问题，具体方案与收益待后续版本与数据。</li>
+<li>与 vLLM/TensorRT-LLM 的性能对比是两周前的旧版本数据且 LightLLM 仅「微小领先」；在 DP+EP 接入后多机场景的实测（讲者承诺放多机 H200/H100 数据）值得回访核对。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「（我们的调度方案）几乎是最安全、而且能把显存利用满的一种调度方案。」——讲者讲峰值显存估计调度（字幕约 19:51–20:03，干净口径转写）</p>
+<p>「（PD 分离后）其实选择哪一种调度都不会再对 SLA 有更大的影响了，因为 prefill 和 decode 已经完全分开了。」——讲者对 PD 分离价值的判词（字幕约 33:16–33:27，干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

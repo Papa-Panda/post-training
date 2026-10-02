@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP70 — Evaluation Agent：面向视觉生成模型的高效可提示的评估框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP70 — Evaluation Agent：面向视觉生成模型的高效可提示的评估框架</h1>
+    <p class="sub">Evaluation Agent 把视觉生成模型的评估从「固定 benchmark 全量跑分」改造成一个多智能体对话式流程：plan agent 把用户的自然语言查询分解为子方… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP70-evaluation-agent.html</p>
+<p>「Vision is all you need——其实评估这一任务是推动 AI 发展的关键。我们只有通过更好、更高效的评估方式，才能真正理解模型的能力和局限性。」——讲者总结句（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>70</dd><dt>标题</dt><dd>Evaluation Agent：面向视觉生成模型的高效可提示的评估框架</dd><dt>BV</dt><dd>BV1SC4az4Ehn</dd><dt>时长</dt><dd>00:58:28（讲授约 37 分钟 + Q&amp;A 约 16 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>田书林（南洋理工大学 MMLab 博士生；导师刘子维教授与朱宏远博士；主持人介绍作田书林，讲者字幕自述姓名，字幕中多处作「田书玲/田树林」，均系识别误差）</dd><dt>相关论文</dt><dd>Evaluation Agent（ACL 2025 oral，并获 SAC highlight award；讲者口头口径，论文编号以公开资料为准，本纪要不挂 arXiv 链接）</dd><dt>相关代码</dt><dd>已开源（讲者明确表示代码与数据全部开源，toolkit 的定义文件在 GitHub 仓库中，照格式即可外接新 benchmark）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1SC4az4Ehn/">https://www.bilibili.com/video/BV1SC4az4Ehn/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP70.txt</code>（1053 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP70，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 VBench 字幕作「微bench/WEBENCH」、T2I-CompBench 字幕作「t toi Comp bench」、plan agent 字幕作「PLANATION」，均以公开资料为准）。凡涉及具体数字，均为讲者口头口径，以下关键数字总表统一标注来源「字幕」。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Evaluation Agent 把视觉生成模型的评估从「固定 benchmark 全量跑分」改造成一个多智能体对话式流程：plan agent 把用户的自然语言查询分解为子方面，prompt agent 动态生成最有信息量的测试提示词，生成模型采样后由可扩展的 evaluation toolkit 打分，多轮迭代收敛后输出一份可解释的报告。它用不到 1% 的样本与时间（讲者口径：VBench 评估 VideoCrafter-2 需 4355 个样本、4000 多分钟，Evaluation Agent 只需 23 个样本、24 分钟）达到与完整 benchmark 高度一致的结论，并支持传统 benchmark 做不到的开放式查询。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">系统自动完成理解意图</div><div class="farrow">→</div><div class="fnode">设计方案</div><div class="farrow">→</div><div class="fnode">执行评估</div><div class="farrow">→</div><div class="fnode">给出解释与 summary report</div></div>
+<h3>背景：评估危机，与 agent 的理论框架</h3>
+<p>讲者的研究目标是构建能像人类一样感知、推理、预测的多模态智能体；智能体的三项核心能力是感知（从复杂环境提取有意义表征）、推理（理解因果、做逻辑推断）、预测（规划长程轨迹）。他先用 POMDP（部分可观测马尔可夫决策过程）框架给 agent 下了个形式化定义：隐藏的环境状态空间、动作空间（自然语言输出、工具调用、API 调用等）、观测空间、状态转移函数、记忆（存到当前时刻的全部交互历史），以及要优化的策略函数与最终目标（隐式 reward）。agent 的关键是在不完全观测下维护历史记忆、学最优策略——这也是 Evaluation Agent 的设计基础。</p>
+<p>为什么是现在做评估 agent：视频生成模型从 2023 年的 Runway/VideoCrafter 一代，到 2024 年 Sora/Kling，再到 2025 年 Veo 3 等，迭代速度爆炸，但评估方法没跟上。讲者引 Andrew Ng 的说法：现在存在「评估危机」——现有指标要么过于狭窄、要么容易被 hack，而 vibe checking（直觉抽查）又太主观、样本量太小。需要从 vibe checking 走向 transverse（系统化）evaluation。</p>
+<p>他顺带区分了 model 与 agent：LM/VLM 是 model-level、stateless、无动作接口；agent 是 system-level、有长期记忆、能与环境交互。从 LM 到 agent 获得的是<strong>自动化</strong>——端到端自主执行。他团队的 Ego-R1 就是例证：训练小参数 LM 的工具调用能力 + 分层检索，能处理长达 7 天的第一人称视频推理；这个能力与视频形态无关，所以在第三人称 Video-MME 上同样迁移得动。</p>
+<h3>现有评估的三个问题</h3>
+<ol>
+<li><strong>贵</strong>：VBench 评测一个模型需要 4730 个样本，T2I-CompBench 需要超过 18000 个样本（字幕口径），一次评估通常要几十个小时。</li>
+<li><strong>固定</strong>：指标与流程预先设定，无法适配用户需求——有人关心艺术风格，有人关心物理准确性，固定 benchmark 只能给固定维度。</li>
+<li><strong>黑箱</strong>：只输出一个分数（如 87.5），不解释分数背后的含义：模型哪些方面好、哪些要改进，无从得知。</li>
+</ol>
+<h3>方法：两阶段、多轮迭代的评估 agent</h3>
+<p>框架的目标是「让评估像日常对话一样自然」：用户用自然语言提问（如「VideoCrafter-2 生成对象及其属性的能力如何」），系统自动完成理解意图 → 设计方案 → 执行评估 → 给出解释与 summary report。流程分两个阶段：</p>
+<ul>
+<li><strong>Proposal stage（提案阶段）</strong>：plan agent 把用户问题分解为具体子方面（如空间关系拆成上下关系、左右关系的理解）；prompt agent 据此动态生成测试提示词（如「一只猫在桌子上」「汽车停在房子面前」）。提示词是按用户意图动态生成的，不是静态题库。</li>
+<li><strong>Execution stage（执行阶段）</strong>：提示词送入被测生成模型采样，结果交给 evaluation toolkit 打分——toolkit 里既有现成 benchmark 的工具，也有专为 open query 设计的工具。每轮结果以 observation 形式反馈给 plan agent，它据此推理、决定继续探索还是停止，并调整子方面与提示词。多轮之后，agent 把全部观测整理成包含总结与深入分析的报告。</li>
+</ul>
+<p>被测生成模型是外接的：系统只关心它 sample 出来的图片/视频，任何架构、开源闭源都可接入。</p>
+<h3>实验：效率与「能不能反映真实能力」</h3>
+<p>效率对比（讲者口径）：以视频生成为例，VBench 评估 VideoCrafter-2 需要 4355 个样本、4000 多分钟；Evaluation Agent 只需 23 个样本、24 分钟即可达到相等或类似的评估效果——不到 1% 的样本、不到 1% 的时间。图像生成（T2I-CompBench）上提升同样显著。</p>
+<p>准确性验证：与 VBench、T2I-CompBench 的原始结果逐维度比匹配度。关键发现：</p>
+<ul>
+<li><strong>单次运行已经很准</strong>：如 VideoCrafter-2 在 subject consistency 维度上单次即达到 100% 匹配（字幕口径）；</li>
+<li><strong>多次运行普遍更准</strong>：评估 5 次后，美学、apparent style 等维度可达 90%–100% 匹配；</li>
+<li><strong>有些维度天然难</strong>：human action、color、spatial relationship、场景这几类维度，即使评 5 次匹配度仍偏低——讲者归因于这些维度本身生成 variation 大、区分性差，需要更特别的设计。</li>
+</ul>
+<p>讲者把这总结为三点：少样本能得出与完整评估高度一致的结论；模型间优劣关系与关键能力差异被保留下来；这不是随机减样本，而是智能采样选了最有信息量的 case。</p>
+<h3>开放式查询：传统 benchmark 做不到的事</h3>
+<p>user study 发现用户更关心「模型能否满足我的特定需求」，而非通用指标——比如能否保持原始风格生成现有艺术作品的变体、是否理解焦距/光圈/ISO 等摄影概念。为此他们构建了一个开放式查询评估数据集（open-ended query evaluation dataset）。</p>
+<p>讲者用艺术风格案例完整演示了渐进式探索：第一轮查「复制基础艺术风格」（莫奈印象派风景：是否反映印象派的光线色彩强调、笔触纹理是否像莫奈）→ 第二轮查风格一致性（梵高《星夜》变体加城市天际线）→ 第三轮查风格混合（把澳大利亚土著点画元素融入莫奈睡莲——这轮暴露了模型局限：只用了印象派技巧、没有系统性点阵）→ 第四轮查复杂风格整合（浮世绘 + 非洲部落图案，保留部分浮世绘特征但整合不足）。最终报告：模型生成单个对象熟练，但在保持空间关系等混合生成上挑战大。这个案例展示了四点：渐进式探索（按每轮结果调下一步）、深度分析（不仅判对错、还解释为什么）、能力边界发现（强弱项画像）、全过程对用户可见的可解释报告。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>多次评估会因 LLM 不确定性而不稳定吗</strong>：恰恰相反，多次评估会逐渐收敛到原始 benchmark 的结果——可以把 Evaluation Agent 理解为对原始 benchmark 的一种更聪明的采样，测得越多越 converge。开放查询部分由 LLM 生成提示词与评估，确实存在不确定性，但实测 qualitative score 还不错。</li>
+<li><strong>少量样本的样本偏差风险</strong>：存在，这是效率与偏差的 trade-off；大部分维度上影响小，generation variation 大的维度（human action、color、spatial relationship）偏差风险更大。</li>
+<li><strong>为什么只需要少量样本</strong>：传统方法要测全部维度是因为只输入了「一个模型」；他们先分析用户 query，用户关心的层面往往不需要把十几个维度全测一遍就能回答。</li>
+<li><strong>promptable 如何实现、通用吗</strong>：plan agent 把自然语言 query 投射到评测维度上（如「空间关系生成能力」→ spatial consistency 类维度）；toolkit 可编辑可扩展，目前集成了常用视频/图像 benchmark + open-ended query 工具，换上图表/流程图类评估工具即可评测图表生成（直接评视觉质量则现成可用）。</li>
+<li><strong>评测问题是 yes/no 形式吗</strong>：不是。评测问题是「在某维度上好或不好、好到什么程度、不好在哪里出问题」的更复杂形式。</li>
+<li><strong>能否做多模态数据的 reward/评估</strong>：可用 toolkit 中个别维度或 open-ended query 工具做，但框架整体是 model-level 的生成模型评测。</li>
+<li><strong>可解释性怎么评估</strong>：讲者坦言没法用数字指标衡量，可解释性是 qualitative 层面的——报告里包含各维度具体表现与原因，用户能理解得更深入，这本身就是可解释性的提升。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VBench 单次评估样本量</td>
+<td>传统固定 benchmark</td>
+<td>4730 个样本</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>T2I-CompBench 单次评估样本量</td>
+<td>传统固定 benchmark</td>
+<td>超过 18000 个样本</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>评估 VideoCrafter-2 的成本</td>
+<td>VBench：4355 个样本、4000 多分钟</td>
+<td>Evaluation Agent：23 个样本、24 分钟（均不到 1%）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>与原始 benchmark 的匹配度</td>
+<td>单次运行，subject consistency（VideoCrafter-2）</td>
+<td>100% 匹配</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>与原始 benchmark 的匹配度</td>
+<td>评估 5 次后，美学 / apparent style 等维度</td>
+<td>90%–100% 匹配</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>匹配度偏低的维度</td>
+<td>评估 5 次后</td>
+<td>human action、color、spatial relationship、场景仍偏低</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Ego-R1 可处理视频长度（团队相关工作）</td>
+<td>第一人称视频</td>
+<td>长达 7 天</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>评测即采样问题</strong>：把「全量跑分」改成「按 query 投影维度 + 智能选最有信息量的 case + 多轮收敛」，直接对应 RL 评测自动化——eval 预算有限时，先想清楚用户/训练真正关心的维度，再设计采样策略，而不是把 benchmark 全量刷一遍。</li>
+<li><strong>Toolkit 注册表模式</strong>：评估工具可插拔扩展（换 toolkit 即可评图表生成），对内部 eval infra 是个干净的抽象——评测维度与工具解耦，agent 只负责编排。</li>
+<li><strong>报告而非分数</strong>：评估产物从单个分数升级为带原因的能力画像，对 post-training 的意义明确——模型迭代需要的恰恰是「哪里不行、为什么」，而不是又一个总分。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>可解释性无法量化：当评估结论要用于模型选型或上线决策时，「报告写得好」与「结论可信」之间还缺一个可验证的锚点；讲者给出的收敛性论证（测得越多越接近原始 benchmark）依赖一个前提——原始 benchmark 本身是对的。</li>
+<li>开放式查询中 LLM 既出题又判卷，其 qualitative score 的可靠性在分布外查询上还没有系统验证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们急需一个更好的评测流程……用户得到的不仅仅是一个冰冷的数字，而是一个更加可理解、可操作的洞察性的 report。」（字幕口径整理）</p>
+<p>「多次 evaluation 其实反而会增加我们对结果的 confidence；测得越多，结果越会 converge 到原本的 benchmark。」（字幕口径整理）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

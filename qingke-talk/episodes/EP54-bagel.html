@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP54 — BAGEL：统一生成理解的多模态基础模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP54 — BAGEL：统一生成理解的多模态基础模型</h1>
+    <p class="sub">BAGEL 用一套 Mixture-of-Transformers（MoT）架构把「理解」和「生成」放进同一个 decoder-only Transformer：理解与生成各用… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP54-bagel.html</p>
+<p>「我们希望一个统一的模型，它自己能够实现自我的一个推理，它自己知道什么时候应该生成一个图片帮助他做一个更好的理解，或者说什么时候做一个 reasoning 帮助他做一个更好的生成……实现更高的一个智能上限。」——讲者在 Q&amp;A 中对「为什么不直接用智能体调外部工具」的回答</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>54（官网期号：第 54 期）</dd><dt>标题</dt><dd>BAGEL：统一生成理解的多模态基础模型</dd><dt>BV</dt><dd>BV1t34szKEUc</dd><dt>时长</dt><dd>01:11:49（讲授约 54 分钟 + Q&amp;A 约 16 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>李坤昌（字节跳动 Seed；主持人介绍其研究方向为视觉/视频基础模型与统一模型，在学期间以一作/共一发表论文 12 篇、谷歌学术引用 6400 余次；讲者亦为 BAGEL 论文共同作者，字幕中主持人结尾致谢时将姓名读作「李长坤」，以论文作者页 Kunchang Li 为准）</dd><dt>相关论文</dt><dd>Chaorui Deng, Deyao Zhu, Kunchang Li, et al., <em>Emerging Properties in Unified Multimodal Pretraining</em>（BAGEL），<a href="https://arxiv.org/abs/2505.14683">https://arxiv.org/abs/2505.14683</a></dd><dt>相关代码</dt><dd>已开源，<a href="https://github.com/ByteDance-Seed/Bagel">https://github.com/ByteDance-Seed/Bagel</a> （讲者开场即说明数据之外训练、模型、推理与各种 setting 全部开源）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1t34szKEUc/">https://www.bilibili.com/video/BV1t34szKEUc/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP54.txt</code>（1409 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP54，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 BAGEL 在字幕中作「背狗/北狗/BGO」、MoT 作「MOT」、MSE loss 作「mc loss」、CE loss 作「ca log」、Janus-Pro 作「genus pro」、GPT-4o 作「GPTFO/GBTFO」、Step1X-Edit 作「Stone one x edit」，均以论文与公开资料为准）。论文（arXiv:2505.14683）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>BAGEL 用一套 Mixture-of-Transformers（MoT）架构把「理解」和「生成」放进同一个 decoder-only Transformer：理解与生成各用一套独立参数、只在 attention 层共享上下文，从而既绕开外挂 diffusion 解码器的信息瓶颈、又避免单套参数的任务冲突；再配上大规模交错（interleaved）图文数据与只在 SFT 阶段构造的推理增强数据，模型在训练后期涌现出 free-form 图像编辑、世界知识生成与 3D/导航类操作能力。这期 talk 的价值不在报 benchmark，而在讲者把「为什么选这条路线、四阶段怎么训、哪些能力何时涌现、哪些坑（EMA、CFG）怎么避」完整摊开。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>路线之争：五类统一架构，BAGEL 为什么选参数分离</h3>
+<p>讲者先用近年的综述图谱把统一理解+生成模型的路线分成几类，并逐条给出否决理由，这部分是整场最有信息量的「选型论证」：</p>
+<ol>
+<li><strong>纯 AR + 离散视觉 token</strong>（Chameleon、Emu 一系）：好处是完全复用 LLM 基建、天然支持图文交错生成；但离散化同时伤生成质量与理解性能，且逐 token 生成大图慢、内存开销大——「目前沿着这条路线做还稍微有点尴尬」。</li>
+<li><strong>双 encoder</strong>（连续 ViT 管理解、离散 VAE 管生成）：缓解了理解差的问题，但生成质量仍差、双编码内存开销大，且两个任务在同一个 LM 里存在语义冲突。</li>
+<li><strong>单一专用 tokenizer</strong>（VILA-U、TokenFlow、Muse 一系）：把高低层语义压进一个 vision encoder，交错场景下省 token，但理解与生成效果都还不够好，讲者定位为更适合学术界探索。</li>
+<li><strong>冻结理解模型 + 外挂 diffusion 解码器</strong>（BLIP-Diffusion、MetaQuery 一系）：从训好的多模态理解模型接 learnable query 去条件化 diffusion，训小模块、一两天见效，两个任务都「守得住」。但讲者团队一开始考虑后放弃了：query 压缩等于显性信息瓶颈，单图生成无碍，一旦做超长文本、图文交错输入就会丢信息。讲者并据此反推 GPT-4o 的图像编辑容易丢细节（风格转换后眼镜、长发、背景灯消失）「很有可能就是用的这种外挂一个 decoder 的结构」——这是猜测，但给出了从结果反推架构的方法论。</li>
+<li><strong>单 Transformer 同做 next-token prediction 与 flow matching</strong>（Transfusion、MonoFormer、Show-o 一系）：不做高层信息压缩、交互无损、可扩展到长上下文；但共享参数导致高层语义归纳（文本）与低层生成（图像）的任务冲突，且要从头训扩散模型，学术界算力做不动、训练不稳定。</li>
+<li><strong>参数分离、共享注意力</strong>（LLaMA-Fusion/LM-Fusion、Seed 的 Mogao、Janus-Pro、BAGEL）：理解与生成各用一套参数、共享同一套 attention。这样既保留第 5 类「无瓶颈、可长上下文」的好处，又用独立参数消掉任务冲突；代价仍是训练开销大、稳定性差——「我们今天要介绍的也是这一套架构」。</li>
+</ol>
+<p>此外讲者提到一条更新的路线：把文本生成也改成 diffusion 目标（字节 Duo Diffusion、Princeton/CA 的 MMaDA 一系），生成质量已不错，但文本理解离自回归模型还有差距。</p>
+<h3>架构细节：MoT 的 token 如何流动、attention mask 怎么切</h3>
+<p>BAGEL 的具体做法（以两轮交错输入为例）：第一轮输入图像+文本，文本 token 走理解分支；若任务是文生图，噪声 token 走生成分支。第二轮的文本与图像需要看到第一轮的图文信息，所以训练时把第一轮图像的 <strong>clean VAE 特征</strong> 喂给生成分支、<strong>ViT 特征</strong> 喂给理解分支，后续轮次重复这一过程。attention mask 整体仍是 causal 的：后续文本/图像能看到前面所有轮次的图文内容，但<strong>看不到前面轮次的 noise token</strong>；每张图像（或每个噪声块）内部是 bidirectional 的。对视频训练做了变体：上下文太长，不再喂 clean 特征，而是借 diffusion forcing 的做法，让后续帧看到前面帧的带噪特征。</p>
+<p>为什么生成与理解必须分参数？讲者给了小模型消融：在 dense、只共享 QKV 的 MoE、QKV 与 FFN 全分离的 MoT 之间比较，理解任务的几条曲线差异不大，但生成任务的 MSE loss 能差出 0.01 甚至 0.04——「这个差距对生成任务影响非常大」，故最终选 MoT。不过讲者也留了口子：模型放到非常大的规模时，MoE 与 MoT 的差别未必还有这么大，这一点他们并不确定。</p>
+<h3>数据：开源没有现成的交错生成数据，只能自己造</h3>
+<p>BAGEL 与其他统一模型最大的不同，是不用纯 image-text pair 训，而用大量 interleaved 数据激发 free-form 生成。理解侧交错数据现成（主流理解数据本身就是交错形式），生成侧交错数据开源生态里几乎没有，他们为此搭了两条构造管线：网页图文交错数据（从 OmniCorpus 过滤）与把开源编辑数据改写成交错形式；视频数据天然适合构造交错（帧间变化即编辑指令），另有 3D 数据支撑 rotation 类能力（字幕作「MB image net」，应为 MVImgNet 一类多视角数据集）。需要推理的生成数据（文生图推理、free-form manipulation、智能编辑）最难构造，只做了 SFT 规模，用开源的 VLM/thinking 模型辅助生成推理过程。</p>
+<p>配比实验结论很干脆：<strong>生成 : 理解 ≈ 4 : 1</strong>。增大生成数据比例对生成 MSE loss 影响非常大；而理解的 CE loss 虽然曲线波动大，从 benchmark 看影响不大——理解数据比例可以不用太大，生成数据比例一定要够。讲者补充：这里还有很多可做的 ablation，论文里没有放太细。</p>
+<h3>四阶段训练：分辨率与 pack 长度逐阶段放大</h3>
+<ol>
+<li><strong>对齐</strong>：类似 LLaVA 的做法，先用简单的 image caption 数据把 ViT 与 LM 对齐，开销小，在较小的 ViT feature 上快速做完。</li>
+<li><strong>预训练</strong>：原生分辨率训练——生成侧图像最长边约 512，理解侧最长边约 980。所有样本 pack 成长序列训练，<strong>没有严格的 batch size 概念</strong>，靠控制 pack 序列长度与卡数来控制样本吞吐（这是 GitHub 上被问最多的点之一）。</li>
+<li><strong>继续训练（CT）</strong>：借鉴文生图模型的经验把生成侧长边放大到约 1K，token 量涨幅大，最长 pack 序列相应增加约 10K token。</li>
+<li><strong>SFT</strong>：筛更高质量数据并加入推理增强数据；随阶段推进，纯文生图数据占比逐步下降、交错数据占比上升，以换取 free-form 生成能力。</li>
+</ol>
+<p>讲者顺带给了三个实战参数经验（都来自被坑过的复现者提问）：优化器 epsilon 要设得非常小以防崩溃（某篇论文的小发现）；<strong>EMA 是最常见的翻车点</strong>——默认 EMA 衰减设得太大时 EMA 模型几乎不更新，会出现「训了几万步 loss 降了很多但模型没效果」，解法是先测普通权重、或把 EMA 调小；生成发糊/过曝主要是 CFG 引入的，开 CFG renorm/rescale 或调小 CFG scale 可明显缓解（Flash 模型的做法是直接做 CFG 蒸馏）。</p>
+<h3>涌现顺序：理解先到，智能编辑最后</h3>
+<p>讲者用「达到最终性能的 85% 即算饱和」的口径画了能力随训练的涌现次序：理解任务收敛最快（几百 B token 量级即可达到不错性能，与 LLaVA 时代的经验一致）；生成约到 700B token 才有像样的基础 matching；之后才慢慢长出基础编辑；<strong>最后涌现的是「智能编辑」</strong>——需要理解与生成真正互相促进的那类任务（如推断毛线织完的形状、水果加牛奶搅拌后的颜色、视角转换），可视化上要到约 4.5T token 才与人的预期对齐。文生图很早就与 prompt 对齐、后续只是质量与文字渲染变好；简单编辑在训练早期（约 2T token）就可以了，后面是润色。另有一个推理侧消融：简单增删改查用纯 VAE 推理与 VAE+ViT 推理差距不大，但<strong>需要智能推理的编辑，VAE+ViT 明显更好</strong>——ViT 的语义特征是这类任务的关键输入。</p>
+<h3>效果与边界：self-CoT 是统一模型独有的招</h3>
+<p>benchmark 讲者只做定性交代：主流理解 benchmark 与同规模纯理解模型 comparable，但比不过自家专门的理解模型——这里他主动澄清了参数口径问题：MoT 虽然总参数翻倍，但理解任务只流经理解分支的那套参数，「另外 7B 参数其实是完全没有用的」，所以按 7B 理解参数与别人比是成立的。生成侧两个自研要点：一是 <strong>self-CoT</strong>——让模型先对输入文本/图像做文本推理、再按推理结果生成，在需要世界知识的生成与智能编辑上都有明确增益（如「由小车拼成的大车」这类构图，直接生成做不对、先想一想就对了）；二是文字生成能力是规模涌现的，中小模型学不好，英文场景迁移尚可、中文明显弱。编辑 benchmark 上，中英文编辑与专用模型 Step1X-Edit 相差不大；智能编辑明显强于开源模型，但与 GPT-4o 仍有距离。</p>
+<p>失败案例讲者也不藏着：特殊 IP/动漫形象、复杂文字生成、交换两个瓶子、deblur（会幻想不存在的内容）都做不好——并指出这些是目前几乎所有模型的共同短板。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>为什么不直接用 Agent 调外部生图工具？</strong> Agent 现在确实很强、是很多任务的高上限做法，但统一模型的追求是模型自身在「生成帮助理解、推理帮助生成」之间自我循环，冲更高的智能上限。生成促进理解目前还很初步：用简单 transform/visual CoT 帮理解「提升非常慢」，甚至不如直接函数调用；图像的 2D 表达与文本的 1D 表达差异何在，是讲者认为值得想的方向。</li>
+<li><strong>输出模态怎么决定？</strong> 目前靠人工指定的 special token 切换文本/图像输出，不像 GPT-4o 那样自动调用生图；要模型自判只需补一版 special token 预测的 SFT，「非常好训练」，主要难在应用端交互工程。</li>
+<li><strong>训练数据是多任务混合、任务间不可见吗？</strong> 是混合训练，样本间由 attention mask 隔离，样本内另有特殊 mask 设计。</li>
+<li><strong>文字生成除了数据量还靠什么？</strong> 字符级 encoder 是关键一招（可看 Seed 的文生图技术报告）。</li>
+<li><strong>理解指标还会不会涨、会不会打架？</strong> 打架肯定有，只是 MoT 里程度小；理解在 CT 之前就已到 90%–95%，后续涨幅有限。</li>
+<li><strong>生成扩图：先升分辨率还是先升参数？</strong> 先升分辨率，收益更大。</li>
+<li><strong>编辑能商用吗？</strong> 还有距离（瑕疵率要求高）；讲者认为 Flash 一类闭源模型已接近商用水准，这条路线要靠更大规模与更好数据长期演进。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>讲者学术指标（主持人介绍）</td>
+<td>—</td>
+<td>一作/共一论文 12 篇，谷歌学术引用 6400 余次</td>
+<td>字幕（开场介绍）</td>
+</tr>
+<tr>
+<td>MoT vs dense/MoE 小模型消融</td>
+<td>理解任务曲线差异不大</td>
+<td>生成 MSE loss 差距 0.01–0.04</td>
+<td>字幕（架构部分）</td>
+</tr>
+<tr>
+<td>数据配比</td>
+<td>—</td>
+<td>生成 : 理解 ≈ 4 : 1</td>
+<td>字幕（数据部分）</td>
+</tr>
+<tr>
+<td>预训练分辨率</td>
+<td>原生分辨率 + packing</td>
+<td>生成最长边约 512，理解最长边约 980</td>
+<td>字幕（训练部分）</td>
+</tr>
+<tr>
+<td>CT 阶段</td>
+<td>pack 序列</td>
+<td>生成长边扩至约 1K，pack 增加约 10K token</td>
+<td>字幕（训练部分）</td>
+</tr>
+<tr>
+<td>能力饱和定义</td>
+<td>最终性能的 85%</td>
+<td>理解几百 B token 量级先饱和，生成约 700B token</td>
+<td>字幕（涌现部分）</td>
+</tr>
+<tr>
+<td>智能生成对齐点</td>
+<td>可视化节点 1.5T / 2.5T / 4.5T token</td>
+<td>约 4.5T token 才与人类预期对齐</td>
+<td>字幕（涌现部分）</td>
+</tr>
+<tr>
+<td>理解性能进程</td>
+<td>CT 阶段之前</td>
+<td>已达最终性能的 90%–95%</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>理解参数口径</td>
+<td>MoT 总参数</td>
+<td>理解只流经理解分支的参数（讲者按 7B 口径比较）</td>
+<td>字幕（benchmark 部分）</td>
+</tr>
+<tr>
+<td>图像编辑 benchmark</td>
+<td>专用编辑模型 Step1X-Edit</td>
+<td>中英文编辑相差不大，智能编辑强于开源模型</td>
+<td>字幕（benchmark 部分）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>选型论证框架可直接复用</strong>：把「离散 AR / 双 encoder / 单 tokenizer / 外挂解码器 / 共享参数 / 参数分离」按信息瓶颈与任务冲突两条轴排一遍，是做任何理解+生成统一系统时的第一张图；尤其「外挂解码器=显性瓶颈、长上下文交错场景必丢信息」这条，对评估闭源模型（GPT-4o 编辑丢细节）也是可操作的反推线索。</li>
+<li><strong>infra 视角</strong>：MoT 是「共享 attention、分离 FFN/参数」的静态路由，它的部署形态介于 dense 与 MoE 之间——理解流量只激活一半参数，成本模型要按激活参数而非总参数算；原生分辨率 + packing、无固定 batch size 的训练方式，对变长多模态数据的吞吐管理是现成参考。</li>
+<li><strong>训练坑位清单</strong>：EMA 衰减过大导致「loss 降了模型没变」是隐蔽的静默失败，任何带 EMA 的生成训练都应先验普通权重；CFG 的糊/过曝优先查 renorm/rescale 而不是先怀疑模型。</li>
+<li><strong>self-CoT 值得在 RL 数据构造里借鉴</strong>：生成任务先出文本推理再执行，与 post-training 中「先想后做」的轨迹设计同构；且 ViT 语义特征对推理型编辑不可替代，提示多模态 RL 的状态表示不能只用像素 latent。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>MoT 与 MoE 在超大规模下是否趋同，讲者明确表示不确定；小模型上 0.01–0.04 的 MSE 差距能否外推到 7B 以上，没有给出证据。</li>
+<li>生成数据 : 理解数据 4 : 1 只是「中间结果看着不错」的经验值，讲者承认不是最优、ablation 未放全；交错生成数据的两条构造管线细节（过滤规则、编辑数据改写方式）在 talk 中一句带过，须查论文与 GitHub。</li>
+<li>「生成促进理解」讲者自认尚无好形式（visual CoT 太弱）——这恰是统一模型相对 Agent+工具范式的立项理由，目前仍停留在愿景层，缺可量化证据。</li>
+<li>智能编辑与 GPT-4o 的差距被多次提及但未量化；论文口径的 benchmark 数字（理解/生成/编辑）需另行查 arXiv:2505.14683 核对，不能只凭 talk 口径引用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们希望一个统一的模型，它自己能够实现自我的一个推理，它自己知道什么时候应该生成一个图片帮助他做一个更好的理解，或者说什么时候做一个 reasoning 帮助他做一个更好的生成……实现更高的一个智能上限。」——Q&amp;A 中回应「为何不用智能体调外部工具」（字幕 64:18–64:44，按干净口径转写）</p>
+<p>「可以先把分辨率变大，然后再把参数变大，分辨率变大的收益会更大一些。」——Q&amp;A 中被问训练分辨率与参数规模的取舍（字幕 69:31–69:40）</p>
+<p>「它很有可能就是用的这种外挂一个 decoder 的结构。」——由 GPT-4o 图像编辑丢失眼镜、长发等细节反推其架构（字幕 12:58–13:03，讲者明确标注为猜测）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

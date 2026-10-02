@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP52 — Sparse VideoGen：无需重新训练的 DiTs 推理加速框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP52 — Sparse VideoGen：无需重新训练的 DiTs 推理加速框架</h1>
+    <p class="sub">讲者以「video DiT 的 attention 计算量占比随序列总长度快速膨胀」为起点，把视频生成的推理瓶颈定位到注意力；据此发现 attention head 天然分成两… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP52-sparse-videogen.html</p>
+<p>「它能够使得 kernel 的加速比和理论上基于 sparsity 算出来的加速比非常接近。」——讲者谈 layout transformation 对 temporal head 计算效率的修复</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>52</dd><dt>标题</dt><dd>Sparse VideoGen：无需重新训练的 DiTs 推理加速框架</dd><dt>BV</dt><dd>BV1xw4jzgENr</dd><dt>时长</dt><dd>00:53:17（字幕覆盖约 53 分钟，主持等待开场约前 5 分钟；讲授从 11 分钟起，之后为 Q&amp;A）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>徐浩成（加州大学伯克利分校博士生；字幕中自述与主持人介绍一致，正式头衔以论文作者页为准）</dd><dt>相关论文</dt><dd>Sparse VideoGen——无需重新训练的视频扩散 Transformer（DiTs）推理加速框架；讲者称已被 SysML 2025 接收（字幕口径）；后续工作 Sparse VideoGen 2 提于 Q&amp;A</dd><dt>相关代码</dt><dd>字幕中未给出</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1xw4jzgENr/">https://www.bilibili.com/video/BV1xw4jzgENr/</a></dd><dt>官网期号</dt><dd>第 52 期（官网预告链接省略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP52.txt</code>（929 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP52，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如「spatial head」字幕作「special hand」、temporal head 作「TEMPORHEAD」、SysML 作「SML」、sparse video gen 作「sparse video g」，均以讲者口径与公开资料为准；讲者口头介绍会议时字幕写作「SML2025」，疑为 SysML；主持人开场介绍作「ICLO22025」，显系识别错误）。论文未在字幕中给出 arXiv 编号，故数字全部为讲授字幕口径。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者以「video DiT 的 attention 计算量占比随序列总长度快速膨胀」为起点，把视频生成的推理瓶颈定位到注意力；据此发现 attention head 天然分成两类——主管空间相关性的 spatial head（attention 集中在对角线附近的本地 tile 与首帧列）和主管时间一致性的 temporal head（attention 沿 3D 序列的同位置跨帧斜线规则分布）；Sparse VideoGen 的贡献，是给每个 head 在线、近乎零成本地选对该用哪类 mask，并把 temporal head 不规则的稀疏分布经 layout transformation 重排成 GPU 友好的紧凑小块，最终实现接近理论上限的 attention kernel 加速与特征上几乎无损的视频生成质量。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">attention 占比越高——讲者给的比例是 17K</div><div class="farrow">→</div><div class="fnode">51%、40K</div><div class="farrow">→</div><div class="fnode">73%、120K</div><div class="farrow">→</div><div class="fnode">82%</div></div>
+<h3>背景：视频 DiT 中 attention 是计算大头，长序列时更夸张</h3>
+<p>视频扩散模型的骨架是 3D attention：sequence 同时沿空间 token（像素块）和帧（frame）两个维度展开。一个 30 帧、每帧 3000 token 的典型设置，sequence 长度直接到 90K。attention 计算量关于 sequence 长度平方增长，其他算子线性增长，所以序列越长 attention 占比越高——讲者给的比例是 17K → 51%、40K → 73%、120K → 82%。</p>
+<p>在这种占比下，仅优化其余算子（MLP、normalization、采样 scheduling）改善的只是次要部分；要真正加速视频生成，必须直接压低 attention 峰值——Sparse VideoGen 因此把问题限定为——<strong>不重训练、不改模型、不改扩散时间表，只靠跳过本就不重要的 attention 计算</strong>。</p>
+<h3>发现：head 天然分 spatial 与 temporal 两类</h3>
+<p>讲者走的路子不是从通用稀疏 API 出发，而是先看 attention map 里固有的稀疏结构。他把全部 head 分成两类。</p>
+<p><strong>Spatial head</strong>：attention score 集中在对角线附近（同一帧内的本地 token + 邻近帧的对应 tile）、以及第一列（所有 token 都会关注首帧 token，相当于 LLM 的 attention sink 现象在时序上的对应物）。讲者的解释是这类 head 在维护局部空间信息——每个 token 不可避免地要像看它周围邻居那样看附近的 token。</p>
+<p><strong>Temporal head</strong>：attention score 分布是稀疏的对角线条纹——同一个空间位置在不同帧的 token 之间互相 attend，在由帧×空间构成的 3D attention map 上呈现斜线规律。讲者认为这类 head 在维护时间一致性（同一个物体在各帧间连续出现、避免闪烁跳动）。</p>
+<p>讲者强调这条分法不是人为划分的稀疏 mask，而是模型内部真实存在的行为分化；知道 head 是空间型还是时间型，才能给每个 head 施以恰当的稀疏化方案。</p>
+<h3>方法：在线识别 head 类型 + 稀疏 mask + layout transformation</h3>
+<p>一旦能正确分类 head，后续处理拆成两块。</p>
+<p><strong>在线识别 head 类型（online profiling）</strong>。讲者先给出离线方案：跑一遍 dense attention、算两种 sparse map 的输出、按 MSE 选更近的；效果几乎无损（PSNR ≈ 30），但它<strong>需要先跑 dense attention</strong>，把前向传播的大头算完了所谓加速也就无从谈起。线上策略则把「先跑一遍」降到「只抽少量 query token 试探」：在每个 head 内部从全部 query 里随机取约 32 token（讲者举例 20K 里取 32，约 1%）计算两种稀疏 map 下的结果并比较，从而判定 head 类型。代价仅约 1% 量级。</p>
+<p><strong>Layout transformation（解决 temporal head 的计算不效率）</strong>。讲者点出 dense 稀疏 map 可以「识别出应该算的块」并不等于高效：temporal head 的斜线分布在内存上不连续——即便 density 降到 20%，理论加速 5 倍，实际往往只有 2–3 倍。其根源是斜线型布局与 GPU 上连续内存访问的不匹配。</p>
+<p>讲者给的解法是 orthogonal 重排：按“token 位置”而不是帧序组织序列——先排帧 1–F 中“位置 1”的所有 token，再排“位置 2”的所有 token……这样同一个位置在不同帧的 token 变成一排连续的小块，temporal attention 的斜线在新排布里变成对角线附近的紧凑小块，GPU 内核即可按规则顺序装载。讲者同时强调这步重排是可逆的：算完再施加逆变换恢复到原来的 attention output 排布，工程上还与 text embedding/token 兼容——只对 video token 用 transformation，text token 保持不动。</p>
+<p><strong>系统侧配套</strong>。两条零星但重要的工程措施：把稀疏 attention 集成到现有高效内核之上（Q&amp;A 澄清是基于 FlashAttention 做 sparse attention，并非重新写 kernel）；同时讲者还发现很多 video 模型里 QK norm（字幕作 SuperNorm）与 RoPE（字幕作「肉」）这些次要算子耗时不低，用 kernel fusion 合成一个卷一起的算子包能拿到 8–16 倍该级别算子的提速。</p>
+<p>这套组合搭配的具体评估数字在下一节列出。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>和 XAttention 的区别</strong>：讲者认同两者思路相近、甚至交流过；XAttention 可看作一种让 sparse 识别「该算哪些块」的通用方法，但识别完仍面临不连续内存访问的风险；Sparse VideoGen 不是靠稀疏计数规则，而是通过 layout transformation 把 temporal head 的计算真正落地，并且是为 video diffusion 的固有冗余结构设计。</li>
+<li><strong>跳过 denoising steps（如 TeaCache）正交</strong>：与 TeaCache 完全兼容——TeaCache 从 denoising step 数量上做跳步，Sparse VideoGen 在单步 attention 内部做稀疏，互不冲突。</li>
+<li><strong>是否一定能二分类</strong>：讲者承认有些 head 既不像纯 spatial 也不像纯 temporal——这也是他们做后续工作 <strong>Sparse VideoGen 2</strong> 的起因之一——新版对这类混合型 head 的近似更好。</li>
+<li><strong>mask 的时间-空间统一</strong>：讲者解释 transformation 把 temporal head 拉回对角线附近后、规则化后的 temporal 与 spatial 的 mask 形式基本一致，实践时对 temporal head 施加 transformation、spatial head 不施加。</li>
+<li><strong>attention mask 的存储</strong>：理论存储是 ， $N \times N$ ， 讲者用「大规模时靠 query token 索引压缩（如 1000–5000 条上限）」把 profiling 用的 mask 锁到 1GB 以内点到即止——承认真实 query 数量 20K 级别时要做约束。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>30 帧 × 3000 token 的 sequence 长度</td>
+<td>—</td>
+<td>约 90K</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>attention 占比（17K 序列）</td>
+<td>—</td>
+<td>约 51%</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>attention 占比（40K 序列）</td>
+<td>—</td>
+<td>约 73%</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>attention 占比（120K 序列）</td>
+<td>—</td>
+<td>约 82%</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>offline profiling 识别 head 类型的质量</td>
+<td>PSNR</td>
+<td>≈ 30（几乎无损）</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>online profiling 抽样比例</td>
+<td>20K query 中抽取</td>
+<td>32 个 query token（约 1%）</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>稀疏 density 20% 时的期望加速</td>
+<td>naive sparse kernel 2–3 倍</td>
+<td>期望 5 倍</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>attention kernel 整体加速区间</td>
+<td>—</td>
+<td>2.5–3.6 倍</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>端到端视频生成加速</td>
+<td>dense baseline</td>
+<td>约 2.33 倍（字幕口径）</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>PSNR（Sparse VideoGen）</td>
+<td>现有 baseline 约 22–23</td>
+<td>≈ 29</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>SSIM（Sparse VideoGen）</td>
+<td>现有 baseline 约 0.7–0.8</td>
+<td>&gt; 0.9</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>QK norm / RoPE 的 kernel fusion 加速</td>
+<td>旧 PyTorch 实现</td>
+<td>8–16 倍</td>
+<td>字幕（讲授部分）</td>
+</tr>
+<tr>
+<td>附加 profiling 开销</td>
+<td>占 sparse attention 总耗时</td>
+<td>约 10–20%</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>profiling 用的 attention mask 存储</td>
+<td>， $N \times N$ ，</td>
+<td>约 1GB 以内（query 索引上限 1000–5000）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>选 head 前先 profile、别拍脑袋</strong>：对于任何 transformer-based 的推理加速工作，「假设所有 head 都适合同一种稀疏结构」都可能过粗；讲者用极小算力（≈1% query token）两秒式地把每个 head 按它真正的行为定型，可以考虑把这种小额 online sampling 套用到 LLM 推理加速和 MoE 专家视角的 profile 里。</li>
+<li><strong>layout transformation 是个正交技巧</strong>：稀疏结构的有效性与计算效率是两回事——只要访问模式与内存排布不匹配，FLOPS 优势就会被加载开销抵消。把「不连续块」重排成「连续行」先算、算完再恢复的模式，比尝试写更聪明的 kernel 更先验有效，与 EP50 中 MoLE「先重参数化、再查表」是同构的工作模式。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>既然 Q&amp;A 已经承认存在第三类 head（既非纯 spatial 也非纯 temporal），Sparse VideoGen 2 为此做了哪些具体修改暂时没有完整材料，建议后续补录。</li>
+<li>PSNR ≈ 29（字幕略带「PSNR 是不是该 28.5 左右」的口头摇晃）是与 baseline 相对而非绝对保真上限；若要实际用于端到端评测，还要再看 VBench/LIPS 等更细维的指标。</li>
+<li>layout transformation 在超长视频（比如 1000 帧）下是否仍稳定、profiling mask 的 1GB 上限在 MoE 化的新 video 模型上是否需要新的压缩策略，未在本次 Q&amp;A 中展开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「它能够使得 kernel 的加速比和理论上基于 sparsity 算出来的加速比非常接近。」——讲者谈 layout transformation 对 temporal head 计算效率的修复</p>
+<p>「如果这些 head 的计算不够好，生成出来的视频它的时空一致性就不会很好。」——讲者把 temporal head 与视频质量的契约摊开解释</p>
+<p>「有一些 head 既不能太归类到 spatial head，也不太能归类到 temporal head。」——讲者在 Q&amp;A 中自述后续把这类 head 当作第二版工作的独立议题</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

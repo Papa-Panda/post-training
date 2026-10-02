@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP34 — K-Sort Arena：视觉生成模型的高效人类偏好竞技场</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP34 — K-Sort Arena：视觉生成模型的高效人类偏好竞技场</h1>
+    <p class="sub">针对视觉生成模型的人类偏好评估，讲者团队把 Chatbot Arena 式的一对一比较改造成四路自由混战：用 $K$ 路比较提高单次投票的信息量，用「能力正态分布 + 表现噪声… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP34-ksort-arena.html</p>
+<p>「我们如何高效地利用这些投票数据、这些信息，而不会导致人类的成本不被浪费，是我们关注的一个点。」——讲者李智凯在引入部分对全场问题的定调（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP34</dd><dt>标题</dt><dd>K-Sort Arena：视觉生成模型的高效人类偏好竞技场</dd><dt>BV</dt><dd>BV1EeNZeeENy</dd><dt>时长</dt><dd>00:54:23（讲授约 43 分钟 + Q&amp;A 约 11 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>李智凯（字幕开场自述姓名；本工作与加州大学伯克利分校合作完成，讲者所属单位字幕未自述，以论文作者页为准）</dd><dt>相关论文</dt><dd>K-Sort Arena（讲者口播的工作名；论文链接以公开资料为准）</dd><dt>相关代码</dt><dd>已托管 Hugging Face Space（Gradio 交互界面，榜单至少每周更新一次）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1EeNZeeENy/">https://www.bilibili.com/video/BV1EeNZeeENy/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP34.txt</code>（1138 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP34，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 K-Sort Arena 在字幕中多作「K4/K-Sort/K4条微纳」、Elo 作「yellow/一楼」、TrueSkill 作「true scale」，均以论文与公开资料为准）。凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>针对视觉生成模型的人类偏好评估，讲者团队把 Chatbot Arena 式的一对一比较改造成四路自由混战：用 $K$ 路比较提高单次投票的信息量，用「能力正态分布 + 表现噪声」的双重随机概率建模加贝叶斯更新替代 Elo 数值分以抗人类偏好噪声，再用 UCB 探索-利用匹配策略决定每轮让哪几个模型交手；仿真中给 50 个模型排名从 Elo 所需的 1 万多次比较降到平均 716 次（16.3 倍效率提升），新模型加入榜单不到 30 次投票即可定位。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景：Arena 机制搬到视觉生成模型上，卡在效率与噪声</h3>
+<p>讲者先按 Chatbot Arena 论文的分类法铺垫：benchmark 可按「评估指标」（ground-truth 对照 vs 人类偏好）和「问题来源」（静态 vs 动态）分四象限，Arena 的优势是开放式 prompt + 实时平台，能跟上快速迭代的新模型与新玩法。但直接照搬到视觉生成模型有三个待解问题：</p>
+<ol>
+<li><strong>效率</strong>：人类投票成本高昂且不可再生，如何让每次投票的信息量最大化、不浪费人力；</li>
+<li><strong>可靠性</strong>：同一输入输出、不同评估者打分不一致是固有的人类偏好噪声，排行榜要在噪声下仍可信；</li>
+<li><strong>模态特性</strong>：图像/视频比文本更具感官直观性（扫两三秒即可整体判断），这个特性应当被利用来放大单次投票的信息量。</li>
+</ol>
+<h3>方法一： $K$ 路比较模式（本场实现取 $K = 4$ ）</h3>
+<p>不再一对一，而是 $K$ 个模型同题竞技、投票者给出全序（如 A &gt; C &gt; B &gt; D）。近似相同的投票时间里，一次投票包含的成对信息远多于一对一。讲者给的生物学依据是视觉信息的直观性：评文本要逐字看对错、结构、关键词，评图像/视频则可快速形成整体与细节认知。 $K$ 的取值做过消融： $K = 2$ 收敛慢， $K = 6$ 初期下降快但后期震荡、且更新更难，最终系统取 $K = 4$ 。</p>
+<h3>方法二：概率建模 + 贝叶斯更新，得分取保守下限</h3>
+<p>Elo 的数值分对偏好噪声敏感，讲者改用概率建模，且叠了两层随机性：</p>
+<ul>
+<li>模型能力 $\theta$ 用正态分布 $N(\mu, \sigma^2)$ 表示（ $\mu$ 是能力均值， $\sigma$ 是不确定性）；</li>
+<li>在能力之上再叠一层「实际表现」的随机性（选手有超常/失常发挥），使建模对噪声与扰动鲁棒；</li>
+<li>最终得分不用均值，而用保守分估计，即按下限 $\mu - 3\sigma$ 排序，避免不确定性大的模型虚高。</li>
+</ul>
+<p>更新走贝叶斯路线：以当前能力分布为先验、本轮比较结果为观测，按 $P(\theta \mid D) \propto P(D \mid \theta) P(\theta)$ 求联合后验，再对单个模型边缘化、代入期望与方差公式得到新的 $\mu$ 与 $\sigma$ 。先以 $K = 2$ 推导，再推广到 $K$ 路：一组 $K = 4$ 的投票等价于单个模型与其余 3 个模型并行各比一次，沿用同一更新公式。初始化统一取 $\mu = 0$ 、 $\sigma = 1$ 。Q&amp;A 里讲者补充了噪声自适应性质：若新投票与先验矛盾， $\sigma$ 反而增大（不确定性上升、需要更多投票），与先验一致则 $\sigma$ 收缩——恶意投票主要拖慢收敛，不改变最终结果。</p>
+<h3>方法三：UCB 匹配策略，每轮投票先算「打谁最划算」</h3>
+<p>随机匹配会浪费投票（例如榜单已稳定时还让第一名打最后一名，收益趋零）。讲者把模型对之间的关系建模成多臂老虎机的一条臂，用 UCB 同时做两件事：</p>
+<ul>
+<li><strong>探索</strong>：成对比较次数少的模型对，优先促成其交手；</li>
+<li><strong>利用</strong>：能力越接近的模型越值得打（区分度最高，避免强弱悬殊的无效比较）。</li>
+</ul>
+<p>组局方式是贪心的：先选一个「枢纽模型」——即参与比较总次数最少的模型——再按 UCB 得分贪心挑 $K-1$ 个对手组成一组。枢纽取最少参与者带来两个天然好处：从零排 50 个模型时各模型参与次数自动均衡、不会评估不足或过度；新模型加入时其参与次数天然最少，会在最初几十轮频繁当枢纽，快速追平老模型的比较量，实现新模型的实时评估。</p>
+<h3>实验：仿真四组消融 + 已上线的双榜单</h3>
+<p>仿真设定：给每个模型预设一个隐藏的「无序标签」当真实能力，投票结果由标签生成（可另加偏好噪声），榜单与标签算 MSE 看收敛；两种场景——50 个模型从头排名、向已有 50 模型榜单加 1 个新模型。</p>
+<ol>
+<li><strong>端到端对比</strong>：Elo 系统（ $K = 2$ 、数值建模、随机匹配）给 50 个模型排名需要 1 万多次比较；K-Sort Arena（ $K = 4$ 、概率建模、UCB 匹配）平均 716 次比较即收敛，效率提升 16.3 倍。</li>
+<li><strong>建模方式消融</strong>（固定 $K = 2$ + UCB 匹配）：无噪声时 Elo 在 3400 次比较时仍剧烈震荡，概率建模约 1500 次即稳定收敛（MSE 降为零）；加入 5% 偏好噪声后收敛变慢，但约 2000 多次仍收敛，Elo 继续震荡。</li>
+<li><strong>匹配策略消融</strong>（固定 $K = 4$ + 概率建模）：随机匹配在 3400 次时仍震荡；TrueSkill 式按能力相近匹配（只有利用、没有探索）同样严重震荡（很多模型没被充分比较）；UCB 在 700–800 次比较即收敛。</li>
+<li><strong>新模型评估</strong>：全随机选枢纽时新模型只有约 1/50 概率被选中、收敛极慢；枢纽随机 + UCB 匹配有改善（探索项会照顾比较次数少的新模型）；最终方案（新模型当枢纽 + UCB 匹配）在无噪声理想情况下，不到 30 次投票即可完成对新模型的评估。</li>
+</ol>
+<p>线上系统：已在 Hugging Face Space 运行数月，投票界面给出明确标尺（50% 文本对齐程度 + 50% 图像真实性），支持全序投票与只选最佳两种模式，并备有预生成样例免去等待生成。截至讲授时：文生图榜单收录 34 个模型、收集 1530 张投票；文生视频榜单收录 13 个模型、收集 577 张投票（均为字幕口径）；讲者特别提到榜单上已有国内开源模型超越商业模型的结果。此外平台公开前经历了近 4 个月内测（邀请伯克利、新加坡国立、CMU、斯坦福、普林斯顿、北大等同行反馈），并设了投票贡献者排行榜。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>公平性/权威性</strong>：投票全程匿名、无名称与顺序先验；权威性靠算法可靠性 + 持续纳入最新模型积累。</li>
+<li><strong>闭源模型怎么测</strong>：实时评估只支持开源权重或有 API 的模型；闭源模型只能人工逐个收集其输出做成缓存再投票，无法实时生成。</li>
+<li><strong>平衡系数 $\alpha$ 怎么定</strong>：简单 grid search 定死后全场景通用，不追求逐场景最优。</li>
+<li><strong>偏好随场景漂移</strong>：当前榜单是对齐与真实性各半的宏观口径；讲者表示后续可能拆出只看对齐或只看真实性的细分榜单。</li>
+<li><strong>自有模型想上榜</strong>：可联系团队或在 Hugging Face 提 issue，最好提供开源权重或可调用 API。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>50 模型从头排名所需比较次数</td>
+<td>Elo（ $K = 2$ + 数值建模 + 随机匹配）1 万多次</td>
+<td>平均 716 次收敛，效率提升 16.3 倍</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>概率建模 vs 数值建模（无噪声， $K = 2$ + UCB）</td>
+<td>Elo 在 3400 次仍震荡</td>
+<td>约 1500 次稳定收敛</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>概率建模 vs 数值建模（5% 偏好噪声）</td>
+<td>Elo 持续震荡</td>
+<td>约 2000 多次收敛</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>匹配策略对比（ $K = 4$ + 概率建模）</td>
+<td>随机匹配/纯利用匹配在 3400 次仍震荡</td>
+<td>UCB 700–800 次收敛</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>$K$ 值消融结论</td>
+<td>$K = 2$ 收敛慢； $K = 6$ 后期震荡</td>
+<td>系统取 $K = 4$</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>新模型加入 50 模型榜单的评估成本</td>
+<td>全随机方案收敛极慢</td>
+<td>不到 30 次投票（无噪声理想情况）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>文生图榜单规模（讲授时）</td>
+<td>—</td>
+<td>34 个模型、1530 张投票</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>文生视频榜单规模（讲授时）</td>
+<td>—</td>
+<td>13 个模型、577 张投票</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>投票评分标尺</td>
+<td>—</td>
+<td>对齐程度 50% + 真实性 50%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>能力分布初始化</td>
+<td>—</td>
+<td>$\mu = 0$ 、 $\sigma = 1$ ，得分取 $\mu - 3\sigma$</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「比较次数少的当枢纽 + UCB 选对手」是一套通用的评估调度：任何靠两两/多路比较攒排行榜的场景（模型评测、prompt/策略 A/B、数据配比筛选）都可先按参与次数定枢纽、再按「不确定性 + 能力接近度」选对照组，把预算花在区分度最高的比较上，而不是随机配对。</li>
+<li>概率建模 + 保守分（ $\mu - 3\sigma$ ）排序的思路可直接迁移到内部 benchmark 榜单：带不确定性的分数比点估计更抗标注噪声，新模型/新 checkpoint 用很少样本就能给出可信的保守名次，适合做快速准入评估。</li>
+<li>投票标尺先行（把「对齐 50% + 真实性 50%」写在投票界面顶部）是低成本降噪手段：任何众包或内部标注任务，先把评估维度与权重显性化，比事后清洗更划算。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>5% 偏好噪声下约 2000 多次收敛的数字是在「噪声即与真实标签相反」的简化仿真下得到的；真实众包噪声（系统性偏好、恶意投票、评估者水平差异）下收敛性与榜单稳定性的实测曲线，讲授未展开。</li>
+<li>$K = 4$ 的全序投票在模型水平两极分化时，后段名次的判别精度是否退化（一眼能分出最好，但第 3 与第 4 名常难分），以及只选最佳模式与全序模式的票数如何统一进同一套贝叶斯更新，讲授未细讲。</li>
+<li>榜单票数（文生图 1530 张）相对 34 个模型的规模仍然不大；保守分 $\mu - 3\sigma$ 在票数稀疏时是否会系统性压低新模型名次、影响「不到 30 次定位新模型」的实际体验，值得看论文的真实数据部分核对。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们如何高效地利用这些投票数据、这些信息，而不会导致人类的成本不被浪费，是我们关注的一个点。」——讲者引入部分（字幕约 05:48–06:01，干净口径转写）</p>
+<p>「（图像和视频）我其实一眼扫个两到三秒，就能很快把握这么多图像从整体到一些细节的认知，从而快速投票。」——讲者解释视觉模态为何支撑 $K$ 路比较（字幕约 12:14–12:33，干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

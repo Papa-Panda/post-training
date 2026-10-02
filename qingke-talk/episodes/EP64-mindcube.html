@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP64 — MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP64 — MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力</h1>
+    <p class="sub">MindCube 测的不是 VLM 能否重建 3D，而是它能否像人一样，从几个局部视角在「脑海里」维护一张一致的空间心理模型（spatial mental model）并据此回… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP64-mindcube.html</p>
+<p>「先（在脑海里）有一个对场景的整体感知，再基于这个感知去做推理，这样对应的过程相加起来，会使模型产生最好的性能。」——讲者尹百桥总结 MindCube 的核心结论（字幕 20:31 附近）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>64</dd><dt>标题</dt><dd>MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力</dd><dt>BV</dt><dd>BV1MP4Cz9EGg</dd><dt>时长</dt><dd>01:00:15（讲授约 26 分钟 + Q&amp;A 约 33 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>尹百桥（纽约大学访问学生；工作完成于其在西北大学李曼玲老师组实习期间）、王启能（西北大学博士生，Q&amp;A 主答）；共同指导包括吴佳俊、李飞飞、谢赛宁等（均按字幕自述与主持人口径，字幕中个别姓名有识别误差，正式名单以论文作者页为准）</dd><dt>相关论文</dt><dd>MindCube（英文题目字幕口径为 <em>Spatial Mental Modeling from Limited Views</em>；讲者未在字幕中给出 arXiv 编号，以论文原文为准）</dd><dt>相关代码</dt><dd>字幕未提及</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1MP4Cz9EGg/">https://www.bilibili.com/video/BV1MP4Cz9EGg/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP64.txt</code>（1221 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP64，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 WildRGB-D 字幕作「well的RGBD」、ARKitScenes 作「ark thing in」、ScanNet 作「sky night」、cognitive map 作「cognition Mac」、GRPO 作「gr pu」，均以论文与公开资料为准）。讲授中多处实验数字只给了相对结论（如「提升一大截」）而未口播精确数值，以下只记字幕给出的口径，不补论文数字。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>MindCube 测的不是 VLM 能否重建 3D，而是它能否像人一样，从几个局部视角在「脑海里」维护一张一致的空间心理模型（spatial mental model）并据此回答未见视角的问题。结论有两层：现有 VLM（包括专门的空间大模型）在这件事上离人类很远（最好约 40% 多 vs 人类 90% 多，字幕口径）；而最有效的补强不是塞更多帧，而是逼模型先显式输出一张 cognitive map（10×10 栅格上的物体相对位置，可带朝向），再基于图做自由推理——「map + reasoning」在 frozen 提示、SFT、SFT+RL 三种设定下一致最优，且在基座上单独做 RL 几乎无效、先 SFT 再 RL 才有大幅提升。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">附录的人类基线</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">90%</div></div><div class="barrow"><div class="barlabel">多，最好的 VLM 只有</div><div class="bartrack"><div class="barfill" style="width:44.4%"></div></div><div class="barval">40%</div></div></div>
+<h3>问题设定：从局部视角拼出整体——partial observation 下的一致性</h3>
+<p>讲者的出发点是人的能力：看到场景的几个局部视角，人能凭空间一致性与物体一致性在脑中拼出完整场景的大致布局（什么东西大致在哪）。这不需要精细 3D 重建，更像是维护一张粗粒度的「心理地图」。MindCube 就测 VLM 有没有这种 spatial mental model。</p>
+<p>数据集规模（字幕口径）：21,000 多条 QA、3,000 多张图像。来源包括 WildRGB-D、DL3DV-10K、ARKitScenes、少量 ScanNet，以及团队自己手动采集的一部分。构造流程是先筛 group（场景里要有几个语义明确的物体，且空间分布满足直线或十字排列一类要求），再从环绕拍摄的视频里筛出四个正交视角的关键帧，最后由人工标注物体、空间关系、遮挡关系与朝向，再用模板（template-based）批量生成 QA。</p>
+<p>为什么强调正交视角：正交视角有明确语义（前/左/右/后），这样即使模型没法从图像本身判断自己在哪，也能从文本里明确告知「这是左视角」来锚定位置——评测的是空间整合能力，不混入位姿估计的噪声（字幕口径）。</p>
+<p>核心题型都围绕「不可见性」设计，三种主设定：</p>
+<ol>
+<li><strong>Rotation（原地旋转）</strong>：在原地转，每个视角面前一个物体；问「假设你在第一个视角，向左转 90 度，你的右边/后面应该是什么」。</li>
+<li><strong>Around（遮挡）</strong>：讲者最喜欢的设定。给正、左、右三视图，正视图完全可见而左右视图有遮挡，问被遮挡的物体本来应该是什么。提问分两种：完全遮挡、物体较少时用存在性判断（yes/no），部分遮挡或物体成串时用选择题（「冰箱后面最近的物体是什么」）。附录还按遮挡程度分了四级（完全/大部分/少部分/不遮挡），结论是遮挡越深准确率越低。</li>
+<li><strong>Among（绕物旋转）</strong>：相机绕着中心物体转，每个视角都是「中心物体 + 它后面的一个物体」，不可见来自视野受限。</li>
+</ol>
+<p>此外还有未进正文的 translation 设定（从 A 在 B 左边、B 在 C 左边，能否推出 A 在 C 左边——传递性推理）与 perspective-taking（假设你站在某物体处、与它同朝向，电视/沙发在你哪边；为此每个物体都标了朝向），讲者称可能在 V2 增补。</p>
+<h3>现状：空间大模型在 VSI-Bench 上的强势泛化不过来</h3>
+<p>讲者在主流 VLM 与专门的空间大模型（字幕提及 SpatialMM、VLM-3R 一类用 VGOT/CUT3R 增强的模型）上测了一圈，结论是「都表现得很烂」：这些模型能在 VSI-Bench 一类数据集上拿高分，但在 MindCube 上没有统治力。附录的人类基线是 90% 多，最好的 VLM 只有 40% 多（字幕口径，Q&amp;A 中给出）——差距不在感知精度，而在「把多个局部观察整合成一致整体」这一步根本没建立起来。</p>
+<h3>提升方法一（推理性提示）：多给帧几乎没用，先画图再推理才有用</h3>
+<p>讲者在完全不训练（frozen VLM）的设定下试了三条提示侧路线：</p>
+<ol>
+<li><strong>视角扩充</strong>：数据源本就是环绕视频，只裁了正交帧；把原始帧按插帧方式补回去（字幕口径记为 T=1/2/4 三档帧数），期望模型看懂视角变化过程。结果只提升了约 0.1 个百分点——讲者判断模型本身对「相机如何移动」没有感知，直截了当塞一串视频帮不了它。</li>
+<li><strong>加 reasoning 提示</strong>（please think step by step 一类）：效果「反而还不错」。</li>
+<li><strong>给 cognitive map</strong>：为每个 group 生成一张真值 cognitive map——正常版只给每个物体在 10×10 栅格上的相对位置，加强版再加朝向。把图告诉模型再提问，性能提升明显。</li>
+</ol>
+<p>合起来的关键结论（讲者称之为比较激动的发现）：<strong>map + reasoning 的组合在 frozen、SFT、SFT+RL 三种设定下一致产生最明显的提升</strong>；单独用 map generation 或单独生成 reasoning，都不足以把 SFT 拉高一大截，两者组合才行（Q&amp;A 口径）。附带的佐证是：训练过程中模型画的图质量（通过率与整体相似性）随训练稳步上升、图画得越好问题答得越好，且 reasoning 过程本身也帮助提升图质量——「学着去重建这个图，能同时帮助提升准确率」。</p>
+<p>reasoning 文本本身怎么造：与 QA 生成同理，模板化生成。空间设定有限（物体分布与视角情形可枚举），每小类问题写一个模板，填入物体语义即可；讲者称模板过了好几遍人工修订，保证人能读懂、模型不产生歧义。</p>
+<h3>提升方法二（训练）：SFT 教格式，RL 只在 SFT 之后才放大</h3>
+<p>训练实验在 Qwen2.5-VL 3B 上（字幕作「Q问2.5的3B」）。数据划分：从 2 万多 QA 中拿 1 万条做训练、1,050 条做 tiny benchmark；且 tiny benchmark 的场景与训练集背景尽量不重合，防「见过这个场景」式泄漏（字幕口径）。</p>
+<p>字幕给出的训练结论（顺序与相对幅度明确，精确数值未口播）：</p>
+<ol>
+<li><strong>直接在基座上做 RL，提升不明显</strong>——RL 本身没法把一个 base model 的这类能力直接拉起来。</li>
+<li><strong>SFT 有不错的提升</strong>（字幕口径：SFT 用 3 个 epoch）。</li>
+<li><strong>SFT 之后再加 RL，提高一大截</strong>——这是讲者反复强调的发现。RL 用 GRPO 一套，reward 以答案正确为主（Q&amp;A 口径提到含少量格式分）；SFT 与 RL 用同一批 1 万条数据。</li>
+</ol>
+<p>讲者与师兄在 Q&amp;A 里给这套「冷启动 + RL」范式补了机制解释：SFT 阶段同时在学「背题」（模仿回答格式）和「解题」，好处是把 scaffold（cognitive map + 自由推理的输出结构）教给模型，坏处是容易死记硬背；RL 只看最终 reward、不约束中间步骤，能把模型从八股式模仿里解放出来。所以顺序不可交换——没有 scaffold 的 RL 没有可优化的结构，有 scaffold 没 RL 则停留在模仿。这与同期 NLP 侧的共识一致，本讲给了一个空间任务上的复证。</p>
+<h3>空间智能是什么：Q&amp;A 里的定位与分歧</h3>
+<p>Q&amp;A 占了近一半时长，几个定位性判断值得记：</p>
+<ul>
+<li><strong>空间智能 vs 具身智能</strong>：空间智能侧重对三维空间与物体关系的理解，具身智能强调在物理实体环境中学习交互；前者是后者的基础/「大脑」。业内（RoboBrain、VLA 一类工作）普遍把空间理解作为具身大脑的一环。讲者补充：空间智能不止于空间关系，还包括物体结构级的理解（王启能提出的 affordance 是典型例子：水杯把手对「喝水」任务的高可供性区域），以及主动探索（通过交互构建空间理解）与动态场景理解两个当前缺口——现有工作几乎都建立在静态场景上（MindCube 本身也是用「时间换空间」：静态场景的视频帧等价于同一时刻的不同视角）。</li>
+<li><strong>空间智能的两条路线</strong>：一条是提升 VLM 本身的空间问答/推理能力（MindCube 走的路），另一条是建更好的 world model / simulator（如 MindJourney 一类：给定初始视角，用 world model 想象视角移动后的画面再回答）。讲者认为两条正交。</li>
+<li><strong>模型内部是否真有「想象空间」</strong>：讲者区分两种主张——internal 的（模型内部构建但不可见）与 explicit 的（diffusion/world model 生成出可看的想象图）。后者可解释但保真度与一致性差（生成的物体可能不再是原物体），前者只能靠 QA 或探针间接检验；他认为可解释性分析是更难但更值得走的线。</li>
+<li><strong>应用落点</strong>：讲者认为离落地最近的不是人形机器人整体，而是给现有机器人硬件（包括机械臂）提供更好的空间基础能力，做 tabletop 级规划与物体动力学理解。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MindCube 数据集规模</td>
+<td>—</td>
+<td>21,000+ 条 QA、3,000+ 张图像</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>数据来源构成</td>
+<td>公开数据集 + 自采</td>
+<td>WildRGB-D、DL3DV-10K、ARKitScenes、少量 ScanNet + 手动采集</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>cognitive map 规格</td>
+<td>—</td>
+<td>10×10 栅格相对位置（加强版带朝向）</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>人类表现（附录口径）</td>
+<td>—</td>
+<td>90% 多</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>最好 VLM 表现</td>
+<td>人类 90% 多</td>
+<td>40% 多</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>视角扩充（插帧补帧）的增益</td>
+<td>只给正交帧</td>
+<td>约 +0.1 个百分点</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>训练/评测划分</td>
+<td>21,000+ QA</td>
+<td>训练 10,000 条、tiny benchmark 1,050 条（场景背景去重）</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>训练基座</td>
+<td>—</td>
+<td>Qwen2.5-VL 3B</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>SFT 训练量</td>
+<td>同一批 1 万条 QA</td>
+<td>3 个 epoch（字幕口径）</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>直接在基座上做 RL</td>
+<td>SFT</td>
+<td>提升不明显，弱于 SFT</td>
+<td>字幕（正片）</td>
+</tr>
+<tr>
+<td>SFT 后再加 RL（GRPO）</td>
+<td>只做 SFT</td>
+<td>再提高一大截（精确数值未口播）</td>
+<td>字幕（正片）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>「先显式建一张中间表征，再在其上推理」是可直接搬走的 scaffold 设计</strong>：MindCube 的 cognitive map 本质是让模型先把多视角信息落成一份可检查的结构化中间产物（栅格位置 + 朝向），再答题。在 coding data / agent 任务里同构的做法是先产出结构化状态摘要（文件关系图、调用图、环境状态表）再决策——中间产物可自动校验（本讲中图质量与答题准确率同步上升），比纯 CoT 文本更容易做 reward 与 debug。</li>
+<li><strong>RL 的前置条件是 scaffold 已被 SFT 教会</strong>：本讲与 EP63 的 RexThinker 构成跨任务复证——没有冷启动教输出结构时，GRPO 在基座上几乎无效。这条对 post-training 排期是最实的预算分配依据：先花数据预算造「格式正确」的 SFT 集，再谈 RL 放大。</li>
+<li><strong>给中间表征设计可测的质量指标</strong>：他们用通过率与相似性追踪「画图质量」，从而能证明能力提升与表征质量提升同向。迁移到 agent infra：任何让模型先产中间产物的流程（计划、检索摘要、工具调用草稿），都值得给中间产物单独建离线指标，否则只能看最终成功率猜原因。</li>
+<li>评测设计教训：<strong>多给输入帧 ≠ 给了空间信息</strong>——模型对相机运动没有内建感知时，堆原始帧只涨 0.1 个点。迁移到多图/长上下文评测：先验证模型能利用新增信息通道，再扩大输入规模；且评测集要做场景级去重（本讲 tiny benchmark 与训练集背景不重合），防「见过场景」冒充泛化。</li>
+<li>Infra 视角：本讲三条提升路线的成本排序很清楚——提示侧给真值 map 最便宜但不可部署（测试时没有真值图），SFT+RL 最贵但可部署且增益最大；中间态是让模型自己先生成 map 再推理，推理成本多一段输出 token，换来可部署的增益，这对推理服务的延迟/成本核算是一个具体的可比选项。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>精确数值缺口大：三种设定（Rotation/Around/Among）各自的模型分数、map+reasoning 相对纯 SFT 的确切增益、SFT+RL 的最终分数，字幕均未口播，需要查 MindCube 论文原文补齐。</li>
+<li>cognitive map 在测试时由模型自己生成，其质量（讲者只给了「随训练稳步提升」的定性描述）与最终准确率的定量关系未给出；map 生成错误如何传导到答案、是否可做校验重试，讲者未展开。</li>
+<li>translation（传递性推理）与 perspective-taking 尚未进正文评测，V2 的时间表与数据规模讲者未承诺。</li>
+<li>全部实验只在 3B 单模型上做；map+reasoning 的增益随模型规模如何变化、强基座（如更大的 Qwen-VL）上是否仍需要显式 map，讲者未回答。</li>
+<li>主讲在 Q&amp;A 承认空间智能目前几乎全是静态场景评测，动态场景的心理模型如何定义与标注，是开放问题。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「先（输出）对场景的 cognitive map——我先意识到什么在什么位置，再基于这个（图）去做 reasoning……这两个相加起来，会使模型产生最好的性能。」——尹百桥在正片总结核心结论（字幕 20:31–21:05，按干净口径转写）</p>
+<p>「人类可以轻松拿到 90% 多，但（最好的）VLM 也就是 40% 多，这个和人的差距还是很远很远的。」——Q&amp;A 论遮挡设定的人机差距（字幕 44:25–44:38）</p>
+<p>「多给帧只提升了可怜的 0.1%。」——正片讲视角扩充实验（字幕 16:46–16:57，按干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
