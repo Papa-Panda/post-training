@@ -16,6 +16,16 @@
 
 | 期号 | 标题 | 状态 |
 |---:|---|---|
+| 15 | [MiniCPM-V：端侧可用的 GPT-4V 级多模态大模型](episodes/EP15-minicpm-v.md) | ✅ 要点已提炼 |
+| 16 | [YOLO-World：基于视觉语言模型的实时开放词汇物体检测](episodes/EP16-yolo-world.md) | ✅ 要点已提炼 |
+| 17 | [SEED-Story：生成长篇图文故事的多模态大型语言模型](episodes/EP17-seed-story.md) | ✅ 要点已提炼 |
+| 18 | [InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界](episodes/EP18-internvl2.md) | ✅ 要点已提炼 |
+| 22 | [mPLUG-Owl3：探索长序列模型架构的通用多模态大模型](episodes/EP22-mplug-owl3.md) | ✅ 要点已提炼 |
+| 23 | [CogVideoX 视频生成开源模型上手实践](episodes/EP23-cogvidex.md) | ✅ 要点已提炼 |
+| 25 | [LLMC：大语言模型的量化基准](episodes/EP25-llmc-benchmark.md) | ✅ 要点已提炼 |
+| 27 | [GenAD & Vista：构建通用可泛化的自动驾驶世界模型](episodes/EP27-genad-vista.md) | ✅ 要点已提炼 |
+| 29 | [VILA^2：视觉语言模型能力的自我提升](episodes/EP29-vila2.md) | ✅ 要点已提炼 |
+| 31 | [Rectified Flow：矫正流生成式模型的概念及应用实践](episodes/EP31-rectified-flow.md) | ✅ 要点已提炼 |
 | 49 | verl 源码解读与 HybridFlow 编程范式讲解 | ✅ 要点已提炼 |
 | 68 | slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践 | ✅ 要点已提炼 |
 | 75 | FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案 | ✅ 要点已提炼 |

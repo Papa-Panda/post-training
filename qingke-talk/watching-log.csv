@@ -13,23 +13,23 @@ No,Title,BV,Duration,Date,Status,Notes
 12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,episodes/EP12-villager-agent.md,要点已提炼,2024-06-27,todo,VillagerAgent：DAG动态派活避开长对话幻觉
 13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,episodes/EP13-llama-factory.md,要点已提炼,2024-07-08,todo,LLaMA Factory实录：高效微调三条线与RLHF多LoRA显存方案
 14,Mobile-Agent：基于多模态Agent架构的手机智能体,episodes/EP14-mobile-agent.md,要点已提炼,2024-07-11,todo,Mobile-Agent实录：纯视觉路线与反思agent分工
-15,MiniCPM-V：端侧可用的GPT-4V级多模态大模型,BV1tLPEzfEDD,,2024-07-15,todo,title-reworded
-16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,BV1MDaYzgEYV,,2024-07-23,todo,
-17,SEED-Story：生成长篇图文故事的多模态大型语言模型,BV1MDaYzgEt1,,2024-07-30,todo,
-18,InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界,BV1mDaYzuEif,,2024-08-06,todo,
+15,MiniCPM-V：端侧可用的GPT-4V级多模态大模型,episodes/EP15-minicpm-v.md,要点已提炼,2024-07-15,todo,MiniCPM-V端侧路线：小基座加密集反馈压幻觉与跨语言传递
+16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,episodes/EP16-yolo-world.md,要点已提炼,2024-07-23,todo,YOLO-World区域文本对比加权重参数化部署的实时开放词汇检测
+17,SEED-Story：生成长篇图文故事的多模态大型语言模型,episodes/EP17-seed-story.md,要点已提炼,2024-07-30,todo,SEED-Story三阶段训练与多模态attention sink支撑长故事生成
+18,InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界,episodes/EP18-internvl2.md,要点已提炼,2024-08-06,todo,InternVL渐进式对齐：6B ViT配对规则与按任务标定分辨率
 19,AWQ：激活值感知的LLM低位权重量化,episodes/EP19-awq.md,要点已提炼,2024-08-14,todo,AWQ：保留1%激活显著通道即可救回INT3量化精度
 20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,episodes/EP20-s-lora.md,要点已提炼,2024-08-26,todo,S-LoRA：统一内存池让单卡serving上千adapter吞吐不降
 21,SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎,,,2024-09-03,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
-22,mPLUG-Owl3：探索长序列模型架构的通用多模态大模型,BV1KsYVzJEUg,,2024-09-10,todo,
-23,CogVideoX 视频生成开源模型上手实践,BV1PbYVz2E6d,,2024-09-23,todo,
+22,mPLUG-Owl3：探索长序列模型架构的通用多模态大模型,episodes/EP22-mplug-owl3.md,要点已提炼,2024-09-10,todo,mPLUG-Owl3的Hyper Attention并行注入视觉KV实现多图泛化
+23,CogVideoX 视频生成开源模型上手实践,episodes/EP23-cogvidex.md,要点已提炼,2024-09-23,todo,CogVideoX开源实践：3D VAE分块显存优化与微调起步量
 24,使用CAMEL Agents构建GraphRAG及应用实践,episodes/EP24-camel-graphrag.md,要点已提炼,2024-09-26,todo,CAMEL agents自动建图做GraphRAG，双路检索管关系
-25,LLMC：大语言模型的量化基准,BV1SjNzeAEXe,,2024-10-11,todo,
+25,LLMC：大语言模型的量化基准,episodes/EP25-llmc-benchmark.md,要点已提炼,2024-10-11,todo,LLMC量化基准：校准一致性与旋转法打破outlier迷信
 26,VITA：开源交互式多模态基础大模型,,,2024-10-14,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
-27,GenAD & Vista：构建通用可泛化的自动驾驶世界模型,BV1bJYVzXET3,,2024-10-17,todo,
+27,GenAD & Vista：构建通用可泛化的自动驾驶世界模型,episodes/EP27-genad-vista.md,要点已提炼,2024-10-17,todo,GenAD与Vista：OpenDV大数据与不确定性排序做reward
 28,DuQuant：基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,episodes/EP28-duquant.md,要点已提炼,2024-11-05,todo,DuQuant：两级正交变换平滑massive outlier做W4A4
-29,VILA^2：视觉语言模型能力的自我提升,BV1cHYNzJE77,,2024-11-23,todo,
+29,VILA^2：视觉语言模型能力的自我提升,episodes/EP29-vila2.md,要点已提炼,2024-11-23,todo,VILA2自增强recaption循环与specialist结构化标注
 30,OminiParser：基于纯视觉的 GUI Agent,,,2024-11-30,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
-31,Rectified Flow：矫正流生成式模型的概念及应用实践,BV1pqHezrED5,,2024-12-14,todo,
+31,Rectified Flow：矫正流生成式模型的概念及应用实践,episodes/EP31-rectified-flow.md,要点已提炼,2024-12-14,todo,Rectified Flow速度场回归与reflow拉直的一步生成路径
 32,LLMC：大语言模型压缩工具的开发实践,BV1BeNZeeEQy,,2024-12-16,todo,
 33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,episodes/EP33-xgrammar.md,要点已提炼,2024-12-21,todo,XGrammar：文法约束解码的近零开销结构化生成引擎（论文还原）
 34,K-Sort Arena：视觉生成模型的高效人类偏好竞技场,BV1EeNZeeENy,,2024-12-24,todo,

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP15 — MiniCPM-V：端侧可用的 GPT-4V 级多模态大模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP15 — MiniCPM-V：端侧可用的 GPT-4V 级多模态大模型</h1>
+    <p class="sub">MiniCPM-V 这条线的核心结论是：端侧多模态模型的瓶颈不在语义本体，而在部署形态与反馈质量 —— 把语言基座训扎实、用跨语言路径把中文能力「借来」、用密集反馈把幻觉压下去… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP15-minicpm-v.html</p>
+<p>「（我们发现）其实 8B 已经基本能够实现我们的目标。」——讲者在于天宇视频 31 分钟附近讲 MiniCPM-V 2.5 时对 8B 版本给出的判断（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP15</dd><dt>标题</dt><dd>MiniCPM-V：端侧可用的 GPT-4V 级多模态大模型</dd><dt>BV</dt><dd>BV1tLPEzfEDD</dd><dt>时长</dt><dd>01:00:51（字幕 3651 秒；讲授约 39 分钟 + Q&amp;A 约 21 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>于天宇（清华大学自然语言处理实验室博士生；字幕开场自述：<code>[00:04] 我是来自清华大学自然语言处理实验室的博士生于天宇</code>）</dd><dt>相关论文（按讲授中点名的代表作列出，具体编号与版本以论文原文为准）</dt><dd></dd><dt></dt><dd>MiniCPM-V / MiniCPM-Llama3-V 2.5 技术报告（讲授结束部分提到技术文章近期发布的口径，未给出编号）</dd><dt></dt><dd>RLHF-V（CVPR；细粒度修正式人类反馈 + dense DPO）</dd><dt></dt><dd>RLAIF-V（同伴反馈 / 自反馈的后续工作）</dd><dt></dt><dd>LLaVA-UHD（ECCV；高清图像编码）</dd><dt></dt><dd>Language-path transfer 多模态跨语言泛化（ACL 2024 Spotlight）</dd><dt>相关代码</dt><dd>GitHub OpenBMB MiniCPM-V（讲授口径提到 HuggingFace trending 曾居开源模型第一；具体星标与榜单数字见下文数字总表，属于字幕口径）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1tLPEzfEDD/">https://www.bilibili.com/video/BV1tLPEzfEDD/</a></dd><dt>官网期号</dt><dd>EP15</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP15，已存档，原始字幕存档于 <code>transcripts/EP15.txt</code>，1646 条，带时间戳）清洗提炼；信息来源为 AI 字幕原文（经清洗；个别专名可能有识别误差，讲者人名与机构以字幕自述为准）。字幕中「MiniCPM」被识别为「CPM / CP n / mini cpv」等多形，「MiniCPM-V 2.5」常作「拉玛三V 2.5」，「LLaVA-UHD」作「拉瓦 USD / lava u s d」，与论文标准拼写对照后统一按官方拼写写出；凡是与字幕口径相冲突的细节仍以字幕原话标注。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>MiniCPM-V 这条线的核心结论是：端侧多模态模型的瓶颈不在语义本体，而在部署形态与反馈质量 —— 把语言基座训扎实、用跨语言路径把中文能力「借来」、用密集反馈把幻觉压下去、再用高清切片与加速工程把推理开销打到端侧可跑，2B 与 8B 两个档位就分别能在手机与通用场景触到 GPT-4V 级别的可用线。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：为什么是端侧</h3>
+<p>讲者开篇摆了当前多模态大模型的三处短板，并说明这三处短板决定 MiniCPM-V 的三条技术线：</p>
+<ol>
+<li><strong>参数量、成本与隐私</strong>。可用大模型依赖高性能服务器，用户数据要离开自己的设备才能被处理，既贵又有隐私传输风险。</li>
+<li><strong>幻觉高企</strong>。开源模型在描述图像内容这类基础任务上的幻觉率可达 $60\%$ 以上；讲者口径里 GPT-4V 的某版本在其评测中接近一半的幻觉率（见数字总表，字幕口径）。</li>
+<li><strong>中文能力明显弱于英文</strong>。中文图文数据无论规模还是质量都显著弱于英文，但中文用户是最直接的需求方。</li>
+</ol>
+<p>他把这三条对应到三类工作：用端侧小模型解决成本与隐私，用修正式反馈与同伴反馈解决幻觉，用语言路径传递（language-path transfer）解决中文数据稀缺。</p>
+<h3>端侧路线：训练前压缩而不是只量化</h3>
+<p>讲者把「把模型做小」分成训练前与训练后两条路，并明确说 MiniCPM-V 1.0 / 2.0 走的是训练前：先在语言基座上用 scaling-law 沙盒优化训练与数据方案，从零训一个高质量的 2B 语言模型，再接多模态方案，最后才叠加 GGUF 等量化版本往端侧部署。用他的话：先从零训一个好的，再在训练完之后进一步量化，两者叠加，才能拿到显著的计算效率优势。</p>
+<p>这样做的好处是参数效率可控：讲授里提到，MiniCPM 的 2.4B 模型能做到和使用量很高的 Mistral 7B 相当的实力（字幕口径）。这条基座线后来就是 MiniCPM-Llama3-V 2.5 切换到 Llama 3 基座的原因——8B 语言基座的质量已经足够支撑端侧 8B 模型摸到 GPT-4V 级别。</p>
+<h3>幻觉治理：从修正式人类反馈到同伴反馈</h3>
+<p>第一代做法是 RLHF-V。讲者的类比是：让老师只说「这次 70 分、下次 80 分」对学习没用；把每道错题在哪里、应该怎么写标出来才有效。RLHF-V 就是把反馈做成 span 级修正，并用 dense DPO 给这些被关注的 span 更高权重，以此大幅降低模型的物体幻觉。</p>
+<p>第二代做法是 RLAIF-V。纯人工反馈不可规模化，于是他们改用模型给模型提供反馈。关键论证是「feedback from teacher vs feedback from peer」：依赖比自己强一大截的教师模型这条路不可持续，于是他们让能力相近的模型彼此反馈，甚至让模型给自己提供反馈。做法是把「哪个回复更好」这种超出模型能力边界的整体判定，拆成子句抽取与逐题判定（divide-and-conquer），自动构造的数据质量能逼近 RLHF-V 的人工数据。工程上他们同时提出 iterative DPO：DPO 是离线偏好建模，反馈会很快过时，他们用迭代数据刷新去近似 PPO 的实时反馈效果。讲者给的结论是：RLAIF-V 的 7B 与 12B 模型在判别式与生成式任务上的幻觉抑制效果都优于 GPT-4V（字幕口径）。</p>
+<h3>跨语言：语言路径传递</h3>
+<p>这一部分讲的是 ACL 2024 Spotlight 的工作。核心发现是：中文文本表示已经在多语言语言模型里和英文表示对齐好了，而英文又通过多模态训练和图像对齐好了，于是可以绕开「中文图文对数据稀缺」这件麻烦事，把中文多模态能力借英文这条桥传过去。讲者强调两个口径：即便完全不用中文多模态数据，模型也能用中文提问得到高质量的英文回答；只用几千条高质量中文数据简单再训，就能得到不错的中文问答效果。</p>
+<h3>高清图像编码：LLaVA-UHD 路线</h3>
+<p>OCR 与文档理解是社区呼声最高的能力，讲者把 LLaVA-UHD 的两件事分开说：</p>
+<ol>
+<li><strong>先说反证</strong>。他们通过几千次请求逆向了 GPT-4V 的图像编码方案，判断它用的是带重叠的切片，重复信息会把模型送进歧义区，直接把数数能力拖垮；LLaVA-1.5 则是给任意图像 padding 到固定边，这种做法在长截图一类极端长宽比上浪费计算并丢失信息。</li>
+<li><strong>自适应动态切分</strong>。给定任意长宽比，通过因数分解挑出最接近正方形的小块切法，保证每一块的宽长比有上界；每个小块单独编码后，用共享压缩层做池化压缩 token，再用逗号与回车这类结构符号把二维相对位置关系显性写给语言模型。</li>
+</ol>
+<p>实验口径一并给了：支持分辨率从 LLaVA-1.5 的 336 分辨率图片提升 6 倍以上，最终到手机端可谈的推理开销反而低于 LLaVA-1.5（见数字总表）。下个版本进一步把任意长宽比编码支持推进到约 180 万像素。</p>
+<h3>版本迭代口径：2.0 与 2.5</h3>
+<ul>
+<li><strong>MiniCPM-V 2.0</strong>：语言 2B，OCRBench 上已经能和 Gemini Pro 相当（多项指标超过）；同时把物体幻觉与多语言能力再度推进，语言面为中文与英文，并初步适配安卓、鸿蒙与 iPad 端。</li>
+<li><strong>MiniCPM-V 2.5</strong>：语言基座换成 Llama 3，参数量 8B。讲者口径明确说通用能力已经超越 GPT-4V 1106 与 Gemini Pro，OCR 与幻觉都达到了同档水平的 SOTA；语言扩大到 30 多种；最关键的端侧指标是语言解码速度快 3 倍、图像编码速度快 150 倍，能够让 8B 模型在用户设备上流畅解码。</li>
+</ul>
+<h3>多模态的摩尔定律叙事</h3>
+<p>讲者把整条线总结成一个叙事：红线是「实现固定能力所需的参数规模」在持续下探，蓝线是「端侧芯片能流畅跑起来的参数规模」在持续上探，两条线终会汇合。MiniCPM-V 2.5 被他定位为目前最接近交汇点的模型。这段叙事是整场最愿意留给观众带走的东西。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>从零训还是量化</strong>：两者都有，从零训练的高质量小基座在前，GGUF 等量化在后叠加。</li>
+<li><strong>8B 后续会给量化吗</strong>：已经给了十几个量化版本，可以直接在 HuggingFace 上搜到 GGUF 模型。</li>
+<li><strong>预训练与 SFT 数据规模</strong>：预训练几百 million 量级，SFT 几 million 量级（讲者先口误又立刻修正过一次，这里取修正后的口径）。</li>
+<li><strong>手机端能不能跑</strong>：瓶颈主要是内存，能把模型放得下就能跑；8x gen2 一类芯片的重复输出问题，讲者答第一步看推理框架而非模型本体。</li>
+<li><strong>端侧 150 倍加速怎么来的</strong>：编译优化、芯片并行适配、量化与推理框架四件套的体系化结果；他诚实补了一句初始速率确实太慢，是花了很久才优化到可用。</li>
+<li><strong>vision encoder 选型</strong>：用 SigLIP 一路，规模一直压在 1B 以下，因为端侧场景不适合外挂大视觉编码器。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>开源模型幻觉率（讲者口径）</td>
+<td>图像内容描述</td>
+<td>$60\%$ 以上</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GPT-4V 某版本幻觉率（讲者评测口径）</td>
+<td>讲者自建评测</td>
+<td>接近一半</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MiniCPM 参数量（对标 Mistral 7B）</td>
+<td>Mistral 7B</td>
+<td>2.4B</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>中文数据激发量级（跨语言路径传递）</td>
+<td>无中文多模态数据</td>
+<td>几千条高质量中文数据</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LLaVA-UHD 支持分辨率提升</td>
+<td>LLaVA-1.5 单帧</td>
+<td>提升 6 倍以上</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LLaVA-UHD 推理开销（讲者口径）</td>
+<td>LLaVA-1.5：15.5 TFLOPs</td>
+<td>14.6 TFLOPs</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MiniCPM-V 2.0 任意长宽比像素支持</td>
+<td>早期单图</td>
+<td>约 180 万像素</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MiniCPM-V 2.5 参数量</td>
+<td>MiniCPM-V 2.0 的 2B</td>
+<td>8B</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MiniCPM-V 2.5 语言数</td>
+<td>早期中英两种</td>
+<td>30 多种</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MiniCPM-V 2.5 语言解码加速</td>
+<td>早期端侧版本</td>
+<td>3 倍</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>MiniCPM-V 2.5 图像编码加速</td>
+<td>早期端侧版本</td>
+<td>150 倍</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>模型下载量（讲者当时口径）</td>
+<td>开源平台累计</td>
+<td>60 万次以上</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GitHub star 数量（讲者当时口径）</td>
+<td>模型仓库</td>
+<td>约 8000</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>预训练数据量（讲者答疑口径）</td>
+<td>同类模型常规区间</td>
+<td>几百 million 量级</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>SFT 数据量（讲者答疑口径）</td>
+<td>同类模型常规区间</td>
+<td>几 million 量级</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>数据顺序对竞争维度的处理方式</strong>：讲者谈 SFT 混合数据时给了一个明确工程判断——维度间确实有竞争（如选择题与问答题的指令跟随能力会互相抢），工程上的解法不只是配比，而是数据流的排布（基础数据先学、收尾阶段留给真正想要强化的格式）。这个「数据流排布优先于纯配比」的看法，对今天的后训练混合数据设计可直接借用。</li>
+<li><strong>端侧优先的产品决策</strong>：MiniCPM-V 这条线把「能不能在用户自己的设备上跑」放到了「指标能高多少」前面，由此倒逼出自研基座、高清切片与加速栈三件大事；对任何要落地到真实设备的模型团队，这都是现成的优先级排序模板。</li>
+<li><strong>密集反馈优于粗粒度偏好的实证</strong>：RLHF-V 与 RLAIF-V 合起来给了一个偏好学习的清晰结论——把反馈做成 span 级修正，再让模型自给反馈，效果可以显著超过把 GPT-4V 当老师直接蒸馏；这正是多模态后训练里把算力该往哪儿花的一手经验。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>字幕明确说 MiniCPM-V 2.5 OCR 与幻觉「达到了 SOTA 或者说超越 GPT-4V 的水平」，但体感仍明显弱于对方；讲者自己也承认 benchmark 只能覆盖一部分，如何把 benchmark 优势转成使用者可感知的稳定与可读性，讲者未展开。</li>
+<li>150 倍图像编码加速背后拆分明细（编译、并行、量化、推理框架各占多少）讲者只给了一个体系化叙事，没给分解；这块细节对任何要复刻端侧部署的人都是关键空白。</li>
+<li>多模态摩尔定律的两条线是讲者提出的一个趋势叙事，还没有给出可证伪的刻画（比如收敛时间或斜率估计），值得后续拿真实发布节奏去校准。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「把这条红线和这条蓝线终究我们认为它会在最近不远的时间内实现一个汇合。」——讲者谈多模态大模型摩尔定律趋势时对 MiniCPM-V 2.5 的定位（字幕口径）</p>
+<p>「我们先在 8B 上做了一个试验，我们发现其实 8B 已经基本能够实现我们的目标。」——讲者在 MiniCPM-V 2.5 段给出的版本判断（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

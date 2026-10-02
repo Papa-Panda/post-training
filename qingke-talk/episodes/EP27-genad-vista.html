@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP27 — GenAD &amp;amp; Vista：构建通用可泛化的自动驾驶世界模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP27 — GenAD &amp;amp; Vista：构建通用可泛化的自动驾驶世界模型</h1>
+    <p class="sub">高深远串讲了团队构建「通用可泛化驾驶世界模型」的两步工作：① GenAD 配 OpenDV 数据集——从 YouTube 采集 2000 多小时、横跨 40 多个国家 200 … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP27-genad-vista.html</p>
+<p>「我们要做一个未来的预测模型，然后同时它要支持这个长时序的这个 roll out。」——讲者高深远谈 GenAD 设计出发点的一句话判词</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>27</dd><dt>标题</dt><dd>GenAD &amp; Vista：构建通用可泛化的自动驾驶世界模型</dd><dt>BV</dt><dd>BV1bJYVzXET3</dd><dt>时长</dt><dd>01:02:06（讲授约 40 分钟 + Q&amp;A 约 22 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>高深远（香港科技大学；字幕自述姓名与单位；GenAD / Vista 与 OpenDV 数据集出自 OpenDriveLab、香港科技大学、香港大学与图宾根大学的合作团队）</dd><dt>相关论文</dt><dd>GenAD（CVPR 2024 Highlight）、Vista（NeurIPS 2024）；OpenDV 数据集（随 GenAD 发布）</dd><dt>相关代码</dt><dd>GenAD/Vista 的数据集、训练测试实现与模型权重已公开（讲者给出 GitHub/项目页入口，以论文页为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1bJYVzXET3/">https://www.bilibili.com/video/BV1bJYVzXET3/</a></dd><dt>官网期号</dt><dd>EP27（官网预告链接本文省略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP27.txt</code>（1110 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP27，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 GenAD 在字幕中作「JAD/GD/JD」、nuScenes 作「new sense/new face」、Vista 作「visa」、LeCun 作「淹了困」，均以论文与公开资料为准）。讲者在本期串讲团队 2023–2024 年的两个代表作（GenAD + OpenDV 数据集、Vista）与统一的技术路线：以互联网驾驶视频为数据源，把视频生成模型改造成「可泛化、可控制、可给 reward 的驾驶世界模型」。本文结论均按讲授口径记录，凡与论文版可能有出入的数字已标（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>高深远串讲了团队构建「通用可泛化驾驶世界模型」的两步工作：① GenAD 配 OpenDV 数据集——从 YouTube 采集 2000 多小时、横跨 40 多个国家 200 多个城市的驾驶视频（比 nuScenes 大 370 倍），用 VLM 自动标注 + 自动滤除 + 驾驶行为分类清洗成高质量训练集；再把 Stable Video Diffusion 从「image-to-video 生成」改造为真正的未来预测模型（固定条件帧为视频第一帧 + 多帧 context 提供动力学先验 + dynamics-aware 与高频两类辅助损失），实现长时序一致的 roll out。② Vista 在此基础上补齐四件事：统一编码的多模态 action control（command、goal point、轨迹、速度/方向盘角等，类 ControlNet 注入）、低到高分辨率的多阶段训练 + LoRA 微调以低成本学控制能力、用「预测不确定性即 reward」的免监督判定（在人类安全驾驶视频上训练的世界模型，对不合理 action 的预测方差会变大，可直接当奖励函数、且排序比 L2 误差更合理）、以及 15 秒级的高分辨率长视频预测。小结中最有价值的是讲者对局限的坦率：推理慢（A100 上 12.5 秒视频要 1 分多钟）、command/goal point 控制弱、红绿灯规则与物理理解仍有硬伤；未来方向是把视频世界模型与 3D 重建（Gaussian Splatting 一类）结合，让未来预测能直接算出可用于决策的 cost。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>世界模型为什么值得为自动驾驶认真做</h3>
+<p>讲者用 LeCun 2022 年 position paper 的四模块框图（感知、action、world model、cost）定场：世界模型是「给当前状态与 action，预测下一个状态」的状态转移函数。放进自动驾驶开发闭环，它同时治四个瓶颈：数据采集（真人真车、费时费力、有安全问题、场景受限）、训练（固定 data log，无法捕捉「换一种策略走这条路会怎样」的多模态行为、无法反事实推进）、评测（真车路测难以 scale）、部署（可套 model predictive control，用预测提前避开灾难性后果）。</p>
+<p>但讲者随即划了两个判据，把「视频生成」与「世界模型」分开：Sora 这类 text-to-video 模型对驾驶不够用——文本表达不了决策过程中的 action；而现有驾驶世界模型（DriveDreamer 等）共同的四个局限决定了新一代世界模型的目标函数：①泛化差（nuScenes 只有 5 小时、只含新加坡与波士顿；DriveDreamer 换一个中国城市的样例直接失效）、②表征弱（保真度低、有 artifacts，分辨率与帧率低）、③action control 单一且没人验证过「换个新场景控制还管不管用」、④只谈构建不谈应用（缺 reward、缺闭环）。GenAD/Vista 每一项技术基本都能映射回这四条中的一条。</p>
+<h3>GenAD 与 OpenDV：先解决「数据从哪来」</h3>
+<p>讲者把泛化问题的根源定位在数据：nuScenes 太小，于是团队去 YouTube 采——「YouTube 是一个无穷无尽的数据来源」。OpenDV（字幕口径）规模：2000 多个小时、40 多个国家、200 多个城市，每段视频半小时到三四个小时，天然就是一个长视频生成数据集（讲者笑说「当时采这个数据的时候，并不知道有 Sora 会出来」）。</p>
+<p>但原始 YouTube 数据不能直接下：「YouTube 上有非常多的脏乱的数据」，所以配了一条完整的处理链路：</p>
+<ol>
+<li>选高质量视频 → 下载；</li>
+<li>用 vision-language model 标注 context（场景中的车、街道、天气等）；</li>
+<li>按关键词自动滤除（全黑、模糊、广告弹出等）；</li>
+<li>训一个视频分类模型标注自车行为（左转/右转/变道等）。</li>
+</ol>
+<p>最终得到带 context 自然语言描述与自车行为自然语言标注的多模态数据集，已公开（含处理流程、下载链接与标注）。这套「VLM 标注 + 规则滤除 + 行为分类」的 web-video 清洗流水线，是本篇最可移植的工程部分。</p>
+<h3>把 SVD 改造成未来预测模型：四个技术点</h3>
+<p>GenAD 的出发点是 Stable Video Diffusion（SVD），但讲者强调 SVD 是 image-to-video <strong>生成</strong>模型而不是预测模型：生成视频的第一帧与条件帧并不一致，长 roll out 时「风格和内容会产生非常剧烈的跳变」。GenAD 的改造逻辑链：</p>
+<ul>
+<li><strong>固定条件帧为待生成视频的第一帧、关掉 noise augmentation</strong>：模型学会从这一帧出发预测未来，content 一致；</li>
+<li><strong>多帧 context（上一段预测的最后几帧）作条件</strong>：只给一帧时模型无从推断速度/方向等动力学信息，片段之间运动接不上；context 帧提供「dynamic prior」，用的帧越多，与 ground truth 的运动越一致——这条讲者用广告牌的运动一致性可视化实证；</li>
+<li><strong>Dynamics-aware 辅助损失</strong>：用「预测帧间差与真值帧间差之差」高亮运动剧烈、难以预测的区域，在标准 diffusion loss 之外对该位置加权——讲者举的两个例子是高速上「前面那辆车停着不动」（未建模的运动）与右转时「远处的树木应往左移动却纹丝不动」（ego 运动耦合）；加完这两个症状都消失；</li>
+<li><strong>高频辅助损失</strong>：运动物体的边缘模糊/破碎是高频信息丢失，把预测特征图做频域变换、高通滤出高频、只对高频部分加监督后，卡车与白车的轮廓在运动中保持锐利完整。</li>
+</ul>
+<p>结果是 SVD 只能生成 2–3 秒，GenAD 可以不断 roll out 出长视频。讲者对 GenAD 保真度的论述没有停留在定性：GenAD 与 Vista 在 FID/FVD 上均优于既有驾驶世界模型，并在与 I2VGen-XL（阿里）、DynamicCrafter（腾讯）、SVD（Stability AI）的主流视频生成模型 human evaluation 中，视觉质量与运动合理性「都要好」。</p>
+<h3>Vista：补齐控制、reward 与长时高清</h3>
+<p>Vista（NeurIPS 2024）是在 GenAD 基础上的系统升级，四个新增点：</p>
+<ol>
+<li><strong>统一的多模态 action control</strong>：把 high-level command、goal point、轨迹、速度、方向盘角等「所有跟驾驶相关的 action」统一编码，以类 ControlNet 方式注入；使用时「只需要用一种」即可独立控制（与 GenAD 阶段多为单模态形成对比）。</li>
+<li><strong>低成本学控制的两段式训练</strong>：第一阶段只在未标注的 YouTube 数据上训练（学泛化与真实性）；第二阶段把 U-Net 主干固定、在 nuScenes 上学多模态 action 控制、同时混入 YouTube 数据保持泛化；再配多阶段分辨率策略（低分辨率多 iteration 快速学会控制、高分辨率少量微调）+ LoRA 微调 + action 独立约束加速（细节见论文）。</li>
+<li><strong>不确定性即 reward（本篇概念上最亮的一点）</strong>：世界模型在人类驾驶视频上训练，「人类基本上都是安全开车」；拿不合理的 action 去条件时，预测的不确定性（方差）会升高。于是直接把「该 action 下预测的方差」当作 reward——无需参考真实轨迹、无需监督，还能在任何场景下执行。讲者用一个代表性 case 对比 L2 误差的荒谬：开阔路面上向前加速直行，L2 说错（与 ground truth 轨迹不一致）、reward 说对（向前多开没有问题）；冲向旁边，L2 说近（与原轨迹差得不远）、reward 说错（危险）。这个排序合理性正是「reward 作为决策评价函数」区别于「轨迹拟合误差」的地方。Q&amp;A 中讲者补充：uncertainty 不需要把视频生成完，「只需要做几步 denoise」即可估出，效率高；也未被用作 loss 训 policy，先作 metric 用。</li>
+<li><strong>长时高清预测</strong>：未见过的新环境下仍可做高分辨率、高帧率预测，最长可续到 15 秒（字幕口径，Q&amp;A 确认「目前我们最长可以做到 15 秒的生成」）。</li>
+</ol>
+<p>外部认可（讲者口径）：模型公开后收到了 HuggingFace CEO、Comma AI CTO 的评价；人形机器人公司 1X Technologies 与团队多次交流、想把 Vista 用到室内人形机器人数据上；腾讯的新工作把 Vista 作为自动驾驶赛道的 baseline 与可灵、Luma 等商业模型对比。</p>
+<h3>小结与展望：讲者对局限的坦率清单</h3>
+<p>讲者没有用成绩收尾，而是先列问题（这部分对后来者最有用）：</p>
+<ul>
+<li><strong>推理开销大</strong>：生成 12.5 秒视频在 A100 上仍需 1 分多钟，车端在线使用「现在不行」；</li>
+<li><strong>action control 不完美且模态间不均衡</strong>：轨迹控制最强，goal point 与 command 弱——归因于数据分布（nuScenes 大多直行、command 分布极偏；goal point 取前视图二维坐标，很多 sample 的点根本不在前视图内，是无效样本）；解法是补更多丰富 action 标注的数据集 + 训练时对 action 分布 re-balance（resample 转弯 command）；</li>
+<li><strong>物理与规则理解仍有硬伤</strong>：车会「分裂」（不理解物体组成）、无 action 控制时面对红灯也会往前开、长视频质量随时间的下降与细节平滑；</li>
+<li><strong>action control 不精准的一个结构性原因</strong>：真实驾驶视频「有迹可循」——模型不看 action 也能凭迹象猜出接下来怎么开，这与「反事实推理」之间是张力；讲者举的正面涌现例子同样迷人：强行让自车执行危险的 goal point 时，旁边正在过马路的车会停下来让行——即其他 agent 会根据自车行为做出反应，这是 closed-loop simulation 可行的前提。</li>
+</ul>
+<p>展望押注在 3D：视频世界模型胜在可扩展性（能在互联网视频上训练）与因果/反事实推理，但输出只是 2D 像素，「没有提供非常直接的信息用于决策」；Gaussian Splatting 类重建能给出显式 3D 表征，可以直接算「自车有没有跟其他车撞在一起」的 cost。讲者认为的 promising 方向是让世界模型既保有视频路线的泛化与因果能力，又能预测出带 3D 信息的未来、直接服务于 cost 计算与决策。对 latent world model 的评价同样务实：Vista 本身就在 latent space 预测，pixel 输出只是为了提供监督信号；真应用时「可能不需要重建出整个视频，只要预测出未来状态的一些表征」就够了。</p>
+<h3>Q&amp;A 精选</h3>
+<ul>
+<li><strong>训练资源</strong>（字幕口径）：第一阶段 128 张卡 + 第二阶段 8 张卡；两个阶段共两周（约 8 天 + 7 天，讲者自述「我中途有中断几次，然后进行继续训练」）。经验判词是「batch size 不是特别重要」「主要是靠叠 iteration」——少些卡训久也能得到类似效果。GenAD/Vista 全程以 SVD 预训练为出发点；Q&amp;A 中明确建议从预训练开始（市面上还没有现成的、带世界模型功能的视频模型可买）。</li>
+<li><strong>帧率（采样频率）影响</strong>：训练数据默认 10 Hz 采样；预测固定帧数时采样越稀、时间跨度越长、难度越大——「你预测 25 帧、采 2 Hz，这个其实就更长了」。</li>
+<li><strong>可控性增强</strong>：一是高维 action + 数据多样性/重平衡，二是附录里的方案——把 action 信号单独拆出来做多重 classifier-free guidance（代价是计算倍增）。</li>
+<li><strong>uncertainty 无监督为什么准？</strong> 因为不安全 action 与人类数据的组合是 out-of-distribution，模型在 OOD 输入上方差自然变大；可调项包括 denoise 步数（要调）。</li>
+<li><strong>Vista 生成的数据能训端到端模型吗？</strong> 可以生成，但 Vista 不提供 3D 监督信号；若下游需要 3D 信息则不行。另一条互补路线是 bounding box / layout 条件生成，直接服务感知训练数据，与 action 条件是「两条不同的技术路线」。</li>
+<li><strong>多视角？</strong> 现在没做（为了保泛化覆盖）；可能路线是单视角预测再 adapt 到多视角。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nuScenes 数据集规模</td>
+<td>—</td>
+<td>5 小时，仅新加坡与波士顿</td>
+<td>字幕（背景部分）</td>
+</tr>
+<tr>
+<td>OpenDV 相对 nuScenes 的规模倍数</td>
+<td>nuScenes</td>
+<td>370 倍（讲者先说 3700 倍随即订正）</td>
+<td>字幕（GenAD 部分）</td>
+</tr>
+<tr>
+<td>OpenDV 规模（字幕口径）</td>
+<td>—</td>
+<td>2000+ 小时、40+ 国家、200+ 城市，单段 0.5–3+ 小时</td>
+<td>字幕（GenAD 部分）</td>
+</tr>
+<tr>
+<td>SVD 单次生成时长</td>
+<td>—</td>
+<td>2–3 秒（GenAD 之后可长时 roll out）</td>
+<td>字幕（GenAD 部分）</td>
+</tr>
+<tr>
+<td>Vista 最长连续预测</td>
+<td>—</td>
+<td>15 秒（转弯场景细节衰减更快）</td>
+<td>字幕（Vista/Q&amp;A）</td>
+</tr>
+<tr>
+<td>Vista 生成 12.5 秒视频的推理耗时</td>
+<td>A100</td>
+<td>1 分多钟</td>
+<td>字幕（小结部分）</td>
+</tr>
+<tr>
+<td>训练资源与时长（字幕口径）</td>
+<td>两阶段</td>
+<td>128 卡 + 8 卡，共约两周（约 8 天 + 7 天）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>训练数据采样频率</td>
+<td>YouTube 源数据</td>
+<td>10 Hz</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>FID/FVD 与 human eval 结论</td>
+<td>既有驾驶世界模型；I2VGen-XL / DynamicCrafter / SVD</td>
+<td>两项指标最优；视觉质量与运动合理性均占优（定性结论，字幕口径）</td>
+<td>字幕（实验部分）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>「互联网视频 + VLM 自动标注 + 规则滤除 + 行为分类」是一条可整段搬运的数据流水线</strong>：任何需要大规模真实世界视频训练的团队（机器人、具身、驾驶仿真）都可以复用——关键是把「脏数据滤除」做成关键词规则 + 学到的行为分类，而不是人工筛。</li>
+<li><strong>「把生成模型改造为预测模型」的判据可泛化到一切 sim2real 评估</strong>：条件一致性（第一帧锚定）、动力学先验（多帧 context）、针对运动区域与高频的辅助监督——这三个改造正对应「自回归 roll out 的误差从哪来」；把「生成」与「预测」分开的思考方式也适用于任何把 diffusion 视频模型当环境模型的场景。</li>
+<li><strong>「不确定性即 reward」是 world-model 派给 RL 的一个低成本接口</strong>：在只有人类（近似最优行为）视频、无显式奖励标注时，用预测方差做 action 排序，比轨迹 L2 更贴决策语义；讲者在 Q&amp;A 中的补充同样关键——估方差「只需几步 denoise」，这让它在闭环评测里成本可控。这个接口与「用世界模型给 policy 提供 dense reward/评测」的思路直接对应，可迁移到机器人策略评测。</li>
+<li><strong>两段式训练（大规模无标注学泛化 + 小规模有标注学控制、主干冻结 + LoRA）是典型的「能力解耦」部署范式</strong>——先保能力、再补接口，迁移到任何基础模型后训练中都是省钱的办法（讲者甚至强调 iteration 远比卡数重要，这条经验对 diffusion 类训练尤其实用）。</li>
+<li><strong>诚实的局限清单本身是可迁移的方法论</strong>：command/goal point 控制弱 → 归因到 action 分布偏斜与无效样本；「视频有迹可循」→ 指出反事实能力与可预测性的内在张力——这种「失败模式先于新功能」的分析顺序，正是把世界模型从 demo 推向可用系统的路径。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>OpenDV 字幕口径的「2000 多个小时」与论文口径的规模口径（视频条数/时长）可能有出入，如需引用请核对 OpenDV 论文与 GitHub 页。</li>
+<li>「uncertainty 即 reward」在讲授中只给了定性 case 与 Q&amp;A 说明（无监督、可调项含 denoise 步数）；它与真实驾驶风险的相关性定量证据（与事故率/接管率的标定）未在本讲展开，建议查 Vista 论文 reward 部分。</li>
+<li>讲者提到的「以模型最终输出学习旋转」是 EP25 的话题；本讲的展望（视频世界模型 + 3D 重建耦合）与他团队后续工作（Vista 之后）的衔接，可从 OpenDriveLab 后续发布核对。</li>
+<li>command/goal point 的无效样本问题（goal point 不在前视图）在 NuScenes 口径下有多严重、resample 策略能补多少，讲者表示「这可能跟数据的分布有关」，未给数字。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「（世界模型）本质上来说它是一个充当一个状态转移的功能：我给定现在这个状态，然后给定他要做的这个 action，world model 它就是能根据这些条件，预测出下一个状态。」</p>
+<p>「（在加速直行时）这个 L2 error 因为跟 ground truth 的轨迹不太一样，所以它就会变得很大……但是我们这个 reward 就能正确地判断出来：你往前多开一点也是可以的，但是往旁边冲上去，它的 reward 应该是要低一点。」</p>
+<p>「他其实就可以为 closed-loop simulation 提供一种可能性。」（谈其他车辆会根据自车行为做出反应时）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

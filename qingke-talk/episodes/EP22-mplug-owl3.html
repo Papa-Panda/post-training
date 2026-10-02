@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP22 — mPLUG-Owl3：探索长序列模型架构的通用多模态大模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP22 — mPLUG-Owl3：探索长序列模型架构的通用多模态大模型</h1>
+    <p class="sub">mPLUG-Owl3 针对 LLaVA 式"视觉 token 直接拼进语言模型序列"在多图/长视频下 token 爆炸的问题，提出与自注意力并行、高度复用语言模型已有参数的 H… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表（含来源）</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP22-mplug-owl3.html</p>
+<p>「视觉特征已经编码的很好了，其实只需要有一些层（往语言模型里）注入进来就可以了。」——讲者在消融部分总结稀疏交互层数的结论</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>22</dd><dt>标题</dt><dd>mPLUG-Owl3：探索长序列模型架构的通用多模态大模型</dd><dt>BV</dt><dd>BV1KsYVzJEUg</dd><dt>时长</dt><dd>01:04:49（讲授约 52 分钟 + Q&amp;A 约 12 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>叶嘉博（华东师范大学毕业，阿里巴巴通义实验室自然语言智能团队；字幕中自述团队与姓名，"通义"在字幕中被识别为"同一"，以公开资料为准）</dd><dt>相关论文</dt><dd>mPLUG-Owl3（Towards Long Image-Sequence Understanding in Multi-Modal Large Language Models）</dd><dt>相关代码</dt><dd>GitHub <code>X-PLUG/mPLUG-Owl</code>（团队官方仓库；ModelScope 有在线 demo；字幕中讲者以二维码形式展示，两者以官方 README 为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1KsYVzJEUg/">https://www.bilibili.com/video/BV1KsYVzJEUg/</a></dd><dt>官网期号</dt><dd>EP22（官网预告链接未确证，省略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP22.txt</code>（1574 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP22，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 LLaVA 在字幕中多作"拉瓦/安帕克"、Hyper Attention 多作"happer tension/hypertension"，均以论文与公开资料为准）。凡讲授未给出的精确 benchmark 分数不写入；数字只记字幕中明确说出口径。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>mPLUG-Owl3 针对 LLaVA 式"视觉 token 直接拼进语言模型序列"在多图/长视频下 token 爆炸的问题，提出与自注意力<strong>并行</strong>、高度复用语言模型已有参数的 Hyper Attention：只在语言模型中稀疏选 4 层做图文 cross-attention，新增参数仅为视觉 KV projection 与 adaptive gate，从而在不压缩视觉 token 的前提下把多图推理开销降到可接受 400 张图的水准，且多图能力可由少量多图训练数据泛化到长序列。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：多图与长视频为什么先卡 token 数量</h3>
+<p>讲者开宗明义：真实落地场景（多模态 RAG 检索、2–3 张图对比提问、长视频理解）必然是图文交错、多图长序列输入。以 LLaVA 为例，单图约抽 729 个视觉 token，语言模型尚可承受；5 张图即约 3.6K token；2 小时视频按每 18 秒抽 1 帧得约 400 帧，视觉 token 膨胀到约 291K——任何现有模型与硬件都吃不下。问题不在语言模型名义上的 32K/128K 上下文，而在视觉 token 占用序列后立刻带来的算力与显存爆炸。</p>
+<p>业界三条既有路线及其代价：<strong>Resampler</strong>（learnable query 交叉注意力压到固定 64 token）：压缩率高但极难训练、信息损失大、依赖海量数据；<strong>Patch Merge</strong>（如 $2 \times 2$ 下采样）：效果与数据效率较好，但压缩率低（约 1/4），token 已经多到顶不住时"不解渴"；<strong>串联式 Cross-Attention</strong>（Flamingo、LLaMA 3.1、Idefics 等在 block 间插入全新 cross-attention 层）：省了序列长度，但新增参数多、难训练，同等数据规模下效果普遍更差。结论是三者都未同时拿到"快"与"好"，这正是 mPLUG-Owl3 的设计靶心。</p>
+<p>mPLUG-Owl3 的三条设计原则：(1) 不压缩视觉 token，保留细粒度信息（这是 LLaVA 路线效果好的原因，不动它）；(2) 走 cross-attention 省算力，但把新增参数压到最少、尽量复用语言模型已学好的结构；(3) 统一范式处理单图、多图、视频任意图文交错输入。</p>
+<h3>方法：Hyper Attention——与自注意力并行的稀疏交叉注意力</h3>
+<p>关键观察：视觉信息并不需要语言模型的每一层都与之交互（消融里只放 2 层也已还不错）。mPLUG-Owl3 在语言模型中稀疏、均匀地选 <strong>4 层</strong>改造为 Hyper Attention block，其余层只做文本自注意力。</p>
+<p>与 Flamingo 式"串联插入全新层"不同，Hyper Attention 与自注意力<strong>并行</strong>：共享 input LayerNorm，共享文本 Query（Q），只新增<strong>视觉 K、V projection</strong>（且从文本 KV projection 初始化，把语言模型已学好的注意力知识迁移过来），并共享原模型的 FFN（讲者判断视觉知识已由 vision encoder 学充分，不需要新的视觉 FFN）。融合侧由 <strong>adaptive gate</strong> 完成：根据文本 hidden state 动态生成权重，决定每个文本 token 吸收多少视觉特征、保留多少文本特征——消融显示这是各指标都受益的组件（强行注入视觉表征会破坏原模型稳定性）。</p>
+<p>图文交错的两个关键实现：(1) <strong>位置编码按图共享</strong>：语言模型侧记录每张图占位符在文本中的位置（如第 15、28 位），该图全部 patch token 共享同一个位置 ID 再算 RoPE。理由：vision encoder 内部已有充分的图内位置信息，语言模型只需知道"这张图在原文中处于哪个位置"。讲者特别指出这个位置编码是多图能力的关键开关——不加时视频指标也能过（帧间时序模型能自学），但多图 benchmark 提升非常显著。(2) <strong>多模态 causal mask</strong>：每个文本 token 只能关注它前面的图片，与语言模型的 causal 范式保持一致。</p>
+<p>输入处理：文本中每张图/每帧视频只留一个占位符进语言模型，图像统一走 vision encoder 抽特征；视频抽 16 帧即展开为 16 个图占位符，与多图同路处理。</p>
+<h3>训练：三阶段渐进 + 视觉编码器全程冻结</h3>
+<p>stage 1 预训练（图文对齐）：只训新增参数（linear projection、视觉 KV projection、adaptive gate）使 cross-attention 分工接近自注意力；用 32 张 V100 训 4 天。stage 2 后训练：视频 caption、图文交错 caption、交互对话数据（少量 M4-Instruct 类指令数据）做多图对齐。stage 3 SFT：单图（LLaVA SFT）、多图（MANTIS、M4-Instruct）、视频 QA 混合对齐下游。stage 2/3 用 64 张 A100 训约 2 天。<strong>vision encoder 全程冻结</strong>——这是后续低层视觉（low-level）能力短板的直接原因，讲者明说这是受算力限制的取舍、是未来要补的点。</p>
+<h3>实验与消融（字幕口径）</h3>
+<ul>
+<li><strong>效率</strong>：模型可接受 400 张图输入，其推理延迟与主流基线在 50–100+ 张图时的延迟相当；而许多基线在少量图片下即因爆显存中断。值得注意的是团队只用约 5–6 张图的训练就得到对 400 张图的抗干扰能力。</li>
+<li><strong>效果分布</strong>：8B 规模在单图 VQA 上领先同级；视频上短视频（NExT-QA 8 帧、MVBench 16 帧）领先但幅度不大，长视频（VideoMME 抽 128 帧、LongVideoBench 抽 64 帧）领先明显，直接受益于可塞入帧数更多；多图主流榜（MANTIS、LLaVA-Interleave 类）效果突出，但评估 low-level 视觉的两个多图榜较弱（冻结 vision encoder 之故，讲者自认缺陷）。</li>
+<li><strong>抗干扰评测（本文新提）</strong>：基于 MIBench 改造——原题配图之外随机混入干扰图，要求模型只针对指定图作答，且每个选项顺序变换时换不同干扰图、四轮全对才算对。结果：单图训练的模型随干扰图增多性能急剧下跌；多图训练过的模型在 25–50 张时尚可，100 张量级显著下跌；mPLUG-Owl3 曲线明显更平缓。但讲者强调绝对准确率仍只有约 40%（字幕口径），"大家还不能接受"，这个评测更多是为未来多图模型留的标尺。</li>
+<li><strong>消融结论</strong>：adaptive gate 与共享 input LayerNorm 都带来全指标收益（后者还明显帮助收敛——直接复用原模型已适配的分布，胜过新学一套 KV 分布）；位置编码在视频上无收益（时序自学即可，甚至打乱帧顺序模型也能还原逻辑位置）、在多图上收益巨大；交互层数 2 层已 decent、层数太多反而收敛不好，取 4 层均匀嵌入折中；结构对比中拼接式在单图最易训、最优，但视频/多图差（单图训练从未学过图间 attention，多图输入时表示不稳定），cross-attention 类（含 Hyper Attention）靠统一"视觉→文本 + 文本→文本"两种关系获得天然 zero-shot 迁移，Hyper Attention 靠参数共享再胜 pre/post 串联式 cross-attention。</li>
+<li><strong>与 Qwen2-VL 的关系</strong>（Q&amp;A）：团队开源数据量远小于 Qwen2-VL/InternVL2，绝对指标不及对方，讲者大方承认；但 Qwen2-VL 的可变分辨率使单图 token 数很多，多图下游微调与推理开销明显更大——这是拼接式与 cross 式最实在的效率差。</li>
+</ul>
+<h3>讲者自认边界与下一步</h3>
+<p>vision encoder 冻结导致 low-level 视觉理解偏弱（后续重点改善）；抗干扰评测绝对值仅约四成，多图理解远未解决；与 Qwen2-VL 等闭源数据规模模型比绝对性能仍有差距。工程侧：开源训练框架（基于 Swift）尚在开发（内部用自研框架训练），多 GPU 推理集成推进中。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表（含来源）</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单图视觉 token 量</td>
+<td>LLaVA 拼接式</td>
+<td>约 729 / 图</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>5 张图视觉 token 量</td>
+<td>同上</td>
+<td>约 3.6K</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>2 小时视频（每 18 秒抽 1 帧，约 400 帧）</td>
+<td>同上</td>
+<td>约 291K token</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Hyper Attention 嵌入层数</td>
+<td>语言模型全部层</td>
+<td>稀疏均匀 4 层（消融：2 层已可）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>新增参数</td>
+<td>Flamingo 式全新 cross 层（含 LN/QKV/FFN/gate）</td>
+<td>仅视觉 KV projection（由文本 KV 初始化）+ adaptive gate</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>多图训练规模 → 泛化</td>
+<td>约 5–6 张图训练</td>
+<td>可推理到 400 张图</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>长视频抽帧</td>
+<td>—</td>
+<td>VideoMME 128 帧、LongVideoBench 64 帧</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>抗干扰评测绝对准确率</td>
+<td>多数基线随图数急剧下跌</td>
+<td>约 40%（讲者称不可接受）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>训练算力 stage 1</td>
+<td>—</td>
+<td>32×V100 × 4 天</td>
+<td>字幕 Q&amp;A</td>
+</tr>
+<tr>
+<td>训练算力 stage 2/3</td>
+<td>—</td>
+<td>64×A100 × 约 2 天</td>
+<td>字幕 Q&amp;A</td>
+</tr>
+<tr>
+<td>单机推理显存</td>
+<td>—</td>
+<td>约 16–19GB 起、24GB 可多图（400 图除外）</td>
+<td>字幕 Q&amp;A</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>"不压缩视觉 token，只把交互层变稀疏 + 参数共享到位"是对长上下文多模态推理的一个通用配方：当序列长度被非文本 token 吃掉时，先质疑"每层都要交互"这个默认，再质疑"新增模块必须自带全套参数"——复用 base LM 已适配的 LN/Q/FFN 与 KV 初始化，是让新模块低成本训起来的关键，比堆数据更先决定成败。</li>
+<li>评估方法可直接借用：多图/长上下文模型不要只看标准榜，在输入里混入干扰项并做顺序置换下的多轮全对判定，能把"看起来会多图理解、实际靠语言先验蒙"的模型筛出来。</li>
+<li>对 RL/post-training infra 的提醒：任何把新条件（视觉、工具返回、多模态观测）拼进主序列的方案，先算 token 预算账（单帧/单图 token × 数量），再决定走序列内还是 cross 式注入；这个账在 agent 长轨迹场景同样成立。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>4 层均匀嵌入是折中值；层位的选择（早/中/晚）与任务类型的关系字幕未展开，值得查论文消融。</li>
+<li>位置 ID 按图共享在 patch 数很大（高清图细粒度问答）时是否会损失图内定位能力，讲者只给了"vision encoder 已编码"的经验说法，未给对照实验。</li>
+<li>抗干扰 40% 上限的原因分解：是注意力被干扰图稀释，还是问题锚定（指代第几张图）失败？讲者未拆分，这决定后续改进方向。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「视觉特征已经编码得很好了，你其实只需要把这个特征注入进来，之后再让原模型自己去承担（推理的）角色，其实就可以了。」——讲者在回答"为何不需要稠密跨模态交互"时（字幕 60:31–60:43，按干净口径转写）</p>
+<p>「这个时候（干扰评测）即使是 mPLUG-Owl3，得分实际上也是大家不太能接受的，比如说只有 40% 的一个准确率。」——讲者对抗干扰评测结果的自我评价（字幕 39:02–39:08 转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

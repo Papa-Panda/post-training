@@ -1,0 +1,1574 @@
+# 期号：青稞Talk EP29
+# BV：BV1cHYNzJE77
+# 来源：B站 AI 字幕
+# 生成日期：2026-10-02
+[04:00] Hello
+[04:01] 大家能听见我的声音吗
+[04:14] 嗯好好谢谢
+[04:19] 额行
+[04:19] 那那咱们就开始呃
+[04:22] 对大家好呃
+[04:23] 现在国内应该是周末了啊
+[04:25] 非常感谢大家
+[04:26] 周末还来听我的这个presentation
+[04:29] 对我先做一个简单的自我介绍呃
+[04:32] 我是方云浩
+[04:33] 然后我本科是在浙江大学就读嗯
+[04:36] 然后我最后一年的时候
+[04:38] 本科最后一年去了上海AI lab
+[04:39] 在林达华老师那边做traditional perception
+[04:44] 相关的内容
+[04:44] 然后那个时候我是i m m tracking的负责人对
+[04:48] 然后在我硕士的时候
+[04:50] 我去了USSD
+[04:51] 跟苏浩老师做了3D robotics相关内容
+[04:55] 然后我的focus是large model的reasoning
+[04:58] 在今年2月开始呢
+[05:00] 我去了NVIDIA做
+[05:02] 在VLOTEAM当英特尔
+[05:04] 然后我的mentor是JASONLOU和MIT的韩松老师
+[05:08] 今天我的talk呢将以这个VLASQUARE为核心
+[05:11] 比拉square说的是
+[05:13] 怎么样让BOM为自己的PRETRAINING
+[05:16] 生成更高质量的data来实现自我提升
+[05:19] 对我将以这一篇paper为中心
+[05:22] 但是呢一开始我会介绍一下BLM的一些background
+[05:25] 以及就是我觉得一些比较大的这个paradigm shift
+[05:29] 然后在后面的时候我会嗯简单介绍一下大致的
+[05:33] 比如说有哪些follow up的方向
+[05:35] 或者我最近在做的工作对
+[05:38] 以及我们处理fox的方向
+[05:42] 对
+[05:43] 首先我想给大家提供一个background
+[05:45] 或者说narrow一下一整个talk的scope
+[05:47] 也就是现在有很多的大模型
+[05:50] 也有很多的多模态模型嗯
+[05:52] 比如说像一些闭源模型
+[05:54] 像gbt four o或者詹姆奶
+[05:57] 然后开源的模型的话
+[05:58] 就像天问two vl啊
+[06:01] 现在非常popular
+[06:02] 也有像我们的VA呃
+[06:04] 我先说一下
+[06:05] villa是fully open source呃
+[06:07] 也就意味着我们的code base weight data
+[06:10] 所有东西都是公开的
+[06:11] 且我们是有一套很好的service system对
+[06:15] 但是呢这两这这些模型
+[06:18] 他们实际上都会被称为茅台model的模型
+[06:20] 从一开始它本来是一个pure text chat board
+[06:24] 到现在发展成呃有visual input
+[06:27] 甚至有audio input
+[06:28] 甚至还有image或者video output能力的这种多模态模型
+[06:32] 实际上很重要的一点就是大家都看到了
+[06:35] 从DEMODELITY像多mortality的一种进化或者提升
+[06:39] 我们希望从这些模型里看到的是
+[06:43] 他们也能实现human level
+[06:45] 对word的理解
+[06:46] 对word理解可以包括text
+[06:48] 包括single image
+[06:49] 也包括video
+[06:50] 就是各种video signal
+[06:52] 他们能做像我们一样做classification detection
+[06:56] 甚至generation task
+[06:57] 其实这个deep learning从很早开始
+[07:00] 从比如说10年一二年的英internet开始
+[07:03] 那个时候更多的是一些specialist model
+[07:06] 他做单一task
+[07:07] 做qualification
+[07:08] 到后面像faster r cn这种
+[07:10] 他做detection或者去做mask segments的prediction
+[07:14] 现在整个paradigm shift
+[07:16] 也从单一能力的模型转化成一个general类似的agent
+[07:21] 也就是说
+[07:22] 我们希望模型能做的
+[07:24] 不只是在有限数据下的training
+[07:27] 然后在一些in domain的validation test set上面做测试
+[07:32] 我们更希望的是看到这个一个generalist的agent
+[07:36] 能够回答认各种各样的visual question
+[07:38] answering啊
+[07:39] 甚至是做一些prediction
+[07:41] future prediction嗯
+[07:43] 或者就是对embodied agent来说
+[07:45] 做一些action的prediction
+[07:46] 真正的和世界进行理解
+[07:48] 进行交互
+[07:49] 去建立联系的这么一个过程
+[07:51] 对
+[07:51] 所以我们今天会嗯
+[07:53] 虽然多模态模型有很多能力
+[07:55] 今天我会focus在visual intelligence
+[07:57] 也就是visual层面
+[07:59] 但我们最终的目的是实现intelligence
+[08:01] 实现真的所有的
+[08:03] Let's say
+[08:03] Generalization
+[08:04] 可以应对各种各样的情况啊
+[08:06] 对所以今天的topic我一开始会介绍一些background information
+[08:11] 然后就会讲va square motivation和一些细节嗯
+[08:15] 最后的话就是说一些future的directions
+[08:21] 对
+[08:22] 所以大家可以看到
+[08:23] 就是其实会说大家都讨论什么什么paper非常好
+[08:27] 什么paper非常好
+[08:28] 那RESNET肯定在讨论的范围之内嘛
+[08:30] 15年RESNET出来了之后
+[08:32] 其实computer vision就非常的火热
+[08:34] 然后大家会投入了一波非常嗯
+[08:38] 或者说就是非常狂热的这个
+[08:41] PRETRAINING的这么一个潮流中
+[08:43] 那个时候大家崇尚的会是self supervised learning
+[08:46] 比如说像MAE
+[08:47] 比如像DINO这种方式啊
+[08:50] 甚至说对
+[08:51] 然后但是那一个之后
+[08:52] 在21年其实出现了一种新的PARADIM
+[08:55] 从google的这个align和a AI clip开始
+[08:59] 大家会希望
+[09:00] 因为那个时候已经看到了这个language model能力
+[09:03] 大家就觉得是一个机会
+[09:05] 可以看看这个visual之前已经这么成熟了
+[09:08] 能否和language model联系起来
+[09:10] 做一个更general的VQA的这么一个task
+[09:13] 对当时的做法呢
+[09:14] 就是说visual这个MODELITY本身就有pretrain encoder
+[09:17] 那它可以有一个latent space的embedding
+[09:20] 那对于text space嗯
+[09:22] 它也可以通过类似于BT的方式
+[09:24] 你去提取一个embedding
+[09:26] 然后在这两个MODELA之间用contractive learning嗯
+[09:30] 去训练一个相对的这种关系
+[09:33] 然后以此为嗯基础模型吧
+[09:36] 其实clip也衍生了很多的呃更好的模型
+[09:40] 比如说for downstream task
+[09:41] 它可以做retrieval
+[09:42] 各种各样的image base
+[09:44] Retrieval
+[09:45] 它也可以做为special stable diffusion
+[09:48] 去提供一些能够作为condition的image
+[09:51] embedding和text embedding
+[09:53] 然后就可以做到可控的生成
+[09:55] 对这些都是这一次怎么说
+[09:58] paradim shift带来的好处
+[10:00] 但是呢再过两年
+[10:02] 再过一两年就开始出现了
+[10:04] 以generative为objective的这一些茅台model模型嗯
+[10:08] 代表性比较有代表性的其实就是flamingo
+[10:11] 然后还有lava
+[10:12] 这中间还有一项blip之类的工作也很优秀
+[10:15] 但我这边就只提到只提这两个工作
+[10:18] 就这两个工作就第一次是以auto aggressive的形式
+[10:21] 开始
+[10:22] Predict
+[10:23] Next token
+[10:23] Next token
+[10:24] 当然他这2work都只是text token
+[10:27] 现在更新的范式会是连image token也可以做predict
+[10:31] 或者去predict一个latent based on the latent
+[10:34] 再去生成图片
+[10:36] 但是呢就是说整体的范式就从control t
+[10:39] 变到了generative
+[10:41] 我们接下去我就会介绍一下via了
+[10:44] 也就via是一种generative
+[10:46] 维奥J就是generation为objective的vision language model啊
+[10:52] 我们是一个来自于NVIDIA的team
+[10:54] 然后我们的核心是做efficient的AI嗯
+[10:57] villa是一个team
+[10:58] 也是我们整个组fox project
+[11:00] 也是一篇paper嗯
+[11:02] 那现现在呢
+[11:02] 我就以villa第一篇paper的architecture和training的方式
+[11:08] 给大家先呃
+[11:09] 让大家知道就怎么样
+[11:11] 我们训出能训出一个VOM
+[11:13] 对我们follow了lava的范式
+[11:16] 也就是对于一个input image
+[11:18] 我们会有一个VIT
+[11:20] 这个VIT其实就是PRETRAIN的一个clip
+[11:23] 对于language modality
+[11:25] 对于任意的text input
+[11:27] 我们都会有一个token eizer
+[11:28] 把它转成token
+[11:29] 然后放到text embedding space
+[11:31] 至于怎么样去connect visual space和tt space
+[11:35] 我们用的是简单的MLP
+[11:37] 在实验中我们也验证测试
+[11:40] 试试过像flamingo那种preceiver sampler的形式
+[11:43] 但发现有的时候这个因为用flamingo的话
+[11:48] 可以大量减少
+[11:49] 比如说有token
+[11:49] 但是我们发现这个有的时候剪的太多
+[11:52] 像OCR之类的task
+[11:53] 他就会做的非常差
+[11:54] 那我们就选择了在小数据下
+[11:56] 更effective mlp的这种形式去connect的两个modality
+[12:00] 然后在训练方面呢
+[12:02] 我们会把visual encoder完全freeze住
+[12:04] 这是去年我们的维拉第一篇paper
+[12:06] 然后第一个stage只train这个projector
+[12:10] 用lava的data
+[12:11] 在第二个stage呢
+[12:13] 我们会引入这个英特live的PRETRAINING
+[12:17] 所以呢INTERLIVE的PRETRAINING
+[12:18] 就是说像大家可以看到那种网页图和文字
+[12:22] 都是穿插在一起的
+[12:25] 这种data
+[12:25] 我们发现它对于in context learning的task非常有帮助
+[12:31] 所谓的compass learning就是指啊
+[12:33] 比如说给给定几个image text a pair
+[12:37] 再given一个新的image
+[12:39] 那他会用类似的方式去做一个输出
+[12:42] 这这里只是简单的knowledge base的嗯
+[12:45] 一一个output
+[12:46] 但同时如果有一些复杂reading task
+[12:48] 也会expect它有相同的behavior对
+[12:52] 然后呃我们发现这个in context learning的能力
+[12:55] 就是从这种interleave data里来的对
+[12:58] 然后第二个方案就是说嗯
+[13:00] 实际上tax only的data
+[13:03] 在vivision language model training里也很重要
+[13:06] 它能加强这个两个MODEH之间的alignment对
+[13:10] 然后实际上过了这个pretraining stage之后
+[13:12] 我们就会有第三个stage呃
+[13:14] 是更各种各样非常diverse question
+[13:17] answering的data
+[13:18] 然后希望这个model通过这种方式啊能够学到
+[13:21] 就大家可能会问什么样的问题
+[13:23] 然后能很好的把visual encoder里见过那些图和language
+[13:28] 里见过那些所有text data给他真的align上
+[13:32] 然后去做一个任何
+[13:38] 对接下来就是介绍一下基本结构之后
+[13:41] 我们就进入对va square的介绍
+[13:43] 所以va square motivation简单来说呢
+[13:46] 是我们在因为我们的via是完全open source嘛
+[13:50] 然后我们希望一直保持更高的性能
+[13:52] 不断提升这个基础模型
+[13:54] 我们在提升这个模型的过程中
+[13:55] 就会client各种各样的开源的data
+[13:58] 甚至我们自己会标一些data
+[14:00] 我们发现internet skill的这种raw image会非常多
+[14:03] 或者说video其实也很多
+[14:05] 但是呢他们都没有非常好的label
+[14:07] 因为这些label都是非常需要的
+[14:10] 它的答案都是非常短的呃
+[14:12] 然后有的甚至像coo的那些image
+[14:15] 图和文甚至是不相符的
+[14:17] 呃同时呢我们又注意到一点
+[14:19] 也就是说因为这个BOM它已经是被训练完的
+[14:23] 所以SFT的data
+[14:24] 我们会呃认为它是更加高质量的
+[14:27] 那么有没有可能把这种更高质量data
+[14:30] 训完之后的模型
+[14:32] 它的knowledge重新注入到他的pretraining stage里
+[14:36] 那所以在这个VLASQUARE这篇paper里呢
+[14:38] 我们实际上讨论了两个问题
+[14:41] 第一个问题是
+[14:42] 如果说我们让SSD之后的model去RECAPTION
+[14:46] 它的pretraining data
+[14:48] 那么他能做到什么程度
+[14:50] 因为这是可以是一个cycle
+[14:51] 先让这个MOL去标一遍DA
+[14:53] 然后重新训一遍
+[14:55] 拿训完的模型再去标一遍DA
+[14:57] 然后第二次进行训练
+[14:59] 呃
+[14:59] 那我们这里有一个简单的answer
+[15:01] 就是说我们发现在两到三轮左右
+[15:03] 模型的两到三轮之间
+[15:06] 模型的performance
+[15:07] 在BENCHMARR上的performance会持续的增长
+[15:09] 但到三轮左右就会饱和了
+[15:11] 对所以我们就探究了第二个问题
+[15:13] 一旦它饱和了
+[15:14] 那有没有什么办法能够surprise
+[15:17] 能够超过这种限制
+[15:18] 对这个时候我们就引出了我们paper的第二点
+[15:21] 也就是使用specialist augmentation对
+[15:23] 接下去我会介绍主要介绍一下这两个cycle嗯
+[15:27] 但是在介绍之前
+[15:28] 我是想往往就是往外拉一步
+[15:32] 就实际上如果从整个data的层面来说
+[15:35] 我们怎么样能够去提升这些嗯
+[15:37] 大的茅台model的这些model其实一个general的
+[15:42] 或者说paradigm
+[15:43] 它就是一个learn from feedback的过程
+[15:45] 那feedback从哪里来呢
+[15:46] 一种是可以从已经有的这些close source models来做提取
+[15:51] 比如说像shell g p t系列for v for video
+[15:56] 他们会去呃
+[15:58] 用g p t for先标一批数据
+[15:59] 基于for b或者gp for o标完了之后呢
+[16:02] train一个REACTIONER
+[16:04] 这种方式呢
+[16:05] 它实际上就是从closource model在dist呃
+[16:09] 这这这这种这种做法在language model里其实也经常出现
+[16:12] 第二种方法呢就是说learn from human
+[16:14] 网上已有的很多label其实都是人标的嘛
+[16:17] 或者说现在互联网上哦
+[16:19] actually不是现代
+[16:20] 因为现在有很多模型生成的数据
+[16:23] 在以前的话
+[16:23] 所有互联网上的这些记录实际上都是人提供的
+[16:27] 对那用这些数据就是learn from human
+[16:30] 可是这两种方式它都是被bounded的
+[16:33] 为什么呢
+[16:34] Quantitatively
+[16:35] 他们不能够SCALABLE
+[16:36] 你如果用API
+[16:38] 它会有token prelimit限制
+[16:39] totoken per minute的限制
+[16:42] 你如果从人来
+[16:44] 那就更更shay的
+[16:45] 就是
+[16:45] 你不能同时还有很多
+[16:47] 很多人来做这个数据标注的事
+[16:49] 嗯而且这两个事其实都是非常high cos的
+[16:52] 然后qualitatively呢
+[16:54] 他们实际上是不足够的
+[16:55] 我们会觉得就现在的这个g p four o或者GEMINI
+[16:58] 实际上他们已经有很好的对static image的理解能力
+[17:02] 也就是说你放一张image
+[17:04] 实际上他已经回答
+[17:06] 可以回答你大概的问题了
+[17:08] 呃当然这里是不包括那些common sense
+[17:10] 比如说物体和物体的relations
+[17:12] 以及物体的three d的spatial的这种关系
+[17:16] 上下左右前后
+[17:17] 这点他们确实还没有做好对
+[17:19] 但是anyway就是对static image的理解
+[17:22] 他们已经非常棒了
+[17:23] 甚至和human同level了
+[17:25] 那我们缺的数据是什么
+[17:26] 是一些expertise
+[17:27] 一些需要visual呃
+[17:30] 比如说我们对texture的理解
+[17:31] 对shape的理解
+[17:32] 比如说reasoning的过程
+[17:34] 不是说现在
+[17:35] 现在不是说让你描述一张图里有什么
+[17:37] 而是根据这个图
+[17:40] 未来你比如说你可以根据图中信息做什么
+[17:43] 就它我们需要的是一种visual的reasoning
+[17:45] 或者chain of thought
+[17:46] 对啊
+[17:47] 除此之外呢
+[17:48] 其实这两种方式都无法提供super human level的supervision
+[17:53] 而这才是我们想要的
+[17:54] 我们希希望一个模型真的非常的强
+[17:57] 能够比人还强
+[17:58] 达到那样的intelligence
+[18:00] 所以怎么做呢
+[18:01] 我们就提出就是你这个模型既然已经很强了
+[18:04] 它又是一个GENERALI
+[18:05] 它能做任何的task
+[18:07] 那我们是不是就能把它FORMUL类成一个group of
+[18:11] Teachers
+[18:11] 就有一个模型
+[18:12] 他擅长数学
+[18:13] 擅长物理
+[18:14] 擅长化学
+[18:15] 那我把它变成非常多个小的这种老师
+[18:18] 他擅他变成数学老师
+[18:21] 对对化学老师
+[18:22] 然后用自己的domain的这种知识来做一个T恤
+[18:29] 这就是我们要提出的self evolving
+[18:31] 所以这也是就
+[18:33] 这是维拉斯科尔背后想做的一件事
+[18:35] 就是探究一下self evolving
+[18:36] 这件事的可行度以及极限到底是在哪里
+[18:40] 对
+[18:40] 那我我这边地方
+[18:41] 我还是简单介绍一下model architecture
+[18:44] 实际上呢
+[18:45] model architecture这件事和VLASQUARE是independent
+[18:49] 我们只是希望在最强的模型上
+[18:52] apply villasquare仍然能提到起到提升的效果
+[18:56] 所以这个是我们当时呃
+[18:58] 这是b a one point five的一个open source版本的architecture
+[19:02] 我们在我刚刚介绍的VA的基础上
+[19:05] 其实加了两点
+[19:06] 一点是这里的s two
+[19:07] 还有一点是当sample
+[19:09] 那s two呢是为了support high resolution的这种case
+[19:13] 比如说table和charge understanding
+[19:15] 对于一张原本的图片
+[19:18] 我们会先做这个interpolation
+[19:20] 把它放大
+[19:21] 比如放放大两倍就放大2×2
+[19:24] 然后对每一个小的region
+[19:26] 我们都过一个这个VITB可以是ECLIP对
+[19:30] 但是我们当然clip的话是v i it large
+[19:32] 然后每一块都分别的过clip之后有一个feature map
+[19:37] 然后把这个feature map merge在一起
+[19:39] 其实就是慷慨的到一起再做一个pulling
+[19:41] 然后在channel上去contact的起来
+[19:43] 这个就如果做做过detection的同学
+[19:46] 大家会觉得
+[19:47] 就这个整个过程可能和FPN是非常像的
+[19:50] 但是也是用这种方式嗯
+[19:52] 让model提取了多尺度
+[19:54] 且有有HARRESOLUTION的这些visual information
+[19:58] 去适应一些需要高HARRESOLUTION的这种use case
+[20:03] 但同时呢就是我们又觉得token太多了
+[20:05] 我们想让token少一点呃
+[20:07] 所以我们就把这个4×44值的概述
+[20:10] 就是我们把过了s two之后的这个所有的visual token
+[20:13] 以2×2为一个小单元
+[20:16] 我们会做一个
+[20:17] 我们会把这22的token或者是patch
+[20:20] 在channel上给他contact起来
+[20:22] 一旦contact起来之后
+[20:24] 然后我们再做一个down sample
+[20:25] 就相当于我们会把四个token merge成一个对
+[20:30] 就是channel上它是减少的
+[20:31] 会再过一个MLP
+[20:32] 这用用这种方式
+[20:33] 本来一个西格lip
+[20:34] 本来如果我们用SILIP最大的model的话
+[20:37] 一张image会要729个token啊
+[20:39] 现在我们其实只要200个token不到就可以了
+[20:44] 对呃介绍完了model
+[20:45] 实际上我就要来介绍一下
+[20:47] 就是我们有的这两个cycles呃
+[20:50] 这两个cycle都是AI in the loop的这个范式
+[20:53] 一个是self argentation
+[20:55] 还有一个是specialist augmentation
+[20:58] default的方式怎么去train vm
+[21:01] 那就是人收集了一些test annotations
+[21:04] 也就是一些real的data
+[21:05] 就真实世界的data
+[21:07] 然后去训这么一个BLMM
+[21:10] 那我们的BLASQUARE呢肯定有这一条线啊
+[21:13] 也就是说我们也是通过同样的方式
+[21:16] 先获得一个呃version0的就第一代的VM
+[21:20] 那BASON这个BOM呢
+[21:22] 我们让这个BOM对他的pretraining data
+[21:25] 做一个caption
+[21:27] 我们preaching data里就有一部
+[21:29] 很很大一部分都是像KO这样的image
+[21:32] 就是它虽然是大量的几10M的image text pair
+[21:36] 但text和image的correlation是非常差的对
+[21:40] 所以我们让BOM做caption这个task
+[21:42] 去生成很多data
+[21:44] 然后呢我们会重新训一个BOM
+[21:46] 也就是说我们重新拿一个pretrain slip
+[21:50] PRETRAIN的LOM
+[21:51] 只是在这个只是换了pretrain data的pretrain image
+[21:56] 对应的这个text
+[21:57] 我们只是把这个text replace成了一个synthetic data
+[22:03] 然后做训练
+[22:04] 然后第二次的话也是一样
+[22:05] 就是嗯再拿一个reaction过的data
+[22:09] 然后从头从头训这个model
+[22:12] 这就是self argentation的loop
+[22:14] 但同时呢我这里也一并介绍了specialist
+[22:17] Augmentation
+[22:17] specialist augmentation实际上是在说
+[22:20] 如果我们有一个BLM
+[22:22] 那我们如果反复的做这个self centation的loop
+[22:26] 实际上是非常耗资源的
+[22:28] 你每次都要走一次PRETRAININGSFT
+[22:30] 那我们不如就是直接让模型
+[22:33] 在他擅长的方面做他擅长的事
+[22:36] 我们收集一些domestic pertise
+[22:40] 然后就训一个SPECIALIBL
+[22:42] 让这个specialist bim做task
+[22:45] Specific annotation
+[22:46] 比如说可以你如果是个grounding的model
+[22:49] 那你就去做output bounding box
+[22:51] 如果你是OCR的model
+[22:53] 你就去识别图中的这种文字
+[22:56] 然后把这所有的有多个task吗
+[22:58] 有多个specialist对一张image问多个不同的QA
+[23:02] 把这些q a compact到一起之后嗯
+[23:05] 变成一个茅台RQA的形式来重新训这个model
+[23:09] 这就是所谓的specialist augmentation对
+[23:13] 然后要注意
+[23:13] 这里就是我们并不是改SFT的data啊
+[23:16] 因为就是如果大家有了解的话
+[23:19] 其实那nature有一篇paper
+[23:20] 就是说
+[23:21] 如果让model自己不停的去标自己的s f t data
+[23:25] 最后他会变的就是output nonsense的东西
+[23:28] 等于s f t data还是需要一些非常高质量的
+[23:32] 但我们在PRETRAINING这个stage是有机会嗯
+[23:35] 用非常好的这种specialist data呃
+[23:38] 做一个替代
+[23:39] 让模型的能力真的得到提升
+[23:42] 因为PRETRAINING是这2MODITY
+[23:44] 真正在做alignment的这个过程对
+[23:47] 然后这个地方我先给他看一个简单的趋势吧
+[23:50] 也就是说self antation会呈现的趋势
+[23:53] 实际上就是一开始涨的多
+[23:54] 慢慢涨的少
+[23:55] 再涨到第三轮的时候就平了
+[23:58] 最后一轮它就会掉下来
+[24:00] 但如果加上specialist armtation
+[24:02] 它又能往上涨一截
+[24:03] 对这个的话就是说呃右边的是一个增强的baseline
+[24:07] 就是说我们在同一批data上
+[24:09] 如果用更多的FLOS
+[24:11] 就可能会大家会想会不会是flops用多了
+[24:13] 所以它就好了
+[24:14] 呃
+[24:15] 对单单其实不是
+[24:16] 更多的FLOS并不会让perform能变好
+[24:19] 那所以用了VLASQUARE之后
+[24:21] blast square是一个让capital越来越好的方式
+[24:24] 且让model在更好的cap上进行训练
+[24:26] 的这么一个cycle
+[24:28] 我们可以看到就是gp four v会觉得
+[24:31] gp four v和JERMANI都会觉得就是va square
+[24:33] 增强过后的模型
+[24:35] 它的标注会更好呃
+[24:37] 那这里有个win rate
+[24:39] 就是human
+[24:39] 我们让human也做evaluation
+[24:40] 到底哪个好
+[24:41] 那也是va square比较玩的好
+[24:44] 呃同时呢在一个left out的DATASET上
+[24:46] vs r它就是一个three d的
+[24:48] 就3D
+[24:49] 他会问你A和BA在B的上下前后左右
+[24:53] answer就是yes or NO
+[24:54] 那实际上这yes or NO的output直接上
+[24:57] 就你如果错了
+[24:58] 那就是hallucination
+[24:59] 所以我们把它作为hallucination的一个标准
+[25:01] 发现经过blasquare training的呃模型
+[25:04] 它的hallucination也下降了
+[25:08] 对那我们有这个loop之后
+[25:10] 这就是supplementation的loop
+[25:12] 我们可以哦
+[25:13] Sorry
+[25:14] 我们可以看到这个是结果
+[25:17] 首先呢这里的下标表示的是self mentation的这个轮次
+[25:22] 第零轮的话就是正常的训练
+[25:24] 训完的BLM
+[25:25] 第一轮的话就是用VA0recap的data做的pre train
+[25:31] VA2的话就是说用VA1recap data做PRETRAIN
+[25:37] 就我们可以看到这个performance的话
+[25:39] 从0~1是有明显的涨点的
+[25:42] 1~2也会有涨
+[25:43] Sorry
+[25:44] 然后2~3也是会涨
+[25:46] 但到3~4的时候就不涨了
+[25:49] 然后我等下会给出一些分析
+[25:52] 对这个地方其实主要的原因就是一零从0~3
+[25:56] 这个嗯text的detail
+[25:59] 这些细节信息越来越多了
+[26:01] 但同时他的hallucination没有找
+[26:05] 对
+[26:05] 然后针对每一轮的这个self partition
+[26:09] 其实我们也做了一些小的LATION
+[26:11] 就说有一种方式
+[26:12] 因为KO本身的text是很短的
+[26:15] 那我们可以让它describe image briefly
+[26:18] 我们也可以让他用很多diverse的
+[26:20] 又长的这种prompt
+[26:21] 希望他输出更可尽可能多的这个caption
+[26:24] 但我们发现就是嗯实际上就长了会有好处
+[26:28] 但是我们最最后嗯最后试出来的版本
+[26:31] 就是说其实要用非常多diverse prompts
+[26:34] 因为你在做reception这个task的时候
+[26:37] 实际上是让model去output的更consistent的数据
+[26:41] 本来KO对应的土豆网上收集来的
+[26:43] 他那个text可能千奇百怪
+[26:45] 他是非常diverse
+[26:46] 符合整个世界的这个distribution
+[26:48] 但我们让模型去标的数据
+[26:50] 实际上它会是一个更consistent的distribution
+[26:53] 那么这样更consistent
+[26:55] 当更consistent distribution对模型的训练是有好处的
+[26:58] 它更容易学
+[26:59] 他会陷入一个不那么坏的local optimal
+[27:02] 就它比之前那个可能是要好对
+[27:04] 但他同时就丧失了这个diversity
+[27:06] 所以我们发现在训练的时候
+[27:09] 如果说我们能加上一些正确的human的short label
+[27:13] 那是有有好处的
+[27:15] 这human shell label
+[27:16] 大家可以理解为我们本来是对一个image
+[27:19] 有了caption有极其复杂的描述
+[27:21] 但是很短的human label实际上是作为一个abstraction
+[27:24] 也就是告诉你你这一段话的总结应该是什么
+[27:28] 且里面可能还有一些知识
+[27:30] 因为在做caption的时候
+[27:31] 模型只是倾向于去输出图里有什么
+[27:34] 而比如说对应一张桥的图片
+[27:37] 它桥就是这是哪里的一座桥之类的
+[27:39] knowledge信息嗯
+[27:41] 在原来的shell human label里有
+[27:43] 所以就我们发现就最后两行吧
+[27:45] 如果你contact了这个原始的这个
+[27:47] 只要它是valuable的human label
+[27:49] 那它就是有好处的对对
+[27:53] 所以嗯这个地方就是一些实验结果吧
+[27:56] 就是说如果你花了更多的flops
+[27:58] 在同样的data上可以看见这个baseline和多训一轮
+[28:02] 多训两轮
+[28:03] 实际上结果是一样的对
+[28:05] 然后大家会看到这个实际上villa1VA二VA三标的
+[28:10] 他的这个average length是逐渐变长的
+[28:15] 但是就这是一个qualitative with example吧
+[28:17] 就rock action就是BORISJOHNSON在车在街上骑自行车
+[28:22] 第一轮cap完之后就会发现长度明显变多了嗯
+[28:26] 但是呢就会发现像blue blue suit
+[28:29] 再像basket
+[28:30] 就实际上没有对
+[28:32] 就是他会有很多hallucination
+[28:34] 到第二轮的时候就仍然也有hallucination
+[28:36] 但其实第三轮的时候就会好很多
+[28:41] 对
+[28:41] 但是我觉得这这个东西只是一个非常sparse
+[28:45] signal来说明它不会变差
+[28:48] 这caption没有变差
+[28:49] 在变好
+[28:49] 然后我们就去寻找了更多的证据吧
+[28:52] 就一种方式
+[28:53] 我们是用closers model来judge
+[28:55] 到底哪一轮的caption比较好
+[28:57] 那就会发现直到第三轮为止
+[29:00] 都是越后面的round
+[29:02] 他的caption quality更高
+[29:03] 同时呢我们一个是测了在vs2那个benchmark上
+[29:08] 它和LUCINATION到底变多了还是变少了
+[29:10] 对就是训在这样的captain上
+[29:13] 训完的模型
+[29:14] 它产生的和LUCINATION到底变多变少
+[29:17] 那实际上就是一问到了第三轮
+[29:20] 也发现这个hallucination是越来越少
+[29:23] 然后这个win瑞则的话
+[29:24] 就是我们找了组里的15个PHD来判断
+[29:28] 就是每一轮的caption到底谁的荷鲁斯nation更少
+[29:31] 对也可以看到就是大家会agree
+[29:34] 就是大家会统一越后面的
+[29:36] 实际上他和LUCINATION更少
+[29:37] 也就是前这这三个东西
+[29:39] 我觉得就是一个证据吧
+[29:42] 算部分的证据来说明这个呃
+[29:44] 来解释为什么他能变好
+[29:46] 就是details变多了
+[29:47] 但hallucination没有变多
+[29:51] 对然后呃因为大家可以看到这第三轮之后
+[29:54] 他其实就饱和了嘛
+[29:55] 那我们怎么办呢
+[29:56] 我们就propose用specialist
+[29:58] 那用specialist其实有两个初衷吧
+[30:01] 一个是我觉得就他是一个generalist
+[30:04] specialist学习的这种框架
+[30:07] specialist我们选了三个
+[30:09] 为什么选这三个呢
+[30:11] 呃一个就是因为这些specialist都是visual intensive的task
+[30:15] 对现在的BOM来说
+[30:17] 其实它output的就有些题目
+[30:20] 比如说像TTOCR
+[30:21] 他们甚至会提供OCR的token
+[30:23] 就是他做的VQA
+[30:25] 其实只要text就它只要是一个language model
+[30:29] 它就能回答他并不需要什么visual的信息
+[30:31] 所以我们选的ocr grounding和spatial
+[30:34] 它都是极其visual intensive的task
+[30:37] 比如说GRANDY
+[30:38] 你你必须得认出这是一个猫
+[30:40] 以及它在哪
+[30:41] 你才能输出这个bounding box对
+[30:43] 所以对于OCR呢
+[30:44] 我们就是collect the table chart的这些data
+[30:46] 对grounding的specialist呢
+[30:48] 我们就去找了那些interleave的bounding box和TTD
+[30:53] 然后special specialist我们就是找了所有的three d的public
+[30:57] Three d dataset
+[30:58] 也不是所有的吧
+[30:59] 就比较大的
+[31:00] 然后我们去首先filter bounding box
+[31:02] 然后从一个relation pool里去选
+[31:05] 首先任选一个bounding box
+[31:07] Three d bounding box
+[31:08] 然后去选一个relation
+[31:10] 然后去找有没有任何一个bounding box
+[31:13] 是match和就最开始选的那个buy box match这个关系的
+[31:18] 如果有的话就留下
+[31:19] 然后会把这个data做成一个QA的形式
+[31:22] 也就是说嗯哪个bounding box
+[31:25] relation in the image对
+[31:27] 然后这个bounding box就是他的projected to d bounding box
+[31:32] 通过这种方式呢
+[31:33] 呃然后我们又是每一个specialist
+[31:36] 因为要执行自己的那个task specific annotation
+[31:39] 所以special的就会嗯给caption
+[31:42] 但是focus在special relations grounding的呢
+[31:45] 他就会直接去output这个bounding box
+[31:48] 但这个地方有一些不一样
+[31:49] 就是for grounding
+[31:51] 我们有一个小的design吧
+[31:52] 我们会让他去预测
+[31:54] 000~999代表占占这个图片的比例
+[31:58] 比如说000就是占0010%
+[32:00] 就是占0.1%
+[32:02] 这样对
+[32:03] 然后我们会每个都是一个special token
+[32:05] 且我们会apply一个soft cross entropy loss
+[32:08] 也就是说其实我们如果把它当做text来预测的话
+[32:13] 你你一个位置
+[32:14] 比如说345和245
+[32:17] 那比如说345和344这两个loss是一样的
+[32:21] 但是明显345和245
+[32:23] 它这个差距会更大嘛
+[32:24] 所以我们实际上会把会有一个soft的loss
+[32:27] 也就是说对于比如说900
+[32:30] 我们会对899和90e apply一个loss
+[32:34] 然后希望就是他在学业categorical distribution的match
+[32:37] 而不是完全的这个text的对应的loss
+[32:41] 对OCR的specialist实际上就是认图中的字了
+[32:44] 下面就是一个example吧
+[32:46] 就是我们一旦有了这个第一代的模型
+[32:49] 我们就用domain specific data把它变成不同的specialist
+[32:54] 每一个specialist都执行task
+[32:56] 像special specialist会有信向suspended from the ceiling above
+[33:00] 就这种位置相关的信息
+[33:02] 而grounding specialist呢它会输出详细的这个caption
+[33:06] 但同时它也会给这种major focus的bounding box
+[33:09] 也就是他们的位置对OCL的specialist
+[33:12] 它就是output嗯
+[33:14] 这里面的一些文字信息
+[33:16] 然后我们在训的时候呢
+[33:18] 会把这三种specialist的q a contact到一起
+[33:23] 就一张image
+[33:24] 相当于有三个round of q a甚至更多
+[33:26] 然后去喂给这个嗯模型哦
+[33:30] 还还有一点
+[33:31] 刚刚就是其实选这三个specialist
+[33:33] 还有一个原因吧
+[33:33] 就是这三个task
+[33:35] 大家可以知道在computer vision里它是非常成熟的
+[33:37] 三个field
+[33:38] 那这三个field的话对应的高质量的数据就多
+[33:41] 所以说我们我们来做了这么件事
+[33:44] 对对这个就可以发现同一张图
+[33:47] 如果是用special specialist标的话
+[33:50] 就会看到central figure
+[33:52] 然后呃有一些比如blue sn on the front
+[33:56] 然后人在他后面走
+[33:57] 然后之类的信息就是它会很丰富嘛
+[34:00] 然后也可以从结果上看到这个special specialist
+[34:04] 其实就是这个第三个checkpoint在哦
+[34:08] Sorry
+[34:09] 就是根据第三个checkpoint加special specialist
+[34:13] special的data训出的这个specialist
+[34:15] 然后有他就让这个special specialist output
+[34:19] 上述的这样的caption
+[34:21] 然后从头训练这个模型
+[34:22] 就是整个过程和1234是一样的
+[34:24] 只是说用来label的那个model变成了一个specialist
+[34:29] 但这种方式我就可以在stage3的情况下继续提升
+[34:32] 但就是我们这里就可以看到不同的specially
+[34:37] 到底有什么好处吗
+[34:38] 那special specially
+[34:39] Ocr
+[34:40] Specialist
+[34:40] Granning speciali
+[34:41] 他们其实都在这些task上
+[34:44] 就是有比较不错的表现
+[34:46] 可以看到就是嗯对
+[34:48] 就每一个TT上基本上都是正的嘛
+[34:50] 而且我们为了做实验
+[34:52] 就这里只用了10%的data s f t
+[34:54] 大概是1.8M的这个量级
+[34:56] 我们为了快速的实验
+[34:57] 就是都用了subset
+[34:59] 但可以看到
+[35:00] 其实像这个performance都已经很不错了
+[35:03] 那如果说我们skill up这个reception
+[35:05] data呢
+[35:06] 也就是我们的reception本来是apply
+[35:08] 在这个10%的Q有25M
+[35:10] 也就2.5m data上
+[35:12] 它就可以体现出这些优势了
+[35:14] 那我们把它变成了百分之百
+[35:17] 也就是25M全都recap
+[35:19] 大家就可以看到这个performance就相当好了
+[35:22] 所以这里的SFT仍然只有1.5M啊
+[35:26] sorry sf t只有1.8M
+[35:28] 但同时我们的visual input并不是harassed
+[35:31] 就我们只是加了s to
+[35:33] 我们并没有说像dynamic tiling之类的嗯
+[35:36] 技术让vivo token变得更多
+[35:38] 因为我们一张图只有200个token
+[35:40] 对我觉得given this这个performance已经相当不错了
+[35:45] 对然后呃其实呢这就是一些benchmark performance吧
+[35:49] 啊对就是这是我们刚做完的时候的一个结果
+[35:53] 就当刚做完的时候
+[35:54] 那些SOTA大概就是这样
+[35:56] 其实就是非常的strong呃
+[35:58] 其实这里也有一个waketo strong generalization吗
+[36:01] 不会说
+[36:02] 因为我们的这里有一个34B模型的结果
+[36:04] 而34B的这个模型
+[36:06] 实际上是用8B标的数据训练的
+[36:09] 也就是说它是它是train on8B标的
+[36:12] 8B那些specialist标data
+[36:13] 它也能够提升很多的performance
+[36:15] 当时在open source榜单上就是非常非常领先对嗯
+[36:21] 然后就是其实比拉斯QUARE
+[36:23] 他这这大概就是维拉斯QUARE
+[36:25] 整个故事我们发现了在self orientation的情况下
+[36:29] 它能够找三轮
+[36:30] 然后碰到一个saturation
+[36:32] 但是呢就是他他的后面再往后走
+[36:34] 他就会performance
+[36:35] 就会job
+[36:36] 那如果在此基础上再apply specialist
+[36:40] 他能做的更好
+[36:41] 而这个概念其实不不只仅限于这个啊
+[36:44] BOM它对language model同同样也是成立的
+[36:47] 比如说你有一个max或者code specialist
+[36:50] 对embodied agent
+[36:51] 实际上你对每个specific task
+[36:53] 你都可以训一个specialist
+[36:55] 对抓取这种task
+[36:56] 甚至对navigation task对
+[36:58] 然后都用它们去生成数据
+[37:00] 因为他们在那个更窄一点的domain上
+[37:04] 他的这个能力会更好
+[37:06] 我们也会发现嗯
+[37:07] 可能大家会觉得每一个specialist都用了额外的data
+[37:11] 那是不是这些data加到preaching这个stage里
+[37:15] 这个model本身就能变好呢
+[37:16] 那实际上不是的
+[37:18] 我们如果把这三个迅special string
+[37:20] 三个specialist data加到PRETRAINING里
+[37:22] 会发现在DOS streaming test上没有明显的提升
+[37:25] 嗯一个原因就是因为这些data a实在太少了嗯
+[37:30] 所以需要有一种方式能让model获取专业知识
+[37:34] 而且大量地表现出来
+[37:36] 再让model从这这些上面去学习
+[37:39] 但也要注意就是要keep这个diversity这件事对啊
+[37:43] 因为其实其实希望的是让model在更复杂的task上
+[37:47] 做一个search
+[37:48] 做完了再做一个distillation
+[37:50] 对
+[37:51] 当然bear square这个idea我们也尝试
+[37:53] 比如说你可以apply到video上呃
+[37:56] 因为对image成立
+[37:57] 对video也会成立
+[37:58] 我们发现就是实际上你video只train bug frame
+[38:02] 就influence32个frame
+[38:04] 自然就有一个generalization
+[38:05] 也就是说它结果就会变好
+[38:08] 然后呢va square的这个方式去训video
+[38:12] 就会被bounded的住
+[38:14] 为什么
+[38:14] 因为video的SFT
+[38:17] 我们我们VLASQUARE改善的是PRETRAINING
+[38:20] data的quality
+[38:21] 但是呢SFT的data对于video来说
+[38:24] 更多的就是现有的data
+[38:25] 实际上都是比如说八帧
+[38:27] 16帧的input的的那些close source model表的
+[38:30] 所以就算我的PRETRAINING越变越好
+[38:33] 帧数越来越多
+[38:34] 你在最后一个SFT的时候又被压回去了
+[38:36] 又对应一一个完整的video嗯
+[38:39] va square本来可以看到32帧
+[38:41] 更多的内容
+[38:42] 可以看到更多的细节
+[38:43] 但你最后的supervision又是非常sparse的
+[38:45] 帧只有16帧的这些supervision
+[38:47] 那就导致了VLASQUARE的效效能
+[38:50] 就是被这个s f t data给绑定的住
+[38:54] 对但是其实我还想和大家讨论一点
+[38:56] 就是嗯我们也应该注意更好的
+[38:58] 比如说language alignment
+[38:59] 就是当然对va square来说
+[39:01] 有一个很简单的方式是VLASQUARE
+[39:03] 因为可以有bounding box
+[39:05] 那他能做两件事
+[39:07] 一个是bounding box
+[39:08] 可以crop出来
+[39:09] 单纯的这种细节的信息再补充进去
+[39:12] 第二件事是说一旦有了bounding box
+[39:15] 我们实际上就可以做某种程度的verification
+[39:17] 也就是bounding box
+[39:20] 那一块东西的细节和你整个caption里
+[39:23] 比如说你说那个杯子是红色的
+[39:25] 但我帮你box抠出来
+[39:27] 他如果说是蓝色的
+[39:28] 那显然在更小的嗯
+[39:30] 可见遇上你的output会更准确嘛
+[39:33] 那我们就比如说就相信那个bounding box的内容呃
+[39:37] 来做这么一个替换
+[39:37] 就这些东西我们都是简单实验做了一下会work的
+[39:40] 但是我们就没有SKUP做下去了
+[39:42] 对因为对对于我们来说
+[39:44] profile concept就已经够了
+[39:45] 这里嗯当然就是一旦有了bounding box
+[39:48] 我们还可以去做这种visual的chain of salt
+[39:51] 比如说我们要做呃
+[39:53] 你去做一个很复杂的
+[39:55] 做一个navigation task
+[39:56] 比如说去找到呃
+[39:58] 你在一个房间里说呃
+[40:00] 比如说一盘菜可能在哪
+[40:02] 那就会先去locate到那个微波炉
+[40:05] 然后再过去
+[40:07] 比如打开微波炉
+[40:08] 然后看到菜在里面之类的
+[40:09] boy box也提供了一个visual的chain of s的可能性对
+[40:13] 然后第二点其实就是modity energy
+[40:15] 我们现在va square
+[40:17] 包括从darling开始
+[40:18] 其实大家做的一件事情都是去dist
+[40:21] Generation from understanding
+[40:23] 也就是你能看到什么呃
+[40:25] 就是你能理解什么
+[40:26] 你都能说出来
+[40:27] 那你就能生成出来
+[40:28] 但generation到底能不能帮助这个understanding
+[40:31] 其实是一个很好的问题
+[40:33] 对我们希望的是有generation能力之后
+[40:36] 至少说比如说我们以前做题
+[40:38] 有一些数形结合的问题
+[40:41] 那如果能想出那条辅助线
+[40:43] 那应该会有帮助
+[40:44] 就这只是很小的一个case
+[40:46] 但是这也是我们在探究的方向
+[40:48] 也就uni fying到底会不会对嗯
+[40:50] language model本身的reason你有好处
+[40:52] 会不会对茅台model reason你有好处对
+[40:56] 其实刚刚讲述的就是一个
+[40:58] 我会把它叫做generative
+[41:00] Pretrain transformer
+[41:01] 也可以被叫做GBT吧
+[41:02] 它的self evolving
+[41:03] 但是呢就是这整个loop是值得有更多的探索的
+[41:07] 我们希望的是把整个loop给close起来
+[41:10] 包括去让这个model呃真的能去自己的做exploration
+[41:15] 然后呃甚至就是做完exploration
+[41:18] 这其实是另一篇工作了
+[41:19] 但是做完exploration之后
+[41:22] 你的目的是说获得diverse data
+[41:24] 为什么要做exploration
+[41:26] 因为所有的model他的training data都是有bias
+[41:31] 也就是我们以数学题为例吧
+[41:33] 你要去解一道数学题
+[41:34] 可能有很多种策略
+[41:36] 但因为training data的这个bias
+[41:38] 你往往会sample到某一种策略与的概率特别大
+[41:43] 而你做数学题的时候用的又是majority voting
+[41:46] 那一旦你陷入了某种high level strategy中
+[41:49] 且那种high level strategy并不是适合做这道题的
+[41:52] 那你就很有可能会出现错误
+[41:54] 就after majority voting
+[41:56] 所以要做exploration或者尽可能diverse answer
+[41:59] 对
+[42:00] 不能在恒consistent consistent data上一直睡对
+[42:03] 然后第二件事呢可能就是说啊
+[42:05] verification的重要性就是这
+[42:07] 这这也是我们当时也说叫delective verification
+[42:10] 和OpenAI的last verifist steve steve是同一时间的
+[42:14] 就我们还我们还稍微早一点
+[42:16] 也就是说你获得了这个exploration的reading chain
+[42:19] 之后呃
+[42:20] 其实现在比如说o one就是各种MCTS也好
+[42:23] 就做各种在value function里也好
+[42:25] 其实你需要对整一个长的reading chain
+[42:28] 去做一个评估嘛
+[42:29] 它final author是不是对的
+[42:31] 每个reading step是不是对的
+[42:32] 其实需要的是一个step
+[42:34] wise都正确的这么一种模式
+[42:36] 那么我们就会需要使用verification
+[42:38] 来获得一个正确的思维链
+[42:40] 但这个地方也有一个问题
+[42:42] 就是其实even apply the verification
+[42:44] 获得了正确的思维链之后
+[42:46] 大家会发现现在的模型在解一些稍微难的题
+[42:49] 或者甚至所有的数学题
+[42:50] 它都会加上很强的pattern
+[42:52] 也就是我们通过verification的方式
+[42:56] 让模型把题目给做出来了
+[42:58] 但是呢因为我们训练太狠了
+[43:01] 然后这个模你会发现
+[43:02] 模型有的时候经常会有某种template来做一些题
+[43:06] 就这件这件事未必是一个好事
+[43:08] 因为我们希望一个general的
+[43:09] 可以帮我们解决黎曼猜想的这么一个模型对
+[43:13] 但这显然不够的
+[43:14] 当然这这些地方都有很多探究的空间嘛
+[43:16] 那接下来我就其实这个talk已经基本到了嗯
+[43:21] 尾声了
+[43:22] 但是我是想来和大家讨论一下
+[43:24] 就是我们villa这个group吧
+[43:26] 我们还有很多很多paper
+[43:28] 比如说一开始的VA再到va square
+[43:31] 其实我们关注的是真正的foundation model
+[43:34] 就是这个base model我们怎么去提升嗯
+[43:37] 一个是每一个villa这篇paper vila paper
+[43:40] 就是说每一块你到底怎么做是最efficient的
+[43:44] 呃且就是首先让他得有这个能力
+[43:46] 然后什么能力和什么data或者什么loss去对应
+[43:50] VLASQUARE呢
+[43:51] 说的是考虑的
+[43:53] 其实就是说data的来源这个问题
+[43:55] 我们怎么样去有更高质量的data
+[43:57] 且整个过程把它automate起来
+[44:00] 那对于输出这个field呢
+[44:02] 我们也有像VLU这样的工作啊
+[44:04] VAU就是说我们通过sequence to sequence的方式
+[44:08] 去让模型不仅能做understanding
+[44:11] 也能做generation
+[44:12] 就这个工作室张若阳例子的一个工作
+[44:16] 然后呃主要我这里就很简单介绍
+[44:18] 因为如果之后可能可以请主要来讲一下之类的
+[44:22] 也就是这篇工作主要讲的就是你有一个input
+[44:25] 那我们用一个shared video encoder
+[44:29] 所谓的share video encoder
+[44:31] 指就是说这个vision encoder既能做understanding
+[44:34] 也能做generation
+[44:36] 它是一个RQVAE的形式
+[44:38] 所以它是一个DISPTIZED的video tokens
+[44:41] based on这些visual tokens
+[44:42] 那我们就可以记住understanding也可以做generation
+[44:45] 做generation的话
+[44:46] 就是把本身那个VAE的decoder接上
+[44:49] 就可以去预测图像了
+[44:50] 但是在这个工作里我们也发现到了
+[44:53] 如果一个visual encoder要既做understanding
+[44:56] 又做generation
+[44:57] 两个task其实是conflict
+[44:59] 因为就是对于理解来说
+[45:02] 我们很多时候只需要一些high level的semantics
+[45:05] 而对于生成来说
+[45:06] 我们需要的是呃更更low level的这些所有的细节
+[45:10] 这两个objective本身它会打架啊
+[45:13] 就导致这个其实很难训
+[45:15] 就会发现这边拉尤其实做的已经很好了
+[45:18] 但是understanding和via本身就只做understanding相比
+[45:21] 还是有差距对
+[45:24] 然后这是就相当于我们在输出的模态上
+[45:26] 我们会支持generation
+[45:28] 我们还会支持audio
+[45:30] 但这这这个就是后续的工作了
+[45:32] 呃
+[45:33] 然后还有一个的话就是long villa
+[45:34] 我们就是因为这个其实对于image的理解来说
+[45:38] 大家做的已经很不错了
+[45:40] 当然有还就像我刚刚提到的
+[45:42] 有一些visual pretraining仍然是应该进行的
+[45:45] 就至少这个BIM得有和人一样的
+[45:48] 对世界的common sense的理解
+[45:50] 就我们人可能是因为能感知到这种力
+[45:53] 能和世界做interaction
+[45:54] 才有这个位置的信息和运动的信息对
+[45:57] 但是我们有办法通过PRETRAINING
+[45:59] 让V2M也有对呃
+[46:02] long va的话
+[46:02] 就是support我们去从video中进行学习的一个呃工作
+[46:07] 就本来的VRM的训练
+[46:09] 你会受限于呃
+[46:11] 因为像我刚刚说一张image
+[46:13] 正常的话就700个token
+[46:14] 你放十张image
+[46:16] 实际上就7000个token了
+[46:17] 那QN它也正常的这种小的模型
+[46:20] 它也只有8K的这个contest lds
+[46:22] 那就没有办法去支持更多的video frames
+[46:25] 做understanding
+[46:26] 那long va就是一个系统上的工作
+[46:28] 而是陈玉航和薛福招lead的
+[46:31] 还有利达成对
+[46:32] 然后去做这么一件事
+[46:35] 通过的方式就是说打一个很长的video sequence
+[46:39] 切到各个GPU上
+[46:40] 每个分别算
+[46:41] 算完了之后
+[46:42] Aggregate
+[46:43] aggregate到一起之后
+[46:44] 再来做这个training或者influence对
+[46:48] 然后嗯因为一些那个cpi policy
+[46:50] 我不能介绍具体的介绍工作
+[46:53] 但是其实我们后面的嗯一块内容
+[46:56] 实际上是朝word model去走的
+[46:58] 我们会对word model
+[47:00] 也就是现在所有的video generation model去做一个benchmark
+[47:05] 我们会对现在所有的video generation model
+[47:09] 根据它instruction following各个种physical
+[47:12] Physical laws
+[47:12] 也会对他aesthetics
+[47:14] aesthetics就包括temporal是否consistent
+[47:17] 美学上它是否很好看
+[47:19] 来进行一个打分对
+[47:22] 打完分之后
+[47:22] 就是我们会收集很多data去造这么一个reward model
+[47:26] 那根据这个word model feedback
+[47:29] 我们又可以去train前面的那个video generation model
+[47:32] 去提升它作为一个word simulator的能力
+[47:37] 对这个这就是
+[47:39] 然后我们也有一些可能机器人方面的探索
+[47:42] 就VA整个team它的核心是怎么样efficient的
+[47:45] 就train这个model
+[47:47] efficient algorithm来做learning这件事
+[47:50] 以及efficient system来做这个serving这件事对
+[47:55] 然后嗯最后就是可能大家如果有
+[47:58] 就是这第一个就是VLA的这个code base
+[48:01] 也欢迎大家使用
+[48:02] 然后这是我的email
+[48:03] 大家就是如果有任何问题要合作之类的
+[48:07] 都可以来找我呃
+[48:09] 以及就是大家如果对VA这个team感兴趣
+[48:12] 想in turn的话
+[48:13] 其实我们是有呃有那个head count的
+[48:15] 所以大家也方也欢迎大家联系我们
+[48:18] 但是就是呃我们是会有一定的这个要求的
+[48:21] 就是对能力而言
+[48:23] 那最后的话就是呃
+[48:25] 刘之健是villa的一个CORE contributor
+[48:28] 然后他现在是U3D的新AP
+[48:31] 如果大家有呃有这个升学升学要求的话
+[48:36] 升学目标的话
+[48:37] 也欢迎申请对制建制建非常强
+[48:40] 而且非常靠谱
+[48:41] 对
+[48:42] 那我的talk今天差不多就是这样了
+[48:44] 然后就是看看大家还有没有什么问题
+[48:49] 我把这个放到第一页
+[48:51] 然后看一下大家有没有什么问题
+[48:59] 对就是呃对下彩要和pixel shuffle有类似的对
+[49:04] 可以说就是pixel shuffle
+[49:09] 呃对就是合成造成模型崩塌的话
+[49:12] 就说其实在SFT做这件事的话是会的
+[49:16] 就是我们试过
+[49:17] 在S如果让模型自己生成ST的data
+[49:20] 它迅体轮也会迅崩
+[49:21] 就我们稍微验证了一下nature nature那篇paper的结果对
+[49:25] 但我我们这篇相当于是SFT
+[49:27] 仍然保留这种high quality data
+[49:29] 但是PRETRAIN的时候把这些image的data给呃replace
+[49:34] image对应的text data or replace
+[49:37] 且同时我们会保留一部分的real data
+[49:40] 这就是real和synthetic mix在在做这个PRETRAIN
+[49:44] 就大概是这样
+[49:48] 对sat数据完全相同
+[50:08] 对大家不管是对就是va square这篇paper
+[50:12] 对我刚提到的任何哪篇paper嗯
+[50:15] 或者说对这个team相关的问题都可以问对
+[50:20] 包括包括你可以可以甚至可以放宽到整个machine learning
+[50:24] 都可以对
+[50:53] specialist对specialist model
+[50:56] 每一个specialist都是在stage3的时候嗯
+[51:00] 提高domain expertise的比例
+[51:02] 训出来的就是我们会放一部分等max retise data
+[51:06] 也会放一部分caption的data嗯
+[51:09] caption的data
+[51:10] 可能就是说希望这个model保持这种输出长的
+[51:14] 这种风格
+[51:16] 还会放一些放一个小小小小数据的
+[51:19] 少量的
+[51:20] 其实就是lava那个SFT
+[51:21] 用来保证他对各种各样的呃prompt的这种支持
+[51:27] SFT训多少个epoch最好
+[51:30] 这个问题的话
+[51:32] 就实际上现在的practice我觉得depends吧
+[51:34] 就是现在的B2M的practice
+[51:37] 还是训一个apple多少的话
+[51:40] 其实看loss不是不一定是那么准
+[51:43] 我们我们的就是实际上一个比较好的方式
+[51:47] 就是或者说我们会用的
+[51:48] 就首先SFT选一个
+[51:50] 我们如果界定在做很长
+[51:52] 就是比如说PRETRAIN要train好几天
+[51:55] 甚至好几好几个星期的这种
+[51:57] 那我们可能会其中挑出一个checkpoint
+[51:59] 然后在一个很小的ST上训完
+[52:01] 还是看benchmark的嗯
+[52:03] performance就是这个这个signal还是非常sparse的
+[52:06] 得看这个最最终的evaluation的结果
+[52:12] 对
+[52:12] 毕竟因因为这个问题其实是在于
+[52:14] MULTIMODEL的training
+[52:16] 没有一个skinning law
+[52:17] 就至少现在没有那么一个curve出现
+[52:19] 所以很难做这种数值上的预测
+[52:33] OK对granning loss
+[52:35] 比如说就是说
+[52:39] 那我看看能不能换一下
+[52:43] 对比如说就是你对这个他他0~1000的数字
+[52:47] 比如说120比123
+[52:50] 那实际上就是123
+[52:56] 120
+[53:02] 4something like
+[53:11] 呃我这是一概述的
+[53:13] 我们我们用的应该是有有有那个总共五个的
+[53:16] 就相当于你给零点122+0.3的位次
+[53:19] 123+0.4的位次
+[53:21] 124+0.3
+[53:23] 就每个都是cross entropy
+[53:24] 但是会乘一个系数
+[53:26] 就是一个soft的cross entropy
+[53:33] 嗯有什么推荐的paper吗
+[53:35] 呃能说一下
+[53:36] 比如说你感兴趣的方向吗
+[53:38] 就视觉语言
+[53:46] 对视觉语言模型的话
+[53:48] 就是我觉得是这样的
+[53:49] 就视觉语言模型因为涉及到视觉以后
+[53:52] 之前所有东西都能被重新做一遍算好对
+[53:55] 所以这个地方比较tricky
+[53:56] 就真的真的有意义的paper
+[53:58] 我觉得嗯哦或者这样吧
+[54:01] 就是大家的focus是不同的
+[54:03] 呃对就是能能再说一下细节
+[54:06] 比如说你想你想对什么方面感兴趣
+[54:10] 对OK然后我看一下下一个是多模态的推理能力
+[54:17] 对我觉得这个推理是一个重要的发展方向
+[54:21] 但是多模态来说
+[54:23] 其实推理更要更要注意的是
+[54:25] 这个问题到底是什么
+[54:26] 我们对多模态的expectation
+[54:27] 实际上他能做一个long horizon decision
+[54:30] Making task
+[54:30] 也就是说我们希望他做的并不是说图里有什么
+[54:34] 或者图里有或者没有什么的这种reasoning
+[54:37] 像这种时钟图像推理呃
+[54:40] 方块推理经典
+[54:42] 如对这些都是很经典的VQA的task吧
+[54:45] 呃我觉得都是
+[54:48] 真实世界图像还是认为数学几何更为重要
+[54:53] 嗯我会觉得就是都都很重要
+[54:56] 但是像数学推理和几何推理
+[54:59] 就是这部分数据很好生成嘛
+[55:00] 只要做一些runaway就可以生成这种图图字形式
+[55:05] 或者说这样的data
+[55:06] 可能你只要能recognize出来
+[55:09] 那language model会做
+[55:10] 他就会做
+[55:11] 就是这个这个是一个lemon的问题
+[55:13] 但是对真实的
+[55:14] 就像比如说一些视觉上的推理问题
+[55:17] 比如说有某几个形状公务员考试题那种
+[55:20] 你推测下一个到底是什么
+[55:22] 呃这种我觉得是现在欠缺的
+[55:24] 而真实需要的对
+[55:29] 然后继续遇到瓶颈吗
+[55:33] 又该怎么解决
+[55:35] 就是这样的
+[55:35] 就是我觉得这种方式能提升的根本原因
+[55:39] 就是说这element还有缺
+[55:40] 而我们的三个specialist
+[55:42] 比如说对应的每一种data都是highly visual intensive
+[55:46] 那么它实际上是在做一个代替一个很好的
+[55:49] visual pretraining这件事
+[55:51] 我觉得这个东西最后也不说碰到瓶颈嘛
+[55:54] 就这个问题最终会被解决
+[55:56] 会被一种方式解决
+[55:57] 让这个V2M可以真正有人的这种视觉的理解
+[56:01] 那一旦有了这个之后
+[56:02] 其实他就不是瓶颈了
+[56:03] 就是已经没有这个问题了
+[56:05] 对VM常见的DATASET和benchmark
+[56:09] 就是这个的话
+[56:10] 我们这个我这里没有列
+[56:11] 但是paper里可能有list
+[56:13] 就是benchmark的话
+[56:14] 对现在benchmark本身也是一个问题
+[56:16] 对于多模态模型来说
+[56:19] 因为这些模型它的就像我刚刚说了
+[56:22] 他的evaluation方式都嗯都不是非常合理
+[56:26] 他可能就看一个short answer
+[56:27] 到底是不是exact match对
+[56:29] 但是如果说像就大家如果对reading感兴趣的话
+[56:33] 以后就算是有这些reasoning的
+[56:36] 就visual reasoning的DATASET
+[56:38] 实际上又碰到一个很难evaluate的问题
+[56:41] 因为它的output都是natural language
+[56:43] Natural language
+[56:44] 不能通过exact match来判断
+[56:46] 也不能通过人来判断
+[56:48] 那它就变成了一个很难evaluate的问题
+[56:51] 对然后bonny box呃
+[56:56] 对这个boy box的那个token
+[56:58] 就是就是我们家的special token是同同样的head
+[57:03] 但是output就相当于你本来
+[57:05] 比如说65536个token
+[57:07] 然后现在我们加1000个token
+[57:09] 然后对去让他预测
+[57:14] 呃呃多模态的推理
+[57:16] 比如说嗯就是OK或者或者是这么说
+[57:19] 有什么东西我们一定要需要visual
+[57:21] 其实有很多
+[57:22] 比如说像texture
+[57:23] 像shape
+[57:24] 或者说就比如说说一个迷宫吧
+[57:26] 迷宫这个东西你很难让language model做output对吧
+[57:30] 但是visual可以一眼就能理解出来
+[57:32] 就有一些推理的过程是在visual做的
+[57:35] 而不是在language做的
+[57:37] 因为visual对一些复杂的pattern
+[57:40] 一些信息量很大的
+[57:41] 因为visual是一个很好的这种information的
+[57:44] compression的这个方式嘛
+[57:46] 获取信息的方式
+[57:47] 那这个compress这个力度只要很大的东西
+[57:51] language就很难表述
+[57:52] 那么这一块其实有很多的visual reasoning的啊
+[57:56] 空间在哪里
+[58:00] 图文混合的数据在次回归那里是怎么mask的
+[58:08] 哦就是mix的数据的话
+[58:11] 实际上就是把所有的一面都是那个mask掉的
+[58:14] 就因为我们只去predict text
+[58:16] 所以所有的image都是当做condition token
+[58:19] 我们不会对image算loss
+[58:21] 但是这是之前嘛
+[58:23] 如果像VAU这种结构
+[58:25] 就因为BELU是支持text image interleave的生成的
+[58:29] 所以在做这这样的task的时候
+[58:31] 我们image也会算loss
+[58:32] 只做understanding话
+[58:34] image是不会算loss的
+[58:55] 数值回归的vision task
+[58:57] 在现有的是的对数值回归的话没不用special token
+[59:02] 现在一般都是直接出的
+[59:05] 像但是像robotics里面
+[59:07] 他你要去predict action
+[59:09] 它也可以是就直接当做纯的text来对来表示对
+[59:50] 不不就这这个问题是就有一个迷宫
+[59:54] 就是迷宫长什么样
+[59:56] 这个事儿你并不会用language来表示出来
+[59:59] 而且你很难用language表示出来
+[60:02] 因为他3号是会非常就是会非常重复的
+[60:05] 而language model1旦碰到重复的东西
+[60:07] 它就开始就是叽里咕噜乱说了
+[60:09] 就你要用语言描述一个魔宫是很魔
+[60:11] 那个迷宫是很复杂的对吗
+[60:13] 但是就是你匕首你人一看就知道那是迷宫
+[60:16] 医生一看你就知道怎么走对吧
+[60:18] 就我觉得这这这这个适合先转成tax information
+[60:22] 再做reasoning3号不一样的一个探索
+[60:29] 就相当于你visual就visual这个东西本身的POR和language
+[60:33] 或者说做reasoning这个POR是不一样的
+[60:36] the visual他就是擅长做pattern recognition这件事
+[60:39] 因为他可能会对这个整个图像
+[60:41] 因为图像毕竟是一个two d space
+[60:43] 或者你可以说是一个three d space
+[60:45] 他的他对这个整个是东西的理解
+[60:47] 就是你对里面的每一个步骤
+[60:50] 对墙对连接起来的东西
+[60:52] 对这些connection你都会有一个visual很强的POR
+[60:55] 然而并不是通过auto regressive
+[60:58] 比如一行一行的去理解的对吧
+[61:00] 它实际上你是有一个high level
+[61:02] 就different level
+[61:03] hierarchical of a semantics去理解这整个东西的
+[61:06] 也就是还是还是会有一些不一样
+[61:09] 很难先对对
+[61:10] 是的嗯
+[61:11] 现在的这些VRM你很难让他先做text的
+[61:14] 交给RM
+[61:17] 但是嗯对
+[61:42] 诶完了撤回
+[61:53] OK可能还有3分钟
+[61:55] 或者大家对这个后面有什么方向想做
+[61:58] 有什么问题吗
+[62:01] 这个对
+[62:02] 反正什么都可以问
+[62:29] 对
+[62:30] 就我觉得就是一个就是floating point的那些
+[62:33] number的prediction
+[62:34] 我觉得很适合用这个来做
+[62:36] 就比如说嗯grounding的这种bounding box regression
+[62:40] 或者说就是navigation task里预测到底多少厘米
+[62:45] 再比如说robotics
+[62:47] 他这个你去预测delta pose
+[62:49] 这个手的下一个pose怎么样
+[62:51] 就所有和这个floating point来说的都比较适合吧
+[62:54] 还有一个就是嗯我觉得一个准则
+[62:57] 就是说它的含义是不同的
+[63:01] 也就意味着我们的这个数字的12345
+[63:04] 其实它可以是text
+[63:06] 但是呢在grounding里面
+[63:08] 它代代表的是距离对吗
+[63:09] 这样的话就会带给这个token本身嗯
+[63:12] 一些hallucination
+[63:13] 也就是说这个这个字
+[63:16] 这个token它本身可以表示很多种意思
+[63:19] 那么你去学的时候到底是在学哪种意思
+[63:22] 就会让他就让他不知道预测什么东西
+[63:25] 在这种情况下
+[63:27] 就是就可能就是在中文里
+[63:29] 你一个字有很多种意思
+[63:30] 这个这个其实也挺麻烦的
+[63:32] 只是说训练数据足够多了
+[63:34] 根据这个sequence能能做这件事对
+[63:36] 所以说对于prediction的时候
+[63:38] 就是你可以直接用special token
+[63:41] 你也可以加一个
+[63:42] 比如说begin and的token去把它帮助
+[63:44] 就是框住
+[63:45] 就是说一旦遇到这个specific的case下
+[63:48] 那么它采用这种距离的理解
+[63:51] 或者说他就采用这种嗯其他的意思
+[63:56] 现在的多么菜呃
+[64:00] 可以啊
+[64:01] 就我们我们动作太生成的话
+[64:02] 就是VA优势一点嘛
+[64:04] 但是我们也在做next stage的嗯
+[64:07] VLU的话呃
+[64:09] 或者说这样吧
+[64:09] 就是现代生成其实分为几个paradigm
+[64:13] 一种就是原生的
+[64:14] 所有都是token in token out
+[64:15] 这种方式呢嗯就会有我刚刚说的问题
+[64:19] 就是generation和understanding这1conflict
+[64:23] 且同时如果我们一旦用了这个diretire token
+[64:28] 那visual那边就会有一个DISCRETIES
+[64:30] representation和continuous
+[64:32] 这个这个这个representation的这么一个gap
+[64:34] 因为你做了vector框test之后肯定会丢一些信息嗯
+[64:38] 对
+[64:39] 所以所以说就是如果我们要做end to end
+[64:41] 这个prediction呃
+[64:43] 这是一种方
+[64:43] 就是这只是一种方式
+[64:45] 第二种方式是说像show o或者像Emo那样
+[64:49] 你去predict一个continuous的feature作为condition
+[64:53] 再把这个condition
+[64:54] 因为这是V2M的output condition
+[64:56] 这condition既能配一个image
+[64:58] 就visual也能take text instruction作为input
+[65:01] 然后出的这么一个东西
+[65:02] 这个东西你把它输给一个the shelf
+[65:05] 就是一个PRETRAIN的diffusion model作为condition
+[65:08] 那么你你就可以相当于
+[65:10] 你试试图把两个模型的能力无缝的衔接在一起
+[65:14] 对一种就是放到unified一个model里
+[65:16] 或者你就拆成两个模型来做这个
+[65:19] Understanding and generation
+[65:20] 比如说再再有一种
+[65:21] 就比如说像deep sick
+[65:23] 他们有一个嗯有个genus的
+[65:26] 就是他们也是用我们这边understanding和generation
+[65:29] 用两个head做
+[65:30] 而他们就是呃我们用一个head做
+[65:32] 他们就拆成两个head的
+[65:33] 尽量避免这两个MODITY的打架
+[65:35] 但其实我们最近会有一些研究说
+[65:38] 可以解决这个问题
+[65:39] 对呃推理还有啥广泛的场景吗
+[65:45] 数学几何
+[65:49] 对对对
+[65:50] 我觉得这个故意的agent是一个典型例子吧
+[65:54] 对但也depends就是嗯
+[65:56] 如果说你是就看你有没有OS的这个access
+[66:00] 就是你你如果底层底层的function call的话
+[66:02] 它实际上变成一个language model问题
+[66:04] 但实际上就是现在嗯AERROPIC
+[66:06] 除了那个computer use之后
+[66:09] 其实大家也会想要做这个多模态的
+[66:11] 比如说apple就比较intensively
+[66:13] 在做这个像FERREUI这种尝试
+[66:18] 去用多模态的模型
+[66:19] 对这个电脑或者对任何的virtual words进行控制
+[66:25] 特live输出interleave
+[66:27] 我觉得英特live就是现在下一嗯
+[66:31] 明年或者后年吧
+[66:32] 肯定是以VIDEGENERATION为主
+[66:34] 就是怎么样做常识的这种视频的序列呃
+[66:38] 那是否英interleave
+[66:39] 是因为interleave这件事永远都可以变成
+[66:43] 你先出text
+[66:44] 再比如说在某一个部分放一张image的
+[66:47] 这这个placeholder再去生成之类的模式
+[66:50] 对我觉得一旦这个问题能被decompose成嗯
+[66:54] 就是stabilized或者HIERRULLAR的形式的话
+[66:56] 它应该不是当前就是最重点的地方
+[67:03] 很难把所有视觉special token
+[67:05] 缺少一个更统一的special token
+[67:12] 这个问题倒没有特别看懂
+[67:20] 对应的我觉得就是VIVISUAL这个问题来说
+[67:23] 还是这个不知道
+[67:24] 或者说这个visual pretraining
+[67:26] 这个objective到底是什么的问题吧
+[67:28] 就至少嗯大家以前会觉得是maybe bm a e
+[67:31] MAE是学了一个非常强的一个bias
+[67:35] 就是based on mars去predict max对
+[67:37] 但是就这个东西是一个巨强无比的呃
+[67:42] prior或者一个bias就导致他无法SKUP
+[67:45] 我觉得就是video
+[67:46] 这边
+[67:46] 3号可能会会存在一个这个真的
+[67:49] PRETRAINING的这么一种方式
+[67:51] 对对对
+[67:57] OK那大家还有什么问题吗
+[67:59] 我在我在等一分钟
+[68:01] Ok
+[68:07] 做visual encoder
+[68:09] 现阶段比在做对齐sf
+[68:15] 嗯我觉得仍然是depends吧
+[68:18] 就是现在大家都会想想的一个问题
+[68:21] 就是真正的application是什么
+[68:23] 对于茅台model来说
+[68:24] 就因为对比如说对于人来说
+[68:26] 我们需要这个模型
+[68:28] 它有VIR这个MODELITY嘛对吧
+[68:31] 就是呃大家在做就focus几个方向
+[68:35] 肯定就是UI是一个方向
+[68:36] robotics是一个方向
+[68:37] 这几个地方都需要这种
+[68:39] 包括医疗也是一个方向吧
+[68:42] 嗯嗯至于说这个就是我觉得还是depends on
+[68:47] 这个application
+[68:47] 就是呃也看你做research是什么样的方向吧
+[68:51] 如果你是application driven的话
+[68:52] 那就去解决这个对于某个特定的specific的
+[68:55] 这种application到底需要解决的这个真正的问题是什么
+[68:59] 你如果要说这个foundation的
+[69:01] 就是底层的这个模型层面来说嗯
+[69:05] 我觉得重要的问题在于就对茅台model而言
+[69:12] 我我会觉得这个
+[69:15] 比如说encoder是一个很重要的问题
+[69:17] 但是是一个很难解决的问题
+[69:19] 对就是depends on
+[69:22] 你做做就你做的research风格是什么
+[69:24] 以及你线下的需求是什么
+[69:26] 对我觉得比如说encoder
+[69:28] definitely是一个非常重要的问题
+[69:30] 但它很难解决
+[69:31] 或者说对他很难解决
+[69:34] 他很需要经验
+[69:36] 但是同时在这个对齐SFT上嗯
+[69:39] 其实大家并没有做出什么新的花样来
+[69:41] 就或者说现代的茅台model的alignment或者SFT
+[69:45] 仍然是处于一个缺数据的状态
+[69:48] 我觉得对于整个video encoder来说
+[69:50] 就是一个处于或者茅台model来说
+[69:53] 就是处于一个缺数据的状态
+[69:55] 我们并不能直接的对人见到的这个茅台model word
+[69:59] 去做理解
+[70:00] 去做嗯
+[70:01] This decision making
+[70:05] 做图像
+[70:09] 做图像生成可以模型output的连续或者离三表示
+[70:14] 直接交给一个
+[70:15] 那当然可以啊
+[70:16] 就是VAU的话
+[70:17] 就是把output交给一个decoder
+[70:21] 对不是那个扩散模型
+[70:24] 就是否是扩散模型其实不那么重要嗯
+[70:31] 那如果大家没有问题
+[70:33] 今天就这样对
+[70:34] 就就谢谢大家
+[70:36] 谢谢大家
+[70:37] 周末还来还来听talk
+[70:40] Ok
+[70:41] 那我这边就结束了
+[70:42] 对反正大家大家之后对
+[70:45] 有有什么问题就对
+[70:47] 有什么问题或者想要英特尔就来就来
+[70:50] 就发这个就给这个邮箱
+[70:53] 不对不对
+[70:53] 这个邮箱
+[70:54] 然后如果要升PHD就找支箭
+[70:57] 支箭非常强好嗯
+[71:00] 那就先先这样嗯
+[71:01] 拜拜大家拜拜
