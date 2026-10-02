@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP106 — Intern-S1：科学多模态基础模型（B站实际视频）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP106 — Intern-S1：科学多模态基础模型（B站实际视频）</h1>
+    <p class="sub">Intern-S1 是上海 AI Lab 的「专才型通才」（specialized generalist）：241B 总参 / 28B 激活的多模态 MoE，在 5T toke… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">编号冲突说明（106 期）</a><a href="#sec-3">一句话总结</a><a href="#sec-4">核心</a><a href="#sec-5">关键数字</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>106（官网编号；本期存在编号冲突，见下文专节）</dd><dt>标题</dt><dd>Intern-S1: A Scientific Multimodal Foundation Model（B站视频实际标题口径）</dd><dt>BV</dt><dd>BV1FY6sBuECe</dd><dt>时长</dt><dd>未取得（B站接口不可达）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>未确认（官网 106 期预告对应的是另一场 talk，见编号冲突专节；本场讲者待补）</dd><dt>相关论文</dt><dd>Intern-S1 Team, Shanghai AI Laboratory，<a href="https://arxiv.org/abs/2508.15763">https://arxiv.org/abs/2508.15763</a></dd><dt>相关代码/模型</dt><dd><a href="https://huggingface.co/internlm/Intern-S1">https://huggingface.co/internlm/Intern-S1</a></dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1FY6sBuECe/">https://www.bilibili.com/video/BV1FY6sBuECe/</a></dd><dt>官网预告（编号对应另一场）</dt><dd><a href="https://qingkeai.online/blog/GDPO-talk">https://qingkeai.online/blog/GDPO-talk</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期无字幕（B站字幕接口在本环境不可达）。本纪要以 B站该 BV 的实际视频内容（Intern-S1）为准，根据论文原文（arXiv:2508.15763）还原，非逐字稿；Q&amp;A 即兴内容未覆盖。信息来源：论文还原。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>编号冲突说明（106 期）</h2>
+<p>官网枚举的第 106 期是《GDPO：解决 GRPO 在多奖励 RL 训练中的"优势崩溃"问题》（讲者：香港科技大学博士候选人、NVIDIA 研究实习生刘诗扬；论文 arXiv:2601.05242，代码 https://github.com/NVlabs/GDPO ）。但合集中该期号对应的 B站视频（BV1FY6sBuECe）实际内容是 <strong>Intern-S1</strong>，GDPO 一期的视频未在合集出现。按「以视频实际内容为准」的原则，本纪要写 Intern-S1；GDPO 的要点附记于此：GRPO 在多奖励下先求和再 group-wise 归一化，会把不同奖励组合压成相同 advantage（advantage collapse），训练信号分辨率下降；GDPO 改为逐奖励解耦归一化再聚合、并做 batch 归一化稳定尺度，在工具调用、数学推理、代码推理三类任务上一致优于 GRPO。</p>
+</section>
+<section class="sec sec-lede" id="sec-3"><h2><span class="n">3</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">241B</div><div class="l">总参</div></div></div>
+<p>Intern-S1 是上海 AI Lab 的「专才型通才」（specialized generalist）：241B 总参 / 28B 激活的多模态 MoE，在 5T token（其中 2.5T+ 科学数据）上持续预训练，后训练用 InternBootCamp 做离线 + 在线 RL，并以 Mixture-of-Rewards（MoR）在 1000+ 任务上协同训练——目标是把开源模型在科学专业领域与闭源 SOTA 的差距补上。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心</h2>
+<h3>背景/问题</h3>
+<p>通用基础模型在热门领域已接近闭源，但在高价值科学专业领域（分子合成规划、反应条件预测、晶体热力学稳定性等）要么依赖专家模型，要么通用模型明显落后。Intern-S1 的问题设定：能不能用一个模型同时保持通用理解/推理，又吃下多模态科学数据（文本、图像、分子、晶体等）？</p>
+<h3>方法/设计</h3>
+<ul>
+<li><strong>底座</strong>：多模态 MoE，241B 总参数、28B 激活参数；持续预训练 5T tokens，科学域数据占 2.5T 以上。</li>
+<li><strong>后训练两段</strong>：先 offline RL 再 online RL，统一在 InternBootCamp 环境中进行。</li>
+<li><strong>Mixture-of-Rewards（MoR）</strong>：1000+ 任务同时 RL 时，用奖励混合机制协同多任务信号，避免逐任务单独训练的系统开销与信号冲突——这是和多奖励归一化问题（对照 GDPO 的 advantage collapse）同源的工程关切：在多奖励/多任务下保住训练信号的分辨率。</li>
+<li><strong>系统</strong>：算法、数据、训练系统三侧协同，论文称其在线 RL 训练性能达到 top-tier。</li>
+</ul>
+<h3>实验/实战</h3>
+<p>论文口径：通用推理基准上在开源模型中具竞争力；科学域显著超过开源模型，并在分子合成规划、反应条件预测、晶体热力学稳定性预测等专业任务上超过闭源 SOTA（具体分数以论文表格为准，本纪要未逐项抄录，避免转引误差）。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>总参数 / 激活参数</td>
+<td>241B / 28B</td>
+</tr>
+<tr>
+<td>持续预训练 token</td>
+<td>5T（科学域 &gt;2.5T）</td>
+</tr>
+<tr>
+<td>MoR 协同 RL 任务数</td>
+<td>1000+</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>多任务 RL 的奖励侧设计先行：任务数上千时，奖励的归一化与混合方式（而不是单个奖励函数本身）决定信号分辨率——与 GDPO 的逐奖励解耦归一化是同一课。</li>
+<li>Infra 视角：科学多模态数据的模态对齐与 token 记账（分子/晶体等结构化模态如何进同一条序列）是数据管道的真成本，评测要按专业任务单独建集，通用基准测不出科学域差距。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>本场 talk 的讲者与具体分享提纲未确认（官网 106 期预告对应 GDPO 场）；Intern-S1 的 MoR 细节（奖励如何加权、任务采样分布）值得回论文正文深挖。</li>
+<li>InternBootCamp 的环境抽象与 Intern-S1-Pro（万亿参数续作，arXiv:2603.25040）的关系可后续对照。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"a specialized generalist equipped with general understanding and reasoning capabilities with expertise to analyze multiple science modal data." —— 论文对 Intern-S1 的自我定位（摘要原文，非视频原话）。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

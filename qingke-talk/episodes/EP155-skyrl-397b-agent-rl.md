@@ -1,5 +1,7 @@
 # EP155 — SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战
 
+> 📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP155-skyrl-397b-agent-rl.html
+
 ## 元信息
 
 - 期号：155

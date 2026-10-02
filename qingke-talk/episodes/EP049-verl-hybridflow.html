@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP049 — verl 源码解读与 HybridFlow 编程范式讲解</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP049 — verl 源码解读与 HybridFlow 编程范式讲解</h1>
+    <p class="sub">这期是 verl 的"源码导读课"：嘉宾以 debugger 视角从入口文件出发，按执行顺序走完一条 PPO/GRPO 数据流，让听众理解 verl 为什么长这样——答案在 H… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>49</dd><dt>标题</dt><dd>verl 源码解读 与 HybridFlow 编程范式讲解</dd><dt>BV</dt><dd>BV1Cs7WzNEDX（<a href="https://www.bilibili.com/video/BV1Cs7WzNEDX/）">https://www.bilibili.com/video/BV1Cs7WzNEDX/）</a></dd><dt>时长</dt><dd>未确认（2025-05-19 直播安排 20:00–21:00）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>信息来源</dt><dd>论文还原（B站字幕接口在本环境不可达，未能取得 AI 字幕）</dd><dt>讲者</dt><dd>童雨轩（清华大学计算机系本科生，verl core contributor；曾在 THUKEG、HKUST-NLP、CMU-LTI、字节跳动 Seed 实习）</dd><dt>相关论文</dt><dd>HybridFlow: A Flexible and Efficient RLHF Framework（Guangming Sheng、Chi Zhang、Ziling Ye、Xibin Wu、Wang Zhang、Ru Zhang、Yanghua Peng、Haibin Lin、Chuan Wu；香港大学 + 字节跳动），<a href="https://arxiv.org/abs/2409.19256（EuroSys">https://arxiv.org/abs/2409.19256（EuroSys</a> 2025）</dd><dt>相关代码</dt><dd><a href="https://github.com/verl-project/verl（原">https://github.com/verl-project/verl（原</a> volcengine/verl）</dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期字幕未能取得，本纪要根据该期 talk 对应的公开材料还原——青稞Talk 官网预告文 + HybridFlow 论文（arXiv:2409.19256）+ verl 官方仓库。Talk 本体是源码走读（从 <code>main_ppo.py</code> 入口按执行顺序讲，类 debugger 视角），其内容结构与论文/仓库一一对应；Q&amp;A 即兴内容未覆盖。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期是 verl 的"源码导读课"：嘉宾以 debugger 视角从入口文件出发，按执行顺序走完一条 PPO/GRPO 数据流，让听众理解 verl 为什么长这样——答案在 HybridFlow 的混合编程范式里：<strong>顶层用单控制器写算法数据流，节点内用多控制器跑分布式训练/生成，再用 3D-HybridEngine 把 actor 在训练与生成两套并行布局之间零冗余地重分片</strong>。灵活（换算法只写顶层几十行）和高效（相对基线 1.53×–20.57× 吞吐）是同一个设计的一体两面。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">Python driver 里顺序写 generate</div><div class="farrow">→</div><div class="fnode">compute_log_prob</div><div class="farrow">→</div><div class="fnode">compute_values</div><div class="farrow">→</div><div class="fnode">compute_scores</div><div class="farrow">→</div><div class="fnode">update_actor</div></div>
+<h3>背景/问题：RLHF 数据流的控制范式困境</h3>
+<p>RLHF 的计算可以画成一张数据流图：actor 生成、reference 算 log-prob、critic 估值、reward 打分、actor 更新，每个节点本身又是一个分布式大模型程序，边是多对多组播。传统框架二选一：</p>
+<ul>
+<li><strong>单控制器</strong>（一个 driver 进程发指令）：算法表达灵活，但要逐一调度节点内部的分布式计算，控制分发开销巨大；</li>
+<li><strong>多控制器</strong>（每个 worker 跑同一份程序、按 rank 分工）：执行高效，但把分布式计算和数据通信嵌套在同一层控制流里，换算法、换放置策略都很别扭。</li>
+</ul>
+<p>HybridFlow 的立论：这不是灵活与高效的取舍题，而是<strong>分层</strong>问题——两个范式各管一层。</p>
+<h3>方法/设计：混合控制器 + 分层 API + 3D-HybridEngine</h3>
+<ol>
+<li><strong>混合编程模型</strong>：顶层（模型之间）用单控制器表达 RLHF 数据流，用户在一个 Python driver 里顺序写 <code>generate → compute_log_prob → compute_values → compute_scores → update_actor</code>；节点内部（模型之内）用多控制器执行分布式训练/生成。两层通过分层 API 解耦：上层只声明计算与数据依赖，下层负责编排到具体设备。</li>
+<li><strong>3D-HybridEngine</strong>：actor 在训练阶段（训练并行布局）和生成阶段（推理并行布局）需要不同的分片方式。HybridEngine 在两阶段间直接重分片权重，零显存冗余、通信开销显著降低——这是基线们把权重绕道主机内存/磁盘所付的税。</li>
+<li><strong>灵活放置</strong>：colocate（所有模型同组设备轮转）、split、standalone（各占独立设备组）等放置策略由数据流映射决定，而不是写死在框架里。论文实验显示最优放置随规模变化：16–64 GPU 时 colocate 最好，规模再大时 split/standalone 反超。</li>
+<li><strong>verl 的工程形态</strong>：四个 worker 组（actor、rollout、reference、critic/reward）跑在 Ray 上，各自可选后端（训练 FSDP/FSDP2/Megatron-LM，生成 vLLM/SGLang/TensorRT-LLM）。Talk 的三段提纲正是仓库的阅读路线：入口执行逻辑 → HybridFlow 范式与动机 → Programming Guide（如何用这套 API 写自己的算法）。</li>
+</ol>
+<h3>实验/实战：论文口径的吞吐数字</h3>
+<p>HybridFlow 论文在多种 RLHF 算法与模型规模上对比 DeepSpeed-Chat、OpenRLHF、NeMo-Aligner：</p>
+<ul>
+<li>总体吞吐提升 <strong>1.53×–20.57×</strong>，规模越大优势越大；</li>
+<li>70B 模型平均加速约 9.64×；</li>
+<li>相对基线，模型间切换（transition）开销最多降低约七成到九成——生成阶段在 NeMo-Aligner 中可占单轮迭代 81.2% 的时间，是基线的主要瓶颈。</li>
+</ul>
+<h3>结论/观点（区分事实与判断）</h3>
+<ul>
+<li>事实：数据流分层 + 零冗余重分片确实把"控制开销"和"切换开销"两个税都降下来了，数字有论文实验支撑。</li>
+<li>判断（框架的设计哲学）：RLHF 框架的 API 应该按"算法数据流"而不是"分布式程序"来组织；并行策略、放置、后端都是映射层的事，不该泄漏到算法层。这条哲学后来成为 verl 生态（GRPO/DAPO 等 recipe 层出不穷）的地基。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RLHF 吞吐（vs DeepSpeed-Chat/OpenRLHF/NeMo-Aligner）</td>
+<td>1×</td>
+<td>1.53×–20.57×</td>
+</tr>
+<tr>
+<td>70B 模型平均吞吐加速</td>
+<td>1×</td>
+<td>约 9.64×</td>
+</tr>
+<tr>
+<td>模型切换（训练↔生成）开销降幅</td>
+<td>基线绕道主机/磁盘</td>
+<td>最多降低约 71%–89%</td>
+</tr>
+<tr>
+<td>生成阶段占 NeMo-Aligner 单轮迭代时间</td>
+<td>—</td>
+<td>最高 81.2%</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li>读任何 RL 框架先画数据流图再读源码：节点（模型角色）、边（数据依赖）、每节点的并行布局——verl 的 <code>main_ppo.py</code> 就是按这个顺序组织的，照 talk 的 debugger 路线走最省力。</li>
+<li>选框架时把"训练↔生成切换成本"列为一等指标：权重重分片是否零冗余、是否绕主机内存，直接决定 rollout 占比高时的总吞吐。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：放置策略（colocate vs split）没有普适最优，必须按集群规模和模型大小实测；框架把放置做成可映射维度、而不是写死，就是为了让这个实测便宜。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：3D-HybridEngine 的零冗余重分片在 MoE（专家并行布局与训练布局差异更大）上如何成立？verl 后续版本对 MoE 的 resharding 路径值得单独追。</li>
+<li>本期字幕若后续取得，应回补 talk 中对 <code>main_ppo.py</code> 的具体走读细节与 Q&amp;A。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"希望能让大家获得对 verl 的行为与设计思想较为全面的理解。"——官网预告文对这期源码导读的定位：讲行为（执行顺序）与设计思想（HybridFlow 范式），而不是逐行念代码。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

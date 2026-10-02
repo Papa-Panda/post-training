@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP124 — 拒绝阈值化：迈向共生关系的新型人机信任（B站实际视频）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP124 — 拒绝阈值化：迈向共生关系的新型人机信任（B站实际视频）</h1>
+    <p class="sub">这场（据题面与相关研究还原）反对把人机信任做成「达标/不达标」的阈值化指标：基于对用户与对话式 AI 长达六个月的纵向追踪，信任被刻画为一个在互动中持续协商、双向驯化的动态过程… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">编号冲突说明（124 期）</a><a href="#sec-3">一句话总结</a><a href="#sec-4">核心</a><a href="#sec-5">关键数字</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>124（官网编号；本期存在编号冲突，见下文专节）</dd><dt>标题</dt><dd>拒绝阈值化：迈向共生关系的新型人机信任（B站视频实际标题）</dd><dt>BV</dt><dd>BV133556AE16</dd><dt>时长</dt><dd>未取得（B站接口不可达）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>未确认（官网 124 期预告对应的是另一场 talk，见编号冲突专节；本场讲者待补）</dd><dt>相关研究</dt><dd>人机信任协商与「双向驯化」的纵向质性研究（《当代教育与艺术》2026 年刊载文本，下称"信任协商研究"）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV133556AE16/">https://www.bilibili.com/video/BV133556AE16/</a></dd><dt>官网预告（编号对应另一场）</dt><dd><a href="https://qingkeai.online/blog/The-Scaling-Law-for-Reinforcement-Learning">https://qingkeai.online/blog/The-Scaling-Law-for-Reinforcement-Learning</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期无字幕（B站字幕接口在本环境不可达），且未能确认讲者与讲稿。本纪要根据视频标题 + 可检索到的同名主题研究文本（信任协商研究）还原主题脉络，非逐字稿；与视频的逐点对应关系未经校验，引用时请以此为界。信息来源：相关研究还原（低置信）。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>编号冲突说明（124 期）</h2>
+<p>官网枚举的第 124 期是《大模型强化学习的 Scaling Law》（讲者：中科大与上海 AI Lab 联培博士生谭泽霖；论文《Scaling Behaviors of LLM Reinforcement Learning Post-Training》，arXiv:2509.25300，ACL 2026）。但合集中该期号对应的 B站视频（BV133556AE16）实际标题是《拒绝阈值化：迈向共生关系的新型人机信任》，Scaling Law 一期的视频未在合集以该期号出现。按「以视频实际内容为准」的原则，本纪要写人机信任一场；Scaling Law 的要点附记于此：该研究在 Qwen/Llama 系列上系统做数学推理 RL 后训练实验，得到统一幂律 $\log L(N, X) = -k(N)\log X + E(N)$ ，其中 $L$ 为 Test Loss（即 1-PassRate）， $X$ 为算力或数据量，三点发现——幂律可统一刻画规模/资源与性能的关系；学习效率 $k(N)$ 随模型规模饱和、存在理论上限；高质量数据受限时性能主要由数据总量而非样本独特性驱动。</p>
+</section>
+<section class="sec sec-lede" id="sec-3"><h2><span class="n">3</span>一句话总结</h2>
+<p>这场（据题面与相关研究还原）反对把人机信任做成「达标/不达标」的阈值化指标：基于对用户与对话式 AI 长达六个月的纵向追踪，信任被刻画为一个在互动中持续<strong>协商</strong>、双向<strong>驯化</strong>的动态过程——人把通用 AI 驯化成私人工具/伙伴，AI 的交互范式也反向驯化人的认知、习惯与情感调节。关系状态是共生演化，不是静态验收。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心</h2>
+<h3>背景/问题：阈值化信任观的不足</h3>
+<p>主流人机信任讨论常把信任当成一个可测量、可设阈值的量（超过某个分数即"可信"）。题面「拒绝阈值化」的立场是：信任不是主客体之间的单向采纳关系，用静态阈值刻画会漏掉信任在真实互动中的生成、破裂与修复。研究问题是：用户与对话式 AI 的信任关系在时间中如何演化？</p>
+<h3>方法/设计（信任协商研究）</h3>
+<ul>
+<li><strong>纵向质性设计</strong>：对同一批参与者在第 1 个月（初期）、第 3 个月（中期）、第 6 个月（末期）做三轮深度访谈，分别聚焦初始印象/使用动机、已形成的使用习惯与挑战、以及整体回顾与关系变化；参与者信息匿名化处理。</li>
+<li><strong>分析视角</strong>：借用组织信任的经典定义（一方基于对另一方将采取重要行动的预期、愿意受其影响的意愿），并从「信任协商」的视角看待人机关系——信任主体与对象在互动中互相试探、校准预期。</li>
+<li><strong>四阶段过程</strong>：研究把关系演化刻画为动态四阶段，开篇阶段为「挪用：校准初次相遇」——用户像「面试」新员工一样出题测试 AI 的能力边界，校准初始信任；后续阶段围绕使用深化、信任破裂与修复的协商展开。</li>
+</ul>
+<h3>关键发现</h3>
+<ul>
+<li><strong>初始信任校准</strong>：初次相遇充满好奇、试探与期望校准，用户通过刁钻提问测试 AI 的「智商与情商」，本质上在做能力边界摸底。</li>
+<li><strong>双向驯化</strong>：用户通过互动、反馈与个性化设置把通用 AI 驯化为贴合自身需求的私人工具或伙伴；同时 AI 以其算法逻辑、交互范式与功能设定微妙地反向驯化用户的认知设定。这不再是传统主体（人）与客体（工具）的支配关系，而是一个动态、循环、相互建构的共生过程。</li>
+<li><strong>信任修复的协商</strong>：信任破裂后（如 AI 给出错误法条并被用于正式备忘录，用户有「被背叛」感），AI 的回应方式——道歉并给出正确版本、承认识别错误、解释出错原因——直接影响用户是否愿意「再给它一次机会」。修复不是自动发生的，是协商出来的。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>纵向追踪时长</td>
+<td>6 个月</td>
+</tr>
+<tr>
+<td>访谈轮次</td>
+<td>3 轮（第 1 / 3 / 6 个月）</td>
+</tr>
+<tr>
+<td>关系演化阶段</td>
+<td>4 阶段（首阶段「挪用：校准初次相遇」）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>对 Agent 产品/评测的启发：把「信任」做成阈值化验收（某个准确率达标即上线）会系统性漏掉破裂—修复这一环；评测应包含错误后的修复行为（道歉质量、纠错方式、是否解释原因），这与 post-training 里对 refusal/repair 行为的设计直接相关。</li>
+<li>Infra 视角：长程 Agent 的 eval 轨迹里应单独标注 trust-breaking 事件与修复事件的发生率，而不是只看终局成功率。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>本场讲者、机构与完整提纲未确认；「双向驯化」四阶段的后三阶段名称与视频讲稿的逐点对应关系待字幕恢复后校验。</li>
+<li>「拒绝阈值化」在工程上的替代方案（若不用阈值，用什么刻画信任状态）是本场最值得追问的点，现有材料未给出可操作答案。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「用户与对话式 AI 的关系，远非单向的技术采纳。」—— 信任协商研究文本（非视频原话）；其结论是把关系理解为「动态、循环、相互建构的共生过程」。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

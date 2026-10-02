@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP075 — FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP075 — FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案</h1>
+    <p class="sub">现代 RL 框架为了吞吐，把 rollout 交给推理引擎（vLLM/SGLang）、训练交给训练后端（FSDP/Megatron）——但两个引擎对同一组参数算出的 token… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>75</dd><dt>标题</dt><dd>FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案</dd><dt>BV</dt><dd>BV1J6WyzTEJP（<a href="https://www.bilibili.com/video/BV1J6WyzTEJP/）">https://www.bilibili.com/video/BV1J6WyzTEJP/）</a></dd><dt>时长</dt><dd>未确认（2025-08-30 直播安排 11:00–12:00）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>信息来源</dt><dd>论文还原（B站字幕接口在本环境不可达，未能取得 AI 字幕）</dd><dt>讲者</dt><dd>姚峰（Feng Yao，UCSD 二年级博士生，导师商静波 Jingbo Shang；曾在微软研究院实习）</dd><dt>相关论文（技术博客形态）</dt><dd>Your Efficient RL Framework Secretly Brings You Off-Policy RL Training（Feng Yao、Liyuan Liu、Dinghuai Zhang、Chengyu Dong、Jingbo Shang、Jianfeng Gao，2025-08），<a href="https://fengyao.notion.site/off-policy-rl">https://fengyao.notion.site/off-policy-rl</a> ；FlashRL 项目页 <a href="https://fengyao.notion.site/flash-rl">https://fengyao.notion.site/flash-rl</a></dd><dt>相关代码</dt><dd><a href="https://github.com/yaof20/Flash-RL（">https://github.com/yaof20/Flash-RL（</a><code>pip install flash-llm-rl</code>）</dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期字幕未能取得，本纪要根据公开材料还原——青稞Talk 官网预告文 + 讲者团队的 FlashRL 项目页与 off-policy 技术博客。官网提纲（mismatch 问题 → TIS 方案 → 8-bit rollout → 未来方向）与博客内容对应；视频实录与 Q&amp;A 未覆盖。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">32B</div><div class="l">总训练时间的</div></div></div>
+<p>现代 RL 框架为了吞吐，把 rollout 交给推理引擎（vLLM/SGLang）、训练交给训练后端（FSDP/Megatron）——但两个引擎对<strong>同一组参数</strong>算出的 token 概率可以显著不同，甚至一个给 1、另一个给 0。于是名义上的 on-policy 训练被静默变成了 off-policy，梯度被系统性污染。FlashRL 的解法是截断重要性采样（TIS）：用推理/训练两侧概率比构造 token 级修正因子、截断封顶后乘到 policy loss 上；在此之上再把 rollout 权重降到 INT8/FP8，<strong>8-bit 生成、16-bit 效果</strong>，rollout 吞吐（约占 DAPO-32B 总训练时间的七成）被显著压缩。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：rollout-training mismatch——同参数、不同分布</h3>
+<p>RL 训练里 rollout 生成是主要瓶颈（讲者给出 DAPO-32B 口径下约占总训练时间 70%），所以主流框架（以 verl 为代表）普遍采用"推理引擎采样 + 训练后端更新"的混合架构。问题在于：推理引擎 $\pi_{\text{sampler}}$ 与训练后端 $\pi_{\text{learner}}$ 加载同一份参数 $\theta$ ，数值路径却不同（kernel、并行布局、量化），同一 token 的概率可以差异巨大，个别 token 甚至出现 $\pi_{\text{vllm}}(a)=1$ 而 $\pi_{\text{fsdp}}(a)=0$ 的矛盾预测。REINFORCE/PPO 的更新公式默认采样分布就是 $\pi_{\text{learner}}$ ，这个前提被打破后，训练在无人察觉的情况下变成 off-policy——这是本期的核心诊断：<strong>错位不是精度洁癖，而是梯度估计的系统性偏置</strong>。</p>
+<h3>方法/设计：TIS 修正 + 在线量化 rollout</h3>
+<ol>
+<li><strong>截断重要性采样（TIS）</strong>：逐 token 计算训练侧与推理侧的概率比 $w = \pi_{\text{train}}(\theta_{\text{old}}) / \pi_{\text{rollout}}(\theta_{\text{old}})$ ，截断为 $\min(w, C)$ 后作为修正因子乘到 policy loss 上。与 PPO clip 的区别是关键：TIS 作用在<strong>更新前</strong>的分布错位上、用乘性权重衰减异常 token，而不是裁剪<strong>更新步</strong>的 surrogate 目标；两个 ratio 是两个独立的量（SkyRL 的 FlashRL 集成示例中 <code>TIS_IMP_RATIO_CAP = 8.0</code>，verl 的 FP8 实践用 token-level TIS 且 $C = 2$ ，阈值口径随框架而定）。</li>
+<li><strong>在线量化支持</strong>：这补上了第二个工程障碍——vLLM 为 serving 优化，原生不支持"训练中带参数更新的量化推理"。FlashRL 提供 <code>flash-llm-rl</code> 包为 vLLM 打补丁，使权重同步时能按 INT8/FP8 在线量化并加载（INT8 需要校准 profile 把 BF16 权重映射到量化格式）。</li>
+<li><strong>为什么量化必须配 TIS</strong>：量化把 rollout 分布 $\pi_{\text{int8}}$ 进一步推离训练分布 $\pi_{\text{bf16}}$ ，放大 mismatch。不加 TIS 时 INT8/FP8 rollout 相比 BF16 有显著精度掉点；加上 TIS 后，量化 rollout 的下游精度与 BF16 rollout + TIS 持平、甚至超过不加 TIS 的朴素 BF16 训练。测得的 KL 口径也印证：INT8 rollout 与训练侧的 KL 大于 FP8。</li>
+</ol>
+<h3>实验/实战（项目页口径）</h3>
+<ul>
+<li>场景：DAPO recipe，Qwen2.5-32B，BF16 FSDP 训练后端；FP8 在 H100、INT8 在 H100 与 A100 上测。</li>
+<li>结论形态：带 TIS 的 INT8/FP8 rollout 在 AIME、GSM8K 上达到与 BF16 rollout 一致的精度曲线；不带 TIS 的量化 rollout（图中灰色虚线）明显掉点。</li>
+<li>FlashRL 自称是第一个开源且可用的量化 rollout RL recipe，后被 SkyRL 原生集成（仅支持单轮训练），OpenRLHF 也集成了 TIS。</li>
+</ul>
+<h3>结论/观点（区分事实与判断）</h3>
+<ul>
+<li>事实：train/inference 两侧概率不一致是实测现象，TIS 修正与量化 rollout 的精度结论有项目页图表与多家框架（SkyRL、OpenRLHF、TRL 文档）采纳背书。</li>
+<li>判断（讲者立场）：凡是"推理引擎 + 训练后端"的混合架构，都应默认自己在做 off-policy 训练，并把 mismatch 当作需要显式监控与修正的一等公民，而不是等训练崩溃了再回头找。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rollout 占总训练时间（DAPO-32B 口径）</td>
+<td>—</td>
+<td>约 70%</td>
+</tr>
+<tr>
+<td>量化 rollout 不加 TIS</td>
+<td>BF16 rollout</td>
+<td>显著精度掉点（AIME/GSM8K）</td>
+</tr>
+<tr>
+<td>量化 rollout + TIS</td>
+<td>BF16 + TIS</td>
+<td>精度持平，且超过不加 TIS 的朴素 BF16</td>
+</tr>
+<tr>
+<td>TIS 截断阈值 $C$</td>
+<td>—</td>
+<td>SkyRL 集成示例 8.0；verl FP8 实践 2</td>
+</tr>
+<tr>
+<td>两侧概率矛盾样本</td>
+<td>假设一致</td>
+<td>实测存在 $\pi_{\text{vllm}}(a)=1$ vs $\pi_{\text{fsdp}}(a)=0$ 的 token</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>给 rollout/训练一致性上监控</strong>：同一批 token 上两侧 log-prob 的差（或 rollout correction KL）应该是仪表盘常驻指标；数值实现一换（引擎版本、并行布局、量化）就可能悄悄漂移。</li>
+<li><strong>rollout 想上低精度，先问修正跟不跟得上</strong>：量化加速的前提是 TIS 类修正已接入且阈值调过；裸上 FP8/INT8 rollout 是用精度换吞吐的隐性交易。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：mismatch 是"引擎选型"这一 infra 决策泄漏到算法层的典型案例；框架层把 $\pi_{\text{sampler}}$ 与 $\pi_{\text{learner}}$ 显式区分为三个策略（采样/近端/目标）来记账，比事后调 clip 更治本（本仓库 <code>post-training-framework/</code> 的 rollout 章节可与本期对照）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：token-level TIS 被后续工作质疑为有偏梯度估计（有文献提出 sequence-level masked IS 作为无偏替代），两者在长序列上的偏差-方差取舍如何量化？值得对照 MIS 类工作再深挖。</li>
+<li>本期字幕若后续取得，应回补讲者对"未来研究方向"的具体表述。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"This unexpected behavior implicitly breaks the on-policy assumption, secretly making the RL training become off-policy."——off-policy 技术博客对 mismatch 的定性：你的高效框架，正在悄悄把 on-policy 训练变成 off-policy。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

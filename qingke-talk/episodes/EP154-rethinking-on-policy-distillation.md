@@ -1,5 +1,7 @@
 # EP154 — Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe
 
+> 📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP154-rethinking-on-policy-distillation.html
+
 ## 元信息
 
 - 期号：154
