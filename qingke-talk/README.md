@@ -24,11 +24,14 @@
 | 13 | [LLaMA Factory：从预训练到RLHF，大模型高效训练框架](episodes/EP13-llama-factory.md) | ✅ 要点已提炼 |
 | 33 | [XGrammar：高效实现 LLM 灵活且可移植的结构化生成](episodes/EP33-xgrammar.md) | ✅ 要点已提炼 |
 | 42 | [COAT：显存高效的 FP8 训练，实现高效深度学习](episodes/EP42-coat.md) | ✅ 要点已提炼 |
+| 41 | [PC-Agent：面向复杂 PC 任务的多模态智能体框架](episodes/EP41-pc-agent.md) | ✅ 要点已提炼 |
 | 44 | [InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建](episodes/EP44-infercept-preble-cognify.md) | ✅ 要点已提炼 |
 | 39 | [PRIME: 结合隐式过程奖励的强化学习](episodes/EP39-prime.md) | ✅ 要点已提炼 |
 | 45 | [B-STaR & SimpleRL-Zoo：通过强化学习自我提升推理性能和效率](episodes/EP45-bstar-simplerl-zoo.md) | ✅ 要点已提炼 |
 | 46 | [从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化](episodes/EP46-tinyzero-apr.md) | ✅ 要点已提炼 |
 | 48 | [从 TTS 到 TTRL：无标签数据强化学习探索与展望](episodes/EP48-tts-ttrl.md) | ✅ 要点已提炼 |
+| 58 | [Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台](episodes/EP58-virtual-community.md) | ✅ 要点已提炼 |
+| 61 | [GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架](episodes/EP61-gui-reflection.md) | ✅ 要点已提炼 |
 | 59 | [大模型推理强化学习中的熵机制](episodes/EP59-entropy-mechanism-rl.md) | ✅ 要点已提炼 |
 | 60 | [Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型做 SWE](episodes/EP60-satori-swe.md) | ✅ 要点已提炼 |
 | 62 | [ProRL：延长强化学习训练框架，拓展大语言模型的推理边界](episodes/EP62-prorl.md) | ✅ 要点已提炼 |
@@ -37,6 +40,9 @@
 | 71 | [RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题](episodes/EP71-rlpr.md) | ✅ 要点已提炼 |
 | 74 | [ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架](episodes/EP74-roll.md) | ✅ 要点已提炼 |
 | 76 | [NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍](episodes/EP76-nemo-rl.md) | ✅ 要点已提炼 |
+| 79 | [UserRL & UserBench「知人者智」：以用户为中心的智能体交互与训练](episodes/EP79-userrl.md) | ✅ 要点已提炼 |
+| 81 | [MemGen：生成式隐式记忆，Agent Memory 的第三种可能](episodes/EP81-memgen.md) | ✅ 要点已提炼 |
+| 82 | [OpenCUA：用于构建 Computer-Use Agent 的开源框架](episodes/EP82-opencua.md) | ✅ 要点已提炼 |
 | 80 | [RL for LRMs：探讨面向推理模型的 RL 最新研究](episodes/EP80-rl-for-lrms.md) | ✅ 要点已提炼 |
 | 84 | [SimpleVLA-RL：简单可拓展的VLA强化学习训练](episodes/EP84-simplevla-rl.md) | ✅ 要点已提炼 |
 | 87 | [QeRL：量化技术增强强化学习 Reasoning 探索](episodes/EP87-qerl.md) | ✅ 要点已提炼 |

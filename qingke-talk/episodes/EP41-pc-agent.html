@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP41 — PC-Agent：面向复杂 PC 任务的多模态智能体框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP41 — PC-Agent：面向复杂 PC 任务的多模态智能体框架</h1>
+    <p class="sub">PC-Agent 把复杂 PC 指令拆成「指令 → 子任务 → 动作」三层，用 manager / progress / decision / reflection 四个多模态… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP41-pc-agent.html</p>
+<p>「我们还是会坚持键鼠操作的这样一个动作空间的设置……多模态感知和键鼠操作，将是我们 PC-Agent 坚持的两个点。」——讲者在 Manus/OpenManus 对照下给出的路线判词</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>41</dd><dt>标题</dt><dd>PC-Agent：面向复杂 PC 任务的多模态智能体框架</dd><dt>BV</dt><dd>BV1WiHezGEm7</dd><dt>时长</dt><dd>01:02:21（讲授约 50 分钟 + Q&amp;A 约 12 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>张希（阿里巴巴通义实验室；字幕中自述姓名，职级与正式头衔以公开资料为准）</dd><dt>相关论文</dt><dd>PC-Agent（讲者团队工作；论文名与开源仓库均为 PC-Agent，arXiv 号未在字幕中给出）；同系列前作 Mobile-Agent、Mobile-Agent-V2</dd><dt>相关代码</dt><dd>已开源（Mobile-Agent 系列与 PC-Agent 同仓托管于 GitHub，仓库字幕口径 3.7K star；具体地址视频中以二维码给出，未口播）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1WiHezGEm7/">https://www.bilibili.com/video/BV1WiHezGEm7/</a></dd><dt>官网期号</dt><dd>41（预告链接不确定，未附）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP41.txt</code>（1436 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP41，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 accessibility tree 在字幕中作「a l y tree/AE eleven y tree」，SoM 作「SOM」，Manus 作「menus」，Qwen 作「千万」，均按上下文校正）。实验数值多为讲者指图口述，凡此类均标注（字幕口径），精度以论文原文为准。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>PC-Agent 把复杂 PC 指令拆成「指令 → 子任务 → 动作」三层，用 manager / progress / decision / reflection 四个多模态 agent 分工执行，并用 accessibility tree 加主动感知模块补上通用多模态大模型在 PC 场景的两块短板——密集小图标的 grounding 与富文本布局理解；在自建的 PC-Eval 上拿到对比框架中的最佳成绩，但完整指令成功率也只有 50% 出头（字幕口径），讲者明言这是框架缝合式方案、终局是把四种能力训进一个端到端模型。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">看 Outlook 邮件</div><div class="farrow">→</div><div class="fnode">Chrome 查攻略</div><div class="farrow">→</div><div class="fnode">写进 Word</div><div class="farrow">→</div><div class="fnode">算日期</div></div>
+<h3>两个难点：PC 不是放大版的手机</h3>
+<p>讲者的立论从与自家 Mobile-Agent 的对比开始。PC 场景比手机难，两难都在「生产力场景」：</p>
+<ol>
+<li><strong>感知难</strong>：屏幕大、交互元素密集多样（Word 功能区全是小图标且无文字说明），像素级小图标的理解与定位对多模态模型是硬挑战；Word/Excel 这类富文本的布局理解（「把倒数第一段文字加下划线」）更是普遍做不对。讲者实测口径：针对若干应用收集约 100 条 grounding 数据，当时 GPT-4o、Claude 3.5 的定位效果都很差——这是多模态大模型的通病（Qwen2.5-VL 因混入大量此类预训练数据而明显更好）。</li>
+<li><strong>决策难</strong>：PC 指令是办公/生产力型的长序列、跨应用工作流（看 Outlook 邮件 → Chrome 查攻略 → 写进 Word → 算日期），子任务间有信息传递与依赖，远长于手机的娱乐型短任务。</li>
+</ol>
+<h3>感知层：a11y tree + 主动感知，用「先读出文字」绕开布局理解</h3>
+<ul>
+<li><strong>Accessibility tree（a11y tree）</strong>：借用 Windows/macOS 系统自带的可访问性树，框出页面全部可交互元素，并带上软件预置的功能描述（如关闭图标旁注「关闭」）。框的来源是系统数据而非模型预测，讲者在 Q&amp;A 中强调其准确率从设计上就有保证。</li>
+<li><strong>主动感知模块（APM）</strong>：专门处理模型读不懂的富文本布局。做法是加一层桥：先让 intention-understanding agent 把目标文本段落整段「读出来」（把定位问题转成模型擅长的 OCR 问题），再用 OCR 工具回定位这段文字的左上/右下坐标，最后用 drag 动作选中。端到端定位被拆成「读出 → 定位 → 操作」三步降难度。</li>
+<li>决策时给模型的输入是双路的：带可交互框标注的 SoM 截图 + 主动感知产出的文本与坐标信息，一并交给 decision agent。</li>
+</ul>
+<h3>决策层：三层拆解 + 四个 agent + 一个结构化 hub</h3>
+<p>框架是「自上而下执行、自下而上反馈」，四个 agent 各管一层：</p>
+<ul>
+<li><strong>Manager agent（指令层）</strong>：把复杂指令拆成子任务，并维护一个 <strong>communication hub</strong>——子任务间要传递的信息（会议时间、地点、步行时长等）不写在自然语言记忆里，而是解析成 JSON 式的结构化数据存取，manager 负责把上游子任务的输出填入下游的输入。</li>
+<li><strong>Progress agent（子任务层）</strong>：跟踪当前子任务的执行进度（哪些步骤已完成），避免把冗长的历史 action 全堆给决策模型造成干扰与压力。</li>
+<li><strong>Decision agent（动作层）</strong>：结合感知输入与进度信息，输出三件套——思考（thought）、具体动作（action）、给 progress agent 用的简短 summary；动作经 pyautogui 落到键鼠操作上执行。</li>
+<li><strong>Reflection agent（反馈回路）</strong>：输入操作前、后两张截图，比较变化判断动作是否达到预期（单张图无法判断预期是否达成），成功则回写 communication hub 并推进，失败则把反馈给 decision agent 改动作。讲者给的案例很能说明其价值：连续搜索时 agent 误点失效的「前进」箭头卡死，反思发现前后截图无变化后报错，决策改用 Ctrl+T 新建标签页完成第二个搜索。</li>
+</ul>
+<p>消融（字幕口径）：主动感知、manager、reflection 三个组件对整体都关键，缺一明显掉点——讲者以此呼应他开篇的智能体定义：memory、planning、reflection 缺一不可。</p>
+<h3>评测：PC-Eval 与「50% 出头」的诚实成绩</h3>
+<ul>
+<li><strong>PC-Eval</strong>：团队自建并开源的测试集，覆盖 8 个常用 PC 应用、25 条复杂用户指令，每条由多个有依赖关系的子任务组成，强调精细图标操作与长程决策；讲者认为 OSWorld、WebArena 的生产力子集仍不够贴近真实工作流。</li>
+<li><strong>结果（字幕口径）</strong>：端到端单模型能完成前一两个子任务，但完整指令成功率很低；多 agent 框架（UFO、Agent-S）整体优于单模型，PC-Agent 最佳，但完整指令成功率也只有 50% 多。两个对照框架的短板被点名：UFO 擅长操作系统设置类任务、但依赖 API 调用，在用户真实浏览器里（无 Playwright 时）表现差；Agent-S 子任务拆得过细、依赖关系复杂反而拉低成功率。换基座实验中 GPT-4o 最佳；reflection 成功率（recovery rate）以 Claude 与 GPT-4o 较高，manager 的拆分正确率（人工核查）亦然。</li>
+<li><strong>延迟账（字幕口径，Q&amp;A）</strong>：基于 GPT-4o 一类 API 时，decision 一次约 30 秒、reflection（双图输入）约 40 秒、progress 约 10 秒——两个动作之间实际运行时间很长。这是讲者力推端到端化的直接理由：把感知、决策、反思训进一个模型，单步调用压到 10–20 秒甚至 5 秒级。</li>
+</ul>
+<h3>定位：坚持键鼠 + 多模态，终局是端到端 RL 模型</h3>
+<p>讲者在热点对照一节给出的路线判断（观点，非实验结论）：</p>
+<ul>
+<li><strong>键鼠操作不放弃</strong>：Operator、Manus 的经验都说明，API 不开放/需高权限的场景大量存在，键鼠是最通用泛化的执行方式；未来是「键鼠 + API 结合」（先从浏览器插件/API 入手），纯文本 LLM 路线读不懂的布局必须靠多模态补。</li>
+<li><strong>框架只是过渡</strong>：当前多 agent 框架有大量 handcrafted 成分；团队正在探索用 DeepSeek-R1 式 RL 流程（讲者提及 GRPO 等策略）训一个端到端 agent 模型，把决策与反思等模块融进单个模型。讲者判断 agent 场景的 RL 训练还能反哺通用推理能力。</li>
+<li><strong>其他方向</strong>：操作上云（云端执行不占用用户本机，Manus 的关键产品点）、快操作与慢思考结合、手机与 PC 端信息联动（个性化偏好多存在手机端）、语音交互前置模块（已在开发）、端云结合的隐私方案（感知模型放端侧、只上传感知结果）。</li>
+</ul>
+<h3>开源形态（字幕口径）</h3>
+<p>Mobile-Agent 仓库含 Mobile-Agent v1（2024 年 1 月，端到端）、v2（planning/decision/reflection 三 agent）、v3、Mobile-Agent-E（自我进化、执行中总结 tips/shortcut）与 PC-Agent v1/v2；PC-Agent 已同时支持 Windows 与 macOS。几个实用配置：<code>add_info</code> 字段注入操作知识或用户偏好（如点咖啡不加冰）可显著提高成功率；简单任务可关 reflection、跳过任务拆解（simple 模式）提速。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PC-Eval 规模</td>
+<td>—</td>
+<td>8 个常用 PC 应用、25 条复杂指令</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Grounding 自测规模</td>
+<td>—</td>
+<td>约 100 条（icon/文字/图标定位）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>PC-Agent 完整指令成功率</td>
+<td>对比框架 UFO、Agent-S 与端到端单模型</td>
+<td>最佳，但仅 50% 多</td>
+<td>字幕（指图口述）</td>
+</tr>
+<tr>
+<td>单步延迟（GPT-4o API）</td>
+<td>—</td>
+<td>decision 约 30s；reflection 约 40s；progress 约 10s</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>开源仓库热度</td>
+<td>—</td>
+<td>3.7K star，曾上 GitHub 日榜第 5</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Mobile-Agent 首版时间</td>
+<td>—</td>
+<td>2024 年 1 月</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>Communication hub 的结构化传递</strong>：多步 agent 工作流中，子任务间传 JSON 结构化状态而非自然语言记忆转述，可显著降低信息在转述中的损耗与幻觉——适用于任何 manager/worker 式 agent 编排。</li>
+<li><strong>「先读出、再定位」的感知降难度法</strong>：把模型不擅长的布局定位问题转成其擅长的 OCR/生成问题，再用工具回定位坐标。对 GUI 自动化、文档处理类 agent 是通用技巧。</li>
+<li><strong>前后截图对比做反思</strong>：判断动作是否生效要看状态差分而非单帧，这一点对一切 GUI/环境交互 agent 的 verifier 设计都成立；且反思的收益在长程任务上才显现，简单任务应可关（对应其 disable_reflection 配置）。</li>
+<li><strong>延迟预算观</strong>：多 agent 串行调用的单步延迟是框架方案的硬约束（本期约 80 秒/步量级，字幕口径）；做 agent infra 时应把「每步几次模型调用、每次多久」作为一等公民指标，它直接决定端到端化的必要性。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>PC-Eval 只有 25 条指令，50% 出头的成功率统计噪声较大；且评测由团队自建自测，与 OSWorld 等公开基准的交叉验证未在 talk 中给出。</li>
+<li>框架对手工设计的依赖（子任务拆分、hub 字段、add_info 注入）与讲者主张的端到端 RL 终局之间的路径未展开：RL 训练需要可交互环境与奖励信号，PC 真实环境里这两者如何规模化获取，talk 未涉及。</li>
+<li>Reflection 以截图差分判成败，对「动作生效但页面变化微小/延迟加载」的场景鲁棒性如何，未讨论。</li>
+<li>a11y tree 依赖应用与系统提供可访问性数据；对自绘 UI（游戏、专业软件）覆盖如何，talk 未展开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「对于 PC 来说，因为有这个生产力场景，所以会导致它的决策面临更大的挑战。」——讲者对 PC 与手机场景难度差异的定性</p>
+<p>「如果可以用调用 API 的话，我们肯定也希望能够调用 API；所以这也是我们后续 PC-Agent 想要改进的一个方向，就是键鼠结合 API 的操作。」——讲者回应「键鼠毕竟是为人设计的」之问</p>
+<p>「我们还是希望能够通过模型的训练或者强化学习的一些策略，能够构建一个更好的端到端模型。」——讲者给出的框架终局：感知、决策、反思合一，单步压到秒级</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

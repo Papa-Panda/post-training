@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP79 — UserRL &amp;amp; UserBench「知人者智」：以用户为中心的智能体交互与训练</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP79 — UserRL &amp;amp; UserBench「知人者智」：以用户为中心的智能体交互与训练</h1>
+    <p class="sub">这期把「agent 会不会做事」推进到「agent 会不会跟人打交道」：UserBench 先量化了主流模型在需求模糊、偏好渐进披露的多轮交互里只有约 20% 的回答能完全对齐… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP79-userrl.html</p>
+<p>"models provide answers that fully align with all user intents only 20% of the time on average, and even the most advanced models uncover fewer than 30% of all user preferences through active interaction." —— UserBench 论文 Abstract 对现状的量化判断</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>79</dd><dt>标题</dt><dd>UserRL &amp; UserBench「知人者智」：以用户为中心的智能体交互与训练</dd><dt>BV</dt><dd>BV18tsFzhE35</dd><dt>时长</dt><dd>01:04:19（3859 秒，B站页面口径）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>无法由字幕确认（本期字幕不可得，见提炼方式说明）；论文作者为 Cheng Qian、Zuxin Liu 等（Salesforce AI Research，通讯作者含 Huan Wang；官网预告的讲者介绍待核）</dd><dt>相关论文</dt><dd></dd><dt>Cheng Qian, Zuxin Liu, Akshara Prabhakar, Jielin Qiu, Zhiwei Liu, Haolin Chen, Shirley Kokane, Heng Ji, Weiran Yao, Shelby Heinecke, Silvio Savarese, Caiming Xiong, Huan Wang, UserRL</dt><dd>Training Interactive User-Centric Agent via Reinforcement Learning</em>，<a href="https://arxiv.org/abs/2509.19736">https://arxiv.org/abs/2509.19736</a> （2025-09-24 提交；v1 题名作 <em>Training Proactive User-Centric Agent</em>）</dd><dt>Cheng Qian, Zuxin Liu, Akshara Prabhakar, Zhiwei Liu, Jianguo Zhang, Haolin Chen, Heng Ji, Weiran Yao, Shelby Heinecke, Silvio Savarese, Caiming Xiong, Huan Wang, UserBench</dt><dd>An Interactive Gym Environment for User-Centric Agents</em>，<a href="https://arxiv.org/abs/2507.22034">https://arxiv.org/abs/2507.22034</a> （2025-07-29 提交）</dd><dt>相关代码</dt><dd><a href="https://github.com/SalesforceAIResearch/UserRL">https://github.com/SalesforceAIResearch/UserRL</a> （verl + SGLang 实现，含 SFT/RL/eval 全流水线）；<a href="https://github.com/SalesforceAIResearch/UserBench">https://github.com/SalesforceAIResearch/UserBench</a></dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV18tsFzhE35/">https://www.bilibili.com/video/BV18tsFzhE35/</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：<strong>非逐字稿</strong>。本期有 B站视频，但字幕接口多次返回串台字幕、无法验证，未能取得可用字幕。本纪要据两篇对应论文（UserRL，arXiv:2509.19736；UserBench，arXiv:2507.22034）与官方开源仓库还原，讲授提纲按 talk 标题（UserRL &amp; UserBench）组织；现场讲授顺序、演示与 Q&amp;A 不可还原，关键数字均为论文口径并逐项标注出处。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期把「agent 会不会做事」推进到「agent 会不会跟人打交道」：UserBench 先量化了主流模型在需求模糊、偏好渐进披露的多轮交互里只有约 20% 的回答能完全对齐用户全部意图、最强模型主动问出来的偏好也不到 30%；UserRL 随后给出配套的训练框架——用模拟用户加标准化 gym 环境做 GRPO 多轮 RL，并系统比较了轮级奖励分配与轨迹级计分的不同配方，得出 SFT 冷启动必需、轨迹计分要刻意设计、开源模拟用户（Qwen3-32B）可平替 GPT-4o 三条结论。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：任务完成率掩盖了用户对齐的塌方</h3>
+<p>UserBench 论文的出发点是：现有 agent 评测默认用户目标明确且静态，但真实协助场景里用户目标往往模糊、动态、间接表达。论文据此构建了偏好驱动的多轮评测环境——模拟用户开局只给不完整目标，在交互中渐进披露偏好，agent 必须主动澄清意图并用工具做有依据的决策（论文 Abstract）。评测主流开源与闭源 LLM 的结果显示「任务完成」与「用户对齐」之间存在显著脱节：完全对齐全部用户意图的回答平均只有约 20%，最强模型通过主动交互挖掘出的用户偏好也不足 30%（论文 Abstract）。换句话说，瓶颈不在执行，而在「知人」——先搞清对方真正想要什么。</p>
+<h3>方法/设计一：UserBench——偏好渐进披露的交互式评测环境</h3>
+<p>环境以旅行规划为载体实现（官方实现即 TravelGym）：每个场景内置一组结构化用户偏好与真值标注，模拟用户逐步透露偏好，agent 在多轮对话中调用工具给出个性化推荐（UserBench 仓库 README）。难度分三档 travel22、travel33、travel44（仓库 README），评测脚本默认 <code>--max_turns 20</code>（仓库 README 的评测命令）。环境基于 Gymnasium 接口（仓库 README「Architecture」），因此同一套环境既能评测、也能直接当 RL 的训练场——这是它与 UserRL 衔接的关键：评测环境即 gym。</p>
+<h3>方法/设计二：UserRL——用模拟用户把「会聊天」训出来</h3>
+<p>UserRL 把 UserBench 式的环境推广为统一训练框架：标准化 gym 环境配模拟用户，在 GRPO 下做多轮 RL（UserRL 论文 Abstract）。框架层面的设计变量被作者拆成两组并系统扫参：一是<strong>轮级奖励分配</strong>（turn-level reward assignment），二是<strong>轨迹级计分</strong>（trajectory-level score calculation）（UserRL 论文 Abstract）。官方实现的默认配方可作参照：<code>algorithm.adv_estimator: grpo_multiturn</code>，折扣 $\gamma = 0.8$ ，训练 batch 128；轮级方法在 Equalized、R2G、EM 之间可选，轨迹计分在 Sum 与 R2G 之间可选（UserRL 仓库 README「Training Pipeline」）。环境侧提供 10 余个用户中心 gym，覆盖函数发现、意图识别、说服、搜索、工具使用、心灵感应式提问、旅行规划与海龟汤等任务（仓库 README「Available Environments」）。训练基建基于 verl 并用 SGLang 做推理后端（仓库 README「Acknowledgments」）。</p>
+<h3>实验/结论：三条来自 Qwen3 实验的发现</h3>
+<p>论文在 Qwen3 系列模型上实验，结论以三条 findings 形式给出（UserRL 论文 Abstract）：</p>
+<ol>
+<li><strong>SFT 冷启动是关键</strong>：它解锁初始交互能力，并使后续 RL 能持续改进——没有冷启动，模型连「开始跟人交互」的门槛都迈不过去；</li>
+<li><strong>轨迹计分要刻意设计</strong>：deliberate trajectory scoring 带来更高效、更有效的多轮交互，即整条轨迹怎么打分与轮级奖励怎么分同样影响成败；</li>
+<li><strong>模拟用户的选择有性价比拐点</strong>：更强的模拟用户（如 GPT-4o）确实促进训练，但开源的 Qwen3-32B 模拟器是成本可控且可迁移的选项。</li>
+</ol>
+<p>作者的总判断是：奖励塑形与用户模拟的选择与模型规模同等重要（UserRL 论文 Abstract）。与 UserBench 的 20%/30% 数字合看，这期的完整叙事是：先证明「不会跟人打交道」是当前 agent 的系统性短板，再证明这个能力可以被 RL 训出来、且配方比堆规模更要紧。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>回答完全对齐全部用户意图的比例</td>
+<td>主流开源/闭源 LLM 平均</td>
+<td>约 20%</td>
+<td>UserBench 论文 Abstract</td>
+</tr>
+<tr>
+<td>主动交互挖掘出的用户偏好比例</td>
+<td>最先进模型</td>
+<td>不足 30%</td>
+<td>UserBench 论文 Abstract</td>
+</tr>
+<tr>
+<td>UserBench 难度档位</td>
+<td>—</td>
+<td>travel22 / travel33 / travel44 三档</td>
+<td>UserBench 仓库 README</td>
+</tr>
+<tr>
+<td>UserBench 评测默认最大轮次</td>
+<td>—</td>
+<td>20 轮</td>
+<td>UserBench 仓库 README</td>
+</tr>
+<tr>
+<td>UserRL 环境数量</td>
+<td>—</td>
+<td>10 余个用户中心 gym</td>
+<td>UserRL 仓库 README</td>
+</tr>
+<tr>
+<td>UserRL 默认折扣因子</td>
+<td>—</td>
+<td>$\gamma = 0.8$</td>
+<td>UserRL 仓库 README</td>
+</tr>
+<tr>
+<td>UserRL 默认训练 batch</td>
+<td>—</td>
+<td>128</td>
+<td>UserRL 仓库 README</td>
+</tr>
+<tr>
+<td>模拟用户性价比结论</td>
+<td>GPT-4o（强但贵）</td>
+<td>Qwen3-32B 可平替、可迁移</td>
+<td>UserRL 论文 Abstract</td>
+</tr>
+</tbody>
+</table>
+<p>注：论文实验的逐项得分表未逐一抄录，本表只收摘要与官方仓库可直接确证的数字。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>给 agent 数据加「偏好渐进披露」轴</strong>：现有轨迹数据多是目标一次给全；可构造用户只给模糊目标、偏好分轮透露的合成环境，专门训主动澄清——UserBench 证明这块是当前模型最系统性的短板（完全对齐率仅约 20%，论文 Abstract）。</li>
+<li><strong>多轮 RL 的计分配方值得单独扫参</strong>：轮级奖励分配与轨迹计分不要照搬单轮设置；UserRL 把两者拆开系统比较，默认配方（ $\gamma = 0.8$ 、Equalized/Sum，仓库 README）可作起点。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：</li>
+<li>评测环境与训练 gym 同构（Gymnasium 接口，UserBench 仓库 README）省去了「评测一套、训练另一套」的双份维护；做 agent 环境时优先选可复用为训练场的评测协议。</li>
+<li>模拟用户是可替换组件：Qwen3-32B 平替 GPT-4o 的结论（论文 Abstract）意味着用户模拟的推理成本可以大幅压缩，且模拟器与策略同源部署（verl + SGLang，UserRL 仓库 README）便于规模化 rollout。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：轮级奖励分配的三种方法（Equalized、R2G、EM，UserRL 仓库 README）各自的公式定义与胜出场景，摘要层面没有展开，需读论文正文第 3-4 节核对；talk 现场若有讲授偏好，也待字幕恢复后补。</li>
+<li>本期字幕不可得：B站后续若恢复正确字幕，应按字幕重写为实录版，并与本论文版逐项对照（尤其讲者对三条 findings 的现场解读与 Q&amp;A）。</li>
+<li>UserBench 目前以旅行规划为唯一落地领域（TravelGym，仓库 README）；偏好对齐能力能否迁移到代码、客服等领域，论文与 talk 是否谈及，待核。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"These results highlight the challenges of building agents that are not just capable task executors, but true collaborative partners." —— UserBench 论文 Abstract</p>
+<p>"careful design of reward shaping and user simulation choice is as crucial as model scale" —— UserRL 论文 Abstract 对三条 findings 的总括</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

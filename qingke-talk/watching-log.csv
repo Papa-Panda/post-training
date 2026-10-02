@@ -39,7 +39,7 @@ No,Title,BV,Duration,Date,Status,Notes
 38,Satori：通过训练LLM做自回归搜索来增强推理能力,BV1WiHezGEQN,,2025-02-15,todo,
 39,PRIME: 结合隐式过程奖励的强化学习,episodes/EP39-prime.md,要点已提炼,BV1UaPNecEcW,00:56:21,PRIME：隐式过程奖励免费得逐token过程分，在线更新是必需项
 40,基于 LightLLM 的 DeepSeek R1/V3 模型部署实战,BV1xWREYrEJm,,2025-03-08,todo,
-41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,BV1WiHezGEm7,,2025-03-15,todo,
+41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,episodes/EP41-pc-agent.md,要点已提炼,2025-03-15,todo,PC-Agent实录：a11y感知链与四agent决策框架的延迟硬伤
 42,COAT：显存高效的 FP8 训练，实现高效深度学习,episodes/EP42-coat.md,要点已提炼,2025-03-22,todo,COAT：优化器与激活双路FP8量化，250B token近乎无损
 43,VideoGrain：基于扩散模型的多粒度视频编辑的探索与应用,BV1REpYzZEWy,,2025-03-29,todo,
 44,InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建,episodes/EP44-infercept-preble-cognify.md,要点已提炼,2025-04-04,todo,Agent工作流系统三件套：Cognify调优、Preble调度、InferCept拦截
@@ -56,10 +56,10 @@ No,Title,BV,Duration,Date,Status,Notes
 55,生成模型中的极简概念擦除,BV1b34szKETU,,2025-06-16,todo,
 56,InternVL3：多模态通用感知大模型,BV18K4szzERi,,2025-06-21,todo,title-reworded
 57,Fast-dLLM：无需重训的扩散大语言模型推理加速,BV1qs4uz3EXL,,2025-06-24,todo,
-58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,BV1Bp4uzkEHG,,2025-06-28,todo,
+58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,episodes/EP58-virtual-community.md,要点已提炼,2025-06-28,todo,Virtual Community：经纬度生成可模拟社区与人机社会模拟
 59,大模型推理强化学习中的熵机制,episodes/EP59-entropy-mechanism-rl.md,要点已提炼,2025-07-01,todo,RL熵塌缩的协方差机制（Clip-Cov/KL-Cov）与熵-奖励经验定律
 60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,episodes/EP60-satori-swe.md,要点已提炼,2025-07-05,todo,Satori-SWE：进化式测试时缩放让小模型做SWE，样本效率主线
-61,GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架,BV1SA4CzWEph,,2025-07-08,todo,
+61,GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架,episodes/EP61-gui-reflection.md,要点已提炼,2025-07-08,todo,GUI-Reflection三阶注入反思能力，数据精度95%才稳
 62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,episodes/EP62-prorl.md,要点已提炼,2025-07-12,todo,ProRL长程RL配方：动态采样+周期性重置，1.5B在3000步持续扩边界
 63,ChatRex & RexSeek & RexThinker：结合多模态大语言模型的目标检测模型构建,BV1uA4CzsETk,,2025-07-15,todo,
 64,MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力,BV1MP4Cz9EGg,,2025-07-19,todo,
@@ -77,10 +77,10 @@ No,Title,BV,Duration,Date,Status,Notes
 76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,episodes/EP76-nemo-rl.md,要点已提炼,2025-09-06,todo,NeMo RL实录：671B MoE权重refit三级优化约15倍与FP8生成排期
 77,"Theory of Agent: From Definition, to Behavior and Objective",BV1dHWEzWETN,,2025-09-09,todo,same
 78,从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体,BV1sxWgzUEZo; BV1sBsFz9EVw,,2025-09-18,要点已提炼,episodes/EP078-llm-rl-to-agentic-rl.md
-79,“知人者智”：以用户为中心的智能体交互与训练,BV18tsFzhE35,,2025-10-18,todo,title-reworded
+79,“知人者智”：以用户为中心的智能体交互与训练,episodes/EP79-userrl.md,要点已提炼,2025-10-18,todo,UserRL/UserBench：用户中心agent的短板在知人不在执行（论文还原）
 80,RL for LRMs：探讨面向推理模型的 RL 最新研究,episodes/EP80-rl-for-lrms.md,要点已提炼,2025-10-21,todo,面向推理模型的RL综述：奖励设计、策略优化与采样策略全景
-81,MemGen：生成式隐式记忆，Agent Memory 的第三种可能,BV1wMWEzPEUD,,2025-10-16,todo,
-82,OpenCUA：用于构建 Computer-Use Agent 的开源框架,BV14isozHErN,,2025-10-25,todo,
+81,MemGen：生成式隐式记忆，Agent Memory 的第三种可能,episodes/EP81-memgen.md,要点已提炼,2025-10-16,todo,MemGen：latent记忆第三条路，两份LoRA胜全参GRPO
+82,OpenCUA：用于构建 Computer-Use Agent 的开源框架,episodes/EP82-opencua.md,要点已提炼,2025-10-25,todo,OpenCUA实录：AgentNet数据与结构化CoT，pass@N差指向RL空间
 83,统一 SFT & RL：迈向大型语言模型后训练的统一视角,BV1Gz1MBZEGk,,2025-10-28,要点已提炼,episodes/EP083-unified-sft-rl-upge-hpt.md
 84,SimpleVLA-RL：简单可拓展的VLA强化学习训练,episodes/EP84-simplevla-rl.md,要点已提炼,BV1dm1jBWEXJ,01:01:11,SimpleVLA-RL把R1式二元奖励搬上VLA，数据效率与sim-to-real双涨
 85,OpenMoE 2: Sparse Diffusion Language Models,BV1rg1sBQESS,,2025-11-04,todo,

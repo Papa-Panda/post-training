@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP81 — MemGen：生成式隐式记忆，Agent Memory 的第三种可能</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP81 — MemGen：生成式隐式记忆，Agent Memory 的第三种可能</h1>
+    <p class="sub">MemGen 把 agent 的经验不写进 prompt、也不训进主模型参数，而是外挂两个只训 LoRA 的模块：一个 trigger 在解码的语义间隔处判断「此刻需不需要记忆… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP81-memgen.html</p>
+<p>「我们想构造一个 agent memory system，它是一个动态的过程，能够在 agent 本身的 reasoning 过程中无缝地交织 memorization 和 memory 的过程。」——讲者对研究目标的表述</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>81</dd><dt>标题</dt><dd>MemGen：生成式隐式记忆，Agent Memory 的第三种可能</dd><dt>BV</dt><dd>BV1wMWEzPEUD</dd><dt>时长</dt><dd>00:59:31（讲授约 48 分钟 + Q&amp;A 约 11 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>张贵斌（新加坡国立大学博士生；字幕中自述姓名，字幕末处主持人致谢作「张桂斌」系识别异写，以讲授开场自述为准）</dd><dt>相关论文</dt><dd>MemGen（讲者团队工作；英文标题口播近似为 Generative Latent Memory for Self-Evolving Agents，arXiv 号未在字幕中给出，待补录）</dd><dt>相关代码</dt><dd>视频中未给出仓库地址</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1wMWEzPEUD/">https://www.bilibili.com/video/BV1wMWEzPEUD/</a></dd><dt>官网期号</dt><dd>81（预告链接不确定，未附）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP81.txt</code>（1434 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP81，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 MemGen 在字幕中作「MEIJEN/MEMORGEN」，memory weaver 作「river/VIVO」，GRPO 作「GRPU」，均按上下文与领域常识校正）。讲者在实验部分给出的数字多为指图口述、未逐项报数，凡此类数字下文标注（字幕口径），精度以论文原文为准。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>MemGen 把 agent 的经验不写进 prompt、也不训进主模型参数，而是外挂两个只训 LoRA 的模块：一个 trigger 在解码的语义间隔处判断「此刻需不需要记忆」，一个 weaver 据当前上下文现场生成若干 latent token 插入 KV cache；主模型全程冻结，却能在多类任务上超过对主模型做全参数 GRPO 的效果，且学到的记忆可跨域迁移、抗持续学习遗忘。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">11</div><div class="farrow">→</div><div class="fnode">16</div><div class="farrow">→</div><div class="fnode">17</div><div class="farrow">→</div><div class="fnode">13</div><div class="farrow">→</div><div class="fnode">2.53，字幕口径，最终原能力基本丧失</div></div>
+<h3>记忆的分类学：MemGen 站在第三格</h3>
+<p>讲者先把 agent memory 的版图切开。他区分的不是技术而是<strong>用途</strong>：</p>
+<ul>
+<li><strong>Chatbot / personalized memory</strong>：记用户偏好并随时间增删改（如「100 天前说喜欢吃苹果、50 天后说不喜欢」），代表工作是 MemGPT、Mem0 一类。本文不研究这一格。</li>
+<li><strong>Self-improving memory</strong>（本文的 scope）：让 agent 利用过往任务轨迹/经验提升新任务（含域外任务）的解决能力。这一格内部再分三条实现路线：</li>
+<li><strong>Retrieval-based memory</strong>：经验以文本/结构化形式存外部库（向量库、图库），新问题来了做相似度检索再塞进 prompt。讲者团队前作 G-Memory 即属此类（三层图：query 图、interaction 图、insight 图）。判词：本质是 context engineering，性能有上限。</li>
+<li><strong>Parametric memory</strong>：把经验直接训进主模型参数（SFT、GRPO 都算），或训一个独立 critic 模型把反思能力参数化（讲者举 ICLR 2024 的早期工作为例）。判词：动主模型参数，灾难性遗忘难以避免。</li>
+<li><strong>Latent memory</strong>（第三种可能）：以 latent embedding / hidden states 作记忆载体，是更「machine-native」的表示。先行工作 MemoryLLM、Memory³、M+ 维护 latent 记忆池并按相似度检索回填 KV cache——但仍是「新问题来了先检索一次」的静态形态。</li>
+</ul>
+<p>讲者的不满在于：人脑记忆是与推理交织的连续流（continuous flow of thought），边说边联想；而现有三类都是在推理之外另设一道检索工序。研究问题因此定为：<strong>能否让记忆的召唤与编织发生在解码过程内部、与推理无缝交织。</strong></p>
+<h3>架构：冻结的 reasoner + trigger + weaver</h3>
+<p>系统三件套，主模型（reasoner）全程冻结：</p>
+<ol>
+<li><strong>Reasoner</strong>：负责 thinking 与 action 的 agent 本体，参数不动。</li>
+<li><strong>Memory trigger</strong>：输入当前已解码的全部 hidden states（即一个 $J \times D$ 的 embedding 矩阵， $J$ 为已生成 token 数、 $D$ 为 embedding 维度），输出当前时刻的记忆调用概率，经 Bernoulli 采样得到 0/1 决策。</li>
+<li><strong>Memory weaver</strong>：被唤醒后读同一份上下文，生成一段长度为 $K$ 的 latent token 序列（实践中 $K$ 约为 4 或 8），直接写入 reasoner 的 KV cache。这段记忆不解码成自然语言、不打断正常解码，reasoner 在后续生成中「读到」它。</li>
+</ol>
+<p>两个关键的工程取舍：</p>
+<ul>
+<li><strong>只在语义间隔处判断</strong>。逐 token 调 trigger 代价太高且干扰句内解码；MemGen 只在逗号、句号、换行符处做调用判断（讲者引 Anthropic 可解释性工作的类似结论背书：句中干预更有效且不扰动句内生成）。</li>
+<li><strong>实现上是两个 LoRA</strong>。论文实践中 trigger 与 weaver 都是附着在冻结主模型上的 LoRA adapter；讲者明确说这不是唯一形态——也可以是独立小模型（如 reasoner 为 7B 时用 1.5B 小模型全量微调）、其他 PEFT 方法，代价最高的选项是复制一份主模型专存记忆（太贵，违背初衷）。记忆的形态是一个参数化网络，具体用 LoRA 只是当前实现。</li>
+</ul>
+<h3>训练：weaver 学「记什么」，trigger 学「何时记」</h3>
+<p>两个模块分开训，顺序是<strong>先训 weaver、固定后、再训 trigger</strong>：</p>
+<ul>
+<li><strong>Weaver 的 loss 几乎任意</strong>（SFT / GRPO / DPO 皆可）：核心约束只有一条——不更新 reasoner 参数，经验全部注入 weaver。实验对比了 MemGen-SFT 与 MemGen-GRPO 两个版本，后者更好（reward 直接对齐答对与否）。</li>
+<li><strong>Trigger 用 GRPO 训</strong>：固定 weaver 后，trigger 对每个问题采样 4 或 8 条轨迹，奖励 = 轨迹的稀疏 0/1 对错信号 <strong>减去调用次数惩罚</strong>。第二个分量是刻意的：每个标点都插记忆会拖慢解码、甚至起负作用，trigger 必须学会只在关键处召唤。讲者强调这套训练保证了生成出的 latent embedding「不干扰原解码、且能提点」——不是靠结构先验，而是 loss 直接朝答案正确率优化出来的。</li>
+</ul>
+<h3>实验：四个研究问题</h3>
+<p>设置（字幕口径）：基座模型 1.5B / 3B / 8B；约 8 个数据集，一半是 ReAct 式多轮 agent 任务（TriviaQA、PopQA、ALFWorld），一半是单次生成任务（GPQA、MATH、代码等）；基线覆盖原模型与 CoT、参数化路线（SFT、GRPO、REINFORCE++ 等）、检索路线（MemoryBank、ExpeL、Agent Workflow Memory）与隐式推理路线（Soft CoT 等）。</p>
+<ul>
+<li><strong>RQ1 能否超过另两类记忆</strong>：参数化方法整体强于检索方法，但全参数 GRPO 的代价是动主模型。MemGen-GRPO 只微调两份 LoRA，在 ALFWorld 上超过全参数 GRPO（字幕口径：检索基线 Agent Workflow Memory 约 32–40、GRPO 约 55，MemGen-GRPO 在其上再高出不止一两个点）。讲者的定性结论是：这是一种「更温和、但性能不输全量微调」的干预方式。</li>
+<li><strong>RQ2 跨域泛化</strong>：在 ALFWorld 上攒的经验迁到 TriviaQA、ScienceWorld、Fever 上仍持续涨点（ScienceWorld 约 2 倍提升，字幕口径）；而 SFT 与 MemoryBank 在迁移时掉点。机制证据来自 trigger 的激活计数：在训练域 GSM8K 上平均激活约 86 次，到 GPQA 约减半，到完全异域的代码任务约 20 次（约为训练域的 1/4）——trigger 学会了「别域经验没用时少召唤甚至不召唤」，这是不掉点的原因。</li>
+<li><strong>RQ3 持续学习</strong>：四个数据集轮流训练、每轮后测 GPQA。SFT 路线先涨后崩（11 → 16 → 17 → 13 → 2.53，字幕口径，最终原能力基本丧失）；检索路线聊胜于无；MemGen-SFT 维持在约 20（11 → 19 → 20 → 21 → 约 20）。讲者同时坦白：近来多篇工作表明 RL 本身抗遗忘就远强于 SFT，本实验只比了 SFT 版本，RL 版本未及做。</li>
+<li><strong>RQ4 这些 latent token 到底是什么</strong>：把 latent token 强行按词表最近邻解码出来，人类完全不可读（混着德语词、keyword 一类碎片）。但三层分析显示其内部有结构：</li>
+<li>不同数据集产生的 latent token 经 t-SNE 降维后按域聚类（数学类彼此交织、代码类彼此靠近）；</li>
+<li>同一数据集内部再聚类，各簇有共享「后缀」模式的倾向（粗粒度统计约 50%–60% 同簇共享同一结尾模式）；</li>
+<li><strong>事后干预实验</strong>（借鉴 failure taxonomy，把错误分为 planning failure、tool response/parsing error、demand misunderstanding、answer 格式错误等类）：消融掉 cluster 2，planning 类失败显著上升（约 6 例 → 17–18 例）；消融 cluster 3，工具响应/解析/格式类错误上升；cluster 1、4 与 think-action 一致性、需求理解类错误相关。即无外部监督下，记忆自发分化出近似 planning memory / procedural memory / working memory 的功能分工。讲者强调这不是泾渭分明的划分，只是偏好倾向。</li>
+</ul>
+<h3>边界与未决（多为 Q&amp;A 中的坦白）</h3>
+<ul>
+<li><strong>跨基座不兼容</strong>：latent embedding 绑定基座模型的表示空间，换 reasoner 必须重训一套 trigger/weaver；想通用需加 projection head，效果无保证（讲者称用 SLM 训练 + 投影头已有跑通的实验）。</li>
+<li><strong>离线记忆</strong>：当前 weaver 不能实时写入新经验（来一条轨迹更新一次做不到），online 注入是其团队在探索的方向。</li>
+<li><strong>推理开销</strong>：最坏情况每个 token 需 reasoner、trigger、weaver 三次推理；但因 trigger 只在标点处判断，实测额外 inference delay 不超过 5%（论文附录口径，字幕转述）。</li>
+<li><strong>讲者的定位</strong>：trigger/weaver 本身当然也是 parametric memory，只是记忆的承载与传递形式是 latent 的；trigger 与 weaver 理论上也可合并为一个网络训练。至于为什么不用 special token 让 reasoner 自己发记忆请求——那需要动 reasoner，违背「不碰主模型推理能力」的设计出发点。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基座模型规模</td>
+<td>—</td>
+<td>1.5B / 3B / 8B</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>每次插入的 latent token 数 $K$</td>
+<td>—</td>
+<td>约 4 或 8</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Trigger 训练轨迹采样数</td>
+<td>—</td>
+<td>每题 4 或 8 条</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>ALFWorld 成功率</td>
+<td>Agent Workflow Memory 约 32–40；全参数 GRPO 约 55</td>
+<td>MemGen-GRPO 超过 GRPO（高出不止一两个点）</td>
+<td>字幕（指图口述）</td>
+</tr>
+<tr>
+<td>跨域迁移（ScienceWorld）</td>
+<td>在 ALFWorld 训练</td>
+<td>约 2 倍提升</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Trigger 平均激活次数</td>
+<td>训练域 GSM8K 约 86 次</td>
+<td>GPQA 约减半；代码任务约 20 次（约 1/4）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>持续学习 GPQA 得分轨迹</td>
+<td>SFT 路线：11 → 16 → 17 → 13 → 2.53</td>
+<td>MemGen-SFT：11 → 19 → 20 → 21 → 约 20</td>
+<td>字幕（指图口述）</td>
+</tr>
+<tr>
+<td>记忆簇消融</td>
+<td>原模型 planning 类失败约 6 例</td>
+<td>移除 cluster 2 后约 17–18 例</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>额外推理延迟</td>
+<td>无 MemGen</td>
+<td>不超过 5%</td>
+<td>字幕（转述论文附录）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>记忆即外挂 LoRA、主干冻结</strong>：这是一个把「经验沉淀」与「基座能力」解耦的工程范式——对 RL infra 的意味是：经验库可以独立迭代、独立回滚、按任务域热插拔，而不需要为攒经验重训/微调交付模型本身；同一基座挂不同 weaver 即可分化行为。</li>
+<li><strong>「何时调用」的决策要显式训练并计费</strong>：trigger 的 GRPO 奖励里直接扣调用次数，与推理成本同账。做 agent 记忆/工具调用门控时，可借鉴这条：门控不是规则阈值，而是一个被任务奖励和调用成本联合训练的小策略。</li>
+<li><strong>语义边界插入</strong>：只在标点/换行处干预解码，是低成本且低干扰的注入点选择；对需要在生成中途注入信息（检索结果、校验反馈、隐式记忆）的系统都可复用。</li>
+<li><strong>可解释性方法</strong>：对不可读的 latent 表示，用「按簇消融 × 人工 failure taxonomy 计数」验证功能分工，比强行解码最近邻 token 有信息量得多。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Weaver 的 online 写入未实现：经验只能离线批量训入。若要让 agent 在部署中持续攒经验，增量更新 weaver 时如何避免它自身遗忘、如何与 trigger 的调用分布漂移共适应，讲者未给方案。</li>
+<li>跨基座迁移只有 projection head 一条无保证的路线；不同规模/家族基座间 latent 记忆能否蒸馏复用，尚无证据。</li>
+<li>RQ3 只比了 SFT 版本的遗忘；MemGen-GRPO 版本与「RL 本身抗遗忘」的结论叠加后增益还剩多少，未验证。</li>
+<li>记忆簇的功能分工是事后归因（消融 + 错误计数），因果强度有限；且簇内约一半成员并不遵循共享后缀模式，其余结构未解释。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「人脑的记忆其实是 reasoning 和 memory 彼此交织的，在 reason 的过程中可能会同步地联想起 memory。」——讲者以此立论现有记忆机制与目标形态的差距</p>
+<p>「我们把之前的经验性知识全部注入到 weaver 里面去，而当一个 context 来了之后，它可能就能够回忆起之前相关的经验。」——讲者解释 generative 的含义：记忆按当前上下文现场定制生成</p>
+<p>「在没有任何外部监督的情况下，MemGen 进化出了这样不同的 memory 层次和 memory 功能，我们认为这是一个很有意思的现象。」——讲者对 RQ4 簇消融结果的判词</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

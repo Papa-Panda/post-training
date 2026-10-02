@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP58 — Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP58 — Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台</h1>
+    <p class="sub">讲者把 Virtual Community 做成「只给经纬度就能在地球任意地点长出一个可跑物理模拟的社区」的开放世界平台：真实地理数据经几何简化与材质修复变成可模拟的 3D 场… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP58-virtual-community.html</p>
+<p>「我们也是第一个去创建这样的模拟器，同时支持人类智能体和机器人智能体以及他们组成的社群在开放世界中的模拟。」——讲者周景红对平台定位的自述</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>58</dd><dt>标题</dt><dd>Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台</dd><dt>BV</dt><dd>BV1Bp4uzkEHG</dd><dt>时长</dt><dd>00:58:25（3505 秒；讲授约 44 分钟 + Q&amp;A 约 14 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>周景红（麻省大学博士生，导师甘创；字幕自述，字幕中其名另有「周晋红/周庆红」等识别异体）；张宏鑫（第二讲者，字幕作「张宏鑫/张红星」，介绍任务与长期记忆部分）；团队主要来自 UMass、JHU 与 CMU（讲者口述）</dd><dt>相关论文</dt><dd>Virtual Community 平台论文（讲者称代码与项目主页已公开；具体 arXiv 编号未在 talk 中给出，待补录）</dd><dt>相关代码</dt><dd>项目主页已公开（讲者称 code 都放在项目主页，含场景生成与 agent 生成两个仓库；地址待补录）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1Bp4uzkEHG/">https://www.bilibili.com/video/BV1Bp4uzkEHG/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP58.txt</code>（1014 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP58，已存档）清洗提炼，专名可能有识别误差（如物理引擎 Genesis 在字幕中作「genesis/JANIS/JENSIS」多形、动作库 Mixamo 作「mix ammo」、主持人王过作「王顾」），均以公开资料为准；凡数字均为讲授现场口径，论文数值未经交叉核对。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者把 Virtual Community 做成「只给经纬度就能在地球任意地点长出一个可跑物理模拟的社区」的开放世界平台：真实地理数据经几何简化与材质修复变成可模拟的 3D 场景，LLM 生成带画像、日程与社会关系的人类智能体，再与多类机器人一起放进 Genesis 物理引擎，用两层嵌套循环抹平两类智能体相差百倍的控制频率，从而解锁通勤规划、竞选说服、长期记忆社交等此前难以构造的人—机—社会共存任务。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：具身的物理与社会智能缺一个共用的世界</h3>
+<p>讲者用《底特律：变人》开场，提炼出三个待答问题：机器人之间如何合作与竞争、人类自身如何构建社群、人与机器人如何在开放世界中共存。三者的共同前提是「具身的物理和社会智能」——智能体如何在一个物理世界里与其他智能体交互。此前缺少同时支持人类智能体、机器人智能体及其社群的开放世界模拟器，这是团队做这个平台的立项理由。</p>
+<h3>方法/设计一：场景生成——从经纬度到可模拟的 3D 社区</h3>
+<p>输入只有经纬度与范围，三类数据源各取所长：OSM 提供符号化标注（道路、建筑轮廓），Google 的 3D 地理数据提供布局精度与真实感，街景 2D 图提供视觉真实性。原始 3D 数据由航拍重建，近地面粗糙且带噪声（移动车辆会被重建进材质），不能直接模拟，因此分两步加工：</p>
+<ol>
+<li><strong>几何简化</strong>：用 OSM 的建筑标注把几何形体压到极低面数，总面数降至原始数据的约 1/10 ，方便物理模拟并提速；</li>
+<li><strong>材质修复</strong>：把原始材质迁移到简化几何上，再用 Grounding DINO 等检测模型加规则方法找出噪声区域，配合 diffusion inpainting 与街景投影提升近地面视觉质量。视觉评测用 FID/KID 对比，生成结果显著优于原始数据。</li>
+</ol>
+<p>物体分两路放置：复杂物体（如树）从 BlenderKit 检索，简单物体（自行车点、电话亭）用生成式方法造形，按地图标注落位。室内场景同样两路：商店、住所等可生成类用 Architect 类工作生成布局，办公楼等难生成类从既有室内数据集按语义抽取。Q&amp;A 中讲者强调范围参数调大即可空间扩展，整套生成在单卡 GPU 节点上即可跑完。</p>
+<h3>方法/设计二：社区生成——有日程、有关系的人类智能体</h3>
+<p>人类智能体的生成输入只有照片、名字、年龄与位置。身体侧用 Avatar SDK 生成皮肤外观，导出为团队自改的格式，并从 Mixamo 导入 2000 多个动作作为动作库；拿/放等交互动作走 IK 求解，走路等常见动作预缓存以提速。认知侧由 LLM 依名字、年龄与地点生成人物画像（年龄、职业、工作地点、社会关系），再据此生成细到每半小时一天日程，做法参考 Stanford 小镇，但日程中的每个地点（如某间工作室）都锚定在 3D 场景里真实存在的位置，生成后还要过一遍 LLM 验证，确保画像里引用的地点在场景中真实存在。路网层面另用 OSM 数据生成可调密度的人流车流，并按人流密集点规划公交线路、真放一辆按时刻表运行的公交车模型，为通勤类任务打底。名人画像则从 Wikipedia 检索介绍后生成（Q&amp;A 明确：社交模型是生成式设定，未用现实统计数据）。</p>
+<h3>方法/设计三：在 Genesis 上的两层嵌套模拟循环</h3>
+<p>平台采用为机器
+...[truncated 4629 chars]</p></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
