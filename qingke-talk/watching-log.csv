@@ -1,99 +1,99 @@
 No,Title,BV,Duration,Date,Status,Notes
-1,SceneTex：高质量三维室内场景纹理图生成,episodes/EP01-scenetex.md,要点已提炼,2024-04-10,todo,SceneTex：整场景纹理场的全局一致生成与VSD优化
-2,ChatDev：大语言模型驱动的多智能体协作与演化,episodes/EP02-chatdev.md,要点已提炼,2024-04-15,todo,ChatDev实录：瀑布交流链与角色翻转缓解幻觉
-3,从 3D LLM 到 MultiPLY，3D 具身基础模型的构建,episodes/EP03-3d-llm-multiply.md,要点已提炼,2024-04-19,todo,3D LLM到MultiPLY：neural field表征与环境反馈造数据
-4,Mini-Gemini：挖掘多模态视觉语言大模型的潜力,episodes/EP04-mini-gemini.md,要点已提炼,2024-04-24,todo,Mini-Gemini：固定token预算下patch-informing提多模态质量
-5,3D-VLA：构建生成式三维具身世界模型,episodes/EP05-3d-vla.md,要点已提炼,2024-05-10,todo,3D-VLA：off-the-shelf模型链造3D具身数据再训世界模型
-6,实时渲染 3DGS 中的反走样及逆渲染应用,episodes/EP06-3dgs.md,要点已提炼,2024-05-21,todo,Analytic-Splatting解析积分抗3DGS走样与GS-IR逆渲染（论文还原）
-7,MixEval：混合评测数据集来拟合大语言模型的人类评估,episodes/EP07-mixeval.md,要点已提炼,2024-05-24,todo,MixEval：逐条匹配真实query重组评测集对齐人类偏好
-8,VideoBooth：文本和图像提示共同驱动的视频生成,episodes/EP08-videobooth.md,要点已提炼,2024-05-29,todo,VideoBooth：两阶段训练防语义层被UNet特征抄答案
-9,具身多模态大模型的视觉表征预训练研究,episodes/EP09-embodied-multimodal-pretraining.md,要点已提炼,2024-06-06,todo,MPI视觉预训练：重建过渡帧与手物交互点定位
-10,PiSSA：收敛快、误差小的大模型参数高效微调方法,episodes/EP10-pissa.md,要点已提炼,2024-06-13,todo,PiSSA：只改LoRA初始化，主奇异值进adapter近似全参梯形
-11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,episodes/EP11-llama-pro.md,要点已提炼,2024-06-17,todo,LLaMA Pro：恒等复制扩块继续预训练，容量胜LoRA
-12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,episodes/EP12-villager-agent.md,要点已提炼,2024-06-27,todo,VillagerAgent：DAG动态派活避开长对话幻觉
-13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,episodes/EP13-llama-factory.md,要点已提炼,2024-07-08,todo,LLaMA Factory实录：高效微调三条线与RLHF多LoRA显存方案
-14,Mobile-Agent：基于多模态Agent架构的手机智能体,episodes/EP14-mobile-agent.md,要点已提炼,2024-07-11,todo,Mobile-Agent实录：纯视觉路线与反思agent分工
-15,MiniCPM-V：端侧可用的GPT-4V级多模态大模型,episodes/EP15-minicpm-v.md,要点已提炼,2024-07-15,todo,MiniCPM-V端侧路线：小基座加密集反馈压幻觉与跨语言传递
-16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,episodes/EP16-yolo-world.md,要点已提炼,2024-07-23,todo,YOLO-World区域文本对比加权重参数化部署的实时开放词汇检测
-17,SEED-Story：生成长篇图文故事的多模态大型语言模型,episodes/EP17-seed-story.md,要点已提炼,2024-07-30,todo,SEED-Story三阶段训练与多模态attention sink支撑长故事生成
-18,InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界,episodes/EP18-internvl2.md,要点已提炼,2024-08-06,todo,InternVL渐进式对齐：6B ViT配对规则与按任务标定分辨率
-19,AWQ：激活值感知的LLM低位权重量化,episodes/EP19-awq.md,要点已提炼,2024-08-14,todo,AWQ：保留1%激活显著通道即可救回INT3量化精度
-20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,episodes/EP20-s-lora.md,要点已提炼,2024-08-26,todo,S-LoRA：统一内存池让单卡serving上千adapter吞吐不降
+1,SceneTex：高质量三维室内场景纹理图生成,BV1qKeyzdEVp,00:57:27,2024-04-10,要点已提炼,episodes/EP01-scenetex.md
+2,ChatDev：大语言模型驱动的多智能体协作与演化,BV15oe2z8EiH,00:49:23,2024-04-15,要点已提炼,episodes/EP02-chatdev.md
+3,从 3D LLM 到 MultiPLY，3D 具身基础模型的构建,BV18se2zHEzc,00:54:42,2024-04-19,要点已提炼,episodes/EP03-3d-llm-multiply.md
+4,Mini-Gemini：挖掘多模态视觉语言大模型的潜力,BV15oe2z8Eyx,00:53:28,2024-04-24,要点已提炼,episodes/EP04-mini-gemini.md
+5,3D-VLA：构建生成式三维具身世界模型,BV1Loe2z8EFW,00:59:44,2024-05-10,要点已提炼,episodes/EP05-3d-vla.md
+6,实时渲染 3DGS 中的反走样及逆渲染应用,BV1NntyzRExN（有,01:06:03,2024-05-21,要点已提炼,episodes/EP06-3dgs.md
+7,MixEval：混合评测数据集来拟合大语言模型的人类评估,BV1une9zMEKF,00:58:59,2024-05-24,要点已提炼,episodes/EP07-mixeval.md
+8,VideoBooth：文本和图像提示共同驱动的视频生成,BV1une9zME2m,00:38:06,2024-05-29,要点已提炼,episodes/EP08-videobooth.md
+9,具身多模态大模型的视觉表征预训练研究,BV1s8e9zwE8E,01:00:01,2024-06-06,要点已提炼,episodes/EP09-embodied-multimodal-pretraining.md
+10,PiSSA：收敛快、误差小的大模型参数高效微调方法,BV118e9zwEeu,01:20:41,2024-06-13,要点已提炼,episodes/EP10-pissa.md
+11,LLaMA Pro：扩展Transformer块优化的大型语言模型继续预训练,BV1JfeXzpEtr,00:50:01,2024-06-17,要点已提炼,episodes/EP11-llama-pro.md
+12,VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架,BV1LYaYzQEbs,01:03:09,2024-06-27,要点已提炼,episodes/EP12-villager-agent.md
+13,LLaMA Factory：从预训练到RLHF，大模型高效训练框架,BV1jbYNzyEaw,01:16:21,2024-07-08,要点已提炼,episodes/EP13-llama-factory.md
+14,Mobile-Agent：基于多模态Agent架构的手机智能体,BV1obYNzCE1b,00:54:21,2024-07-11,要点已提炼,episodes/EP14-mobile-agent.md
+15,MiniCPM-V：端侧可用的GPT-4V级多模态大模型,BV1tLPEzfEDD,01:00:51,2024-07-15,要点已提炼,episodes/EP15-minicpm-v.md
+16,YOLO-World：基于视觉语言模型的实时开放词汇物体检测,BV1MDaYzgEYV,00:58:30,2024-07-23,要点已提炼,episodes/EP16-yolo-world.md
+17,SEED-Story：生成长篇图文故事的多模态大型语言模型,BV1MDaYzgEt1,00:57:30,2024-07-30,要点已提炼,episodes/EP17-seed-story.md
+18,InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界,BV1mDaYzuEif,01:15:21,2024-08-06,要点已提炼,episodes/EP18-internvl2.md
+19,AWQ：激活值感知的LLM低位权重量化,BV1mDaYzuE7o,00:49:46,2024-08-14,要点已提炼,episodes/EP19-awq.md
+20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,BV1mDaYzuEqK,01:00:14,2024-08-26,要点已提炼,episodes/EP20-s-lora.md
 21,SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎,,,2024-09-03,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
-22,mPLUG-Owl3：探索长序列模型架构的通用多模态大模型,episodes/EP22-mplug-owl3.md,要点已提炼,2024-09-10,todo,mPLUG-Owl3的Hyper Attention并行注入视觉KV实现多图泛化
-23,CogVideoX 视频生成开源模型上手实践,episodes/EP23-cogvidex.md,要点已提炼,2024-09-23,todo,CogVideoX开源实践：3D VAE分块显存优化与微调起步量
-24,使用CAMEL Agents构建GraphRAG及应用实践,episodes/EP24-camel-graphrag.md,要点已提炼,2024-09-26,todo,CAMEL agents自动建图做GraphRAG，双路检索管关系
-25,LLMC：大语言模型的量化基准,episodes/EP25-llmc-benchmark.md,要点已提炼,2024-10-11,todo,LLMC量化基准：校准一致性与旋转法打破outlier迷信
+22,mPLUG-Owl3：探索长序列模型架构的通用多模态大模型,BV1KsYVzJEUg,01:04:49,2024-09-10,要点已提炼,episodes/EP22-mplug-owl3.md
+23,CogVideoX 视频生成开源模型上手实践,BV1PbYVz2E6d,01:01:00,2024-09-23,要点已提炼,episodes/EP23-cogvidex.md
+24,使用CAMEL Agents构建GraphRAG及应用实践,BV1feNZeYEbm,00:49:57,2024-09-26,要点已提炼,episodes/EP24-camel-graphrag.md
+25,LLMC：大语言模型的量化基准,BV1SjNzeAEXe,01:10:39,2024-10-11,要点已提炼,episodes/EP25-llmc-benchmark.md
 26,VITA：开源交互式多模态基础大模型,,,2024-10-14,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
-27,GenAD & Vista：构建通用可泛化的自动驾驶世界模型,episodes/EP27-genad-vista.md,要点已提炼,2024-10-17,todo,GenAD与Vista：OpenDV大数据与不确定性排序做reward
-28,DuQuant：基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,episodes/EP28-duquant.md,要点已提炼,2024-11-05,todo,DuQuant：两级正交变换平滑massive outlier做W4A4
-29,VILA^2：视觉语言模型能力的自我提升,episodes/EP29-vila2.md,要点已提炼,2024-11-23,todo,VILA2自增强recaption循环与specialist结构化标注
+27,GenAD & Vista：构建通用可泛化的自动驾驶世界模型,BV1bJYVzXET3,01:02:06,2024-10-17,要点已提炼,episodes/EP27-genad-vista.md
+28,DuQuant：基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,BV16CaRzWEvx,01:01:44,2024-11-05,要点已提炼,episodes/EP28-duquant.md
+29,VILA^2：视觉语言模型能力的自我提升,BV1cHYNzJE77,01:11:06,2024-11-23,要点已提炼,episodes/EP29-vila2.md
 30,OminiParser：基于纯视觉的 GUI Agent,,,2024-11-30,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
-31,Rectified Flow：矫正流生成式模型的概念及应用实践,episodes/EP31-rectified-flow.md,要点已提炼,2024-12-14,todo,Rectified Flow速度场回归与reflow拉直的一步生成路径
-32,LLMC：大语言模型压缩工具的开发实践,BV1BeNZeeEQy,,2024-12-16,todo,
-33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,episodes/EP33-xgrammar.md,要点已提炼,2024-12-21,todo,XGrammar：文法约束解码的近零开销结构化生成引擎（论文还原）
+31,Rectified Flow：矫正流生成式模型的概念及应用实践,BV1pqHezrED5,01:26:06,2024-12-14,要点已提炼,episodes/EP31-rectified-flow.md
+32,LLMC：大语言模型压缩工具的开发实践,BV1BeNZeeEQy,01:51:01,2024-12-16,要点已提炼,episodes/EP32-llmc-toolkit.md
+33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,BV1WiHezGEWU（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2024-12-21,要点已提炼,episodes/EP33-xgrammar.md
 34,K-Sort Arena：视觉生成模型的高效人类偏好竞技场,BV1EeNZeeENy,,2024-12-24,todo,
 35,Tuning-Free Enhence：通过噪声初始化和采样轨迹优化增强预训练扩散模型,BV1DjNzeAEEm,,2024-12-28,todo,
 36,Follow Family：可控视频生成方法探索与应用,BV1ZeNZeYEfe,,2025-01-04,todo,
 37,Motion Dreamer：面向自动驾驶与物理世界对齐的视频生成模型,BV1feNZeYETq,,2025-01-14,todo,
-38,Satori：通过训练LLM做自回归搜索来增强推理能力,episodes/EP38-satori.md,要点已提炼,2025-02-15,todo,Satori：CoAT格式+重启探索RL学推理纠错
-39,PRIME: 结合隐式过程奖励的强化学习,episodes/EP39-prime.md,要点已提炼,BV1UaPNecEcW,00:56:21,PRIME：隐式过程奖励免费得逐token过程分，在线更新是必需项
+38,Satori：通过训练LLM做自回归搜索来增强推理能力,BV1WiHezGEQN,01:09:00,2025-02-15,要点已提炼,episodes/EP38-satori.md
+39,PRIME: 结合隐式过程奖励的强化学习,BV1UaPNecEcW,56:21,BV1UaPNecEcW,要点已提炼,episodes/EP39-prime.md
 40,基于 LightLLM 的 DeepSeek R1/V3 模型部署实战,BV1xWREYrEJm,,2025-03-08,todo,
-41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,episodes/EP41-pc-agent.md,要点已提炼,2025-03-15,todo,PC-Agent实录：a11y感知链与四agent决策框架的延迟硬伤
-42,COAT：显存高效的 FP8 训练，实现高效深度学习,episodes/EP42-coat.md,要点已提炼,2025-03-22,todo,COAT：优化器与激活双路FP8量化，250B token近乎无损
+41,PC-Agent：面向复杂 PL 任务的多模态智能体框架,BV1WiHezGEm7,01:02:21,2025-03-15,要点已提炼,episodes/EP41-pc-agent.md
+42,COAT：显存高效的 FP8 训练，实现高效深度学习,BV1REpYzZE19,00:47:01,2025-03-22,要点已提炼,episodes/EP42-coat.md
 43,VideoGrain：基于扩散模型的多粒度视频编辑的探索与应用,BV1REpYzZEWy,,2025-03-29,todo,
-44,InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建,episodes/EP44-infercept-preble-cognify.md,要点已提炼,2025-04-04,todo,Agent工作流系统三件套：Cognify调优、Preble调度、InferCept拦截
-45,B-STaR & SimpleRL-Zoo：通过强化学习自我提升推理性能和效率,episodes/EP45-bstar-simplerl-zoo.md,要点已提炼,BV1d7pYzbE1C,01:11:59,B-STaR自动平衡探索/利用；SimpleRL极简配方复现强推理
-46,从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化,episodes/EP46-tinyzero-apr.md,要点已提炼,BV1rGxyzVE5m,01:13:44,TinyZero小成本复现R1涌现；APR学何时并行推理
+44,InferCept、Preble&Cognify：面向下一代 AI Agent 工作流系统的构建,BV1d7pYzbEif,00:57:18,2025-04-04,要点已提炼,episodes/EP44-infercept-preble-cognify.md
+45,B-STaR & SimpleRL-Zoo：通过强化学习自我提升推理性能和效率,BV1d7pYzbE1C,01:11:59,BV1d7pYzbE1C,要点已提炼,episodes/EP45-bstar-simplerl-zoo.md
+46,从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化,BV1rGxyzVE5m,01:13:44,BV1rGxyzVE5m,要点已提炼,episodes/EP46-tinyzero-apr.md
 47,Free4D：无需微调的 4D 场景生成新框架,BV1sPxyzUEeU,,2025-04-26,todo,
-48,从 TTS 到 TTRL：无标签数据强化学习探索与展望,episodes/EP48-tts-ttrl.md,要点已提炼,BV1NA4jz6EQB,01:06:02,TTRL：多数投票伪标签把无监督测试时适配接回GRPO
+48,从 TTS 到 TTRL：无标签数据强化学习探索与展望,BV1NA4jz6EQB（https://www.bilibili.com/video/BV1NA4jz6EQB/）,01:06:02,BV1NA4jz6EQB,要点已提炼,episodes/EP48-tts-ttrl.md
 49,verl 源码解读 与 HybridFlow 编程范式讲解,BV1Cs7WzNEDX,,2025-05-19,要点已提炼,episodes/EP049-verl-hybridflow.md
 50,MoLE & SpeCache：大语言模型端侧部署的架构与算法,BV1yA4jzzEmf,,2025-05-22,todo,
 51,EraseAnything: 在 Flux 等先进文生图架构的概念擦除方法,BV1sA4jzzE5V,,2025-05-26,todo,
 52,Sparse VideoGen：无需重新训练的 DiTs 推理加速框架,BV1xw4jzgENr,,2025-05-29,todo,
-53,Chain-of-Model（模型链）：引入因果建模，全新的大模型 Scaling 结构,episodes/EP53-chain-of-model.md,要点已提炼,2025-06-09,todo,Chain-of-Model：把因果性搬到表征维度做弹性激活
+53,Chain-of-Model（模型链）：引入因果建模，全新的大模型 Scaling 结构,BV18K4szzEzT,01:12:18,2025-06-09,要点已提炼,episodes/EP53-chain-of-model.md
 54,BAGEL：统一生成理解的多模态基础模型,BV1t34szKEUc,,2025-06-12,todo,
 55,生成模型中的极简概念擦除,BV1b34szKETU,,2025-06-16,todo,
 56,InternVL3：多模态通用感知大模型,BV18K4szzERi,,2025-06-21,todo,title-reworded
-57,Fast-dLLM：无需重训的扩散大语言模型推理加速,episodes/EP57-fast-dllm.md,要点已提炼,2025-06-24,todo,Fast-dLLM：给扩散LLM补KV缓存与置信度并行解码（论文还原）
-58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,episodes/EP58-virtual-community.md,要点已提炼,2025-06-28,todo,Virtual Community：经纬度生成可模拟社区与人机社会模拟
-59,大模型推理强化学习中的熵机制,episodes/EP59-entropy-mechanism-rl.md,要点已提炼,2025-07-01,todo,RL熵塌缩的协方差机制（Clip-Cov/KL-Cov）与熵-奖励经验定律
-60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,episodes/EP60-satori-swe.md,要点已提炼,2025-07-05,todo,Satori-SWE：进化式测试时缩放让小模型做SWE，样本效率主线
-61,GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架,episodes/EP61-gui-reflection.md,要点已提炼,2025-07-08,todo,GUI-Reflection三阶注入反思能力，数据精度95%才稳
-62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,episodes/EP62-prorl.md,要点已提炼,2025-07-12,todo,ProRL长程RL配方：动态采样+周期性重置，1.5B在3000步持续扩边界
+57,Fast-dLLM：无需重训的扩散大语言模型推理加速,BV1qs4uz3EXL（B站有视频，但全站无任何字幕轨：浏览器内,00:48:50,2025-06-24,要点已提炼,episodes/EP57-fast-dllm.md
+58,Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台,BV1Bp4uzkEHG,00:58:25,2025-06-28,要点已提炼,episodes/EP58-virtual-community.md
+59,大模型推理强化学习中的熵机制,BV1Bp4uzkECF,,2025-07-01,要点已提炼,episodes/EP59-entropy-mechanism-rl.md
+60,Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型解决复杂软件工程,BV1Zs4uz3E16,00:49:39,2025-07-05,要点已提炼,episodes/EP60-satori-swe.md
+61,GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架,BV1SA4CzWEph,01:00:39,2025-07-08,要点已提炼,episodes/EP61-gui-reflection.md
+62,ProRL：延长强化学习训练框架，拓展大语言模型的推理边界,BV1mP4CzXE9a,,2025-07-12,要点已提炼,episodes/EP62-prorl.md
 63,ChatRex & RexSeek & RexThinker：结合多模态大语言模型的目标检测模型构建,BV1uA4CzsETk,,2025-07-15,todo,
 64,MindCube：空间智能的实现路径，探究 VLMs 构建稳健空间心理模型的能力,BV1MP4Cz9EGg,,2025-07-19,todo,
 65,Hi3DGen：法线为桥，为高清三维几何生成另辟蹊径,BV1qk4QzfEv4,,2025-07-22,todo,
-66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,episodes/EP66-simoe.md,要点已提炼,2025-07-26,todo,SIMoE：mask学习在哪升级专家，共享基底+正交专业化
-67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,episodes/EP67-pipeline-parallelism.md,要点已提炼,2025-08-05,todo,流水线并行四部曲：B/W分离、V形调度、offload与词表并行
+66,SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架,BV1Br4Qz8EpF,01:20:48,2025-07-26,要点已提炼,episodes/EP66-simoe.md
+67,大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展,BV1v14QzoEZf,01:37:28,2025-08-05,要点已提炼,episodes/EP67-pipeline-parallelism.md
 68,slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践,BV1d14QzoEai,,2025-08-02,要点已提炼,episodes/EP068-slime-rl-scaling.md
-69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,episodes/EP69-gspo.md,要点已提炼,2025-08-07,todo,GSPO：把GRPO重要性采样从token级改为序列级，复苏MoE长训稳定性（论文还原）
+69,GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习,BV1UC4az4EiU（B站有视频；字幕接口多次返回串台字幕、无法验证，未能取得可用字幕）,,2025-08-07,要点已提炼,episodes/EP69-gspo.md
 70,Evaluation Agent：面向视觉生成模型的高效可提示的评估框架,BV1SC4az4Ehn,,2025-08-09,todo,
-71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,episodes/EP71-rlpr.md,要点已提炼,2025-08-12,todo,RLPR：用参考答案概率做通用领域连续奖励，绕开PRM与likelihood陷阱
+71,RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题,BV1cF4Yz2E5z,01:14:10,2025-08-12,要点已提炼,episodes/EP71-rlpr.md
 72,Clothed Human Body Fitting: A Journey to ETCH,BV1rF4Yz1ENZ,,2025-08-16,todo,title-reworded
 73,从BLIP3o到BLIP3o-NEXT：迈向统一生成与理解的多模态大模型,BV1s4WkzMEYF,,2025-08-19,todo,
-74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,episodes/EP74-roll.md,要点已提炼,2025-08-23,todo,ROLL生产级RL框架：样本级rollout调度与agentic环境管理（论文还原）
+74,ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架,BV1y4WkzME92（B站有视频；字幕接口多次返回串台字幕、无法验证，未能取得可用字幕）,,2025-08-23,要点已提炼,episodes/EP74-roll.md
 75,FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案,BV1J6WyzTEJP,,2025-08-30,要点已提炼,episodes/EP075-flashrl-tis.md
-76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,episodes/EP76-nemo-rl.md,要点已提炼,2025-09-06,todo,NeMo RL实录：671B MoE权重refit三级优化约15倍与FP8生成排期
-77,"Theory of Agent: From Definition, to Behavior and Objective",episodes/EP77-theory-of-agent.md,要点已提炼,2025-09-09,todo,Theory of Agent：工具使用决策边界与知识边界对齐
+76,NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍,BV1qNWyzcEuv,01:06:55,2025-09-06,要点已提炼,episodes/EP76-nemo-rl.md
+77,"Theory of Agent: From Definition, to Behavior and Objective",BV1dHWEzWETN,01:21:03,2025-09-09,要点已提炼,episodes/EP77-theory-of-agent.md
 78,从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体,BV1sxWgzUEZo; BV1sBsFz9EVw,,2025-09-18,要点已提炼,episodes/EP078-llm-rl-to-agentic-rl.md
-79,“知人者智”：以用户为中心的智能体交互与训练,episodes/EP79-userrl.md,要点已提炼,2025-10-18,todo,UserRL/UserBench：用户中心agent的短板在知人不在执行（论文还原）
-80,RL for LRMs：探讨面向推理模型的 RL 最新研究,episodes/EP80-rl-for-lrms.md,要点已提炼,2025-10-21,todo,面向推理模型的RL综述：奖励设计、策略优化与采样策略全景
-81,MemGen：生成式隐式记忆，Agent Memory 的第三种可能,episodes/EP81-memgen.md,要点已提炼,2025-10-16,todo,MemGen：latent记忆第三条路，两份LoRA胜全参GRPO
-82,OpenCUA：用于构建 Computer-Use Agent 的开源框架,episodes/EP82-opencua.md,要点已提炼,2025-10-25,todo,OpenCUA实录：AgentNet数据与结构化CoT，pass@N差指向RL空间
+79,“知人者智”：以用户为中心的智能体交互与训练,BV18tsFzhE35,01:04:19,2025-10-18,要点已提炼,episodes/EP79-userrl.md
+80,RL for LRMs：探讨面向推理模型的 RL 最新研究,BV1b9sGzwEAc,01:09:10,2025-10-21,要点已提炼,episodes/EP80-rl-for-lrms.md
+81,MemGen：生成式隐式记忆，Agent Memory 的第三种可能,BV1wMWEzPEUD,00:59:31,2025-10-16,要点已提炼,episodes/EP81-memgen.md
+82,OpenCUA：用于构建 Computer-Use Agent 的开源框架,BV14isozHErN,00:52:09,2025-10-25,要点已提炼,episodes/EP82-opencua.md
 83,统一 SFT & RL：迈向大型语言模型后训练的统一视角,BV1Gz1MBZEGk,,2025-10-28,要点已提炼,episodes/EP083-unified-sft-rl-upge-hpt.md
-84,SimpleVLA-RL：简单可拓展的VLA强化学习训练,episodes/EP84-simplevla-rl.md,要点已提炼,BV1dm1jBWEXJ,01:01:11,SimpleVLA-RL把R1式二元奖励搬上VLA，数据效率与sim-to-real双涨
+84,SimpleVLA-RL：简单可拓展的VLA强化学习训练,BV1dm1jBWEXJ,01:01:11,BV1dm1jBWEXJ,要点已提炼,episodes/EP84-simplevla-rl.md
 85,OpenMoE 2: Sparse Diffusion Language Models,BV1rg1sBQESS,,2025-11-04,todo,
-86,从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术,episodes/EP86-deepseek-ocr-glyph.md,要点已提炼,2025-11-06,todo,DeepSeek-OCR到Glyph：把上下文渲染成图片的近无损压缩路线
-87,QeRL：量化技术增强强化学习 Reasoning 探索,episodes/EP87-qerl.md,要点已提炼,BV1iAkDBrEVt,00:57:46,QeRL：NVFP4量化噪声转成探索增益，rollout加速约2倍
+86,从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术,BV1Ks1UB8E4J,00:45:27,2025-11-06,要点已提炼,episodes/EP86-deepseek-ocr-glyph.md
+87,QeRL：量化技术增强强化学习 Reasoning 探索,BV1iAkDBrEVt,00:57:46,BV1iAkDBrEVt,要点已提炼,episodes/EP87-qerl.md
 88,UniLat3D：几何–外观统一VAE的单阶段 3D 生成框架,BV1qDC7BWEBo,,2025-11-11,todo,
-89,Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架,episodes/EP89-generative-rlhf-v.md,要点已提炼,2025-11-15,todo,Generative RLHF-V：让生成式奖励模型自学原则再打分（论文还原）
+89,Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架,BV1JRCyBiEp2（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2025-11-15,要点已提炼,episodes/EP89-generative-rlhf-v.md
 90,ShotBench: 面向增强MLLM摄影语言理解能力的训练与评估体系,BV1xNynB1Emx,,2025-11-18,todo,
-91,KTransformers，在大模型微调与推理中的系统化实践,episodes/EP91-ktransformers.md,要点已提炼,2025-11-22,todo,KTransformers：CPU-GPU异构跑MoE微调与推理的系统化实践
-92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",episodes/EP92-rlinf.md,要点已提炼,2025-11-25,todo,RLinf具身版：M2Flow可编程执行流与弹性异构调度
+91,KTransformers，在大模型微调与推理中的系统化实践,BV18wUPBEE4r,00:55:02,2025-11-22,要点已提炼,episodes/EP91-ktransformers.md
+92,"RLinf：面向具身智能的""渲训推一体化""开源强化训练框架",BV1mfSjBDEnS,01:00:57,2025-11-25,要点已提炼,episodes/EP92-rlinf.md
 93,通过量化与稀疏性实现高效注意力机制（SageAttention）,,,2025-11-29,todo,official-only（官网有预告，B站合集无对应视频）
 94,RLinf-VLA 实践：从零上手 VLA（OpenVLA）强化学习,,,2025-12-02,todo,official-only（官网有预告，B站合集无对应视频）
-95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,episodes/EP95-pi-rl.md,要点已提炼,2025-12-06,todo,π_RL：给流匹配VLA补上可计算似然的在线RL（论文还原）
+95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2025-12-06,要点已提炼,episodes/EP95-pi-rl.md
 96,Fast-dLLM v2：高效训练推理的块扩散大语言模型框架,,,2025-12-09,todo,official-only（官网有预告，B站合集无对应视频）
 97,从 BF16 到 FP16：如何解决RL训练-推理不匹配问题,,,2025-12-13,todo,official-only（官网有预告，B站合集无对应视频）
 98,SANA-Series：探索图像视频扩散模型的高效设计与加速,,,2025-12-16,todo,official-only（官网有预告，B站合集无对应视频）
@@ -127,7 +127,7 @@ No,Title,BV,Duration,Date,Status,Notes
 126,STream3R & 4RC: 面向几何与运动理解的流式前馈 3D/4D 重建,,,2026-05-19,要点已提炼,episodes/EP126-stream3r-4rc.md
 127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,,,2026-05-26,todo,official-only（官网有预告，B站合集无对应视频）
 128,MinT: 面向百万级 LoRA 策略的训练与推理基础设施,BV1j67H6TEKL,00:54:29,2026-06-02,要点已提炼,episodes/EP128-mint-lora.md
-129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,episodes/EP129-arpo-aepo-agent-world.md,要点已提炼,2026-06-06,todo,ARPO/AEPO熵驱动分支搜索与Agent-World环境自动合成
+129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,01:10:07,2026-06-06,要点已提炼,episodes/EP129-arpo-aepo-agent-world.md
 130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,2026-06-09,todo,official-only（官网有预告，B站合集无对应视频）
 131,UniRL：面向统一多模态模型的分布式 RL 后训练框架,,,2026-06-13,todo,official-only（官网有预告，B站合集无对应视频）
 132,从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制,,,2026-06-16,todo,official-only（官网有预告，B站合集无对应视频）
@@ -151,7 +151,7 @@ No,Title,BV,Duration,Date,Status,Notes
 150,SIM1：物理一致世界模型如何实现可扩展机器人学习,,,2026-09-01,todo,official-only（官网有预告，B站合集无对应视频）
 151,从 Harness 看 AI4AI 如何实现,,,2026-09-05,todo,official-only（官网有预告，B站合集无对应视频）
 152,如何在真实 Coding Agent Harness 中接入 RL？,BV1AJYx6wEpo,01:17:09,2026-09-08,要点已提炼,episodes/EP152-lego-rl.md
-153,"EnvHarness，Agent 和环境如何""左脚踩右脚""实现自进化",episodes/EP153-envharness.md,要点已提炼,2026-09-12,todo,EnvHarness：给静态环境加可演化外壳，50个环境胜过300个真实环境
+153,"EnvHarness，Agent 和环境如何""左脚踩右脚""实现自进化",BV1ZqYX6YE3T,01:08:03,2026-09-12,要点已提炼,episodes/EP153-envharness.md
 154,Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe,BV1WbeS6KEFf,01:24:51,2026-09-17,要点已提炼,episodes/EP154-rethinking-on-policy-distillation.md
 155,SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战,BV1creh6LEu6,01:28:18,2026-09-19,要点已提炼,episodes/EP155-skyrl-397b-agent-rl.md
 156,聊聊自我改进、递归自我改进（RSI），以及与自博弈的关系,BV1PZhs6bEsy,01:01:52,2026-09-23,要点已提炼,episodes/EP156-spiral-spice-spade-rsi.md

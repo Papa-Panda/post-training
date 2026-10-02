@@ -26,6 +26,7 @@
 | 27 | [GenAD & Vista：构建通用可泛化的自动驾驶世界模型](episodes/EP27-genad-vista.md) | ✅ 要点已提炼 |
 | 29 | [VILA^2：视觉语言模型能力的自我提升](episodes/EP29-vila2.md) | ✅ 要点已提炼 |
 | 31 | [Rectified Flow：矫正流生成式模型的概念及应用实践](episodes/EP31-rectified-flow.md) | ✅ 要点已提炼 |
+| 32 | [LLMC：大语言模型压缩工具的开发实践](episodes/EP32-llmc-toolkit.md) | ✅ 要点已提炼 |
 | 49 | verl 源码解读与 HybridFlow 编程范式讲解 | ✅ 要点已提炼 |
 | 68 | slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践 | ✅ 要点已提炼 |
 | 75 | FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案 | ✅ 要点已提炼 |
