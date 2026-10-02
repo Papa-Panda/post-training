@@ -110,22 +110,22 @@
 109,线性轨迹：揭示 LLM 强化学习中的高效捷径,,,,,2026-03-03,https://qingkeai.online/blog/RLVR-Linearity,unknown,official-only（官网有预告，B站合集无对应视频）
 110,Dr. Kernel：突破大模型 GPU Kernel 生成的多轮 RL 训练瓶颈,,,,,2026-03-07,https://qingkeai.online/blog/Dr.%20Kernel-talk,unknown,official-only（官网有预告，B站合集无对应视频）
 111,RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统,BV1W6c6z3E1F,111,,,2026-03-10,https://qingkeai.online/blog/RLinf-USER,yes,有B站视频（后补枚举确认）
-112,"EditReward：当 AI 学会""审美""，可控多模态生成的下一代范式",,,,,2026-03-14,https://qingkeai.online/blog/EditReward-talk,unknown,official-only（官网有预告，B站合集无对应视频）
+112,"EditReward：当 AI 学会""审美""，可控多模态生成的下一代范式",BV11zwxzzEyS,,,,2026-03-14,https://qingkeai.online/blog/EditReward-talk,yes,official-only（官网有预告，B站合集无对应视频）
 113,面向对象的 Agent Infra 新范式：有状态运行时管理的设计与工程实践（CaveAgent）,,,,,2026-03-17,https://qingkeai.online/blog/CaveAgent-talk,unknown,official-only（官网有预告，B站合集无对应视频）
 114,从 VGGT 到 PAGE-4D：动态世界中的 3D 感知统一框架,,,,,2026-03-20,https://qingkeai.online/blog/PAGE-4D-talk,unknown,official-only（官网有预告，B站合集无对应视频）
 115,WideSeek-R1：通过多智能体 RL 探索大模型的广度扩展（Width Scaling）,,,,,2026-03-24,https://qingkeai.online/blog/WideSeek-R1,unknown,official-only（官网有预告，B站合集无对应视频）
-116,"RISE: 组合式世界模型，在""想象""中实现机器人策略的自主进化",,,,,2026-03-28,https://qingkeai.online/blog/RISE-blog,unknown,official-only（官网有预告，B站合集无对应视频）
+116,"RISE: 组合式世界模型，在""想象""中实现机器人策略的自主进化",BV1rnXhB9Ekf,,,,2026-03-28,https://qingkeai.online/blog/RISE-blog,yes,official-only（官网有预告，B站合集无对应视频）
 117,OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾,,,,,2026-03-31,https://qingkeai.online/blog/OpenClaw-RL,unknown,official-only（官网有预告，B站合集无对应视频）
 118,Puffin: 统一多模态空间智能大模型——从任意视角理解和生成世界,,,,,2026-04-07,https://qingkeai.online/blog/Puffin,unknown,official-only（官网有预告，B站合集无对应视频）
 119,,,,,,,,unknown,官网无预告文，标题/日期待补；B站119 Farm 为 bilibili-only，未回填本行
-120,"VLANeXt：12条设计准则，从入门到精通的 VLA 终极""配方""",,,,,2026-04-14,https://qingkeai.online/blog/VLANeXt-talk,unknown,official-only（官网有预告，B站合集无对应视频）
-121,SimScale：真实世界仿真重塑端到端自动驾驶学习范式,,,,,2026-04-21,https://qingkeai.online/blog/SimScale,unknown,official-only（官网有预告，B站合集无对应视频）
-122,从 TTRL 到 URLVR：大模型的无监督强化学习还能走多远？,,,,,2026-04-27,https://qingkeai.online/blog/urlvr-talk,unknown,official-only（官网有预告，B站合集无对应视频）
+120,"VLANeXt：12条设计准则，从入门到精通的 VLA 终极""配方""",BV1Ztd6BDEDj,,,,2026-04-14,https://qingkeai.online/blog/VLANeXt-talk,yes,official-only（官网有预告，B站合集无对应视频）
+121,SimScale：真实世界仿真重塑端到端自动驾驶学习范式,BV1SQoUBcETB,,,,2026-04-21,https://qingkeai.online/blog/SimScale,yes,official-only（官网有预告，B站合集无对应视频）
+122,从 TTRL 到 URLVR：大模型的无监督强化学习还能走多远？,BV1w49rBsEr7,,,,2026-04-27,https://qingkeai.online/blog/urlvr-talk,yes,official-only（官网有预告，B站合集无对应视频）
 123,DeepSeek V4 模型在 SGLang 中的系统级优化与全栈适配,BV12YRdBzEM2,123,,,2026-05-09,https://qingkeai.online/blog/SGLang-DeepSeekV4,yes,有B站视频（后补枚举确认）
 124,大模型强化学习的Scaling Law,,,,,2026-05-12,https://qingkeai.online/blog/The-Scaling-Law-for-Reinforcement-Learning,unknown,official-only（官网有预告，B站合集无对应视频）；原备注：conflict: B站标题为「拒绝阈值化：迈向共生关系的新型人机信任」，与官网枚举「大模型强化学习的Scaling Law」冲突，待终裁（官网标题保留）
 125,重探 On-Policy Distillation（OPD）：三类典型失败以及修复路径,BV1CMLg6rENd,125,重探 On-Policy Distillation（OPD）：三类典型失败以及修复路径,,2026-05-16,https://qingkeai.online/blog/revisiting_opd-talk,yes,
 126,STream3R & 4RC: 面向几何与运动理解的流式前馈 3D/4D 重建,BV11gGt6pEKw,126,,,2026-05-19,https://qingkeai.online/blog/STream3R%264RC,yes,有B站视频（后补枚举确认）
-127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,,,,,2026-05-26,https://qingkeai.online/blog/%CE%B4-mem,unknown,official-only（官网有预告，B站合集无对应视频）
+127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,BV1H7Eg6jEus,,,,2026-05-26,https://qingkeai.online/blog/%CE%B4-mem,yes,official-only（官网有预告，B站合集无对应视频）
 128,MinT: 面向百万级 LoRA 策略的训练与推理基础设施,BV1j67H6TEKL,128,,,2026-06-02,https://qingkeai.online/blog/MinT,yes,有B站视频（后补枚举确认）；原备注：conflict: B站 EP128 含两个不同 talk（见 128(B站) 两行），本行（官网 MinT）与 B站视频的对应关系待终裁
 129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,128,ARPO & AEPO：智能体强化学习算法的最新进展,,2026-06-06,https://qingkeai.online/blog/ARPO-AEPO-Agent-World,yes,字幕第4轮 harvest 经浏览器内主题校验通过（2026-10-02），已做字幕实录版纪要
 130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,,,2026-06-09,https://qingkeai.online/blog/ZEDA-Talk,unknown,official-only（官网有预告，B站合集无对应视频）
@@ -178,7 +178,7 @@ B115,锦江大模型酒旅AI助手：全站AI场景灵活配置与Dify插件集�
 B116,KLong：1M 上下文检索推理，长上下文大模型 RL 后训练,BV1rnXhB9Ekf,116,KLong：1M 上下文检索推理，长上下文大模型 RL 后训练,,,https://www.bilibili.com/video/BV1rnXhB9Ekf,unknown,bilibili-only；B116 KLong 与官网116 RISE 主题完全不同
 B117,OpenLM.ai & FreedomIntelligence：探索模型组合,BV1gp9LBwECf,117,OpenLM.ai & FreedomIntelligence：探索模型组合,,,https://www.bilibili.com/video/BV1gp9LBwECf,unknown,bilibili-only；B117 OpenLM.ai 模型组合 与官网117 OpenClaw-RL 主题完全不同
 B118,HiDream-O1-Image：像素级理解与推理的统一图像生成大模型,BV1aUDpB1Eyx,118,HiDream-O1-Image：像素级理解与推理的统一图像生成大模型,,,https://www.bilibili.com/video/BV1aUDpB1Eyx,unknown,bilibili-only；B118 HiDream-O1-Image 与官网118 Puffin 主题完全不同
-B119,Farm：LLM 训练与推理的确定性系统，Unsloth 社区新项目,BV1cXDyBWEwr,119,Farm：LLM 训练与推理的确定性系统，Unsloth 社区新项目,,,https://www.bilibili.com/video/BV1cXDyBWEwr,unknown,bilibili-only；B119 Farm；官网119 无预告文，无对应官网 talk
+B119,Farm：LLM 训练与推理的确定性系统，Unsloth 社区新项目,BV1cXDyBWEwr,119,Farm：LLM 训练与推理的确定性系统，Unsloth 社区新项目,,,https://www.bilibili.com/video/BV1cXDyBWEwr,yes,bilibili-only；B119 Farm；官网119 无预告文，无对应官网 talk
 B120,DAgger-less imitation learning for Pi-0 VLA,BV1Ztd6BDEDj,120,DAgger-less imitation learning for Pi-0 VLA,,,https://www.bilibili.com/video/BV1Ztd6BDEDj,unknown,bilibili-only；B120 DAgger-less Pi-0 VLA 与官网120 VLANeXt 主题不同
 B121,CAMEL-AI： 科研自动化、Benchmark 与 Agent Infra 新探索,BV1SQoUBcETB,121,CAMEL-AI： 科研自动化、Benchmark 与 Agent Infra 新探索,,,https://www.bilibili.com/video/BV1SQoUBcETB,unknown,bilibili-only；B121 CAMEL-AI 科研自动化 与官网121 SimScale 不同；与官网24 CAMEL GraphRAG 亦不同场
 B122,ms-swift v4.0：后训练与原生支持的强化学习,BV1w49rBsEr7,122,ms-swift v4.0：后训练与原生支持的强化学习,,,https://www.bilibili.com/video/BV1w49rBsEr7,unknown,bilibili-only；B122 ms-swift v4.0 与官网122 URLVR 主题完全不同

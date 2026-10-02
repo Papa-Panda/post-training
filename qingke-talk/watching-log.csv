@@ -110,22 +110,22 @@ No,Title,BV,Duration,Date,Status,Notes
 109,线性轨迹：揭示 LLM 强化学习中的高效捷径,,,2026-03-03,todo,official-only（官网有预告，B站合集无对应视频）
 110,Dr. Kernel：突破大模型 GPU Kernel 生成的多轮 RL 训练瓶颈,,,2026-03-07,todo,official-only（官网有预告，B站合集无对应视频）
 111,RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统,BV1W6c6z3E1F,00:51:10,2026-03-10,要点已提炼,episodes/EP111-rlinf-user.md
-112,"EditReward：当 AI 学会""审美""，可控多模态生成的下一代范式",,,2026-03-14,todo,official-only（官网有预告，B站合集无对应视频）
+112,"EditReward：当 AI 学会""审美""，可控多模态生成的下一代范式",BV11zwxzzEyS,00:46:33,2026-03-14,要点已提炼,episodes/EP112-editreward.md
 113,面向对象的 Agent Infra 新范式：有状态运行时管理的设计与工程实践（CaveAgent）,,,2026-03-17,todo,official-only（官网有预告，B站合集无对应视频）
 114,从 VGGT 到 PAGE-4D：动态世界中的 3D 感知统一框架,,,2026-03-20,todo,official-only（官网有预告，B站合集无对应视频）
 115,WideSeek-R1：通过多智能体 RL 探索大模型的广度扩展（Width Scaling）,,,2026-03-24,todo,official-only（官网有预告，B站合集无对应视频）
-116,"RISE: 组合式世界模型，在""想象""中实现机器人策略的自主进化",,,2026-03-28,todo,official-only（官网有预告，B站合集无对应视频）
+116,"RISE: 组合式世界模型，在""想象""中实现机器人策略的自主进化",BV1rnXhB9Ekf,01:11:16,2026-03-28,要点已提炼,episodes/EP116-rise.md
 117,OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾,,,2026-03-31,todo,official-only（官网有预告，B站合集无对应视频）
 118,Puffin: 统一多模态空间智能大模型——从任意视角理解和生成世界,,,2026-04-07,todo,official-only（官网有预告，B站合集无对应视频）
 119,,,,,todo,官网无预告文，标题/日期待补；B站119 Farm 为 bilibili-only，未回填本行
-120,"VLANeXt：12条设计准则，从入门到精通的 VLA 终极""配方""",,,2026-04-14,todo,official-only（官网有预告，B站合集无对应视频）
-121,SimScale：真实世界仿真重塑端到端自动驾驶学习范式,,,2026-04-21,todo,official-only（官网有预告，B站合集无对应视频）
-122,从 TTRL 到 URLVR：大模型的无监督强化学习还能走多远？,,,2026-04-27,todo,official-only（官网有预告，B站合集无对应视频）
+120,"VLANeXt：12条设计准则，从入门到精通的 VLA 终极""配方""",BV1Ztd6BDEDj,01:01:48,2026-04-14,要点已提炼,episodes/EP120-vlanext.md
+121,SimScale：真实世界仿真重塑端到端自动驾驶学习范式,BV1SQoUBcETB,00:52:51,2026-04-21,要点已提炼,episodes/EP121-simscale.md
+122,从 TTRL 到 URLVR：大模型的无监督强化学习还能走多远？,BV1w49rBsEr7,01:08:02,2026-04-27,要点已提炼,episodes/EP122-ttrl-urlvr.md
 123,DeepSeek V4 模型在 SGLang 中的系统级优化与全栈适配,BV12YRdBzEM2,01:00:16,2026-05-09,要点已提炼,episodes/EP123-deepseek-v4-sglang.md
 124,大模型强化学习的Scaling Law,,,2026-05-12,todo,official-only（官网有预告，B站合集无对应视频）；原备注：conflict: B站标题为「拒绝阈值化：迈向共生关系的新型人机信任」，与官网枚举「大模型强化学习的Scaling Law」冲突，待终裁（官网标题保留）
 125,重探 On-Policy Distillation（OPD）：三类典型失败以及修复路径,BV1CMLg6rENd,,2026-05-16,要点已提炼,episodes/EP125-revisiting-opd.md
 126,STream3R & 4RC: 面向几何与运动理解的流式前馈 3D/4D 重建,,,2026-05-19,要点已提炼,episodes/EP126-stream3r-4rc.md
-127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,,,2026-05-26,todo,official-only（官网有预告，B站合集无对应视频）
+127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,BV1H7Eg6jEus,00:35:29,2026-05-26,要点已提炼,episodes/EP127-delta-mem.md
 128,MinT: 面向百万级 LoRA 策略的训练与推理基础设施,BV1j67H6TEKL,00:54:29,2026-06-02,要点已提炼,episodes/EP128-mint-lora.md
 129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,01:10:07,2026-06-06,要点已提炼,episodes/EP129-arpo-aepo-agent-world.md
 130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,2026-06-09,todo,official-only（官网有预告，B站合集无对应视频）
@@ -178,7 +178,7 @@ B115,锦江大模型酒旅AI助手：全站AI场景灵活配置与Dify插件集�
 B116,KLong：1M 上下文检索推理，长上下文大模型 RL 后训练,BV1rnXhB9Ekf,,,todo,bilibili-only；B116 KLong 与官网116 RISE 主题完全不同
 B117,OpenLM.ai & FreedomIntelligence：探索模型组合,BV1gp9LBwECf,,,todo,bilibili-only；B117 OpenLM.ai 模型组合 与官网117 OpenClaw-RL 主题完全不同
 B118,HiDream-O1-Image：像素级理解与推理的统一图像生成大模型,BV1aUDpB1Eyx,,,todo,bilibili-only；B118 HiDream-O1-Image 与官网118 Puffin 主题完全不同
-B119,Farm：LLM 训练与推理的确定性系统，Unsloth 社区新项目,BV1cXDyBWEwr,,,todo,bilibili-only；B119 Farm；官网119 无预告文，无对应官网 talk
+B119,FIPO & Future-KL：突破大语言模型在复杂推理中的性能瓶颈,BV1cXDyBWEwr,00:42:45,,要点已提炼,episodes/EP119-fipo-future-kl.md
 B120,DAgger-less imitation learning for Pi-0 VLA,BV1Ztd6BDEDj,,,todo,bilibili-only；B120 DAgger-less Pi-0 VLA 与官网120 VLANeXt 主题不同
 B121,CAMEL-AI： 科研自动化、Benchmark 与 Agent Infra 新探索,BV1SQoUBcETB,,,todo,bilibili-only；B121 CAMEL-AI 科研自动化 与官网121 SimScale 不同；与官网24 CAMEL GraphRAG 亦不同场
 B122,ms-swift v4.0：后训练与原生支持的强化学习,BV1w49rBsEr7,,,todo,bilibili-only；B122 ms-swift v4.0 与官网122 URLVR 主题完全不同

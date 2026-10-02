@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP120 — VLANeXt：12条设计准则，从入门到精通的 VLA 终极"配方"</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP120 — VLANeXt：12条设计准则，从入门到精通的 VLA 终极"配方"</h1>
+    <p class="sub">VLA 领域各家在不同框架、不同 benchmark、不同 loss 下自称更强，无法公平比较；本期工作以最原始的 RT-2/OpenVLA 为起点，在统一框架内沿一条「从最早… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP120-vlanext.html</p>
+<p>「到底什么样的 design 是真正有效的、到底是不是有效，其实很难有一个比较客观的评价。」——讲者开场对 VLA 现状的判断，也是本期工作的出发点（字幕 01:20 附近）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>120</dd><dt>标题</dt><dd>VLANeXt：12条设计准则，从入门到精通的 VLA 终极"配方"</dd><dt>BV</dt><dd>BV1Ztd6BDEDj</dd><dt>时长</dt><dd>01:01:48（视频总时长 3708 秒；字幕末条结束于 3576.43 秒，比总时长早约 132 秒，字幕在 Q&amp;A 最后一答中途截断，见下方说明；讲授约 43 分钟 + Q&amp;A 约 17 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>吴晓明（南洋理工大学一年级博士生，MMLab 成员；字幕开场自述：<code>[00:22] 我自己是叫吴晓明</code>、<code>[00:25] 我现在在南洋理工大学读一年级博士</code>；研究方向为具身智能与世界模型，字幕作「学生智能」，按上下文订正）</dd><dt>相关论文</dt><dd>VLANeXt（讲者在讲授结尾给出论文名，字幕作「will a nx」；本纪要未核对 arXiv 编号，以论文原文为准）</dd><dt>相关代码</dt><dd>讲者提到已开源一个可复现论文全部探索的库，并维护一个 awesome VLA/VLM 仓库（字幕口径，具体地址以论文页为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1Ztd6BDEDj/">https://www.bilibili.com/video/BV1Ztd6BDEDj/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/VLANeXt-talk">https://qingkeai.online/blog/VLANeXt-talk</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP120.txt</code>（1338 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>⚠️ 编号与台账说明：本视频在仓库观看台账中原以 B 站独有行「B120 DAgger-less imitation learning for Pi-0 VLA」登记，该标题与视频实际内容不符。经字幕核对，本视频实际内容就是官网 EP120《VLANeXt：12条设计准则，从入门到精通的 VLA 终极"配方"》（官网预告页 VLANeXt-talk，发布日期 2026-04-14），本纪要按实际内容归为 EP120。另注意：字幕末条（3576.43 秒）比视频总时长（3708 秒）早约 132 秒，字幕在 Q&amp;A 最后一个问题（更强的 VLM 提升性能靠什么）的回答中途截断（末条为「我个人觉得」），该问题后半段与可能的收尾语未收录，本纪要据实标注，不做补写。</p>
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP120，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 VLANeXt 在字幕中作「We are a nex / will a nx」、Qwen-VL 作「千问 VL / 前任三」、PaliGemma 作「佩里伽马」、SigLIP 作「slip」、MetaQuery 作「METAPHI / matter curry」、LIBERO 作「liberal」、π0 作「派」，均按公开资料订正）。凡讲授口径与论文版可能不同处，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>VLA 领域各家在不同框架、不同 benchmark、不同 loss 下自称更强，无法公平比较；本期工作以最原始的 RT-2/OpenVLA 为起点，在统一框架内沿一条「从最早 VLA 走到现代 VLA」的路线逐步消融，最终给出 12 条可直接照抄的设计准则：分出独立 policy head 并放大成 policy network、用 action chunking、用 flow matching 等连续 loss、用更强的 VLM backbone、用软连接（soft connection）连接 VLM 与 policy、当前别直接喂 video、多视角优于单视角、自感知（proprioception）加到 VLM 一侧且用一层 linear 就够、预测未来几帧图像的世界建模目标有用但慢、频域正则（低频加权）提升泛化。判词：设计选择大多不是质变，胜负在强 baseline 上能否仍然成立。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：为什么需要一份"配方"</h3>
+<p>讲者对现状的描述是「原始汤」状态（字幕口径）：工作很多，但每家用不同的测试、框架、benchmark、loss 与 setup，无法在完全公平的环境下对比，「A 组说 A 组的模型好，B 组说他的模型也更强」，单个设计到底有没有效、有多有效，没有客观评价。本工作的办法是搭一个统一框架，从 VLA 的起源 RT-2（及其开源版 OpenVLA）开始，一步步把现代设计逐个加上去，形成一条可复查的演进路线；其中有些结论是新的，有些是把机器人社区已有共识在统一环境下重新确认（讲者明说这一点，不冒充新发现）。探索分三组：基础组件（架构与 loss）、感知输入（video / 视角 / 自感知怎么进）、多任务学习目标（额外 loss 能否帮 action 学习）。前半程 benchmark 用 LIBERO，后半程因 LIBERO 已接近饱和、波动太小看不出差异，切换到同源但专测泛化的 LIBERO-Plus（在 LIBERO 任务上加 7 种扰动，训练集不变、只测没见过的扰动）。</p>
+<h3>第一组：基础组件（policy head、chunking、loss、backbone、连接）</h3>
+<p>起点架构：Llama 纯语言模型 + SigLIP 视觉编码器，输入一张当前帧图像 + 文本，输出下一帧 action；RT-2 的原始做法是把词表里最少用的几个 token 替换成 action token，用与文本完全相同的交叉熵分类来学。在此之上逐步替换：</p>
+<ol>
+<li><strong>要分出独立的 policy head，不要复用 token</strong>。直接把词表尾部 token 当 action 输出，会破坏文本空间本身的学习；把输出特征接一个独立的小 head，效果远远好于复用 token（讲授口径）。直觉：分出 head 等于把 action 学习的压力从语言空间里卸下来。</li>
+<li><strong>把 policy head 放大成 policy network</strong>。借 MetaQuery 的做法：用一组可学习 query 经一个 connector（transformer）把 VLM 特征整理成 policy 能用的条件，再以 cross-attention 注入；policy 从 2 层加深到 12 层后，性能又远远超过小 head。结论是 policy 要独立、且要给足容量。</li>
+<li><strong>Action chunking 必开，长度至少 4</strong>。一次只预测下一帧 action（约零点几秒）信息量太小；一次预测未来 4 / 8 / 16 / 32 帧（约覆盖 1 秒）能让模型学到连续运动过程，同时还能加速推理。实测 4 以上差别不大，4 以下性能骤减（字幕口径）。讲者明说这是机器人社区已有定论，此处是重确认。</li>
+<li><strong>Loss 用连续的，不要离散分类</strong>。把 action 值域（如 −1 到 1）切成 256 个 bin 做分类、或用 VQ-VAE 式离散化，学起来慢、收敛差；回归、diffusion、flow matching 这类连续 loss 明显更好、更稳，因为 action 本身就是连续过程。还有一层随性能水平翻转的细节：性能还低时回归反而好于 diffusion（action 分布简单，回归够用且好学）；性能上去之后 diffusion / flow matching 胜出，因为它能表达精细的 action 过程。本工作最终选 flow matching。</li>
+<li><strong>VLM backbone 越强，VLA 越强（数据足够时）</strong>。对比 Llama、PaliGemma、Qwen-VL 三种 backbone，排序是 Qwen-VL 好于 Llama、再好于 PaliGemma（字幕口径）。讲者补充最近试了 Qwen3.5 的 0.8B 版本：参数量比论文里用的 2B 版本小得多，性能几乎一致，「可以考虑用 3.5 作 backbone」。</li>
+<li><strong>VLM 与 policy 之间用软连接（soft connection）</strong>。三种接法：松连接（MetaQuery 式，只在最后一层把 VLM 输出特征接给 policy）、紧连接（π0 式，VLM 每一层特征逐层连到 policy 每一层）、软连接（在两者之间加一个缓冲区，先把有效信息蒸馏进缓冲区再传给 policy）。结论：软连接好于紧连接、好于松连接。理由是 VLM 的输出空间是文本、policy 的输出空间是 action，两者完全不同，紧连接硬连很难把知识迁过去；缓冲区给了文本空间到 action 空间一个过渡。讲者在 Q&amp;A 中坦白：软连接「不是一个质变」，只是更好学一点、轻微提升，偏工程而非飞跃。</li>
+</ol>
+<h3>第二组：感知输入（video、视角、自感知）</h3>
+<ol>
+<li><strong>历史 video 直接喂进来，目前无效</strong>。Qwen-VL 本身在视频理解上大规模训练过，把单帧图像换成历史几帧 video 是最自然的选择，但实测没有收益。讲者的解释：学的是 action 不是文本理解，action 需要 3D 空间理解，video 理解任务里学到的信息很难直接抽象成对 action 有用的东西。他个人仍相信未来有更好的方式能用上 video，但当前直接加不行——这是本期少数让他「一开始比较惊讶」的负结果。</li>
+<li><strong>多视角好于单视角，但真机上收益小于 benchmark</strong>。第三视角（高处俯瞰机械臂）+ 腕部相机视角（装在机械臂上）两路输入，在 benchmark 上提升巨大，因为仿真数据干净，腕部视角给的抓取边缘信息非常准；真机数据本身噪声大，收益就没有那么大。方向有效，幅度打折。</li>
+<li><strong>自感知（proprioception）要加，而且加到 VLM 一侧</strong>。自感知即机器人自身状态（字幕中称「自感知」，讲授里也混用 action state 指代）。四种接法对比：不加、加到 VLM、加到 policy、两边都加，排序是加 VLM 最好，其次不加，再次两边都加，加 policy 最差（字幕口径）。机制解释很关键：加到 policy 一侧会让 policy 的学习变得太简单——loss 下降极快，但模型就不愿再从 VLM 那里取知识，容易收敛到局部最优；加到 VLM 一侧则强迫 VLM 在长期训练中慢慢蒸馏出 action 信息再传给 policy。</li>
+<li><strong>自感知的注入方式越简单越好：一层 linear 就够</strong>。对比 linear、transformer、先用 MAE 式 masked autoencoder 预训练 action 表征再注入三种：linear 与 transformer 性能大差不差（linear 更稳），MAE 明显最差、掉了约 7–8 个点（字幕口径）。与上一条同构的解释：MAE 预训练出的特征已经自带 action 还原信息，模型又容易偷懒收敛到局部最优；linear 把融合的压力留给本来就很强的 VLM，反而学得更好。讲者的归纳：关键在学好融合，不在把 action 表征提前做深。</li>
+</ol>
+<h3>第三组：多任务学习目标（世界建模与频域正则）</h3>
+<ol>
+<li><strong>预测未来图像的世界建模目标有用，但要预测"未来几步"而不是"最终目标"，且代价是慢</strong>。为了公平，他们不用预训练的图像生成器，而把图像 token 化后从头训一个 generator，用 next-token 分类学生成（讲者明说这不算完全公平，但至少没引入外部预训练模型的知识）。两个目标对比：预测任务完成时的最后一帧（目标帧）vs 预测未来几步之后的帧——后者好得多；直接预测目标帧收敛虽快，却容易记住训练集的目标长相、收敛到局部最优，新任务目标一变就学不好。整体结论：世界建模目标能带来提升，但要额外背一个生成模型，速度确实慢。</li>
+<li><strong>频域正则（frequency regularization）：便宜的泛化增益</strong>。灵感来自讲者与一位做时序预测的朋友的聊天：VLA 本质上就是带条件的时序预测，而时序预测领域频域流派已近乎「压榜」。把轨迹做频域分解后加一个频域 loss，实测主要涨的是 LIBERO-Plus 上的泛化而非 LIBERO 本身分数，讲者把它理解为一个正则化。细节结论：低频成分更有效——机器人轨迹采集里有直行、突然大拐弯和抖动，带来很多高频噪声；适当加大低频权重，泛化更好。这个方案的好处是不用背大模型，加一个很小的 loss 就行。</li>
+</ol>
+<p>讲授末尾的两条实操经验（不在 12 条内，但讲者特别点名）：其一，<strong>warmup 非常必要</strong>；其二，当前 VLA 训练基本是一个过拟合过程——「不过拟合性能就上不去」，所以有利于过拟合的尝试对性能提升比较大。Q&amp;A 中他把"训到过拟合"说清了：不是数据量大，而是同一批数据训很多遍、把 loss 降到足够低。</p>
+<h3>讲者的路线判断（观点，非实验结论）</h3>
+<ul>
+<li>机器人数据的结构性问题：真实机器人数据永远在数据金字塔顶端、最稀缺；互联网上有大量带 action 的视频（自动驾驶、人体运动），但没标签、且与机械臂 action 差很多。讲者看好的解法是 <strong>latent action</strong>：不直接学 action 本身，先学一个 action 表示，用大规模视频预训练把 latent action 提出来，再拿这个预训练模型做机器人微调，让模型"提前见过类 action 的东西"。</li>
+<li>第二个方向是 <strong>VLA + reaction model</strong>（字幕词，按上下文即在 VLM 旁联合学习视频生成/反应模型再接 action 的多任务结构）：VLM 主干终究是语言模型，其表征空间源于人类语言，而 video 是更原始、更反映现实世界的数据，可能更有利于 action 学习。他判断未来更可能是 VLA 与视频建模联合学，而不是二选一。</li>
+<li>对 video model + imagination planning 路线：不冲突。那是用视频模型生成数据给 policy 学的数据增广；他看好的是把视频建模与 action 一起学的 reaction model，两者不同。VLANeXt 本身是 reactive policy（不断从环境取新输入、输出、再反馈），且很容易扩展到世界模型——把多任务部分的世界建模 generator 换成预训练初始化即可，他自己后续的世界模型工作就搭在 VLANeXt 基础上。</li>
+</ul>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>组件之间有强交互效应，且不小</strong>。最典型的就是 loss 那条：regression 在低性能时有效，性能拉高后比不过 diffusion / flow matching 的泛化与精度。讲者由此给出一条方法论判词：探索要在强 baseline 上做——「基于一个很强的 baseline，如果还能有效，那这个东西就确实是可以的」；弱 baseline 上有效的东西未必可信。</li>
+<li><strong>为什么 flow matching 在高性能段赢</strong>：到了高性能段，好与不好就差在抓杯子时偏一毫米还是几毫米这种细粒度偏差上；flow matching 通过多步细化的连续表达能刻画这种精细过程，回归给不出。连续 loss 整体胜分类，则因为 action 本来就在连续空间里表示。另外他明确确认：机器人动作本质上是多模态分布（抓杯子可以抓杯柄也可以抓杯身、可以从左绕也可以从右绕），不是确定函数。</li>
+<li><strong>真机长时任务上结论还成立吗</strong>：他们没做太多长时任务消融，但最近在 clean table（抓多个物体放好，算稍长任务）上做过消融，结论一致。他的判断是长短任务差别没有想象中大——机器人反正过拟合在任务上，每个 step 的成功率差不多，步数多了综合成功率自然低一些。</li>
+<li><strong>Scaling 与 recipe 之争</strong>：不冲突。机器人的 scaling 确实慢（话题火了一年多，连大公司也还在秀 demo、难落地），但探索好 recipe 本来就是为后面的 scaling 铺路，两件事互相帮助。</li>
+<li><strong>"删掉 80% 设计只留本质"</strong>：讲者答得很实在——他自己在搭新框架时一点都没删，只把 backbone 换成了 Qwen3.5；试过删，删了性能就掉，而且这些设计的代价也没那么大，所以删 80% 他做不到。这个回答本身是对"哪条准则最重要"的一种回避式诚实：配方是整体生效的。</li>
+<li><strong>软连接是本质优势还是更好调参</strong>：他承认更像后者——借鉴松、紧两种连接的直接延伸，性能只是轻微提升、没有质变，他试了很多变体后感觉 soft 还是好一些，「偏 engineer 一点」。</li>
+<li><strong>对同行工作的态度</strong>：被问到某个同行 VLA 工作（如 MoVA，字幕音译）时，他说方法跟自己的「blow（框架）也比较相似」、性能挺好，但补了一句「好不好你自己做了才知道，说不定他调的时候才有 bug」——建议是把别家的 recipe 拿到自己的框架里直接试，这是最可靠的判断方式。他还提到一个学术取向的工作（字幕作「FASTONE」，未核对）把视频生成的部分直接去掉、训练时换一种身份，推理快很多、效果只差一丢丢，「想做的话可以看他公开的代码库」。</li>
+<li>最后一个问题（更强的 VLM 提升性能，靠的是理解任务、更会猜答案、还是别的）讲者答「他其实也不是理解任务，也不是猜答案，更多是更好的去拟合这个 action」——此答在字幕截断处中断（末条「我个人觉得」），后半句未收录，以上只记已播部分。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Action chunking 长度</td>
+<td>逐帧预测（chunk &lt; 4）</td>
+<td>4 / 8 / 16 / 32 均可，差别不大；小于 4 性能骤减；约覆盖 1 秒</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>离散 action 分类</td>
+<td>连续 loss 对比</td>
+<td>值域切 256 个 bin 做分类（或 VQ-VAE），收敛慢、效果差</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Policy network 深度</td>
+<td>小 policy head（2 层）</td>
+<td>放大到 12 层 transformer connector 后性能远超小 head</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>VLM backbone 排序</td>
+<td>Llama 起点</td>
+<td>Qwen-VL &gt; Llama &gt; PaliGemma；Qwen3.5 0.8B 与 2B 版性能几乎一致、体积小得多</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LIBERO-Plus 扰动种类</td>
+<td>LIBERO 原任务</td>
+<td>7 种扰动，只测泛化、训练集不变</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>自感知注入方式对比</td>
+<td>linear 注入</td>
+<td>transformer 大差不差（linear 更稳）；MAE 预训练注入掉约 7–8 个点</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>世界建模目标对比</td>
+<td>预测最终目标帧</td>
+<td>预测未来几步之后的帧明显更好；预测目标帧易收敛到局部最优</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>频域正则细节</td>
+<td>全频段等权</td>
+<td>低频成分更有效，加大低频权重后 LIBERO-Plus 泛化更好</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+<p>注：讲授中多张结果图只有结论口播、未逐项报数，上表只收字幕明确给出的数字；各准则在 LIBERO / LIBERO-Plus 上的具体分数以论文原文为准。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「强 baseline 上再验证」是本期最可迁移的方法论：讲者明说组件间交互效应不小（regression 与 flow matching 的优劣随性能水平翻转），弱 baseline 上跑出的消融结论不可外推。做 post-training / RL 实验设计时，消融应在已调好的强 baseline 上做，并预期结论会随性能段翻转——这与本仓库 OPD 线「实施细节先于换目标」的经验同构。</li>
+<li>「把信息加在强模型一侧、用最简注入、把融合压力留给强模型」是一条跨域的设计启发式：自感知加在 VLM 侧 + linear 注入胜过加在弱 policy 侧 + MAE 预深加工，因为过强的现成表征会让下游偷懒、收敛到局部最优。对照 LLM 侧：给小模型/适配器喂过加工的特征、或让 loss 太容易降，都可能买到快速收敛但学不到真东西——loss 降得太快本身就是一条警报信号（讲者正是从 loss 曲线上看出 policy 侧注入的问题）。</li>
+<li>频域视角处理轨迹噪声：机器人轨迹的高频多来自采集抖动与突然转向，低频才是运动意图。对任何序列建模（包括 agent 轨迹、rollout 数据清洗），先做频域分解再决定平滑/加权，比时域硬过滤更可控；且这类正则便宜、无需额外大模型，值得先试。</li>
+<li>消融组织方式可抄：统一框架、从最原始 baseline 出发沿一条时间线逐步加设计，每步只换一个变量，benchmark 饱和后换同源泛化版继续测。这套「演进路线式消融」比散点式对比更容易让读者（和自己）看清每个设计的边际贡献。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>字幕在 Q&amp;A 最后一答中途截断（末条 59:34「我个人觉得」，视频还剩约 132 秒）：讲者对"更强 VLM 为何提升 VLA"的完整回答未收录，需要回看视频尾段或论文补齐。</li>
+<li>12 条准则在论文中的正式编号与分组、以及每条在 LIBERO / LIBERO-Plus / 真机上的具体分数，字幕只给了结论与少数数字，需查 VLANeXt 论文原文核对；论文 arXiv 编号本纪要未核对。</li>
+<li>「video 直接输入无效」是讲者自陈的惊讶负结果，他只给了一个解释（video 理解的信息难抽象为 action 所需的 3D 空间信息），未给消融证据（如换 video encoder、加深度/点云对照）；这条与 EP95 π_RL、EP84 SimpleVLA-RL 等期对多模态输入的处理可对照深挖。</li>
+<li>世界建模目标"有用但慢"的性价比：讲者未给出生成目标带来的具体分数提升与速度代价比，他自己也只说"后面想拓展"；与讲者看好的 reaction model 路线合并后是否还成立，待其后续工作验证。</li>
+<li>频域正则中"低频更有效"的权重具体怎么设（截断频率、低频权重系数）、对不同任务（长时 vs 短时）是否一致，字幕未展开，需查论文。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「如果你在这个很强的 baseline 上还能有效，那你这个东西就确实是可以的。」——Q&amp;A 中讲者谈组件交互效应时给出的方法论判词（字幕 44:33 附近）</p>
+<p>「（VLA 训练）基本上都是一个比较过拟合的一个过程，必须得过拟合，不过拟合性能就上不去。」——讲授末尾的实操经验（字幕 37:25 附近）</p>
+<p>「机器人（动作）本质上肯定不是一个确定函数。」——Q&amp;A 中被问 flow matching 胜出是否因为动作是多模态分布时讲者的确认（字幕 48:38 附近；字幕作「生存人物」，按上下文订正为「生成任务」语境下的多模态分布判断）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

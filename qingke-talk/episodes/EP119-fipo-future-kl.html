@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP119 — FIPO &amp;amp; Future-KL：突破大语言模型在复杂推理中的性能瓶颈</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP119 — FIPO &amp;amp; Future-KL：突破大语言模型在复杂推理中的性能瓶颈</h1>
+    <p class="sub">复现 DAPO 时性能能涨但 CoT 长度卡在约 4000 token，讲者追问「这算不算激发了长 CoT」并给出否定答案；FIPO 的解法是不用 critic、不用逐 tok… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP119-fipo-future-kl.html</p>
+<p>「DAPO 会卡在 4000 左右，我们会涨到 1 万 2。」——讲者对长 CoT 是否被真正激发的判据（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>119（B站编号 B119，bilibili-only；台账 B119 行登记标题为「Farm：LLM 训练与推理的确定性系统，Unsloth 社区新项目」，与本视频实际内容不符，以实际内容为准；官网无对应期——官网 119 无预告文）</dd><dt>标题</dt><dd>FIPO &amp; Future-KL：突破大语言模型在复杂推理中的性能瓶颈</dd><dt>BV</dt><dd>BV1cXDyBWEwr</dd><dt>时长</dt><dd>00:42:45（讲授约 29 分钟 + Q&amp;A 约 13 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>马诗雨（达特茅斯学院博士三年级；本工作为其在千问团队的实习项目，字幕作「千万 PO 组」，机构口径以论文作者页为准）</dd><dt>相关论文</dt><dd>FIPO（Future-KL Influenced Policy Optimization）及前序分析工作 Sparse...（字幕作「sparser critical」，ICLR 在投/录用口径待查）、Direction of ... Updates（字幕作「direction of 821 updates」，ACL 口径待查）、Dark Secrets 博客（wasted moments 主题）；具体标题与编号以论文原文为准，本纪要不臆造</dd><dt>相关代码</dt><dd>32B 模型已开源（代码在 GitHub、模型在 HuggingFace，讲者口径；repo 地址待从论文页补录）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1cXDyBWEwr/">https://www.bilibili.com/video/BV1cXDyBWEwr/</a></dd><dt>官网预告</dt><dd>无（官网无对应期）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP119.txt</code>（1084 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；别名极多，如 GRPO/DAPO 在字幕中作「G2PO/DAO/DEO」、CoT 作「coo t」、wasted moment 作「乌斯 moment / wood moment」、Qwen2.5-32B base 作「2.53102B 贝斯」、AIME 作「A米」，均以论文与公开资料为准）。台账注记：<code>episode-index.csv</code> 中 BV1cXDyBWEwr 原登记为 bilibili-only 的 Farm 一场，实际视频内容为 FIPO 本场，官网亦无对应期；编号沿用 B站台账位置 B119（与 EP106 Intern-S1、EP124 人机信任的编号先例一致），讲授中主持人未报期号，此编号为台账位置而非官方期号。凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">32B</div><div class="l">base</div></div></div>
+<p>复现 DAPO 时性能能涨但 CoT 长度卡在约 4000 token，讲者追问「这算不算激发了长 CoT」并给出否定答案；FIPO 的解法是不用 critic、不用逐 token 人工信用分配，而是用当前 token 之后整段轨迹的 log-prob 累积（Future-KL）判断这个 token 到底引出了好行为还是坏行为，再据此对 DAPO 的均一 advantage 做逐 token 的重加权，从而在 Qwen2.5-32B base 上把思维链稳定推到 1.1 万–1.2 万 token 并超过基线性能。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：性能涨了，但长 CoT 没被激发</h3>
+<p>动机来自一个复现落差：按公开 recipe 跑 DAPO，分数能到 47–50（超过 DeepSeek R1-Zero 当时汇报的 47，字幕口径），但平均 CoT 长度始终停在约 4000、偶尔 5000 token。讲者的质疑是：长度不涨的「长 CoT recipe」可能并没有真正激发长推理，只是把短推理做得更对。这与 PPO 路线的工作形成对照——有工作回到纯 PPO 后长度能涨到约 1 万、分数却和 DAPO 差不多（47–50，字幕口径），说明 base 模型的长 CoT 潜力在、只是 GRPO 系的信用分配方式没把它引出来。</p>
+<h3>前置分析一：RL 只改写了极少数关键 token</h3>
+<p>FIPO 的设计建立在讲者团队三步前序研究上。第一步用 JS 散度逐 token 比较 base 与 RL 后模型的输出分布，发现约 83% 的 token 分布没有区别（一个 simple RL 变体里甚至 98% 没区别，字幕口径）：RL 没有改写整体 policy，只动了一小部分。交叉改写实验（cross sampling）把这件事量化：用 RL 模型替换 base 的仅 1%–4% 的 token 就能恢复 RL 的性能，反过来用 base 替换约 5%–8% 就能把 RL 模型打回 base（均为字幕口径）。这些被改写的 token 稀疏地集中在生成过程的头部与关键节点上——RL 像是在少数分叉点改写、其余位置仍由 base 的轨迹接管。</p>
+<p>第二步是找指标：entropy、KL 这类无方向的度量分不出哪些 token 是关键节点，带方向的 log-prob 比值（字幕作 log p）可以——按 log-prob 大小挑 token 改写同样能恢复 RL 性能，说明它能定位关键 token。</p>
+<p>第三步是 wasted moment 现象：理想中的 aha moment（停顿、反思、把错的改对）其实是少数；更常见的是模型中途已经得到正确答案、又强行 double-check 把自己改错（讲者举的例子中途已算出答案、最终却错）。在 outcome-only 的均一 advantage 下，这条轨迹前面所有正确 token 会被同等惩罚——这是 FIPO 要修的核心伤害。</p>
+<h3>方法：Future-KL 把「后续轨迹」变成逐 token 信号</h3>
+<p>基线选 DAPO 而非 GRPO（GRPO 的 sequence-level 均一 advantage、以及对短的正确/长的错误回答的隐含偏置是讲者点名的问题；所有改进都在 DAPO 之上做）。FIPO 的核心想法：一个 token 的好坏，由它引出的后续轨迹判断。具体做法（按字幕口径转述）：</p>
+<ul>
+<li>把当前 token 之后各 token 的 log-prob（importance ratio 的对数形式）累积成 Future-KL 的和；和大于零说明该 token 引出了训练中更被偏好的后续行为，应予强化，小于零则应压低。</li>
+<li>稳定化三件套：其一，importance ratio 超过极值的样本直接 mask 掉、不计入 Future-KL（讲者复现时发现个别样本的 ratio 过大会把整个 advantage 信号拉爆、把训练推回 DAPO 水平约 51–52 分，字幕口径）；其二，加 GAE 式的衰减窗（GAE window），让近处 token 权重高、远处递减，既符合因果、又防序列变长后累积和爆炸，再做 clip；其三，先把 Future-KL 和变成指数形式使其在 1 处对称，再配合指数变换把重加权做成「大于 1 放大该 token 的 advantage、小于 1 压缩」的乘性缩放。</li>
+</ul>
+<p>讲者给的理论直觉（他自陈先有直觉、后有一位热心读者补了证明）：在「最大化 reward 且限制 policy 变化」的目标下，最优 policy 近似正比于先验 policy 乘上 advantage 的指数项；FIPO 的 Future-KL 恰与 PPO 里由 critic 与 reward model 估出的 advantage 项等价，GAE window 对应 GAE 的形式。区别只在误差来源：PPO 需要一个足够准、且适应长 CoT 的 critic（讲者引 VAPO 的冷启动 critic 与回到纯 PPO 的工作为证），FIPO 则用更新后 policy 本身做隐式 critic 近似，省掉显式 critic 模型。</p>
+<h3>实验：32B base 上的保守数字</h3>
+<p>设定刻意保持与基线可比：Qwen2.5-32B base（要干净的 base 才能回答「如何从 base 引出长 CoT」）、训练数据与 DAPO 相同的 7K（字幕口径）、128 卡训 32B（字幕后段又作 7B 用 32 卡，卡数口径前后不一，以论文为准）。结果（讲者明说报得保守）：</p>
+<table>
+<thead>
+<tr>
+<th>观察项</th>
+<th>基线/口径</th>
+<th>FIPO（保守汇报 / 讲者称最高）</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AIME 2024</td>
+<td>DAPO 复现 47–50</td>
+<td>56 / 最高 58，裸版曾跑到 60（与 VAPO 相当）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>AIME 2025</td>
+<td>—</td>
+<td>43 / 最高约 45–47</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>平均 CoT 长度</td>
+<td>DAPO 卡在约 4000</td>
+<td>稳定升至约 11000–12000，且单调上升不回摆</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>长度与性能关系</td>
+<td>DAPO 后期被长的负样本主导</td>
+<td>正样本逐渐变长并压过负样本长度，长度–性能正相关</td>
+<td>字幕（其长度加权 advantage 度量）</td>
+</tr>
+<tr>
+<td>训练稳定性</td>
+<td>DAPO 后期 entropy、grad norm、policy KL 波动/爆炸</td>
+<td>三者均更平滑（同等 mini-batch 下亦然）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+<p>讲者同时给出小模型边界：在 7B 上先升后降的 entropy 轨迹更有效，硬套 32B 的探索型参数 7B 反而涨不上去——小模型可能更适合强蒸馏而非这类激发式 RL，他明确说训小模型与大模型不能用同一套参数。pass@k（如 pass@32）只涨一两个点也被坦白：没有新知识注入时这类算法主要教模型「把题做对」，大幅 pass@k 提升更依赖教师蒸馏。</p>
+<h3>Q&amp;A 要点（含讲者最坦白的边界）</h3>
+<ul>
+<li><strong>纯 on-policy 还成立吗</strong>：成立性不依赖 on/off-policy 标签，本质是更新前后 policy 的对比；纯 on-policy 每次 rollout 成本高（他们测过约 90% 时间在 rollout），但把梯度更新前后的对比做成 Future-KL 信号是他们后续在做的版本，预期噪声更低。</li>
+<li><strong>mini-batch 是关键稳定性旋钮</strong>：一次 rollout 多次更新的意义是效率与总 rollout 次数，但更新多噪声大；FIPO 里把 DAPO 的 mini-batch 从 32 个 prompt 翻倍（字幕口径）后 importance sampling 方差明显下降、稳定性提升。mini-batch 越大 log-prob 精度越高、信号越准，代价是更新次数变少，要权衡。</li>
+<li><strong>与调高 clip 的区别</strong>：把 clip 上界从 1.28（字幕作 1.8 应为 clip 口径，待查）调到更高（如 1.4）确实涨长度更快（约 100 步到 1.2 万），但涨出来很多是 LaTeX 格式冗余而非有效推理，性能不跟；FIPO 的变长速度与「步长、思维链完整度」相关，不是单纯放开探索。Future-KL 本身也可被强制压小当作稳定性正则，取决于怎么用。</li>
+<li><strong>为什么不在 Qwen3 等已蒸馏模型上训</strong>：已预置长 CoT 的蒸馏模型与 base 的训练机制不同、RL 很脆容易崩，他们要研究的是从 base 引出而非在蒸馏模型上巩固；稳定性类算法（如 GSPO）更适合那类模型。FIPO 与 GSPO 不冲突，正在做把 Future-KL 嫁接到 GSPO、以及多智能体与数学以外任务（字幕作 ME 方向，待查）的 V2。</li>
+<li><strong>数据与泛化边界</strong>：只在 DAPO 的 7K 数学数据上验证过（32B 训练两三周一轮、换数据集调参成本太高，字幕口径）；pass@k 提升有限、需要外部 process reward 或蒸馏补知识，是他明确认领的下一步而非已解决项。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RL 后分布未变的 token 占比</td>
+<td>base vs RL 逐 token JS 散度</td>
+<td>约 83%（simple RL 变体约 98%）</td>
+<td>字幕（分析部分）</td>
+</tr>
+<tr>
+<td>交叉改写恢复 RL 性能所需替换</td>
+<td>用 RL token 改写 base</td>
+<td>仅 1%–4%</td>
+<td>字幕（分析部分）</td>
+</tr>
+<tr>
+<td>交叉改写打回 base 所需替换</td>
+<td>用 base token 改写 RL</td>
+<td>约 5%–8%</td>
+<td>字幕（分析部分）</td>
+</tr>
+<tr>
+<td>DAPO 复现性能</td>
+<td>AIME 口径</td>
+<td>47–50（CoT 卡在约 4000 token）</td>
+<td>字幕（引入部分）</td>
+</tr>
+<tr>
+<td>FIPO AIME 2024</td>
+<td>保守汇报</td>
+<td>56（最高 58，裸版曾到 60）</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>FIPO AIME 2025</td>
+<td>保守汇报</td>
+<td>43（最高约 45–47）</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>FIPO 平均 CoT 长度</td>
+<td>训练全程</td>
+<td>约 11000–12000，稳定上升</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>训练配置</td>
+<td>DAPO 同款</td>
+<td>7K 数据、512 prompt × 16 重复、32B 用 128 卡</td>
+<td>字幕（Q&amp;A，卡数口径待查）</td>
+</tr>
+<tr>
+<td>rollout 时间占比</td>
+<td>训练总时长</td>
+<td>约 90%</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 RL post-training 的直接清单：当 outcome-only 均一 advantage 出现「中途做对又改错却被全程惩罚」的 wasted moment 时，可用后续轨迹的 log-prob 累积做逐 token 信用重加权，不引入 critic 模型；但先查 mini-batch 大小——信号噪声对它极其敏感，翻倍 mini-batch 是讲者验证过的最便宜的降噪手段。</li>
+<li>评判一个 RL recipe 是否「激发长 CoT」，不要只看分数：同时看平均长度是否持续上升、长度与性能是否正相关、正样本是否在变长。只涨分不涨长度的 recipe 可能只是在把短推理做得更对。</li>
+<li>base 与蒸馏模型的 RL 参数不能共用：小模型/蒸馏模型的稳定性要求更高，先分开调参再谈算法优劣，避免把参数 regime 的差异误记为算法差异。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Future-KL 的确切公式（累积范围、指数变换与 clip 的具体形式、GAE window 的衰减系数）字幕只给了口径，需查 FIPO 论文原文核对后再引用；前序两篇分析工作的准确标题与发表状态同样待查。</li>
+<li>AIME 数字讲者明说报保守值且裸版最高到 60，论文表格口径与讲授口径的对应关系需逐项对齐；32B/7B 的卡数在字幕前后段不一致（128 卡 vs 32 卡），以论文实验设置页为准。</li>
+<li>wasted moment 与 aha moment 的比例是用 R1 系模型做验证得到的定性结论，具体统计口径（哪个 judge、多少样本）字幕未给，需查 Dark Secrets 博客原文。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「DAPO 会卡在 4000 左右，我们会涨到 1 万 2。」——讲者对比基线与 FIPO 的 CoT 长度（字幕口径）</p>
+<p>「训小模型和训大模型，我们不能用同样的参数。」——讲者关于模型规模与 RL 参数 regime 的判词（字幕口径）</p>
+<p>「很多 RL 算法都不太能提高 pass@k，没有介入额外的新知识，只是教模型怎么更好地把问题做对。」——Q&amp;A 中对这类方法能力边界的坦白（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

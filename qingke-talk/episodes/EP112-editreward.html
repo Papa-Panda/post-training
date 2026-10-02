@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP112 — EditReward：当 AI 学会"审美"，可控多模态生成的下一代范式</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP112 — EditReward：当 AI 学会"审美"，可控多模态生成的下一代范式</h1>
+    <p class="sub">针对图像编辑领域缺一个与人类对齐的评价器，讲者团队做了三件套：200K 人类偏好数据（EditReward-Data）、在 VLM 基座上用双头 + 不确定性感知排序损失训出的… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP112-editreward.html</p>
+<p>「有一个好的评价指标，这样的话其实对于做 RL 或者是做数据处理，或者是做 evaluation，都是有更好的帮助。」——讲者在总结中对这件工作的定位</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>112</dd><dt>标题</dt><dd>EditReward：当 AI 学会"审美"，可控多模态生成的下一代范式</dd><dt>BV</dt><dd>BV11zwxzzEyS</dd><dt>时长</dt><dd>00:46:33（讲授约 17 分钟 + Q&amp;A 约 29 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>吴克明（清华大学软件学院博士一年级；研究方向：多模态推理、多模态大模型 AIGC 评测、diffusion RL；字幕开场自述）</dd><dt>相关论文</dt><dd>EditReward（human-aligned reward model for image editing；数据、模型与 benchmark 均已开源，论文编号以公开页面为准）</dd><dt>相关代码</dt><dd>已开源（数据 EditReward-Data、模型 EditReward、评测 EditReward-Bench 三个组件，讲者口述）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV11zwxzzEyS/">https://www.bilibili.com/video/BV11zwxzzEyS/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP112.txt</code>（814 条，带时间戳）</dd><dt>编号说明</dt><dd>B站视频实际内容为官网 EP112《EditReward》，台账 B 行旧标题（Kimi K2 相关）与视频不符，纪要按实际内容。</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP112，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 EditReward 在字幕中多作「idea reward / id reward」、Qwen2.5-VL 作「千万 2.5VL」、GPT-5 与 Gemini 2.5 作「GBT5 / 界面 2.5」，均以公开资料为准）。凡讲授口径与论文版可能不同，以下数字来源均标注（字幕）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">200K</div><div class="l">人类偏好数据</div></div><div class="stat"><div class="v">20K</div><div class="l">数据训出的编</div></div></div>
+<p>针对图像编辑领域缺一个与人类对齐的评价器，讲者团队做了三件套：200K 人类偏好数据（EditReward-Data）、在 VLM 基座上用双头 + 不确定性感知排序损失训出的奖励模型（EditReward），以及用多图组全排序判定来压位置偏置的评测基准（EditReward-Bench）；这个小开源模型在多个基准上与 GPT-5、Gemini 2.5 相当或更好（字幕口径），并用一个数据过滤实验证明：筛后的 20K 数据训出的编辑模型优于 46K 全量——数据质量比数量更关键。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>动机：闭源编辑模型拉开差距后，缺的是评价器</h3>
+<p>工作构思于 2025 年 6 月前后，当时 GPT-Image 一类强闭源编辑模型刚出现，开源与闭源的差距明显拉大。讲者把差距拆成两个可动手的点：其一，训练数据质量有差，需要一个能做 data filter 的高质量图像编辑 evaluator；其二，文生图领域 Flow-GRPO 一类 diffusion RL 已成范式，图像编辑要跟进 RL，同样先得有一个好的 reward model。传统路线（CLIP/LPIPS 特征匹配、通用 VLM 直接 prompt 打分）噪声大、不连续、与人类对齐程度存疑；社区共识已转向用 VLM 做 reward model，利用其图像理解先验——EditReward 沿这条线做全。</p>
+<h3>EditReward-Data：200K 偏好数据怎么造</h3>
+<p>数据构造分三步。第一步选指令：尽量取人工选出的高质量 instruction，压低「输入图与指令本身不对齐」的噪声。第二步生成候选：用当时 SOTA 的编辑专家模型与通用统一模型（字幕专名误差较大，以论文为准），每组生成 12 个 candidates；为防「强模型候选总是更好」带来的偏差，随机抽其中 7 个进入标注，并引入随机种子等随机性。编辑类型覆盖多样。</p>
+<p>标注只设两个尽量正交的维度，各按 1–4 分制、专家标注并交叉核验：</p>
+<ol>
+<li><strong>Instruction Following（IF）</strong>：是否严格执行指令，其中明确包含对背景与「不需要编辑区域」的保持能力——编辑任务里「不该动的地方别动」被讲者列为一等公民。</li>
+<li><strong>Visual Quality（VQ）</strong>：传统意义上的视觉质量与美学（模糊、畸变、不一致等）。</li>
+</ol>
+<h3>EditReward 模型：双头 + 把打分建模成分布</h3>
+<p>模型设计（借鉴 HPSv3 一类工作的 head 结构，字幕口径）：输入为 source image、instruction、edited image 三元组，在 Qwen2.5-VL 等 VL 基座（字幕另提一个基座，专名不清）上挂两个 reward head，分别管 IF 与 VQ。关键设计是每个 head 不输出点值、而是输出一个高斯分布（mean 与 variance），用 uncertainty-aware ranking loss 训练、取 mean 作分数。动机是人标注本身带误差，真实好坏与标注之间存在偏差，把输出建模成分布等于给模型一个「信赖度」，能压低它在不确定样本上的幻觉式排序。</p>
+<p>两个训练细节被讲者点名有效：其一，加入「tie 数据」——总分相同、但一个在 IF 更好另一个在 VQ 更好的样本对——训练明显更稳定；只喂完全分大小的数据，模型容易陷在局部、学不好。其二，双维度聚合策略做过消融（average / min / max 等），结论是平均策略最好，因为它综合了两维度的相互关系（字幕口径）。</p>
+<h3>EditReward-Bench：多图组全排序，专治位置偏置</h3>
+<p>旧基准（GEdit-Bench 一类，字幕作「g AI bench」）多是两图比较。讲者的观察是：VLM 做排序有 position bias，会偏向某个位置，未必反映真实好坏。Bench 因此把一组扩到 2 / 3 / 4 张图，要求模型对组内全部图给出完全正确的排序（如 A&gt;B&gt;C），整组才算对——难度与判别力都更高。构建上从总标注池里撇出 500 个 case，专挑 3 位标注者之间平均分与极值高度对齐的样本作 ground truth（字幕口径）。</p>
+<h3>结果与三个用途</h3>
+<p>结果（字幕口径，未给逐项数字）：在多个 benchmark 上与当时最好的闭源模型 GPT-5、Gemini 2.5 相比，有更好、有持平，整体相当或更优；且是开源小模型，推理速度快得多。</p>
+<p>讲者给了三个用途，其中第一个有完整实验：</p>
+<ol>
+<li><strong>数据过滤</strong>：取 ShareGPT-4o-Image 的 46K 图像编辑数据，用 EditReward 打分排序、只留 top 20K 训练编辑模型，结果比 46K 全量训练更好，分数与当时的 VLM 方案相当（字幕口径）。讲者由此下判词：数据质量比数量关键。</li>
+<li><strong>RL 后训练的 reward</strong>：本工作因算力有限没有自做 diffusion RL，但讲者称后续多个工作已采用 EditReward 做 RL 训练、指标不错（专名以各论文为准）。</li>
+<li><strong>Test-time scaling</strong>：推理阶段打分选 best-of-N。</li>
+</ol>
+<p>定性 case 上，模型能识别「remove 任务只把杯子模糊化、没清掉」「六根手指」一类细粒度失败（字幕口径）。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>IF 与 VQ 冲突时标注者怎么权衡？</strong> 不做权衡：两维度按各自标准独立打分（IF 看指令完成度与背景保持，VQ 看美学与畸变）；讲者补充两者并不完全独立，VQ 很低时往往意味着图被改坏，IF 通常也不会好。</li>
+<li><strong>VQ 更主观、噪声更大，有无特殊处理？</strong> 一条数据找 3 人分别打分取平均，代表大众口径。</li>
+<li><strong>pairwise 还是 pointwise？</strong> 各有好坏：pairwise ranking 有工作证明对 RL 训练更友好；pointwise 直接出分，用起来方便（单图评价、数据过滤都有现成参考），且能看出样本在标尺上的大致范围。本工作是 pointwise 出分、Bench 侧再做多图排序判定。</li>
+<li><strong>为什么不用生成式 reward model？</strong> 讲者认为 VLM 式 reward 能用上语言侧的感知与 reasoning，可解释性更好，是当前主流路线；纯蒸馏闭源模型的 CoT 造数据，上限会被教师锁死，他更看好带空间定位（如先框出应编辑区域再评估）的 reward 设计。</li>
+<li><strong>公认难做的编辑任务</strong>：structured data（infographic、chart、diagram）与复杂文本渲染，目前编辑模型处理得都不好。</li>
+<li><strong>中文指令编辑</strong>：数据以英文为主，未专门考察，讲者建议使用者自测。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>偏好数据规模（EditReward-Data）</td>
+<td>—</td>
+<td>200K</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>每组候选生成与抽取</td>
+<td>每组 12 个 candidates</td>
+<td>随机抽 7 个进入标注（防模型强度偏差）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>标注量表</td>
+<td>IF + VQ 双维度</td>
+<td>各 1–4 分制，专家标注 + 交叉核验</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Bench 构建</td>
+<td>从总标注池撇出</td>
+<td>500 个 case，3 位标注者对齐作 ground truth</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Bench 判定方式</td>
+<td>传统两图比较</td>
+<td>2/3/4 图组全排序完全正确才计对</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>数据过滤实验</td>
+<td>ShareGPT-4o-Image 46K 全量训练</td>
+<td>只用筛后 top 20K，效果反而更好</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>与闭源模型对比</td>
+<td>GPT-5、Gemini 2.5</td>
+<td>多个 benchmark 相当或更好（无逐项数字）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>Reward model 先当 data filter 用，是投入产出比最高的验证方式</strong>：46K→20K 还涨点的实验说明，先拿评价器筛数据、再谈 RL 接入，能用很低的成本验证评价器与人类偏好的对齐程度；这条「评价器→过滤→训练」的链路对 coding data 的质量筛选同样成立。</li>
+<li><strong>偏好标注把维度拆正交、且把 tie 样本喂回去</strong>：总分相同但维度互有胜负的样本对能显著稳定排序训练——做人类偏好/LLM judge 数据时，与其只收「明显一好一坏」的对子，不如刻意保留难分对子并给模型不确定性出口（分布输出而非点值）。</li>
+<li><strong>评测端用多样本全排序压位置偏置</strong>：任何 pairwise judge（代码评审、回答质量评估）都可借这个办法——扩大组规模、要求全序正确，比反复交换位置取平均更能暴露 judge 的真实判别力。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>与 GPT-5、Gemini 2.5 的逐项 benchmark 数字字幕未展开，需查论文原文核对（尤其 Bench 上各模型的 2/3/4-pair 准确率）。</li>
+<li>模型基座除 Qwen2.5-VL 外字幕另提一个 VL 基座，专名识别不清；双 head 的聚合消融细节（average 为何胜出）也需以论文为准。</li>
+<li>EditReward 接入 diffusion RL 的实际增益讲者未自测（算力所限，仅称后续工作采用且指标好）；若要把这条链路迁到自己的 RL 训练，值得先找采用它的后续工作看 reward hacking 与分布漂移的处理。</li>
+<li>VQ 维度的 3 人平均只是压噪声的工程办法；标注者间一致性本身（agreement 数值）字幕未给。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「数据质量是很重要的，比这个数据数量要比较关键一点。」——讲者在数据过滤实验（46K 筛到 20K 反而更好）后的判词（字幕口径，按干净口径转写）</p>
+<p>「有一个好的评价指标，这样的话其实对于做 RL 或者是做数据处理，或者是做 evaluation，都是有更好的帮助。」——讲者总结（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
