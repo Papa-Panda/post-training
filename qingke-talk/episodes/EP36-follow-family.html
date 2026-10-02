@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP36 — Follow Family：可控视频生成方法探索与应用</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP36 — Follow Family：可控视频生成方法探索与应用</h1>
+    <p class="sub">讲者以「Follow 家族」五件工作为主线，复盘了可控视频生成一条清晰的方法论：在 ControlNet、IP-Adapter 都还没有的时期，他们用「条件与时序解耦的两阶段训… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP36-follow-family.html</p>
+<p>「ControlNet 本质上就是对 attention map 的影响，进而对整体的条件信息进行一个很好的引导。」——讲者复盘 Follow Your Handle 时的总结（字幕）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>36</dd><dt>标题</dt><dd>Follow Family：可控视频生成方法探索与应用</dd><dt>BV</dt><dd>BV1ZeNZeYEfe</dd><dt>时长</dt><dd>00:35:29（工作介绍约 22 分钟 + 科研分享与 Q&amp;A 约 13 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>马悦（香港科技大学博士生，2024 年清华大学毕业后入读；字幕自述导师为「陈立峰」老师、研究方向为图像与视频生成；曾在腾讯 AI Lab、混元团队实习，正式头衔以其主页为准）</dd><dt>相关论文（均为讲者自述的 Follow 系列工作，编号与版本以论文原文为准）</dt><dd></dd><dt></dt><dd>Follow Your Pose（姿态可控的人物视频生成，两阶段训练 + 姿态数据集）</dd><dt></dt><dd>Follow Your Click（局部图像动画，TPAMI 2024；由 Dream2 一类 regional motion brush 启发）</dd><dt></dt><dd>Follow Your Handle（通过编辑首帧实现视频编辑，attention 特征注入）</dd><dt></dt><dd>Follow-Emoji（人脸版 Animate Anyone，表情 landmark 表示 + Emoji-Bench）</dd><dt></dt><dd>Follow Your Canvas（高分辨率视频 outpainting，TPAMI；区域 embedding + 多卡分块推理）</dd><dt>相关代码</dt><dd>Follow Your Pose 训练与推理代码已全部开放（讲授口径，GitHub 1.3K stars）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1ZeNZeYEfe/">https://www.bilibili.com/video/BV1ZeNZeYEfe/</a></dd><dt>官网预告</dt><dd>青稞Talk EP36（官网链接未确认，略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP36.txt</code>（850 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP36，已存档）清洗提炼，信息来源为 AI 字幕原文（经清洗，专名可能有识别误差：如 Follow-Emoji 在字幕中作「佛罗 emoji」、LoRA 作「LAURA」、评审分数「7769」为字幕口径且含义存疑等；引用具体数字前建议查论文与项目页核对）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者以「Follow 家族」五件工作为主线，复盘了可控视频生成一条清晰的方法论：在 ControlNet、IP-Adapter 都还没有的时期，他们用「条件与时序解耦的两阶段训练」把稀缺的人物视频数据用起来，之后沿着 pose、click（局部运动）、handle（首帧编辑传播）、emoji（表情 landmark）、canvas（高清外扩）逐个把控制信号做细；他给的统一解释是——所有控制的本质都是对 attention map 施加影响，而基模型能力决定控制效果的上限。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景：控制信号五花八门，缺的是注入方式</h3>
+<p>讲者先给可控视频生成做了一次分类：camera/motion control 一系、pose 与 landmark、prompt 文本注入、depth、box（如字节 Boximator 一系）、frame 条件（插帧、图生视频本质都是条件）。这些信号本身不难拿，难的是在上游视频生成模型之上把信号有效注入、且不破坏时序一致性。Follow 家族就是按控制信号逐个攻的系列。</p>
+<h3>Follow Your Pose：条件与时序解耦的两阶段训练</h3>
+<p>这是家族起点，动机很现实：带人物的姿态视频数据极难获取，直接训人物视频模型没有数据。他们的解法是两阶段：第一阶段用图像驱动学条件控制（图像数据充足），第二阶段再用视频信号学时序（cross-frame self-attention + temporal self-attention 做帧间与时序控制），把「条件信息」与「时序信息」解耦后最大化利用现有数据。配套还发布了姿态数据集（字幕作「line pose 数据集」，名称以论文为准）。讲者给的采用度：引用一百二十多次、GitHub 1.3K stars（字幕口径，截至讲授当日早晨）。</p>
+<h3>Follow Your Click：局部动画难在数据构造</h3>
+<p>目标是 Dream2 的 regional motion brush 式局部动画：用户涂抹一块区域，那块动起来。真正的难点不是模型而是数据构造——人工挑局部运动样本太慢。他们用一个通用管线绕过去：用光流找出局部动作幅度最大的区域自动生成 mask，再把光流均值做成 motion 信号（延时摄影即使帧率高、动作也慢，光流能把真实运动强度提出来），配一个 motion 增强模块与短 prompt，得到可批量生产的训练数据。这件工作讲者自述中了 TPAMI 2024。</p>
+<h3>Follow Your Handle：编辑首帧，靠 attention 传播到全片</h3>
+<p>思路与现在的 drag 操作同构：很多编辑本质是对首帧做线性/非刚性形变，只要形变能统一地应用到整个视频，就能得到一致的编辑。实现分两段：第一阶段先用 LoRA 微调把物体与 sketch/pose 的对应关系「绑」进模型；第二阶段在 inversion 与去噪两个过程中同时把编辑后的 condition 注入 self-attention——消融很干净：只在 inversion 注入，网络知道要编辑哪两个区域但编不出来；只在去噪注入，网络不知道源区域与目标区域在哪；两处都不注入则完全无效；两处都注入才成立。讲者由此提炼出全场最有迁移价值的一句：ControlNet 这类控制机制的本质，就是改 attention map。mask 的抠除则是为了显式告诉网络「哪块是待编辑区、哪块是控制区」。</p>
+<h3>Follow-Emoji 与 Follow Your Canvas：把控制做细、做大</h3>
+<p>Follow-Emoji 冲着人脸版 Animate Anyone 去：表情表示上不用原始 landmark——去掉脸部轮廓（轮廓会把身份形状泄漏进驱动信号、干扰生成）、去掉鼻子、保留两只眼睛，再加 facial mask 与 expression mask 两路局部控制 loss；训练只用纯人数据，不构造杂物场景，靠生成模型自身的先验就得到不错的泛化（讲者举例：训练时嘴闭合，生成张嘴时牙齿仍是像样的牙齿）。配套发布 Emoji-Bench 补齐这一方向的评测缺失。</p>
+<p>Follow Your Canvas 做高分辨率视频 outpainting：输入 $256 \times 256$ 、输出可达 $4096 \times 4096$ 。训练侧用两个不同位置的 anchor（一中一边）驱动生成其余区域，推理侧因显存必须分块，用 regional embedding 让网络知道每块在全局 layout 中的位置，再用多 GPU 分块推理后拼接。讲者自述该工作 TPAMI 评审分数不错（字幕作「7769」，含义存疑，未入数字表）。</p>
+<h3>讲者的判断：基模型决定上限，控制只是引导</h3>
+<p>Q&amp;A 里讲者把话说得很直：控制信号并没有「限制」生成能力，效果差异主要来自基模型——混元 Video 基模型变强之后，Follow 系列在其上的效果整体抬升。所以做 research 资源不够时，他建议先在 SD 一系上做而不是直接上 DiT（太耗资源）。趋势判断：生成会往自回归（AR）走，AR 与扩散结合做大一统（下游任务本质都是「给 condition 生成」，可打成一个 batch），他正做的 3D/4D 生成也是这个逻辑的延伸（明年下半年将去 Meta 实习做该方向，字幕口径）。</p>
+<h3>科研分享（节选）</h3>
+<p>后半段讲者给在读研究生三点：个人能力与团队能力缺一不可（先自己分析再拿给老师确认，形成正向反馈）；做代表性工作要「多挖坑、少填坑」，A+B 式改进没有 novelty，图像/视频已是红海，去找 AR、3D/4D 这类蓝海；idea 成型后多找老师师兄聊，不存在「被偷 idea」，聊的过程就是在验证大方向。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Follow Your Pose 引用量</td>
+<td>—</td>
+<td>120+ 次（截至讲授当日早晨）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Follow Your Pose GitHub stars</td>
+<td>—</td>
+<td>1.3K</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Follow Your Canvas 输入分辨率</td>
+<td>$256 \times 256$</td>
+<td>可输出至 $4096 \times 4096$</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Follow Your Click 发表</td>
+<td>—</td>
+<td>TPAMI 2024（讲者自述）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Follow Your Canvas 发表</td>
+<td>—</td>
+<td>TPAMI（讲者自述，评审分数「7769」字幕口径存疑）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「两阶段解耦」是数据稀缺时的通用招：先在便宜数据上把条件对齐学会，再在稀缺数据上只学时序/动态——对应到 RL 训练就是先用离线数据教表示、再用在线 rollout 教时序信用分配，顺序反了两边都学不好。</li>
+<li>控制即 attention 干预：做可控生成或可控 agent 时，优先想「我的条件信号应该改哪一层的 attention、怎么显式 mask 出待编辑区」，比在输入端堆条件编码器更直接可控。</li>
+<li>自动数据管线先行：Follow Your Click 的真正贡献是光流自动挖 mask 的数据管线——评测/数据类工作里，「如何低成本造出带标注的训练对」往往比模型结构更决定成败。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>各工作的确切发表状态与编号需逐一核对：讲者口径里 Click 与 Canvas 均为 TPAMI，Pose 的数据集名称字幕识别不清（「line pose」），引用前查项目页。</li>
+<li>Follow Your Handle 的「第一阶段 LoRA 绑定」细节（绑定的是哪种对应关系、在哪些层放开）字幕讲得较跳跃，需对论文方法节确认。</li>
+<li>讲者判断「控制效果上限由基模型决定」给了混元 Video 的例子，但没有量化对比（如同一控制方法在弱/强基模型上的指标差），值得找后续工作验证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「ControlNet 本质上实际上就是对 attention map（施加影响），进而对整体的条件信息进行一个很好的引导。」——讲者复盘 Follow Your Handle 消融后（字幕约 15:50）</p>
+<p>「多做挖坑的工作，而少做填坑的工作……如果只是一个简单的 A 加 B，那么实际上它并没有什么 novelty。」——讲者给研究生的选题建议（字幕约 26:05）</p>
+<p>「（控制信号）本质上都是给一个 condition，然后让它来生成一些东西，所以本质上是一样的东西……都可以打成一个 batch 进行一个整合。」——讲者论大一统生成（字幕约 34:10）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

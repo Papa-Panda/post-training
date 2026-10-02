@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP35 — Tuning-Free Enhence：通过噪声初始化和采样轨迹优化增强预训练扩散模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP35 — Tuning-Free Enhence：通过噪声初始化和采样轨迹优化增强预训练扩散模型</h1>
+    <p class="sub">讲者围绕「如何增强一个预训练好的扩散模型的采样过程」讲了两条互补路线：一是把初始噪声本身当作可学习对象，训练一个极小的 SVD 结构模型把随机高斯噪声改写成富含 prompt … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP35-tuning-free-enhance.html</p>
+<p>「把 noise 当作一个可优化、可学习的对象，用模型去学习一个 noise，再用预测的 noise 去提升你的扩散模型的表现。」——讲者对第一篇工作的总结（字幕）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>35</dd><dt>标题</dt><dd>Tuning-Free Enhence：通过噪声初始化和采样轨迹优化增强预训练扩散模型</dd><dt>BV</dt><dd>BV1DjNzeAEEm</dd><dt>时长</dt><dd>00:51:39（讲授约 46 分钟 + Q&amp;A 约 5 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>周子恺（香港科技大学（广州）博士生；字幕开场自述导师为谢德科教授（字幕作「谢德科」），实验室方向为生成式模型与大模型的推理和优化；正式头衔以其主页为准）</dd><dt>相关论文（按讲授中点名的三篇工作列出，具体编号与版本以论文原文为准）</dt><dd></dd><dt></dt><dd>Golden Noise for Diffusion Models（讲授第一篇，字幕作「code noise for diffusion models」，按其方法名 Golden Noise 还原）</dd><dt></dt><dd>Z-Sampling（讲授第二篇，字幕作「the exact diffusion sampling / Z-Sampling」，利用去噪与 inversion 的 CFG 差值累积语义信息）</dd><dt></dt><dd>Z-Sampling 的视频扩展（讲授第三篇，用图像扩散模型交替辅助视频扩散模型推理；具体论文名讲授未给出）</dd><dt>相关代码</dt><dd>Golden Noise 已开源（GitHub 提供 checkpoint 与推理脚本，另有社区 ComfyUI 实现；讲授口径）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1DjNzeAEEm/">https://www.bilibili.com/video/BV1DjNzeAEEm/</a></dd><dt>官网预告</dt><dd>青稞Talk EP35（官网链接未确认，略）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP35.txt</code>（1202 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP35，已存档）清洗提炼，信息来源为 AI 字幕原文（经清洗，专名可能有识别误差：如实验室名在字幕中作「shirley flag / shai flab」、论文名 Golden Noise 作「code noise」、Z-Sampling 多处作「Z30 / Z3pl」等，均按上下文与公开资料还原；关键数字以字幕口径为准，论文版数值请查原文核对）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者围绕「如何增强一个预训练好的扩散模型的采样过程」讲了两条互补路线：一是把初始噪声本身当作可学习对象，训练一个极小的 SVD 结构模型把随机高斯噪声改写成富含 prompt 语义的「golden noise」，即插即用地抬高生成质量；二是 Z-Sampling，在每一步去噪后用 inversion 把语义信息逐步注回 latent，利用去噪 CFG 与 inversion CFG 的差值实现「自我反思」式的轨迹优化，并进一步用图像扩散模型交替辅助视频扩散模型推理。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：采样质量的一半写在初始噪声里</h3>
+<p>讲者的出发点是一个常见经验：同一个 prompt、不同随机种子采样出的高斯噪声，生成图质量差异很大，有的种子语义匹配明显更好。传统解法是反复试种子再挑最好的（讲授中称 seed selection 一类做法），但它有三条硬伤：只能拿到局部最优、要反复生成非常耗时、挑出的种子只对当前 prompt 和当前模型有效、没有泛化性。讲者由此把问题改写成一个机器学习问题：能不能训练一个模型，输入随机噪声和 prompt，输出一个更好的噪声？</p>
+<h3>Golden Noise：先把定义立住</h3>
+<p>讲者强调一个反直觉的定义：在他们的工作里，golden noise 不是「对某个 prompt 生成质量最好的噪声」这么简单，而是<strong>本身蕴含给定 prompt 语义信息的噪声</strong>。这个定义后面 Z-Sampling 部分会给出机制解释：初始 latent 里的语义信息与 prompt 越相符，最终生成质量越高。如何往噪声里注入 prompt 语义？他们发现一个经验现象：把 latent 正常去噪一步、再用 DDIM inversion 加噪回去，得到的新 latent 就带上了 prompt 的语义信息，重新生成的图在文本描述与细节上强于标准采样。他们用两个实验坐实：纯随机高斯噪声训练的「噪声→prompt」分类器学不动（loss 与准确率基本不变），而用「先去噪再 inversion」得到的噪声训练，分类器 loss 持续下降、准确率持续上升；论文里另有理论证明（讲授未展开）。</p>
+<p>数据管线随之确定：输入是随机初始噪声 + prompt，输出是用上述「去噪一步 + inversion」构造、再经人类偏好模型（HPS v2、PickScore 一类 reward model）筛选过的 golden noise——只保留确实生成出更高质量图的配对，保证数据集一致性。</p>
+<h3>模型架构：小模型只预测奇异值</h3>
+<p>难点在架构：扩散模型的噪声 latent 维度很高，让小模型直接预测整个噪声、或预测新旧噪声之差，拟合难度都太高。他们对收集到的噪声配对做 SVD 后发现一个关键结构：新旧噪声的奇异向量余弦相似度在 98% 以上，几乎只有奇异值不同。于是架构只做一件事：保留输入噪声的 $U$ 与 $V^T$ 不变，让小模型预测中间的奇异值矩阵，再经 SVD 逆变换得到预测噪声；另加一条残差预测分支补细节。prompt 信息通过一个 text embedding 以两个可学习系数（字幕中称 $\alpha$ 与 $\beta$ ，量级约 $10^{-4}$ ）注入——系数虽小，却是控制噪声里语义含量的关键旋钮，置零效果明显变差。训练只需单卡一到三小时（字幕口径）。</p>
+<p>使用方式是即插即用：模型预测出 golden noise 后直接喂回原扩散管线，不改任何原 pipeline，因此可以和 ControlNet、LoRA 叠加，也可以和 DPO 一类偏好优化方法叠加（讲授口径）。</p>
+<h3>Z-Sampling：轨迹侧的自我反思</h3>
+<p>第二篇工作把优化对象从起点换到整条轨迹。机制核心：扩散模型去噪时用的 CFG 与 inversion 时用的 CFG 之间存在差值，这个 gap 就是语义信息累积的来源。end-to-end 式的做法（整段去噪再整段 inversion 回去）步子太大、方向太随机，讲者类比于 batch size 为 1 的训练；他们改用 step-by-step 形式：去噪一步、inversion 注回一步、再正常推理，如此逐步累积语义、减小误差。消融结论有两条：必须全路径都用这种形式才最好；去噪 CFG 必须高于 inversion CFG，两者差值为零时生成结果与标准采样无异（副作用是差值过大时画面容易过饱和）。</p>
+<h3>视频扩展：让图像模型替视频模型「反思」</h3>
+<p>直接把 Z-Sampling 搬到视频扩散模型上效果不好（FVD 略升但 UMT score 变差，字幕口径），讲者给的原因是开源视频模型训练数据质量太低、反思时取不到好的语义信息。而把视频按帧看就是图像集合，图像扩散模型数据质量高得多，于是第三篇工作让图像扩散模型与视频扩散模型<strong>交替</strong>做 inversion 加噪与去噪：全用图像模型会丢时序信息、生成静止画面，交替则兼顾单帧质量与时序一致性。他们枚举了交替组合（字幕称共 $C$ 类组合逐一探究），IVIV 式交替（图像 inversion、视频 inversion、图像去噪、视频去噪再正常推理）效果最好，同样要全路径执行。他们还在做把这套范式迁移到 MaskGIT 一类掩码生成模型的工作（讲授口径）。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>多样性</strong>：注入语义不会把生成过拟合到某个固定风格或 prompt，多样性与标准采样无异（讲者让提问者直接跑开源代码验证）。</li>
+<li><strong>分辨率限制</strong>：当前开源只支持 $1024 \times 1024$ ；换分辨率要重收数据重训——收约 1 万到 1.5 万个噪声配对单卡需三四天，训练单卡三四小时（字幕口径）。</li>
+<li><strong>定位类比</strong>：用法和 LoRA 一样即插即用，也能在 SD WebUI 里使用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>噪声配对奇异向量余弦相似度</td>
+<td>—</td>
+<td>98% 以上</td>
+<td>字幕（Golden Noise 架构动机）</td>
+</tr>
+<tr>
+<td>语义注入系数 $\alpha$ / $\beta$ 量级</td>
+<td>置零时效果明显变差</td>
+<td>约 $10^{-4}$</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Golden Noise 模型规模</td>
+<td>—</td>
+<td>checkpoint 约 300MB、显存约 500MB</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>额外推理耗时（同步数）</td>
+<td>标准采样</td>
+<td>约多 0.3–0.4 秒</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>SDXL HPS v2（Ani-style 数据集，字幕口径）</td>
+<td>标准采样约 24 点</td>
+<td>28.41（约 +4.1 点）</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>步数效率（DPM 采样器）</td>
+<td>标准 50 步</td>
+<td>本方法 30 步效果反超</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Winning rate 示例</td>
+<td>标准噪声</td>
+<td>100 个噪声中约 63 个被转成更优（最高口径见下）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Z-Sampling winning rate</td>
+<td>标准采样</td>
+<td>最高约 94%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Z-Sampling 时间代价（同步数）</td>
+<td>标准采样</td>
+<td>约 3 倍；等时间预算下质量仍明显更高</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>数据收集成本</td>
+<td>—</td>
+<td>1 万–1.5 万噪声配对，单卡约 3–4 天</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>视频直接扩展（VV 形式）</td>
+<td>标准视频采样</td>
+<td>FVD 略有提升但 UMT score 变差</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「把采样起点当作可学习对象」是一个通用范式：任何由随机种子/初始状态驱动的生成或搜索过程（扩散采样、RL rollout 的初始状态分布、模拟退火初温），都可以用一个小模型先做「起点改写」再进主流程，且不改主流程本身——对推理 infra 而言这是成本最低的挂载点。</li>
+<li>SVD 观察的启发：当「好起点」与随机起点只差低维结构（奇异值）时，学习对象应降维到那个子空间；先对配对数据做结构分解再决定预测目标，比端到端硬拟合省算力一个量级。</li>
+<li>Z-Sampling 的 CFG 差值视角可迁移到任何带 inversion/重构的迭代过程：去噪与重构两条路径的条件强度差，就是信息注入率；做采样轨迹优化时先检查这条「差值通道」是否存在，比先设计复杂控制器更便宜。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>三篇工作的确切论文名、arXiv 编号与发表状态讲授未完整给出（第二篇字幕作「the exact diffusion sampling」，第三篇未给名），引用前需按作者（周子恺、谢德科组）检索核对。</li>
+<li>Golden Noise 的理论证明（为何去噪+inversion 能注入语义）讲授只提及未展开，与 Z-Sampling 的 CFG-gap 解释应是同一机制的两种表述，值得对读论文确认。</li>
+<li>视频扩展中交替组合的枚举规模与最优组合 IVIV 的判定指标，字幕口径较粗（枚举总数字幕作「C42」一类说法、识别存疑），需查论文实验表。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「把 noise 当作一个可优化、可学习的对象，用模型去学习一个 noise，再用预测的 noise 去提升你的扩散模型的表现。虽然说我们这个方法比较直接，但是它很有效。」——讲者总结第一篇工作（字幕约 23:35）</p>
+<p>「它利用的就是去噪 CFG 和 inversion CFG 之间的一个差值，来实现这个语义信息的一个累积。」——讲者解释 Z-Sampling 机制（字幕约 33:46）</p>
+<p>「你要保证你的去噪 CFG 的值是要高于你的 inversion CFG 的，在这种情况下你生成的图片质量就会明显的提升。」——讲者给出的关键超参关系（字幕约 34:22）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

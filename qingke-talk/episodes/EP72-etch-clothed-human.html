@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP72 — Clothed Human Body Fitting: A Journey to ETCH</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP72 — Clothed Human Body Fitting: A Journey to ETCH</h1>
+    <p class="sub">任务是把参数化人体模型（SMPL 系）拟合到穿着宽松衣服的三维扫描里，估计衣服底下真实的裸体形状与姿态。ETCH 的核心是提出 tightness vector（从内层人体表面… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP72-etch-clothed-human.html</p>
+<p>「我们并不想让它紧密地贴合在穿衣人体表面，而是希望精准地估计穿衣人体底下、衣服底下的裸人体表面是什么样的。」——讲者李伯谦区分 fitting 与 registration 时的定位（字幕口径，[17:23] 附近）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP72</dd><dt>标题</dt><dd>Clothed Human Body Fitting: A Journey to ETCH</dd><dt>BV</dt><dd>BV1rF4Yz1ENZ</dd><dt>时长</dt><dd>01:06:47（总时长 4007 秒；前约 11 分钟为直播等候，讲授约 48 分钟 + Q&amp;A 约 4 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>李伯谦（字幕自述：2024–2025 年在西湖大学某实验室担任实习生期间完成本工作，本科华中科技大学，目前在德州大学奥斯汀分校实习；实验室与导师姓名在字幕中识别不一，以论文作者页为准）</dd><dt>相关论文</dt><dd>ETCH: <em>Equivariant Tightness Vector</em> 系列工作（ICCV 2025 Highlight；讲授中给出项目主页，字幕未口播完整地址）</dd><dt>相关代码</dt><dd>项目主页含 demo 与方法细节（讲者口头邀请关注，未给出确切 URL）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1rF4Yz1ENZ/">https://www.bilibili.com/video/BV1rF4Yz1ENZ/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP72.txt</code>（1205 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP72，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；识别误差较多：SMPL 在字幕中作「simple」、tightness vector 作「tennis/tas vector」、equivariant 作「equal/equence」、数据集 4D-Dress 作「forty dress」、CAPE 作「keep」、基线 ARTIC 疑作「金融公司ARTICK」、MoSh 作「mosh」，均按上下文校正并以论文原文为准）。讲者明确说实验细节请看论文，量化图的具体数值多未口播，下表只收录字幕明确给出的数字。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>任务是把参数化人体模型（SMPL 系）拟合到穿着宽松衣服的三维扫描里，估计衣服底下真实的裸体形状与姿态。ETCH 的核心是提出 tightness vector（从内层人体表面指向外层衣服表面交点的一组有向向量），假设其方向局部等变、长度近似不变，用等变点网络（EPN）+ Point Transformer 预测；再借鉴 MoSh 的标记点思想，用 86 个 marker 的「标签 + 测地置信度」替代难以预测的密集对应（dense correspondence），最后仅用 marker 损失（无 shape/pose 先验）做拟合，从而在未见过的姿态、极端体型与极少量训练数据下都保持鲁棒。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>问题定位：fitting 不是 registration</h3>
+<p>把三维扫描人体「结构化」的标准做法，是把参数化人体模型（SMPL/SMPL-X/GHUM 一系，骨架 + shape/pose 混合蒙皮驱动表面顶点）塞进扫描数据。但塞法有两条路线：</p>
+<ul>
+<li><strong>Registration</strong>：让模型表面尽量贴合扫描的（穿衣）表面。穿厚衣服的人会被估计成一个胖子。</li>
+<li><strong>Body fitting（本工作）</strong>：不追求贴合外表面，要估计衣服底下裸人体的 shape 与 pose——这是动画、虚拟试衣乃至脂肪/肌肉/骨骼估计的前提。</li>
+</ul>
+<h3>旧方法的三条路线与各自的坑</h3>
+<ol>
+<li><strong>基于优化的传统管线（如 BUFF）</strong>：多视角骨骼初始化 + 四个优化项（皮肤贴近、衣服「在外大惩罚、在内小惩罚」的制衡项、shape/pose 先验稳定项）。讲者点出其结构性矛盾：衣服的两个子项互相制衡，优化只能给出「合理」而非「真实」的结果；更关键的是 shape/pose 先验会重罚极端体型与姿态，而实际应用理应允许它们存在。</li>
+<li><strong>IP-Net 类网络方法</strong>：把穿衣表面采样成点云、体素化，逐 voxel 预测「在裸体内部 / 衣与体之间 / 外部」及所属 body part；但最后仍要接一步优化拟合。</li>
+<li><strong>ARTIC 类等变网络方法</strong>：利用等变网络「输入点云旋转平移、输出特征同步旋转平移」的性质，把 body part 逐一近似为刚体：不变特征做分割与 shape、等变特征回归旋转矩阵。中间网络只需学「不变输入 → 不变输出」，负担极轻，因此少量数据就能泛化到未见姿态。但它的前提是每个 body part 近似刚体——宽松衣服的形变显然不满足。</li>
+<li>另一类 UV 方法：学一个 tightness 标量场（衣服表面每点到内层人体的距离），阈值化剥离裸体点云，之后仍需常规 fitting。</li>
+</ol>
+<h3>ETCH 的两步回答</h3>
+<p>讲者把问题拆成两个：(a) 如何精准估计内层人体表面，尤其穿裙子、长袍时；(b) 如何在众多甚至未见过的姿态下鲁棒。对应的两个设计：</p>
+<p><strong>第一，tightness vector 解耦衣与体。</strong> 不用标量距离，而用向量：从内层人体表面出发、与外层穿衣表面相交的有向向量。两个假设撑起整个建模（均为字幕口径）：</p>
+<ul>
+<li>向量的<strong>方向是局部等变的（locally equivariant）</strong>：某个 body part 旋转时，其上对应衣物点的 tightness 向量近似随之同角度旋转；</li>
+<li>向量的<strong>长度近似不变</strong>；真实衣物并非刚体、长度会随大幅动作变化，这部分动态由 Point Transformer 的相对位置编码来补捉。</li>
+</ul>
+<p>预测路径：EPN 给出逐点等变特征（SO(3) 按 60 个方向离散化，字幕口径），方向分支几乎不需要额外加工——一个 self-attention 把等变特征无损映射到方向；长度、标签、置信度分支则用不变特征 + 相对距离编码预测。</p>
+<p><strong>第二，用 marker 系统替代 dense correspondence。</strong> 讲者先试了常规路线：预测每个扫描点在 canonical 空间的 dense correspondence，再拉近拟合。结果是分布不均、且宽松衣物上对应点极难预测，手与小臂的上下前后一旦预测反了，人体就会扭曲。转折来自 MoSh（动作捕捉标定，SIGGRAPH 2024 Test of Time）的启发：确定参数化人体并不需要控制每个皮肤顶点，只需定住若干关键点（marker）。于是 ETCH 改为：</p>
+<ul>
+<li>在人体表面放置 86 个 marker，每个内层表面点按最近 marker 划分标签区域（marker-based labels）；</li>
+<li>置信度定义为点到其 marker 的<strong>测地距离</strong>（沿 mesh 表面走的距离，而非欧氏距离）：离 marker 越近置信度越高；</li>
+<li>把预测出的标签与置信度经 tightness vector 带回内层人体表面后，每个标签取置信度最高的 top-k 个点做置信度加权平均，得到该 marker 的预测位置；</li>
+<li>最后只用一个 marker 损失，把 SMPL 上的对应 marker 与预测 marker 拉近即可完成拟合。</li>
+</ul>
+<p>这个设计顺带解决了一个先验问题：<strong>整个优化只有 marker 损失，没有 shape/pose prior</strong>，因此对极端 shape 与 pose 不施加任何惩罚，理论上允许它们出现在预测结果里。</p>
+<h3>实验设计（讲者强调看设计与假设的对应，具体数值查论文）</h3>
+<ul>
+<li><strong>数据集</strong>：4D-Dress（宽松衣服；同一批人按不同 sequence 切分训练/测试，测未见姿态）与 CAPE（紧身衣服；按不同的人切分，测未见体型 + 姿态）。</li>
+<li><strong>指标</strong>：V2V（预测与真值 SMPL 表面的点对点欧氏距离）、MPJPE（关节点距离误差）、Chamfer distance（预测内层点云与真值表面的双向距离，衡量内层人体估计精度）、angular error（预测 tightness 向量方向与真值的角度差）。</li>
+<li><strong>结论口径</strong>：在两个数据集、三个主指标上均优于 NSP、ARTIC、IP-Net、PTF 等基线；讲者把优势归因于 tightness vector 建模（显式建模内层人体的方法里 Chamfer 也最好）与 marker 优化系统（减轻学习负担、高效无损地回归 SMPL 参数）。</li>
+<li><strong>Hard case</strong>：取最宽松的前 10%、shape 与 pose 的离群点单独评测，仍保持最优；典型定性例子是交叉腿——IP-Net 等会预测成 X 型腿，ETCH 与 ARTIC 因用了局部等变特征都能处理。</li>
+<li><strong>跨数据集</strong>：在 4D-Dress 训练、直接测完全未见的数据集与合成数据，讲者口径是「效果非常好」。</li>
+</ul>
+<h3>消融：三个对照把假设逐个验掉</h3>
+<ol>
+<li><strong>Marker vs dense correspondence</strong>：换回 dense correspondence 就会出现手部、胳膊扭曲；marker 版本没有此现象——证明替换 dense correspondence 的选择成立。</li>
+<li><strong>等变特征有没有用</strong>：把等变特征换成纯位置（xyz）或 xyz + 不变特征，标准设置下都更差。</li>
+<li><strong>极少数据（one-shot 式验证）</strong>：每个动作序列只随机取一帧训练，相当于 0.66% 与 2.1% 两个档位的训练数据；ETCH 的 angular error 明显更低，且定性结果能维持完整人形，其他变体则崩坏。讲者的解读是：数据极少时模型必然过拟合，这个实验测的不是过拟合而是过拟合之后的泛化——高效特征捕获能力正是等变网络带来的。</li>
+</ol>
+<h3>讲者自陈的四个 limitation</h3>
+<ol>
+<li><strong>手部与面部</strong>：手上只有 2–3 个 marker，而手的自由度远高于此，手指与面部表情无法捕获；</li>
+<li><strong>输入完整性</strong>：必须输入完整人体点云，缺失区域对应的 marker 随之缺失，结果变差；</li>
+<li><strong>衣物范围</strong>：能泛化到未见的人与姿态，但衣物类型要落在见过的范围内，没见过厚外套加帽子这类组合就泛化不了；</li>
+<li><strong>可扩展性悖论</strong>：等变特征的高效学习是归纳偏置红利，数据量大到一定程度后这个优势会被 scaling law 抹平。</li>
+</ol>
+<p>Q&amp;A 里两个工程细节值得记：多层/重叠衣物（如裙子）的向量交点问题，训练数据构造时用「射线相交得到 anchor points，未覆盖区域按离 anchor 的远近分别继承或做最近查询」的办法处理（细节在论文）；拟合成本极低——优化目标只有 86 个 marker，用 LM 二阶优化约 5–6 秒得到一个 SMPL 预测。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Marker 数量</td>
+<td>dense correspondence（逐点）</td>
+<td>86 个 marker 替代</td>
+<td>字幕（方法部分）</td>
+</tr>
+<tr>
+<td>等变特征的旋转离散化</td>
+<td>SO(3) 连续空间</td>
+<td>60 个方向（字幕口径）</td>
+<td>字幕（相关工作部分）</td>
+</tr>
+<tr>
+<td>极少数据消融的训练量</td>
+<td>全量训练集</td>
+<td>0.66% 与 2.1% 两档（每序列取一帧）</td>
+<td>字幕（消融部分）</td>
+</tr>
+<tr>
+<td>Hard case 选取</td>
+<td>各指标离群点</td>
+<td>最宽松前 10% 等子集单独评测，均最优（定性）</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>拟合耗时</td>
+<td>逐点 dense 优化目标</td>
+<td>约 5–6 秒 / 个（LM 二阶优化，86 个目标）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>手部 marker 数</td>
+<td>全身 86 个</td>
+<td>手部仅 2–3 个（limitation）</td>
+<td>字幕（局限部分）</td>
+</tr>
+</tbody>
+</table>
+<p>注：V2V、MPJPE、Chamfer distance、angular error 的具体数值讲授均未口播，只说「在两个数据集上都达到最好」；需要引用数字时查论文原文。数据集规模、训练设置同样以论文为准。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「稀疏锚点 + 置信度加权」替代「密集监督」是一个通用降负担手法：当逐点/逐 token 的对应关系难学且错一位就崩（人体扭曲）时，退到少量高置信锚点再做低维优化（86 个目标、几秒收敛），鲁棒性反而更好——对应到后训练里，稠密逐 token 监督不稳定时，关键节点监督 + 置信加权是可试的降阶方案。</li>
+<li>归纳偏置的价值在低数据区最大、会被 scaling 抹平：讲者对等变特征的这句自评适用于一切「手工结构 vs 规模」之争——先问自己在数据曲线的哪一段，再决定要不要为结构付复杂度。</li>
+<li>优化目标设计上「只保留与任务同构的损失、砍掉先验惩罚项」让极端样本不再被系统性压扁；评测集若含长尾分布（极端体型姿态、离群 case），要单独切离群子集评测，主榜平均数会掩盖这类失败。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>主指标的具体数值（V2V/MPJPE/Chamfer/angular error 及相对基线的差距幅度）字幕完全没有，评估该方法强度必须查论文表格。</li>
+<li>Tightness vector 的 ground truth 构造细节（anchor point 覆盖策略）在 Q&amp;A 只给了轮廓，多层衣物、遮挡自交叠时的覆盖率没有数字。</li>
+<li>讲者预告的下一版本（ETCH 后续）要解决手部/面部与输入缺失问题，具体方案未展开；实验室主页与论文页可跟踪。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「与其说是制衡，不如说它稍微有点矛盾，所以优化只能带来合理的结果，不可能带来绝对真实的结果。」——讲者评 BUFF 衣服项两个子损失的互相牵制（字幕 [22:14] 附近）</p>
+<p>「我们只需要 86 个（优化目标），用 LM 二阶优化方法大概五六秒钟就可以得到一个 SMPL 的预测结果。」——讲者答拟合复杂度问题（字幕 [65:12] 附近）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

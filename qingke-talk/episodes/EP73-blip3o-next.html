@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP73 — 从BLIP3o到BLIP3o-NEXT：迈向统一生成与理解的多模态大模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP73 — 从BLIP3o到BLIP3o-NEXT：迈向统一生成与理解的多模态大模型</h1>
+    <p class="sub">这期讲 BLIP3o 系列如何在统一多模态模型里安排「理解」与「生成」两个任务：BLIP3o 的结论是把图像表示放进 CLIP 语义空间、用 diffusion（flow ma… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP73-blip3o-next.html</p>
+<p>「我的 discrete 能大概打一个图的一个 blueprint，然后在这个 blueprint 的基础上，再用 diffusion 来进行渲染。」——讲者对 BLIP3o-NEXT 双信号设计的概括</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>73</dd><dt>标题</dt><dd>从BLIP3o到BLIP3o-NEXT：迈向统一生成与理解的多模态大模型</dd><dt>BV</dt><dd>BV1s4WkzMEYF</dd><dt>时长</dt><dd>01:04:22（讲授约 40 分钟 + Q&amp;A 约 24 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>陈九海（马里兰大学博士生；主持人开场介绍，字幕中其姓名另有「陈秋海」等识别误差，正式头衔以论文作者页为准）</dd><dt>相关论文</dt><dd>Jiuhai Chen et al., <em>BLIP3-o: A Family of Fully Open Unified Multimodal Models</em>（2025）；<em>BLIP3o-NEXT</em>（讲授时约两周前刚放出；具体编号与版本以论文原文为准）</dd><dt>相关代码</dt><dd>已开源（模型 checkpoint、训练代码与数据，讲者 Q&amp;A 中确认；以项目 GitHub 为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1s4WkzMEYF/">https://www.bilibili.com/video/BV1s4WkzMEYF/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP73.txt</code>（1259 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP73，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如「千万VL」应为 Qwen-VL、「千万3」应为 Qwen3、「JEVIL/JINVIL」应为 GenEval，均以论文与公开资料为准）。凡讲授口径与论文版可能不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期讲 BLIP3o 系列如何在统一多模态模型里安排「理解」与「生成」两个任务：BLIP3o 的结论是把图像表示放进 CLIP 语义空间、用 diffusion（flow matching）目标而非回归目标去建模连续图像特征，并用「先训理解、冻结骨干、再训生成」的顺序训练避开多任务配比难题；其续作 BLIP3o-NEXT 再在同一骨干上加一路离散图像 token 的交叉熵监督——离散信号负责打好画面结构（尤其文字渲染与空间关系）、diffusion 负责渲染细节——并由此把语言模型那一整套 GRPO 式 RL 原样搬到图像生成上，拿到明显的 prompt 对齐与文字渲染提升。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>BLIP3o 的表示选择：为什么在 CLIP 空间里生成</h3>
+<p>统一模型的高层结构是「自回归模型 + diffusion」：自回归骨干产出中间的连续特征，diffusion 模型以此为条件生成真实图像。第一个设计问题是图像用什么表示。老做法是 VAE latent：低层像素特征，重建质量好，但与理解侧的表示不在一个空间。BLIP3o 选择 CLIP 特征作图像编码——理解侧本来就用 CLIP，生成侧也用 CLIP，两个任务就被统一到同一个语义空间里操作。代价是 CLIP + diffusion 解码器的重建质量可能略逊于 VAE，讲者认为为了统一性这个交换值得。</p>
+<p>讲者把三种架构并排做了对照实验（在 GenEval、DPG、FID 三个常用生成基准上、每 3–4 千步画一次曲线）：</p>
+<ul>
+<li>架构 A：自回归模型直接回归 CLIP 特征（MSE 一类目标），无 diffusion 模块（Emu、SEED、MetaMorph 一系）；</li>
+<li>架构 B：自回归模型 + Diffusion Transformer 对 CLIP 特征去噪（BLIP3o 的方案）；</li>
+<li>架构 C：自回归模型 + Diffusion Transformer 对 VAE latent 去噪（MetaQuery 一系）。</li>
+</ul>
+<p>两个结论：其一，B 对 C 说明<strong>语义特征比 VAE latent 更容易与自回归骨干对齐</strong>；其二，B 对 A 说明<strong>连续图像特征的分布要用 diffusion 式目标（flow matching）来建模</strong>，样本多样性与图像质量都好于直接回归。附带一提：他们后期弃用了 FID——FID 可以很低但图完全不跟指令，GenEval 与 DPG 更可信。</p>
+<h3>训练策略：顺序训练代替多任务混合</h3>
+<p>理解与生成同训有两条路：多任务混合（两个任务的数据按配比混着训），或顺序训练（先训理解、冻结自回归骨干、再单独训 diffusion 部分）。讲者选了后者，理由很实际：混合训练必须仔细调两个任务的数据配比，配比一错某个任务就掉；顺序训练每个阶段只专注一个任务，不存在配比问题，且能最大程度保留原有理解能力。</p>
+<p>代价是放弃了探索「理解与生成能否互帮互助」。讲者对此给了少见的坦白：他们实际试过，结论完全取决于数据配比、数据规模与架构三件事——小规模下用 MSE/余弦相似度目标（如 MetaMorph）时互助似乎成立，但一旦换上 diffusion 式损失，互助基本消失、两任务甚至互相冲突。所以这不是「统一模型没有意义」，而是在当前框架下观测不到；他猜测本质问题可能在于两个任务还没被放进同一个 tokenizer 之下。</p>
+<p>数据与开源：BLIP3o 开源了模型、训练代码与 3000 万条预训练数据（用 Qwen-VL 重新标注，dense caption 平均约 120 个 token）；另蒸馏了约 6 万条 GPT-4o 的高质量指令数据。讲者的经验是蒸馏数据比真实图像<strong>更容易学</strong>，消除生成伪影也更快。预训练数据主要用 CC12M 与 SAM 并做 recaption；SFT 数据则是先看预训练模型的具体毛病（如人体姿态差），再针对性构造 prompt 生成数据补齐。</p>
+<h3>BLIP3o-NEXT：给连续生成加一路离散监督</h3>
+<p>NEXT 的唯一大改动是加一路离散信号。骨干的 hidden states 之上挂两个头：一个还是 Diffusion Transformer 用 flow matching 损失建模连续 CLIP 特征；另一个是 LM head，用交叉熵预测离散图像 token。离散 token 来自 VQ-SigLIP2：不用 VQ-VAE，而是把 SigLIP2 的语义特征量化成 codebook——理由与 BLIP3o 一以贯之：一切都放在语义空间里操作。</p>
+<p>关键澄清：<strong>推理时生图仍然只靠 diffusion 那一路</strong>，离散头只在训练时注入监督，不参与出图。离散与连续的分工来自他们的观察：连续/diffusion 的视觉保真度高，但离散自回归在需要空间结构的任务上更强——文字渲染、物体间位置关系（「A 在 B 左边」这类构图）都明显更好。讲者的比喻是：离散 token 先把图的结构蓝图打好，diffusion 再在蓝图上填细节、做渲染。</p>
+<h3>离散信号的真正红利：把 LM 的 RL 整套搬过来</h3>
+<p>加离散 token 还有一个架构外的重要好处：图像生成可以<strong>原样复用语言模型的 RL 基础设施</strong>。他们的做法是冻结 diffusion transformer、只更新自回归骨干：骨干采样出不同的离散序列，冻结的 diffusion 部分据此渲染出不同的图，可验证的 reward 给图打分，信号回传给骨干——整个训练 pipeline、代码与 infra 与语言模型 RL 一模一样。选的两个任务都因为 reward 可验证：文字渲染用 OCR 模型核对图中文字，prompt 对齐用 GenEval 的 evaluator 打分。</p>
+<p>结果（字幕口径）：GenEval 类任务上 reward 约 500 步从 0.80 涨到 0.991；文字渲染准确率从 0.55 左右涨到约 0.9（不到 1000 步，后期 reward 出现下滑，他们停了，讲者说学习率与 KL 系数还要再调）；GenEval 总分从 0.81 提到约 0.91。做这件事的模型总共约 3B（约 1.7B 语言骨干 + 1.5B diffusion 部分），且用的是原始 GenEval prompt、没做长 caption 改写。讲者对 RL 价值的概括有两层：一是让每次采样更大概率一次就出对图（少抽几次奖）；二是把 text token 与 image token 并进同一个词表后（16 万文本 + 5 万图像 ≈ 21 万），推理时的搜索空间被实质放大，这对 reasoning 类任务是很有前景的方向——当然，Q&amp;A 中他也承认实际解码时文本与图像词表需要隔离、交错生成怎么做还没落地。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>算力</strong>：两个项目都只用了 32 张 H200；BLIP3o 的数据在 1–2 亿量级。讲者自评这是「学校与公司之间的地带」。</li>
+<li><strong>参数口径</strong>：BLIP3o 的 8B ≈ 7B 自回归骨干 + 1.xB diffusion 部分，不含 CLIP。</li>
+<li><strong>生成能力来自谁</strong>：冻结骨干后，生成能力基本来自 Diffusion Transformer，骨干只提供条件。</li>
+<li><strong>NEXT 还做不做理解</strong>：放出的版本没做理解任务。讲者的观点是理解 benchmark 与最终需要的能力（比如图像编辑里的理解）之间有 gap，与其刷 benchmark，不如「需要什么能力就用那方面的数据去训」。</li>
+<li><strong>双 CLIP 的代价</strong>：生成侧实际用了 EVA-CLIP 配套的 diffusion 解码器（借自 Emu），与理解侧的 CLIP 不是同一个——理想情况应统一，但自己训这个解码器并不 trivial。影响主要在图像编辑的一致性上，相当于给能力定了个上限，数据可以逼近上限但消不掉这个 gap。</li>
+<li><strong>为什么 CLIP 特征训得动</strong>：CLIP 特征池化成固定 64 个 token、每 token 约 1000 维，与分辨率无关；1024×1024 出图的压力全在第二阶段的 diffusion 解码器上，不进主训练。这是 CLIP 相对 VAE 的最大好处：压缩比高、训练效率高。</li>
+<li><strong>对 GPT-4o 架构的猜测</strong>：讲者认为大概率是「BLIP3o + NEXT 式结构」——AR + diffusion 且带离散 token。理由有二：有离散 token 时训练/推理 infra 与语言模型零差别，公司会喜欢；且 OpenAI 擅长 RL，离散化后所有 RL 算法能直接继承到图像生成。</li>
+<li><strong>统一模型 vs 纯文生图</strong>：讲者的判断是 GPT-4o 之后统一模型已无明显短板（文字渲染、prompt 对齐都不差），GenEval 上的提升很大；剩下的短板主要在图像编辑一致性。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>架构对照结论</td>
+<td>架构 A（直接回归）/架构 C（VAE latent）</td>
+<td>架构 B（CLIP 特征 + flow matching）生成质量与对齐最好</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>开源预训练数据</td>
+<td>—</td>
+<td>3000 万条，Qwen-VL 重标注、平均约 120 token dense caption</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>蒸馏指令数据</td>
+<td>真实图像数据</td>
+<td>约 6 万条 GPT-4o 蒸馏数据，更易学、去伪影更快</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>RL：GenEval 类 reward</td>
+<td>约 0.80</td>
+<td>约 500 步升至 0.991</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>RL：文字渲染准确率</td>
+<td>约 0.55</td>
+<td>不到 1000 步升至约 0.9（后期回落，KL/学习率待调）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>RL 后 GenEval 总分</td>
+<td>0.81</td>
+<td>约 0.91（约 3B 模型，原始 prompt 无长 caption 改写）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>合并词表规模</td>
+<td>文本约 16 万</td>
+<td>+ 图像约 5 万 ≈ 21 万（搜索空间扩张口径）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>训练算力</td>
+<td>—</td>
+<td>两个项目均为 32 张 H200；BLIP3o 数据 1–2 亿量级</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>BLIP3o 参数构成</td>
+<td>总 8B（不含 CLIP）</td>
+<td>约 7B 自回归骨干 + 1.xB diffusion 部分</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>CLIP 特征规格</td>
+<td>随分辨率变化的 VAE latent</td>
+<td>固定 64 token × 约 1000 维，与分辨率无关</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>「冻结渲染器、只训策略」是把 LM RL 搬进生成任务的最小改动路径</strong>：只要生成链路里有一段可采样、可打分的离散决策层，就能复用现成的 GRPO 框架、infra 与调试经验，连续渲染部分完全不进训练图。做多模态 RL 时先找这个离散决策层在哪，比先改 RL 算法更重要。</li>
+<li><strong>任务合并先问「表示是否同一空间」</strong>：BLIP3o 的经验是理解与生成能否共存，先取决于表示是否统一到同一语义空间，其次才是数据配比；配比调参救不了表示层面的错位。反过来，顺序训练（训一个、冻结、再训下一个）是配比敏感场景下的保底方案，代价是放弃任务间互助，需要显式接受。</li>
+<li><strong>评测口径</strong>：生成质量别只看分布距离类指标（FID 可以很低而图不跟指令）；优先用可验证的任务型评测（OCR 核字、evaluator 打分），这类评测同时还能直接当 RL 的 reward，一套设施两用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>离散监督到底帮了多少：讲者说不做 RL、只 SFT 时 NEXT 的文字渲染已明显好于 BLIP3o，但这是跨模型对比（架构、数据都变了），缺同一骨干上「有/无离散头」的干净消融；离散头对理解任务有无影响也未提。</li>
+<li>RL 后期 reward 回落的原因只归到学习率与 KL 系数，没有展开：是 reward hacking（OCR/GenEval evaluator 被钻空子）还是优化不稳定，值得看论文或后续版本。</li>
+<li>文本/图像词表隔离与交错（interleaved）生成的具体解码方案未落地；「搜索空间扩张有助于 reasoning」目前是方向性判断，没有实验支撑。</li>
+<li>双 CLIP 空间不一致对图像编辑一致性的实际损失有多大、数据能补回多少，讲者只给了定性判断（决定上限、数据逼近），没有量化。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我的 discrete 能大概打一个图的一个 blueprint，然后在这个 blueprint 的基础上呢，我再用 diffusion 来进行渲染。」——讲授约 30 分钟处对离散/连续分工的概括（按干净口径转写）</p>
+<p>「我通过 RL，我可以让我后面的这种抽奖的这种抽奖次数变得更加的少。」——讲授约 38 分钟处讲 RL 对图像生成的实际意义（按干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

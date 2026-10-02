@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP51 — EraseAnything：在 Flux 等先进文生图架构的概念擦除方法</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP51 — EraseAnything：在 Flux 等先进文生图架构的概念擦除方法</h1>
+    <p class="sub">EraseAnything 是第一个在 Flux 这类 Rectified Flow Transformer 上验证有效的概念擦除方法：它只在双流块（dual-stream b… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP51-eraseanything.html</p>
+<p>「（目标是）让 AI 在忘掉不好的概念、想让它忘掉的概念的同时，能够保留不相关的概念。」——讲者口述（字幕清洗）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP51</dd><dt>标题</dt><dd>EraseAnything: 在 Flux 等先进文生图架构的概念擦除方法</dd><dt>BV</dt><dd>BV1sA4jzzE5V</dd><dt>时长</dt><dd>00:32:16（正片讲授约 29 分钟 + Q&amp;A 约 3 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>高代恒（青稞社区联合创始人；主持人介绍口径，字幕中其姓名亦识别作「高大恒」，以主持人介绍为准）</dd><dt>相关论文</dt><dd>EraseAnything（讲者称发表于 ICLR 2025；面向以 Stable Diffusion 3、Flux 为代表的 Rectified Flow Transformer 文生图/文生视频基座；具体标题以论文版为准）</dd><dt>相关代码</dt><dd>基于 Diffusers 修改（Q&amp;A 口径）；仓库地址未在讲授中给出</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1sA4jzzE5V/">https://www.bilibili.com/video/BV1sA4jzzE5V/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP51.txt</code>（755 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（已存档）清洗提炼。字幕为 AI 识别结果，专名多有误差：Flux 在字幕中作「flex/flax/flag」，LoRA 作「LAURA」，EraseAnything 作「erise anything」，下文均按通行写法订正。讲授中的定量对比大多只有相对口径（如「高约两个点」），未给出精确数值的均如实标注，不补造数字。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>EraseAnything 是第一个在 Flux 这类 Rectified Flow Transformer 上验证有效的概念擦除方法：它只在双流块（dual-stream block）上挂 LoRA，用注意力图定位待擦概念、用反向自对比损失把目标概念在语义空间里推向无关概念并远离其近义词，再用双层优化把「擦除」与「保留无关概念」分开交替训练，从而能擦掉实体、抽象概念乃至「握手」这类关系，且擦得干净、其他概念基本不受损。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 背景：架构换代后，旧擦除方法在 Flux 上集体失效</h3>
+<p>概念擦除要解决的是扩散模型的安全/可控问题：模型会生成不宜内容（讲者举例 NSFW 图像），需要让它「忘掉」指定概念。2023 年 SD 出现后不久这个方向就热起来，代表作 CA、ESD（ICCV 2023）以及 UCE、EAP 等都建立在 SD 1.x 的 UNet + CLIP 文本编码架构上。</p>
+<p>问题在于基座已经换代：Flux（黑森林实验室出品）用 T5 做文本编码、用 RoPE 旋转位置编码、图像与文本走 dual-stream block 分开处理再拼接、采样器换成 Rectified Flow。讲者把旧方法直接搬到 Flux 上复现的结果是：擦裸体只补出下半身、上半身仍裸（ESD）；擦是擦了但人物外观全毁（UCE）；EAP 干脆擦不掉。而 EraseAnything 在同一批案例上能擦掉裸体、梵高风格、蜘蛛侠的西服，且整体一致性保持得不错。讲者的结论是：架构变化不是小事，方法必须针对新架构重做，他们是第一个在 Flux 上验证这件事的人。</p>
+<h3>2. 方法定位：只改 dual-stream block，且是试出来的</h3>
+<p>Flux 没有显式的 cross-attention 层——过去大家习惯改的那一层不存在了。讲者的实验把作用点锁定在文本与图像特征混合的第一个阶段即 dual-stream block，只在那里训练 LoRA。他很坦白这一步的来源：「完全是根据经验，一个一个试出来……先有假设，验证 OK 就继续往下走」，并感慨做大模型研究的假设与效果很少天生相符，「所以大家要多做实验」。实验基座选 Flux 的开源版本 schnell 与 dev（pro 闭源改不了权重）。</p>
+<h3>3. 方法组件一：注意力定位擦除</h3>
+<p>第一个组件回答「概念存在于哪里」。用 attention map 做定位：以「小孩踢足球」为例，采样早期 attention 对球的位置不敏感，随迭代推进，attention map 会清晰地圈出足球所在；同理可定位黄猫、握手位置等。擦除时就显式抑制目标概念对应区域的 attention 激活。</p>
+<p>但讲者随即指出纯定位法的泛化缺陷：如果用户故意把 soccer 拼错一个字母，模型语义上仍理解为足球，而按名词精准定位会找不到它。也就是说按词定位的方法没有足够的泛化性，必须配上语义层面的机制——这引出下一个组件。</p>
+<h3>4. 方法组件二：反向自对比损失（reverse self-contrastive loss）</h3>
+<p>核心思想一句话：让待擦概念在特征空间里向无关概念靠拢、同时远离它自己的近义词。比如擦「裸体」：把它往「大树」「青草」这类无关概念上匹配（讲者举的直观后果是模型可能给人物生成绿色的内衣裤，因为树是绿的），同时让它远离「胸部」等近义词。普通自对比损失是让概念与近义词靠近，这里是刻意反着来，所以叫 reverse。</p>
+<p>近义词与无关词的集合是动态生成的，不用固定词表：挂一个大模型（LLM agent）按语义距离给出近义词、中等距离词与远距离词。讲者解释了为什么不用 T5 特征做余弦相似度：Flux 用的就是 T5，他们试过，T5 特征下与「裸体」最相近的竟然是「瘦」「女孩」这类词，质量明显不如大模型生成的结果。这是「用 LLM 当构词器优于用编码器特征算相似度」的一个具体证据。</p>
+<h3>5. 方法组件三：双层优化分开「擦」与「留」</h3>
+<p>训练是 bi-level（双层）的：低层负责擦除，高层负责保证无关概念不受影响，两层各带两个 loss 交替迭代。擦除侧用两条：其一是沿用 ESD 一路的擦除损失；其二是定位侧的 attention 激活抑制。保留侧的逻辑讲者用大白话讲得很清楚：把「nude girl」里的 nude 擦掉，你起码得还生成一个 girl，不能生成个男的出来——保留损失就是约束擦除后的模型在无关概念上与原模型表观一致。</p>
+<p>最终擦除效果上，讲者强调三点：擦得干净（不留残余，ESD 式「只擦下半身」的问题不存在）；抗叠加——多个 LoRA 叠起来可以一次擦掉 5–10 个概念而不明显掉效果（擦汽车变轿车的同时，生成 C 罗、蝙蝠侠、绿巨人仍正常）；多概念 LoRA 的合成方式在 Q&amp;A 里也给了：两个就各乘 0.5，三个就各乘约 0.33，等权相加。</p>
+<h3>6. 能擦什么：实体、抽象、关系三类</h3>
+<p>定量实验按三类概念组织：实体（具体的人、鞋等）、抽象概念（烟雾效果、艺术风格）、关系（握手、拥抱、亲吻）。关系是这一代基座的新增能力——Flux 对关系的理解相比 SD3/SD 系列大幅提升，所以「能不能把关系也擦掉」成了新问题：CA 擦不掉两只猫握手的「握手」关系，EraseAnything 可以。讲授还展示了更刁钻的案例：擦颜色（红/绿）、擦量词（「五个铅笔」的五、「三只猫」的三）、组合擦除（狗 + 背靠背关系一起擦，结果变成拥抱；教堂 + 爆炸一起擦等)。与 CA 的定量对比上，讲者称在非相关概念准确性上平均高约两个点（字幕口径），其余指标亦更优。</p>
+<h3>7. 定量实验与 user study</h3>
+<ul>
+<li>干净程度：用检测模型过擦除后模型的生成图，数值越低擦得越干净。EraseAnything 不是最低的（UCE 更低），但 UCE 的代价是生成图像质量严重受损，EraseAnything 则基本不影响图像质量——讲者的立场是干净与质量要一起看。</li>
+<li>对抗攻击鲁棒性：对擦除后模型做 adversarial attack，其抵抗力优于对比方法（指标越低越好，字幕口径）。</li>
+<li>User study 五个维度：擦除干净程度、无关概念保留、图像质量、prompt adherence（是否还按 prompt 生成）、输出多样性（换 seed 结果仍多样、没有过拟合到擦除权重上）；讲者展示其方法在各维度均居前。</li>
+</ul>
+<h3>8. Q&amp;A 要点</h3>
+<ul>
+<li>多概念 LoRA 叠加：等权平均（2 个各 0.5、3 个各约 0.33）直接相加，即目前的做法。</li>
+<li>基线方法的基座都是 SD，在 Flux 原生上做擦除的，「应该我们是第一个」。</li>
+<li>实现基于 Diffusers 改；做图像/视觉语言模型方向的人容易上手。</li>
+<li>讲者个人判断：概念擦除这类工作放到 vision-language model 上做影响力更大、机会更多（他的开放讨论邀请，非论文结论）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实验基座</td>
+<td>Flux Pro（闭源）</td>
+<td>选用开源的 schnell 与 dev 两版</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>改动范围</td>
+<td>全模型</td>
+<td>仅 dual-stream block 上训 LoRA</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>无关概念准确性 vs CA</td>
+<td>CA</td>
+<td>平均高约 2 个点</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>多 LoRA 叠加可擦概念数</td>
+<td>单概念</td>
+<td>一次 5–10 个概念，不明显掉效果</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>多 LoRA 合成权重</td>
+<td>—</td>
+<td>2 个各 0.5；3 个各约 0.33，等权相加</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>擦除干净程度（检测器指标，越低越干净）</td>
+<td>UCE 最低但毁画质</td>
+<td>本方法非最低，但图像质量基本不受影响</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>User study 维度</td>
+<td>—</td>
+<td>干净/保留/质量/prompt adherence/多样性共 5 维</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「擦除—保留」双层结构可直接类比到模型编辑与机器遗忘：把目标行为的消除与无关行为的保真拆成两个交替优化层级、各自带独立损失，比单个加权总损失更容易定位是哪一侧在退化。换到 LLM 的 unlearning / 拒答训练上是同一套结构。</li>
+<li>用大模型生成对比学习的正负样本集合（近义/远义概念），优于用编码器特征算余弦相似度挑词——讲者给了一个编码器挑词翻车的具体反例（T5 特征下「裸体」的近邻是「瘦」）。凡是需要语义邻域的训练数据构造，这条优先级值得先验采用。</li>
+<li>对新架构做方法迁移时，先系统地找「作用点」而不是急着改损失：Flux 没有 cross-attention 层，旧方法的默认改动位置直接不存在；讲者逐块试出 dual-stream block 的过程说明，架构级定位实验的优先级高于损失设计。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>反向自对比损失的精确形式（温度、权重、两项如何配比）讲授未展开，需查论文原文；同样 bi-level 两层各两个 loss 的具体构成只给了功能描述。</li>
+<li>「平均高约两个点」等定量结论没有精确数值与置信区间，引用前要回论文核对表格。</li>
+<li>擦除的鲁棒性只提了 adversarial attack 一个口径；对同义词改写、拼写扰动（讲者自己举的 soccer 拼错例子）这类语义级攻击，方法的实际表现值得看论文实验部分。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「（在 Flux 里）它其实没有显式的 cross-attention 层……所以我们为什么改 dual-stream block，完全是根据经验，一个一个试出来的。」——讲者（字幕清洗）</p>
+<p>「很难说你做一个大模型时代的研究，你的假设跟你的实验效果是一下子天生符合的，我觉得这个概率是比较低的，所以大家要多做实验。」——讲者（字幕清洗）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
