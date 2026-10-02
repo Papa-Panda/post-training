@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP128 — MinT：面向百万级 LoRA 的后训练与在线推理基础设施</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP128 — MinT：面向百万级 LoRA 的后训练与在线推理基础设施</h1>
+    <p class="sub">MinT 把 LoRA adapter 而非完整基模做成训练、评测与上线的核心对象：基模常驻 GPU，训练与推理之间只交接数百 MB 量级的 adapter，从而在同一套路径上… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP128-mint-lora.html</p>
+<p>「我们为 LAURA 后训练和在线推理设计的一套基础设施」——讲者在开场对 MinT 的定位（字幕 00:25）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP128</dd><dt>标题</dt><dd>MinT-LoRA（官网预告题）；B站标题《MinT：面向百万级 LoRA 策略的训练与推理基础设施》</dd><dt>BV</dt><dd>BV1j67H6TEKL</dd><dt>时长</dt><dd>约 54 分钟（字幕末条 54:24；讲授约 33 分钟 + Q&amp;A 约 21 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>陆艺文（字幕自述「我是陆艺文，是来自 my lab 的 infer 研究员」；my lab 为专注大模型后训练的前沿实验室）</dd><dt>主题</dt><dd>LoRA 后训练与在线推理基础设施（MinT 系统）</dd><dt>同名消歧</dt><dd>另有一篇同名的 MinT 指 <em>MinT: Mind the Process in On-Policy Distillation</em>（讲 on-policy distillation 过程），与本期不同；本期是把 LoRA adapter 作为核心对象的训练与推理基础设施，请勿混淆</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1j67H6TEKL/">https://www.bilibili.com/video/BV1j67H6TEKL/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/MinT-LoRA（2026-10-02">https://qingkeai.online/blog/MinT-LoRA（2026-10-02</a> 访问返回 404，未能核对预告页内容；以上标题以 B站标题与字幕为准）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP128.txt</code>（824 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP128，已存档为 <code>transcripts/EP128.txt</code>）清洗提炼。字幕中的识别误差原样保留在存档文件中（例如 LAURA = LoRA、机模 = 基模、met = MinT、筋膜 = 基模、顺推/劝退 = 训推 等），本纪要在正文中按通行写法转写为 LoRA / 基模 / MinT / 训推，并在此统一说明；凡数字均可在字幕原文中按时间戳回查，找不到字幕出处的数字不写入。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>MinT 把 LoRA adapter 而非完整基模做成训练、评测与上线的核心对象：基模常驻 GPU，训练与推理之间只交接数百 MB 量级的 adapter，从而在同一套路径上支持 0.6B 到 1T 的基模、百万级 adapter 目录与多策略交错训练；针对 MoE 与稀疏注意力的训推不一致，分别用 R3 路由重放与 IcePop 式 token 降权/丢弃做工程化稳定。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>为什么需要百万级 LoRA：从「一个任务一个微调」到「一个基模挂海量 adapter」</h3>
+<p>讲者先把 LoRA 的常规介绍收个尾：冻住基模、只训一个低秩矩阵来调整行为。但本期要看的是另一个维度——<strong>同一个基模上挂载多个不同的 LoRA</strong>。字幕中列了三类场景：</p>
+<ol>
+<li>领域专家：除代码任务外，法律、金融等领域都需要处理专业知识的专家 LoRA。</li>
+<li>产品个性化：每个用户表达偏好不同，可以用不同 LoRA 对不同用户做个性化。</li>
+<li>工程迭代：同一任务做多种实验、多个候选与 AB 测试、以及对整个训练迭代过程做完整快照。</li>
+</ol>
+<p>当 LoRA 数量从个位数变成成千上万甚至百万级，就不能再为每一个 LoRA 复制一套基模——这是 MinT 要解决的核心问题。讲者把 MinT 定位为 LoRA 后训练与推理的统一运行服务，简单说就是 "LoRA as a Service"：用户只关心基模选型、训练数据、训练范式（SFT / RL / DPO）与评测指标，GPU 集群分配、模型状态管理、分布式并行与编排等工程细节由 MinT 封装，不应成为使用门槛。</p>
+<p>系统的工作闭环是一个 RL 循环：training worker 更新权重并写入 LoRA population（包含大量不同 adapter 的池子），rollout 侧从 population 中取最新 adapter 采样，采样数据再送回 training worker 做下一轮迭代。关键点是基模一直在 GPU 上驻留，每次训练与推理之间交接的只是 LoRA 这一部分权重——对万亿参数规模的大模型来说，也就是数百 MB 而不是数百 GB 的文件尺寸。讲者由此引出三个扩展维度，并给出 adapter 参数占比的口径：在千问三 4B、rank 32 的 adapter 上实测，单个 adapter 约占基模参数量的 3% 左右；对更大基模若只做少量风格调整，rank 可以更低、占比还可以更低。这条路径已在 MinT 上基于 GLM 5.1 训练出用户助手类 agent 模型「马卡龙 V1」，并对 GLM 5.2 的微调做了 day-0 支持。</p>
+<h3>Scale down：只交接 adapter，RL 每步交接的成本被压下来</h3>
+<p>传统全参数微调训练完要把整套权重从训练侧搬给推理侧；即便用 LoRA 训练，若训练完把 adapter 与基模权重合并再交付，交付的仍是一个完整模型，合并与传输都有成本。MinT 的做法不同：基模已在 GPU 上驻留，训练完只需传输挂载在基模上的 LoRA adapter。讲者给出实测口径：在小模型上交接时间可加速高达十几倍；模型越大，传输时间的相对倍数不像小模型那么明显，但节约时间的绝对值更大，大、小模型都有明显加速。这个加速在 RL 训练中尤其重要，因为 RL 的 rollout–update 循环每一步都要做一次交接，反复交接省下的时间非常可观。</p>
+<h3>Scale up：同一条路径从 0.6B 到 1T，以及 MoE / DSA 的训推不一致</h3>
+<p>MinT 号称用同一套 RL 训练路径支持从 0.6B 一直到 1T 的模型，共支持 6 个模型家族、27 个变体、4 种不同架构；讲者称其团队是「全世界除了智谱以外，第一个在 GLM 最新模型上进行后训练的团队」，且这与 MinT 的支持分不开。</p>
+<p>规模上去后第一个难点是 MoE 的训推不一致。MoE 每层有多个 expert，router 决定每个 token 送到哪个 expert；推理时某 token 被送到 expert 2，训练时因 router 前的数值误差被送到另一个 expert，两边的梯度就对不上，导致严重的训推不一致，且经多轮训练逐渐累积。讲者给出架构对比：在千问三这类架构上训推不一致还能控制在合理水平，但用 Moonlight 16B（DeepSeek V3 架构的小模型）时，随着训练推进训推不一致越来越大，直到整个策略崩溃。原因是 DeepSeek V3 架构的 router 对每个 expert 独立打分，得分接近时微小变化就可能翻转排名，路由选择结果关于前面的数值误差是不连续的。</p>
+<p>解法是 <strong>R3（replay router routing）</strong>：推理时把每一个 router 的选择记录下来，训练时强制重放同一条 routing。讲者强调实验表明这对高效训练 LoRA 模型非常重要：使用 R3 后 training 与 rollout 的概率分布一直保持较好对齐（mean probability difference 保持平衡），在 Math 任务上只有使用 R3 后 validation accuracy 可以持续上升；若只用 baseline 或简单的 importance sampling 做训推不一致缓解，reward 会越训越差，在 DeepSeek V3 架构模型上做 LoRA 时无法得到有效训练。</p>
+<p>第二个难点来自 <strong>DSA（DeepSeek Sparse Attention）</strong>，即 GLM 5.1 等 DeepSeek V3.2 架构新模型使用的注意力机制。DSA 有一个 indexer 机制，在每一步选择哪些历史 token 参加 attention；与 MoE routing 类似，由于前期数值误差累积，离散的选择状态会变化——例如 rollout 时对历史 token 1、3、5 做了选择，训练时却变成 2、3、4，最终当前 token 的概率就很不一样。与 MoE 的区别是：MoE 的 router 每层只做一次决定、数量较小，可以 replay；DSA 里对每一个 token 都需要 indexer 做选择，决策数量远大于 router，完整的 replay 不可行，需要一种不依赖 replay 的稳定化方案。讲者的方案参考了 GLM 5 / 5.1 原始技术报告，思路是 <strong>IcePop</strong>：对训推不一致严重的 token 进行降权或者丢弃，从而稳定梯度。实测口径是：baseline（虚线）整个 grad norm 大幅波动、训练非常不稳定；使用 IcePop 选择性丢掉训推不一致特别差的 token 后，grad norm 保持平稳，训练可以正常收敛。讲者坦言这不是一套完美的方案，但在工程上非常可行，他们在 GLM 5.1 的 LoRA RL 训练中使用该方法获得了非常好的后训练效果。</p>
+<h3>Scale out：百万级 adapter 的三级驻留与加载</h3>
+<p>当 adapter 到达百万量级，如何管理它们？讲者的思路是三级缓存 / 三层驻留机制：</p>
+<ul>
+<li>最底层是持久存储，承载整个 100 万量级的 LoRA 目录 catalog；</li>
+<li>中间是 CPU 内存缓存，单台机器上大概可以存 500 个最近使用的 adapter；</li>
+<li>最上层是 GPU，可同时进行推理的 adapter 可能就是几十个或者更少。</li>
+</ul>
+<p>加载效率上做了两点优化：一是对 MoE 模型 LoRA 中很多小的 tensor 做打包，加载时能形成 8.5 倍左右的提速；二是新的 adapter 在后台预热，不影响在线正在使用的用户。为什么需要三层？讲者给出实测数据：CPU 缓存命中时，把一个 LoRA 加载进来的 P95 延迟只有约 21 秒（字幕口径；该数值明显偏大，疑为字幕识别或讲者口误，原文如此，读者请结合上下文理解为「命中时延迟远低于冷加载」），而缓存未命中、从冷存储加载一个 LoRA 可能需要 200 多秒，两者差了整整一个量级——这正是三层设计的驱动力。把 catalog 从试验性的 1000 个扩到真正关心的 10 万量级后，warm（已在 CPU 上加载）的延迟基本不变，说明 catalog 规模本身不是大瓶颈，关键是系统如何设计以更好地命中缓存、让当前真正需要使用的 LoRA 尽可能快地加载进来。冷加载的边际成本是每个 LoRA 大概一点几秒，呈线性增长、可预测，这也是更大规模 scaling 的理论基础。基于这套设计，讲者称已成功 serve 百万级别的 LoRA，其中没有任何系统错误，大部分请求 P95 在几十秒这样相对可接受的量级。</p>
+<p>推理侧与训练侧使用 adapter 的方式不同：推理侧是空间维度的 multi-LoRA——一个推理引擎同时持有多个不同 adapter，不同请求路由到不同 adapter、共享一个基模，可以在一个 batch 里同时处理；训练侧是时间维度的 multi-LoRA——同一个 trainer、同一个基模分时切换不同 policy 的 LoRA 及其对应的优化器状态。例如 LoRA A 这个 policy 等待 rollout 时，trainer 就切到 LoRA B 去做更新，减少 GPU 空闲。为什么训练侧不用空间切分？一是训练数据量往往比较大，单个 LoRA 就可以打满整个 GPU 的显存和算力，不像推理那样有必要靠同时处理多个 LoRA 提升效率；二是算子支持层面上目前还有一些 gap。讲者同时说，训练上支持多个 LoRA 真正在时间上并行训练是可以的，也是他们正在做的工作，之后会在 infra 上不断创新以提升多策略并行训练效率。多 session 交错调度的实测结果是：在测试任务上，千问三 4B 训练三个 GRPO 策略的总时间从 51 分钟压缩到 29 分钟，加速将近两倍；在千问三 30B 这个 MoE 模型上也有类似加速效果，且峰值显存完全不变——因为基模一直驻留，只是切换 adapter 在训练；峰值显存与算力占用类似，但分时切换极大减少了 GPU 中的「泡泡」，提高整体利用率。</p>
+<h3>第三条扩展轴：数量，以及马卡龙与行业验证</h3>
+<p>讲者在技术细节之后退一步看大模型发展主线：过去更关注两条 scaling 轴——扩大模型规模（更多数据训更大参数规模的模型），以及扩展模型能力（通过 RL 在规模下不断后训练，学会更好的推理与行动）。讲者认为同样重要的还有第三条轴，也就是<strong>数量</strong>：未来可能不是训一个大模型试图解决所有问题，而是在同一个基模基础上训练海量的 LoRA 来做领域分工、个性化演化以及模型之间的继承与组合。给出的数字是：可以使用 1T 的基模，但每一个用户、每个版本只需要最多 5B 的 LoRA；现在在线产品上已经有数十个 LoRA 在同时运行，用户在产品中创建了 30 万规模的不同小应用来满足个性化需求。</p>
+<p>MinT 支撑的 C 端产品是「马卡龙」——用户个人助手性质的 agent 小应用，也是 MinT 的第一个规模化验证。愿景是 "one person, one LoRA"：MinT 支持的百万 LoRA 恰好对应百万用户规模，希望记住每一个用户的个性化能力、偏好，生成定制化 UI，适应每一个用户的对话风格。已上线的 agent 模型「马卡龙 V1 preview」被讲者称为全球首个在 GLM 5.1 上完成 LoRA RL 的 agent 模型：744B 的 GLM 5.1 基模加上 6B 的 LoRA（字幕口径作「470 744B」，此处按 744B 理解）。该模型天生支持 Mixture of LoRA 范式——针对不同任务训练多个不同 LoRA、在线对它们进行路由；在生成式 UI 编码、多轮聊天、长链路推理以及工具调度与交接上都取得了非常好的效果，并能和同类模型匹敌甚至超过。MinT 还支撑了 A2UI 技术（agent 生成可交互界面而不只是文本），这是马卡龙 app 的核心能力：传统方式是用户反复和 AI 聊天澄清需求，A2UI 是 AI 直接生成带选择器和滑动条的可交互卡片，用户点选偏好来和 AI 沟通；这个能力是在 GLM 基模上通过 LoRA RL 训练出来的，模型已在 Hugging Face 上开源。</p>
+<p>同一套「基模 + 不同 LoRA」的范式已在六个行业场景中验证，讲者逐项给数：在医疗相关的 coding 任务中把 GPU 成本降低了 90%，有 8000 多个医生在使用这样一个产品选出的定制模型；在金融客服场景中客户满意度提升了 34%，合规度也有大幅提升；在政务中政策更新周期缩短、转人工率明显下降；在最关心的个人 agent 上，不同用户创建了 30 多万个小程序；法律领域用其提供的 recipe 进行了 SFT 与 RL 训练；甚至在具身智能中，VLA 以及世界模型也可以基于 MinT 这样一套架构进行训练。</p>
+<h3>开源生态与使用方式：让 coding agent 自己跑通 MinT</h3>
+<p>MinT 的一些核心组件已贡献到开源社区，讲者重点提到提供了可自行部署的 MinT 服务包（集成到 vLLM 生态），同时提供客户端 SDK 与快速上手示例，包括大量示例与完整 recipe 的 cookbook。设计开源生态时希望是一个 AI-native 的机制：cookbook 是 coding agent 可以自己去读、自己去跑里面的例子、自己用它进行研究的；MinT 提供的 API 足够简洁且经过了大量测试，agent 确实可以在里面自己提交训练、评测筛选，然后进行研究。讲者展示了一个法律例子上 auto research 的轨迹：灰色点是 coding agent 基于 MinT 实验淘汰的候选方案，蓝色圈是保留的，折线是随时间变化的当前 SOTA，紫色是完整 benchmark 的结果；可以看到 coding agent 基于 MinT 自我迭代，整个指标不断上升，最后的版本既通过了 agent 优化的中间指标，也通过了最终完整的 benchmark。</p>
+<p>从用户角度看，一次完整的 MinT 工作流就是六步：先选择一个基模，配置数据和 reward，提交训练，导出 adapter 获得一个 id，对它进行评测，最后上线；每一步都可以通过 API、甚至在线 UI 完成。若通过代码实现也很简单，讲者展示了 SFT 与 RL 两种常用范式的核心代码：第一段是创建客户端并指定基模与 LoRA 配置；第二段是 SFT 循环，只有两行——算一下梯度、进行一下优化器更新；第三段 RL 多一个 sample 步骤，用当前 LoRA 版本采样，拿到 reward 后指定损失函数进行策略更新。整个 SFT 加 RL 的流程都可以用一套统一的客户端 API 完成。</p>
+<h3>总结与 Q&amp;A 边界</h3>
+<p>讲者总结三点：第一，MinT 的核心观点是用 LoRA adapter 作为核心对象，整个训练、评测、上线的循环都围绕 adapter，而不是完整的基模；第二，从 0.6B 模型一直支持到万亿参数模型，使用同一条路径，有百万级 LoRA 的 catalog 按需加载，可以保证整体加载效率，不需要为每一个 LoRA 复制基模；第三，已经在 GLM 5.1 的微调以及 GLM 5.2 的支持、用户端 agent 模型以及大量企业端场景中进行了实际验证。</p>
+<p>Q&amp;A 中讲者给出的几个坦白边界值得单独记下：</p>
+<ul>
+<li>与 vLLM / SGLang 等不是竞争关系，更多是生态互补；开源仓库 vil-mint（字幕口径）底层基于 vLLM 提供的引擎，MinT 更多在系统层面把现有 infra 工作组合起来，根据 multi-LoRA 需求做改进。</li>
+<li>与 Tinker 完全兼容，用户甚至可以直接 import Tinker 的客户端来使用 MinT 服务；对比优势一是第一个支持 GLM 5.1 与 GLM 5.2，二是进行了开源展示，大家能在一台机器上部署的小模型都不闭源，可以直接克隆开源代码自己部署，也可以在团队内部提供 multi-LoRA 服务。</li>
+<li>「每一个用户一个 LoRA」最大的缺点还是在成本层面：实话说现在也没有完全做到真的在产品中给每一个用户训练一个 LoRA，成本还有非常大的提升空间；相比用 context 实现个性化，LoRA 里能记住的用户偏好以及真正能干预的风格、真正影响模型行为的程度肯定是训练到模型里更彻底，他们也有 LoRA as memory 的研究工作在对比。</li>
+<li>训推一致是否必须实现精准的 bit-wise 对齐？答案是不需要，也不可能——训推至少基于现在这一套使用单独引擎、单独优化架构，不可能做到完全精确对齐；实际是带着一些训推不一致在训，先从机理上缓解一部分，对确实不可解决的训推不一致用 importance sampling 截断或丢弃一部分数据；采到大量数据其中有 80% token 可用，就是一个非常可用的训练系统。</li>
+<li>基模更换后所有 LoRA 是否都需要重新训练？目前看简单答案是是的，基模更换以后所有 LoRA 基本需要重新训练；也可以用蒸馏等方法把旧有模型中的知识传递过来；基模权重变化时原有 LoRA 如何复用，仍是一个比较 active 的研究问题。</li>
+<li>如何评估和管理僵尸 adapter 的存储与元数据维护成本、是否有自动化降级或归档机制？这涉及之后业务需求规模上来后是否需要给出第四级缓存的问题，可能还需要降级，把不需要的 adapter 放到真正冷的、成本更低的存储中。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线 / 口径</th>
+<th>结果 / 数值</th>
+<th>字幕出处</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单个 LoRA adapter 参数占比</td>
+<td>千问三 4B、rank 32 adapter 实测</td>
+<td>约 3% 的基模参数量</td>
+<td>04:56–05:16（sid 79–84）</td>
+</tr>
+<tr>
+<td>训练–推理交接加速</td>
+<td>小模型、全量权重交接</td>
+<td>高达十几倍；大模型省时绝对值更大</td>
+<td>07:57–08:22（sid 119–126）</td>
+</tr>
+<tr>
+<td>基模规模支持范围</td>
+<td>同一套 RL 训练路径</td>
+<td>0.6B 到 1T</td>
+<td>08:42–08:52（sid 131–134）</td>
+</tr>
+<tr>
+<td>支持范围</td>
+<td>6 个模型家族、27 个变体、4 种架构</td>
+<td>—</td>
+<td>08:53–09:01（sid 134–137）</td>
+</tr>
+<tr>
+<td>可支持 adapter 规模</td>
+<td>实测</td>
+<td>百万级（ $10^6$ ）不同 LoRA adapter</td>
+<td>06:00–06:09（sid 92–96）</td>
+</tr>
+<tr>
+<td>MoE 小 tensor 打包加载提速</td>
+<td>未打包加载</td>
+<td>约 8.5 倍</td>
+<td>17:20–17:23（sid 277–278）</td>
+</tr>
+<tr>
+<td>三级缓存容量</td>
+<td>CPU 内存缓存（单机）</td>
+<td>约 500 个最近使用的 adapter；GPU 同时推理几十个或更少</td>
+<td>16:50–17:06（sid 269–272）</td>
+</tr>
+<tr>
+<td>CPU 缓存命中加载延迟</td>
+<td>P95（字幕口径）</td>
+<td>约 21 秒（原文数值，与冷加载对比读）</td>
+<td>17:46–17:51（sid 285）</td>
+</tr>
+<tr>
+<td>冷存储加载延迟</td>
+<td>缓存未命中</td>
+<td>200 多秒，与命中差一个量级</td>
+<td>17:56–18:00（sid 287–288）</td>
+</tr>
+<tr>
+<td>冷加载边际成本</td>
+<td>每 LoRA</td>
+<td>一点几秒，线性增长、可预测</td>
+<td>18:47–18:51（sid 298–299）</td>
+</tr>
+<tr>
+<td>百万级 serving 结果</td>
+<td>无系统错误</td>
+<td>大部分请求 P95 在几十秒量级</td>
+<td>19:06–19:20（sid 303–306）</td>
+</tr>
+<tr>
+<td>多策略交错调度加速</td>
+<td>千问三 4B、三个 GRPO 策略依次训练 51 分钟</td>
+<td>压缩到 29 分钟，加速将近两倍；峰值显存不变</td>
+<td>22:33–22:46（sid 358–362）</td>
+</tr>
+<tr>
+<td>每用户每版本 LoRA 上限</td>
+<td>1T 基模</td>
+<td>最多 5B 的 LoRA</td>
+<td>24:40–24:45（sid 390）</td>
+</tr>
+<tr>
+<td>在线运行规模</td>
+<td>数十个 LoRA 同时运行；用户创建小应用</td>
+<td>30 万规模</td>
+<td>24:53–24:58（sid 392）</td>
+</tr>
+<tr>
+<td>马卡龙 V1 preview 构成</td>
+<td>GLM 5.1 基模 + LoRA</td>
+<td>744B 基模 + 6B LoRA（字幕口径）</td>
+<td>26:21–26:26（sid 412–413）</td>
+</tr>
+<tr>
+<td>医疗 coding 场景</td>
+<td>GPU 成本</td>
+<td>降低 90%；8000 多个医生使用</td>
+<td>28:15–28:25（sid 445–446）</td>
+</tr>
+<tr>
+<td>金融客服场景</td>
+<td>客户满意度</td>
+<td>提升 34%</td>
+<td>28:27–28:29（sid 448）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 RL infra 工作的直接启发是把「权重交接量」当成一等公民：当基模常驻、交接对象从数百 GB 压到数百 MB 时，RL 的 rollout–update 循环每步的固定开销被数量级压低，这比优化单次 kernel 更先决定端到端吞吐。凡是训推分离的 RL 系统，都值得先算一笔「每步到底搬多少字节」的账。</li>
+<li>训推一致性的工程分层值得照搬：能 replay 的离散决策（MoE routing，决策数小）就强制重放对齐；决策数大到不可 replay 的（DSA indexer），改用重要性采样式的降权/丢弃稳定梯度。先按「决策数量与可记录性」分诊，再选对齐手段，而不是一上来追求 bit-wise 对齐。</li>
+<li>百万级 adapter 的管理本质是缓存问题而非存储问题：catalog 规模本身不是瓶颈（10 万级 warm 延迟基本不变），命中率与预热策略才是。可以把「热 / 温 / 冷」三级驻留与后台预热直接迁移到任何多租户 LoRA serving 的设计评审中。</li>
+<li>训练侧多策略调度用时间维度而非空间维度：单 LoRA 已能打满 GPU 时，与其追求同卡并行，不如做分时切换填掉 rollout 等待的泡泡——千问三 4B 三个 GRPO 策略 51 分钟到 29 分钟、峰值显存不变，是这个取舍的现成证据。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>CPU 缓存命中的 P95「21 秒」与冷加载「200 多秒」在字幕中均为秒级，与常见 LoRA 加载延迟（通常秒级以内）量级不符，疑为口播或识别误差；如后续有论文或技术报告，应以书面数字为准并回填本表。</li>
+<li>DSA 的 IcePop 丢弃比例、阈值与最终保留 token 比例，讲者只给出了 grad norm 平稳的定性结论，未给具体超参；在 GLM 5.1 之外的架构上是否同样成立，字幕中没有展开。</li>
+<li>「第一个支持 GLM 5.1 / 5.2」与「全球首个在 GLM 5.1 上完成 LoRA RL 的 agent 模型」均为讲者口径，本纪要未做独立核验；正式引用前建议对照公开技术报告再确认。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我们为 LAURA 后训练和在线推理设计的一套基础设施」——讲者开场对 MinT 的定位（字幕 00:25；LAURA 为字幕对 LoRA 的识别结果，原文存档保留）</p>
+<p>「未来我们可能不是训一个大模型，试图让他去解决所有的问题，而是在同一个基模的基础上训练海量的 LoRA 来进行领域的分工、个性化的演化以及模型之间的继承与组合」——讲者对「数量」这第三条扩展轴的判词（字幕 24:18–24:33，ZA / LoRA 按上下文转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

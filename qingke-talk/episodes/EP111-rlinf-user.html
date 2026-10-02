@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP111 — RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP111 — RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统</h1>
+    <p class="sub">USER 是在 RLinf 框架上为真实世界机器人在线策略学习补的一层系统：统一硬件抽象让机器人像 GPU 一样被调度，自适应通信平面解决异地训练与点对点数据传输，全异步学习框… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP111-rlinf-user.html</p>
+<p>「我们想要像使用 GPU 一样使用机器人。」——讲者介绍统一硬件抽象层时的口号</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>111</dd><dt>标题</dt><dd>RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统</dd><dt>BV</dt><dd>BV1W6c6z3E1F</dd><dt>时长</dt><dd>约 51 分钟（讲授约 37 分钟 + Q&amp;A 约 14 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>臧宏之（清华大学交叉信息研究院本科生，之后继续在清华读博，导师汪玉、于超；字幕自述姓名作「张弘之」，从声近，官网预告页作「臧宏之」，以官网为准）</dd><dt>相关论文</dt><dd>RLinf-USER，<a href="https://arxiv.org/abs/2602.07837">https://arxiv.org/abs/2602.07837</a> （官网预告页给出）</dd><dt>相关代码</dt><dd><a href="https://github.com/RLinf/RLinf">https://github.com/RLinf/RLinf</a> （USER 在 RLinf 基础上开发，feature 持续合入主仓库）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1W6c6z3E1F/">https://www.bilibili.com/video/BV1W6c6z3E1F/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/RLinf-USER">https://qingkeai.online/blog/RLinf-USER</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP111.txt</code>（1042 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（经清洗，专名可能有识别误差）提炼。字幕中的常见识别误差包括：RLinf 作「arlif / r live」、Franka 作「FRANA」、方舟无限机械臂、HG-DAgger、π0 作「派」、SAC、EasyTier 作「easy tire」、穿越组网作「遂川」、NCCL 作「NC4L」、NCCL_MAX_CTAS 作「think weight」参数，均按上下文还原。凡讲者口径与论文版可能不同处，以下以字幕口径为准。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>USER 是在 RLinf 框架上为真实世界机器人在线策略学习补的一层系统：统一硬件抽象让机器人像 GPU 一样被调度，自适应通信平面解决异地训练与点对点数据传输，全异步学习框架加持久化 buffer 则把「交互」与「训练」彻底解耦；实验显示异步化使总训练时间缩短到同步版的 1/5 ，跨域分布式 channel 使交互时间变为原来的 1/3 。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">把笔放进橙色盒子</div><div class="farrow">→</div><div class="fnode">抓起橙盒塞进白色大盒子</div><div class="farrow">→</div><div class="fnode">扣上盖子，用来验证大模型能力</div></div>
+<h3>背景：真机在线策略学习难在哪</h3>
+<p>讲者先界定场景：真实世界（相对仿真）+ 在线（相对 offline，训练中持续与环境交互）。仿真里可以并行上千环境，但 sim-to-real gap（视觉与物理规律）使仿真训出的 policy 直接部署会掉性能；直接在真机上学是另一条路，但有三重困难：</p>
+<ol>
+<li><strong>硬件种类与接口不统一</strong>。仿真里只有 GPU/CPU 这类封装规范的硬件；真机引入机械臂后，不仅多了一类硬件，Franka、方舟无限等不同机械臂的控制接口、通信接口还各不相同。「能不能像平时分卡一样，选 0 到 4 号卡那样去用机器人」成为系统问题。</li>
+<li><strong>真机数据昂贵，样本效率是第一约束</strong>。仿真并行上千环境只需算力，真机并行上千环境需要上千台机械臂，成本高得多。这要求算法侧选高样本效率的方法。</li>
+<li><strong>reward / success 信号不明确</strong>。真实任务里「是否成功」没有仿真里现成的判据，reward 设计本身要改。</li>
+</ol>
+<p>在算法答案未统一的阶段，系统的价值是把多种算法集成到同一框架里公平比较——USER 的定位就是「系统层与学习层之间的桥梁」。</p>
+<h3>系统层之一：统一硬件抽象——像使用 GPU 一样使用机器人</h3>
+<p>整个训练流程拆成三个组件：<strong>环境</strong>（机械臂本身）、<strong>rollout</strong>（模型推理并与真实世界交互）、<strong>actor</strong>（训练节点，负责参数更新）。推理与训练主要吃 GPU，环境是机械臂。配置方式是给资源打 label 组节点组：例如 GPU 标为 4090 节点组、Franka 作为一个节点组，在右侧配置文件里写明各自落在哪个节点上。连多台机械臂只需补机械臂的 IP；异构混训也只需在环境节点组里写上两种机械臂（如某个代号 TL2 的机械臂与 Franka）的名字与所在机器，代码侧无痛切换。讲者称这套抽象的好处是「改好配置文件，就可以在代码中无痛地使用多个机械臂和多种类型的机械臂」。</p>
+<h3>系统层之二：自适应通信平面</h3>
+<p>通信层做了三件事：</p>
+<ol>
+<li><strong>穿越组网支持异地训练</strong>。借助开源工具 EasyTier：北京节点与深圳节点不在同一局域网时，两边都连上一台有公网 IP 的中继机器（如租一台云服务器只提供公网 IP），即可在节点 A、B 之间建联。这样可以「北京放训练集群、深圳放机械臂」地组织实验。</li>
+<li><strong>分布式 data channel</strong>。最朴素的实现是所有数据经 master 节点转发，master 带宽压力巨大、效率低。USER 的做法是让推理节点与机器人节点 P2P 直传，不走 master 转发，极大减轻 master 的传输负担。</li>
+<li><strong>权重同步的 SM 感知</strong>。训练后要把新权重经 NCCL 发给推理节点，但 NCCL 会占用 GPU 的 SM 资源，导致同步期间推理卡顿。对策是在配置里设置 NCCL_MAX_CTAS 这类参数，限制通信占用的 SM 数量，剩下的 SM 留给推理计算。</li>
+</ol>
+<h3>学习层之一：全异步训练流程</h3>
+<p>同步版在线策略学习的流程是「交互攒数据 → 发给训练节点 → 训练 → 同步权重 → 再交互」，交互与训练互相阻塞，两次网络更新之间的间隔被拉得很长。USER 的全异步流程让交互持续进行：攒到一点数据就发给训练节点，训练节点数据一够就不间断训练，每次训练结束即向推理节点同步权重。交互与训练互不等待，同时不间断运行。</p>
+<p>异步对算法有要求：on-policy 算法（如 PPO）要求数据新鲜度，天然更配同步；off-policy 算法与 DAgger 这类模仿学习算法对数据新鲜度没有要求，可以直接吃异步加速。讲者在 Q&amp;A 中补充：RLinf 主分支已经集成了异步 PPO，数据不太旧时仍可用，且系统支持策略版本隔离（控制采集数据与训练策略之间的版本差）。</p>
+<h3>学习层之二：持久化 buffer</h3>
+<p>off-policy 算法要把交互数据存进 buffer 供采样，buffer 越大算法上限越高，但内存有限。USER 的 buffer 设计把三层存储拼起来：</p>
+<ul>
+<li><strong>内存只存 index</strong>：所有数据的 ID 常驻内存；</li>
+<li><strong>磁盘存全量</strong>：每份数据在磁盘上都有一份备份，「磁盘有多大 buffer 就有多大」；</li>
+<li><strong>内存 cache</strong>：新数据优先驻留内存 cache，cache 满了淘汰较旧数据（磁盘仍有备份，随时可取，只是慢些）。</li>
+</ul>
+<p>这样 buffer 容量不再受单机内存限制。实验验证了 cache 的作用：以 $R$ 表示数据在内存中的占比（字幕口径）， $R$ 越大，被 cache 住的数据越多，采样效率明显越高。</p>
+<h3>学习层之三：多样的模型、算法与 reward</h3>
+<ul>
+<li><strong>模型</strong>：大小模型都支持，大模型主要支持 π0 这类 VLA 模型；</li>
+<li><strong>算法</strong>：SAC、RLPD 等 off-policy RL 算法，以及 HG-DAgger 这类带人类干预的模仿学习算法；</li>
+<li><strong>reward</strong>：三类来源——rule-based（如按到目标点的距离判定）、人类给的 reward 信号、reward model 接口。</li>
+</ul>
+<h3>实验一：正确性与大模型验证（5 个真机任务）</h3>
+<p>验证用了 5 个真实任务：peg insertion （把 3D 打印插块插入指定孔）、插插座（开场演示的任务）、拧瓶盖（对力控有要求，拧到最后很紧）、pick &amp; place（把鸭子从紫色侧抓到红色侧）、长流程任务（把笔放进橙色盒子 → 抓起橙盒塞进白色大盒子 → 扣上盖子，用来验证大模型能力）。</p>
+<p>小模型侧：peg insertion、charger 等任务很快收敛，pick &amp; place 与拧瓶盖效果也好，reward model 给信号时同样能正常收敛。大模型侧用 π0 + HG-DAgger + 人类 reward 的配置验证成功率：先做一个简单 SFT，SFT 后 pick &amp; place 成功率 23% 、table cleanup 成功率 45% （字幕 28:19–28:23），再做策略学习后两者都达到更高成功率——讲者坦言「当时因为时间所限，这个实验没有完全做完」，但趋势已经 promising。</p>
+<p>HG-DAgger 的配置下成功率本身没有意义（要保证收集的每条数据都成功），所以看的是<strong>人类干预步数</strong>：只有模型行为不符合预期时才干预，干预步数越少性能越高。训练全程人类干预步数呈下降趋势；buffer size 增长也越来越慢，说明模型接近收敛、不再需要更多数据。</p>
+<p>多机与异构训练也做了验证：两台 Franka 分别做插插座与 peg insertion，两条成功率曲线都涨得很快、短时间内收敛；异构侧一台 Franka（较稳定）加一台方舟无限机械臂（造价便宜），做按按钮任务，也在有限时间内收敛。</p>
+<h3>实验二：通信平面的跨域验证</h3>
+<p>实验 setting 把 master 节点放在北京（同时承担训练），机械臂与推理节点放在深圳。先验证穿越组网本身 work（京深两地确实可以训练），再对比集中式通信与分布式 data channel：跨域 setting 下，用 distributed channel 后，无论发送 observation 还是发送 action 的时间都大幅变短，使整个与环境交互的时间变为原来的 <strong>1/3</strong> （字幕 32:55）。讲者还跑了同城对照：跨域与同城在数据发送时间上已达到几乎相近的数量级，证明推理与机器人节点确实走了本地网络。</p>
+<h3>实验三：异步的收益</h3>
+<p>同一实验里蓝线是异步流程、红线是同步流程：整个训练时间缩短到原来的 <strong>1/5</strong> （字幕 34:09）。这个数字在两个 setting 上都成立——大模型 π0 + DAgger 与小模型 SAC，从同步改到异步，两次模型更新之间的间隔基本都是约 5 倍提升，与成功率曲线上的 1/5 提速正好对应。讲者的判断是：只要算法支持异步流程，「把整个训练流程改成异步，绝对是没有损失的」。</p>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>异步会不会导致 policy drift</strong>？取决于算法：off-policy / DAgger 不受数据来源影响，不太会导致性能下降；on-policy 需要考虑新鲜度，原始实现同步更好，但 RLinf 主分支已集成异步 PPO，数据不太旧时好用。</li>
+<li><strong>真机 RL 能否完全替代仿真 RL</strong>？讲者认为不能：仿真便宜太多（一张卡并行上千甚至上万环境），适合训基础的、common knowledge 式的技能；sim-to-real gap 靠真机 RL 做最后一步，把性能冲到接近 100% 。两者并存，真机 RL 是落地的最后一步。</li>
+<li><strong>论文里用了几台机械臂</strong>？论文结果只用了 2 台（时间赶 + 实验室机械臂数量有限），现在已试过 3–4 台同时训练。扩展瓶颈不在通信（网线直连时通信不是主要瓶颈），而在各台机械臂 setup 不尽相同、收敛速度不一，能否同时收敛还需要实验。</li>
+<li><strong>与 offline RL + sim-to-real 比样本效率有定量优势吗</strong>？讲者直言「事实上我觉得未必」。但 real RL 是目前看到能把落地成功率调到最高的方法——各种工作中能到接近 100% ；sim-to-real 只能缓解 gap，做不到 100% 。</li>
+<li><strong>在线 RL 的 exploration cost 会不会让训练时间不可接受</strong>？「是的，这肯定是真机 RL 里面最主要的一个问题。」缓解角度：从成功率已经较高的 checkpoint 起步（奖励信号明确、exploration cost 小）、算法改进（off-policy / offline 技巧结合）、以及 USER 本身想做的事——把机械臂数量 scale 上去摊薄 cost。</li>
+<li><strong>云边协同如何保证推理延迟</strong>？建议训练上云、推理放边端与机械臂实时交互；推理若只能上云，latency 要靠各种 trick，不是 USER 关注的重点。</li>
+<li><strong>灾难性遗忘</strong>？「目前还没有探索到这一步」，真机 RL 还没发展到考虑环境分布变化的阶段，落地场景更多是对单一场景 overfit。</li>
+<li><strong>机器人到 100 / 1000 台时瓶颈在哪</strong>？调度、通信、数据聚合都会成为挑战，需要持续调试与硬件场地支持。</li>
+<li><strong>不同任务能否共享 replay buffer</strong>？当前设计就是共享的、暂未区隔；区隔也简单，加个 label 即可。算法角度上，仿真多任务 RL 的经验是混在一起训就能训得很好，未必需要分开（讲者注明这是个人感受，不是严格结论）。</li>
+<li><strong>RL 更新会不会破坏 VLA 的语义泛化</strong>？讲者引了组里去年的工作（字幕作「what can RL brings for VLA」一类标题）：RL 相比 SFT 在行为泛化上好很多，对预训练获得的泛化能力有很大程度保留，「当时比较超乎我的认知」。</li>
+<li><strong>demonstration 数据与 rollout 数据如何区分</strong>？RLinf 的 RLPD 实现分两个 buffer：demo buffer 放预先采好的数据与训练过程中的人类遥操数据，replay buffer 放交互数据；不想区隔就直接去掉 demo buffer。目前还没特别支持不同的采样策略，真实场景有需要再酌情添加。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SFT 后 pick &amp; place 成功率</td>
+<td>纯 SFT</td>
+<td>23%</td>
+<td>字幕 28:19</td>
+</tr>
+<tr>
+<td>SFT 后 table cleanup 成功率</td>
+<td>纯 SFT</td>
+<td>45%</td>
+<td>字幕 28:23</td>
+</tr>
+<tr>
+<td>策略学习后成功率</td>
+<td>SFT 基线</td>
+<td>更高（实验未完全做完）</td>
+<td>字幕 28:26–28:42</td>
+</tr>
+<tr>
+<td>跨域交互时间</td>
+<td>集中式通信（京深跨域）</td>
+<td>变为原来的 1/3</td>
+<td>字幕 32:55</td>
+</tr>
+<tr>
+<td>异步总训练时间</td>
+<td>同步流程</td>
+<td>缩短到原来的 1/5</td>
+<td>字幕 34:09</td>
+</tr>
+<tr>
+<td>两次更新间隔</td>
+<td>同步流程</td>
+<td>约 5 倍提升（π0+DAgger 与 SAC 两 setting 均成立）</td>
+<td>字幕 34:36</td>
+</tr>
+<tr>
+<td>论文实验机械臂数量</td>
+<td>—</td>
+<td>2 台（现已试 3–4 台）</td>
+<td>字幕 40:35、40:51</td>
+</tr>
+<tr>
+<td>buffer 内存占比 $R$ 与采样效率</td>
+<td>$R$ 较小</td>
+<td>$R$ 越大采样效率越高</td>
+<td>字幕 35:27–35:46</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>「像使用 GPU 一样使用机器人」的抽象方式对 RL infra 是通用模板</strong>：把异构执行体（GPU、机械臂、仿真器）统一成带 label 的节点组 + 配置文件声明拓扑，env / rollout / actor 三组件解耦——这正是 LLM 侧 RL 框架（如 verl 的 resource pool）已经在做的分工，USER 把它推广到了物理执行体。</li>
+<li><strong>异步化的前提是算法对数据新鲜度不敏感</strong>：off-policy / DAgger 可以直接把交互与训练解耦拿到 5 倍提速；on-policy 要异步就必须配策略版本隔离与新鲜度控制。这个判据在 LLM post-training 里同样成立（异步 PPO / off-policy 修正的取舍）。</li>
+<li><strong>buffer 的三层存储（内存 index + 磁盘全量 + 内存 cache）</strong>是 replay buffer 容量突破内存上限的标准解，cache 占比 $R$ 直接决定采样效率——做大规模 rollout 数据管理时可直接借用。</li>
+<li><strong>权重同步的资源隔离</strong>：NCCL 通信会抢 SM 拖慢同卡推理，用 NCCL_MAX_CTAS 限制通信占用——这是 colocate 训练/推理时容易被忽略的卡顿来源。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>HG-DAgger + π0 的大模型实验未做完：策略学习后 pick &amp; place 与 table cleanup 的最终成功率字幕未给，后续可从论文（arXiv:2602.07837）补齐。</li>
+<li>多机扩展的真正瓶颈被讲者定位在「各机 setup 与收敛速度不一致」，但 3–4 台之后的实验数据尚未给出；100+ 台时调度/聚合的解法仍开放。</li>
+<li>灾难性遗忘与环境分布变化在真机 RL 里尚无人探索——USER 的持久化 buffer 理论上能支持跨任务数据复用，但与遗忘问题的关系未展开。</li>
+<li>不同任务共享 replay buffer 目前是「混训即可」的经验判断，缺少真机上的对照实验。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「能不能像我们平时分配卡的时候，选 0 到 4 号卡那样去选择使用机器人？」——讲者引出统一硬件抽象层的问题意识（字幕 04:03–04:15）</p>
+<p>「exploration cost 很大，这是在线 RL、尤其是真机 RL 里面最主要的一个问题。」——Q&amp;A 中讲者对真机在线 RL 核心代价的判断（字幕 43:02–43:09）</p>
+<p>「sim-to-real 只能缓解 gap，并不能达到百分之百；real RL 是目前能把实际落地成功率调到最高的一种方法。」——讲者对比两条路线时的结论（字幕 42:28–42:48，按干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

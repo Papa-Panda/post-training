@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP140 — DRIFT：在线自进化后训练框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP140 — DRIFT：在线自进化后训练框架</h1>
+    <p class="sub">DRIFT 回答"没有外部专家时，模型怎么靠自己的产出持续变强且不崩"：核心不是在 GRPO（RL）和 SDPO（自蒸馏）之间二选一，而是按每道题的历史通过率做难度路由——难题… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP140-drift.html</p>
+<p>"Effective self-evolution depends less on the choice between reinforcement learning and self-distillation than on when and where each signal is applied." —— DRIFT 论文 §5 结论：自进化的关键不在 RL 还是蒸馏，而在每种信号何时、用在哪</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>140（官网期，无 B站视频）</dd><dt>标题</dt><dd>DRIFT：在线自进化后训练框架——没有外部专家监督时，如何让 OPD 策略学会自我持续进化</dd><dt>BV</dt><dd>无——B站合集无对应视频（注意编号冲突：B站合集第 140 期是《鸿蒙智能体发展编年史》，与本期无关）</dd><dt>直播时间</dt><dd>2026-07-28 20:00–21:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>王颢宁（清华大学数学系博士生）、刘懿玮（巴黎萨克雷高等师范学院 MVA 研究生），均为贝壳认知智能组实习生（官网预告嘉宾介绍）</dd><dt>相关论文</dt><dd>Haisen Luo, Yiwei Liu, Haoning Wang 等（Beike / 清华 / ENS Paris-Saclay），<em>DRIFT: Difficulty Routing Self-DIstillation with Rhythm-Gated Exploration and Success BuFfer Training</em>，<a href="https://arxiv.org/abs/2606.30345（v4,">https://arxiv.org/abs/2606.30345（v4,</a> 2026-08-10）</dd><dt>相关代码</dt><dd><a href="https://github.com/LianjiaTech/drift">https://github.com/LianjiaTech/drift</a> ；项目博客 <a href="https://lianjiatech.github.io/drift/blog">https://lianjiatech.github.io/drift/blog</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/DRIFT">https://qingkeai.online/blog/DRIFT</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期为官网期，B站合集无对应视频，字幕无从获取。本纪要根据该期对应的公开材料还原——官网预告（含讲者与提纲）+ DRIFT 论文原文（arXiv:2606.30345）。Q&amp;A 即兴内容未覆盖，talk 现场对"OPD 策略"的具体表述以论文的 self-distillation 设定为准。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">8B</div><div class="l">平均</div></div></div>
+<p>DRIFT 回答"没有外部专家时，模型怎么靠自己的产出持续变强且不崩"：核心不是在 GRPO（RL）和 SDPO（自蒸馏）之间二选一，而是按<strong>每道题的历史通过率</strong>做难度路由——难题走自蒸馏（用成功缓冲里存的历史正确轨迹做 token 级纠正）、能力边界题走 RL 探索并用节奏门控放大关键决策点的更新、已掌握题减少更新；再加两阶段课程（先蒸馏热身攒缓冲、后 RL+蒸馏混合）。在五个科学推理/工具使用基准、三个模型上全面超过 GRPO 与 SDPO，Qwen3-8B 平均 79.5%（论文 Table 1）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：自进化信号不会"因材施教"</h3>
+<p>论文 §1–§2 的问题诊断很具体：</p>
+<ul>
+<li><strong>GRPO 的粗粒度</strong>：组内奖励同质（全对或全错）时优势塌陷；sequence-level 优势把更新摊到所有 token 上，定位不到决定对错的关键推理步。</li>
+<li><strong>SDPO 的一视同仁</strong>：自蒸馏把所有成功轨迹当同样监督，不区分这道题是已掌握、偶然蒙对、还是在能力边界——已掌握题被反复模仿（冗余更新扰动策略），高价值边界题强化不足，难题没有正样本时则完全没信号。</li>
+<li><strong>共同缺失</strong>：没有<strong>跨 batch 持久的题目级学习状态跟踪</strong>；同期 sample-routing 方法只看当前 batch 的即时结果，且高质量正确解不跨 batch 保存复用。</li>
+</ul>
+<p>一句话：信号分配不随模型能力演化而调整，是现有自进化范式不稳的根源。</p>
+<h3>方法/设计：两层信号精修</h3>
+<p>DRIFT 的三个组件互锁（论文 §3）：</p>
+<ol>
+<li><strong>动态难度路由（Difficulty Routing）</strong>：用每道题的<strong>历史通过率</strong>估计掌握程度并分流——难题路由到自蒸馏分支，用成功兄弟轨迹（ $\mathrm{sib}^{+}$ ）提供 token 级纠正；能力边界题路由到 GRPO 分支做探索；稳定做对的题降低更新强度，避免无谓扰动。</li>
+<li><strong>节奏门控探索（Rhythm Gating）</strong>：只在难度路由的 GRPO 分支上生效的 token 级调制，利用 teacher–student 不确定性动态，在学生决策仍不稳定的位置<strong>选择性放大已验证的策略创新</strong>，鼓励在成功边界附近变异、同时保住已有推理模式（论文称之为 structure-preserving exploration）。</li>
+<li><strong>成功缓冲 + 两阶段课程（Success Buffer + Two-Stage Curriculum）</strong>：跨 batch 保存高质量正确轨迹作为蒸馏参考，让当前 batch 很少做对的难题也能吃到历史成功经验；课程第一阶段以自蒸馏快速热身并积累缓冲，第二阶段切换到蒸馏+RL 混合的稳定优化。</li>
+</ol>
+<p>其自蒸馏分支沿用 SDPO 的设定：教师是"条件化在成功兄弟轨迹等反馈 $f$ 上的自身策略"，学生与教师在每个 prefix 上用 Jensen–Shannon 散度对齐（论文 §2.1 采用 JSD，理由是其对称性利于保探索与稳定）。</p>
+<h3>实验/实战（论文 §4）</h3>
+<p>设置：Qwen3-8B 为主模型，另有 Qwen3-4B 与 OLMo3-7B 验证跨规模/跨家族（论文称"三个模型规模"）；五个基准是 SciKnowEval 的 Biology、Chemistry、Materials、Physics 推理子集加 Tool Use（ToolAlpaca 设定）；指标为 mean@16；8×H200 训练 400+ 步。对照 GRPO、SDPO（均以 SDPO 官方框架复现）、SRPO、DistIL、SC-SDPO、PGPO。</p>
+<ul>
+<li><strong>主结果（Table 1）</strong>：Qwen3-8B 上 DRIFT 五基准平均 79.5%，比最强基线 SRPO 高 2.1 点，比底座起点 49.5% 高 30.0 点，且每个单项都排进前二——不是靠单项拉平均。Tool Use 提升最大（79.2%）：论文解释是工具调用的正确性由 schema 与参数格式定义，成功示范可跨样本干净迁移；STEM 知识更依赖具体题目，增益相对温和。</li>
+<li><strong>跨规模（Table 2）</strong>：Qwen3-4B 平均 74.6%、OLMo3-7B 平均 72.8%，均为最高；且<strong>起点越弱增益越大</strong>——OLMo3-7B（底座 30.5%）DRIFT 提升 42.3 点、领先在线 GRPO 约 12 点，因为正样本稀缺时成功缓冲的特权回放恰好补上 GRPO 优势塌陷的空洞。对 SRPO 的领先随规模扩大（4B +0.4 → 8B +2.1），论文解读为"自教能力随规模涌现"。</li>
+<li><strong>消融（Table 3）</strong>：去掉难度路由平均掉到 74.1%（Biology 与 Tool Use 掉得最明显）；去掉成功缓冲 74.9%；去掉热身阶段 71.7%（早期能力引导与缓冲积累是后续稳定的前提）。</li>
+<li><strong>训练动态（§4.3）</strong>：actor 熵早期上升、约 200 步后稳定，响应长度有界；缓冲快速增长后饱和；简单题占比渐升、中等题始终占主导——路由决策随能力演化持续调整。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>五基准平均（Qwen3-8B）</td>
+<td>最强基线 SRPO 77.4%</td>
+<td>DRIFT 79.5%</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>五基准平均（Qwen3-8B）</td>
+<td>复现 SDPO 72.0%、GRPO 70.0%*</td>
+<td>DRIFT 分别 +7.5 / +9.5 点</td>
+<td>论文 Table 1、Abstract（*为引用值）</td>
+</tr>
+<tr>
+<td>Tool Use（Qwen3-8B）</td>
+<td>复现 SDPO 67.7%</td>
+<td>DRIFT 79.2%（+11.5）</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>相对底座提升（Qwen3-8B）</td>
+<td>起点平均 49.5%</td>
+<td>+30.0 点至 79.5%</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>Qwen3-4B / OLMo3-7B 平均</td>
+<td>各自最强基线</td>
+<td>DRIFT 74.6% / 72.8%（OLMo3-7B 相对底座 +42.3 点）</td>
+<td>论文 Table 2</td>
+</tr>
+<tr>
+<td>消融：去难度路由 / 去成功缓冲 / 去热身</td>
+<td>完整 DRIFT 79.5%</td>
+<td>74.1% / 74.9% / 71.7%</td>
+<td>论文 Table 3</td>
+</tr>
+<tr>
+<td>训练配置</td>
+<td>—</td>
+<td>8×H200，400+ 步，mean@16 评测</td>
+<td>论文 §4.1</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>题目级历史通过率是廉价的课程学习信号</strong>：在现有 GRPO 流水线里维护一个 per-problem pass-rate 状态，按难度分流"蒸馏/探索/跳过"，不需要改奖励函数就能减少已掌握题上的冗余更新——对 coding RL 的题目池同样适用。</li>
+<li><strong>成功缓冲 = 在线数据的跨 batch 回放</strong>：把历史正确轨迹存下来给难题做蒸馏参考，本质是把"这一 batch 没采样到的正样本"补回来；对 agentic 任务里稀疏成功轨迹的复用是直接可借的 infra 件。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：</li>
+<li>路由决策依赖持久状态（per-problem 历史、成功缓冲），这要求 RL 训练系统把数据侧状态做成可checkpoint 的一等公民，而不是无状态的 batch 流——状态管理成本要计入框架选型。</li>
+<li>论文特意按训练步数而非墙钟时间报告结果（§4.1），方便跨硬件复现对比；自研框架的实验记录值得照此规范。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：节奏门控利用的 "privileged teacher–student uncertainty" 中，教师是条件化在反馈 $f$ 上的自身策略——在没有任何外部 verifier 的纯自进化设定下， $f$ 的来源与可靠性如何保证不被模型自己的错误成功污染缓冲？想细看论文 §3 与附录的实现。</li>
+<li>现场内容不可还原：讲者对"RL 与蒸馏何时切换"的现场判据、AMA 讨论无法从论文推知；若 B站后续补录视频，应以视频为准修订本纪要。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"training signals are allocated suboptimally: already-mastered problems keep receiving redundant updates, hard problems fail to yield reliable supervision, and high-value boundary cases are under-explored" —— 论文 §1 对现有自进化范式的一句诊断</p>
+<p>"when positive samples are scarce, the privileged replay from the success buffer fills exactly the void left by GRPO's advantage collapse" —— 论文 §4.2，成功缓冲在弱起点模型上增益最大的机制解释</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

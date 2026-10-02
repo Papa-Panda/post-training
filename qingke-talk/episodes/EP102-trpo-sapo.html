@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP102 — 从 TRPO 到 SAPO：大模型 RL 算法演进</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP102 — 从 TRPO 到 SAPO：大模型 RL 算法演进</h1>
+    <p class="sub">这期是一条算法演进史：从 TRPO 的信任域思想出发，经 PPO 的硬裁剪、GRPO 的去 critic、GSPO 的序列级比率，走到 SAPO——用温度可控的 sigmoid… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP102-trpo-sapo.html</p>
+<p>"While all methods may ultimately exhibit signs of instability, SAPO sustains coherent learning for a longer duration and reaches higher Pass@1 accuracy before divergence." —— SAPO 论文 §1 对受控实验的总结</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>102（官网期，无 B站视频）</dd><dt>标题</dt><dd>从 TRPO 到 SAPO：大模型 RL 算法演进</dd><dt>BV</dt><dd>无——B站合集无对应视频（注意编号冲突：B站合集第 102 期是《Megrez2：更轻更快，但更强的推理VLM》，与本期无关）</dd><dt>直播时间</dt><dd>2026-01-10 10:00–11:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>高畅（SAPO 作者、通义千问算法工程师，香港中文大学博士，Qwen3、Qwen3-VL 系列模型核心贡献者；官网预告嘉宾介绍）</dd><dt>相关论文</dt><dd>Chang Gao, Chujie Zheng, Xiong-Hui Chen 等（Qwen Team, Alibaba），<em>Soft Adaptive Policy Optimization</em>，<a href="https://arxiv.org/abs/2511.20347（v2,">https://arxiv.org/abs/2511.20347（v2,</a> 2025-12-01）</dd><dt>相关代码</dt><dd>论文未附公开代码链接；SAPO 已用于 Qwen3-VL 系列模型的实际训练（论文 §5.2）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/SAPO">https://qingkeai.online/blog/SAPO</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期为官网期，B站合集无对应视频，字幕无从获取。本纪要根据该期对应的公开材料还原——官网预告（含讲者与提纲）+ SAPO 论文原文（arXiv:2511.20347）。演进主线（TRPO→PPO→GRPO→GSPO）以官网预告的讲授提纲为准，SAPO 的公式与实验结论以论文为准（预告文中的个别公式与论文不一致时从论文）。AMA 环节与现场发挥未覆盖。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期是一条算法演进史：从 TRPO 的信任域思想出发，经 PPO 的硬裁剪、GRPO 的去 critic、GSPO 的序列级比率，走到 SAPO——用温度可控的 sigmoid 软门控替代"非黑即白"的硬裁剪，并对正/负优势 token 用非对称温度，让 off-policy 程度不同的 token 得到连续衰减的梯度权重，从而同时保住序列级一致性与 token 级自适应性，在 Qwen3-30B-A3B 与 Qwen3-VL 训练中比 GSPO/GRPO 更稳、终点更高。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：一切围绕"信任域怎么落地"</h3>
+<p>按官网预告的提纲，讲授主线是四个阶段：</p>
+<ol>
+<li><strong>TRPO（理论基石）</strong>：用 KL 散度约束把策略更新限制在信任域内，保证单调改进；但需要二阶信息，无法直接用于大模型。</li>
+<li><strong>PPO（实用近似）</strong>：用裁剪（clipping）把重要性比率 $r_t(\theta)$ 限制在 $1-\epsilon$ 到 $1+\epsilon$ 之间，一阶近似信任域；代价是需要同时训练价值模型。</li>
+<li><strong>GRPO（去 critic）</strong>：同一 prompt 采样一组响应，用组内奖励的均值与标准差构造优势 $\hat{A}_i$ ，省掉价值模型；但 token 级重要性比率方差大（论文 §1：MoE 模型中路由异质性与长响应会进一步放大），硬裁剪陷入两难——裁紧了有效样本太少，裁松了 off-policy 噪声梯度进来。</li>
+<li><strong>GSPO（序列级比率）</strong>：把比率换成长度归一化的序列似然比 $s_i(\theta)$ ，在序列粒度上裁剪，MoE 上更稳；但一条序列里只要有少数高度 off-policy 的 token，整条序列的梯度都被压掉，样本效率受损（官网预告把 GSPO 的局限概括为"硬裁剪浪费有效样本"）。</li>
+</ol>
+<p>SAPO 要解决的正是这个两难：<strong>硬裁剪对 off-policy 样本的处理是 0/1 式的，有效学习信号和噪声一起被扔掉</strong>。</p>
+<h3>方法/设计：软门控 + 非对称温度</h3>
+<p>SAPO（Soft Adaptive Policy Optimization）保留 GRPO 的分组优势估计，只替换梯度加权方式（论文 §3，Eq.5–6）。目标为：</p>
+<p>$$\mathcal{J}(\theta)=\mathbb{E}\Big[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{|y_i|}\sum_{t=1}^{|y_i|}f_{i,t}\big(r_{i,t}(\theta)\big)\,\hat{A}_{i,t}\Big]$$</p>
+<p>其中软门控函数为：</p>
+<p>$$f_{i,t}(x)=\sigma\big(\tau_{i,t}(x-1)\big)\cdot\frac{4}{\tau_{i,t}}$$</p>
+<p>这里 $\sigma$ 是 sigmoid 函数， $r_{i,t}(\theta)$ 是 token 级重要性比率，温度 $\tau_{i,t}$ 按优势符号取 $\tau_{pos}$ 或 $\tau_{neg}$ 。求导后每个 token 的梯度权重是 $w_{i,t}(\theta)=4p_{i,t}(\theta)\big(1-p_{i,t}(\theta)\big)$ ，其中 $p_{i,t}(\theta)=\sigma\big(\tau_{i,t}(r_{i,t}(\theta)-1)\big)$ （Eq.7–8）：权重在 $r_{i,t}(\theta)=1$ （on-policy 点）取峰值 1，向两侧近似指数衰减——这是一个<strong>连续信任域</strong>：偏离越远权重越小，但不像硬裁剪那样直接归零。</p>
+<p>三个关键设计判断：</p>
+<ul>
+<li><strong>非对称温度是必需的</strong>：论文 §3 从 logit 梯度传播论证——负优势更新会同时抬高大量未采样 token 的 logit，比正优势更新更容易引入不稳定，因此令 $\tau_{neg}&gt;\tau_{pos}$ ，让负 token 的梯度衰减更快。</li>
+<li><strong>序列一致性自动涌现</strong>：在小步更新、序列内 token log-ratio 离散度低的常见条件下，token 门控的平均会收敛为一个光滑的序列级门控（ $\mathrm{sech}^2$ 形式），退化为 GSPO 式的序列优化但信任域连续；条件不满足时则逐 token 只压"出格"的 token，保住同序列里 near-on-policy token 的信号。</li>
+<li><strong>不需要 routing replay</strong>：对照的 GRPO-R2 是"GRPO + routing replay"（为稳定 MoE 训练引入的工程手段），SAPO 不依赖它即可稳定，论文明确这降低了 RL 系统的工程开销。</li>
+</ul>
+<h3>实验/实战（论文 §5）</h3>
+<p><strong>受控实验（§5.1）</strong>：从 Qwen3-30B-A3B-Base 冷启动、在数学推理数据上微调，评测 AIME25、HMMT25、BeyondAIME（均为 16 采样平均 Pass@1）。SAPO 取 $\tau_{pos}=1.0$ 、 $\tau_{neg}=1.05$ 。结果（论文以训练曲线呈现，Fig.4）：GSPO 与 GRPO-R2 都出现<strong>早期训练崩溃</strong>，SAPO 全程稳定且最终性能更高。温度消融（Fig.5）： $\tau_{neg}=1.05&gt;\tau_{pos}=1.0$ 最稳， $\tau_{neg}=\tau_{pos}=1.0$ 次之， $\tau_{neg}=0.95&lt;\tau_{pos}$ 显著不稳定——非对称方向反了直接翻车。</p>
+<p><strong>Qwen3-VL 实际训练（§5.2）</strong>：三种算法从同一个 Qwen3-VL-30B-A3B 冷启动 checkpoint 出发，在文本+多模态混合任务（数学、代码、逻辑推理）上训练，评测 AIME25（Pass@1，32 采样）、LiveCodeBench v6（8 采样）、ZebraLogic、MathVision。SAPO 在同等算力预算下训练奖励与四个验证基准全面优于 GSPO 与 GRPO-R2（Fig.6）；论文称 SAPO 在不同规模、MoE 与 dense 架构上均有一致收益，并已用于 Qwen3-VL 系列的实际训练。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>温度设置 $\tau_{pos}$ / $\tau_{neg}$</td>
+<td>—</td>
+<td>1.0 / 1.05</td>
+<td>论文 §5.1</td>
+</tr>
+<tr>
+<td>温度方向消融 $\tau_{neg}=0.95&lt;\tau_{pos}$</td>
+<td>$\tau_{neg}=1.05$ 最稳</td>
+<td>显著不稳定</td>
+<td>论文 §5.1、Fig.5</td>
+</tr>
+<tr>
+<td>早期训练崩溃</td>
+<td>GSPO、GRPO-R2 均出现</td>
+<td>SAPO 未出现、全程稳定</td>
+<td>论文 §5.1、Fig.4</td>
+</tr>
+<tr>
+<td>Routing replay 依赖</td>
+<td>GRPO-R2 需要</td>
+<td>SAPO 不需要</td>
+<td>论文 §5.1</td>
+</tr>
+<tr>
+<td>受控实验底座与评测</td>
+<td>Qwen3-30B-A3B-Base 冷启动</td>
+<td>AIME25 / HMMT25 / BeyondAIME，16 采样平均 Pass@1</td>
+<td>论文 §5.1</td>
+</tr>
+<tr>
+<td>Qwen3-VL-30B-A3B 对比</td>
+<td>GSPO、GRPO-R2</td>
+<td>SAPO 同等算力下四基准全面更优</td>
+<td>论文 §5.2、Fig.6</td>
+</tr>
+</tbody>
+</table>
+<p>注：论文实验以训练曲线形式报告终点对比，未给出单一终点数值表，上表只写文中可确证的设置与定性结论，不抄图估数。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的 1-2 个直接可试的点：</li>
+<li><strong>把硬裁剪换成软门控是低侵入改动</strong>：GRPO/GSPO 框架里只需把 clip 换成 sigmoid 门控加权（峰值归一化到 on-policy 点为 1），即可回收被整条裁掉的样本信号；在 MoE 或长响应场景下尤其值得试。</li>
+<li><strong>负优势 token 单独更强的衰减</strong>： $\tau_{neg}&gt;\tau_{pos}$ 这个非对称设计有明确的 logit 梯度论证，且方向反了会显著不稳定——调参时先固定方向再调幅度。</li>
+<li>Infra 视角（扩展性 / 成本 / 评测自动化）的启发：</li>
+<li>SAPO 不依赖 routing replay 就能稳定 MoE 训练，直接减少 RL 系统里一类工程补丁；评估新算法时"少一个稳定化 trick"本身就是infra 成本收益。</li>
+<li>连续信任域让"有效样本数"随训练平滑变化，监控侧可以盯门控权重的分布（均值/尾部）作为 off-policy 程度的实时探针，比只看 clip fraction 更细。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>没看懂的 / 想深挖的 1 个问题：官网预告还提到 BAPO（动态裁剪边界）与 DeepSeek-V3.2 的序列掩码等同期改进，论文未做对比——软门控与"动态边界/掩码过滤"在同一训练设置下谁更稳、能否叠加，值得找复现实验核对。</li>
+<li>现场内容不可还原：TRPO 部分的讲授深度、AMA 问答无法从论文推知；若 B站后续补录视频，应以视频为准修订本纪要。</li>
+<li>论文终点数值只在曲线图里：如需精确终点 Pass@1，需读 Fig.4/Fig.6 原图估读，本纪要未做。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"SAPO selectively down-weights only the offending tokens and preserves the learning signal from the near-on-policy ones, improving sample efficiency." —— 论文 Abstract，软门控相对 GSPO 整条压制的核心区别</p>
+<p>"negative updates tend to increase the logits of many inappropriate tokens and are therefore more prone to introduce instability than positive updates." —— 论文 §1，非对称温度设计的第一性理由</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

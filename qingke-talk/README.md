@@ -22,10 +22,19 @@
 | 78 | 从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体 | ✅ 要点已提炼 |
 | 83 | 统一 SFT & RL：迈向大语言模型后训练的统一视角 | ✅ 要点已提炼 |
 | 101 | MiniMax M2.1：Agent 后训练经验与认知 | ✅ 要点已提炼 |
+| 102 | 从 TRPO 到 SAPO：大模型 RL 算法演进 | ✅ 要点已提炼 |
+| 111 | RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统 | ✅ 要点已提炼 |
+| 123 | DeepSeek V4 模型在 SGLang 中的系统级优化与全栈适配 | ✅ 要点已提炼 |
 | 125 | 重探 On-Policy Distillation（OPD）：三类典型失败以及修复路径 | ✅ 要点已提炼 |
 | 126 | STream3R & 4RC：面向几何与运动理解的流式前馈 3D/4D 重建 | ✅ 要点已提炼 |
+| 128 | MinT：面向百万级 LoRA 策略的训练与推理基础设施 | ✅ 要点已提炼 |
+| 133 | VeRL-Omni：基于VeRL及vLLM-Omni构建的面向多模态生成模型的开源 RL 后训练框架 | ✅ 要点已提炼 |
+| 140 | DRIFT：在线自进化后训练框架 | ✅ 要点已提炼 |
+| 145 | JitRL——无需梯度更新的即时强化学习 | ✅ 要点已提炼 |
+| 152 | 如何在真实 Coding Agent Harness 中接入 RL？ | ✅ 要点已提炼 |
 | 154 | Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe | ✅ 要点已提炼 |
 | 155 | SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战 | ✅ 要点已提炼 |
+| 156 | 聊聊自我改进、递归自我改进（RSI），以及与自博弈的关系 | ✅ 要点已提炼 |
 | B106 | Intern-S1：科学多模态基础模型（B站合集期号） | ✅ 要点已提炼 |
 | B124 | 拒绝阈值化：迈向共生关系的新型人机信任（B站合集期号） | ✅ 要点已提炼 |
 
@@ -37,6 +46,7 @@
 - 56 期官网有预告但合集无视频，记为 official-only；
 - 52 条视频为合集独有，期号记为 `B<n>`。
 - 例：官网 106 期 GDPO、124 期 Scaling Law 均无合集视频；合集的 106 是 Intern-S1、124 是人机信任，两场另有纪要（B106/B124）。
+- 2026-10-02 复核发现：RollArt、重要性采样与熵调控、OPD 反直觉、MinT-OPD、Harness Engineering 五条 B站独有期此前登记的 BV 实际属于官网对应期视频，其真实 BV 待重新枚举合集确认（索引备注列已标注）。
 
 ## 建议补看（RL infra 主线相关，往期）
 
