@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEETUP-verl — verl: An Open-Source Large-Scale LLM RL Framework for Agentic Tasks</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>MEETUP-verl — verl: An Open-Source Large-Scale LLM RL Framework for Agentic Tasks</h1>
+    <p class="sub">这场 23 分钟的线下分享把 verl 放回它最原始的定位：一个以「RL = dataflow」为抽象原点的框架。讲者用 Hybrid Controller（单控制器编排 + … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/MEETUP-verl.html</p>
+<p>「最后可能来点面条，然后就是这 verl 。」——讲者自谦本场是线下 Meetup 的收尾分享（字幕 00:48–00:55 转写）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>活动归属</dt><dd>2025-08-24「LLM RL &amp; RL Infra」线下 Meetup（青稞社区线下分享，本场为收尾场；与 B 站线上合集 sid=6759789 同系列）</dd><dt>标题</dt><dd>verl: An Open-Source Large-Scale LLM RL Framework for Agentic Tasks</dd><dt>BV</dt><dd>BV1wbCFB1E7e</dd><dt>时长</dt><dd>约 1372 秒（约 22 分 52 秒，字幕时间戳至 22:50）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>方家瑞（字节跳动，verl 团队；字幕 00:00 自述「我是方家瑞，来自字节跳动」，本场由他代 verl 团队现场分享；具体组内头衔以公开资料为准）</dd><dt>相关框架</dt><dd>verl（HybridFlow），<a href="https://github.com/verl-project/verl（字幕以「VR">https://github.com/verl-project/verl（字幕以「VR</a> / word / 沃尔」等音近词指代，均已按官方拼写还原）</dd><dt>B 站链接</dt><dd><a href="https://www.bilibili.com/video/BV1wbCFB1E7e/">https://www.bilibili.com/video/BV1wbCFB1E7e/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/MEETUP-VERL.txt</code>（577 条，带时间戳，来源为 B 站 AI 字幕，生成日期 2026-10-02）</dd><dt>关联期号</dt><dd>本仓库 EP049 已收录 verl 的源码导读版（同为 verl / HybridFlow 线的互补一讲），本篇为线下 Meetup 的框架总览 + 最近更新版（讲者与 EP049 不同，具体分工见「疑问 / 下一步」）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B 站 AI 字幕原文（已存档）清洗提炼。字幕中「VR / word / 沃尔」为 verl 的 AI 字幕误识、「史莱姆」为 slime、「ROU / rot」为 rollout、「麦克 / mc tron」为 Megatron、「deep sick」为 DeepSeek、「千问」为 Qwen、「BOAD / RT / ATR」等均为误识，已在纪要中按上下文还原为官方拼写；方家瑞、张弛等自述姓名以字幕原文为准，正式信息以公开资料为准。凡数字标「字幕」即为讲授现场口径；EP049 论文口径数字（如 HybridFlow 吞吐）未在此重复，详见 EP049。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">671B</div><div class="l">MoE 规模</div></div></div>
+<p>这场 23 分钟的线下分享把 verl 放回它最原始的定位：一个以「RL = dataflow」为抽象原点的框架。讲者用 Hybrid Controller（单控制器编排 + 节点内 SPMD 执行）与 Hybrid Engine（rollout 与 trainer 同资源异并行、靠 reshard 自动搬运 activations/参数）两个设计，说清 verl 为什么能用十几行代码写 GRPO/PPO、又能扛住 671B MoE 规模；分享的另一半是 2025 年上半年的更新清单：DeepSeek 671B / Qwen 235B 的可跑通规模、server-based 异步 rollout 与 partial rollout、agent loop 与 MCP/tool-use 配方、角色-backend 解耦与 Megatron 强化，以及 Q3 的 partial rollout / 全异步、TRKT-PPO 与 SWE-bench 配方路线。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：两拨人做这个框架</h3>
+<p>讲者开场先把做 LLM RL 的人分成两拨：一拨是算法背景（他点名前面分享的算法同学），从负载与算法目标出发设计系统；另一拨是系统背景出身（如 slime 的子林、verl 的张弛——后者之前做 FPGA、对 data flow 特别熟），从资源抽象与执行引擎出发做框架。verl 属于后者，它的愿景不是「再发明一个 RL 算法」，而是「让用户只管指定 dataflow 图和算法数学行为，底层 kernel 与并行优化交给框架」。</p>
+<p>规模语境也直接给了：字节内部除预训练外，大部分后训练的 RL 计算量已远超 SFT 与持续训练，多模态（图像、视频、音乐）都在用 RL。verl 是在这种内部需求里长大、又恰好踩中开源风口的项目，讲者称它是 R1 之后可能最大的受益者（开源项目）。</p>
+<h3>设计原点：RL 是 dataflow，每个节点都是分布式程序</h3>
+<p>讲者给 verl 的第一性抽象是：RL 是一个 dataflow。每个阶段（generation/rollout、reward、reference、advantage、update）是一个节点，节点之间有边和依赖；与傳統 RL 不同，每个节点内部已经不是单机程序，而是分布式程序（大模型 + 长 context，rollout 与 trainer 各自都要分布式）。这带来两个结构性难题：</p>
+<ol>
+<li><strong>依赖与编排复杂</strong>：rollout 与 reverse/reference 之间有依赖，内存塞不下要换入换出，资源受限时「怎么合理排布不同阶段的模型与任务」本身就是调度问题。</li>
+<li><strong>并行策略异构</strong>：rollout 与 trainer 的最优并行度通常不同（讲者举例：训练用 TP4/DP2/PP1，generation 用 TP2/DP4/PP1 的切分组合），中间需要 parameter reshard 与数据重组。</li>
+</ol>
+<p>verl 用两个对应设计回应这两点——Hybrid Controller 管编排（用什么编程模型），Hybrid Engine 管执行（不同并行之间怎么高效搬运）。</p>
+<h3>Hybrid Controller：单控制器编排、节点内多控制器执行</h3>
+<p>讲者溯源到 Google Pathways（2022 年初，540B 模型那篇）里的两种范式：</p>
+<ul>
+<li><strong>Single Controller（单控制器）</strong>：一个中心化控制器管理所有 worker，worker 可执行不同程序，即 MPMD 范式；适合描述 RL 这种节点异构的 dataflow。</li>
+<li><strong>Multi Controller（多控制器）</strong>：类 MPI 的 SPMD 范式，每个进程跑同一程序的不同数据分片；PyTorch DDP/FSDP、Megatron 3D 并行都是这一类，适合节点内部的训练/推理执行。</li>
+</ul>
+<p>verl 的 Hybrid Controller 把两者拼起来：<strong>顶层用 single controller 把 dataflow 编排写成近似单机代码</strong>（用户只操作控制面，讲者称 GRPO/PPO 「可能十几二十行就能实现一个比较复杂的流程」），<strong>每个节点内部切换到 multi controller 去跑成熟的 SPMD 后端</strong>（rollout 的推理引擎本质是 multi controller 优化，trainer 的 FSDP/Megatron 同样）。这样复用了既有推理/训练引擎的并行优化，又保留了上层编排的灵活性。讲者强调，这套编程模型现在「基本所有 LLM RL 框架也都采用了」。</p>
+<h3>Hybrid Engine：rollout 与 trainer 同资源、异并行，自动 reshard</h3>
+<p>Hybrid Engine（HybridFlow 论文的第二大设计，讲者说明这一思路最早由 DeepSpeed 提出同类想法，verl 把它「做得比较极致」）解决的是：rollout 与 trainer 部署在同一批计算资源上，但两者最优并行度不同，于是每次切换都要在不同并行布局之间重组参数与 activations。</p>
+<p>verl 的做法是提供 decorator 形式的语法糖：用户只声明每个组件期望的并行方式（例如 3D 并行或 DP），框架在后台自动处理 gather → reshard → scatter 的通信，把「不同并行度之间要传什么、按什么顺序传」的细节封起来。论文里进一步说可针对负载与资源规模搜最优并行方案；讲者现场的评价是「当时大家对它应用性评价非常高」，8 卡/16 卡规模下当时性能领先。这一设计后来也是 verl 被工业界严肃项目选用的原因之一：切换成本低、封装完整。</p>
+<h3>verl 为什么成功：几个小而关键的早期决定</h3>
+<p>讲者明确说，除了 HybridFlow 论文的两大创新，verl 的成功还有一批细节：</p>
+<ul>
+<li><strong>API 早兼容</strong>：很早就兼容 Megatron、FSDP、vLLM、SGLang 等后端，而不是自成封闭生态。</li>
+<li><strong>灵活的 device mapping</strong>：既支持分离部署，也支持 hybrid（同资源）部署，不锁死一种拓扑。</li>
+<li><strong>与 DAPO 的协同出口</strong>：verl 发布时即与 DAPO 相关工作衔接（讲者称「DAPO 通过 verl 做了一个出口，给项目导入了不少流量」；按：DAPO 的论文与开源在 2025 年由字节 Seed 等团队发布，细节以论文为准）。</li>
+<li><strong>性能锚点</strong>：靠 3D Hybrid Engine 在小规模上打出领先性能，建立早期口碑。</li>
+</ul>
+<p>另一个定位判断：verl 把自己做成 researcher（易改、功能全、知名度高，高校发 paper 优先选）与工业界用户（稳定性、规模支持）的二元汇合点。它天然在训练框架、推理框架、硬件厂商、agent 研究者之间形成一个社区——讲者提及团队每周四有公开 Zoom meeting 供各方参与。</p>
+<h3>最近更新（2025 上半年）：大 MoE 支持</h3>
+<p>讲者说这是最近半年最重要的 updates 之一。团队在 6 月之前花了很大功夫让 DeepSeek 671B 与 Qwen 235B 两类大 MoE 能在 verl 上跑起来、loss 曲线正确。现场给的规模数字：</p>
+<ul>
+<li><strong>DeepSeek 671B</strong>：可在 <strong>96 张 H20</strong> 上跑起来（字幕口径），但 MFU 仍偏低，后续在持续优化。</li>
+<li><strong>Qwen 235B</strong>：可在 <strong>32 张 A100</strong> 上跑起来（字幕中「32 张 AHR0」，按上下文还原为 A100；讲者只给「能跑起来」，同样强调 MFU 偏低）。</li>
+</ul>
+<p>讲者对这两条的定位很克制：意义不在「跑得快」，而在「显著降低了做 SOTA 模型 RL 的门槛」，让更多团队能对当红开源权重做 RL 实验。</p>
+<h3>最近更新：从同步 rollout 到 server-based 异步与 partial rollout</h3>
+<p>原始 verl 是同步的：先全量 rollout、同步、再 trainer 更新。讲者承认「如果你是做算法的人设计的，肯定第一时间就不会这样」——同步意味着 GPU 要等最慢的样本，工具调用的 IO 开销也无法与计算重叠。</p>
+<p>最近半年的 rollout 升级是把 LLM inference engine 做成 <strong>server-based</strong>：engine 以 server 形态常驻，client 按需发请求，于是可以实现：</p>
+<ul>
+<li><strong>Async rollout（A-think，字幕音）</strong>：tool calling 等 IO 开销与计算重叠，GPU 不再整批等待。</li>
+<li><strong>Partial rollout</strong>：长样本不必等全组完成，支持分离式「rollout 不间断、 trainer 攒够 batch 就更新」的全异步方案（讲者在 Q3 路线里点名这一管线正在完善，会很快支持与 AREAL 类似的全异步方式）。</li>
+</ul>
+<p>讲者的坐标很清楚：同步是 verl 的出发点，不是它的主张；异步化（尤其在 agent 场景下）是这一代框架的公共必修课，前面的分享（讲者点名 AREAL）在这条线走得靠前，verl 正在补齐。</p>
+<h3>最近更新：agent 生态——tool use、sandbox、MCP、agent loop</h3>
+<p>今年主题是 agent，verl 的对应更新分三层：</p>
+<ol>
+<li><strong>典型 tool-use 场景的 recipe</strong>：code sandbox、search engine、computer use 等都有相应支持。</li>
+<li><strong>成熟 agent framework 与协议接入</strong>：引入 LangGraph 一类框架，并支持 MCP，可通过 MCP 接入外部工具。</li>
+<li><strong>Debug 工具</strong>：tool use 涉及多轮调用，需要能回看 rollout 与调用链是否正确，verl 提供相应可视化/检查工具；讲者说明这一块与 vLLM/SGLang 同学合作较多（性能、易用性、debug 工具）。</li>
+</ol>
+<p>其中 agent loop 是讲者团队最近亲手做的一个小而重要的修复。背景是复现字节的 <strong>ReTool</strong> 工作（字幕作「RETO」；字节 Seed 的代码工具 RL 工作，原团队未开源代码，本复现是与 SGLang、面壁智能同学一起做的）：过程中发现最大坑在 <strong>tokenizer</strong> —— 原实现是 text-in/text-out，中间对文本做一点拼接再 detokenize，token id 就与原序列不一致，导致训练曲线不对。修复方法是把 agent loop 做成 <strong>token-in/token-out</strong> 的接口：用户可定义任意轮数的 LLM generation 与 tool-use 交替（不只是 ReTool 的一轮 generation、一轮 tool use，还可以在中间插入总结或多轮交互），且全程不经过文本重切分。讲者称这是「把 ReTool 的训练曲线都调正确了」之后沉淀下来的抽象。</p>
+<h3>架构解耦：角色与 backend 分离</h3>
+<p>原先 verl 把角色（trainer/rollout 等）与 backend（Megatron trainer、FSDP trainer）耦合，换后端等于换一整套实现。最近的重构把两者解耦：<strong>角色是角色，backend 是 backend，每个角色可切换不同 backend</strong>。讲者说明当前对 Megatron 的支持力度在加大，原因很直接：「像一些比较大的 MoE 训练，肯定还是 Megatron 这边性能更好。」这条线与大 MoE 支持是同一件事的两面：规模越大，backend 的成熟度越决定上限。</p>
+<h3>Q3 路线（讲者现场口径）</h3>
+<p>讲者给的 Q3 roadmap 有四条 + 一条社区信息：</p>
+<ol>
+<li>基于 agent loop 的 <strong>partial rollout 与 full-async training pipeline</strong> 实现（目标：接近 AREAL 式的全异步方式）。</li>
+<li><strong>TRKT-PPO</strong>：字节 Seed 算法同学提出的一个方法（字幕作「TRKT」，另有论文），verl 正把对应 recipe 放出。</li>
+<li><strong>持续性能优化</strong>：重点是 DeepSeek、Qwen 235B/480B 等大模型的 MFU，与 NVIDIA 同学合作中。</li>
+<li><strong>新 agent RL recipe</strong>：最近会放出 <strong>SWE-bench</strong> 的 recipe，讲者提醒「难度比较大，大家复现起来（有挑战）」。</li>
+</ol>
+<p>社区入口：verl 有微信群，问题可提 issue 或直接发邮件给团队联系人（字幕作「海滨」，指团队成员 Haiyin？以仓库维护者列表为准）。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线 / 口径</th>
+<th>结果 / 数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>本场时长</td>
+<td>—</td>
+<td>约 1372 秒（22 分 52 秒）</td>
+<td>字幕时间戳（末尾至 22:50）</td>
+</tr>
+<tr>
+<td>字节内部 RL 计算量定位</td>
+<td>SFT / continue training</td>
+<td>大部分后训练 RL 计算量已远超二者（字幕口径）</td>
+<td>字幕（引入）</td>
+</tr>
+<tr>
+<td>Hybrid Controller 代码量印象</td>
+<td>复杂 RL 流程</td>
+<td>十几到二十行可实现 GRPO/PPO</td>
+<td>字幕（讲者印象）</td>
+</tr>
+<tr>
+<td>DeepSeek 671B 跑通规模</td>
+<td>—</td>
+<td>96 张 H20 可跑起来，MFU 尚低</td>
+<td>字幕（更新）</td>
+</tr>
+<tr>
+<td>Qwen 235B 跑通规模</td>
+<td>—</td>
+<td>32 张 A100 可跑起来，MFU 尚低</td>
+<td>字幕（更新，「AHR0」按上下文还原）</td>
+</tr>
+<tr>
+<td>DeepSpeed / Pathways 引用</td>
+<td>Hybrid Engine 思想来源</td>
+<td>DeepSpeed 曾提同类想法；Pathways 提出 single/multi controller 二分（2022，540B）</td>
+<td>字幕（设计溯源）</td>
+</tr>
+<tr>
+<td>Q3 待优化规模</td>
+<td>—</td>
+<td>DeepSeek、Qwen 235B、480B 大模型 MFU</td>
+<td>字幕（Q3 路线）</td>
+</tr>
+<tr>
+<td>社区同步节奏</td>
+<td>—</td>
+<td>每周四公开 Zoom meeting</td>
+<td>字幕（社区）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>把 RL 系统先写成 dataflow 再谈并行</strong>：讲者反复强调节点与边、依赖与排布，是可迁移到任何 RL/agent 基建讨论的第一性框架；先对齐「每个节点是什么、谁等谁」，再问 TP/DP/PP 怎么切，能避开很多过早优化。</li>
+<li><strong>Agent loop 的 token-in/token-out 原则</strong>：多轮工具场景下，凡经过 text 拼接再 detokenize 的中间层，都要怀疑 token id 漂移；verl 的修复说明这类 bug 会先以「训练曲线不对」的形式出现，而不是报错。</li>
+<li><strong>同步→异步的迁移顺序</strong>：verl 的路线是先把推理引擎 server 化（client 请求、engine 常驻），再谈 partial rollout 与全异步 trainer——先改接口形态，再改调度语义，比直接重写训练循环便宜得多。</li>
+<li><strong>角色/backend 解耦的时机</strong>：当框架被多个团队以不同规模（小规模研究 vs 大 MoE 生产）复用时，耦合实现会先在 backend 选型上卡住；verl 的选择是把 Megatron 这类成熟 backend 做成可切换项，而不是自研一切。</li>
+<li><strong>对研究者的选型信号</strong>：verl 的成功因素（早兼容、各后端都接得上、论文出口、社区可见）提示，评估一个 RL 框架时，「出口通量」（论文/项目愿意在它上面发布结果）与 API 兼容面，和某个单点性能数字同样重要。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>本篇与 EP049 的关系</strong>：EP049 是 verl 的 EP 期号分享（源码导读体裁），本篇是 2025-08-24 线下 Meetup 的框架总览 + 更新分享（讲者为方家瑞，EP049 讲者为童雨轩）。两者同属 verl 线，但还缺一环：EP049 以论文（HybridFlow, arXiv:2409.19256）为主要交叉口，本篇的框架细节（尤其 Hybrid Engine 的 reshard 实现与「自动搜最优并行」）与论文的对应关系，讲者只点到为止，具体实现可回 EP049 对照。</li>
+<li><strong>MFU 数字未给出</strong>：671B/235B 的「能跑起来」没有附 MFU 数值，只有「还比较低」的定性判断；与其他框架的同等规模对比，也不是本场的目标（讲者明确说本场是「给大家简单过一下」）。</li>
+<li><strong>TRKT-PPO 与 ReTool 的出处</strong>：字幕只给音近词（「TRKT」「RETO」），未给论文链接；ReTool 的官方开源状态需另查（讲者说原团队未开源，本复现为社區合作版）。</li>
+<li><strong>Partial rollout 的具体语义</strong>：讲者点名与 AREAL 的全异步对标，但 partial 的粒度（sample 级还是 token 级）、off-policy 程度的控制（staleness bound）等实现选择，字幕没有展开；Q3 的实现落地情况需查 verl repo 的 release 与文档。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「RL 是一个 dataflow，我觉得这个是 verl 设计的一个比较重要的核心。」——讲者在背景部分对框架原点的定义（字幕 04:13–04:19，转写后）</p>
+<p>「最后可能来点面条，然后就是这 verl 。」——讲者开场自谦本场是 Meetup 的收尾分享（字幕 00:48–00:55，转写后）</p>
+<p>「（同步 rollout）如果你是一个算法的人设计的，肯定第一时间就不会是这样。」——讲者在 rollout 升级部分对原始同步实现的坦承（字幕 18:31–18:35，转写后）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

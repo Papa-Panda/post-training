@@ -207,3 +207,17 @@ B147,字节跳动 CV 大模型 （Semi Analysis）,BV1Bw8m6GEd7,,,todo,bilibili-
 B148,Rethinking Noisy Label：哭泣猫猫头,BV1me896CEkR,,,todo,bilibili-only；B148 Noisy Label 与官网148 TriAttention 主题完全不同
 B150,从如何生成到如何验证：生成式推荐的可控建模,BV1jotD65EGU,,,todo,bilibili-only；B150 生成式推荐 与官网150 SIM1 主题完全不同
 B151,AI4AI at Test-Time：从 Harness 看 AI4AI 如何实现以及未来,BV1Wet26CEgH,01:11:12,,要点已提炼,episodes/EP151-ai4ai-test-time.md
+EP100-RL,EP100 RL 专题圆桌,BV1EUi4BwEGT,01:28:50,2025-12-28,要点已提炼,episodes/EP100-rl-panel.md
+EP100-AGENTIC,EP100 Agentic 专题圆桌,BV1rriSBNEyh,01:30:07,2025-12-28,要点已提炼,episodes/EP100-agentic-panel.md
+EP100-EMBODIED,EP100 具身智能专题圆桌,BV1tDqwB2EZ5,01:32:12,2025-12-28,要点已提炼,episodes/EP100-embodied-panel.md
+EP100-LLM,EP100 LLM/MLLM 专题圆桌,BV1pziSBiE7f,01:40:05,2025-12-28,要点已提炼,episodes/EP100-llm-panel.md
+MEETUP-PANEL,Meetup 圆桌 Panel,BV1spCFBSEKX,00:58:08,2025-08-24,要点已提炼,episodes/MEETUP-panel.md
+MEETUP-VERL,Meetup verl 分享,BV1wbCFB1E7e,00:22:52,2025-08-24,要点已提炼,episodes/MEETUP-verl.md
+MEETUP-RLITE,Meetup RLite 分享,BV1AkkoBgEXr,00:18:25,2025-08-24,要点已提炼,episodes/MEETUP-rlite.md
+MEETUP-AREAL,Meetup AReaL 分享,BV1HCkoBBEzL,00:31:18,2025-08-24,要点已提炼,episodes/MEETUP-areal.md
+MEETUP-ENTROPY,Meetup 熵机制分享,BV1Ai1EB6EDH,00:21:24,2025-08-24,要点已提炼,episodes/MEETUP-entropy.md
+MEETUP-ECHO,Meetup ECHO 分享,BV1Pi1EB6Eph,00:19:08,2025-08-24,要点已提炼,episodes/MEETUP-echo.md
+MEETUP-ROLL,Meetup ROLL 分享,BV1Wi1EB6Eez,00:28:17,2025-08-24,要点已提炼,episodes/MEETUP-roll.md
+MEETUP-OPENRLHF,Meetup OpenRLHF 分享,BV1kA1CBuEVQ,00:25:36,2025-08-24,要点已提炼,episodes/MEETUP-openrlhf.md
+AMA2,青稞AMA第2期 World Model 专题,BV1sw9kB8E6u,02:06:26,,要点已提炼,episodes/AMA2-world-model.md
+AMA3,青稞AMA第3期 OPD 专题,BV1qKVd6XEA3,02:20:33,,要点已提炼,episodes/AMA3-opd.md

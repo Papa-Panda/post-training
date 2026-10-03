@@ -124,3 +124,22 @@
 - 系列主页：B站搜索「青稞Talk」
 - SkyRL 代码：https://github.com/NovaSky-AI/SkyRL
 - SkyRL-Agent 论文：https://arxiv.org/abs/2511.16108
+
+## 活动合集（嘉年华 / Meetup / AMA）
+
+| 场次 | 标题 | 阅读版 | 一句话 |
+|---|---|---|---|
+| EP100-RL | [EP100 RL 专题圆桌](episodes/EP100-rl-panel.md) | [阅读版](episodes/EP100-rl-panel.html) | 四人共识：2025 进展在 infra 与稳定性不在算法，PPO 还是 2014 年的 |
+| EP100-AGENTIC | [EP100 Agentic 专题圆桌](episodes/EP100-agentic-panel.md) | [阅读版](episodes/EP100-agentic-panel.html) | 张绍磊：各种 scaling 的本质都是 scaling reward |
+| EP100-EMBODIED | [EP100 具身智能专题圆桌](episodes/EP100-embodied-panel.md) | [阅读版](episodes/EP100-embodied-panel.html) | 于超第三条路：真机数量 scaling，像使用 GPU 一样使用机器人 |
+| EP100-LLM | [EP100 LLM/MLLM 专题圆桌](episodes/EP100-llm-panel.md) | [阅读版](episodes/EP100-llm-panel.html) | 薛复昭：一切用别的东西换 FLOPS 的都是短期解，行业已转 data-bound |
+| MEETUP-PANEL | [Meetup 圆桌 Panel](episodes/MEETUP-panel.md) | [阅读版](episodes/MEETUP-panel.html) | 最大分歧在 reward：implicit PRM 对 LLM-as-judge 的系统账 |
+| MEETUP-VERL | [Meetup verl 分享](episodes/MEETUP-verl.md) | [阅读版](episodes/MEETUP-verl.html) | 方家瑞：verl 第一性抽象是 RL = dataflow |
+| MEETUP-RLITE | [Meetup RLite 分享](episodes/MEETUP-rlite.md) | [阅读版](episodes/MEETUP-rlite.html) | GRPO 只有四步，瓶颈在 HF generate 太慢而非算法 |
+| MEETUP-AREAL | [Meetup AReaL 分享](episodes/MEETUP-areal.md) | [阅读版](episodes/MEETUP-areal.html) | 傅伟：全异步训练承接 off-policyness，API 是 tapas 不是三明治 |
+| MEETUP-ENTROPY | [Meetup 熵机制分享](episodes/MEETUP-entropy.md) | [阅读版](episodes/MEETUP-entropy.html) | 雨辰：RL 拿熵换性能，前 36 步就能拟合预测整条兑换曲线 |
+| MEETUP-ECHO | [Meetup ECHO 分享](episodes/MEETUP-echo.md) | [阅读版](episodes/MEETUP-echo.html) | Jerry：去中心化异构推理 + verl 训练端，LoRA 下 RL 体验等同 SFT |
+| MEETUP-ROLL | [Meetup ROLL 分享](episodes/MEETUP-roll.md) | [阅读版](episodes/MEETUP-roll.html) | 样本级异步 rollout 消灭 batch 长尾 |
+| MEETUP-OPENRLHF | [Meetup OpenRLHF 分享](episodes/MEETUP-openrlhf.md) | [阅读版](episodes/MEETUP-openrlhf.html) | RL 框架的架构革新由算法侧驱动，框架设计者先是算法研究员 |
+| AMA2 | [青稞AMA第2期 World Model 专题](episodes/AMA2-world-model.md) | [阅读版](episodes/AMA2-world-model.html) | 世界模型的价值不在卷高清，在能否同时服务 data engine、simulator、policy |
+| AMA3 | [青稞AMA第3期 OPD 专题](episodes/AMA3-opd.md) | [阅读版](episodes/AMA3-opd.html) | 纯 OPD 训到底就是复刻 teacher，超过老师依赖外部信息 |

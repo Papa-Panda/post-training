@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP100 嘉年华实录 — 具身智能专题圆桌</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP100 嘉年华实录 — 具身智能专题圆桌</h1>
+    <p class="sub">四个背景互补的嘉宾（RL Infra、RL 后训练、SLAM）在一件事上罕见地一致：VLA 作为「通用机器人策略」的任务定义没有悬念，真正的分歧只在实现路径——世界模型该以什么… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心（按议题）</a><a href="#sec-4">关键数字</a><a href="#sec-5">共识与分歧</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP100-embodied-panel.html</p>
+<p><strong>主旨引文</strong>（于超）：「VLA 本质上它就是要是一个世界模型的概念，然后才能够更好地在这个物理世界当中去工作。」</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP100 专题实录（2025 “青稞” AI 嘉年华 · 具身智能专题；嘉年华总览见 EP100-ai-carnival）</dd><dt>标题</dt><dd>具身智能专题｜2025 “青稞” AI 嘉年华</dd><dt>BV</dt><dd>BV1tDqwB2EZ5</dd><dt>时长</dt><dd>5532 秒（约 01:32:12；海报时段 15:00–16:30）</dd><dt>活动日期</dt><dd>2025-12-28（线上直播）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>主持</dt><dd>陈星宇（北京中关村学院研究员；字幕中嘉宾称「星宇」，姓名以 EP100 海报名单为准）</dd><dt>嘉宾（以字幕自述与 EP100 海报名单互证）</dt><dd></dd><dt></dt><dd>于超（清华大学助理教授，即将入职；做 RL 赋能具身智能，主导 RLinf 方向，博士期间工作含 MAPPO）</dd><dt></dt><dd>李浩然（中国科学院自动化研究所副研究员；RL 背景，近两年关注策略自提升与 VLA 的 RL 后训练）</dd><dt></dt><dd>焦健浩（伦敦大学学院高级研究员；长期做机器人 SLAM，从激光雷达到视觉时代）</dd><dt></dt><dd>王光明（剑桥大学工程系博士后；读博做自动驾驶 SLAM / 三维重建，现做世界模型与 VLA 相关研究）</dd><dt>提炼方式</dt><dd>字幕实录版（B站 AI 字幕，<code>transcripts/EP100-EMBODIED.txt</code>，2307 条）。AI 字幕识别误差原样保留在转写文件中；本纪要中的人名以 EP100 海报名单与嘉宾自述互证为准（如字幕作「焦建浩 / 肖老师」，名单作焦健浩），引文按字幕原文摘录、个别明显 ASR 错字在引用时以语境还原。数字均为字幕口径。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>四个背景互补的嘉宾（RL Infra、RL 后训练、SLAM）在一件事上罕见地一致：VLA 作为「通用机器人策略」的任务定义没有悬念，真正的分歧只在实现路径——世界模型该以什么形式内化进 VLA、A（action）这个模态为什么还没被 scale 起来、以及真机 RL 的样本效率与安全探索怎么解；on 形态之争则收敛为「人形只是具身智能的一个 specific case，双臂轮式 / 轮足是近期更被看好的工作形态」。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心（按议题）</h2>
+<h3>议题一：世界模型与 VLA 的关系——VLA 就是终局吗</h3>
+<ul>
+<li><strong>于超</strong>：VLA 是不是终局「没有什么悬念」——只要任务定义是 condition on language 与 vision、output action 的端到端通用策略，它就是最终路径；有争议的只是技术实现（基于视频 backbone 还是 VLM backbone）。对世界模型他持「内化论」：不同人对世界模型的定义完全不同（RL 的人想要神经网络 simulator，CV 的人想要帧级可控的 predictor），他不认为 VLA 与世界模型冲突，「在某种意义上 VLA 应该内化了一个世界模型」；backbone 之争上他倾向 VLM 路线仍然要走，因为语言是对世界的高度抽象、VLM 发展更快，视频先验可以以某种形式压进 VLM 里，而不必以视频 backbone 的形式出现。</li>
+<li><strong>李浩然</strong>：先给世界模型分了两类——表征世界模型（如 LeCun 的 JEPA 系列、Dreamer 的 RSSM，心智世界模型量化程度还不高）与生成世界模型（simulator、三维生成、视频生成）。他的判断是：世界模型比 VLA「更高级」，因为 VLA 只需回答最优策略，世界模型要模拟所有动作产生的未来状态；但更高级不等于更容易得到，它对数据和训练难度的要求更高。VLA 终局论他同样乐观，但点出 VLA 迟迟没跑出 scaling law 的原因大概率在 A：V、L、VL、VA 各自都被验证过能 scale，唯独 A 的表达随动作空间、坐标系、本体不同而高度多样，A 的不确定性远大于语言。主持追问「A 只需少量数据 align 到 VL 空间」时，他回应：本体与动作空间固定时成立，做通用策略时 A 必然牵扯运动学等机器人本体问题，不再是纯对齐。</li>
+<li><strong>王光明</strong>（从 SLAM 视角补刀）：他最初以为 VLA 就是「现成视觉语言模型后面加个 action」，这样太简单了；但若把 VLA 理解为任务定义（只看视觉、听指令、完成事情），那就是机器人最终形态、没有意见。他强调 VLA 内部要学的东西很多：只做重建，没看到的部分怎么办；只做表征，复杂任务的语言描述精度不够；只做生成也不够——重建、表征、生成三件事都得做。</li>
+</ul>
+<h3>议题二：世界模型冲击下，SLAM 死了吗</h3>
+<ul>
+<li><strong>焦健浩</strong>：SLAM 的本质不是「摄像头转一圈建点云」，而是融合多传感器信息、构建对三维环境的一致表达。从科研角度，传统几何 SLAM 确实很难再做过大厂（Meta 智能眼镜自带的 SLAM 已在多种工况下做得很好，且这是硬件、标定、软件耦合的系统工程）；但具身智能时代对 SLAM 的要求变了——机器人频繁与物理世界交互，需要的不只是几何，还要懂语义、懂物理特性、能把物体间关系组织起来，这种「既懂语义又懂物理的三维空间构建器」空间非常大。关于前馈几何模型（VGGT 等）是否让基于优化的方法落后，他的回答是：前馈网络负责出结果，优化负责兜底——闭环检测、位姿图优化、BA 通过残差计算告诉机器人「你这个估计有问题」，在不可控的真实环境里这是安全底线。</li>
+<li><strong>王光明</strong>：用「丑小鸭定理」式的判断开场——说一个东西「做好了」必须看指标和看任务。把 SLAM 重新定义为「实时重建」（real-time reconstruction）：重建的对象可以是几何、颜色、物理性质乃至人对环境的理解，机器人显然都还没达到。他把重建、表征、生成看作三种思路：单图生成世界对传统 SLAM 是「夸张」的做法，但两者做的事在某种程度上相似（都是从部分观测反推世界）；渲染（如 3DGS、NeRF）是 3D 到 2D 的一种很好的投影 / 反推方式，但机器人操作还涉及触觉、力、本体结构，不能指望仅靠视觉解决全部问题。谈 scaling law 时他给出一个冷静的尺度论：自动驾驶的 VA 解空间比通用机器人小得多，所以在 VLA 上谈 scaling law 行不行，要么等算力再上几个台阶，要么靠模型与框架创新大幅压缩解空间。</li>
+</ul>
+<h3>议题三：真机 RL 怎么做——样本效率、安全探索与「第三条 scaling 路」</h3>
+<ul>
+<li><strong>李浩然</strong>：真机 RL 与仿真 RL 的两个根本区别是样本效率（真机忍受不了百万、上千万步）和安全性（探索对策略提升必不可少，但探索在真实世界产生不可预料的安全隐患）；外加两个常被忽视的问题：on-policy 方法在真机上难扩展、以及 VLA 框架下的持续学习（不能学新任务就忘旧任务）。现有真机 RL 工作分两类：一类无人工参与（把初始策略成功率先提得很高再真机微调，代价是交互成本高）；另一类是 human-in-the-loop，用得更多——人既能注入高质量数据急速提升样本效率，又能在机器人不安全时介入拉回安全区。他特别指出今年的一个认知更新：所谓高质量数据，不再是「动作规范、无多余动作」，而是<strong>能让机器人从失败中恢复的数据</strong>，从 DAgger 到 π0.6 都是这个思路。但他也坦承人环的尴尬：很多时候起作用的是人的数据而不是 RL 算法本身，所以下半年他们一直在挣扎着「把 human 拿掉」，从训练范式、奖励函数（稀疏奖励 vs 过程奖励 vs 学通用价值函数）、安全探索、持续学习四个方向尝试。</li>
+<li><strong>于超</strong>：提出具身智能 scaling 的「第三条路」。前两条是数据 scaling（遥操数据、无本体人类数据）和模型 scaling（做到 B 级参数），但数字空间隐含的前提是算力和环境可以无限 scale，具身智能做不到；第三条路是<strong>真机数量的 scaling</strong>：多台真机并行学不同任务，可以大幅缓解持续学习（不再对着单个环境 overfit 一个 task），而人环在他这里不是要去掉的东西——物理世界不可加速，人环是提升数据效率的手段；学术界觉得人力贵（学生不愿 24 小时盯机器人），但对创业公司和大厂，人环反而是在解决劳动力问题、且当前人比机器便宜（机器维修、售后、时间成本都高）。真机并行规模的边界他说还没摸到，自估会到「百的级别」，明年 2 月希望能给出答案。被问到 RL infra 与传统平台的区别，他给出 RLinf 的口号：<strong>「像使用 GPU 一样使用你的机器人」</strong>——把机器人看作灵活可配置的资源，以最简单的标准化接口接入世界上所有真实机器人、回收数据用 RL 学习，并坚持开源让研究平权。</li>
+</ul>
+<h3>议题四：人类数据与导航数据的 scaling</h3>
+<ul>
+<li><strong>焦健浩</strong>：导航场景里真机数据仍不可替代（社交导航必须与真实的人互动才能拿到有价值的数据），由此引出「终身导航」问题：机器人在不断变化的环境中持续知道自己在哪、持续更新对环境的认知，传感器数据以 stream 形式不断回流到中央服务器训练模型。数据源可以众包：Meta / 小米的智能眼镜（自带摄像头与 SLAM）、机器人本体、AR/VR 眼镜、以及人手一部手机——类比特斯拉车队采数据。但脏数据如何清洗是核心课题。</li>
+<li><strong>主持陈星宇</strong>补充：他前两天刚刷到一篇论文，不只用手机，还用手表、耳机记录人整天的生活状态，作为机器人学习的样本。</li>
+<li><strong>王光明</strong>：前馈模型（如 VGGT 一类）之后加优化保底是合理组合，前馈模型能提供纯几何做不好的语义与物体间理解；但泛化的根本难题不变——深度学习模型总会遇到分布外的 corner case，只能尽量扩大训练数据、靠 human-in-the-loop 提数据质量、在越来越多的任务上把指标做上去。</li>
+</ul>
+<h3>议题五：本体形态之争——人形是终极形态吗</h3>
+<p>四位出奇地收敛，本场分歧最小的一节：</p>
+<ul>
+<li><strong>李浩然</strong>：先立论「智能与形态有没有关系」——按具身智能的核心定义，智能在与环境的交互中产生，能接触的环境多样性决定智能上限；若终极目标是 AGI，需要一个能做 AGI 任务的本体，人形是很好的算法验证试验场，但不一定是高效的工作机器人形态，社会分工细化后按场景做形态异化同样符合进化逻辑。</li>
+<li><strong>于超</strong>：2025 上半年争议还很大，下半年已收敛——人形是具身智能的一个 specific case 而非终极 case；当前更被认可的是双臂轮式，轮足在极端、危险条件下稳定性和适应性更好；只把「手」学明白都已很困难，腿完全可以解耦。除了表演，人形到底能赋能什么，质疑很多；后续人形赛事也会更注重上半身操作能力。</li>
+<li><strong>焦健浩</strong>（机器狗背景）：轮足形态最有意思，兼有轮子的通行效率与跨越台阶、gap 的能力；野外救援这类任务四腿轮足在载重、续航、速度上全面胜过人形，「10 分钟救下一个人和 1 小时救下一个人」之间没有理由不用更高效的方案；但科研上仍应用更复杂、功能更强的平台做研究。</li>
+<li><strong>王光明</strong>：补了一个形态智能的例子——剑桥做软体机器人的同行讲，猫去掉头之后腿还能跑一阵，说明智能不全在脑子里，也在肌肉、结构与形态里，「结构决定性质」；人是自然进化的产物，谁能保证人不是局部最优解？但他同样承认，我们的环境是为人设计的，人形有其意义，各行各业也需要其他形态。</li>
+</ul>
+<h3>2026 展望（收尾）</h3>
+<ul>
+<li><strong>王光明</strong>：关注 SLAM 重建与表征、生成的结合，以及这些东西怎么进入 VLA、怎么和 RL 结合。</li>
+<li><strong>焦健浩</strong>：关注机器人的「海马体」——持续作业中不断更新且不轻易遗忘的记忆，从空间理解的记忆扩展到多模态记忆。</li>
+<li><strong>于超</strong>：先把 RLinf 干完（至少一年），另外想看数据问题：RL 需要一个好起点，但目前还没有足够好的模型给 RL 当起点。</li>
+<li><strong>李浩然</strong>：展望「具身智能体」——具身智能不是只有 VLA 和世界模型，SLAM、VLA、世界模型应混在一起协同发展成一个生态。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<p>本场以定性讨论为主，硬数字很少，以下为字幕中出现的、由发言人明确给出的数字（均为字幕口径）：</p>
+<table>
+<thead>
+<tr>
+<th>数字</th>
+<th>内容</th>
+<th>发言人</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>突破 60 亿美元</td>
+<td>2025 年全球机器人行业创投融资（引行业报告）</td>
+<td>陈星宇（主持开场）</td>
+</tr>
+<tr>
+<td>有望突破 5 万亿美元</td>
+<td>投行对机器人整体市场规模的预测（开场引述，字幕上下文有跳跃）</td>
+<td>陈星宇（主持开场）</td>
+</tr>
+<tr>
+<td>百的级别</td>
+<td>真机并行规模的自估量级（边界尚未摸到）</td>
+<td>于超</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>共识与分歧</h2>
+<p><strong>共识</strong></p>
+<ol>
+<li>VLA 作为通用机器人策略的任务定义是终局，分歧只在实现路径（于超、李浩然、王光明三人明确表态一致）。</li>
+<li>世界模型与 VLA 不是竞争关系：世界模型应内化进 VLA，或与之相辅相成（于超、李浩然）。</li>
+<li>人形不是具身智能的终极形态：双臂轮式 / 轮足是近期更被看好的工作形态，人形更适合作为算法验证平台（四人一致，本场分歧最小的一节）。</li>
+<li>高质量数据的定义已经更新：从「动作规范」变为「能让机器人从失败中恢复的数据」（李浩然提出，主持与于超讨论中呼应）。</li>
+</ol>
+<p><strong>分歧</strong></p>
+<ol>
+<li>世界模型该以何种形式进入 VLA：于超倾向 VLM backbone + 视频先验压入；李浩然认为生成式世界模型在能力上比 VLA 更高级、但更难获得；王光明主张重建、表征、生成三者都不可偏废。</li>
+<li>人环的去留：李浩然在努力「把 human 拿掉」以凸显算法作用；于超认为物理世界不可加速、人环应长期保留，且应与工业界合作 scale 真机。</li>
+<li>A 是不是只需少量数据对齐：主持提出「A 只是 VL 空间的一个 align」的看法，李浩然认为只在本体固定时成立，通用策略下 A 的多样性是 VLA 没 scale 起来的主因。</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li><strong>「像使用 GPU 一样使用机器人」的接口观</strong>（于超 / RLinf）：把异构真机抽象成可灵活配置、可回收数据的标准化资源，再在其上跑 RL——这与 RL infra 里把 GPU 集群抽象成 rollout / training 资源的思路同构，做具身 RL  infra 时可直接借鉴其「标准化接口 + 开源平权」的组织方式。</li>
+<li><strong>数据配方的认知更新</strong>（李浩然）：训练数据的「质量」应按能否让策略从失败中恢复来定义，而不是动作是否规范——迁移到 LLM / agent 的 RL 数据构造上，同样应优先收集带失败—恢复结构的轨迹，而不是只收干净的成功轨迹。</li>
+<li><strong>前馈 + 优化兜底的系统设计</strong>（焦健浩）：让前馈模型出结果、用带残差的优化做安全校验，这一半步在任何「学习模型直接驱动执行」的系统里都适用，包括用学习型 verifier / reward 给 agent 轨迹兜底。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>于超称真机并行规模明年 2 月会给出答案，RLinf 的真机 scaling 实测结果值得回看。</li>
+<li>世界模型「内化进 VLA」目前仍是立场而非可检验的架构结论；VGGT 一类前馈几何模型与 VLA 的具体结合方式（点云输出 vs backbone 特征），焦健浩与王光明都只给了方向，没有给已验证的配方。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句</h2>
+<blockquote class="pq">
+<p>「本质上它就是要是一个世界模型的概念，然后才能够更好地在这个物理世界当中去工作。」—— 于超（谈 VLA 与世界模型）</p>
+<p>「所谓高质量数据，其实是一些能够让机器人在失败中恢复的数据。」—— 李浩然（谈 human-in-the-loop 数据）</p>
+<p>「谁能保证人不是这个自然进化的一个局部最优解呢？」—— 王光明（谈本体形态）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP100 嘉年华 · Agentic 专题圆桌（字幕实录版）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP100 嘉年华 · Agentic 专题圆桌（字幕实录版）</h1>
+    <p class="sub">四位嘉宾对 2026 的判断高度收敛：能力会持续从 inference-time 的 prompting/framework 内化进模型参数，但 agent 作为「落地的最后一… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心（按议题）</a><a href="#sec-4">关键数字（圆桌口径，均为字幕）</a><a href="#sec-5">共识与分歧</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP100-agentic-panel.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP100 嘉年华专题（青稞Talk 第 100 期特辑分会场实录）</dd><dt>标题</dt><dd>Agentic 专题｜2025 “青稞” AI 嘉年华</dd><dt>BV</dt><dd>BV1rriSBNEyh</dd><dt>时长</dt><dd>约 90 分钟（字幕末条 5404.0 秒）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd>B站 AI 字幕实录（2481 条，<code>transcripts/EP100-AGENTIC.txt</code>）。发言人归属以字幕自我介绍 + EP100 官网嘉宾名单互证；字幕识别误差按名单与上下文订正，无法确定归属处写「嘉宾」</dd><dt>主持人</dt><dd>张桂彬（新加坡国立大学博士生，导师颜水成；官网名单）</dd><dt>嘉宾（官网名单 + 字幕自述互证）</dt><dd>张绍磊（中国人民大学助理教授，DataAgent / DeepAnalyze）、徐海洋（阿里通义实验室高级算法专家，Mobile-Agent 系列）、王鸿儒（爱丁堡大学博士后，Theory of Agent / self-evolving agent 综述）、潘家怡（UC Berkeley 博士，agentic coding 一线训练）</dd><dt></dt><dd>活动综述见 <a href="EP100-ai-carnival.md">EP100-ai-carnival.md</a></dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>四位嘉宾对 2026 的判断高度收敛：能力会持续从 inference-time 的 prompting/framework 内化进模型参数，但 agent 作为「落地的最后一公里」不会与 LLM 简单划等号；scaling 的真正难点不是单维度堆量，而是 reasoning 与 acting、agent 与 environment 的联合 scale，以及 reward 的定义与规模化。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心（按议题）</h2>
+<h3>开场：四位嘉宾在做什么</h3>
+<ul>
+<li>张绍磊：从大模型算法转到 agentic training，做数据科学场景——把数据分析、编码、质量评估等能力用 RL 原生注入模型（DeepAnalyze 一类工作），目标是企业级海量数据的自动化分析与洞察。</li>
+<li>徐海洋：多模态 GUI agent（Mobile-Agent 系列）。选 GUI 是因为它是日常生活里真正刚需多模态、且跨 PC/mobile/web/车机的开放长程场景；现在看到的买外卖、回消息还只是浅任务。</li>
+<li>王鸿儒：做 agent 的理论（Theory of Agent）——关注三件事：scale reasoning 与 acting、scale agent 与 environment、构建 self-evolving agent（以 memory 为桥梁、前提是 self-awareness）。他判断 2025 上半年是 scale of acting（K2 为代表）、下半年是 scale of environment 爆发。</li>
+<li>潘家怡：上半年在学校把 SWE、computer use、RL、reward model、多智能体都玩了一遍，下半年去业界做一线模型训练，主攻 agentic coding。她认为 2025 最大的事是大家开始系统化思考「怎样让模型变成 native agent」，而 RL 是今年才成熟的关键技巧。</li>
+</ul>
+<h3>议题一：LLM 未来会与 agent 划等号吗</h3>
+<ul>
+<li>潘家怡：基本已经是了。能在 prompting 层做出来的，说明基座有这个能力；转到 training time 做只会更好。framework 层的技巧没有 scale 保证，但训练可以持续投 compute、算法与数据，是更稳定的方法——通用能力（memory、planning、reasoning）会持续内化进参数。</li>
+<li>王鸿儒：短期（半年到一年）可以划等号，长期不会。基础模型像基础教育、agent 像进入社会后的分工与成长；self-evolving 更可能先发生在 agent 层。且 agent 的市场（落地最后一公里）远大于 LM 本身，前提是好 LM 是好 agent 的前置条件。</li>
+<li>张绍磊：别忘了 LLM 之外还有 LLM system——Cursor/Claude Code 受欢迎约一半来自模型外的系统与交互设计。agentic 能力会内化进模型，但 agent 的形态、与人的交互仍在模型之外（memory、infra）；更远期若模型能自己决定自己的 infra 与 memory 构建，那才是 AGI 形态，目前还远。</li>
+<li>徐海洋：框架、agent 模型、基模三者相辅相成且交替迭代：agent 模型靠 workflow 回流数据、再迭代回下一代基模；GUI 这类场景还要端云协同、大小模型协同等系统级调度，离统一范式还很远。</li>
+</ul>
+<h3>议题二：Agent scaling law 最值得探索的方向</h3>
+<ul>
+<li>王鸿儒：三维度递进——先 scale reasoning 与 acting（单独都已被验证，难在同时 scale）、再 scale agent 与 environment 的共演化、最后是时间维度上的 self-evolving。三者同时 scale 上去，就离 AGI 不远了。</li>
+<li>徐海洋：environment 至今没有明确定义（一个 App 算不算一个 environment？），定义不清就谈不上 scale。当前想做的是 mobile/PC/web 三端联动解题。数据是 GUI 的最大瓶颈：query 设计难、verify 难（工具调用好坏、路径好坏、反思好坏、泛化好坏都要判），纯靠人标无法 scale；动态环境里的弹窗、验证码、登录、推荐流都是真实难点。</li>
+<li>潘家怡：不必神化——agent training 本质还是机器学习，无非算法、参数、数据（多样性 + 每类数据量）几个工具；系统性做事时工具箱全都要用，区别只在当前短板在哪。</li>
+<li>张绍磊：各种 scaling 本质上都在 scaling reward。code 类 agent 领先，正是因为环境清晰、reward 易定义；其他领域要先解决「如何定义 reward 并让它通用」，包括用 world simulator 充当 reward 模型或直接充当 environment。</li>
+</ul>
+<h3>议题三：垂类 agent 会被通用大 agent 取代吗</h3>
+<ul>
+<li>潘家怡：agent 轨迹（调工具、等反馈、带 memory 的 loop）在预训练语料里天然 OOD ，比 chat 更吃专有数据。短期有好数据 + 好 infra 的垂类模型提升明显；长期（AGI 量级）可能不需要 specialized agent。</li>
+<li>徐海洋：分两个维度看——金融/医疗这类「领域」垂类会被基座取代；coding、GUI、math 这类「原子能力」垂类会与基模长期并存，因为要求极高、需专项优化。且真实应用永远要算成本，1T 模型部署不到端侧，领域小模型有生存空间。</li>
+<li>张绍磊：时间维度上一到两年垂类数据还有价值，五年或 AGI 之后会被替代。但垂类积累不是浪费——prompting 时代的 workflow 攒下的数据正是现在 agentic 模型的冷启动来源，ReAct 这类方法也在新范式里延续。</li>
+<li>王鸿儒：做个类比——即便通用 LLM 取代垂类 LLM，通用 agent 取代垂类 agent 所需时间还要高一个数量级，因为 agent 的数据壁垒、复杂度、获取难度都再上一个台阶。内化的本质是减少与外部世界的交互次数而不降任务成功率（以 search 为例），但该调几次工具恰恰由领域专家知识决定，非专家拿不到工具、也调不对次数。</li>
+</ul>
+<h3>议题四：Self-evolving agent 会收敛到统一范式吗</h3>
+<ul>
+<li>王鸿儒：2026 年内不会收敛。evolving 可发生在 tool、memory、model、trajectory、skill 等多个模块，哪个先收敛还看不清；且收敛有前置条件 self-awareness——先知道自己的 knowledge boundary 在哪，才能有的放矢。他预判 2026 会看到更多 self-awareness 研究（包括 agent 层面的：该调哪个工具、调几次）。</li>
+<li>徐海洋：自主进化涉及 agent 最本质的问题群：step-level verify 与定位真正的知识缺失点、把静态总结的 knowledge 用进动态环境、学习范式（context / RL / SFT 只有这几条路但怎么学住且可迁移未定）。以 OSWorld 为例，300 多个任务轨迹都公开了，大家仍刷不满——「学会 knowledge」本身极难。</li>
+<li>张绍磊：收敛的前提是这套范式在各领域被验证过、有足够广的 benchmark 覆盖。历史上 reasoning 范式收敛靠的是 solid benchmark；self-evolving 目前只在 math/code 等好 verify 的任务上跑通，预计先在单领域内达成共识，再跨领域迁移，最后收敛成几大类方法；真正统一只有 AGI 时才可能。</li>
+<li>潘家怡：一年内收敛很难，但可能出现「版本陷阱」式淘汰——大家弃用某些技巧、聚焦少数更通用、更易进生产系统的方向。</li>
+</ul>
+<h3>议题五：Agent benchmark 的不足与未来</h3>
+<ul>
+<li>徐海洋：定义问题比解决问题难。好 benchmark 三要素：定义清楚解决什么问题、与时俱进（GAIA 的答案已满网可搜、失去测评意义）、度量真实问题。AndroidWorld 公信力下降就是因为 App 不真实、环境是自研仿真，测不出弹窗验证码这类真实卡点；真实 query + 云手机/真机评测反而更可信。</li>
+<li>潘家怡：agent benchmark 要求可复现环境 + 稳定且不可 hack 的分数，这本身就极大抬高构造难度。很多时候直接和模型交互得到的信息量比看 benchmark 分还高。</li>
+<li>王鸿儒：environment scaling 可能带来本质解法——把 agent 本身当 world model / 环境：既能模仿人做 role playing，又能主动产生动态变化，静态 benchmark 的缺陷有机会被绕开；他们已在做把文本环境统一训成一个 text-based world model。</li>
+<li>张绍磊：现有 benchmark 以模型为中心，但真实使用是人机交互共同完成（如 vibe coding）；未来需要把 human 引进评估——用 LLM 模拟人类用户与 agent 交互、看最终任务是否解决。</li>
+</ul>
+<h3>议题六：2026 展望（各自最想投入的）</h3>
+<ul>
+<li>张绍磊：自主性与自治性——让模型真正 autonomous 地作为生产力工具提效。</li>
+<li>徐海洋：摆脱固定 workflow 模板，展示像人一样的问题解决（试 coding、试 search、试工具、甚至问人）。</li>
+<li>王鸿儒：acting 与 environment scaling 继续推进；更期待同时 scale 多个维度的范式（agent–world-model 共演化），以及 agent 在各行业的落地、个性化与安全问题。</li>
+<li>潘家怡：看更原生、更聪明的 agentic model 在各种 workload 上铺开——现有技巧还没用满，仅推进已知技巧就能走很远。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字（圆桌口径，均为字幕）</h2>
+<table>
+<thead>
+<tr>
+<th>数字</th>
+<th>出处语境</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025 年 AI agent 市场规模约为 2024 年两倍、进入百亿量级</td>
+<td>主持人开场（字幕口径，未核对）</td>
+</tr>
+<tr>
+<td>K2 被理解为第一个 scale 到 1T 参数、原生支持 agentic tool use 的模型</td>
+<td>主持人议题二引入</td>
+</tr>
+<tr>
+<td>OSWorld 只有 300 多个任务、轨迹已公开但无人刷满</td>
+<td>徐海洋谈「学会 knowledge」之难</td>
+</tr>
+<tr>
+<td>agent 轨迹常达 50–100 步，放进 context 难以 follow</td>
+<td>徐海洋谈 step-level verify</td>
+</tr>
+<tr>
+<td>Cursor 类产品的好感度约一半来自模型外系统</td>
+<td>张绍磊估计（明确为个人感受口径）</td>
+</tr>
+</tbody>
+</table>
+<p>说明：本场为观点型圆桌，数字多为嘉宾经验口径，未做外部核对。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>共识与分歧</h2>
+<p>共识：① 能力内化是大趋势（prompting → training），但 agent 层不会消失；② scaling 的难点在多维度联合与 reward 定义，不在单维度堆量；③ self-evolving 短期不收敛，self-awareness 与 benchmark 是前置短板；④ benchmark 必须真实、动态、防污染，人机交互应进入评估；⑤ 垂类 agent 短期有价值、长期被通用模型吸收，但积累的数据与方法会沉淀下来。</p>
+<p>分歧：LLM 与 agent 的关系上，潘家怡最乐观（基本已划等号、内化即可），王鸿儒给出明确的短期 yes / 长期 no；垂类存续上，徐海洋按「领域 vs 原子能力」二分给出并存论，潘家怡更强调数据 OOD 决定的短期优势；对 scaling 的归因，张绍磊收束到 reward，王鸿儒强调维度间的共演化关系。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>Agent 数据飞轮的既定路径已在本场被三方复述：prompting/workflow 攒轨迹 → 冷启动 agentic 模型 → 迭代回基模。新项目可直接照此排期，别指望一步到位训出 native agent。</li>
+<li>评测先行：与其刷公开 benchmark，不如用真实 query + 真实环境（云手机/真机/真实 sandbox）搭小而可信的内部评测，并把答案防污染当成设计约束。</li>
+<li>GUI/多模态 agent 的第一瓶颈是 verify 而非 policy：query 难度分布、step-level 校验、动态环境异常（弹窗/验证码/登录）先有方案，再谈训练规模。</li>
+<li>内化程度可以用「交互次数」量化：在任务成功率不降的前提下最小化工具调用次数，就是在最大化模型内部能力——可直接做成训练目标或评测指标。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>environment 的定义与计数单位（一个 App？一个任务分布？）没有共识，environment scaling 在此之前无法横向比较各家工作。</li>
+<li>self-awareness（知道自己的 knowledge boundary）被点名为 self-evolving 的前置条件，但会上没人给出可落地的训练或评测方案，值得跟踪王鸿儒团队的后续。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句</h2>
+<blockquote class="pq">
+<p>「本质上大家都是在 scaling 这个 reward，就是在 scaling 激励。」—— 张绍磊</p>
+<p>「发现和定义问题其实比解决问题更难。」—— 徐海洋（转述与 benchmark 同行的共识）</p>
+<p>「（垂类 agent）你可能非专家的话需要调十次，但专家可能就只需要调一次……我画一条线可能只需要一美刀，但我知道在哪里画这条线。」—— 王鸿儒</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

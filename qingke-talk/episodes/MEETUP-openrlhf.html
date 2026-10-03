@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MEETUP-openrlhf — RL 算视角下，OpenRLHF 的设计哲学</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>MEETUP-openrlhf — RL 算视角下，OpenRLHF 的设计哲学</h1>
+    <p class="sub">OpenRLHF 的设计哲学是「算法视角优先」：早期 profiling 发现 RLHF 的时间几乎全花在样本生成上，于是用 Ray 做异构分布式胶水、vLLM 做推理、Dee… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/MEETUP-openrlhf.html</p>
+<p>「一个好的 RL 框架的设计者，一定首先是一个好的 RL（算法）工程师或者研究员。」——讲者的核心论点（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>无（线下 Meetup 分享，非青稞Talk 正期）</dd><dt>标题</dt><dd>RL 算视角下，OpenRLHF 的设计哲学</dd><dt>BV</dt><dd>BV1kA1CBuEVQ</dd><dt>时长</dt><dd>00:25:36</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>所属活动</dt><dd>2025-08-24「LLM RL&amp;RL Infra」线下 Meetup（B站合集 sid=6759789）</dd><dt>分享嘉宾</dt><dd>姓名未在字幕中确证（主持人称呼字幕识别作「初夕/除夕老师」，应为识别误差；讲者自述核心开发者多为 RL/NLP 算法背景；OpenRLHF 团队）</dd><dt>相关论文</dt><dd>讲者提及团队博客（GitHub 发布 PPO 稳定训练 tricks 分析）与 REINFORCE++ 论文；DAPO、TRICK（Tricks or Traps，字幕作「part one」）等他人工作在字幕中被引用讨论</dd><dt>相关代码</dt><dd>OpenRLHF（字幕中未给出链接）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1kA1CBuEVQ/">https://www.bilibili.com/video/BV1kA1CBuEVQ/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/MEETUP-OPENRLHF.txt</code>（675 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文清洗提炼。字幕识别误差：vLLM 作「VM/vim/violin」、Ray 作「锐/raid」、HuggingFace 作「哈根 face/han face」、Megatron 作「media/make sure CORE」、DeepSpeed Chat 作「class at chat」、critic 作「creative model」、REINFORCE++ 作「reverse plus plus/reinforce plus plus」、GRPO 作「GIRPO/GRPU」、K2 KL estimator 作「k two」，均按上下文还原；公式按讲者口述重构，标注字幕口径。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>OpenRLHF 的设计哲学是「算法视角优先」：早期 profiling 发现 RLHF 的时间几乎全花在样本生成上，于是用 Ray 做异构分布式胶水、vLLM 做推理、DeepSpeed ZeRO 做训练、HuggingFace 格式做权重同步的桥梁（靠 auto-TP 自动切分实现训推权重零手工转换），并用 hybrid engine 复用同一批 GPU；讲者进而论证 RL 框架的每一次架构革新都由算法侧驱动，框架团队的核心开发者应首先是算法研究员——REINFORCE++（全局标准差归一化的无 critic PPO）即为这一哲学的自产例证。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li><strong>背景/问题</strong>：从 ChatGPT 的 RLHF 流程出发，讲者团队早期分析发现：若用 DeepSpeed ZeRO/FSDP 或 Megatron 拼 RL 系统，开销大头在 generation 阶段（每生成一个 token 都要全量 gather 权重，跨节点不可 scale；Megatron 3D 并行可 scale 但系统复杂、loss 写法要迁就 TP/PP 并行方式，且当时未对推理做优化）。DeepSeek-R1/o1 之后长思维链使推理占比达 95%–99%（字幕口径）。问题定义：如何让算法工程师低门槛上手、又能高效分布式训练。</li>
+<li><strong>方法/设计</strong>：四件套拼装。① Ray 作分布式胶水：MPI 是同构系统，而 RL 的 actor/reward 等模型天然异构，Ray 的异构调度正合用，且启动时自动把各 engine 部署到指定节点。② vLLM 做推理：当时 vLLM 原生支持 Ray backend，OpenRLHF 是最早用 vLLM 加速 RL 推理的框架之一（讲者口径）；训练用 DeepSpeed ZeRO，形成混合引擎。③ HuggingFace 模型格式作桥梁：vLLM 与 DeepSpeed 都原生支持 HF 格式与 auto-TP（加载时按 TP/PP 维度自动切分张量），训练后只需在 DeepSpeed 侧 gather 成完整 tensor 发给 vLLM、由其 auto-TP 自动切片，即完成权重同步，规避 Megatron↔TensorRT-LLM 式的格式转换。④ Hybrid engine（借鉴 DeepSpeed Chat）：同一批 GPU 上先跑 vLLM、offload 到 CPU 后唤醒 DeepSpeed 训练、再交替，同步训练下算力不空转。⑤ 面向 agentic RL 的全异步架构：异步 vLLM engine 与环境异步交互、与 DeepSpeed actor engine 完全异步，中间用 Ray queue 的 sample buffer 连接（2025 年 4 月起的工作，字幕口径）。</li>
+<li><strong>算法侧工作（框架不止于系统）</strong>：团队在框架内做 PPO 稳定训练的 tricks 分析并以博客开源（讲者称当时是第一个能稳定训练 RL 的开源框架口径）。自研 REINFORCE++：起点是「GRPO 能去掉 critic，PPO 本也可以」——GAE 中令 $\lambda = 1$ 时 advantage 退化为回报减 critic 基线，把基线置零（或换成 group 内 reward 均值）再做归一化即得无 critic 的 PPO 变体；关键改动是归一化用全局 batch 的标准差替代 GRPO 的组内局部标准差（样本越多标准差估计越稳、偏差越小）。实验（字幕口径）：REINFORCE++ 在数学基准上略高于 GRPO，叠加 TIS（truncated importance sampling，校正 vLLM 与训练引擎 kernel 不一致）后更高；ROLL 团队的实验亦复现同一规律。讲者还盘点了推动框架革新的算法侧清单：DAPO 的 dynamic sampling 与 clip-higher、K2 KL estimator（无偏、优于 K3）、length penalty、token-level 与推理引擎交互（不用 text 格式）、GSPO 等。</li>
+<li><strong>结论/观点</strong>（讲者明确判断）：RL 框架不是纯系统驱动的领域，每一次架构更新都来自算法演进；系统侧的职责是把算法需求实现好。因此好的框架设计者首先要是好的 RL 算法工程师/研究员——OpenRLHF 核心开发者多为算法出身而非传统系统工程师，这是它能在早期混乱阶段做出标准化框架的关键。Q&amp;A 中他进一步判断：RL 框架本身不决定扩展上限（瓶颈在下层训/推引擎），下一代框架趋势是训练与推理纯异步分离部署、各自深度优化。</li>
+</ol>
+<p>其无 critic 化推导（字幕口径重构）为：</p>
+<p>$$\hat{A}_i = \frac{R_i - \bar{R}_{\mathrm{local}}}{\sigma_{\mathrm{global}}}$$</p>
+<p>其中 $\bar{R}_{\mathrm{local}}$ 是组内 reward 均值（替代 critic 基线）， $\sigma_{\mathrm{global}}$ 是全局 batch 的 reward 标准差（替代 GRPO 的组内标准差）。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>长思维链下推理时间占比</td>
+<td>95%–99%</td>
+<td>DeepSeek-R1/o1 之后，字幕口径</td>
+</tr>
+<tr>
+<td>REINFORCE++ vs GRPO</td>
+<td>数学分数略高，叠加 TIS 更高</td>
+<td>具体分数字幕未逐项给出</td>
+</tr>
+<tr>
+<td>全异步 agentic 架构落地时间</td>
+<td>2025 年 4 月起</td>
+<td>字幕口径</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>HF 格式 + auto-TP 作训推权重同步桥梁</strong>：只要训练与推理引擎都吃 HF 格式，权重同步退化为「gather → 发送 → 自动切片」，零格式转换代码——自研 RL 栈选型时应把「双引擎共同的模型格式」列为硬约束，这正是我们做 verl/vLLM 训推不一致处理时最先要锁定的接口。</li>
+<li><strong>归一化统计量的样本量意识</strong>：组内标准差样本少、估计偏差大，换成全局标准差即更稳——做 GRPO 变体实验时，advantage 归一化的统计口径（组内/全局/batch）应作为一等超参单独消融，而非默认沿用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>REINFORCE++ 的全局标准差在多任务混合 batch（不同 domain reward 尺度差异大）下是否仍稳，字幕未涉及；其论文版与 OpenRLHF 当前实现值得对照细读（尤其与 GSPO 的序列级口径之别）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「RL 框架的架构革新的力量主要来自于算法侧，系统侧只是去想怎么样更好地优化从算法上看到的这些需求和方法。」</p>
+<p>「我们当时这几个比较核心的开发者，一开始背景都是比较偏 RL 算法以及 NLP 算法的，而不是传统的 system engineer。」</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
