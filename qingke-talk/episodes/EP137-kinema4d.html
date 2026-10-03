@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP137 — Kinema4D：面向时空具身仿真的运动学 4D 世界建模</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP137 — Kinema4D：面向时空具身仿真的运动学 4D 世界建模</h1>
+    <p class="sub">Kinema4D 的立场是：具身仿真本质上是一个 4D 时空事件，当前视频生成式世界模型把它拆错了——让同一个网络既猜机械臂怎么动、又猜环境如何反应。它把两者解耦：机械臂控制用… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">Q&amp;amp;A 要点（本期 Q&amp;amp;A 约一小时，问题密度很高）</a><a href="#sec-5">关键数字总表</a><a href="#sec-6">可迁移</a><a href="#sec-7">疑问 / 下一步</a><a href="#sec-8">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP137-kinema4d.html</p>
+<p>「我始终 believe 一件事情：不需要让网络去猜的，我就不要让它去猜。明明可以把它 3D 重建出来，你为什么要让它去猜？」——讲者在 Q&amp;A 中的方法论自白</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>137</dd><dt>标题</dt><dd>Kinema4D：面向时空具身仿真的运动学 4D 世界建模</dd><dt>BV</dt><dd>BV1FpK36UEED</dd><dt>时长</dt><dd>01:33:17（讲授约 32 分钟 + Q&amp;A 约 61 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>徐沐天（南洋理工大学 MMLab / S-Lab 博士后研究员，导师刘子伟教授；博士毕业于香港中文大学（深圳）——字幕自述，导师姓名以论文作者页韩晓光为准）</dd><dt>相关论文</dt><dd>Mutian Xu, Tianbao Zhang, Tianqi Liu, Zhaoxi Chen, Xiaoguang Han, Ziwei Liu, <em>Kinema4D: Kinematic 4D World Modeling for Spatiotemporal Embodied Simulation</em>，<a href="https://arxiv.org/abs/2603.16669">https://arxiv.org/abs/2603.16669</a></dd><dt>相关代码</dt><dd><a href="https://github.com/mutianxu/Kinema4D">https://github.com/mutianxu/Kinema4D</a> （数据集 Robo4D-200k、模型权重均已开源）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1FpK36UEED/">https://www.bilibili.com/video/BV1FpK36UEED/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP137.txt</code>（2233 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP137，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 Kinema4D 在字幕中作「Kinea forty」、ground truth 作「国王处死」、SpatialTracker 作「special track」、TesserAct 作「TESARK/TISK」，均以论文与公开资料为准）。论文（arXiv:2603.16669）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。本期讲授部分以定性对比为主，硬数字较少，表中如实区分来源。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Kinema4D 的立场是：具身仿真本质上是一个 4D 时空事件，当前视频生成式世界模型把它拆错了——让同一个网络既猜机械臂怎么动、又猜环境如何反应。它把两者解耦：机械臂控制用 URDF 正运动学 + 三维重建精确解算、投影成 pointmap 序列喂给生成模型（不让网络猜），生成模型只负责推演环境反应并同步输出 RGB 与 pointmap。再配上 20 万条带 4D 标注的 Robo4D-200k 数据，得到一个能忠实仿真失败、能在未见过的真实场景与本体上做 policy 评测的 action-conditioned 4D 仿真器。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：具身仿真的「不可能三角」</h3>
+<p>讲者先把现有路线逐个摆出来：</p>
+<ul>
+<li><strong>真机 rollout</strong>：贵、危险、要人监督，规模化不了。</li>
+<li><strong>传统物理引擎</strong>（Isaac Sim 一类，字幕作「NVIDIESEXSEM」）：视觉不逼真，且受限于预设物理规则，复杂真实动力学建不出来。</li>
+<li><strong>视频生成式世界模型</strong>（NVIDIA Cosmos、Stanford Ctrl-World 等）：只生成 2D 视频。机器人碰在物体前面还是后面、捏在哪个位置，反馈完全不同——没有 4D 约束，交互就失去了最基本的 grounding。另一个问题是它们用隐式 action encoder 编码机械臂运动，网络还得自己学「这串数字向量在像素空间里该怎么动」，缺乏准确引导。</li>
+<li><strong>输出 4D 表征的工作</strong>（生成 normal map / depth map 一类，如 Stanford 的 TesserAct）：讲者认为它们做的是 action planning——给一句语言指令让模型完成任务，而不是拿 policy rollout 出的 action sequence 做仿真还原，缺的正是精确的动态引导。</li>
+</ul>
+<p>三者合起来是他所谓的<strong>不可能三角</strong>：准确性、时空约束性、动态性难以兼得。Kinema4D 的破法是从 4D 入手把三角拆开：robot control 与环境影响分别锚定在 4D 上处理。</p>
+<h3>方法（上）：机械臂控制不许网络猜</h3>
+<p>第一阶段是纯几何、零神经网络（讲者的原话是这一步「绝对准确」）：</p>
+<ol>
+<li>在 canonical space 下布置多视角相机，对机械臂做三维重建；</li>
+<li>policy（如 π0.5）输出末端位姿或关节角后，结合已知的 URDF 驱动重建出的机械臂，得到 canonical 空间下的 4D robot sequence；</li>
+<li>把该序列投影到主视角相机，得到精确的 <strong>point map</strong>——每个像素存的是该机械臂部位的 XYZ 坐标而非颜色值（ $H \times W \times 3$ ），同时得到机械臂的 occupancy mask。</li>
+</ol>
+<p>讲者反复强调这步的道理：机械臂本体、action sequence、URDF 全都是已知的，与其让 action encoder 去猜数字向量对应的空间运动，不如直接把抽象的 action 向量变成时空可见的 pointmap 信号。后续 Q&amp;A 里他把这条上升为方法论：「明明可以 3D 重建出来，为什么要让网络去猜。」</p>
+<h3>方法（下）：生成模型只管环境反应</h3>
+<p>第二阶段才轮到学习：pointmap 序列（+ 可选 RGB）经 VAE 编码，与 robot mask、噪声一起送入 DiT blocks，生成执行动作之后的世界——未来的 pointmap 序列与 RGB 序列，合起来就是完整的 4D 世界。骨干是视频生成模型（讲者 Q&amp;A 中透露为 14B 的 Wan 模型，字幕口径），关键洞察是：pointmap 本身就是 2D 排布的三通道图，视频生成模型能「天然读懂」这种带空间深度的模态，不需要专门的 pointmap encoder（讲者承认专用 encoder 是后续可探索项）。架构细节他指向团队前作 4DNeX，未在 talk 中展开。两个阶段合起来：控制是解算的、反应是生成的，输入输出都锚在同一个 4D 空间里。</p>
+<h3>数据：Robo4D-200k，失败样本是刚需</h3>
+<p>支撑这套训练的是大规模 4D 标注数据：</p>
+<ul>
+<li><strong>真实数据</strong>：DROID（字幕作「joy」）、Bridge、Google RT-1 三大数据集；</li>
+<li><strong>仿真数据</strong>：补入大量 failure case。讲者的理由很实在：仿真器不能只会仿成功——没抓上就是没抓上，否则模型会过拟合到「总是成功完成任务」；</li>
+<li><strong>4D 标注</strong>：真实视频用 SpatialTracker v2（字幕作「special track v2」，讲者称其对机械臂频繁运动很鲁棒）恢复 4D；仿真数据直接用引擎自带的 depth rendering。</li>
+</ul>
+<p>合计 Robo4D-200k 共 201,426 条 episode（论文口径），讲者称是目前规模最大的机械臂与世界交互 4D 数据集；数据集、代码、模型权重均已开源。</p>
+<h3>实验：定性对比为主，卖点是「仿得准失败」</h3>
+<p>讲者给的硬指标不多（视频生成指标与 4D 几何指标两类表，口头只报「都比 baselines 更好」），主要靠可视化对比讲三件事：</p>
+<ol>
+<li><strong>action 跟随</strong>：与 Ctrl-World 对比，后者靠 action encoder 解码数字向量，action 本身就 follow 不准；Kinema4D 的动作是 URDF 解算的，严格跟随 ground truth，网络只需专注推演环境响应，两个层面都更准。</li>
+<li><strong>反幻觉</strong>：与 TesserAct（文本指令驱动）对比，后者会抓不存在或没接触到的物体；Kinema4D 因为 action 已锚定，生成模型很难幻觉。最能说明问题的是 <strong>failure case</strong>：2D 视角下夹爪与物体明明重叠，纯视频模型（讲者称约 90% 都会如此）一旦看到 overlap 就默认已接触、把物体抓起来；而 pointmap 里夹爪与物体的空间间隙是明摆着的，Kinema4D 能正确仿出「没碰到、没抓起来」。</li>
+<li><strong>OOD 零样本</strong>：在真实世界里跑 π0.5 做 policy evaluation 并与 ground truth（同样用 SpatialTracker 还原成 4D）对比，成功与失败都仿得对；仿真环境下结论同样成立。讲者称这是首次在如此严苛的 OOD 条件下验证生成式仿真器的 zero-shot 能力。展示例子还包括可变形绳子抓取、细小笔、关微波炉门、从第一视角打开并看清柜子内部、抓沙发上的被子等。</li>
+</ol>
+<h3>讲者的四条延伸观点（take away）</h3>
+<ol>
+<li><strong>视频生成学不会可靠的 3D 意识</strong>：对「视频模型已经有 spatial awareness、3D 先验还有没有意义」的质疑，他的回答是明确的否——深度理解不准对观看无碍，对操作是致命的；想要 spatial awareness 就得有 4D 数据与 4D 监督，这是「数据 → 重建模型 → 世界模型」的链条问题。</li>
+<li><strong>action-conditioned 世界模型应是 WAM 的预训练先验</strong>：先用 action 条件训出「给什么动作产生什么结果」的知识，再把条件换成 text 做 world-action model 微调，架构不变、先验保留；且这种数据不需要人类示范——机器人随便抓、成败每一帧都有监督价值，数据效率天然高于示范驱动。</li>
+<li><strong>4D 让 inverse dynamics 几乎免费</strong>：WAM 要从推演结果反解 action，DreamZero 一类工作为此单训 inverse dynamics model；而 4D 输出下机械臂点云的位姿序列用 ICP / PnP 就能解出粗糙但可用的 action sequence 作打底——「4D 信号与 action 之间的 gap 更小」是他全场最强调的 take away。</li>
+<li><strong>监督信号应升级到 state</strong>：现在训 policy 到 action 层就断了、靠大量人类示范；有了世界模型，可以用它产生的 4D state 作监督，视觉信号的搜索空间比 action 空间小、与视觉基础模型的 gap 也小，数据效率应更高（他承认 feed-forward 端到端打通仍任重道远）。</li>
+</ol>
+<h3>局限（讲者自列）</h3>
+<ul>
+<li><strong>效率</strong>：14B Wan 模型，推理约需 50GB 显存（A100 级别，字幕口径）；讲者的排序是先把保真度做对，再谈蒸馏与轻量化表征。</li>
+<li><strong>物理还没进来</strong>：运动学不考虑力，「箱子太重推不动」这类问题需要质量、摩擦等物理属性赋值，而物理属性采集本身很难——他预判未来是显式物理打底 + 生成模型润色的混合路线，且金字塔往上是「视频 → 3D → 4D 时空 → 物理」。</li>
+<li><strong>表征效率</strong>：pointmap 未必是最优的 4D 表征，更高效表征与完全可微的端到端链路是开放问题。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>Q&amp;A 要点（本期 Q&amp;A 约一小时，问题密度很高）</h2>
+<ul>
+<li><strong>机器人动作锁死、环境反应生成，真实碰撞会不会露馅？</strong> 讲者认为这不是 Kinema4D 独有的问题，而是所有生成式世界模型共同的问题；物理属性（材质、重量）想准，前提仍是先有 4D 空间锚定，牛顿力学那套才有地方落。</li>
+<li><strong>视角被遮挡是不是就开始瞎编？</strong> pointmap 存的是 XYZ 不是颜色，夹爪碰没碰到由几何判定，比纯视频稳健得多；严重遮挡下 4D 重建本身会变难，但只要坐标给得准，模型就不会瞎编——「视频生成永远给不了你坐标」。</li>
+<li><strong>推理时点云从哪来？</strong> 机械臂来自重建 + URDF 驱动，天然可得；环境点云由网络从 RGB 推演，这个能力在训练中很容易习得（环境本身也可以重建，但他们没做）。</li>
+<li><strong>换本体泛化如何？</strong> 这是解耦设计的红利：同一串数字 action 在不同本体上运动不同，action encoder 必须重学，而 URDF 解算对任何本体都精确（灵巧手同理，其 URDF 一样存在）。</li>
+<li><strong>VLA 与 WAM 怎么结合？</strong> 讲者指 π0.7 已在做快慢脑结合：world model 做慢的推演、VLA 做快的直出；他同时提醒别纠结概念定义，本质区别只在「有没有推演引擎」。</li>
+<li><strong>先约束后生成 vs 先生成后约束？</strong> 拒绝站队：取决于物理参数可否获得、以及生成模型与物理引擎谁先成熟；当前多数场景还是先约束（生成模型远没到在 80% 场景胜过物理引擎），但参数拿不到时只能先生成。</li>
+<li><strong>灵巧手数据少怎么办？</strong> 硬件不成熟是根源；现阶段解法多从人类手部交互视频迁移，人手与灵巧手的 embodiment gap 本身小。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Robo4D-200k 数据规模</td>
+<td>—</td>
+<td>201,426 条 episode（真实 DROID/Bridge/RT-1 + 仿真含失败样本）</td>
+<td>论文 arXiv:2603.16669 摘要；字幕口径「20 万条」</td>
+</tr>
+<tr>
+<td>生成骨干规模</td>
+<td>—</td>
+<td>14B 参数（Wan 模型）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>推理显存需求</td>
+<td>—</td>
+<td>约 50 GB（A100 级别）</td>
+<td>字幕（Q&amp;A）</td>
+</tr>
+<tr>
+<td>视频生成 / 4D 几何指标 vs baselines</td>
+<td>Cosmos、Ctrl-World、TesserAct 等</td>
+<td>口头口径「都更好」，talk 未报具体数值</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>failure case 判定（夹爪未接触物体）</td>
+<td>纯视频模型在 2D 重叠时默认抓取（讲者称约 90% 如此）</td>
+<td>Kinema4D 凭 pointmap 间隙正确仿出未抓取</td>
+<td>字幕（实验部分）</td>
+</tr>
+<tr>
+<td>OOD policy 评测（π0.5，真机 + 仿真）</td>
+<td>—</td>
+<td>成功与失败均可忠实还原，初步 zero-shot</td>
+<td>字幕（实验部分）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移</h2>
+<ul>
+<li>「能解算的别让网络学」是可直接迁移的系统设计原则：凡是有闭式/几何解的部分（坐标变换、运动学、投影），从学习问题里摘出去，模型容量与数据只花在真正需要泛化的部分——这同时买到了 OOD 鲁棒性（解算部分不存在域外失效）。</li>
+<li>学到的仿真器/奖励模型必须喂失败样本，否则会系统性偏向「总是成功」：这条对 RL 评测与 learned simulator 都成立，评测集构造时应主动配比 failure case。</li>
+<li>用 state（世界模型输出）而非 action 示范作监督信号，是绕开示范数据瓶颈的一条路；4D pointmap 这类与 action 距离近的中间表征，值得在做 sim-to-real / policy 评测基建时优先考虑。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 下一步</h2>
+<ul>
+<li>定量结果在 talk 里基本没展开：视频生成指标与 4D 几何指标的实际数值、相对各 baseline 的差距需要查论文表格。</li>
+<li>50GB 显存、14B 模型的推理延迟决定它现在只能做离线评测；要进 RL 闭环做在线 rollout，轻量化（蒸馏或更高效表征）是前提，讲者尚未给出路线图数字。</li>
+<li>物理属性注入（质量、摩擦）目前只有方向判断，没有任何实验；「先有 4D 再赋物理」在流体、柔性体上是否成立未验证。</li>
+<li>action-conditioned 预训练 → text-conditioned WAM 的迁移收益是讲者的预判（「prior knowledge 一定有用」），尚无对照实验支撑。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「我始终 believe 一件事情：不需要让网络去猜的，我就不要让它去猜。明明可以把它 3D 重建出来，你为什么要让它去猜？」——Q&amp;A 方法论自白（字幕约 51:52–52:03，按干净口径转写）</p>
+<p>「我永远不认为你纯靠视频生成就能把 spatial awareness 训好……你想让一个世界模型有 spatial awareness，你就得有 4D 数据、4D 的监督。」——回应「视频模型已有空间意识、3D 先验是否还有意义」（字幕约 49:43–50:04，按干净口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

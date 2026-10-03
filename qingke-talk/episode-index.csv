@@ -128,14 +128,14 @@
 127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,BV1H7Eg6jEus,,,,2026-05-26,https://qingkeai.online/blog/%CE%B4-mem,yes,official-only（官网有预告，B站合集无对应视频）
 128,MinT: 面向百万级 LoRA 策略的训练与推理基础设施,BV1j67H6TEKL,128,,,2026-06-02,https://qingkeai.online/blog/MinT,yes,有B站视频（后补枚举确认）；原备注：conflict: B站 EP128 含两个不同 talk（见 128(B站) 两行），本行（官网 MinT）与 B站视频的对应关系待终裁
 129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,128,ARPO & AEPO：智能体强化学习算法的最新进展,,2026-06-06,https://qingkeai.online/blog/ARPO-AEPO-Agent-World,yes,字幕第4轮 harvest 经浏览器内主题校验通过（2026-10-02），已做字幕实录版纪要
-130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,,,2026-06-09,https://qingkeai.online/blog/ZEDA-Talk,unknown,official-only（官网有预告，B站合集无对应视频）
+130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,BV1cJEd6kE1t,,,,2026-06-09,https://qingkeai.online/blog/ZEDA-Talk,yes,official-only（官网有预告，B站合集无对应视频）
 131,UniRL：面向统一多模态模型的分布式 RL 后训练框架,BV1DuJp6PEP6,,,,2026-06-13,https://qingkeai.online/blog/UniRL,yes,official-only（官网有预告，B站合集无对应视频）
 132,从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制,BV1E4jF6kETQ,,,,2026-06-16,https://qingkeai.online/blog/GQLA-talk,yes,official-only（官网有预告，B站合集无对应视频）
 133,VeRL-Omni：基于VeRL及vLLM-Omni构建的面向多模态生成模型的开源 RL 后训练框架,BV1BAj96ZE9f,133,,,2026-06-23,https://qingkeai.online/blog/verl-omni,yes,有B站视频（后补枚举确认）
 134,DPA & LLaVA-HUD v4：多模态大模型的深度预对齐与高效视觉编码优化,BV1UHTq6MEwe,,DPA & LLaVA-HUD v4：增强 GUI 定位能力,,2026-06-30,https://qingkeai.online/blog/DPA%26LLaVA-HUD-v4,yes,unnumbered-video；B站视频无期号
 135,如何设计一个好的自回归 VLA：从问题构建到工程落地的探索之旅,BV1aTM86bEND,,,,2026-07-04,https://qingkeai.online/blog/Autoregressive-VLA,yes,official-only（官网有预告，B站合集无对应视频）
 136,PithTrain：Agent 时代的 MoE 训练框架设计,BV1vjNM6wE9i,,,,2026-07-11,https://qingkeai.online/blog/PithTrain-talk,yes,official-only（官网有预告，B站合集无对应视频）
-137,Kinema4D：面向时空具身仿真的运动学 4D 世界建模,,,,,2026-07-15,https://qingkeai.online/blog/Kinema4D-talk,unknown,official-only（官网有预告，B站合集无对应视频）
+137,Kinema4D：面向时空具身仿真的运动学 4D 世界建模,BV1FpK36UEED,,,,2026-07-15,https://qingkeai.online/blog/Kinema4D-talk,yes,official-only（官网有预告，B站合集无对应视频）
 138,STEAM：自监督帧级别优势建模算法,BV1kngS6MEKy,,,,2026-07-21,https://qingkeai.online/blog/STEAM-Talk,yes,official-only（官网有预告，B站合集无对应视频）
 139,LAWAM：隐空间世界动作模型,,,,,2026-07-25,https://qingkeai.online/blog/LAWAM,unknown,official-only（官网有预告，B站合集无对应视频）
 140,DRIFT：在线自进化后训练框架,BV1Z43y6QEzi,,,,2026-07-28,https://qingkeai.online/blog/DRIFT,yes,official-only（官网有预告，B站合集无对应视频）

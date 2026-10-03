@@ -128,14 +128,14 @@ No,Title,BV,Duration,Date,Status,Notes
 127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,BV1H7Eg6jEus,00:35:29,2026-05-26,要点已提炼,episodes/EP127-delta-mem.md
 128,MinT: 面向百万级 LoRA 策略的训练与推理基础设施,BV1j67H6TEKL,00:54:29,2026-06-02,要点已提炼,episodes/EP128-mint-lora.md
 129,从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径,BV1bFEg6ZEry,01:10:07,2026-06-06,要点已提炼,episodes/EP129-arpo-aepo-agent-world.md
-130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,,,2026-06-09,todo,official-only（官网有预告，B站合集无对应视频）
+130,ZEDA：将 Post-Trained MoE 迁移为高效动态 MoE,BV1cJEd6kE1t,01:03:31,2026-06-09,要点已提炼,episodes/EP130-zeda.md
 131,UniRL：面向统一多模态模型的分布式 RL 后训练框架,BV1DuJp6PEP6,01:02:25,2026-06-13,要点已提炼,episodes/EP131-unirl.md
 132,从 MLA 到 GQLA：无需从头训练，硬件自适应高效注意力机制,BV1E4jF6kETQ,01:14:03,2026-06-16,要点已提炼,episodes/EP132-mla-gqla.md
 133,VeRL-Omni：基于VeRL及vLLM-Omni构建的面向多模态生成模型的开源 RL 后训练框架,BV1BAj96ZE9f,01:11:26,2026-06-23,要点已提炼,episodes/EP133-verl-omni.md
 134,DPA & LLaVA-HUD v4：多模态大模型的深度预对齐与高效视觉编码优化,BV1UHTq6MEwe,01:07:34,2026-06-30,要点已提炼,episodes/EP134-dpa-llava-hud.md
 135,如何设计一个好的自回归 VLA：从问题构建到工程落地的探索之旅,BV1aTM86bEND,01:07:45,2026-07-04,要点已提炼,episodes/EP135-autoregressive-vla.md
 136,PithTrain：Agent 时代的 MoE 训练框架设计,BV1vjNM6wE9i,01:13:36,2026-07-11,要点已提炼,episodes/EP136-pithtrain.md
-137,Kinema4D：面向时空具身仿真的运动学 4D 世界建模,,,2026-07-15,todo,official-only（官网有预告，B站合集无对应视频）
+137,Kinema4D：面向时空具身仿真的运动学 4D 世界建模,BV1FpK36UEED,01:33:17,2026-07-15,要点已提炼,episodes/EP137-kinema4d.md
 138,STEAM：自监督帧级别优势建模算法,BV1kngS6MEKy,01:05:10,2026-07-21,要点已提炼,episodes/EP138-steam.md
 139,LAWAM：隐空间世界动作模型,,,2026-07-25,todo,official-only（官网有预告，B站合集无对应视频）
 140,DRIFT：在线自进化后训练框架,BV1Z43y6QEzi,01:02:34,2026-07-28,要点已提炼,episodes/EP140-drift.md
