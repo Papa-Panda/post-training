@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP143 — ACE-Data-0：新一代具身智能数据范式（以人为中心的环境式采集构建具身数据引擎）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP143 — ACE-Data-0：新一代具身智能数据范式（以人为中心的环境式采集构建具身数据引擎）</h1>
+    <p class="sub">具身智能缺的不是模型而是数据：现有数据集要么模态碎片化（只有第一视角视频、没有真值运动与接触），要么在实验室里录、任务只有几秒长。NTU S-Lab 与大晓机器人把真实家居改造… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移（放到 RL 训练 / 数据构造 / 评测框架）</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（论文原话，非讲者语录）</a><a href="#sec-8">未确证项</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP143-ace-data-0.html</p>
+<p><strong>主旨引文</strong>（论文 arXiv:2607.28625，Introduction）：「the data for embodied intelligence must therefore be built rather than found, by instrumenting everyday life itself」—— 语言和视觉有现成的历史档案可挖，物理技能没有；具身数据只能靠把真实家居改造成录音棚式的采集环境，一帧帧录出来。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP143（官网期号 143；青稞Talk 第 143 期）</dd><dt>标题</dt><dd>新一代具身智能数据范式ACE-Data-0：以人为中心的环境式采集构建具身数据引擎</dd><dt>讲者</dt><dd>操雨康（新加坡南洋理工大学 S-Lab / MMLab@NTU 博士后研究员，导师刘子纬教授；ACE-Data-0 论文共同第一作者）</dd><dt>讲者来源</dt><dd><a href="<a href="https://qingkeai.online/blog/ACE-Data-0">https://qingkeai.online/blog/ACE-Data-0</a>">节目页 qingkeai.online/blog/ACE-Data-0</a>（官网预告嘉宾介绍为公开署名；本期未取到字幕，讲者身份未有视频内自述可互证）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>直播时间</dt><dd>2026-08-06 20:00（episode-index.csv 与节目页正文一致；节目页页脚另有「8月4日 19:00」字样，疑为笔误，见未确证项）</dd><dt>BV</dt><dd>BV1MEu46EEH5（页面实际标题为《新一代具身智能数据范式ACE-Data-0：以人为中心的环境式采集构建具身数据引擎》；台账 <code>episode-index.csv</code> 的 B143 行旧登记为「核创业团队分享：我的创业经历」已过时，官网 143 行登记为 official-only。实测结论：该 BV 即本场视频，但字幕接口多轮实测均未拿到本场字幕（串台字幕与空字幕列表交替出现），故无法做字幕实录版）</dd><dt>时长</dt><dd>约 81 分 39 秒（4,899 秒，B站页面口径；同批采集所得）</dd><dt>相关论文</dt><dd><a href="<a href="https://arxiv.org/abs/2607.28625">https://arxiv.org/abs/2607.28625</a>">ACE-Data-0: Human-Centric Ambient Capture as Embodied Data Engine</a>（arXiv:2607.28625，2026-07-30 提交；Yukang Cao、Haozhe Xie、Beichen Wen 等共同一作，S-Lab@NTU 与大晓机器人 ACE Robotics，项目负责人 Liang Pan、Ziwei Liu）</dd><dt>相关代码/数据</dt><dd><a href="<a href="https://ace-data-engine.github.io/ACE-Data-0/">https://ace-data-engine.github.io/ACE-Data-0/</a>">项目主页 ace-data-engine.github.io/ACE-Data-0</a>；数据集 Hugging Face <code>ACERobotics/ACE-Data-0</code>（论文给出链接，本轮未实际下载验证）</dd><dt>提炼方式</dt><dd><strong>字幕接口持续串台，经多轮实测仍无法获得本场字幕；本篇基于对应论文 arXiv:2607.28625 与官网节目页还原，非逐字稿。</strong> 关键数字均标注论文节号/表号来源，未确证者见文末清单。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">17M</div><div class="l">帧</div></div></div>
+<p>具身智能缺的不是模型而是数据：现有数据集要么模态碎片化（只有第一视角视频、没有真值运动与接触），要么在实验室里录、任务只有几秒长。NTU S-Lab 与大晓机器人把真实家居改造成「环境式采集棚」ACE—— 桌面级与房间级两套配置同步录第一视角与多视角视频、全身与手部运动、物体 6-DoF 轨迹、音频与触觉，攒出 ACE-Data-0：150 小时、17M 帧、75,000 个交互 episode、200 类任务、50 名参与者；再配一套从「信号 → 组件 → 交互」三级递进的基准，实测 30 多个现有方法在接触、遮挡、自运动与长时程下集体掉档—— 数据引擎本身，就是这一期的主角。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li><strong>背景/问题</strong>：论文把具身数据的困境说得很直白：语言/视觉模型站在人类几百年攒下的档案上，物理技能（手怎么握杯、用多大力拿玻璃）从来没被写下来过，所以具身数据「必须被建造而非被发现」。而现有数据集三头都缺一截：（一）模态碎片化—— Ego-Exo4D、EPIC-Kitchens 这类大规模第一视角集没有真值的身体/物体运动与同步第三视角；BEHAVE、GRAB、ARCTIC 这类动捕集有精确姿态却没有第一视角，音频与触觉几乎全员缺席；（二）环境不自然—— 带物理标注的数据集清一色实验室棚拍，没有真实家居的遮挡、空间约束与物体多样性；（三）时程太短—— 绝大多数 HOI 片段只有几秒、一个简单动作，而真实家务是分钟到小时级、目标导向、跨房间串联子任务。结论：完整的「感知—动作」闭环从来没被任何数据集同步观测全过。</li>
+<li><strong>方法/设计（采集系统 ACE）</strong>：思路是把真实家居环境本身仪表化成录音棚，分两套互补配置：<strong>桌面级</strong>（密集近距相机 + 高分辨率触觉，抠手-物精细操作）与<strong>房间级</strong>（传感器铺满整个带家具的家居空间，录全身运动、位移与全屋尺度的交互）。每个 take 同步打包：第一视角（四个鱼眼视角 + IMU + 逐帧 6-DoF 头显位姿）、多视角第三视角视频（桌面级手部真值由 8 台同步外视角相机三角化 + 人工精修，房间级用 Manus 动捕手套）、41 关节全身骨骼与铰接手部姿态（转 SMPL-X 参数）、物体 6-DoF 轨迹（物体预先扫描或以 2DGS 重建网格，50 余个实例）、多通道音频、触觉手套的掌形压力网格（做了标定归一化与基线校正）。同步靠光学时钟把所有流对齐到动捕时钟（毫秒级精度），标定靠 marker 桥接把固定相机与穿戴相机注册到同一世界系。采集时只给目标级（goal-level）指令、不给分步脚本，让参与者按自己的方式规划、犹豫、即兴—— 保住自然行为差异，但量测精度不因此打折（每个时刻有 8 个以上视角同时观测，并锚定在度量级身体/手部/物体状态上）。标注五类（物体、身体、手部、触觉、音频+语言），且大比例由追踪到的物理状态自动导出而非靠估计管线：每帧的手/身体 3D 状态会被重投影到每个相机的每一帧上做像素对齐的 2D 标注，在家具遮挡、极端视角、运动模糊下仍正确—— 这是「真值来自量测而非检测」的核心卖点。</li>
+<li><strong>实验/实战（三级基准）</strong>：基准沿感知链自下而上搭三级，恰对应具身 agent 必须串起来的三件事：感知接触、估计场景状态、掌握手-物交互。<strong>第一级（低层信号）：由视觉推触觉</strong>—— 给第一视角视频预测全手压力分布，对触觉手套真值打分。三法里 TouchAnything 最好（时间准确率 0.7095、C-IoU 0.1646、V-IoU 0.1357、压力中心误差 CoP 6.58），但绝对值仍低；PressureVision 几乎交白卷（C-IoU 0.0007、V-IoU 0.0000）；结论是「判断有没有接触容易、恢复压力分布在哪里难」，尤其手-物互相遮挡时。<strong>第二级（场景组件）：人体运动估计</strong>—— 拿动捕真值当尺：单视角第三视角最好的是 SMPLest-X（PA-MPJPE 55.7 mm / MPJPE 58.8 mm）；第一视角方法整体差一个量级（EgoAllo MPJPE 147.9 mm、EgoEgo 163.4 mm），世界系对齐误差 WA-MPJPE 最好的单目方法也有 180.2 mm（Human3R）—— 在真实家居里，现有姿态估计离可用还远，家具挡下半身、蹲柜子、够高处、躺沙发这些日常姿态都不在它们的舒适区。<strong>第三级（交互）：手-物交互中的手部运动</strong>，第一/第三视角同场对比（同一批 take、同一真值）：第一视角逐帧法 WildHands 关节精度最好（PA-MPJPE 11.2 mm），但世界系轨迹误差高达 98.2–102.1 mm（Dyn-HaMR / HaWoR）；第三视角 WiLoR 拿到 PA-MPJPE 9.1 mm、F@5 0.313，视频法 HaPTIC 的轨迹误差只有 63.0 mm。论文的判读很明确：<strong>egomotion（自我运动）估计是第一视角手部重建的主要误差源</strong>—— 不是手指关节估不准，是头一动、世界系就漂；两种视角各有各的死法（第一视角怕截断/畸变/模糊，第三视角怕身体与物体遮挡），融合与给 ego 方法喂量测到的头显运动是下一步。</li>
+<li><strong>结论/观点</strong>（论文口径，非讲者原话）：作者认为现有方法在接触、遮挡与长时活动下的退化，恰说明真实家居与受控实验室是两个难度世界；数据集的价值不止评测—— 因为 ego 视频、多视角视频、运动轨迹与接触监督全部同钟同步，「每个训练信号都指向同一个物理时刻」，这正是模仿学习、世界模型、VLA 需要的对齐方式。自陈局限：只有 2 个场地，布局/陈设/光照多样性有限；真值只覆盖仪表化实体（物体要预先扫描装 marker），铰接机构、流体、可变形材料的状态变化没有标注；动捕服、手套、头显与 marker 在画面里可见，可能引入数据集特有的视觉线索（模型可能学到「看到手套=在操作」的捷径）。伦理上参与者均为知情同意并授权公开发布。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数字</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据总量</td>
+<td>150+ 小时、17M 视频帧、75,000 个交互 episode</td>
+<td>论文 Abstract、§4.2.3</td>
+</tr>
+<tr>
+<td>任务/参与者/环境</td>
+<td>200 类任务、50 名参与者、2 个环境；同时观测视角 ≥8</td>
+<td>论文 Abstract、§1</td>
+</tr>
+<tr>
+<td>take 时长</td>
+<td>最短 take 也是分钟级，约比典型 HOI 片段长一个数量级</td>
+<td>论文 §4.2.3</td>
+</tr>
+<tr>
+<td>视觉→触觉（最好法 TouchAnything）</td>
+<td>时间准确率 0.7095 / C-IoU 0.1646 / V-IoU 0.1357 / CoP 6.58；PressureVision C-IoU 0.0007、V-IoU 0.0000</td>
+<td>论文 Table 3</td>
+</tr>
+<tr>
+<td>人体运动估计（单视角外视角最好）</td>
+<td>SMPLest-X PA-MPJPE 55.7 mm、MPJPE 58.8 mm；第一视角 EgoAllo MPJPE 147.9 mm、EgoEgo 163.4 mm</td>
+<td>论文 Table 4</td>
+</tr>
+<tr>
+<td>手部：第一 vs 第三视角（同场对比）</td>
+<td>ego 逐帧 WildHands PA-MPJPE 11.2 mm，但世界系轨迹误差 98.2–102.1 mm；exo WiLoR PA-MPJPE 9.1 mm、F@5 0.313；exo HaPTIC 轨迹误差 63.0 mm</td>
+<td>论文 Table 5、Table 6、§5.3.3</td>
+</tr>
+<tr>
+<td>子目标结构</td>
+<td>episode = 实现一个子目标的连续片段，保存在更长的 take 上下文内</td>
+<td>论文 §4.2.3</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移（放到 RL 训练 / 数据构造 / 评测框架）</h2>
+<ul>
+<li><strong>把「同步性」当数据资产的第一属性</strong>：ACE 的核心工程不是相机多，而是所有模态同一时钟、同一世界系，且标注尽量从量测状态自动导出而非靠事后估计模型。迁移到任何多源数据管线（合成轨迹 + 真机日志 + 人类视频混训）：先统一时间戳与坐标系、能从状态自动打的标签就别用模型猜——标签的生成方式决定数据上限。RL 侧同理：rollout、reward、环境状态若不对齐到同一时刻，后面再强的算法也在学错位拼接的信号。</li>
+<li><strong>评测分级搭台子</strong>：信号（接触）→ 组件（状态估计）→ 交互（完整行为）的三级基准，把「整链失败」拆成「哪一级先坏」。这套分层评测可直接搬到 agent 评测：工具调用对不对（信号）、中间状态恢复得准不准（组件）、长程任务成不成（交互），而不是只看最终成功率一个数；ego 手部轨迹的教训也提醒：先查漂移/对齐这类系统性误差源，再怪模型能力。</li>
+<li><strong>目标级指令 + 保留自然差异</strong>：只给 goal 不给分步脚本，保住行为多样性（规划、犹豫、即兴），量测精度靠环境仪表化兜底。对应到 SFT/RL 数据构造：与其把轨迹清洗成千篇一律的「标准解法」，不如在标注质量上加固（自动真值、同步对齐），把多样性留给模型——后训练里过窄的数据分布同样会教出脆的策略。</li>
+<li><strong>标注自动化率决定数据集能否 scale</strong>：「大比例标注由追踪状态自动导出」是 75,000 episode 规模的前提。任何想扩十倍的数据项目，先问哪类标注还能从系统状态（仿真器状态、工具调用日志、单元测试结果）免费导出，别把人力标在机器能算的地方。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>讲者现场口径待回填</strong>：本期字幕被串台堵死，操雨康如何讲 ACE 的硬件 BOM 与搭建成本、两套配置的同步/标定踩坑、以及数据集后续版本（ACE-Data-1?）的规划，都只能等回放字幕可得后修订本篇。</li>
+<li>数据集本体未在本轮实际下载核验（Hugging Face <code>ACERobotics/ACE-Data-0</code> 的许可、实际放出比例、文件组织与论文描述是否一致），要用之前需先小规模抽验；论文称每条 take 连标定与同步时间线一并发布，这点对复现最关键，值得优先核。</li>
+<li>基准里「物体 6-DoF 姿态估计」被作者留作未来工作（说现成方法太少、比不了），但数据已带真值——这是现成的空位：拿 FoundationPose 类方法在ACE-Data-0 上测一测，就能补上第三级与第二级之间缺的那块。</li>
+<li>2 个场地的多样性上限：200 类任务、50 人不算小，但厨房/客厅布局就两种，模型在 ACE 上刷出的分数往第三种家居迁移时掉多少，暂时没数。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（论文原话，非讲者语录）</h2>
+<blockquote class="pq">
+<p>"the data for embodied intelligence must therefore be built rather than found, by instrumenting everyday life itself and recording human-object interaction (HOI) as it naturally unfolds."
+（arXiv:2607.28625，§1 Introduction）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>未确证项</h2>
+<ol>
+<li><strong>无字幕</strong>：BV1MEu46EEH5 经 2026-10-03 同批采集多轮实测，字幕接口持续返回串台字幕或空列表，未拿到本场字幕；本文全部技术内容基于论文 arXiv:2607.28625 与官网节目页，讲授顺序、现场补充与 AMA 内容均未覆盖，不能视为讲者原话。</li>
+<li><strong>讲者姓名写法</strong>：官网预告页将讲者写作「操雨康」（NTU MMLab@NTU 博后，导师刘子纬），论文作者表第一作者为 Yukang Cao—— 二者拼音对应，但未找到讲者个人主页做二次确认；「操」字以官网节目页为准。</li>
+<li><strong>直播时间冲突</strong>：节目页正文与 episode-index.csv 均为 2026-08-06 20:00，节目页另一处写「8月4日（周四）19:00–21:00」，两者矛盾（8月4日并非周四），以 2026-08-06 著录，待回放页确认。</li>
+<li><strong>台账冲突</strong>：episode-index.csv 中官网 EP143 登记为 official-only、B143 行旧标题为「核创业团队分享：我的创业经历」，均与实测不符；以 harvest 实测的页面实际标题（ACE-Data-0 本场）为准，BV 与时长按实测著录。「大晓机器人」即论文中的 ACE Robotics，以论文署名为准。</li>
+<li><strong>数据与代码可用性</strong>：Hugging Face 数据集与项目主页链接来自论文，未在本轮实际下载验证，发布范围与许可条款待核。</li>
+</ol></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

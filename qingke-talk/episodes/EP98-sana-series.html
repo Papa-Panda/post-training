@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP98 — SANA-Series：探索图像视频扩散模型的高效设计与加速</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP98 — SANA-Series：探索图像视频扩散模型的高效设计与加速</h1>
+    <p class="sub">图像与视频扩散模型的推理 FLOPs 甚至远超 LLM，算力账不解决，再好的生成质量也普及不了。SANA 系列的路线是四个方向一起抠：VAE 把图像压得更狠（深度压缩 32 倍… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（官网预告，非讲授口播）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP98-sana-series.html</p>
+<p>"Sana-0.6B 模型尺寸比一些大型扩散模型小 20 倍，但吞吐量却快了 100 多倍。" —— 官网预告对 SANA 的概括，本期主线：把视觉生成的 FLOPs 账先算明白</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>98</dd><dt>标题</dt><dd>SANA-Series：探索图像视频扩散模型的高效设计与加速</dd><dt>BV</dt><dd>BV16ui9BkEvJ（台账中该 BV 旧登记为 B98《Momapy-X：具身智能新共享身体》，与本场实际内容完全不符；本场为官网 EP98，B站字幕接口持续串台、无法取得本场字幕，详见下方提炼方式说明）</dd><dt>时长</dt><dd>直播计划 1 小时（讲授 + AMA），字幕不可得、无以字幕计的时长可核</dd><dt>直播时间</dt><dd>2025-12-16（周二）20:00–21:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>陈俊松（香港大学 MMLab 博士生，导师罗平；在 NVIDIA 研究院实习，由谢恩泽、韩松指导；SANA 系列核心作者）</dd><dt>相关论文</dt><dd>SANA：<em>Sana: Efficient High-Resolution Image Synthesis with Linear Diffusion Transformer</em>，<a href="https://arxiv.org/abs/2410.10629（ICLR">https://arxiv.org/abs/2410.10629（ICLR</a> 2025 Oral）；SANA 1.5：<a href="https://arxiv.org/abs/2501.18427；SANA-Sprint：https://arxiv.org/abs/2503.09641；SANA-Video：https://arxiv.org/abs/2509.24695">https://arxiv.org/abs/2501.18427；SANA-Sprint：https://arxiv.org/abs/2503.09641；SANA-Video：https://arxiv.org/abs/2509.24695</a></dd><dt>相关代码</dt><dd><a href="https://github.com/NVlabs/Sana">https://github.com/NVlabs/Sana</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/SANA-Series">https://qingkeai.online/blog/SANA-Series</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：<strong>字幕接口持续串台，经多轮实测仍无法获得本场字幕；本篇基于对应论文还原，非逐字稿。</strong> 讲授提纲为：（1）视觉生成模型的计算瓶颈及其四大加速方向（DiT 架构、VAE、步数蒸馏、Block Diffusion）；（2）高效图像生成：SANA 与 SANA-Sprint；（3）SANA-Video：AR 与 Diffusion 结合生成长视频；（4）AMA 环节。以下按四篇论文为据写；AMA 与讲者现场口头发挥无书面材料，不复述、不虚构。凡数字均为论文或官网口径（逐项标注）。<strong>编号冲突专节</strong>：B站合集内 BV16ui9BkEvJ 在仓库台账里登记为 B98《Momapy-X：具身智能新共享身体，现可用 12+ 款人形机器人》，这是台账旧标题、与实际视频内容（官网 EP98 SANA-Series）完全不符；官网 episode-index 中 EP98 本登记为 official-only（「官网有预告，B站合集无对应视频」），实际对应视频即此 BV。按既定裁决「纪要按实际视频内容编号」，本篇归 EP98；B98《Momapy-X》一期是否另有真实 BV，待后续枚举合集复核。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>图像与视频扩散模型的推理 FLOPs 甚至远超 LLM，算力账不解决，再好的生成质量也普及不了。SANA 系列的路线是四个方向一起抠：VAE 把图像压得更狠（深度压缩 32 倍）、DiT 用线性注意力把序列复杂度从 $O(N^2)$ 降到 $O(N)$ 、蒸馏把推理步数从约 20 步压到 1–4 步、再把自回归与扩散结合生成分钟级长视频——四篇合起来，是把 GenAI 视觉模型的价格打到笔记本 GPU 与消费级显卡能跑的工程答案。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：视觉生成的 FLOPs 比 LLM 还夸张</h3>
+<p>按官网预告，本讲分四段：先讲视觉生成模型的计算瓶颈与四大加速方向，再讲 SANA 与 SANA-Sprint 的高效图像生成，然后是 SANA-Video 的长视频生成，最后 AMA。问题定义（官网口径）：GenAI 视觉模型（Sora 2、Nano Banana 一代）效果惊人，但单次推理的 FLOPs 甚至远超 LLM，部署成本高昂难以普及。四条成本曲线各有解法：高分辨率下 latent token 数爆炸（VAE 压缩率）、长序列下注意力平方复杂度（DiT 架构）、采样步数多（步数蒸馏）、长视频的 KV 内存随长度线性增长（Block Diffusion 与恒定内存缓存）。</p>
+<h3>方法/设计之一：SANA —— 压缩率与线性注意力各砍一刀</h3>
+<p>SANA（arXiv:2410.10629，ICLR 2025 Oral）的两把刀：第一，深度压缩自编码器把图像压缩倍数提高到 32 倍，latent token 数直接降一个量级；第二，Linear DiT——用线性注意力替换所有传统 softmax 注意力，复杂度从 ， $O(N^2)$ ， 降到 ， $O(N)$ ， （官网口径）。结果：Sana-0.6B 比大型扩散模型小 20 倍、吞吐快 100 多倍（官网口径），能在 16GB 显存的笔记本 GPU 上部署，生成一张 1024×1024 图像不到 1 秒（官网口径），最高支持 4096×4096 高分辨率生成（官网口径）。</p>
+<h3>方法/设计之二：SANA 1.5 与 SANA-Sprint —— 训练、剪枝、推理时扩展</h3>
+<p>SANA 1.5（arXiv:2501.18427）解决「怎么长大」：深度增长范式（depth-growth）把模型从 1.6B 平滑扩到 4.8B，配内存高效的 8-bit 优化器压显存；基于 block 重要性分析的深度剪枝可把训好的大模型裁到任意目标尺寸、少量微调即恢复质量；推理时扩展用重复采样以推理算力换等效容量。结果：GenEval 0.81，加推理时扩展后升至 0.96（官网口径，称刷新当时 SoTA）。</p>
+<p>SANA-Sprint（arXiv:2503.09641）解决「怎么变快」：把预训练的 flow-matching 模型零额外训练地转成连续时间一致性蒸馏（sCM）的可蒸馏形式，再做混合蒸馏——sCM 保全局分布一致、潜在对抗蒸馏（LADD）保单步细节；步数自适应的单一模型在 1/2/4 步下都能出图，还集成了 ControlNet 做实时交互（H100 上 ControlNet 模式延迟 0.25 秒，官网口径）。结果：1 步推理 FID 7.59、GenEval 0.74，优于 FLUX-schnell 的 FID 7.94、GenEval 0.71（官网口径）；H100 生成一张 1024×1024 图 0.1 秒 vs FLUX-schnell 1.1 秒、约 10 倍（官网口径）；RTX 4090 文生图延迟 0.31 秒（官网口径）。</p>
+<h3>方法/设计之三：SANA-Video —— Block Linear + 恒定内存 KV 缓存</h3>
+<p>SANA-Video（arXiv:2509.24695）把 SANA 的两件武器搬到视频：Linear DiT 继续做核心算子；面向块线性注意力设计恒定内存 KV 缓存——利用线性注意力的累积特性构造固定内存占用的状态缓存，让 Block 自回归生成在固定内存下拿到全局上下文，支撑分钟级长视频（最高 720×1280、时长达一分钟，官网口径）。数据过滤与训练方案把总成本压到 64 块 H100 训练 12 天，约 MovieGen 训练成本的 1%（官网口径）；性能与 Wan 2.1-1.3B、SkyReel-V2-1.3B 一类小型扩散视频模型可比，实测推理延迟低 16 倍（官网口径）；RTX 5090 上用 NVFP4 精度生成 5 秒 720p 视频，从 71 秒缩短到 29 秒（2.4 倍，官网口径）。</p>
+<h3>结论/观点</h3>
+<p>按官网预告的表述，团队的判断是：视觉生成的普及瓶颈在成本不在效果——FLOPs、显存、步数、内存四本账都得算（这是预告页框定的讲授主旨）；线性注意力被明确表述为「处理超长序列的关键」（官网原文），复杂度从 $O(N^2)$ 到 $O(N)$ 不只是数学优化，而是长视频分钟级上下文的前提。讲者陈俊松为该系列核心作者（港大 MMLab、NVIDIA 实习），本讲按「四大加速方向」组织——DiT 架构、VAE、步数蒸馏、Block Diffusion——四篇论文恰好各占一格，SANA-Video 与 LongSANA 是第四格的最新进展。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VAE 压缩倍数</td>
+<td>32 倍（深度压缩自编码器）</td>
+<td>官网/SANA（arXiv:2410.10629）</td>
+</tr>
+<tr>
+<td>Sana-0.6B 相对大型扩散模型</td>
+<td>尺寸约 1/20，吞吐 100 倍以上</td>
+<td>官网口径</td>
+</tr>
+<tr>
+<td>1024×1024 图像生成（16GB 笔记本 GPU）</td>
+<td>不到 1 秒</td>
+<td>官网口径</td>
+</tr>
+<tr>
+<td>SANA 1.5 深度增长</td>
+<td>1.6B → 4.8B（8-bit 优化器）</td>
+<td>官网/SANA 1.5（arXiv:2501.18427）</td>
+</tr>
+<tr>
+<td>SANA 1.5 GenEval</td>
+<td>0.81，推理时扩展后 0.96</td>
+<td>官网口径</td>
+</tr>
+<tr>
+<td>SANA-Sprint 1 步推理</td>
+<td>FID 7.59、GenEval 0.74（FLUX-schnell 7.94 / 0.71）</td>
+<td>官网口径（arXiv:2503.09641）</td>
+</tr>
+<tr>
+<td>SANA-Sprint 延迟（1024×1024，H100）</td>
+<td>0.1 秒 vs FLUX-schnell 1.1 秒（约 10 倍）</td>
+<td>官网口径</td>
+</tr>
+<tr>
+<td>SANA-Video 训练成本</td>
+<td>64×H100 × 12 天 ≈ MovieGen 的 1%</td>
+<td>官网口径（arXiv:2509.24695）</td>
+</tr>
+<tr>
+<td>SANA-Video 推理延迟</td>
+<td>相对同级小模型低 16 倍</td>
+<td>官网口径</td>
+</tr>
+<tr>
+<td>SANA-Video 生成能力</td>
+<td>720×1280、时长达 1 分钟</td>
+<td>官网口径</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 post-training / RL infra 的可试点：步数蒸馏与「训推成本前置」的账目框架——VLA/LLM 的多步生成同样可以做「sCM 式免训练转换 + 混合蒸馏」的同构移植评估，先在小模型上验证单步退化幅度，再决定是否蒸馏专模；SANA-Sprint 的混合蒸馏分工（一个损失管分布、一个管细节）对 RL 蒸馏目标设计有直接参考。</li>
+<li>Infra 视角：SANA-Video 的恒定内存 KV 缓存与 Block 自回归，本质是把「上下文长度」与「显存」解耦——这正是 agentic RL 长轨迹 rollout 的同一个瓶颈（KV 随轮次线性涨、GPU 被占满后吞吐塌陷）；线性注意力的状态累积在长程 agent 里同样值得一轮对照实验。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>官方预告没有给出 LongSANA 的单独论文编号与量级（官网只列为「长视频生成（SANA-Video, LongSANA）」并入提纲），其与 SANA-Video 的关系（增量版还是并行线）待查 LongSANA 论文原文确认。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（官网预告，非讲授口播）</h2>
+<blockquote class="pq">
+<p>"图像和视频模型的推理 FLOPs 甚至远超 LLM，导致部署成本高昂，难以普及。" —— 官网预告的问题定义：成本是第一约束</p>
+<p>"线性注意力是处理超长序列的关键，它将复杂度从 $O(N^2)$ 降低到 $O(N)$ 。" —— 官网预告原文（此处 $O(N^2)$ 指标准自注意力的序列长度平方项）</p>
+<p>"得益于这一极低的训练开销，SANA-Video 在性能上已可与当前先进的小型扩散视频模型（如 Wan 2.1-1.3B 和 SkyReel-V2-1.3B）相媲美，同时实测推理延迟降低 16 倍。" —— 官网预告对 SANA-Video 的定位</p>
+</blockquote>
+<hr />
+<p><em>未确证项：①本场确切讲授顺序与每节时长无字幕可核，讲纲以官网提纲为准；②关键数字大多取自官网预告页文本，个别数字（如 20 倍/100 倍）未回查论文原文表格；③AMA 与口头补充（如实测硬件细节）无法还原；④LongSANA 的论文出处未确证；⑤B98《Momapy-X》真实 BV 待后续枚举复核。</em></p></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP139 — LaWAM：隐空间世界动作模型！不生成未来视频，也让机器人拥有物理预见力</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP139 — LaWAM：隐空间世界动作模型！不生成未来视频，也让机器人拥有物理预见力</h1>
+    <p class="sub">视频世界动作模型（WAM）为了给策略「预见未来」要逐像素生成未来视频，慢且贵（LingBot-VA 单次推理 4,482 ms）；LaWAM 改在冻结视觉编码器的隐空间里预测一… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移（放到 RL 训练 / 数据构造 / 评测框架）</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（论文原话，非讲者语录）</a><a href="#sec-8">未确证项</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP139-lawam.html</p>
+<p><strong>主旨引文</strong>（论文 arXiv:2606.15768，Conclusion）：「future prediction can serve as a compact latent interface between semantic instruction following and physically grounded control」—— 把「未来」从一段给人看的视频，改造成策略能直接读的隐空间子目标。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP139（官网期号 139；青稞Talk 第 139 期）</dd><dt>标题</dt><dd>LaWAM：隐空间世界动作模型！不生成未来视频，也让机器人拥有物理预见力</dd><dt>讲者</dt><dd>陈佳磊（中关村学院联合培养博士生、LaWAM 论文第一作者；与清华深圳研究生院于超老师合作，由吉林大学徐原博教授指导）</dd><dt>讲者来源</dt><dd><a href="<a href="https://qingkeai.online/blog/LAWAM">https://qingkeai.online/blog/LAWAM</a>">节目页 qingkeai.online/blog/LAWAM</a>（官网嘉宾介绍为公开署名；本期未取到字幕，讲者身份未有视频内自述可互证）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>直播时间</dt><dd>2026-07-25 10:00–11:00（节目页与 episode-index.csv 一致）</dd><dt>BV</dt><dd>BV12D3g6ME3b（页面实际标题为《LaWAM：隐空间世界动作模型》；台账 <code>episode-index.csv</code> 的 B139 行旧登记为「CARL：两年前的超集校准…」已过时，官网 139 行则登记为 official-only。实测结论：该 BV 即本场视频，只是字幕接口持续返回串台字幕（多轮实测四次均未拿到本场字幕，返回过其他视频字幕或空字幕列表），故无法做字幕实录版）</dd><dt>时长</dt><dd>约 68 分 21 秒（4,101 秒，B站页面口径；同批采集所得）</dd><dt>相关论文</dt><dd><a href="<a href="https://arxiv.org/abs/2606.15768">https://arxiv.org/abs/2606.15768</a>">LaWAM: Latent World Action Models for Efficient Dynamics-Aware Robot Policies</a>（arXiv:2606.15768，v1 2026-06-14 提交；陈佳磊等，清华大学、多所高校与正行创新 Striding.AI、Infinigence AI）</dd><dt>相关代码/资源</dt><dd><a href="<a href="https://github.com/RLinf/LaWAM">https://github.com/RLinf/LaWAM</a>">github.com/RLinf/LaWAM</a>；<a href="<a href="https://rlinf.github.io/LaWAM/">https://rlinf.github.io/LaWAM/</a>">项目主页 rlinf.github.io/LaWAM</a>；模型权重见 Hugging Face 集合（官网列于节目页）</dd><dt>提炼方式</dt><dd><strong>字幕接口持续串台，经多轮实测仍无法获得本场字幕；本篇基于对应论文 arXiv:2606.15768 与官网节目页还原，非逐字稿。</strong> 关键数字均标注论文节号/表号来源，未确证者见文末清单。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">2.3B</div><div class="l">参数</div></div></div>
+<p>视频世界动作模型（WAM）为了给策略「预见未来」要逐像素生成未来视频，慢且贵（LingBot-VA 单次推理 4,482 ms）；LaWAM 改在冻结视觉编码器的隐空间里预测一个与下一段动作相关的「隐空间视觉子目标」—— 把隐动作模型（LAM）原本被丢弃的前向解码器扶正为隐空间世界模型 LaWM，策略先预测隐动作、再由 LaWM 展开成子目标、最后动作专家据此生成动作块。结果是 2.3B 参数、每动作块 187 ms，在 LIBERO 拿到 98.6% 平均成功率、RoboTwin 2.0 拿到 91.22%、真机三任务平均 90.0%，端到端延迟最高比像素 WAM 低 24 倍。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li>
+<p><strong>背景/问题</strong>：VLA 只有语义理解、没有「动作会把场景推成什么样」的显式预见；WAM 用预测的未来观测补这一课，但像素路线有三笔账算不过来：把大量建模容量花在纹理光照等与控制无关的像素合成上；迭代式视频生成带来高延迟（论文同口径实测：LingBot-VA 4,482 ms、Motus 3,231 ms，而普通 VLA π₀.₅ 只要 220 ms）；生成出的未来还得「看起来合理」而非「对下一段动作有用」。论文的判断是：控制真正需要的未来，只是物体将如何移动、接触区域在哪、当前动作会把场景推向什么状态——这些信息主要在空间结构里，不在像素里。</p>
+</li>
+<li>
+<p><strong>方法/设计</strong>：全部在冻结视觉基础模型（DINOv3）的特征空间里工作。记当前观测的特征为 $u$ ，未来观测特征为 $u_T$ 。第一阶段先训一个隐动作模型：逆向动力学编码器从一对当前/未来特征里推断隐动作 $z$ ，前向解码器再据当前特征与隐动作预测未来特征：</p>
+</li>
+</ol>
+<p>$$z \sim q_\phi(z \mid u, u_T), \qquad \tilde{u}_T = \mathrm{LaWM}_\omega(u, z)$$</p>
+<p>以往的隐动作工作（LAPA、UniVLA 等）把这个解码器只当预训练的辅助件、训完就扔；LaWAM 的关键一步是把解码器保留下来扶正为 <strong>LaWM</strong>（Latent World Model）—— 它已经学会「给一个抽象动作意图，在当前场景里展开成未来的视觉状态」，正好是策略缺的那块。训练目标包括未来特征预测误差、KL 正则，以及一个轻量的末端执行器状态预测辅助损失（让隐动作更偏具身运动、少被纯外观变化带偏）。部署时真实未来还没发生，链条变成三步：策略先验预测隐动作，LaWM 解码出子目标，动作专家生成动作块：</p>
+<p>$$p(a_{1:T}, \hat{u}_T, \hat{z} \mid o, l) = p_\theta(\hat{z} \mid o, l) \, p_\omega(\hat{u}_T \mid u, \hat{z}) \, p_\eta(a_{1:T} \mid o, l, u, \hat{u}_T)$$</p>
+<p>第二阶段把 LaWM 接进策略时有两个关键件：一是<strong>隐动作蒸馏</strong>（latent-action distillation），用第一阶段 LAM 的后验直接监督策略先验，让策略学会稳定地「驱动」LaWM；二是<strong>知识隔离</strong>（knowledge insulation），策略训练时不让动作专家的梯度回流破坏 LaWM 已学到的场景变化规律。动作专家是 Alternate-DiT 结构，条件是当前上下文加 LaWM 给出的子目标。预训练数据约 3,000 小时机器人视频 + 1,500 小时第一视角人类视频；人类视频只经由 LaWM 的动力学先验进入系统，策略整合阶段只用带语言指令的机器人轨迹—— 人手的动作意图先在隐空间变成「视觉状态转移」，再由 LaWM 结合机器人当前看到的场景展开，绕开了「人手关节 → 机器人关节」的硬翻译。
+3. <strong>实验/实战</strong>：仿真两条线。LIBERO 四套件（每任务 50 次试验）：LaWAM 平均 98.6%（Long 97.0 / Goal 98.4 / Object 99.6 / Spatial 99.4），压过像素 WAM 里最强的 Cosmos-Policy 与 LingBot-VA（均 98.5%）和 π₀.₅（96.9%）；隐动作基线 LAPA 只有 65.7%，差距说明隐动作单独当接口不够、展开成空间结构化的子目标才是增益来源。延迟（每动作块、模型侧墙钟）：LaWAM 187 ms，π₀.₅ 220 ms，Fast-WAM 486 ms，Cosmos-Policy 1,413 ms，LingBot-VA 4,482 ms—— LaWAM 比最慢的像素 WAM 快约 24 倍；LaWM 只有 230M 参数，相比 5B 的 WAN 视频底座省约 95% 世界建模参数，全模型 2.3B。RoboTwin 2.0（50 个双臂任务、每任务 100 次）：clean 92.64% / random 89.80%（平均 91.22%），clean 略高于 Fast-WAM 的 91.98/90.52，稳住双臂协同。真机三任务（每任务 30 次，含分布外初始位形）：抓放 93.3%、开抽屉 86.7%、折毛巾 90.0%，平均 90.0% 对 π₀.₅ 的 83.3%；折毛巾上差距最戏剧—— LingBot-VA 因生成延迟「机器人停下来等视频、布料却不等」，成功率 0.0%。动力学分析：把同一段隐动作放到没见过的场景与本体里开环展开，LaWM 能给出连贯的隐空间演化—— 隐动作是本体无关的视觉转移，LaWM 负责把它落回当前本体的场景里。消融（LIBERO）：去掉 LaWM 掉得最狠（尤其 LIBERO-Long），去掉隐动作蒸馏也明显掉，两者（知识隔离 + 蒸馏）一起去掉更差—— 结论是子目标必须「既能被对齐的隐动作驱动、又要免受动作梯度污染」。
+4. <strong>结论/观点</strong>（论文口径，非讲者原话）：给策略的未来不必是像素级的，只需是动作相关的；隐动作负责跨本体表达抽象转移、LaWM 负责把转移落回当前场景，两件合起来构成「人类视频 → 机器人动作」可复用的中间层。作者自陈两点局限：当前设定最适合相机相对固定的操作任务，相机自身运动主导画面变化时（第一视角抖动、大视角切换）隐动作空间学不连贯，这限制了它在人形/移动机器人上的直接使用；细粒度可变形物体动力学（如折毛巾中微妙的布料形变）在现训练混合里样本太少，LaWM 建模不可靠，下一步是扩数据与模型容量。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数字</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LIBERO 平均成功率（Long/Goal/Object/Spatial）</td>
+<td>98.6%（97.0 / 98.4 / 99.6 / 99.4），每任务 50 次试验</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>同口径基线：Cosmos-Policy / LingBot-VA / π₀.₅ / LAPA</td>
+<td>98.5% / 98.5% / 96.9% / 65.7%</td>
+<td>论文 Table 1</td>
+</tr>
+<tr>
+<td>每动作块推理延迟：LaWAM vs LingBot-VA / Motus / Cosmos-Policy / Fast-WAM / π₀.₅</td>
+<td>187 ms vs 4,482 / 3,231 / 1,413 / 486 / 220 ms</td>
+<td>论文 Table 1、§1</td>
+</tr>
+<tr>
+<td>世界模型参数：LaWM vs WAN 视频底座</td>
+<td>230M vs 5B（约省 95%）；全模型 2.3B</td>
+<td>论文 §4.1、Fig. 1</td>
+</tr>
+<tr>
+<td>RoboTwin 2.0（50 任务，clean/random，平均）</td>
+<td>LaWAM 92.64% / 89.80%（91.22%）；Fast-WAM 91.98% / 90.52%；π₀.₅ 82.74% / 76.76%</td>
+<td>论文 Table 2</td>
+</tr>
+<tr>
+<td>真机三任务平均成功率（抓放/开抽屉/折毛巾，30 次/任务）</td>
+<td>LaWAM 90.0%（93.3 / 86.7 / 90.0）；π₀.₅ 83.3%；GR00T-N1.6 68.9%；LingBot-VA 53.3%（折毛巾 0.0%）</td>
+<td>论文 Table 3</td>
+</tr>
+<tr>
+<td>预训练数据</td>
+<td>约 3,000 小时机器人视频 + 1,500 小时第一视角人类视频</td>
+<td>论文 §4、Introduction</td>
+</tr>
+<tr>
+<td>延迟收益</td>
+<td>端到端最高较像素 WAM 低 24 倍</td>
+<td>论文 Abstract</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移（放到 RL 训练 / 数据构造 / 评测框架）</h2>
+<ul>
+<li><strong>「未来」给策略时只给任务相关的压缩表示</strong>：LaWAM 把未来从像素视频换成隐空间子目标后，延迟降一个数量级而成功率不降。迁移到 agent/RL：任何「先想象再行动」的环节（rollout 预演、规划器给执行器的中间表示），先问表示里哪些维度是决策真正要读的，把纹理级细节从接口里删掉再谈模型大小；对 coding-agent 来说，类似地，给执行步的子目标应是结构化的状态差分而非整段重演的轨迹文本。</li>
+<li><strong>保留并扶正「辅助模块」当推理期组件</strong>：LAM 的解码器在前人工作里训完即弃，LaWAM 把它变成世界模型本体。迁移视角：预训练里的辅助头（逆动力学、未来预测、价值预测）在后训练阶段未必该扔——先检查它是否已经学到了可调用的环境规律，再决定是当特征、当教师还是当在线模块。</li>
+<li><strong>知识隔离 + 蒸馏的接口对齐套路</strong>：让策略驱动一个冻结的先验模块时，LaWAM 用「后验蒸馏教接口、梯度隔离护模块」两件套防双输。这正是 post-training 里常见的失败模式（下游微调把预训练表征训坏）的直接对应解法，可搬运到任何 frozen-backbone + adapter 的微调管线。</li>
+<li><strong>延迟要进评测口径</strong>：折毛巾上 0% 与 90% 的差距不是模型能力而是「等视频生成时布料不等你」。评测动态任务时应把每步决策延迟与任务时间常数一起报告，慢推理在长时程任务里会以成功率的形式还账。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li><strong>讲者现场口径待回填</strong>：本期字幕被串台堵死，陈佳磊在讲授里如何拆两阶段训练的工程细节（隐动作维度、LaWM 的具体结构、Alternate-DiT 与子目标的融合方式）、AMA 里对「移动相机」局限的展开，都只能等回放字幕可得后修订本篇（论文 Appendix C 有部分实现细节，可先查）。</li>
+<li>隐动作空间本身的可解释性与容量：隐动作维度、码本/连续的选择对跨本体迁移的影响，论文正文着墨有限；「同一隐动作多本体展开」的定性结果漂亮，但缺定量指标（如展开轨迹与真实未来的特征距离）。</li>
+<li>RoboTwin random 设定（89.80%）仍略低于 Fast-WAM 与 LingBot-VA 的 random 口径（90.52% / 90.92%），clean 领先、random 微输—— 隐空间子目标对域随机化的鲁棒性是否弱于像素路线，值得在后续版本里盯。</li>
+<li>与同期「像素子目标」路线（如 π₀.₇ 用独立像素模型产子目标）的取舍：LaWAM 赌的是隐空间够表达动作相关动态，这个赌在需要精细接触几何的任务上（插拔、装配）的边界未测。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（论文原话，非讲者语录）</h2>
+<blockquote class="pq">
+<p>"future prediction can serve as a compact latent interface between semantic instruction following and physically grounded control."
+（arXiv:2606.15768，§6 Conclusion）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>未确证项</h2>
+<ol>
+<li><strong>无字幕</strong>：BV12D3g6ME3b 经 2026-10-03 同批采集多轮实测，字幕接口持续返回串台字幕或空列表，未拿到本场字幕；本文全部技术内容基于论文 arXiv:2606.15768（v1）与官网节目页，讲授顺序、现场补充与 AMA 内容均未覆盖，不能视为讲者原话。</li>
+<li><strong>讲者身份</strong>：陈佳磊来自官网节目页嘉宾介绍（中关村学院联合培养博士生、论文第一作者），与论文作者表第一作者 Jialei Chen 可对应；但未在节目页之外找到其个人主页交叉确认机构细节，「与于超老师合作、由徐原博教授指导」为节目页单方表述。</li>
+<li><strong>台账冲突</strong>：episode-index.csv 中官网 EP139 登记为 official-only、B139 行旧标题为「CARL…」，两者均与实测不符；以 harvest 实测的页面实际标题（青稞Talk 139 期 LaWAM 本场）为准，BV 与时长按实测著录。</li>
+<li><strong>论文版本</strong>：arXiv:2606.15768 目前仅见 v1（2026-06-14）；直播在 2026-07-25，讲者口头数字可能与 v1 有出入，以回放为准。</li>
+<li><strong>代码可用性</strong>：代码仓与模型权重链接来自节目页与论文，未在本轮实际下载验证（仓库 RLinf/LaWAM 与 RLinf 框架同组织，LaWAM 的训练/评测复现成本未核）。</li>
+</ol></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

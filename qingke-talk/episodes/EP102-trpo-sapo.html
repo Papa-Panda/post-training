@@ -120,9 +120,9 @@ pre code{background:none;padding:0;color:inherit}
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>期号</dt><dd>102（官网期，无 B站视频）</dd><dt>标题</dt><dd>从 TRPO 到 SAPO：大模型 RL 算法演进</dd><dt>BV</dt><dd>无——B站合集无对应视频（注意编号冲突：B站合集第 102 期是《Megrez2：更轻更快，但更强的推理VLM》，与本期无关）</dd><dt>直播时间</dt><dd>2026-01-10 10:00–11:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>高畅（SAPO 作者、通义千问算法工程师，香港中文大学博士，Qwen3、Qwen3-VL 系列模型核心贡献者；官网预告嘉宾介绍）</dd><dt>相关论文</dt><dd>Chang Gao, Chujie Zheng, Xiong-Hui Chen 等（Qwen Team, Alibaba），<em>Soft Adaptive Policy Optimization</em>，<a href="https://arxiv.org/abs/2511.20347（v2,">https://arxiv.org/abs/2511.20347（v2,</a> 2025-12-01）</dd><dt>相关代码</dt><dd>论文未附公开代码链接；SAPO 已用于 Qwen3-VL 系列模型的实际训练（论文 §5.2）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/SAPO">https://qingkeai.online/blog/SAPO</a></dd></dl>
+<dl class="meta-grid"><dt>期号</dt><dd>102</dd><dt>标题</dt><dd>从 TRPO 到 SAPO：大模型 RL 算法演进</dd><dt>BV</dt><dd>BV1na6mBME2P（B站视频；仓库 <code>episode-index.csv</code> 仍将 EP102 记为 official-only 且未回填 BV，待后续复核）</dd><dt>直播时间</dt><dd>2026-01-10 10:00–11:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>高畅（SAPO 作者、通义千问算法工程师，香港中文大学博士，Qwen3、Qwen3-VL 系列模型核心贡献者；官网预告嘉宾介绍）</dd><dt>相关论文</dt><dd>Chang Gao, Chujie Zheng, Xiong-Hui Chen 等（Qwen Team, Alibaba），<em>Soft Adaptive Policy Optimization</em>，<a href="https://arxiv.org/abs/2511.20347（v2,">https://arxiv.org/abs/2511.20347（v2,</a> 2025-12-01）</dd><dt>相关代码</dt><dd>论文未附公开代码链接；SAPO 已用于 Qwen3-VL 系列模型的实际训练（论文 §5.2）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/SAPO">https://qingkeai.online/blog/SAPO</a></dd></dl>
 <blockquote class="pq">
-<p>⚠️ 提炼方式说明：本期为官网期，B站合集无对应视频，字幕无从获取。本纪要根据该期对应的公开材料还原——官网预告（含讲者与提纲）+ SAPO 论文原文（arXiv:2511.20347）。演进主线（TRPO→PPO→GRPO→GSPO）以官网预告的讲授提纲为准，SAPO 的公式与实验结论以论文为准（预告文中的个别公式与论文不一致时从论文）。AMA 环节与现场发挥未覆盖。</p>
+<p>⚠️ 提炼方式说明：字幕接口持续串台，经多轮实测仍无法获得本场字幕；本篇基于对应论文还原，非逐字稿。讲授范围与顺序以官网预告的四段提纲为准（理论基石 TRPO；实用近似算法 PPO、GRPO 与 GSPO；SAPO 解析；AMA）：演进主线（TRPO→PPO→GRPO→GSPO）以官网预告的讲授提纲为准，GRPO、GSPO 与 SAPO 的公式、理论分析和实验结论以 SAPO 论文（arXiv:2511.20347）为准（预告文中的个别公式与论文不一致时从论文）。AMA 环节与现场发挥未覆盖；若后续取得可验证字幕，应以字幕为准修订。</p>
 </blockquote>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
@@ -218,7 +218,7 @@ pre code{background:none;padding:0;color:inherit}
 <section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：官网预告还提到 BAPO（动态裁剪边界）与 DeepSeek-V3.2 的序列掩码等同期改进，论文未做对比——软门控与"动态边界/掩码过滤"在同一训练设置下谁更稳、能否叠加，值得找复现实验核对。</li>
-<li>现场内容不可还原：TRPO 部分的讲授深度、AMA 问答无法从论文推知；若 B站后续补录视频，应以视频为准修订本纪要。</li>
+<li>现场内容不可还原：TRPO 部分的讲授深度、AMA 问答无法从论文推知；若后续取得可验证字幕，应以字幕为准修订本纪要。</li>
 <li>论文终点数值只在曲线图里：如需精确终点 Pass@1，需读 Fig.4/Fig.6 原图估读，本纪要未做。</li>
 </ul>
 </section>
