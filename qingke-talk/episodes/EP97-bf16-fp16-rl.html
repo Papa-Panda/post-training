@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP97 — 从 BF16 到 FP16：如何解决 RL 训练-推理不匹配问题</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP97 — 从 BF16 到 FP16：如何解决 RL 训练-推理不匹配问题</h1>
+    <p class="sub">RL 微调里 rollout 引擎与训练引擎算出的策略分布数值上并不相等，这个训练-推理不匹配会让策略梯度变有偏、还会留下部署差距；讲者团队的结论是病根不在算法而在 BF16 … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP97-bf16-fp16-rl.html</p>
+<p>"Our key finding is super simple: by switching from BF16 to the FP16 during RL fine-tuning, we can virtually eliminate the training-inference mismatch." —— 论文 §1，点明本期主线：不匹配的病根不在算法，在精度</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>97</dd><dt>标题</dt><dd>从 BF16 到 FP16：如何解决 RL 训练-推理不匹配问题</dd><dt>BV</dt><dd>无。B站合集无本场视频（官网-only 期）；本任务所给的 BV1p2i9B7E1Q 经台账核对实为 B97《Lumina-mGPT 2.0：独立自回归图像生成新方案》，与本期主题完全不同，且其字幕列表为空。2026-10-03 浏览器实测确认本期无可用字幕轨。</dd><dt>时长</dt><dd>直播计划 1 小时（讲授 + AMA），无视频存档可核</dd><dt>直播时间</dt><dd>2025-12-13（周六）10:00–11:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>齐朋辉（Penghui Qi，SeaAI Lab 研究工程师、新加坡国立大学博士生；官网预告嘉宾介绍 + 论文第一作者，论文脚注标注其为 Core Contributor 与 Project Lead）</dd><dt>相关论文</dt><dd>Penghui Qi, Zichen Liu, Xiangxin Zhou, Tianyu Pang, Chao Du, Wee Sun Lee, Min Lin, <em>Defeating the Training-Inference Mismatch via FP16</em>，<a href="https://arxiv.org/abs/2510.26788（2025-10-30">https://arxiv.org/abs/2510.26788（2025-10-30</a> 提交）</dd><dt>相关代码</dt><dd><a href="https://github.com/sail-sg/Precision-RL">https://github.com/sail-sg/Precision-RL</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/Precision-RL">https://qingkeai.online/blog/Precision-RL</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：<strong>本期无字幕，基于对应论文还原，非逐字稿。</strong> 本场在 B站无对应视频、字幕轨不可得，本纪要依据官网预告（含讲者与四点讲授提纲）与讲者团队论文 <em>Defeating the Training-Inference Mismatch via FP16</em>（arXiv:2510.26788）还原。讲授提纲为：（1）RL 为什么会出现训练-推理不匹配问题；（2）从 BF16 到 FP16：为什么 FP16 反而更一致；（3）FP16 的效果验证及启发探讨；（4）AMA 环节。其中（1）（2）（3）分别对应论文 §2、§3、§4–§5，以下以论文为据写；AMA 与讲者现场口头发挥无书面材料，不复述、不虚构。凡数字均为论文口径，关键数字总表逐项标注出处。</p>
+<p>关联：本仓库 EP75《FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案》走的正是本期所批评的「算法补丁」路线（TIS 一系），两期对照读，能看清同一问题的两种解法坐标：EP75 在算法层打补丁，本期主张回精度层治根。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>RL 微调里 rollout 引擎与训练引擎算出的策略分布数值上并不相等，这个训练-推理不匹配会让策略梯度变有偏、还会留下部署差距；讲者团队的结论是病根不在算法而在 BF16 本身——它只有 7 位尾数，舍入误差随自回归步数累积放大。做法只是把 RL 微调的精度从 BF16 换回尾数 10 位的 FP16（配合框架标配的 loss scaling），mismatch 基本消失：最朴素的无偏策略梯度在 FP16 下就跑赢了 BF16 下所有重要性采样补丁，还省掉补丁所需的那次额外前向（约 25% 训练成本）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：两个引擎，两个策略</h3>
+<p>按官网预告，本讲分四段：先讲 RL 为什么会出现训练-推理不匹配，再讲为什么 FP16 反而更一致，然后是效果验证与启发，最后 AMA。论文 §2 给出问题的形式化：现代 RL 框架为了效率，rollout 用高度优化的推理引擎（如 vLLM）采样，梯度计算用训练引擎（如 PyTorch FSDP / DeepSpeed），两者数学上应是同一个策略，数值上却不是。记训练策略为 $\pi$ 、推理策略为 $\mu$ ，目标本应是对 $\pi$ 求期望收益：</p>
+<p>$$J(\theta) = E_{x \sim p_X}\left[ E_{y \sim \pi(\cdot|x,\theta)}[R(x,y)] \right]$$</p>
+<p>但样本实际从 $\mu$ 采出，若直接套 REINFORCE 的梯度形式，得到的是有偏梯度，优化方向被系统性带偏（论文 Eq. 3）。第二个问题更隐蔽：<strong>部署差距</strong>——我们优化的是对训练引擎最优的参数 $\theta$ ，上线跑的却是推理引擎，两个引擎各自的最优参数并不重合，训练再好部署也会掉点（论文 Eq. 4）。已有的算法补丁都只修第一件事，修不了第二件。</p>
+<h3>现有补丁：重要性采样为什么不够</h3>
+<p>论文 §2.1 梳理补丁路线。用序列级重要性比率把期望从 $\mu$ 重加权回 $\pi$ ，可以得到无偏估计：</p>
+<p>$$\nabla_{\theta} J_{\mathrm{pg-is}}(x) = E_{y \sim \mu(\cdot|x,\theta')}\left[ \frac{\pi(y|x,\theta)}{\mu(y|x,\theta')} \nabla_{\theta} \log \pi(y|x,\theta) \cdot A(x,y) \right]$$</p>
+<p>但长序列上这个比率方差极大，于是有了截断（TIS，上限 $C$ ）与掩码（MIS，超限整条丢弃）两个拿偏差换方差的变体（论文 Eq. 6、Eq. 7），以及把它们嫁接进 GRPO 的 token 级 TIS（Yao et al.）与序列级 MIS（Liu et al.）实现。论文指出这类实现的两个硬伤：一是都要为算比率多跑一次前向，按反向约为前向 2 倍成本折算，约多花 25% 训练成本；二是部署差距原样保留——补丁只在训练期校正梯度，最终模型仍是为训练引擎优化的。工程对齐路线（手工对齐两端实现、FP32 lm_head、强制推理确定性）也被点名：要么不足以防崩，要么需要深领域知识逐框架定制、难泛化（论文 §2.2）。</p>
+<h3>根因：BF16 的尾数太短</h3>
+<p>论文 §3 是本讲的核心论证。FP16 与 BF16 同为 16 位，分法不同：FP16 是 5 位指数 + 10 位尾数，动态范围小（最大约 $6.6 \times 10^{4}$ ）；BF16 是 8 位指数 + 7 位尾数，范围与 FP32 相当（最大约 $3.4 \times 10^{38}$ ），代价是精度低。1 附近相邻可表示数的间隔，FP16 是 $1 + 2^{-10} \approx 1.000977$ ，BF16 是 $1 + 2^{-7} \approx 1.007812$ ——FP16 的尾数分辨率是 BF16 的 8 倍（论文 Table 1、§3.4）。</p>
+<p>BF16 当年胜出靠的是免调 loss scaling 的省心：范围大、不易溢出，预训练里这是决定性优势。但在 RL 微调里，两个引擎的 kernel 实现、并行策略、MoE 的 top-k 专家选择等细节差异，会在 BF16 的粗尾数上产生不同的舍入结果，再沿自回归生成的成百上千个 token 累积， $\pi$ 与 $\mu$ 就此分叉。FP16 的细尾数相当于给实现差异留了吸收垫：两端输出更可能数值一致，误差不累积。FP16 范围小的老问题则由 loss scaling 解决——这正是混合精度训练早期的标配技术（动态 loss scaling 自动升降缩放因子），PyTorch、Megatron、DeepSpeed 都内置，开启只需一处配置（论文 §3.2）。讲者团队的判断可以压缩成一句：<strong>RL 微调阶段权重与激活的数值范围已由预训练定型，BF16 的大范围用不上，它牺牲掉的精度反而成了主导矛盾</strong>（论文 §3.4、§6）。</p>
+<p>离线分析先验证了这个归因（论文 §3.5）：在 DeepSeek-R1-Distill-Qwen-1.5B 上，三种精度纯推理的分数基本相当（AMC23 8K 下 BF16 50.38 / FP16 50.60 / FP32 51.54；AIME24 32K 下 29.90 / 30.94 / 28.44），说明精度本身不直接涨推理分；但序列级对数概率比 $\frac{\pi(y|x)}{\mu(y|x)}$ 的分布显示，BF16 的不匹配随生成变长指数级恶化，FP16 把它压到约 24 分之一（论文 Fig. 2）。</p>
+<h3>验证一：sanity test——先造一个「算法理应满分」的考场</h3>
+<p>论文 §4 提出一个方法论贡献：sanity test。从 MATH 中筛出初始模型准确率在 20%–80% 之间的题目（太易浪费算力、太难分不清是算法错还是模型不行），得到 1460 道「可解但不平凡」的 perfectible 数据集，判据是可靠的 RL 算法应能把训练准确率推到 95% 以上。在 VeRL 与 Oat 两个框架、R1-Distill-1.5B 上的结果（论文 §4.2、Fig. 3）：</p>
+<ul>
+<li>BF16 + 原版 GRPO（Dr.GRPO 变体）：早期崩溃，峰值训练准确率仅 73%（VeRL）/ 84%（Oat）；</li>
+<li>BF16 + token 级 TIS：多撑一阵，最终仍崩，峰值 82% / 88%；</li>
+<li>BF16 + GSPO：比 token-TIS 更稳，但 VeRL 实验里 1200 步后梯度范数变 NaN；</li>
+<li>BF16 + 序列级 MIS：唯一不崩的补丁，但收敛慢，且峰值训练准确率 95%、AIME24 34%，明显低于 FP16——这就是部署差距的实测形态；</li>
+<li>FP16 + 最朴素的无偏策略梯度（Eq. 5，不带任何补丁）：训练准确率 99%、AIME24 39%，跑赢 BF16 下全部补丁。</li>
+</ul>
+<p>论文 §4.3 还有一个值得注意的现象：换到 FP16 后，各算法之间的表现差异几乎消失——mismatch 被压下去之后，优化问题近似回到 on-policy，复杂校正就没有额外收益了。训练动态里还有一个可作监控信号的规律：将崩的 run 在崩之前 mismatch 会先持续放大（论文 §4.2），这为 RL 训练加了一个廉价的早期预警指标。</p>
+<h3>验证二：精度消融与跨场景泛化</h3>
+<p>精度组合消融（论文 §4.4，VeRL + vLLM + FSDP）回答了「到底哪端要高精度」：BF16 训练时把推理端精度往上提能延长稳定期，配 FP32 推理甚至完全不崩——但 FP32 推理慢约 3 倍，不可用；训练与推理同用 FP16 时 mismatch 最低、训练最稳，perfectible 集上接近 100% 训练准确率且不损失速度。</p>
+<p>跨场景验证（论文 §5）覆盖四类设置，结论一致：MoE（Qwen3-30B-A3B-Base，三种算法）FP16 更稳、训练与验证分数更高；LoRA（Qwen2.5-Math-1.5B，rank 32）BF16 约 600 步崩溃、FP16 全程稳定；大 dense 模型（Qwen3-14B-Base + DAPO）FP16 奖励涨得更快、AIME24 验证更高；换模型家族（OctoThinker-3B，自 Llama3.2-3B 中训而来）BF16 约 150 步后失稳、FP16 平稳训完。</p>
+<h3>结论/观点</h3>
+<ul>
+<li>论文的立场很克制：不宣称 FP16 普适最优。讨论部分明说效率方向可能走向 FP8，超大模型用 FP16 有溢出管理等工程挑战，但认为这些是可解问题；真正的主张是<strong>社区应重新审视 RL 微调阶段的精度默认选项</strong>，而不是把 BF16 从预训练一路惯性带下来（论文 §6、§7）。</li>
+<li>对 BF16 下算法补丁的评价是一个偏差-方差权衡的诊断：低方差高偏差的方法（GRPO、token-TIS、GSPO）起步快但终局崩溃，低偏差高方差的方法（序列级 IS/MIS）稳但慢；FP16 同时压低两端，这个权衡随之失效（论文 §6）。换句话说，此前一部分「算法之争」其实是精度问题穿了算法的外衣。</li>
+<li>提纲第 3 节标题里的「启发探讨」在论文中对应 §6 的两点：精度是训练栈的地基级选择，值得按训练阶段（预训练 vs RL 微调）分别定默认；以及 mismatch 指标本身可作训练健康度的先行指标。讲者现场如何展开这一节、AMA 问了什么，无书面材料，本纪要不代拟。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>尾数位数（16 位浮点）</td>
+<td>BF16 7 位</td>
+<td>FP16 10 位，1 附近分辨率 $1+2^{-10}$ 对 $1+2^{-7}$ ，精度 8 倍</td>
+<td>论文 Table 1、§3.4</td>
+</tr>
+<tr>
+<td>序列级训练-推理不匹配</td>
+<td>BF16 随生成长度指数级恶化</td>
+<td>FP16 约为 BF16 的 1/24</td>
+<td>论文 §3.5、Fig. 2</td>
+</tr>
+<tr>
+<td>纯推理分数（R1-Distill-1.5B）</td>
+<td>AMC23 8K：BF16 50.38 / FP16 50.60 / FP32 51.54</td>
+<td>三者基本相当，精度不直接涨推理分</td>
+<td>论文 Table 2</td>
+</tr>
+<tr>
+<td>IS 类补丁的额外成本</td>
+<td>需多跑一次前向算比率</td>
+<td>约 +25% 训练成本，且部署差距仍在</td>
+<td>论文 §1、§2.1</td>
+</tr>
+<tr>
+<td>sanity test 数据集</td>
+<td>MATH 筛初始准确率 20%–80%</td>
+<td>1460 题，达标线为训练准确率 95%+</td>
+<td>论文 §4</td>
+</tr>
+<tr>
+<td>BF16 + 原版 GRPO</td>
+<td>VeRL / Oat 双框架</td>
+<td>早期崩溃，峰值 73% / 84%</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>BF16 + token 级 TIS</td>
+<td>同上</td>
+<td>延缓后仍崩，峰值 82% / 88%</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>BF16 + 序列级 MIS</td>
+<td>唯一不崩的补丁</td>
+<td>峰值训练准确率 95%、AIME24 34%</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>FP16 + 朴素无偏策略梯度</td>
+<td>无任何算法补丁</td>
+<td>训练准确率 99%、AIME24 39%</td>
+<td>论文 §4.2</td>
+</tr>
+<tr>
+<td>BF16 训练 + FP32 推理</td>
+<td>稳定性可达标</td>
+<td>推理慢约 3 倍，不实用</td>
+<td>论文 §4.4</td>
+</tr>
+<tr>
+<td>FP16 训练 + FP16 推理</td>
+<td>mismatch 最低</td>
+<td>perfectible 集训练准确率接近 100%，无速度损失</td>
+<td>论文 §4.4</td>
+</tr>
+<tr>
+<td>LoRA RL（Qwen2.5-Math-1.5B）</td>
+<td>BF16 约 600 步崩溃</td>
+<td>FP16 全程稳定</td>
+<td>论文 §5.2</td>
+</tr>
+<tr>
+<td>其他模型家族（OctoThinker-3B）</td>
+<td>BF16 约 150 步后失稳</td>
+<td>FP16 平稳训完</td>
+<td>论文 §5.4</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>自建或改 RL 训练栈时，精度是比算法补丁更先该动的一格</strong>（直接可试）：在 verl 类框架里把 rollout 与训练两端统一切 FP16（训练端记得开框架标配的动态 loss scaling），先测 mismatch 指标与崩溃步数，再决定要不要上 TIS/MIS 类补丁——论文口径下这能省掉约 25% 的额外前向成本，且同时关掉部署差距这一补丁修不了的洞。MoE 的 top-k 专家选择等精度敏感算子切换前先小规模实测溢出。</li>
+<li><strong>把训练-推理 mismatch 做成训练看板的先行指标</strong>（Infra 视角）：序列级对数概率比的分布、两端 policy difference 的极值，都是论文实测中先于崩溃发散的量；比起盯 reward 曲线事后救火，这类指标能在 run 早期给出「这个配置要崩」的信号，适合做自动 kill/告警与配置回归测试的判据。</li>
+<li><strong>sanity test 是现成的框架回归测试模板</strong>（评测自动化）：用一批「当前模型可解但不平凡」（初始准确率 20%–80%）的小数据集作算法/框架改动的验收集，判据明确（理应冲到 95%+），比在真实混合难度数据上看曲线涨跌更能隔离出实现与算法的问题；改精度、换 rollout 引擎、升级框架版本时都可以先过这一关。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>现场内容不可还原：AMA 与讲者口头发挥无书面材料。尤其讲者对 FP16 在超大规模模型上的溢出管理、以及与 FP8 路线的现场回应，可能比论文更具体，现阶段不臆测。</li>
+<li>论文验证的模型规模上限是 30B MoE 与 14B dense，全参 70B+ 的 RL 里 FP16 的 loss scaling 调参与溢出频率没有给出实测数字；若要在自有栈落地，这是第一个要自测的点。</li>
+<li>讲授提纲与论文章节的对应（提纲 1/2/3 对论文 §2/§3/§4–§5）是按主题推断的对应关系，讲者现场的展开顺序与取舍未经字幕确证。</li>
+<li>讲者名单已确证（齐朋辉，官网预告 + 论文第一作者双源一致）；其余作者是否参与本场分享无信息，不另列。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"Our key finding is super simple: by switching from BF16 to the FP16 during RL fine-tuning, we can virtually eliminate the training-inference mismatch." —— 论文 §1，全篇最直白的一句结论</p>
+<p>"This enhanced stability allows even the most naive policy gradient estimator to converge efficiently, creating a training dynamic where all tested algorithms perform well and the tension between stability and speed is effectively resolved." —— 论文 §6，点出 FP16 的真正收益不是某个算法变强，而是算法之争的前提消失了</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

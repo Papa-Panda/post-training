@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP149 — LOPD：不再手动设计 OPSD 特权信息</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP149 — LOPD：不再手动设计 OPSD 特权信息</h1>
+    <p class="sub">本期讲 LOPD（Latent On-Policy Self-Distillation）：它质疑 OPSD 里一个被默认的前提——教师要看的特权信息（答案、反馈、技能、成功轨迹… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP149-lopd.html</p>
+<p>"experience representations should be optimized end-to-end for the policies they are meant to improve." —— LOPD 论文 §5（结论），点出本期的核心主张：经验的表示本身应该是可学习优化的对象，而不是由人预先规定格式。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>149（官网期；B站合集无对应视频）</dd><dt>标题</dt><dd>LOPD：不再手动设计 OPSD 特权信息（Latent On-Policy Self-Distillation）</dd><dt>BV</dt><dd>无（官网有预告，B站合集无对应视频；episode-index 记为 official-only）</dd><dt>直播时间</dt><dd>2026-08-29（周六）10:00–11:00（官网预告）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>张桂彬（新加坡国立大学计算学院博士研究生，导师颜水成教授；官网预告嘉宾介绍；论文共同第一作者 Guibin Zhang）</dd><dt>相关论文</dt><dd>Guibin Zhang, Jiayang Lyu, Ran Sun, Xinlei Yu, Haoyu Zhao, Qibing Ren, Shuicheng Yan，<em>Latent On-Policy Self-Distillation</em>，<a href="https://arxiv.org/abs/2608.13040（arXiv:2608.13040，2026-08-13">https://arxiv.org/abs/2608.13040（arXiv:2608.13040，2026-08-13</a> 提交）</dd><dt>相关代码</dt><dd><a href="https://github.com/bingreeky/lopd（另有">https://github.com/bingreeky/lopd（另有</a> Hugging Face 上的 Qwen3-8B-LOPD 与 Olmo3-7B-LOPD 模型，论文页给出）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/LOPD">https://qingkeai.online/blog/LOPD</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：本期无字幕（官网有预告、B站合集无对应视频），本纪要基于对应论文还原，非逐字稿。讲授提纲以官网预告为准（官网给出的六段提纲：从 OPD 到 OPSD 的「谁来决定什么经验值得被看见」、从设计特权信息到学习经验表示、Composer 压缩经验为 latent context、实验验证、经验即 substrate、AMA）；方法、公式与实验数字全部以 LOPD 论文（arXiv:2608.13040）为准，未取自讲授口播。现场讨论与 AMA 环节未覆盖；若后续取得可验证字幕或回放，应以其为准修订。</p>
+<p>关联：本期与 EP125《重探 On-Policy Distillation》同属 OPD/OPSD 线——EP125 关注标准 sampled-token OPD 的失败模式与修复（教师 top- $k$ 局部支持匹配），LOPD 引用的正是这一线工作（论文引 Fu et al. 2026 与 Zhao et al. 2026 的 OPSD 设定，并采用 SDPO 式 top- $M$ logits 加尾桶的蒸馏实现）。EP154《Rethinking On-Policy Distillation》则是 OPD 何时成败的机制化分析。三者可对照读：125 修监督的「实施」，154 查监督的「机制」，149 把监督信号的输入表示本身变成可学习对象。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>本期讲 LOPD（Latent On-Policy Self-Distillation）：它质疑 OPSD 里一个被默认的前提——教师要看的特权信息（答案、反馈、技能、成功轨迹等）为什么要由人手工规定格式。LOPD 改为从历史成功轨迹的经验库里检索相关经验，用一个可学习的 Composer 把经验压成连续 latent tokens 喂给同骨干的冻结教师，再对学生的 on-policy 轨迹做稠密 token 级蒸馏，并加 privileged-margin 约束防止教师塌向学生。论文结果（arXiv:2608.13040）：在 Qwen3-4B/8B 与 Olmo3-7B 三个骨干、工具调用与代码生成七个基准上全面超过 GRPO 与 OPSD/SDPO/Skill-SD 等代表性 OPSD 方法，且以不到 GRPO 与 Skill-SD 三成的 rollout 预算即反超二者。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：特权信息的「格式」成了 OPSD 的隐形瓶颈（论文 §1、§2）</h3>
+<p>按论文的梳理，OPD 的价值在于把外部经验转成可持久的策略改进：学生先采样自己的轨迹，教师在学生实际访问过的前缀上给 token 级稠密监督。OPSD 进一步去掉外部强教师——教师与学生是同一个模型，只是教师多看一份特权信息（privileged information），如验证过的推理轨迹、最终答案、环境反馈或成功的历史 rollout。于是 OPSD 的核心问题从「哪个教师够强」变成「该给自教师看什么特权上下文」。</p>
+<p>论文指出既有做法的共同毛病：特权上下文都是设计者事先规定的离散工件（artifact）——oracle 答案、文本反思、成功轨迹、检索文档——它们先验地决定了教师能看到什么，因而把蒸馏能利用的信息限制在人选定的格式里。论文 §4.2 给了直接证据：同一种特权上下文在不同设置下效果会反转。例如 Qwen3-4B 上， SDPO 在 BFCL-v3 上从 vanilla 的 22.88 掉到 15.75、在 ACEBench 上从 50.6 掉到 38.0 ，而 OPSD 在 LiveCodeBench 上两骨干都低于 vanilla。结论（论文口径）：问题不在于「有没有特权信息」，而在于它的表示是否适配当前任务与学生的学习状态。</p>
+<p>官网预告里讲者的问题提法更直白：当 answer、trajectory、reflection、skill 被设计得越来越精巧，为什么仍要由人来规定「什么经验值得被看见」？LOPD 的答案是：不再提新的手工变体，而是让特权上下文自身可端到端学习。</p>
+<h3>方法/设计：Composer 把经验压成 latent 特权上下文（论文 §3）</h3>
+<p>LOPD 的训练管线与标准 OPSD 一致（学生 rollout 自己的轨迹、教师在同一前缀上给分布、reverse KL 蒸馏），关键差异只在教师上下文的构造。形式上，传统 OPSD 的上下文是固定变换 $\bm{c}_{\mathrm{fix}}=\Phi_{\mathrm{fix}}(x,\mathcal{E})$ ，其中 $\Phi_{\mathrm{fix}}$ 是设计者规则；LOPD 把它换成可学习参数化 $\bm{c}_{\phi}=\Phi_{\phi}(x,\mathcal{E})$ ，输出 $K$ 个连续 latent token 拼接而成的上下文。教师多看 $\bm{c}_{\phi}$ ，学生仍只看状态 $\bm{s}_{t}$ ，部署时只保留学生——推理不需要经验库、检索或 Composer。</p>
+<p>具体构造（论文 §3.2）：</p>
+<ul>
+<li><strong>经验库与检索</strong>：离线只保留成功 rollout（存任务描述与紧凑的 action–result 轨迹，省去冗长 observation）；对当前任务用 dense retriever 按余弦相似度取 top- $J$ 条经验。论文实现刻意从这个「最小经验管线」起步（§3.2 首段），且只用轨迹这一种原料（Figure 1 注）。</li>
+<li><strong>Composer</strong>：编码器把「任务 + 经验」对映射为隐藏状态，QFormer 式 cross-attention 压缩器（learned queries）把变长状态压成每条经验固定 $K$ 个 latent token；可训练参数只有编码器的 LoRA 与压缩器，编码骨干冻结。Composer 先在成功轨迹上冷启动（骨干冻结），再进入联合优化。</li>
+<li><strong>教师</strong>：与学生同骨干、同初始化的冻结副本（权重不再更新），但前向激活仍在计算图里——蒸馏梯度穿过冻结网络回传到 latent 输入，于是 Composer 能学到「哪些经验特征能对当前学生轨迹产生有效监督」。</li>
+</ul>
+<p>蒸馏目标（论文 §3.3）：对学生自己轨迹的每个被监督 token，用教师 top- $M$ 词表项加一个尾桶（tail bucket）的重整分布做 reverse KL：</p>
+<p>$$\mathcal{L}_{\mathrm{distill}}(\theta,\phi)=\mathbb{E}_{x\sim\mathcal{D}}\mathbb{E}_{\tau\sim\pi_{\theta}^{S}(\cdot\mid x)}\left[\frac{\sum_{t=1}^{|\tau|}\sum_{n=1}^{L_{t}}\omega_{t,n}\,D_{\mathrm{KL}}(\tilde{\bm{p}}^{S}_{t,n}\|\tilde{\bm{p}}^{T}_{t,n})}{\sum_{t=1}^{|\tau|}\sum_{n=1}^{L_{t}}\omega_{t,n}}\right]$$</p>
+<p>其中 $\tilde{\bm{p}}^{S}_{t,n}$ 与 $\tilde{\bm{p}}^{T}_{t,n}$ 是师生在同一动作前缀处的 top- $M$ 加尾桶分布， $\omega_{t,n}$ 是动作 token 掩码。reverse KL 让学生集中到教师支持的行为上。</p>
+<p><strong>privileged-margin 约束</strong>（论文 §3.3）：只优化蒸馏损失有个退化解——Composer 可以把教师分布往学生分布上靠来降低 KL，产出无信息上下文。LOPD 用轨迹级验证结果把教师优势钉住：定义单 token 特权量 $\delta_{t,n}(\phi)$ 为教师与学生在同一采样 token 上的 log-prob 差（学生侧 stop-gradient）：</p>
+<p>$$\delta_{t,n}(\phi)=\log\pi^{T}_{\bar{\theta},\phi}(a_{t,n}\mid\bm{s}_{t},\bm{c}_{\phi},a_{t,&lt;n})-\mathrm{sg}\left[\log\pi^{S}_{\theta}(a_{t,n}\mid\bm{s}_{t},a_{t,&lt;n})\right]$$</p>
+<p>再以结果符号 $A(\tau)=2r(\tau)-1$ 加权，要求加权特权量 $\Delta(\phi)$ 不低于阈值 $m&gt;0$ （配对偶变量 $\beta$ 的约束优化，外加一个把 $\bm{c}_{\phi}$ 锚在冷启动 $\bm{c}_{\phi_{0}}$ 附近的正则项）：</p>
+<p>$$\Delta(\phi)=\mathbb{E}_{\tau}\left[\frac{\sum_{t,n}\omega_{t,n}\,A(\tau)\,\delta_{t,n}(\phi)}{\sum_{t,n}\omega_{t,n}}\right]\geq m$$</p>
+<p>直觉是：若 Composer 退化成无信息上下文，则 $\pi^{T}\to\pi^{S}$ 、 $\delta_{t,n}\to 0$ 、 $\Delta\to 0&lt;m$ ，对偶惩罚自动激活，结构上排除平凡解；结果加权又让 Composer 偏向支持成功行为的证据。论文默认配置（§4.1）：每任务检索 $J=3$ 条经验、每条压 $K=32$ 个 latent token（共 96 个），top- $M$ 取 $M=20$ ，margin 阈值 $m=0.05$ ；工具调用 rollout 上限 30 个环境步，代码蒸馏用 16,384 token 的响应预算。</p>
+<h3>实验/实战：三骨干七基准全面第一，样本效率是最大卖点（论文 §4）</h3>
+<p>实验设置（论文 §4.1）：工具调用用 EnvScaler 派生的 2,349 个任务训练，代码用 DeepCoder 的 TACO 子集 7K 个可验证 Python 题；骨干为 Qwen3-4B、Qwen3-8B 与 Olmo3-7B；工具调用报 EnvScaler 成功率、BFCL-v3 与 ACEBench，代码报 LiveCodeBench v5/v6 与 EvalPlus（HumanEval+/MBPP+）的 pass@1；基线含 GRPO、SDFT 与 OPSD、SDPO、Skill-SD 三个手设计特权上下文的 OPSD 方法。</p>
+<p>关键结果（均为论文表格口径，详见下节数字表）：</p>
+<ul>
+<li><strong>十个「骨干 × 基准」聚合比较里 LOPD 全部第一</strong>，且在全部十个设置中都高于 vanilla（论文 §4.2）。工具调用上增益随骨干变大更明显：Qwen3-8B 的 EnvScaler 从最强基线 Skill-SD 的 60.2 提到 66.4 ，ACEBench 从 GRPO 的 58.0 提到 62.7 ；Qwen3-4B 的 EnvScaler 为 63.7（GRPO 61.8），BFCL-v3 平均 27.38（GRPO 25.25）。</li>
+<li><strong>样本效率</strong>：在 EnvScaler 上，LOPD 仅 320 代即超过 0.61 平均奖励、576 代达 0.637 并在 1,600 代内维持在 0.63–0.64；同预算下 GRPO 与 Skill-SD 在 1,600 代末分别只有 0.611 与 0.588（论文 Figure 4）。摘要口径：LOPD 以不到 GRPO 与 Skill-SD 三成的 rollout 预算反超二者。</li>
+<li><strong>联合优化的必要性消融</strong>（论文 §4.3、Figure 3）：冻结 Composer（只用冷启动）EnvScaler 为 0.573；联合优化但去掉 margin（ $m=0$ ）反而掉到 0.551——无约束蒸馏梯度会把教师拉向学生； $m=0.05$ 时 0.637、 $m=0.10$ 时 0.626 。即「可学习」本身不够，margin 是把上下文学习变成有效监督的必要件。</li>
+<li><strong>容量敏感性</strong>（论文 §4.3、Figure 5）：每条经验的 latent token 数从 8/16（约 0.56）到 32（0.637）有明显阈值，64/128 无稳定增益；检索数从 1（0.605）到 3（0.637）提升，更多则平台化。故默认 $K=32$ 、 $J=3$ 是「最早达到最强」的设置。</li>
+<li><strong>行为内化</strong>（论文 §4.3、Table 3）：蒸馏后的学生（推理时无任何特权上下文）继承了 latent 上下文诱导的交互模式——相比 vanilla，每步工具调用从 3.50 降到 1.11、环境步从 11.12 升到 17.04，首步响应短 37.5% ，重复调用从 8.89 降到 5.25 ，单位工具调用奖励从 0.038 升到 0.050。论文解读为从「一次发很多试探性调用」转向「更顺序化的计划执行」。</li>
+<li><strong>latent token 到底编码了什么</strong>（论文 §4.4）：把 32 个 latent token 过冻结 LM head 投影，得到的是多语言与代码碎片的混合，任务条件改变表面投影但不产生可读的程序、也不复述检索到的解法——与「分布式 latent 表示」一致，但论文也承认可直接解码性并不能证明教师功能上用到的是哪部分信息。</li>
+</ul>
+<h3>结论/观点：把「经验表示」从设计问题改成优化问题（论文 §5；区分事实与作者主张）</h3>
+<p>论文的事实层结论是：手设计特权上下文的效果随任务与学习状态反转，没有一种固定格式普遍最优；可学习 latent 上下文在全部十个聚合比较中稳定占优。作者主张（观点层，论文 §5 与官网预告一致）是：自进化不应依赖越来越精巧的人工经验格式——原始轨迹就足以作最小底座（substrate），更丰富的经验库与检索器可以扩充可得经验，但「学什么」应由端到端优化决定；LOPD 更像一条设计原则的证据，而非又一个特权上下文配方。</p>
+<p>对边界的交代（论文 §4.4、§5 口径）：当前经验来源只有轨迹一种、经验库只存成功 rollout，latent 内容不可读、机制未被直接证明；论文把「更丰富的仓库与检索器」列为后续扩展方向。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<p>数字均为论文（arXiv:2608.13040）口径；工具调用为 0–100 分制。</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果（LOPD）</th>
+<th>来源（arXiv:2608.13040）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EnvScaler 成功率（Qwen3-8B）</td>
+<td>Skill-SD 60.2（最强基线）；GRPO 57.3；vanilla 49.2</td>
+<td>66.4</td>
+<td>Table 1</td>
+</tr>
+<tr>
+<td>BFCL-v3 平均（Qwen3-8B）</td>
+<td>GRPO 29.00；vanilla 28.38</td>
+<td>29.88</td>
+<td>Table 1</td>
+</tr>
+<tr>
+<td>ACEBench 平均（Qwen3-8B）</td>
+<td>GRPO 58.0</td>
+<td>62.7</td>
+<td>Table 1</td>
+</tr>
+<tr>
+<td>EnvScaler 成功率（Qwen3-4B）</td>
+<td>GRPO 61.8；vanilla 48.6</td>
+<td>63.7</td>
+<td>Table 1</td>
+</tr>
+<tr>
+<td>LiveCodeBench 平均（Qwen3-4B）</td>
+<td>GRPO 48.29；vanilla 45.61（OPSD 掉到 40.24）</td>
+<td>48.78</td>
+<td>Table 2</td>
+</tr>
+<tr>
+<td>EvalPlus 平均（Qwen3-4B）</td>
+<td>SDFT 80.07</td>
+<td>81.36</td>
+<td>Table 2</td>
+</tr>
+<tr>
+<td>LiveCodeBench 平均（Olmo3-7B）</td>
+<td>GRPO 48.29</td>
+<td>50.98（+2.69）</td>
+<td>Table 2</td>
+</tr>
+<tr>
+<td>样本效率（EnvScaler 平均奖励）</td>
+<td>GRPO 1,600 代 0.611；Skill-SD 0.588</td>
+<td>576 代 0.637；不到基线三成 rollout 预算反超</td>
+<td>Figure 4 及摘要</td>
+</tr>
+<tr>
+<td>联合优化消融（EnvScaler）</td>
+<td>冻结 Composer 0.573； $m=0$ 时 0.551</td>
+<td>$m=0.05$ 时 0.637（ $m=0.10$ 时 0.626）</td>
+<td>Figure 3（§4.3）</td>
+</tr>
+<tr>
+<td>行为内化</td>
+<td>vanilla 每步工具调用 3.50、环境步 11.12</td>
+<td>1.11、17.04；重复调用 8.89 → 5.25</td>
+<td>Table 3</td>
+</tr>
+<tr>
+<td>训练规模与默认配置</td>
+<td>—</td>
+<td>工具训练 2,349 任务；代码 7K 题； $J=3$ 、每条 $K=32$ 个 latent token、 $M=20$ 、 $m=0.05$</td>
+<td>§4.1</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 的可试图：把「喂给教师/奖励模型的经验格式」本身当成可学习对象。当前 coding-data 流水线里，哪些历史成功轨迹、哪种粒度的反馈进 prompt 多是人工规则；LOPD 给了一个可直接对照的实现——经验库（成功 rollout 存紧凑 action–result 轨迹）+ 检索 + QFormer 式压缩 + 端到端联合优化，且只动训练侧、部署零开销，适合在已有的 OPD 训练管线（如 EP125 的 top- $k$ 匹配实现）上做增量实验。</li>
+<li>privileged-margin 是一个便宜的「教师健康度」指标： $\Delta(\phi)$ 度量教师相对学生的、经结果加权的 log-prob 优势，只需一次 gather、不额外前向。任何自蒸馏/OPSD 训练都可以顺手监控它——它掉到 0 附近就说明教师监督在退化，这比事后看曲线更早暴露问题。</li>
+<li>Infra 视角：教师是冻结的同骨干副本、梯度只回传到 latent 输入，训练侧多一个检索 + 小压缩器模块，推理侧完全不带；当 rollout 预算是瓶颈（agentic 任务采样贵）时，「用更稠密的监督换更少的 rollout」是明确的成本结构——论文的量化口径是不到三成预算反超 GRPO。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>latent 特权上下文不可读（论文 §4.4 自认投影只是碎片），因此无法直接审计「教师到底在教什么」：当学生学坏时，怎么定位是经验库、检索还是压缩的问题？论文没有给可操作的分段诊断方法，这是把 LOPD 搬进生产 post-training 前最想深挖的一点。</li>
+<li>想看 AMA 与讲授里讲者对「经验库只存成功轨迹」的回应：失败轨迹（尤其近失轨迹）在 margin 的结果加权里只起压制作用，是否值得入库存疑——此为讲授/AMA 层面信息，本期无字幕未覆盖，待有回放或字幕时补录。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"The question behind this work is not which new artifact should be appended to an OPSD teacher, but whether the teacher's privileged context can itself be learned from experience." —— LOPD 论文 §5 首句</p>
+<p>「我们为何仍要替模型规定"什么经验值得被看见"？」—— 官网预告对本期的设问（https://qingkeai.online/blog/LOPD）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

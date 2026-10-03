@@ -95,7 +95,7 @@ No,Title,BV,Duration,Date,Status,Notes
 94,RLinf-VLA 实践：从零上手 VLA（OpenVLA）强化学习,,,2025-12-02,todo,official-only（官网有预告，B站合集无对应视频）
 95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2025-12-06,要点已提炼,episodes/EP95-pi-rl.md
 96,Fast-dLLM v2：高效训练推理的块扩散大语言模型框架,,,2025-12-09,todo,official-only（官网有预告，B站合集无对应视频）
-97,从 BF16 到 FP16：如何解决RL训练-推理不匹配问题,,,2025-12-13,todo,official-only（官网有预告，B站合集无对应视频）
+97,从 BF16 到 FP16：如何解决RL训练-推理不匹配问题,,,2025-12-13,要点已提炼,episodes/EP97-bf16-fp16-rl.md
 98,SANA-Series：探索图像视频扩散模型的高效设计与加速,,,2025-12-16,todo,official-only（官网有预告，B站合集无对应视频）
 99,TRPO重生：大模型时代的信任域策略优化,BV1UgrKBNEJc,01:02:29,2025-12-20,要点已提炼,episodes/EP99-trpo-rebirth.md
 100,2025 “青稞” AI 嘉年华（第100期特辑）,,,2025-12-28,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
@@ -103,10 +103,10 @@ No,Title,BV,Duration,Date,Status,Notes
 102,从 TRPO 到 SAPO：大模型 RL 算法演进,,,2026-01-10,要点已提炼,episodes/EP102-trpo-sapo.md
 103,Decoupled DMD & DMDR: 在扩散模型步数蒸馏的实践及 Z-Image-Turbo 应用,BV1ZzrHB8ESf,00:44:22,2026-01-13,要点已提炼,episodes/EP103-decoupled-dmd-dmdr.md
 104,The Prism Hypothesis 视觉统一表征假说：从语义到像素的统一自编码（UAE）,BV1X1zjBPErQ,00:33:46,2026-01-20,要点已提炼,episodes/EP104-prism-hypothesis-uae.md
-105,InternVLA-A1，虚实贯通：理解、生成、执行一体化的具身操作大模型,,,2026-01-27,todo,official-only（官网有预告，B站合集无对应视频）
+105,InternVLA-A1，虚实贯通：理解、生成、执行一体化的具身操作大模型,,,2026-01-27,要点已提炼,episodes/EP105-internvla-a1.md
 106,"GDPO：解决 GRPO 在多奖励 RL 训练中的""优势崩溃""问题",,,2026-01-30,todo,official-only（官网有预告，B站合集无对应视频）；原备注：conflict: B站标题为 Intern-S1，与官网枚举 GDPO 冲突，待终裁（官网标题保留）
 107,"JustRL: 用""最笨""的 RL 方法刷新 1.5B 推理模型新基线",BV155fZBKE64,01:05:22,2026-02-03,要点已提炼,episodes/EP107-justrl.md
-108,BOAD：引入多臂老虎机，自动化搜索层级结构的多 Agent 架构设计,,,2026-02-28,todo,official-only（官网有预告，B站合集无对应视频）
+108,BOAD：引入多臂老虎机，自动化搜索层级结构的多 Agent 架构设计,,,2026-02-28,要点已提炼,episodes/EP108-boad.md
 109,线性轨迹：揭示 LLM 强化学习中的高效捷径,BV1sdPAzjEbX,01:00:21,2026-03-03,要点已提炼,episodes/EP109-rlvr-linearity.md
 110,Dr. Kernel：突破大模型 GPU Kernel 生成的多轮 RL 训练瓶颈,BV1WWNwzVERN,01:09:08,2026-03-07,要点已提炼,episodes/EP110-dr-kernel.md
 111,RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统,BV1W6c6z3E1F,00:51:10,2026-03-10,要点已提炼,episodes/EP111-rlinf-user.md
@@ -147,7 +147,7 @@ No,Title,BV,Duration,Date,Status,Notes
 146,AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）,BV13ZgA64Ept,01:11:34,2026-08-13,要点已提炼,episodes/EP146-ai4ai-rsi.md
 147,大语言模型在 latent space（隐空间）里的优化和推理,BV1Bw8m6GEd7,01:08:10,2026-08-22,要点已提炼,episodes/EP147-latent-space-reasoning.md
 148,TriAttention：面向长上下文推理的三角级数式 KV Cache 压缩,BV1me896CEkR,01:00:33,2026-08-25,要点已提炼,episodes/EP148-triattention.md
-149,LOPD：不再手动设计 OPSD 特权信息,,,2026-08-29,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
+149,LOPD：不再手动设计 OPSD 特权信息,,,2026-08-29,要点已提炼,episodes/EP149-lopd.md
 150,SIM1：物理一致世界模型如何实现可扩展机器人学习,BV1jotD65EGU,01:22:49,2026-09-01,要点已提炼,episodes/EP150-sim1-gauge.md
 151,从 Harness 看 AI4AI 如何实现,,,2026-09-05,todo,official-only（官网有预告，B站合集无对应视频）
 152,如何在真实 Coding Agent Harness 中接入 RL？,BV1AJYx6wEpo,01:17:09,2026-09-08,要点已提炼,episodes/EP152-lego-rl.md

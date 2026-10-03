@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP105 — InternVLA-A1，虚实贯通：理解、生成、执行一体化的具身操作大模型</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP105 — InternVLA-A1，虚实贯通：理解、生成、执行一体化的具身操作大模型</h1>
+    <p class="sub">把理解、视觉预见、动作执行三件事塞进一个 Mixture-of-Transformers，用「语义上下文 + 轻量未来帧预测」共同条件化 flow matching 动作头，在… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移（放到 RL 训练 / 数据构造 / 评测框架）</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（论文原话，非讲者语录）</a><a href="#sec-8">未确证项</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP105-internvla-a1.html</p>
+<p><strong>主旨引文</strong>（论文 arXiv:2601.02456，Conclusion）：「we compromised the fidelity of image prediction, limiting the granularity of generated future frames」—— 本期架构的核心取舍：为实时性牺牲未来帧的像素级保真度。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP105（官网期号 105；青稞Talk 第 105 期）</dd><dt>标题</dt><dd>InternVLA-A1，虚实贯通：理解、生成、执行一体化的具身操作大模型</dd><dt>讲者</dt><dd>曾嘉（上海人工智能实验室具身智能中心青年科学家；InternVLA-A1 项目负责人及核心贡献者、InternData-A1 通讯作者）</dd><dt>讲者来源</dt><dd><a href="<a href="https://qingkeai.online/blog/InternVLA-A1">https://qingkeai.online/blog/InternVLA-A1</a>">节目页 qingkeai.online/blog/InternVLA-A1</a>（嘉宾介绍为公开署名，未查到讲者在视频中的自述，以节目页为准）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>直播时间</dt><dd>2026-01-27 20:00–21:00（节目页）</dd><dt>BV</dt><dd>公开台账（<code>episode-index.csv</code>）记录「official-only（官网有预告，B站合集无对应视频）」；合集内 BV1zF67BmEHD 实际为另一场 SDAR（纯 RL 训练的扩散语言模型），主题与本期完全不同，不归入本期</dd><dt>相关论文</dt><dd><a href="<a href="https://arxiv.org/abs/2601.02456">https://arxiv.org/abs/2601.02456</a>">InternVLA-A1: Unifying Understanding, Generation, and Action for Robotic Manipulation</a>（arXiv:2601.02456，v1 2026-01-05 提交，v2 2026-02-13；本文数字一律采 v2 正文，未特别说明者除外）</dd><dt>相关代码</dt><dd><a href="<a href="https://github.com/InternRobotics/InternVLA-A1">https://github.com/InternRobotics/InternVLA-A1</a>">github.com/InternRobotics/InternVLA-A1</a></dd><dt>提炼方式</dt><dd><strong>无字幕，基于对应论文 arXiv:2601.02456（v2）还原，非逐字稿。</strong> 所有数字、结论、局限均直接标注论文出处，未确证者见文末清单。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">3B</div><div class="l">参数量下真机</div></div></div>
+<p>把理解、视觉预见、动作执行三件事塞进一个 Mixture-of-Transformers，用「语义上下文 + 轻量未来帧预测」共同条件化 flow matching 动作头，在 3B 参数量下真机静态任务平均成功率 75.1%（vs π₀.₅ 70.7%），动态任务优势更大（Express Sorting 80.0% vs 53.3%），数据与架构两头都在治当前 VLA 的两个老毛病：不懂物理动态、真机数据喂不饱。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li><strong>背景/问题</strong>：主流 VLA 建立在多模态大模型（MLLM）上，语义理解强，但文本 token 并不擅长描述物理规律，模型只能做反应式「看→动」映射，在传送带分拣这类高动态场景里跟不上；同时真机示范数据昂贵且难扩展，纯仿真又有 sim-to-real gap。视频预测型世界模型（VPP、Genie Envisioner 等）虽能给出未来观测，但语义锚定弱、对预测误差脆弱，且推理频率撑不住实时控制（论文给出的参照：SANA-Sprint 在 RTX 4090 上单次生成约 0.16 s、至多约 6 Hz；DreamZero 经过 38 倍工程加速后在 GB200 上也只有 7 Hz）。</li>
+<li><strong>方法/设计</strong>：三专家 MoT（Mixture-of-Transformers），统一 masked self-attention，信息流严格按「理解 → 生成 → 执行」单向流动，后面块的 token 可以 attend 前面所有块，反之不行。理解专家直接复用现成的 MLLM（InternVL3 或 Qwen3-VL），产出共享上下文 $h_{\mathrm{und}}$ ；生成专家只做「够用」的未来预测：输入取三个视角（头 + 双腕）的 $t-15$ 与 $t$ 两帧共 6 张 $256\times 256$ 图像，经 COSMOS CI8×8 VAE 编码后用 $8\times 8$ 卷积压缩（每张图 1024 token → 16 token，6 张图共 96 token），沿时间维平均池化到 48 token 再反卷积上采样，单次前向并行解码出 $t+15$ 的未来帧 latent，不用自回归逐 token 生成；动作专家在这个「语义 + 预见」的条件上用 flow matching 预测动作 chunk ， $\hat{a}_{t:t+k}$ 。训练两阶段（大规模预训练 + 任务后训练）共用同一组目标，总损失是生成损失加权 0.01 再加动作损失， $\mathcal{L}_{\mathrm{total}}=\lambda\cdot\mathcal{L}_{\mathrm{gen}}+\mathcal{L}_{\mathrm{act}}$ ，其中未来帧预测步幅 $m=15$ ，动作插值时刻 $\tau\sim\mathrm{Beta}(1.5,1.0)$ 。</li>
+<li><strong>实验/实战</strong>：两个实例：2B 模型（InternVL3-1B 作理解专家，生成/动作专家派生自 Qwen2.5）与 3B 模型（Qwen3-VL-2B 作理解专家，生成/动作专家派生自 Qwen3），两者在 RTX 4090（torch.compile）上推理频率都约 13 Hz（2B 的 InternVL3 输入分辨率 $448\times 448$ 高于 3B 的 $224\times 224$ ，所以并未更快）。预训练数据 692M+ 帧，配方带采样权重：InternData-A1 纯合成仿真 396M 帧（权重 0.64）、AgiBot-World（Beta）真机 206M 帧（0.18）、RoboTwin 17M 帧（0.08）、EgoDex 人类第一视角视频 68M 帧（0.08、不使用其动作标签）、RoboMind 5M 帧（0.02）；工程上用 Load-balanced Parallel Training（LPT）把异构数据集贪心分配到 worker，解决 LeRobot 式全量实例化的显存与 I/O 压力。预训练 700K steps（batch 512，常数学习率 $5\times 10^{-5}$ ），后训练 60K steps（batch 128，学习率 $5\times 10^{-5}\rightarrow 5\times 10^{-6}$ ）。真机评测覆盖 Agibot Genie-1、ARX Lift-2、ARX AC One 三个本体，每任务 30 次 rollout：3B 模型静态任务平均 75.1%（π₀.₅ 70.7%、π₀ 60.6%），2B 模型 64.7%；动态任务两项合计 86.7%，其中 Express Sorting 80.0%（vs π₀.₅ 53.3%），In-motion Ingredient Picking 93.3%（vs 66.7%）。RoboTwin 2.0 仿真基准上 3B 模型 Easy/Hard 均领先 π₀.₅ 2.6 个百分点（该基准每任务用 50/500 条示范、共 27,500 条微调、每次评测跑 100 次取平均）。消融：去掉预训练，平均成功率 77.0% → 25.4%（论文称 pre-training acts as a crucial inductive prior）；去掉生成专家，77.0% → 57.6%，12 个任务中 11 个变差，动态任务跌幅最大；纯仿真预训练在 RoboTwin 上已经很强（88.3%/88.5%），但真机 Place Flower / Sort Parts 只有 53.3%/33.3%，加上真机与人类视频后提升到 60.0%/53.3%——异构混合就是在真机侧补这一截。</li>
+<li><strong>结论/观点</strong>（论文口径，非讲者原话）：VLA 的泛化瓶颈同时来自架构（语义与物理动态脱节）与数据（真机示范难扩展），两者要一起解；生成专家可以刻意「糊」——牺牲高频像素细节换实时性，预见只需要给出对动作有指导作用的粗粒度未来趋势；作者自陈两个主要局限：理解专家未与大规模多模态 VQA 数据联合训练，复杂指令跟随与语义推理仍弱；为实时性妥协了未来帧预测保真度。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数字</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型规模</td>
+<td>2B 实例总参数约 1.8B / 3B 实例约 3.2B</td>
+<td>论文 arXiv:2601.02456 Table 1</td>
+</tr>
+<tr>
+<td>推理频率</td>
+<td>两实例均约 13 Hz（RTX 4090，torch.compile）</td>
+<td>论文 §3.4、Table 1</td>
+</tr>
+<tr>
+<td>生成专家关键压缩</td>
+<td>6 张图、每图 1024 token 压到 16 token，共 96 token；池化 48 token 后并行解码</td>
+<td>论文 §3.2</td>
+</tr>
+<tr>
+<td>生成未来步幅</td>
+<td>预测 $t+15$ 未来帧（ $m=15$ ）</td>
+<td>论文 §3.4</td>
+</tr>
+<tr>
+<td>预训练数据总量</td>
+<td>692M+ 帧（692M 为五项表内之和，论文正文写作 over 692M frames）</td>
+<td>论文 Abstract、Table 3</td>
+</tr>
+<tr>
+<td>数据配方 (帧数 / 采样权重)</td>
+<td>InternData-A1 396M / 0.64；AgiBot-World(Beta) 206M / 0.18；RoboTwin 17M / 0.08；EgoDex 68M / 0.08；RoboMind 5M / 0.02</td>
+<td>论文 Table 3</td>
+</tr>
+<tr>
+<td>InternData-A1 规模</td>
+<td>&gt;63 万条轨迹、7,433 小时、4 本体、18 技能、70 任务、227 场景</td>
+<td>论文 §2、§4.2</td>
+</tr>
+<tr>
+<td>训练步数</td>
+<td>预训练 700K steps（batch 512）；后训练 60K steps（batch 128）</td>
+<td>论文 Table 2</td>
+</tr>
+<tr>
+<td>真机静态任务平均成功率</td>
+<td>InternVLA-A1(3B) 75.1%、(2B) 64.7%；π₀.₅ 70.7%、π₀ 60.6%</td>
+<td>论文 §5.2、Table 4</td>
+</tr>
+<tr>
+<td>动态任务 (Express Sorting / Ingredient Picking)</td>
+<td>3B：80.0% / 93.3%；π₀.₅：53.3% / 66.7%；两项合计 3B 86.7%</td>
+<td>论文 §5.3</td>
+</tr>
+<tr>
+<td>RoboTwin 2.0 (Easy/Hard)</td>
+<td>3B 领先 π₀.₅ 各 2.6 pcts；领先 π₀ 9.4%/10.1%</td>
+<td>论文 §5.4</td>
+</tr>
+<tr>
+<td>消融：去掉生成专家</td>
+<td>12 任务平均 77.0% → 57.6%</td>
+<td>论文 §5.5</td>
+</tr>
+<tr>
+<td>消融：去掉预训练</td>
+<td>平均 77.0% → 25.4%</td>
+<td>论文 §5.5</td>
+</tr>
+<tr>
+<td>帧级压缩比</td>
+<td>每图 1024 → 16 token（64 倍压缩）</td>
+<td>论文 §3.2</td>
+</tr>
+</tbody>
+</table>
+<p>注：arXiv:2601.02456 的 <strong>v1（2026-01-05）与 v2（2026-02-13）数字不完全一致</strong>（v1 摘要写预训练数据 533M+ 帧、动态任务提升 40%–73.3%；v2 写 692M+ 帧、相关真机任务按每项单独与 π₀.₅ 对比），上表均按 v2 正文录入；论文自身未标注两版差异，跨版比较时请留意。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移（放到 RL 训练 / 数据构造 / 评测框架）</h2>
+<ul>
+<li><strong>统一条件化 + flow matching 做多模态（文本/动作）联合分布</strong>：动作多模态性不靠离散 token，而是对连续动作 chunk 做噪声→示范的路径学习，Bernoulli-free；可迁移到任何「连续控制/动作 expert 与语言模块联合微调」的场景——在 coding-data 的 RL 里，动作也可以是结构化编辑（edit program），用条件-连续速度场建模重构分布，或许比离散 token 化更抗多解。</li>
+<li><strong>粗粒度预见信号够好就不必像素级生成</strong>：预见模块刻意压到每张图 16 个 token、单次并行解码，论文明确 argue 高频细节对动作决策不必要。迁移到后训练：任何「先预测未来再决策」的环节（agent 的计划/想象、rollout 预演），都可以先试低保真代理而非真生成，先确认信号量够再谈清晰度。</li>
+<li><strong>异构数据负载均衡并行训练 (LPT)</strong>：把异构规模的数据集按规模从大到小贪心分派给 worker 使单 worker 装载大致均匀，避免大 worker 反复遍历小数据集造成的隐式重加权——这套工程细节在多源 mixing（合成轨迹 + 真机 + 人类视频混合 SFT/RL）时可直接照搬，并对控制隐式采样分布有任何多源训练通用。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>真正想拿视频回放核实的是：曾嘉现场怎么拆 InternData-A1 合成管线（合成质量、灵巧操作标注质量、与真机数据的混配比例消融细节），以及在 B站无字幕视频条件下讲者对 RoboTwin 2.0 上 +2.6 pcts 这一相对单薄增益如何解读——更像全面小胜还是接近上限？这部分只能等录像/字幕可得后回填。</li>
+<li>动态任务（传送带）为什么生成专家的边际收益远大于静态任务、未来帧预测的时间跨度 $m=15$ 如何调、并行单次前向预测的「动态预见」上限（比如是否只适用于短时平稳运动）仍缺细粒度的解释，论文只给了结果未给机理解剖。</li>
+<li>未与大规模 VQA 数据联合训练的理解专家在长指令/组合指令上的上限未测，下一步若有 follow-up（如 InternVLA-A1.5，arXiv:2607.04988，已有公开线索指向该标题）可继续跟踪。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（论文原话，非讲者语录）</h2>
+<blockquote class="pq">
+<p>"we compromised the fidelity of image prediction, limiting the granularity of generated future frames."
+（arXiv:2601.02456， §6 Limitations）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>未确证项</h2>
+<ol>
+<li><strong>无字幕/未直接观看</strong>：B站合集无本期对应视频字幕可提，本文全部内容基于论文 arXiv:2601.02456（v2）；讲者曾嘉来自节目页嘉宾介绍与论文团队署名交叉（论文作者表最后一位为 Jia Zeng，与「曾嘉」拼音一致，但未直接核实为同一人的官方对应关系）。</li>
+<li><strong>v1/v2 数字冲突</strong>：v1 摘要的 533M+ 帧、动态提升 40%–73.3% 与 v2 的 692M+ 帧、动态项逐个与 π₀.₅ 对比为不同口径，上表采 v2；直播当日（2026-01-27）可能引用的是更接近 v1 的数据，具体以录像为准。</li>
+<li><strong>台账 BV 冲突</strong>：交底称 BV1zF67BmEHD 为本期付费预览视频，但 <code>episode-index.csv</code> 显示该 BV 是 B105 SDAR（主题不同），且官网 EP105 登记为「official-only（B站合集无对应视频）」；本文按台账实际记录著录：本期不附 BV。</li>
+<li><strong>关联 follow-up</strong>：arXiv:2607.04988（InternVLA-A1.5）为 GitHub 仓库 <code>internvla-a-series</code> README 中 BibTeX 引用条目所见的后续报告标题，未在本文展开，是否对应本期后续未核实。</li>
+</ol></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
