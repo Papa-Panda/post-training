@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUA — 构建全场景计算机智能体（下半场）：开源 Mobile Agent 的任务与轨迹合成</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>CUA — 构建全场景计算机智能体（下半场）：开源 Mobile Agent 的任务与轨迹合成</h1>
+    <p class="sub">开源社区训不出能打的 mobile agent，缺的不是模型而是高质量轨迹数据及其配方；这份工作把「探索建全局记忆 → 合成指令」与「弱模型先跑、强模型在出错点介入纠正」的轨迹… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/CUA-panel-2.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>场次</dt><dd>ICLR 2026 CUA Workshop「构建全场景计算机智能体：跨领域探索、安全护栏与开源生态」分享，下半场</dd><dt>讲者</dt><dd>程侃之（南京大学计算机系自然语言处理组博士生；字幕自述。此工作为其在商汤实习与南洋理工大学交换期间完成）</dd><dt>BV</dt><dd>BV1iqoUBrEX6</dd><dt>时长</dt><dd>1115 秒（约 18:35）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>相关论文</dt><dd>开源 mobile agent 数据合成工作（字幕英文名转写不一，疑为 OpenMobile 一类名称，待核）；讲内未给出数据与代码的明确链接</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/CUA-PANEL2.txt</code>（506 条，带时间戳）</dd><dt>承接关系</dt><dd>本视频是该场分享的下半场，上半场由孙秋实讲科学发现基准与安全评测，见 <code>episodes/CUA-panel-1.md</code>；孙秋实在上半场开场已预告本半场内容。</dd><dt>说明</dt><dd>基于 B站 AI 字幕整理；讲者姓名在字幕中另有「程看之」「陈凯之」等不同转写，以自述段的「程侃之」记，待核。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">2.8K</div><div class="l">轨迹训出的</div></div></div>
+<p>开源社区训不出能打的 mobile agent，缺的不是模型而是高质量轨迹数据及其配方；这份工作把「探索建全局记忆 → 合成指令」与「弱模型先跑、强模型在出错点介入纠正」的轨迹收集做成开源流水线，用约 2.8K 条轨迹训出的模型明显超过既有开源数据方法，并用覆盖度分析证明数据有效不是靠与测试集长得像。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li>
+<p><strong>背景/问题</strong>：AndroidWorld 这类动态基准上，工业界模型近一年能力跃升，但它们的轨迹数据和合成流程都不开源；人工标注数据集（如 Android in the Wild、AndroidControl、AMEX）训出的模型性能停滞在约 30% 上下，此前的合成工作（如 OS-Genesis）也远远落后。讲者把困境拆成两层：performance gap（没有一份数据能训出有竞争力的模型）与更要命的 knowledge gap（社区不知道是什么样的数据配方在驱动闭源模型的性能与泛化）。</p>
+</li>
+<li>
+<p><strong>方法/设计</strong>：轨迹数据合成拆成指令合成与轨迹合成两步，各有一个关键设计。</p>
+</li>
+<li>指令合成：把探索与生成解耦。类比人探索新 App 的三步（先乱点、再形成整体认知、最后按需联想），他们把多次探索轨迹按屏幕相似度找到交叉节点、缝成网状的全局环境记忆；再从中分出短时记忆（当前屏幕的邻域状态）与长时记忆（抽取出的 App 功能库），按当前屏幕检索相关功能集合，连同 guideline 与示例一起喂给强模型合成任务。旧做法（OS-Genesis 式）拿单条探索轨迹当 context 合成指令，多样性被锁死在一条轨迹上、缺了建全局记忆这步——这是讲者指出的核心差别。该框架兼容任意探索策略，他们实验中用的是简单的 random walk。</li>
+<li>
+<p>轨迹合成：错误介入式 policy switching。让弱模型先执行，另设 monitor 全程监督，一旦发现弱模型偏离预期目标，强模型介入纠正，由此专门收集「出错—意识到—修复」的数据。对比之下：纯专家轨迹没有错误修复样本，弱模型一旦出错不会自救；弱模型自我进化收敛慢且受自身上限限制；随机切换也不行，因为 GUI 任务多路径可解，强弱不一致不等于出错，还会让轨迹变得跳跃。最终用 Gemini 3.1 Pro 做指令生成与轨迹 rollout，得到约 2.8K 条轨迹、34K 步，并提供数据浏览 demo。</p>
+</li>
+<li>
+<p><strong>实验/实战</strong>：在三个动态基准上评测——AndroidWorld（与合成同环境）、AndroidLab（App 层面的 OOD，与 AndroidWorld 的 App 重合度低）、MobileWorld（长程、跨 App 指令的任务层面 OOD）；base 模型用 Qwen2.5-VL 与 Qwen3-VL（讲者认为前者没经过重度 GUI 训练、更能体现数据价值），每个设置测 3 次、报均值与 pass@3。用这份数据训出的模型在三个基准上都大幅超过 base，明显优于既有开源数据与合成方法，接近近期工业模型。消融：指令合成经人工 pairwise 评测在复杂度与综合质量上胜过耦合式方法；错误介入切换收集到的错误修复信号明显更多、下游增益也更大；对模型执行轨迹的人工统计显示，训后模型在「意识到错误、知道如何修正、最终改正」三档上都优于基线。</p>
+</li>
+<li>
+<p><strong>结论/观点</strong>：讲者把数据有效的归因落在功能覆盖上，并做了正面的污染自查：合成指令与 AndroidWorld 测试集确实更像（同一批 App），但相似度超过 70% 的只有 3.5%；去掉与测试集最相似的指令，在低比例时与随机去掉没有差别（说明不靠少数撞题指令），比例升到 20%–40% 时掉点是因为删掉了与核心功能相关的指令。进一步把测试指令拆成原子功能后发现，合成数据对这些原子功能的覆盖度越高、任务成功率越高（AndroidWorld 共 116 个测试任务参与分析）。所以他的设计原则是：广泛而全面的功能覆盖，才是高质量轨迹数据的核心。讲内还提到他们在同一份数据上试过 step 级与轨迹级 online RL，但细节只指向论文。</p>
+</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>合成数据规模</td>
+<td>Gemini 3.1 Pro 生成与 rollout</td>
+<td>约 2.8K 条轨迹、34K 步</td>
+</tr>
+<tr>
+<td>人工标注数据训出模型的 AndroidWorld 表现</td>
+<td>早期工作靠它起步</td>
+<td>约 30% 后停滞（讲内口径）</td>
+</tr>
+<tr>
+<td>合成指令与测试集相似度 &gt; 70% 的占比</td>
+<td>AITW、AndroidControl 与 AndroidWorld 相似度更低</td>
+<td>仅 3.5%</td>
+</tr>
+<tr>
+<td>功能覆盖分析的测试集规模</td>
+<td>—</td>
+<td>AndroidWorld 116 个测试任务</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>数据合成配方</strong>：「先建全局功能清单、再按功能造题」而不是沿单条轨迹反推指令，这套解耦思路可以直接搬到 coding/SWE 的任务合成上——先从仓库或环境里抽功能清单保证覆盖，再让强模型按清单出题，避免合成数据在少数模式上打转。</li>
+<li><strong>轨迹收集</strong>：弱模型先跑、monitor 监视、强模型只在偏离点介入纠正，天然产出带错误修复段的轨迹；这与 agentic RL 的 rollout 数据构造同构，值得在 SWE 轨迹合成上试一把，尤其能补上纯专家轨迹里没有的自救样本。</li>
+<li><strong>污染自查</strong>：相似度分布 + 「去最相似 vs 随机去除」的差分消融，是一套能自证数据没靠撞题的低成本方法，任何合成数据工作都该标配。</li>
+<li><strong>Infra 视角</strong>：讲者点出的 knowledge gap 本质是配方不可见——把数据配方（探索策略、记忆构建、切换规则、prompt）做成可复现的开源流水线，本身就是对社区的 infra 贡献。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>工作的确切英文名、论文与数据/代码的开源地址在字幕里没有给出可靠拼写（字幕作近似 OpenMobile 的读音），需要按讲者与单位（南京大学 NLP 组、商汤实习）去公开渠道核对后再回填。</li>
+<li>主实验只给了「大幅超过 base、接近工业模型」的定性表述，三个基准上的具体成功率数字讲内没有逐项报出；RL 部分（step 级与轨迹级）也只有一句带过。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「广泛全面的功能覆盖，实际上是构建这种高质量目标 agent 的轨迹数据的核心。」（约 [18:23]，ASR 轻微清理，原字幕「目标 agent」即 mobile agent 的转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

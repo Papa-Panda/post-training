@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUA Workshop — 开源、基建、大一统与 CUA 的 ChatGPT 时刻（圆桌）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>CUA Workshop — 开源、基建、大一统与 CUA 的 ChatGPT 时刻（圆桌）</h1>
+    <p class="sub">四位一线从业者（模型、基建、产品、学术四种视角）的共识是：CUA 的「操作层」（grounding、点击执行）基本已经解决，真正的瓶颈是环境与数据的规模化、长时程的推理与决策逻… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/CUA-chatgpt-moment.html</p>
+<p>「只要你能做的事情够多，用户自己会去发现场景；但现在的问题是用户试了一个问题发现做不了，再试一个还是做不了，大家就没有耐心再试了。」——谷雨对「CUA 为什么还没到 ChatGPT 时刻」的归因</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞社区 ICLR 2026 CUA Workshop 系列分享（合集 sid=7971490）圆桌场</dd><dt>标题</dt><dd>开源、基建、大一统与 CUA 的 ChatGPT 时刻</dd><dt>BV</dt><dd>BV1p99yBYE7Q</dd><dt>时长</dt><dd>01:18:23</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>参与者（均按字幕自述/主持人介绍口径）</dt><dd></dd><dt></dt><dd>谷雨（美国一家 AI 创业公司 co-founder，负责 research；此前多年做 agent 相关工作；字幕中公司名识别不清，不臆测）</dd><dt></dt><dd>陈周俊（UCSD 博士生，研究方向为 scale up 强化学习与 real-world agent 上的 RL，近期主攻 coding agent；曾参与 computer use 与组合式 agent benchmark 工作）</dd><dt></dt><dd>彭冲（此前在美团从 0 到 1 建起大规模 CUA 沙盒、数据合成 pipeline 与训练策略；其团队开源的 CUA 模型在字幕中作「EvoCUA」，称下载量近 10 万）</dd><dt></dt><dd>林雨（MiniMax，负责 CUA 方向，横跨基座模型与产品两侧）</dd><dt></dt><dd>主持人姓名未在字幕中给出；本场同时是某档播客（字幕作「grounded」）的第三期节目</dd><dt>相关论文/工作（字幕提及）</dt><dd>OSWorld、陈周俊参与的组合式 benchmark（字幕作「coco bench / cocoa bench」，把 computer use、coding 与 deep research 组合进同一任务）</dd><dt>相关代码</dt><dd>无本场专属代码</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1p99yBYE7Q/">https://www.bilibili.com/video/BV1p99yBYE7Q/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/CUA-CHATGPT-MOMENT.txt</code>（1855 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文清洗提炼；发言人归属仅写入字幕中可确认者（主持人点名与自述可对上者），其余只记观点不硬挂名。专名多有识别误差：CUA 在字幕中作「酷啊/酷外/哭啊/库尔」，EvoCUA 作「EVOCV/UCO」等，均以公开资料为准；凡转述的性能数字均为字幕口径。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>四位一线从业者（模型、基建、产品、学术四种视角）的共识是：CUA 的「操作层」（grounding、点击执行）基本已经解决，真正的瓶颈是环境与数据的规模化、长时程的推理与决策逻辑，以及可靠性与可验证性；所谓 ChatGPT 时刻不会由单一因素触发，它更可能以「某个子领域先出现像 Claude Code 之于 coding 的爆款形态」的方式到来，而开源社区最该补的位是中立评测、轨迹数据与可靠性研究。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>谷雨：被高估的是「把 RL scaling 直接搬到 CUA」，被低估的是操作之外的决策逻辑</h3>
+<p>谷雨的判断：operational 层面的 grounding 已经「解决差不多了」，不值得作为长期追求的目标；真正难的是操作背后的决策逻辑——遇到各种 case 到底应该怎么处理，这是非常长尾的问题。他据此认为把数学/coding 上 RLVR 的 scaling 思维定式迁到 CUA 被高估了：数学与 coding 是相对封闭的世界，CUA 面对的是开放世界，对环境的要求与成本完全不同。</p>
+<p>他给「ChatGPT 时刻」下的定义偏终局形态：一个像生活秘书一样的通用数字助理，你把问题说给它，它能自己想办法解决（他举了自己用虚拟卡买礼品卡导致亚马逊账号被封、至今没解决完的真实经历——这类事纯靠点击解决不了，需要理解申诉流程的决策逻辑）。除能力外，他强调入口因素：他看好 OS 级入口（AI PC / AI 手机），但这背后牵涉的商业与生态问题很难预测。</p>
+<p>在 self-improving（自进化）问题上，谷雨给出全场最体系化的一段：当前最大的瓶颈是数据。已文档化的数据很大程度已被挖掘，但大量知识是 undocumented 的——过程知识、办公场景里的交流与软件使用痕迹，这些从未进入训练。他 bet 的范式转移是：从「人被动准备数据训练模型」转向「模型在部署中主动从 interaction 里获取并决定学什么」。表征上他认为短期非参数化方式能立刻产生迭代，但长期更有效的还是压进参数。落到 CUA，他认为 grounding 与操作层可以靠被动学习解决，self-improving 真正的战场是让模型进入真实场景、理解业务的决策逻辑并不断自我改进。</p>
+<h3>陈周俊：瓶颈不在学习范式，在 environment 如何 scale up</h3>
+<p>周俊自陈是做 RL 的，但同意「learning paradigm 至少不是现在的 bottleneck」：环境与数据没被 grounded 地拉起来之前，讨论哪种学习算法学得更好体现不出来。他还补充了人机分工的建模问题：agent 需要一个 belief state——知道自己处在什么状态、什么时候该停、什么时候该求助人。现在的做法把一切都压进 policy，没有显式建模，部分可观测性（partial observability）下就会出现「点了搜索框但截图里没高亮、于是反复点」这类行为。</p>
+<p>他介绍的组合式 benchmark（computer use + coding + deep research 三种能力组合在同一任务里，因为真实任务往往每样都要沾一点）给出两个关键数字与观察（字幕口径）：最好的开源模型（Kimi K2.5）只有约 11 分，而闭源模型可达四五十分；但在 OSWorld 这类单一 benchmark 上两边差距远没有这么大。也就是说，开源与闭源的真实差距藏在组合式、长时程任务里，error analysis 显示差距主要不在 grounding，而在 reasoning / planning。他还发现：不规定解法时，闭源强模型明显更偏好用 code 来解题（读 HTML、写脚本），效果也确实更好；能不能用 coding 往往取决于基础设施是否暴露 API，没有 API 才只能读截图。</p>
+<p>关于开源，他以 LLM360（字幕作「LM360/M360」）为例：这个组织从数据到 70B 模型全程开源（pretrain、mid-training、SFT、RL、全部 checkpoint 与日志），填补的是「完整训练 recipe 的 revealing」这一空白——学生能看到真实训练中发生了什么（如 loss spike），这些日志与 checkpoint 长期看本身就是研究语料。代价是流程变慢、快迭代与全面公开之间要做优先取舍。</p>
+<h3>彭冲：大厂的优势在基建与算力，短板在组织灵活度；被低估的是数据与环境</h3>
+<p>彭冲与周俊判断一致：被高估的是算法层面的花活（很多 agent 论文的 RL 增益不可复现、无法推广），被低估的是数据与环境。OSWorld 过去两年指引了领域进展，但已经开始饱和，而且它总共只有 369 条数据，做 RL 实验时不得不拆成两半一半训练一半评测——这就是训练数据与环境稀缺的缩影。他列举的新进展包括静态轨迹数据集、动态环境在持续开源。</p>
+<p>谈到大厂视角：CUA 极吃沙盒基建与算力，资源是大厂相对创业公司与社区的真实优势；劣势是组织灵活度（他本人在 2025 年三四月就想全职转 CUA，组织到七月才放行）。</p>
+<p>他对 EvoCUA 开源的复盘很具体：最大的支撑来自工程团队——两周内搭起平台、后来做到上万并发沙盒 rollout，且 Linux、Windows、macOS 都能跑；模型只用 Linux 环境数据训练，在 Windows 任务上表现也好过先行工作，说明数据做得精细时泛化性不错。但部署到自己 Mac 上「还是干不了啥」：数据的真实性与多样性不够，缺真实用户的文件系统与输入回流——在没有 C 端产品的公司里，这类数据根本拿不到。他给开源社区开的药方排第一位的是评测：开源社区立场天然中立，而好评测需要前瞻性、本质是对问题的定义，这件事特别值得社区去做；其次是非英语、长尾 app 场景的评测覆盖。</p>
+<h3>林雨：hybrid 路线被低估；开源对模型厂是「触达」与生态补充</h3>
+<p>林雨认为过去一年纯 GUI 路线被高估、hybrid（GUI + API/code 等混合）方式被低估。MiniMax 约 400 人，模型、工程、产品物理距离近、决策链短，这是偏创业型公司的优势；劣势是资源受限，只能把资源集中在当前最有价值的方向。其 CUA 产品上内部模型已有实际上线使用，后续计划扩展到 mobile 等全平台。</p>
+<p>对开源的看法分两层：对模型厂，开源核心模型是一种触达——让更多人本地用起来，雪球滚出影响力与口碑，并吸引人才；反过来，开源社区的训练框架等基建也会被大厂吸收优化，是互相补充的过程。</p>
+<h3>共识与分歧</h3>
+<p><strong>共识：</strong></p>
+<ol>
+<li>操作/grounding 层基本解决，不再是主要矛盾（谷雨、周俊、彭冲三人明确同调）。</li>
+<li>瓶颈在环境与数据的 scale、以及长时程 reasoning/planning；算法花活的边际收益被高估。</li>
+<li>开源与闭源长期共存：林雨从「涉及个人文件系统与隐私、必然存在只能信任自部署模型的场景」论证开源模型的市场；谷雨用两个关键词总结协作关系—— complementary（互补：评测、数据、可靠性这些闭源不愿做的）与 revealing（揭示：把前沿 recipe 公开给研究社区）。</li>
+<li>人的 taste/审美与判别力在执行被自动化后反而增值（谷雨称最高层级的 taste 是使命感；彭冲举文生图为例；林雨举做 PPT 为例——初稿不错，但不好看且难以靠文字描述改好）；分歧只在 taste 的边界会不会随模型能力上移而被逐步吞掉（主持人提出，周俊认为 taste 决定「不做什么」，即任务优先级本身）。</li>
+</ol>
+<p><strong>分歧：</strong></p>
+<ol>
+<li>ChatGPT 时刻的形态：谷雨认为是通用数字助理 + OS 级入口；彭冲更保守地认为「永远不会出现以通用 computer use 为核心卖点的爆款产品」，CUA 只会作为一种执行媒介被吸收进通用智能体；林雨则预测一年内会出现某个子领域里真正取代人一部分工作的 computer use 产品（如 coding 之于 Claude Code）；周俊的定义最朴素：报税这类繁琐表单，每个格子都能可靠填对，填完人只需 check。</li>
+<li>可靠性优先级：周俊把「不够可靠、太慢」列为第一、第二位（computer use 任务的性质决定了慢而错不可接受，因为人自己填只要十分钟），价格与隐私在其后；彭冲则从产品方视角指出可靠性与可验证性恰恰是大厂不 care 的——刷榜只需秀能力上限，不需要「这次做对、下次还做对、做错了自己知道」。</li>
+</ol>
+<h3>可证伪预测环节（字幕口径，一年为限）</h3>
+<ul>
+<li>彭冲：benchmark 一定会被刷爆——OSWorld 2025 年初还只有 20 多分，现在已 80 来分，新版 benchmark 一年内会被刷到 80 分水平。</li>
+<li>林雨：一年内会出现一个大家都在讨论的 computer use 产品，在某个小子领域真正取代人的一部分工作。</li>
+<li>周俊（相对激进）：未来一年在常用主流 app/网站上，用户可以不用手动操作，看着它干。</li>
+<li>谷雨（反向押注）：永远不会出现以通用 computer use 为卖点的爆款产品，CUA 会被吸收进通用智能体；并玩笑称其公司会在 12 个月内被以 100 亿美元收购（明确自称开玩笑，不计入预测）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数字</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>组合式 benchmark 上开源最好成绩（Kimi K2.5）</td>
+<td>约 11 分</td>
+<td>字幕（陈周俊口述）</td>
+</tr>
+<tr>
+<td>同 benchmark 闭源模型成绩</td>
+<td>约 40–50 分</td>
+<td>字幕（陈周俊口述）</td>
+</tr>
+<tr>
+<td>OSWorld 数据总量</td>
+<td>369 条（常被拆半作训练/评测）</td>
+<td>字幕（彭冲口述）</td>
+</tr>
+<tr>
+<td>OSWorld 分数变化</td>
+<td>2025 年初 20 多分 → 现约 80 多分</td>
+<td>字幕（彭冲口述）</td>
+</tr>
+<tr>
+<td>EvoCUA 开源模型下载量</td>
+<td>近 10 万</td>
+<td>字幕（彭冲口述）</td>
+</tr>
+<tr>
+<td>EvoCUA 沙盒 rollout 并发</td>
+<td>上万并发，覆盖 Linux/Windows/macOS</td>
+<td>字幕（彭冲口述）</td>
+</tr>
+<tr>
+<td>MiniMax 公司规模</td>
+<td>约 400 人</td>
+<td>字幕（林雨口述）</td>
+</tr>
+</tbody>
+</table>
+<p>注：以上全部为讲者口头数字，未与公开榜单逐一核对。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>评测设计</strong>：单一维度 benchmark 会掩盖真实差距——组合式任务（多能力 compose、长 horizon、解法不预设）才暴露开源与闭源在 planning 上的代差。给自己的 agent 评测留一类「不规定解法、只给问题描述」的组合任务，比多刷一个单项榜更能测出上限。</li>
+<li><strong>数据飞轮的先决条件</strong>：彭冲的教训是，没有产品就没有真实用户文件系统与输入回流，合成数据再精细也补不上真实性与多样性这一课。做 agent 数据时，先想清楚回流通道从哪来。</li>
+<li><strong>可靠性作为独立维度</strong>：把「重复运行一致性」与「做错时自知」做成单独指标（而不是混在成功率里），这是大厂激励下被系统性忽略、社区与小团队能建立差异化的点。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>陈周俊参与的组合式 benchmark 正式名称与开源地址（字幕作「coco bench」）：待查证后可补录，也值得单独精读其任务定义与 evaluation script 的设计。</li>
+<li>谷雨在本场之前有一场关于 self-improving agent 的 talk（本合集内另有单场视频），他在这场圆桌里的范式转移论点在那场应有完整展开，可对照阅读。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「最终可能它只是会作为一个 execution 的某一种媒介，还是兼容到某一个所谓的通用智能体里面。」——谷雨解释为何不会有「以 computer use 为卖点」的爆款产品</p>
+<p>「你这次做对了，你下次还得做对；你不能偶尔做对一次，然后偶尔又做错。」——周俊定义 reliability，并指出这是模型厂激励下不会优先做的事</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

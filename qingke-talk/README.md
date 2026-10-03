@@ -143,3 +143,14 @@
 | MEETUP-OPENRLHF | [Meetup OpenRLHF 分享](episodes/MEETUP-openrlhf.md) | [阅读版](episodes/MEETUP-openrlhf.html) | RL 框架的架构革新由算法侧驱动，框架设计者先是算法研究员 |
 | AMA2 | [青稞AMA第2期 World Model 专题](episodes/AMA2-world-model.md) | [阅读版](episodes/AMA2-world-model.html) | 世界模型的价值不在卷高清，在能否同时服务 data engine、simulator、policy |
 | AMA3 | [青稞AMA第3期 OPD 专题](episodes/AMA3-opd.md) | [阅读版](episodes/AMA3-opd.html) | 纯 OPD 训到底就是复刻 teacher，超过老师依赖外部信息 |
+| CUA-ILLUSION | [CUA The Illusion of Self-Improving Agents](episodes/CUA-illusion-self-improving.md) | [阅读版](episodes/CUA-illusion-self-improving.html) | 多数 self-improving 系统在攒数据但不真学习，memory 三关缺一不可 |
+| CUA-SUITE | [CUA-Suite](episodes/CUA-suite.md) | [阅读版](episodes/CUA-suite.html) | 企业 CUA 的真瓶颈是长尾专业软件，当年 SOTA 大量归零 |
+| CUA-CONTINUAL | [CUA 动态环境自主持续学习](episodes/CUA-continual-learning.md) | [阅读版](episodes/CUA-continual-learning.html) | ACULL 全自动闭环，目标环境最高涨约 29% 且出现正迁移 |
+| CUA-CHATGPT-MOMENT | [CUA 圆桌：ChatGPT 时刻](episodes/CUA-chatgpt-moment.md) | [阅读版](episodes/CUA-chatgpt-moment.html) | 共识瓶颈在环境与数据 scale，开源与闭源差距藏在 planning 不在 grounding |
+| CUA-WEBAGENT | [CUA Web Agent 泛化与真实任务](episodes/CUA-web-agent.md) | [阅读版](episodes/CUA-web-agent.html) | WebFactory 建站时留蓝图，任务合成从概率生成变确定性可验证 |
+| CUA-MOBILE-AGENT | [Mobile-Agent-v3.5](episodes/CUA-mobile-agent-v35.md) | [阅读版](episodes/CUA-mobile-agent-v35.html) | 徐海洋：多端交替 RL 缓解端间拉扯，先修训推不一致再谈 RL 收益 |
+| CUA-OSWORLD-MCP | [OSWorld-MCP](episodes/CUA-osworld-mcp.md) | [阅读版](episodes/CUA-osworld-mcp.html) | 张希：给工具普遍涨点，但工具组合与主动调用意愿才是瓶颈 |
+| CUA-PANEL1 | [CUA Panel 上半场（科学发现+安全）](episodes/CUA-panel-1.md) | [阅读版](episodes/CUA-panel-1.html) | 孙秋实：改源码开接口做 verifier，绕开像素匹配失效 |
+| CUA-PANEL2 | [CUA Panel 下半场（数据合成）](episodes/CUA-panel-2.md) | [阅读版](episodes/CUA-panel-2.html) | 程侃之：困难还有 knowledge gap，闭源轨迹配方不可见 |
+| CUA-MAI-UI | [MAI-UI、UI-Ins 技术报告](episodes/CUA-mai-ui.md) | [阅读版](episodes/CUA-mai-ui.html) | 韩章：把指令角度本身当 grounding 的思考方式，普通 CoT 不 work |
+| CUA-MOBILEWORLD | [MobileWorld 评测基准](episodes/CUA-mobileworld.md) | [阅读版](episodes/CUA-mobileworld.html) | 孔雀鱼：自部署开源 app 拿后端权限，四路确定性校验替代 LLM-as-judge |

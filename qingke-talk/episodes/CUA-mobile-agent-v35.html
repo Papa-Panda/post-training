@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUA Workshop — 通义 Mobile-Agent-v3.5：多平台基础 GUI Agent 与 GUI-Owl 1.5</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>CUA Workshop — 通义 Mobile-Agent-v3.5：多平台基础 GUI Agent 与 GUI-Owl 1.5</h1>
+    <p class="sub">这一场是通义 Mobile-Agent 系列的版本总览：v3.5 与基础模型 GUI-Owl 1.5 把手机、平板、车机、PC、浏览器五端统一进一个模型（2B/4B/8B/32… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/CUA-mobile-agent-v35.html</p>
+<p>「不同的端侧之间其实会存在拉扯的问题，所以我们是多个端侧进行交替的这种 RL，这样来缓解不同端侧拉扯的问题。」——讲者给出多端统一模型的关键训练技巧</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞社区 ICLR 2026 CUA Workshop 系列分享（合集 sid=7971490）</dd><dt>标题</dt><dd>Mobile-Agent-v3.5: Multi-platform Fundamental GUI Agents（B站标题作「通义Mobile-Agent-v3.5: Multi-platform Fundamental GUI Agents｜ICLR‘26 CUA Workshop」）</dd><dt>BV</dt><dd>BV1kKoSBDExS</dd><dt>时长</dt><dd>00:20:45</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>徐海洋（阿里巴巴通义实验室；字幕中自述「我是来自通义实验室的徐海洋」）</dd><dt>相关论文</dt><dd>Mobile-Agent 系列 v1/v2/v3 与 Mobile-Agent-v3.5、GUI-Owl 1.5（字幕作「GYOU / GROL1.5」，以论文与开源仓库正式名 GUI-Owl 为准）；讲者称模型已在 ModelScope 与 Hugging Face 开源，阿里云百炼提供体验 API</dd><dt>相关代码</dt><dd>Mobile-Agent 系列 GitHub 仓库（讲者称约 8.3K stars），含 GUI-Owl 等开源工作</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1kKoSBDExS/">https://www.bilibili.com/video/BV1kKoSBDExS/</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/CUA-MOBILE-AGENT.txt</code>（489 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文清洗提炼。专名识别误差较多（CUA 作「COA/酷啊」，GUI-Owl 作「GYOU/GROL」，OSWorld/AndroidWorld 作「os word / 安卓word」，ModelScope 作「摩达」等），均以公开资料为准；性能表述全部为字幕口径。讲者自 v3.5 起改称团队方向为「多模态多端 GUI Agent」，本场即该版本的总览介绍。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这一场是通义 Mobile-Agent 系列的版本总览：v3.5 与基础模型 GUI-Owl 1.5 把手机、平板、车机、PC、浏览器五端统一进一个模型（2B/4B/8B/32B 全尺寸，各有 instruct 与 thinking 两版），针对 GUI 领域的四项老问题——界面理解、定位精度、长程规划与反思、操作效率——给出一条完整配方：合成环境打底的 grounding 数据、仿真为主真实为辅的轨迹合成、海量 GUI 世界知识预训练与统一 CoT 合成、多端交替在线 RL（缓解端间拉扯）配 infra 侧修训推不一致；讲者称在 20 多个 GUI benchmark（grounding、UI 知识、在线环境操作、工具调用）上取得显著提升，其中 ScreenSpot-Pro 拿到 SOTA 且高于 Gemini 3（字幕口径）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>系列脉络：从框架拼装到基础模型</h3>
+<p>讲者先回顾系列演进，这条线本身就是过去两年 GUI agent 的缩影：</p>
+<ul>
+<li><strong>v1</strong>：首个把多模态智能体用到手机端的工作。当时大模型工具调用能力不行，靠外挂带定位能力的工具（OCR、SAM 等）拼起系统。</li>
+<li><strong>v2</strong>：多智能体（multi-agent）框架。</li>
+<li><strong>-E（字幕作「目标按键的杠E」）</strong>：自主进化方向——把过往成功经验总结成 tips 与 shortcuts，提升后续复杂任务的效率与效果。</li>
+<li><strong>v3 / GUI-Owl</strong>：基于无影云环境搭一整套 infra（浏览器、computer use、移动端三类沙盒环境），在其中做在线 RL，在 OSWorld、AndroidWorld 等管理类任务上取得 SOTA。</li>
+<li><strong>v3.5 / GUI-Owl 1.5（本场主角）</strong>：跨平台支持更强（这一版重点补了 browser 能力）、扩充真实 app 数据与在线 RL、release 全尺寸模型，并针对端侧实时要求同时提供 thinking 版（带 CoT）与 instruct 版（输出短、执行快）。</li>
+</ul>
+<p>团队口径的其他信息：该系列连续两年获 CCL best demo；覆盖端包括手机、平板、车机、桌面（PC + browser）。</p>
+<h3>四项能力短板与对应解法</h3>
+<p>讲者把 GUI 领域的核心挑战列为四项，并一一对应到 v3.5 的做法：</p>
+<ol>
+<li><strong>界面理解与 grounding</strong>：难点在多窗口、专业 app 这类复杂场景。做法是合成环境造数据——通过代码、图像生成仿真各种软件，让模型在其中做 grounding 数据合成。</li>
+<li><strong>轨迹数据</strong>：真实 app 有账号安全与成本问题，采集效率低。路线是「仿真环境为主、真实环境为辅」：用代码与 app 开发合成与现实 app 高度相像的模拟 app 产数据，最后在真实环境数据上做 alignment，才真正做到 scaling。</li>
+<li><strong>GUI 世界知识与 agent 能力</strong>：设置在哪、功能在哪这类问题需要海量世界知识。预训练阶段注入百度知道、百度文库、各类软件操作说明书与视频教程，并用 world model 式任务（如预测下一状态分布）提升 GUI knowledge；同时把 CoT 合成流程统一化（讲者发现 CoT pattern 五花八门会损害学习效率）；数据生产 workflow 里除模型合成与人工标注外，还引入多智能体框架合成的数据以提升泛化与适配。</li>
+<li><strong>多端训练的拉扯</strong>：统一模型最现实的痛点。训练三阶段——世界知识与 grounding 数据预训练、各端轨迹 SFT 冷启动、多端在线 RL。RL 阶段的两个关键处理是本场最具操作价值的部分：<strong>多端交替 RL</strong>（不同端侧交替训练，缓解端间互相拉扯；讲者展示的曲线显示交替训练确实缓解了单端训练时的此消彼长）与 <strong>infra 侧修训推不一致</strong>（升级 infra 缓解训练/推理不一致对在线 RL 的干扰）。另外，记忆能力与工具调用/API/MCP 能力在这一版被着重增强，因为业界多用 multi-agent 架构，只训单一能力的模型难以适配各种框架。</li>
+</ol>
+<h3>评测与开源（字幕口径）</h3>
+<p>讲者称共评测了 20 多个 GUI benchmark，覆盖四类：grounding 任务、UI knowledge 任务（ScreenSpot-Pro 上为「绝对的 SOTA」，比 Gemini 3 还高）、在线环境操作（OSWorld、WindowsArena、AndroidWorld、WebArena 等）、工具调用（团队自研的 OSWorld-MCP、MobileWorld 等 benchmark，亦称 SOTA），且全部统一到一个模型里。模型在 ModelScope 与 Hugging Face 开源（2B/4B/8B/32B，instruct 与 thinking 两版），阿里云百炼上有体验 API（字幕念出的接口名以平台实际为准），ModelScope 提供云电脑/云手机/云浏览器的在线 demo。</p>
+<h3>展望：三个未解问题</h3>
+<p>讲者收尾列出他认为最需要解决的三件事：（1）真正的 agent RL scaling 还没做通——只有真实环境下的 scaling 才能提升自主推理与知识进化，因为那是在线学习；（2）桌面端把 MCP、code、GUI 结合起来自主解决问题是当下主流路径（OpenClaw、Claude Code 都沿此思路）；（3）个性化交互与记忆。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数字</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型尺寸</td>
+<td>2B / 4B / 8B / 32B（「两币」按 2B 还原，字幕口径待核）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>模型版本</td>
+<td>每尺寸均有 instruct 与 thinking 两版</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>评测覆盖</td>
+<td>20 多个 GUI benchmark</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>ScreenSpot-Pro</td>
+<td>SOTA，高于 Gemini 3</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GitHub stars</td>
+<td>约 8.3K</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+<p>注：全部为讲者口头口径，未与公开榜单逐项核对。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>多端交替 RL 缓解任务间拉扯</strong>：多任务/多域 RL 出现此消彼长时，不要先怀疑算法——先试交替训练的课程安排，并把单任务训练曲线与交替曲线画在一起验证拉扯是否缓解。这招对任何多域混合的 agent 后训练都可直接试。</li>
+<li><strong>训推不一致要从 infra 修</strong>：在线 RL 效果异常时，先查训练/推理两侧的数值与格式一致性，再调算法超参；讲者团队就是先升 infra 再谈 RL 收益。</li>
+<li><strong>轨迹数据的「仿真为主、真实对齐」配比</strong>：真实环境采集贵且有账号风险时，用代码合成高仿 app 产轨迹、最后用少量真实数据 alignment，比硬采真实数据更能 scale——这与纯合成环境（WebFactory 路线）形成对照，两条路线可按数据预算组合。</li>
+<li><strong>CoT pattern 先统一再训练</strong>：合成思维链数据时统一格式模板，避免 pattern 多样性本身成为学习噪声。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>GUI-Owl 1.5 的技术报告细节（数据配比、各 benchmark 具体分数、多端交替的排程参数）值得查论文原文核对；尤其 ScreenSpot-Pro 高于 Gemini 3 的口径（具体分数与评测设置）。</li>
+<li>模型尺寸的最小档字幕作「两币」，疑为 2B，开源仓库可直接确认。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「如果只用真实 app 的数据采集链路，其实采集的效率还是比较低的。」——讲者解释为何轨迹路线改为仿真为主</p>
+<p>「现在其实还是没有把这件事情完全做 work——只有在真实环境下的 scaling，它才能真正地提升模型的自主推理和知识进化能力。」——谈 agent RL scaling 的未解状态</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

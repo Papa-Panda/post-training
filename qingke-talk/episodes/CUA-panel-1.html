@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUA — 构建全场景计算机智能体（上半场）：科学发现与安全评测</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>CUA — 构建全场景计算机智能体（上半场）：科学发现与安全评测</h1>
+    <p class="sub">上半场讲两件事：把 desktop agent 推向「AI 协科学家」的科学发现基准——关键工程是给科学软件开 RESTful 接口拿确定性中间状态做 verifier；以及一… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/CUA-panel-1.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>场次</dt><dd>ICLR 2026 CUA Workshop「构建全场景计算机智能体：跨领域探索、安全护栏与开源生态」分享，上半场</dd><dt>讲者</dt><dd>孙秋实（香港大学计算与数据科学院博士生；字幕自述）</dd><dt>BV</dt><dd>BV16uoSBUEzA</dd><dt>时长</dt><dd>1670 秒（约 27:50）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>相关论文</dt><dd>讲内两个工作（科学发现基准、安全评测框架）的英文名与发表信息字幕转写不稳，详见「疑问」</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/CUA-PANEL1.txt</code>（835 条，带时间戳）</dd><dt>承接关系</dt><dd>本视频是该场分享的上半场，内容为孙秋实讲的两个工作（科学发现、安全）；下半场由程侃之讲开源 mobile agent 的数据合成，见 <code>episodes/CUA-panel-2.md</code>。孙秋实在开场即预告了这一分工。</dd><dt>说明</dt><dd>基于 B站 AI 字幕整理；专名按可辨者记，不可靠者已注明待核。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>上半场讲两件事：把 desktop agent 推向「AI 协科学家」的科学发现基准——关键工程是给科学软件开 RESTful 接口拿确定性中间状态做 verifier；以及一套面向 mobile agent 的安全评测——把安卓系统层 trace 引入检测，用形式化校验 + 上下文化 VLM judge 的混合方法守住隐私底线。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li>
+<p><strong>背景/问题</strong>：当前 AI 在科研工作流里还只是「分析师」（出 idea、写代码、做审稿辅助），当不了能从 0 到 1 操纵科学软件的「执行者」。科学任务的评测比日常办公难得多：同一个分子可视化任务有多种合法风格与角度，像素级 matching 验不了对错。安全一侧的问题同样尖锐：agent 跑在用户自己的电脑上，良性指令也可能出事——讲者举的例子是让 agent 把会议日程截图发到群里，结果整个日历连同里面的就诊安排一起被截了出去。</p>
+</li>
+<li>
+<p><strong>方法/设计</strong>：</p>
+</li>
+<li>科学发现基准（讲者称 ScienceBoard 一类，字幕转写作「3sport」，待核）：在 Ubuntu 虚拟机里预装生物信息、天文、代数/定理证明、地理、报告写作等科学软件，观测给 screenshot、accessibility tree 与 Set-of-Mark。核心招数是「魔改」开源软件（如生物信息可视化软件 ChimeraX），通过类 RESTful API 暴露运行时中间状态，从而对每一步拿到确定性 state 做 verifier（状态匹配、数值容差校验），而不是看最终画面像不像。任务由有学科背景的标注者先读软件 tutorial 再构造，标注 easy/medium/hard 难度与 GUI/CLI/混合标签，标注者之间交叉复核，强调任务必须能在环境里被准确执行、尽量避免一题多解。</li>
+<li>
+<p>安全评测：先做 live 环境 MobileRisk-Live（原生安卓模拟器），除截图、accessibility tree、Set-of-Mark 外，额外从系统层抽取 system traces——文件系统元数据、权限、网络信息等，对语义层看不见的敏感信息触达做留痕。再考虑到不可逆风险、流媒体内容漂移、超级 App 反虚拟机三件事，又把环境信息冻结采集成 MobileRisk 基准（含真机事件驱动采集来对付反虚拟机），轨迹带 safe/unsafe 标注与安全场景分类。检测方法是混合式：formal verifier 从系统状态里查完整性与敏感模式，给一条低成本的安全底线；contextual judge 则在传统 VLM judge 之上喂入 Android runtime 信息判断轨迹语义；两者可单步或多步组合，输出轨迹级判定。</p>
+</li>
+<li>
+<p><strong>实验/实战</strong>：科学基准上整体成功率仍然低，更新到 Claude、GPT-5 等最新模型后最好也只有约 25%。分领域差距明显：代数、生物化学类做得较好，讲者分析是因为模型学过这些软件的 tutorial；定理证明这类需要开软件、写代码、高阶逻辑推理的任务则明显挣扎。两个值得记的负面/正面结果：科学 UI 元素密集时，把 Set-of-Mark 框全部打满反而成为 agent 的认知负担，不是越多越好；把有 planning 能力的大模型与小规模 action model 做模块化组合，能实打实提升表现。安全一侧，混合检测在不同 backbone 上、step 级与轨迹级都明显优于 rule-based verifier 与传统 VLM judge，且离线冻结版与在线 live 版结果接近。</p>
+</li>
+<li>
+<p><strong>结论/观点</strong>：讲者明确的判断有二。一是想让 computer-use agent 迈向更高阶应用，光有 planning 与 action 能力不够，还要补 domain knowledge——高阶任务里缺的是领域能力本身。二是安全上，「这不只是 agent 的 safety，也是人的 safety」：检测必须同时看语义层与系统层，只靠 VLM judge 看屏幕会漏掉系统层面的敏感信息触达。关于科学基准里模型「熟悉 tutorial 所以做得好」，讲者不认为这是基准被 hack，反而认为 tutorial learning 是走向自动化科学家的一条可行路线。</p>
+</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>科学发现基准最强模型总体成功率</td>
+<td>早期模型更低</td>
+<td>约 25%（Claude、GPT-5 等最新模型，讲内口径）</td>
+</tr>
+<tr>
+<td>安全检测（step 级 / 轨迹级）</td>
+<td>rule-based verifier、传统 VLM judge</td>
+<td>混合方法在各 backbone 上均有明显提升（讲内未给具体数值）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>Verifier 设计</strong>：科学基准的做法——给被测软件开接口、暴露确定性中间状态做校验，而不是对最终产物做模糊匹配——可以直接迁移到 coding agent 与 GUI agent 的评测 harness：凡是能拿到结构化中间状态的地方，都优先用它做 verifier，LLM judge 只补语义层。</li>
+<li><strong>评测数据纪律</strong>：任务构造流程（标注者先读 tutorial、难度分层、GUI/CLI/混合标签、多人交叉复核、刻意避免一题多解）是一套现成的 benchmark 构建规范；另外「界面标注不是越多越好、密集标注反成认知负担」这条负面结果，对 GUI grounding 的数据合成与观测设计有直接参考价值。</li>
+<li><strong>安全护栏</strong>：给 agent 的安全检测同时接语义层（截图/轨迹）与系统层（文件、权限、网络 trace），并留一条规则化的形式底线，是 agent infra 里可落地的 guardrail 结构。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>两个工作的确切英文名与发表信息在字幕里转写不稳：科学基准字幕作「3sport」（疑为 ScienceBoard），安全框架字幕作近似「OSWorld Sentinel / MobileRisk」的混杂读音，且讲者称安全工作被 ACL 2026 接收、获 ICLR AI workshop 最佳论文提名——均待与公开页面核对后再回填。</li>
+<li>安全实验讲内只给了「明显提升」的定性结论，没有具体数值；科学基准除约 25% 的总体成功率外，各领域的具体数字也未在讲内展开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「它并不只是关于 agent 的 safety，也关于人的 safety。」（约 [20:09]，ASR 轻微清理）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUA — OSWorld-MCP：评测 Computer-Use Agent 的工具调用与混合决策</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>CUA — OSWorld-MCP：评测 Computer-Use Agent 的工具调用与混合决策</h1>
+    <p class="sub">第一个在真实桌面环境里同时评测 GUI 操作、MCP 工具调用、以及「每一步该走 GUI 还是走工具」的混合决策能力的 benchmark；结论是给工具普遍涨点，但模型主动、正… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/CUA-osworld-mcp.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>场次</dt><dd>ICLR 2026 CUA Workshop 分享</dd><dt>标题</dt><dd>OSWorld-MCP</dd><dt>讲者</dt><dd>张希（阿里巴巴通义实验室，Mobile-Agent 团队；字幕自述）</dd><dt>BV</dt><dd>BV1F3oSBEE9V</dd><dt>时长</dt><dd>1424 秒（约 23:44）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>相关论文</dt><dd>OSWorld-MCP: Benchmarking MCP Tool Invocation in Computer-Use Agents（ICLR 2026，arXiv:2510.24563）</dd><dt>相关代码</dt><dd>github.com/X-PLUG/OSWorld-MCP（Mobile-Agent 家族）</dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/CUA-OSWORLD-MCP.txt</code>（596 条，带时间戳）</dd><dt>说明</dt><dd>基于 B站 AI 字幕整理；个别被测模型名（如字幕作「台S2.5」的多智能体框架）转写不可靠，正文不点名。讲内数字与论文摘要口径有出入处已在「疑问」注明。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>第一个在真实桌面环境里同时评测 GUI 操作、MCP 工具调用、以及「每一步该走 GUI 还是走工具」的混合决策能力的 benchmark；结论是给工具普遍涨点，但模型主动、正确地调用工具的意愿仍然很低。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li>
+<p><strong>背景/问题</strong>：此前的评测有两头不公平——纯 GUI 基准把自带 API 的模型和纯键鼠模型放在一起比，文本侧的 MCP 基准又不测 GUI。而工具调用对 computer-use agent 正在变得不可忽视：VS Code 装插件走 GUI 要 4 步、调一次工具 1 步完成；Excel 批量录入数字走 GUI 是 50–100 步重复点击，批量输入工具 1 步完成。步数少不仅快，还避免了逐步误差累积。但没有 API 的软件、新软件、老电脑仍然存在，所以讲者的判断是终局形态为「GUI 兜底 + 有工具时用工具」的交错轨迹——前提是得先有一个基准能公平地量这件事。</p>
+</li>
+<li>
+<p><strong>方法/设计</strong>：直接复用 OSWorld 的 query（为了与既有 OSWorld 高分 agent 公平对照），在上面加 158 个 MCP 工具，覆盖 Office、VS Code、Chrome 等 7 个应用场景。工具的构建有一条自动化流水线：先用 o3 为每个 OSWorld 任务生成代码解（提示策略参考 CoAct 并改进），再用 OSWorld 自带 verifier 验证、只保留能真正跑通的 72 个解，最后再让 o3 把代码封装成可调用的 MCP 工具；同时从现有 MCP 服务器精选 100 多个，260 多个候选经过人工检查（剔除任务特异性强、功能重复的，至少两位有 GUI 开发经验的评审独立验证），最终留 158 个。除成功率外引入两个新指标：TIR（工具调用率，把任务分成 tool-beneficial 与 non-tool-beneficial 两子集，既看该用工具时是否用了、也看不该用时是否乱用）与 ACS（平均完成步数，量决策路径效率）。</p>
+</li>
+<li>
+<p><strong>实验/实战</strong>：统一用 Mobile-Agent v3 的消息组织形式，评测 Qwen2.5、Gemini 2.5、OpenAI、Seed、Claude 等模型及一个多智能体框架。引入 MCP 后多数模型成功率显著提升，如 Claude 在 tool-beneficial 子集从 36.6% 升到 45.2%（讲内口径）；但 TIR 普遍很低，最高者约 31.5%——模型调用工具的积极性和能力都不够。ACS 普遍下降，印证工具提效。消融显示：工具多时若不加 RAG 检索过滤上下文，模型调用工具的倾向明显下降；工具描述顺序（默认字典序）打乱对受益任务影响不大、对非受益任务影响明显，讲者猜测模型会把描述顺序当作隐含的解题策略暗示。在需要组合 4 种以上工具的极复杂任务上，Gemini 2.5 Pro 准确率接近于零，工具组合是主要瓶颈。会后更新：修复了十余个 Office 工具（参数补全、描述细化生效范围），并改为按各模型官方 OSWorld 代码逐一做 MCP 适配，复测 Kimi K2.5、Gemini 3.1 Pro、Claude Sonnet 4.6，修复后 Office 场景成功率显著增强。</p>
+</li>
+<li>
+<p><strong>结论/观点</strong>：给工具不等于会用工具——「每一步选 GUI 还是工具」本身已经成为被测的核心能力。讲者给出的后续方向有三：GUI、tool、code 三个动作空间的自主路由；GUI 与 tool 交错轨迹上的 online RL；以及自动化的 tool scaling（158 个工具的人工定义成本已经很高）。</p>
+</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP 工具规模</td>
+<td>260+ 候选</td>
+<td>158 个工具，覆盖 7 个应用场景</td>
+</tr>
+<tr>
+<td>任务受益面</td>
+<td>—</td>
+<td>69% 的任务可借工具提效，其中 42% 需多轮工具调用</td>
+</tr>
+<tr>
+<td>工具合成流水线</td>
+<td>o3 生成代码解</td>
+<td>verifier 过滤后得 72 个有效解，再封装为工具</td>
+</tr>
+<tr>
+<td>Claude 在 tool-beneficial 子集成功率</td>
+<td>36.6%（纯 GUI）</td>
+<td>45.2%（加 MCP，讲内口径）</td>
+</tr>
+<tr>
+<td>工具调用率 TIR</td>
+<td>—</td>
+<td>最高约 31.5%（讲内口径，多数模型更低）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>评测设计</strong>：给 agent 增加新动作空间（新工具、新 API）时，除了总成功率，要单独拆出「该用时用没用、不该用时乱没乱用」的决策指标；TIR 的双子集拆法可以直接借用到 coding agent 的工具使用评测上。</li>
+<li><strong>Infra 视角</strong>：工具描述的检索注入（RAG 过滤）会显著改变模型的调用倾向，说明 rollout 侧的 context 组装本身就是被测变量——评测框架里必须固定并记录这一层配置，否则不同模型的横向对比不可复现。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲内口径 TIR 最高约 31.5%，而论文摘要写作最强模型 36.3%，成功率数字也有小幅差异（讲内 Claude 36.6→45.2，论文为 40.1→43.3 一类口径），可能是评测步数设置或版本不同，讲中未说明；引用时以论文版为准、讲内数字只作参考。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「用 GUI 兜底，然后当有可用的 MCP tool 的时候我们就去用这个 tool，这样一个 GUI 和 tool 交错的轨迹，可能才是我们认为很智能的一种情况。」（约 [06:02]，ASR 轻微清理）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
