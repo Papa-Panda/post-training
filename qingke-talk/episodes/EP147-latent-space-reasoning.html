@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP147 — LatentSeek &amp;amp; GradCuit：从价值引导的隐空间优化看大语言模型推理</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP147 — LatentSeek &amp;amp; GradCuit：从价值引导的隐空间优化看大语言模型推理</h1>
+    <p class="sub">讲者主张把推理从「在 token 空间里 likelihood 最大化」改写为「在隐空间里沿 value 梯度优化」：给定 prompt $c$ ，不要问什么样的 latent… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP147-latent-latent-space-reasoning.html</p>
+<p>「A great latent space is one where following the gradient of value is enough to solve complex problems.」——讲者反复回到的判词：推理的核心不在生成更多 token，而在找到一个只需沿 value 梯度下降就能解题的隐空间</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>147</dd><dt>标题</dt><dd>大语言模型在 latent space（隐空间）里的优化和推理（B站标题：LatentSeek &amp; GradCuit：从价值引导的隐空间优化看大语言模型推理）</dd><dt>BV</dt><dd>BV1Bw8m6GEd7</dd><dt>时长</dt><dd>01:08:07（讲授约 48 分钟 + Q&amp;A 约 20 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>李恒利（北京大学；字幕中自述姓名，英文名 Hengli Li，以论文作者页为准；GradCuit 论文的 project lead）</dd><dt>相关论文</dt><dd><em>Seek in the Dark: Reasoning via Test-Time Instance-Level Policy Gradient in Latent Space</em>（LatentSeek），<a href="https://arxiv.org/abs/2505.13308">https://arxiv.org/abs/2505.13308</a> ；<em>GradCuit: Credit-Assigned Gradient Flow Enables Robust and Interpretable Test-Time Latent Reasoning</em>，<a href="https://arxiv.org/abs/2608.02585">https://arxiv.org/abs/2608.02585</a></dd><dt>相关代码</dt><dd><a href="https://github.com/bigai-nlco/LatentSeek">https://github.com/bigai-nlco/LatentSeek</a> ；<a href="https://github.com/Yuzhaoxin946/GradCuit">https://github.com/Yuzhaoxin946/GradCuit</a></dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1Bw8m6GEd7/">https://www.bilibili.com/video/BV1Bw8m6GEd7/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/LatentSeek%26GradCuit">https://qingkeai.online/blog/LatentSeek%26GradCuit</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP147.txt</code>（1586 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP147，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 GradCuit 在字幕中作「GRACKET/GRIT」、LatentSeek 作「latent thick」、Coconut 作「coconuts」等，均以论文为准）。论文（arXiv:2505.13308 与 arXiv:2608.02585）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。官网对本期的定性是「LatentSeek &amp; GradCuit」，讲授亦以此为序；两项工作同属 BIGAI/UCLA 一线（论文通讯 Zilong Zheng、Ying Nian Wu），李恒利为共同作者与 GradCuit 的 project lead。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者主张把推理从「在 token 空间里 likelihood 最大化」改写为「在隐空间里沿 value 梯度优化」：给定 prompt $c$ ，不要问什么样的 latent $z$ 最能生成答案 $x$ ，而要问什么样的 $z$ 能生成 reward 最高的 $x$ ——因为验证一个答案比求解它便宜。两篇工作沿这一 formulation 各推进一步：LatentSeek 把 LM head 前最后一层的 hidden states 当作一串可优化的 latent 向量，用 self-reward（模型给自己的答案打分）驱动实例级 policy gradient，在 CoT 基线之上平均涨约 10 个点（字幕口径）；GradCuit 则发现 LatentSeek 的死穴在 credit assignment——latent 与后续推理之间隔了一层不可导的 decoding，于是把 latent 前移到 Transformer 中间层，让每个后续 token 的 log-prob 都经由 self-attention 对每个 latent 可导，reward-weighted 梯度可以直接、稠密地回流，学习率鲁棒性与可解释性同时变好。两篇的共同判词是：<strong>推理的瓶颈可能不在采样策略，而在有没有一个「沿 value 梯度走就能解题」的隐空间</strong>。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>引入：为什么要在 latent 里推理，以及隐空间从哪来</h3>
+<p>讲者从统计学史切入：从 David Mumford 一代的统计学家起，「感知」就被理解为反演——看到观测 $i$ ，找其背后的 latent structure / hidden causes（柏拉图洞穴的现代形式）。贝叶斯写法是经典的</p>
+<p>$$p_\theta(z \mid i) \propto p_\theta(i \mid z) \, p_\theta(z)$$</p>
+<p>——什么样的隐表示能生成所见之物；AIGC 与 diffusion 的思想根源都在这里。语言模型如今的主流是自回归</p>
+<p>$$p_\theta(x \mid c) = \prod_t p_\theta(x_t \mid x_{&lt;t}, c)$$</p>
+<p>而推理（o1/R1 之后）默认走 CoT：把思考外化为长 token 序列。讲者列出 CoT 的三重限制：只能落在人类可读语言里（真思考有 incubation period 式的潜意识过程，未必可言说）；序列太长、慢且难控制；训练侧还要为它收集昂贵的长标注。问题于是变成：<strong>能不能让模型用人类看不懂的方式思考？</strong></p>
+<p>当下 latent reasoning 有两条来路：Coconut 一派让连续 hidden state 自回归地迭代（像 loop transformer 的 for 循环）；贝叶斯/EM 一派仍按老路找 $z^* = \arg\max_z \log p_\theta(x \mid z, c)$ 再 ELBO 训练。讲者指出两派在 inference 侧并无本质区别——都是先 infer 隐结构、再生成答案，区别只在怎么把参数 $\theta$ 训出来。</p>
+<h3>核心 formulation：从 likelihood-driven 到 value-driven</h3>
+<p>讲者的关键一步是把 inference 侧的目标换掉。旧框架找 likelihood 最好的 $z$ ；新框架找能导出 reward 最高答案的 $z$ ：</p>
+<p>$$z^* = \arg\max_z \; R(x, c), \quad x \sim \pi_\theta(\cdot \mid z, c)$$</p>
+<p>（附带一个可丢弃的先验项）。直觉是「验证比求解简单」：求解要从生成分布里采样出推理路径，验证只需 reward 给个对错判断；这套 formulation 等把验证能力转移进求解过程。 $z$ 的诱导分布由此是一个由 value 定义的 energy-based 分布。两个边界要划清：其一， $\pi_\theta$ 全程冻结，这是纯 inference 框架，叫 test-time training 并不准确，更像 test-time search/reasoning；其二，它与 RL 后训练的区别正在于此——RL 也用 reward，但更新的是参数本身，这里参数不动、只动当前实例的 latent。讲者的一句凝练（talk 中英文原话）是：</p>
+<blockquote class="pq">
+<p>A great latent space is one where following the gradient of value is enough to solve complex problems.</p>
+</blockquote>
+<p>即推理的核心问题被重新表述为：<strong>找到这样一个隐空间，在其中只做最简单的（value 引导的）梯度下降，就能解开复杂问题</strong>。后面两篇工作都是在不同位置上找这个空间。</p>
+<h3>LatentSeek：在最后一层 hidden states 上做 policy gradient</h3>
+<p>第一篇（<em>Seek in the Dark</em>）的空间选址：LM head 之前、最后一层 Transformer 的输出。给定 prompt $c$ ，latent 是一串 $N$ 个向量 $z = (z_1, \dots, z_N)$ ，先经 LM head 解码成 token，再把这些 token 与 prompt 一起送回模型继续生成答案，最后拿 reward。流程是闭环：生成→打分→按 policy gradient 更新 latent→再生成，直到 reward 超过阈值或超时。</p>
+<p>三个实现决定值得单独记：</p>
+<ol>
+<li><strong>独立性假设与 policy gradient 形式</strong>。因为解码这一步不可导，无法沿梯度直接上升，改用 policy gradient；为使更新可分解，假设各 $z_t$ 相互独立，每位的梯度是</li>
+</ol>
+<p>$$[\nabla_z J(z)]_t = \mathbb{E}_{x \sim \pi(x \mid z, c)}\left[R(x, c) \, \nabla_{z_t} \log \pi(x_t \mid z_t)\right]$$</p>
+<p>讲者坦承这个假设「肯定不完全对」，并给出理论补丁（论文 Appendix C）：他们定义了一个借自多证明者交互证明的复杂度类 MIP-Bounded（每个 prover 只许说一个 token，对应每个 latent 独立），并证明只要能找到多项式时间的 verifier，这个受限类与原 MIP 在表达能力上等价（乃至等价于指数时间图灵机）——即独立性的代价可被一个好 verifier 补偿。这个类并非首创，ITCS 2013 的 <em>On the Power of Many One-Bit Provers</em> 已有相近定义。</p>
+<ol>
+<li>
+<p><strong>初始化代替先验</strong>。formulation 里先验被删掉，补救办法是拿第一次推理产生的前 $\rho$ 比例 token 的 hidden states 做出发点（ $\rho$ 经验取约 20%），等价于把先验经由初始化带回来；讲者说完整做法（假设高斯先验、加 $L_2$ 正则）当然可行，但为了简单直接删掉。</p>
+</li>
+<li>
+<p><strong>Self-reward</strong>。reward 不用训好的 reward model，也不用更强的外部大模型：直接问模型本身「这个答案对的程度是多少，给个百分比」。理由有二：训好的 reward model 在 outcome reward 上反而不如 self-reward（过程奖励上 PRM 稍好，判最终答案它会错得更多，论文附录有实验）；而若可用 GPT 级闭源模型打分，何不直接让它答题。reward 的定义由此完全内生。</p>
+</li>
+</ol>
+<p>实验（字幕口径）：与 CoT 基线比平均涨 10.75 分，MATH-500 约 +3.04 分、AIME2024 约 +4.07 分（AIME 只有 30 题，该涨幅「还是有点说法的」）；骨干是 Qwen2.5-7B、LLaMA3.1-8B 这一代模型（讲者承认偏旧）。几个分析结论：</p>
+<ul>
+<li><strong>新的 test-time scaling 轴</strong>：旧 scaling 是生成更长或采更多（BoN、self-consistency），这里是增加 latent 优化的迭代轮数，accuracy 随轮数上升；简单题平均一轮收敛，难模型/难设置轮数更多、涨幅也更大。</li>
+<li><strong>梯度方向不可替代</strong>：消融把 policy gradient 换成纯 random search（高斯噪声加在 $z$ 上），保留 reward 做选择，性能显著更差——如 LLaMA3.1-8B 上高约 30 个点、Qwen2.5-7B 上高约 20 个点（字幕口径）； $\nabla \log \pi$ 本身就含有指向正确方向的信息。</li>
+<li><strong>长度不是作弊来的</strong>：最终答案长度与普通 CoT 的比值在 1 附近，即不是靠让模型说更长取胜。</li>
+<li><strong>代价说清</strong>：它是 sequential 算法，单题延迟天然高于可并行的 BoN/self-consistency；且当前推理 infra（vLLM、SGLang）很难把 latent 取出来，这个框架在真实部署上吃亏，data-parallel 摊薄后理论上可比，但未做工程验证（字幕口径）。</li>
+<li><strong>定性发现</strong>：优化后的 latent 解码出来是「Let's find this, , let you more understand it down step to and let」一类人类不可读的 token 串，却能导出正确答案——与 prompt tuning 的区别是，这里的 latent 是从模型自身推理中 infer 出来的、逐实例优化的，而非在整个数据集上训出来的一段前缀。PCA 下看各 latent 的优化轨迹则形状各异、看不出规律——这正是下一篇的引子。</li>
+</ul>
+<h3>GradCuit：把 latent 前移，让 reward 梯度经 attention 直接回流</h3>
+<p>第二篇（<em>GradCuit: Credit-Assigned Gradient Flow …</em>，名字取 gradient through circuit）从 LatentSeek 的两个病入手：<strong>credit assignment 不可知</strong>（一串 latent 都在更新，不知道哪个起了作用）与 <strong>latent dynamics 不稳定</strong>（轨迹什么形状都有，稍改就崩，对调参极其敏感）。解法是一个位置变化带来的机制变化：</p>
+<ul>
+<li><strong>空间前移</strong>：latent 不再放在 LM head 前，而插入 Transformer 中间层（经验上 25%–50% 深度，如 32 层模型取第 8 或 16 层；讲者借 Twitter 评论的说法，叫在更深的「记忆宫殿 mind palace」里推理）。</li>
+<li><strong>机制随之改变</strong>：中间层的 latent 不必先解码成 token，可直接经 causal self-attention 影响后续所有位置的生成；于是后续每个 token 的 log-prob 都对每个 latent 可导。用论文摘要的话说，self-attention 为每个 continuation token 的 log-prob 提供了一条通往每个前置 latent 的可微通路，<strong>reward-weighted 梯度从整条续写直接、稠密地分配给每个 latent</strong>。相对 LatentSeek 少掉一层不可导的解码，梯度估计的第一层噪声源消失；优化仍用同一套 policy-gradient 式更新，且全程同一套参数（这一点讲者在 Q&amp;A 中被反复确认）。</li>
+<li><strong>可解释性第一次有了抓手</strong>：把每个后续 token 对各 latent 的梯度模长打出来，发现影响力集中在 because / therefore / however 这类 <strong>reasoning connectors（推理转折词）</strong> 上——latent 主要在调控「逻辑往哪转」，而不是盯着「 $1+1=2$ 算没算对」或答案格式；这与讲者们起初的猜测（以为会关注答案内容或 boxed 格式）相反。因为不再解码，中间 token 也不再出现 LatentSeek 那种乱码串，生成文本基本可读。</li>
+</ul>
+<p>实验对照（字幕口径）：GradCuit 在多个骨干（含 Qwen3-4B、LLaMA3.2-3B）与 GPQA（物理/化学/生物）等新基准上取得同组最优；论文口径为五骨干三基准平均 64.5%，比 CoT 高 6.6 个百分点、比最强竞品高 2.4 个百分点。鲁棒性是更硬的卖点：</p>
+<ul>
+<li>学习率在原值 ±60% 范围内扫，LatentSeek 性能大幅波动，GradCuit 波动很小；准确率标准差 0.82 对 1.53 （论文口径一致），「腰斩」。</li>
+<li>方向鲁棒性（消融，讲者自己都称意外）：在 GradCuit 的中间层空间里做纯 random search，竟能与 LatentSeek 的梯度法打得有来有回、个别设置还更好——说明这个空间里「对的方向太多，随便走都容易踩到对的」；当然有 reward 引导的梯度法仍明显更强。</li>
+</ul>
+<p>讲者收尾的自我定位：可解释性离「完全可解释」还差得远，这只是在 credit 如何分配上迈了一小步；这条线上可对照的工作还包括 LTPO（中科院/牛津）、他们自己把同一套方法迁到图像生成的 Mirage 一篇（ICLR），以及 CVPR 的 Demirage 一类后续。</p>
+<h3>Q&amp;A 要点（含讲者最坦白的边界）</h3>
+<ul>
+<li><strong>稀疏奖励下单样本梯度为什么够？</strong> 他们实际只采样一次来估梯度，「单单（这件事）不可理解」但一次样本已足够好；多次采样取平均会更好，这也是 policy gradient 的性质使然。</li>
+<li><strong>Coherence 无法保证</strong>。独立性假设把 latent 之间的关联完全抹掉，这是 LatentSeek 乱码 token 的根源；GradCuit 因为不解码而绕开了这个问题，但讲者补了一句反问：可解释性也许只是人类的需求，模型未必需要。</li>
+<li><strong>早期事实/计算错误会被回溯修正，还是会扭曲后续逻辑去迎合错误前提？</strong> 讲者称这个问题「值得单独做一篇 paper」：目前不可解释，只能说 GradCuit 在这方面有一点小进步，latent 在中间层之后的 dynamics 仍是黑盒。</li>
+<li><strong>与 Coconut 的区别</strong>：Coconut 的 latent 是自回归生成的、优化的是 log-prob；这里的 latent 彼此独立、用 value 引导的 policy gradient 优化。与 iCoT 的区别：iCoT 把长 CoT 的各 token 表示逐层塞回去，在一次 forward 内完成 CoT；这里是按 value 做反向传播引导。</li>
+<li><strong>「latent」与「hidden representation」</strong>：实现上无区别；可认为 latent 服从高斯分布、infer 出来的是其均值，先验在实践中可删。</li>
+<li><strong>理论上限</strong>：讲者直说不知道，得等后续工作；infra 支持（vLLM/SGLang 取 latent、做 gradient-based inference）若跟上，简单题上甚至可能加速推理，但没做过实验，不给肯定答复。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LatentSeek 平均分</td>
+<td>CoT 基线</td>
+<td>约 +10.75 分</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LatentSeek MATH-500</td>
+<td>CoT 基线</td>
+<td>约 +3.04 分</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LatentSeek AIME2024</td>
+<td>CoT 基线（30 题）</td>
+<td>约 +4.07 分</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>LatentSeek GSM8K</td>
+<td>BoN</td>
+<td>+15.23 分</td>
+<td>论文 arXiv:2505.13308</td>
+</tr>
+<tr>
+<td>梯度 vs 随机搜索（LatentSeek 空间）</td>
+<td>random search 消融</td>
+<td>LLaMA3.1-8B 约 +30 点、Qwen2.5-7B 约 +20 点</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>latent 初始化比例 $\rho$</td>
+<td>首次推理前段 token</td>
+<td>约 20%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>GradCuit 平均准确率</td>
+<td>五骨干三基准</td>
+<td>64.5%（CoT +6.6 pp；最强竞品 +2.4 pp）</td>
+<td>论文 arXiv:2608.02585</td>
+</tr>
+<tr>
+<td>学习率鲁棒性（准确率标准差）</td>
+<td>LatentSeek 1.53 @ LR ±60% 扫描</td>
+<td>GradCuit 0.82</td>
+<td>字幕/论文一致</td>
+</tr>
+<tr>
+<td>GradCuit latent 插入深度</td>
+<td>25%–50% 层深（如 32 层取第 8/16 层）</td>
+<td>早期至中间层最优</td>
+<td>字幕/论文</td>
+</tr>
+<tr>
+<td>LatentSeek 平均更新轮数</td>
+<td>简单题</td>
+<td>约 1 轮收敛（平均口径）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 RL infra 的直接启发：这条工作线本质是把 policy gradient 从参数空间搬到激活空间——同一套「采样→reward→ $\nabla \log \pi$ 加权」的更新律，优化对象换成每实例的 hidden states。若推理引擎（vLLM/SGLang 级别）将来支持把中间层激活取出并回注，test-time 就会多出一个与 BoN/self-consistency 正交的 scaling 轴：按题难度分配的优化轮数，而不是一律堆采样数。</li>
+<li>Credit assignment 的定位法可借鉴：LatentSeek 的失败不是「隐空间不行」，而是监督信号隔了一层不可导解码；GradCuit 的全部收益都来自把信号通路改直。做 latent/agent 侧的梯度或反馈设计时，先查「反馈到被优化量之间有几层不可导」，比先调学习率更优先。</li>
+<li>Self-reward 的取舍判据：训好的 ORM 在「判最终答案」上不如让模型自评百分比——在 verifier 选型时，outcome 级判定与 process 级判定要用不同口径分别验，不要默认 PRM 全面占优。</li>
+<li>「Reasoning connectors 梯度最大」这一归因方法（逐 token 打梯度模长）是一个轻量的可解释性探针：可用于检查任何 latent/prefix 干预到底在调控逻辑转折还是在拟合格式。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲者自陈未解的核心问题：隐空间优化能否回溯修正早期事实错误、还是只会扭曲后续逻辑迎合错误前提——当前两篇都不可解释，这决定了该方法在长链推理上的可信边界。</li>
+<li>基础设施缺口是落地前置条件：主流推理引擎取不出、也回注不了中间层 latent，GradCuit 式「梯度穿过 attention」在生产推理栈里暂无对应实现；data-parallel 摊薄延迟的说法停留在口头估计。</li>
+<li>LatentSeek 的实验骨干（Qwen2.5/LLaMA3.1 代）偏旧，强推理模型（R1 式长 CoT 模型）上这套实例级优化还剩多少增益，talk 未覆盖；GradCuit 的 GPQA 细分数值亦未在讲授中给出。</li>
+<li>理论侧只证明了「独立性可被好 verifier 补偿」的表达能力等价性，对最优 verifier 不存在、reward 有偏时的收敛与偏差控制，讲者在 Q&amp;A 中明确说尚无答案。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「A great latent space is one where following the gradient of value is enough to solve complex problems.」——讲者的核心命题：好的隐空间里，最简单的梯度下降就足以解题</p>
+<p>「（可解释性）这件事情有可能……单纯对人类而言需要可解释，但有可能对模型而言，它并不需要。」——Q&amp;A 谈 coherence 与乱码 token 时讲者的回应</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

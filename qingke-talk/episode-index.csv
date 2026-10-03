@@ -113,7 +113,7 @@
 112,"EditReward：当 AI 学会""审美""，可控多模态生成的下一代范式",BV11zwxzzEyS,,,,2026-03-14,https://qingkeai.online/blog/EditReward-talk,yes,official-only（官网有预告，B站合集无对应视频）
 113,面向对象的 Agent Infra 新范式：有状态运行时管理的设计与工程实践（CaveAgent）,,,,,2026-03-17,https://qingkeai.online/blog/CaveAgent-talk,unknown,official-only（官网有预告，B站合集无对应视频）
 114,从 VGGT 到 PAGE-4D：动态世界中的 3D 感知统一框架,BV1hmwfzGEQB,,,,2026-03-20,https://qingkeai.online/blog/PAGE-4D-talk,yes,official-only（官网有预告，B站合集无对应视频）
-115,WideSeek-R1：通过多智能体 RL 探索大模型的广度扩展（Width Scaling）,,,,,2026-03-24,https://qingkeai.online/blog/WideSeek-R1,unknown,official-only（官网有预告，B站合集无对应视频）
+115,WideSeek-R1：通过多智能体 RL 探索大模型的广度扩展（Width Scaling）,BV1bgQSBnEs6,,,,2026-03-24,https://qingkeai.online/blog/WideSeek-R1,yes,official-only（官网有预告，B站合集无对应视频）
 116,"RISE: 组合式世界模型，在""想象""中实现机器人策略的自主进化",BV1rnXhB9Ekf,,,,2026-03-28,https://qingkeai.online/blog/RISE-blog,yes,official-only（官网有预告，B站合集无对应视频）
 117,OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾,BV1gp9LBwECf,,,,2026-03-31,https://qingkeai.online/blog/OpenClaw-RL,yes,official-only（官网有预告，B站合集无对应视频）
 118,Puffin: 统一多模态空间智能大模型——从任意视角理解和生成世界,BV1aUDpB1Eyx,,,,2026-04-07,https://qingkeai.online/blog/Puffin,yes,official-only（官网有预告，B站合集无对应视频）
@@ -139,16 +139,16 @@
 138,STEAM：自监督帧级别优势建模算法,BV1kngS6MEKy,,,,2026-07-21,https://qingkeai.online/blog/STEAM-Talk,yes,official-only（官网有预告，B站合集无对应视频）
 139,LAWAM：隐空间世界动作模型,,,,,2026-07-25,https://qingkeai.online/blog/LAWAM,unknown,official-only（官网有预告，B站合集无对应视频）
 140,DRIFT：在线自进化后训练框架,BV1Z43y6QEzi,,,,2026-07-28,https://qingkeai.online/blog/DRIFT,yes,official-only（官网有预告，B站合集无对应视频）
-141,Qwen-Robot Suite 的设计原理,,,,,2026-08-01,https://qingkeai.online/blog/Qwen-Robot-Suite,unknown,official-only（官网有预告，B站合集无对应视频）
-142,LA4VLA：从 VLA 预训练中解耦语言-动作监督,,,,,2026-08-04,https://qingkeai.online/blog/LA4VLA-talk,unknown,official-only（官网有预告，B站合集无对应视频）
+141,Qwen-Robot Suite 的设计原理,BV114GV6LEMB,,,,2026-08-01,https://qingkeai.online/blog/Qwen-Robot-Suite,yes,official-only（官网有预告，B站合集无对应视频）
+142,LA4VLA：从 VLA 预训练中解耦语言-动作监督,BV1A9My6WEvW,,,,2026-08-04,https://qingkeai.online/blog/LA4VLA-talk,yes,official-only（官网有预告，B站合集无对应视频）
 143,ACE-Data-0：新一代具身智能数据范式,,,,,2026-08-06,https://qingkeai.online/blog/ACE-Data-0,unknown,official-only（官网有预告，B站合集无对应视频）
 144,从端到端 VLA 到 Harness VLA,,,,,2026-08-08,https://qingkeai.online/blog/Harness-VLA,unknown,official-only（官网有预告，B站合集无对应视频）
-145,JitRL——无需梯度更新的即时强化学习,,,,,2026-08-11,https://qingkeai.online/blog/JitRL,unknown,official-only（官网有预告，B站合集无对应视频）
-146,AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）,,,,,2026-08-13,https://qingkeai.online/blog/AI4AI-RSI,unknown,official-only（官网有预告，B站合集无对应视频）
-147,大语言模型在 latent space（隐空间）里的优化和推理,,,,,2026-08-22,https://qingkeai.online/blog/LatentSeek%26GradCuit,unknown,official-only（官网有预告，B站合集无对应视频）
-148,TriAttention：面向长上下文推理的三角级数式 KV Cache 压缩,,,,,2026-08-25,https://qingkeai.online/blog/TriAttention,unknown,official-only（官网有预告，B站合集无对应视频）
+145,JitRL——无需梯度更新的即时强化学习,BV1X5g56xEme,,,,2026-08-11,https://qingkeai.online/blog/JitRL,yes,official-only（官网有预告，B站合集无对应视频）
+146,AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）,BV13ZgA64Ept,,,,2026-08-13,https://qingkeai.online/blog/AI4AI-RSI,yes,official-only（官网有预告，B站合集无对应视频）
+147,大语言模型在 latent space（隐空间）里的优化和推理,BV1Bw8m6GEd7,,,,2026-08-22,https://qingkeai.online/blog/LatentSeek%26GradCuit,yes,official-only（官网有预告，B站合集无对应视频）
+148,TriAttention：面向长上下文推理的三角级数式 KV Cache 压缩,BV1me896CEkR,,,,2026-08-25,https://qingkeai.online/blog/TriAttention,yes,official-only（官网有预告，B站合集无对应视频）
 149,LOPD：不再手动设计 OPSD 特权信息,,,,,2026-08-29,https://qingkeai.online/blog/LOPD,unknown,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
-150,SIM1：物理一致世界模型如何实现可扩展机器人学习,,,,,2026-09-01,https://qingkeai.online/blog/SIM1%26GAUGE,unknown,official-only（官网有预告，B站合集无对应视频）
+150,SIM1：物理一致世界模型如何实现可扩展机器人学习,BV1jotD65EGU,,,,2026-09-01,https://qingkeai.online/blog/SIM1%26GAUGE,yes,official-only（官网有预告，B站合集无对应视频）
 151,从 Harness 看 AI4AI 如何实现,,,,,2026-09-05,https://qingkeai.online/blog/Harness-AI4AI,unknown,official-only（官网有预告，B站合集无对应视频）
 152,如何在真实 Coding Agent Harness 中接入 RL？,BV1AJYx6wEpo,152,Lego：面向真实 Coding Agent 场景的数据合成与 Harness 对齐,,2026-09-08,https://qingkeai.online/blog/Lego-RL-Talk,yes,title-reworded
 153,"EnvHarness，Agent 和环境如何""左脚踩右脚""实现自进化",BV1ZqYX6YE3T,153,EnvHarness: 左脚踩右脚，左手画彩虹,,2026-09-12,https://qingkeai.online/blog/EnvHarness-Talk,yes,title-reworded

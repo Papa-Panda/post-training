@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP146 — AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP146 — AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）</h1>
+    <p class="sub">讲者先把「AI4AI / 进化 / 自进化 / 元进化 / RSI」这组正在被产业热炒的概念逐层拆开——AI4AI 回答「谁在改进谁」（任务关系），进化是「提出修改→执行→评价… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP146-ai4ai-rsi.html</p>
+<p>「Loop is all you need（这话）不是（对的）——你相当于不断地在刷题，但是你没有做错题本。」——讲者在 Q&amp;A 末尾对「只迭代不沉淀经验」的判词</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>146</dd><dt>标题</dt><dd>AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）</dd><dt>BV</dt><dd>BV13ZgA64Ept</dd><dt>时长</dt><dd>01:11:29（讲授约 47 分钟 + Q&amp;A 约 24 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>江澈（清华大学电子系博士生，导师周博文教授；同时为 Frontis.AI 算法研究员；字幕中自述姓名「江澈」，主持人口播作「江车」，以论文作者页 Che Jiang 为准）</dd><dt>相关论文</dt><dd>Junlin Yang, Che Jiang, et al., <em>Frontis-MA1: Training an AI4AI Model towards Recursive Self-Improvement in Machine Learning Engineering</em>，<a href="https://arxiv.org/abs/2607.28568">https://arxiv.org/abs/2607.28568</a> （2026-07-30）；另含同组 2026 年 6 月发布的自改进 agent 综述与 NatureBench（Nature Gym）工作，随 talk 介绍</dd><dt>相关代码</dt><dd><a href="https://github.com/FrontisAI/OpenRSI">https://github.com/FrontisAI/OpenRSI</a> （Frontis-MA1/OpenMLE 全栈开源；数据与任务包发布于 Hugging Face）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV13ZgA64Ept/">https://www.bilibili.com/video/BV13ZgA64Ept/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/AI4AI-RSI">https://qingkeai.online/blog/AI4AI-RSI</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP146.txt</code>（1467 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP146，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如系统名在字幕中作「FRANISMARVIN/FRONTIMA1」、公司名作「显眼科技/全远科技」，均以论文与公开资料的 Frontis-MA1 / Frontis.AI 为准）。论文（arXiv:2607.28568）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">35B</div><div class="l">Frontis-MA1</div></div></div>
+<p>讲者先把「AI4AI / 进化 / 自进化 / 元进化 / RSI」这组正在被产业热炒的概念逐层拆开——AI4AI 回答「谁在改进谁」（任务关系），进化是「提出修改→执行→评价→筛选回滚」的机制闭环，自进化要求进化产生的经验回流并改变未来系统，元进化则要求改进器本身被改进（系统学会如何进化）；随后把这套概念落到自家全栈开源系统上：以机器学习工程（MLE）为可执行、可评价、可溯源的试验场，构造 Nature Gym 与大规模 Kaggle 任务环境，用「四种原子操作在训练与搜索两侧严格对齐」的方式把改进轨迹分别沉淀为 test-time 经验卡（OpenMLEvo）与模型参数（OpenMLEvoRL 的 SFT+RL，训出 35B 的 Frontis-MA1），在 MLE-bench Lite 上超过 GPT-5.5 + Codex，并把「投入的智能量小于产出的智能量」作为 RSI 是否成立的操作性判据。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">最小闭环是「提出修改</div><div class="farrow">→</div><div class="fnode">实现执行</div><div class="farrow">→</div><div class="fnode">外部评价</div><div class="farrow">→</div><div class="fnode">筛选/回滚</div><div class="farrow">→</div><div class="fnode">迭代」</div></div><div class="viz viz-bars"><div class="barrow"><div class="barlabel">：Medal Average 从基座</div><div class="bartrack"><div class="barfill" style="width:55.3%"></div></div><div class="barval">39.39%</div></div><div class="barrow"><div class="barlabel">提到</div><div class="bartrack"><div class="barfill" style="width:85.1%"></div></div><div class="barval">60.61%</div></div><div class="barrow"><div class="barlabel">配 OpenMLE-Evo-Max</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">71.21%</div></div></div>
+<h3>概念辨析：五个词回答的是五个不同的问题</h3>
+<p>讲者把整场 talk 的第一半用于概念分层，核心区分如下：</p>
+<ol>
+<li><strong>AI4AI 是一种任务关系，不是机制</strong>。只要 AI 参与构建或改进了某个 AI 系统（可以改进模型、算法，也可以只改进 harness、工具与工作流），即属 AI4AI。介入的 AI 与被改进的 AI 可以是同一个系统，也可以不是——这与「自」无关。</li>
+<li><strong>进化是一种机制：最小闭环是「提出修改→实现执行→外部评价→筛选/回滚→迭代」</strong>。讲者用四个代表工作点出共同点：AlphaEvolve 把算法与训练基础设施变成可评估的进化对象（数据中心调度、Gemini kernel 加速、训练提速）；Karpathy 的 autoresearch 把一次 nanoGPT 训练压成单个 train.py、给定固定 5 分钟预算，「跑一晚上」即得到可观的训练能力；DGM（Darwin Gödel Machine）不改基座模型、只改写 agent 的 harness（工具、工作流），在 SWE-bench 与 Polyglot 上维护树状结构逐代变强；AIDE² 在任务内层做树搜索（内循环）之外再包一层、外层重写自己的 harness，经 100 次 agent 迭代、7 个版本，不仅在见过的 MLE-bench 上变好，在 weather bench、kernel bench 等域外任务上也更好，且 reward hacking 水平下降。四者的共性：改进对象不同，但闭环相同，且评价必须来自可验证的外部环境（或独立的评价 agent）。</li>
+<li><strong>自进化 = 进化 + 经验回流</strong>。普通进化每换一个任务就从初始解重新开始（讲者图中「蓝线」）；自进化则要求进化产出的不只是 solution，还留有可复用经验，且这些经验回到系统里改变未来的起点（「紫线」）。讲者按经验落点分三类资产：<strong>内容资产</strong>（如 Voyager 在 Minecraft 中积累的 skill 库——讲者称这是 skill 一词可考的最早出处）、<strong>机制资产</strong>（从交互成败中提炼策略与执行结构，如 ReAct 一类把策略本身沉淀下来的工作）、<strong>参数资产</strong>（经验多到可直接训练/微调模型，如 SkillRL 把轨迹整理为 memory→skill 再与基座联合训练）。这也解释了「养龙虾（Clawdbot/OpenClaw 一类个人 agent）」为何成立：今天的 agent 已是「参数化模型 + harness」的经验系统，越用越聪明是自进化在产品层的自然结果。</li>
+<li><strong>元进化（meta-evolution）= 学习如何进化</strong>。类比元学习「学习如何学习」：系统沉淀的不再是任务经验，而是「关于改进的经验」——起始状态、改了什么、结果如何、为何如此。元进化层可以内置于 task agent 自身（如 Meta Agent 把元进化能力放在做事的 agent 里），也可以是独立于 task agent 的外部 meta layer（task agent 只做任务、不自指，如他们自己的系统）；更进一步是 HyperAgents：连「改进策略」本身也成为进化对象，形成套娃式嵌套（在 DGM 之上再套一层）。</li>
+<li><strong>RSI 是元进化之上的极限形态，判据是复利</strong>。讲者坦言学界没有统一定义，他给出的操作性版本是：<strong>升级后的改进器要接管下一轮 AI 进化、持续产生更强的后继</strong>，且按他在 Q&amp;A 中展开的判据——「投入的算力（智能量）小于最终产出的智能量」，才算真正进入持续复利。talk 中引用了某公司（字幕作 VICO，以公开资料为准）的 L0–L3 分级：L0 进化慢于人类，L1/L2 快于人类，L3 才是上述复利循环；这与 OpenAI 的五级 AI 能力分级不是同一个概念。</li>
+</ol>
+<p>一条贯穿全篇的警戒（Q&amp;A 中被反复回到）：<strong>只有 loop、没有经验沉淀的系统，连自进化都算不上</strong>——AlphaEvolve 只基于搜索树、若不维护 memory，就只是在刷题而没有错题本；但若把搜索树上「父节点→改了什么→子节点效果」这条边记录并积累下来，它学到的就是「如何改进」，那就是元进化的经验。</p>
+<h3>为什么选 MLE 做试验场：先有可执行证据，才有进化经验</h3>
+<p>讲者的工程主张是：元进化要研究「什么是一条好的改进经验」，就必须选一个<strong>高价值、可执行、可评价、修改可溯源</strong>的任务域。自动化机器学习（Machine Learning Engineering）恰好满足：给 agent 一个比赛描述与数据，它自己训模型、测模型，产出一张可与人类排行榜对比的量化表格，整个「改了什么→分数如何变」的轨迹天然可记录。两条任务线：</p>
+<ul>
+<li><strong>Nature Gym</strong>：从近 10 本 Nature 系列子刊出发，粗筛 5000 多个候选任务，经前沿 agent 能力测试与大量人工筛选，留下 90 个忠于原文的前沿科学任务（覆盖细胞组学、蛋白质等 6 个科学领域）；关键设计是把原论文方法隐藏且禁止联网检索，防止 agent「查答案」，测的是面对未知问题能否超过人类科学家。</li>
+<li><strong>大规模 Kaggle 任务线（OpenMLE-Gym）</strong>：把 Kaggle 全部数据集与比赛下载筛选，并挑少量高质量 anchor 任务，统一为「带训练/测试数据、可评分」的任务包；模态与任务类型跨度大。讲者强调任务量与既有工作「不在一个数量级」（论文口径：三源合计 5,758 个过质量门的任务——156 个手工 anchor、3,362 个 Kaggle 数据集任务、2,240 个 Kaggle 竞赛任务），数据与任务包已开源至 Hugging Face。</li>
+</ul>
+<p>三条既有路线在讲者框架里是同一问题链的三个环节：<strong>可获得</strong>（构造沙箱/任务、产出可验证的改进轨迹）、<strong>可使用</strong>（test-time 用搜索与经验组织复用旧经验）、<strong>可内化</strong>（把改进能力训进模型参数）。他们的 Frontis-MA1 系统主张把三条打通并全栈开源。</p>
+<h3>系统：训练与搜索共用同一组原子操作，是整个设计的枢纽</h3>
+<p>系统三层共享同一个底座——所有反馈都来自 MLE 任务在沙箱中的<strong>真实执行</strong>，不做模拟、不让 LLM 自评：</p>
+<ol>
+<li><strong>OpenMLE-Gym（环境层）</strong>：统一任务形式 + 开源沙箱构造方法，给出可执行、可评测的环境。</li>
+<li><strong>OpenMLEvo（test-time 层）</strong>：把训练好的模型放进进化搜索。每个算法节点挂一张<strong>经验卡（experience card）</strong>，存分数、相对父节点的改进幅度、novelty 等元信息。经验卡有两处用途：其一决定节点被采样的概率（分数、改进、novelty 加权）；其二在生成新节点时，把被选节点的兄弟与祖先节点经验卡按重要性加权采样若干张、由模型自行总结后注入上下文（memory injection），再产生新节点。效果（字幕口径）：相比参考工作 AIRA，每次调用 token 更少、同等 token 预算下效果更好，「进化的效率不断提升」。</li>
+<li><strong>OpenMLEvoRL（参数层）</strong>：把经验训回模型。四种原子操作（论文口径：Draft / Improve / Debug / Crossover）是关键设计——这类操作在 test-time scaling 文献里并不新，讲者的主张是<strong>训练时模型见到的操作必须与搜索时完全一致</strong>：好处一是上下文短（每步只是一次「从一个算法改进到另一个算法」的单步转移，而非完整改进轨迹）；好处二是搜索能力随训练直接变强，且搜索产物又能反哺参数训练，闭环成立。</li>
+</ol>
+<p>参数训练的具体 recipe（讲授部分信息密度最高的一段）：</p>
+<ul>
+<li><strong>SFT 数据（2.6 万余条）</strong>：不只采高质量最终解，还先跑一遍进化式搜索采出整棵树，专门挑「debug 节点」——父节点是错的、子节点改对且改得更好——这类父→子边正是「改进经验」的原子单位。</li>
+<li><strong>RL 在树上进行</strong>：policy 的每一步是从树上采一个节点、产出一个新算法，评价后按组收集，用 GRPO 回传。</li>
+<li><strong>Reward 归一化</strong>：不同任务指标量级、方向（越高越好还是越低越好）都不同，统一映射到固定区间：有排行榜的任务用人类最高分/最低分作上下界；无排行榜的先用理论上下界，随采样推进再用模型实际能达到的分数动态估计。</li>
+<li><strong>截断与指数放大</strong>：每个 group 内中下游的分数直接截断为 0（只鼓励模型产出自己能做到的中上游）；同时借用「entropic advantage」式的指数型 advantage 把 group 内最高分大幅放大——best candidate 的 advantage 是传统算法的好几倍，效果明显：训练中每组的最好解持续变高，最终模型也更强。</li>
+</ul>
+<h3>实验结果（按字幕口径，论文口径附注）</h3>
+<ul>
+<li><strong>MLE-bench Lite</strong>：训练出的模型 + 自家进化算法，得牌率超过 GPT-5.5，甚至超过 GPT-5.5 + Codex（灰线）；再在此基础上加保持总计算量一致的并发优化，得牌率进一步提高。讲者的概括是「35B 的模型参数获得很大模型才能达到的效果，在所有对比的 agent 系统中达到 Pareto 最优」（论文口径：Medal Average 从基座 39.39% 提到 60.61%，配 OpenMLE-Evo-Max 达 71.21%）。</li>
+<li><strong>消融</strong>：固定进化算法换不同改进者模型，自家模型最强；固定模型换算法，该进化策略对其他模型也有提升（但对自家模型提升最大——训练与搜索同构的收益在此可见）。</li>
+<li><strong>泛化</strong>：同一套模型 + 搜索在 Nature Gym 上达到与 GPT-5.4 + Codex 相当的效果（字幕口径）——讲者据此主张「改进 AI 算法」的能力可以从 MLE 域迁移到科学问题域。</li>
+<li>讲者对现状的定位克制：这只是一条「通往 RSI 的可执行路径」，下一步要证明的是被改进的系统能接管自己的改进并持续产生更强后继，而不只是在一个 benchmark 上刷高分。</li>
+</ul>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>元进化是否等同于 code agent？</strong> 目前 AI 系统本身由代码构成，改自己必然需要很强的 coding 能力，code agent 是当下的实践路径；但已有团队把硬件优化做成进化循环，未来可能与物理世界交互，不必局限于代码。</li>
+<li><strong>经验知识库无限增长、检索错误与知识冲突如何处理？</strong> 这正是需要元进化的原因：淘汰/更新机制不应由人手写策略，而应让 AI 自己学会判断什么样的经验对自己有用、如何设计沉淀机制。</li>
+<li><strong>没有在线 RL、只靠搜索树，算不算元进化？</strong> 只靠每轮从零开始的搜索不算；但若记录并积累父→子边的改进轨迹（改了什么、效果如何），那就是在学习如何改进，可以算。AlphaEvolve 若维护 memory 同理。</li>
+<li><strong>学界算力有限如何验证 scaling？</strong> 挑高价值、可检验的任务验证进化/自进化/元进化机制本身，且不必用大厂模型——他们用 4B 模型在 MLE 上也训出明显提升；大厂做的是自家大模型的进化，学界做的是机制验证，分工不同（字幕口径）。</li>
+<li><strong>科学垂类问题上，harness 与垂类模型能否一起做 RSI？</strong> 可以：垂类模型套上带特殊工具/接口的垂类 harness 收集科研经验，再用经验训垂类模型，循环转起来即是自进化乃至元进化。</li>
+<li><strong>如何评价「越改越好」、如何防评价指标被 hack？</strong> 看版本间增量（第 1 版相对第 0 版的增长是否小于第 2 版相对第 1 版的增长，用以判断越改越快还是越改越收敛）；单个任务指标容易被 hack，任务足够多、足够真实、跨多轮汇聚的指标很难 hack，且进化轮数上去后 hacking 反而下降（引用了 AIDE 侧的观察）；主观指标则需人工设计跨任务 rubric，目前缓解有限（字幕口径）。</li>
+<li><strong>RSI 的判据</strong>：投入的智能量（算力）小于产出的智能量，即是复利的开始；真正部署后进化的评价还可看 Continual Learning Bench 一类序列化任务中经验是否在积累（字幕口径）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nature Gym 候选任务粗筛</td>
+<td>约 10 本 Nature 系列子刊</td>
+<td>5000+ 候选 → 90 个最终任务，覆盖 6 个科学领域</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>OpenMLE-Gym 任务总量</td>
+<td>三源合并、过质量门</td>
+<td>5,758 个（anchor 156 / Kaggle 数据集 3,362 / Kaggle 竞赛 2,240）</td>
+<td>论文 arXiv:2607.28568</td>
+</tr>
+<tr>
+<td>SFT 数据量</td>
+<td>含进化树 debug 节点采样</td>
+<td>2.6 万余条</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Frontis-MA1 规模</td>
+<td>—</td>
+<td>35B 参数</td>
+<td>字幕/论文</td>
+</tr>
+<tr>
+<td>MLE-bench Lite 得牌率（Medal Average）</td>
+<td>基座模型 39.39%</td>
+<td>60.61%（+OpenMLE-Evo-Max 71.21%）；超过 GPT-5.5 + Codex</td>
+<td>论文；「超过 GPT-5.5」为字幕口径</td>
+</tr>
+<tr>
+<td>Nature Gym</td>
+<td>GPT-5.4 + Codex</td>
+<td>自家模型+搜索与之相当</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>best candidate advantage</td>
+<td>传统 GRPO group advantage</td>
+<td>指数放大后为好几倍</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>小模型可行性</td>
+<td>MLE 任务、内部实验</td>
+<td>4B 模型训练后提升明显</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「训练时见到的操作 = 搜索时使用的操作」是一条可直接搬到 agentic RL 数据构造的原则：若推理期用 Draft/Improve/Debug/Crossover 式原子步做 test-time 搜索，SFT/RL 阶段就应按同一原子步切分轨迹（单步转移、短上下文），而不是喂完整长轨迹——讲者给出的两个收益（上下文变短、搜索产物可反哺训练）都与 rollout 数据管线设计直接相关。</li>
+<li>「经验卡」是对 agent memory 的一种具体落法：记忆单元不存任务轨迹本身，而存「父方案 → 做了何种修改 → 效果与相对改进」这条边，附分数/改进量/novelty 作为采样权重——对 coding data 的轨迹筛选与回放排序同样适用：存 diff 及其执行结果，而非只存成功全文。</li>
+<li>Reward 归一化的两件套（排行榜上下界 + 无排行榜时「理论界初始化、运行中动态估计」；group 内中下游截断为零）是把异构任务塞进同一个 GRPO 训练时的现成配方，尤其适合多任务混合奖励尺度不一致的 RL infra。</li>
+<li>评价防 hack 的经验法则：先把任务做多、做真，再谈指标；以及把「版本间增量是否放大」作为进化是否真实加速的度量——可用于自建自进化系统的验收，而非只看单点分数。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Frontis-MA1 的「改进器接管下一轮进化」尚未闭环：论文口径全程只训到 generation 1、权重更新发生在部署前的离线阶段，talk 中也只演示了一代训练 + 一代搜索；讲者主张的 RSI 复利（改进者越改越快）在本系统内还没有多代实验支撑。</li>
+<li>元进化的收益目前主要用 MLE-bench Lite 与 Nature Gym 两个域验收；讲者称已向科学问题泛化，但「改进经验」在代码/数学证明/硬件等其他可验证域上的可迁移性，只有 Q&amp;A 层面的论证，没有数据。</li>
+<li>经验卡的采样权重（分数、相对改进、novelty 的加权方式）与经验淘汰机制讲者未给细节，而这正是他自己列出的元进化核心问题；开源 repo 中 OpenMLE-Evo 的实现细节值得对照。</li>
+<li>概念分层（AI4AI/进化/自进化/元进化/RSI）是讲者一家的操作定义，与产业界其他分级（如同期另一篇 491 篇综述的 L1–L5）并不一致，引用时需注明口径。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「（Loop is all you need 这话）不是（对的）——你的 loop 如果没有经验的积累、没有学习的循环，你只是迭代去修改，是没用的；你相当于不断地在刷题，但是你没有做错题本。」——Q&amp;A 67:40 前后（字幕口径）</p>
+<p>「我们投入的智力（的量），小于我们最终产出（的智能量）——这肯定就是 RSI 了。」——Q&amp;A 68 分前后，讲者给出的复利判据（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

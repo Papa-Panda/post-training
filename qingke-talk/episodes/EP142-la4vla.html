@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP142 — LA4VLA：从 VLA 预训练中解耦语言-动作监督</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP142 — LA4VLA：从 VLA 预训练中解耦语言-动作监督</h1>
+    <p class="sub">LA4VLA 先做诊断实验证明：标准 VLA 预训练里动作其实没有被语言锚住，而是被密集的视觉信号带着走（换掉图像，动作就跟着图像暗示的方向跑）。它的做法是把「语言如何约束动作… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP142-la4vla.html</p>
+<p>「标准的 VLA 预训练可能让策略主要学到『看到什么就怎么动』，而不是语言如何去约束这个动作。」——讲者对诊断实验的判词</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>142</dd><dt>标题</dt><dd>LA4VLA：从 VLA 预训练中解耦语言-动作监督</dd><dt>BV</dt><dd>BV1A9My6WEvW</dd><dt>时长</dt><dd>01:02:58（正片约 51 分钟 + Q&amp;A 约 11 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>林涛（上海交通大学人工智能学院博士生；研究方向为具身智能 VLA 模型与多模态大模型；字幕自述与主持人称呼口径）。本期为其所在实验室与阿里巴巴合作的工作</dd><dt>相关论文</dt><dd><em>Learning to Act without Seeing: Vision-Agnostic Language-Action Pre-training</em>（讲授英文标题，字幕识别有误差；作者与发表信息以论文页为准）</dd><dt>相关代码</dt><dd>LA33K 与 LA33K-V 数据集、StarVLA 上的 LA 预训练权重均已开源（字幕口径；仓库地址待从论文页补录）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1A9My6WEvW/">https://www.bilibili.com/video/BV1A9My6WEvW/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/LA4VLA-talk">https://qingkeai.online/blog/LA4VLA-talk</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP142.txt</code>（982 条，末条 3775.42s / 总时长 3778s）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文清洗提炼，凡数字均为讲授口径，已在关键数字总表标注「字幕」；个别专名有识别误差（VLA 在字幕中多作「VAA/BLA」、InternVL3-1B 作「in turn b l3EB」、Qwen3-VL-Plus 作「千问3v vl plus」等），以论文与公开资料为准。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">33K</div><div class="l">数据集</div></div></div>
+<p>LA4VLA 先做诊断实验证明：标准 VLA 预训练里动作其实没有被语言锚住，而是被密集的视觉信号带着走（换掉图像，动作就跟着图像暗示的方向跑）。它的做法是把「语言如何约束动作」先从联合训练里拆出来单独学一遍——构建无视觉的 LA33K 数据集（原子动作指令 + 本体状态 → 动作），先做 vision-agnostic 的 LA 预训练学一个可复用的语言条件动作先验，再接回带视觉的 VLA 预训练。仿真、跨架构、真机与视觉扰动四组实验一致显示：LA 单独预训练就强于带视觉的 VLA 预训练，两者结合（先后或混合）进一步提升，且动作在表示空间里按文本聚成簇。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：视觉信号从三个层面压过语言信号</h3>
+<p>讲者把「语言为什么约束不住动作」拆成三层：</p>
+<ol>
+<li><strong>数据层密度不对称</strong>。一条轨迹里有成百上千帧图像–动作对（字幕口径：平均约 287 帧/轨迹），却只有一条从头到尾不变的高层指令；即使加 subtask 标注，粒度仍偏粗，语言与局部动作对不齐。</li>
+<li><strong>输入层 token 不对称</strong>。图像被编码成数百个 token，语言 token 少一到两个数量级，架构上模型更容易盯着视觉 token 的变化走。</li>
+<li><strong>行为层 shortcut</strong>。换了 prompt 模型照样按当前场景做原来的事；视觉一变（指令不变），动作就切换到另一个任务。语言退化成任务一/任务二式的条件 label，而不是对动作的约束。</li>
+</ol>
+<p>核心判词：标准 VLA 预训练让策略学到的是「看到什么就怎么动」，而不是「语言如何约束动作」。</p>
+<h3>诊断实验：把视觉拿掉/换掉，动作还听不听语言</h3>
+<p>固定语言指令与机器人状态不变，只动视觉输入，四种条件对照：</p>
+<ul>
+<li><strong>标准配对</strong>：指令与原本配对的视觉观察一致；</li>
+<li><strong>遮挡视觉</strong>：把图像遮住；</li>
+<li><strong>错配视觉</strong>：同场景、但与当前指令不匹配的观察；</li>
+<li><strong>冲突视觉</strong>：把图像换成来自相反运动方向轨迹的观察（图像暗示与指令直接打架）。</li>
+</ul>
+<p>四个指标（字幕口径，约 100 个方向样本统计）：方向对齐率（末端位移落在指令方向的比例，0.5 为随机、低于 0.5 为更常落到反方向）、方向一致性（预测末端位移与真实末端位移的余弦相似度）、不同指令间的可分性、轮廓系数（同指令样本是否更靠近）。</p>
+<p>定性结果很直白：遮住图，轨迹完全散掉、分不清方向；换成没见过的图，动作走成一个偏执方向；冲突条件下，指令明明说往 Z 轴正向走，模型却跟着图像往负向走。定量上，视觉一旦移除/错配/冲突，四个指标全面大幅下降。讲者的结论是：标准预训练下的「听指令」是一种表面对齐——训练与推理配得越齐越显得听话，视觉一冲突就露馅，因为动作根本没绑定在语言上。</p>
+<h3>方法：先学「该怎么动」，再学「目标在哪」</h3>
+<p>LA4VLA 的主张（借讲者的人类类比）：人闭着眼也能伸右手、推门、放东西，本体感知不需要视觉。视觉主要负责「目标在哪里」，语言–动作先验负责「该怎么动」，两者可以分开学：</p>
+<ol>
+<li><strong>LA 预训练（无视觉）</strong>：输入语言指令与本体状态，预测动作，显式学语言条件的动作先验。注意不是只训动作头（DiT/flow-matching 头），而是 VLM 主干与动作头一起训（字幕口径）。</li>
+<li><strong>接回 VLA 预训练</strong>：在 LA 先验之上再引入视觉做正常的 VLA 训练与下游微调。</li>
+</ol>
+<p>讲者用的比喻是先让机器人「对自己的身体有个认识」，再引入视觉。</p>
+<h3>数据：LA33K 的七步构建流水线</h3>
+<ol>
+<li>取原始 VLA 数据（字幕口径：约 9500 条轨迹）；</li>
+<li>关键帧检测切分（关注静止段与夹爪开合跳变，作为原子动作边界）；</li>
+<li>写原子动作词表（当前 12 类，如 lower / push / lift / grasp / release 等）；</li>
+<li>带词表提示 VLM（字幕口径：Qwen3-VL-Plus）生成候选切分片段与指令（约 5.6 万条）；</li>
+<li>人工逐条检验，过滤掉一切需要视觉才能判别的信息（颜色、物体名等不进入指令文本，指令保证 vision-agnostic）；</li>
+<li>清洗后保留 33K 条 episode，是原始轨迹数的 3.46 倍；</li>
+<li>平均长度从约 287 帧压到约 46 帧——把稀疏的任务级语言监督换成密集、局部对齐的语言–动作监督。</li>
+</ol>
+<p>另备带视觉版 LA33K-V（片段、指令、状态、动作、预训练步数全同，唯一变量是视觉在不在），专为证明「收益来自去视觉」而做。数据集与 StarVLA checkpoint 已开源（HuggingFace 有下载，字幕口径）。</p>
+<h3>实验：五种预训练组合的完整对照（同模型同超参）</h3>
+<p>主模型为 1B 级 VLA（backbone InternVL3-1B + flow matching 动作头，字幕口径），下游微调流程完全一致，五种组合：</p>
+<ul>
+<li><strong>Base</strong>：无预训练，直接微调；</li>
+<li><strong>VLA</strong>：在 LA33K-V 上带视觉预训练；</li>
+<li><strong>LA</strong>：在 LA33K 上无视觉预训练；</li>
+<li><strong>LA→VLA</strong>：先后两阶段；</li>
+<li><strong>MixPT</strong>：两份数据单阶段混合（采样 1:1，字幕 Q&amp;A 口径）。</li>
+</ul>
+<p>仿真主结果（Meta-World，字幕口径）：Base 69 → VLA 79 → LA 83，LA 单独预训练即超过带视觉的 VLA 预训练；LA→VLA 与 MixPT 再进一步（讲者开场给的宏观口径：最佳融合方案在 Meta-World 相对 baseline +17.8%）。LIBERO 趋势相同（LA &gt; VLA，结合更好；LA→VLA 与 MixPT 在不同 benchmark 上轮流最优）。</p>
+<p>其余三组验证（均为字幕口径）：</p>
+<ul>
+<li><strong>跨架构</strong>：同一套 LA 预训练搬到 StarVLA，Meta-World 58.4% → 69.9%（+11.52），LIBERO 同样提升——讲者强调这是监督信号层面的收益，不是某个模型结构的专属技巧；</li>
+<li><strong>真机</strong>：三类「同场景、靠指令区分动作」的任务，LA &gt; VLA、结合更高（开场口径：最佳融合方案相对 baseline +45%）；</li>
+<li><strong>视觉扰动</strong>：给训练图像加高斯噪声，无预训练最低，MixPT &gt; LA &gt; VLA 依次提高；且 LA 预训练后无视觉也能跟语言走，表示可视化里动作按文本聚成簇，而普通 VLA 的动作按 state 零散分布。</li>
+</ul>
+<h3>结论/观点（讲者明确表达的判断）</h3>
+<ol>
+<li>模态不对称真实存在：密集视觉信号会稀释语言–动作监督，多篇同期工作也在论证同一现象。</li>
+<li>语言–动作监督可以被单独抽出来，先学可复用、可跨场景跨任务的动作先验，再与 VLA 监督互补（先后或混合都成立）。</li>
+<li>增益的主要来源是本体感知：LA 阶段没有视觉 shortcut，模型对原子动作本身更熟（Q&amp;A 口径：真机上抓、放等原子动作做得明显更好）。</li>
+<li>局限（讲者自列）：LA33K 只从约 9000 余条原始轨迹切出；视觉移除用黑图替代，是否有更好的移除方式未尝试；下一步是 scale LA 数据量，验证「先验随数据量继续变强」这条曲线。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Meta-World 成功率 Base（无预训练直接微调）</td>
+<td>—</td>
+<td>69</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Meta-World 成功率 VLA 预训练（LA33K-V 带视觉）</td>
+<td>Base 69</td>
+<td>79</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Meta-World 成功率 LA 预训练（LA33K 无视觉）</td>
+<td>Base 69</td>
+<td>83</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Meta-World 最佳融合方案相对提升</td>
+<td>baseline</td>
+<td>+17.8%</td>
+<td>字幕（开场宏观口径）</td>
+</tr>
+<tr>
+<td>StarVLA Meta-World（跨架构验证）</td>
+<td>58.4%</td>
+<td>69.9%（+11.52）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>真机最佳融合方案相对提升</td>
+<td>baseline</td>
+<td>+45%</td>
+<td>字幕（开场宏观口径）</td>
+</tr>
+<tr>
+<td>LA33K 规模</td>
+<td>约 9500 条原始轨迹 → 约 5.6 万候选</td>
+<td>33K 条（3.46 倍）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>平均轨迹长度</td>
+<td>约 287 帧</td>
+<td>约 46 帧</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>原子动作词表</td>
+<td>—</td>
+<td>12 类（lower/push/lift/grasp/release 等）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>主模型规模</td>
+<td>InternVL3-1B + flow matching 动作头</td>
+<td>1B 级</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>对 post-training 数据构建</strong>：LA33K 的做法本质是「把稀疏的 episode 级监督切成密集的原子级监督，并人为剥离不需要的模态通道」。迁移到 LLM post-training：当某个监督信号（如系统提示、工具 schema）被高频信号（长上下文、代码块）稀释时，可以考虑先单独训一遍「信号→行为」的窄任务，再合回联合训练，而不是指望联合训练自己学会配比。</li>
+<li><strong>诊断先行的方法论</strong>：这篇最值得借的是诊断实验设计——固定其他一切、只扰动一个模态，看行为跟谁走。对自己的 RL/agent 评测同理：怀疑模型在靠 shortcut（比如靠工具返回格式而非语义）时，做「换掉/遮掉该通道」的反事实探针，比看 benchmark 分数更能定位问题。</li>
+<li><strong>Infra 视角</strong>：LA 与 VLA 两阶段是纯粹的训练配方（同模型、同超参、同数据片段，唯一变量是视觉在不在），复现成本低；作者把 StarVLA checkpoint 直接开源，适合拿来做小规模 A/B 验证「先验式预训练」在自己任务上的收益。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>LA33K 只有 33K 条、原始轨迹约 9000 条，讲者说下一步要 scale——LA 先验的 scaling 曲线（数据量 vs 下游收益）是全篇最关键的未验证假设，值得等后续版本。</li>
+<li>「视觉移除用黑图替代」是讲者自列的局限：黑图本身也是一种分布（模型可能学到「黑图→只听语言」的条件开关），到真机遇到真实视觉时这个开关是否还成立，真机实验部分回答了但规模有限。</li>
+<li>零样本泛化只在方向/原子指令层面验证过（Q&amp;A 口径），复杂空间关系指令在 LA 阶段被构造性排除了（指令里不允许出现需要视觉的指代），这条边界在向更复杂任务推广时需要重新处理。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「标准的 VLA 预训练可能可以让策略主要学习到看到什么他就怎么动，而不是说语言如何去约束这个动作。」——诊断实验结论（字幕约 09:07 口径转写）</p>
+<p>「视觉主要是负责目标在哪里，而语言动作先验呢主要是负责该怎么动。」——方法主张（字幕约 24:41 口径转写）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

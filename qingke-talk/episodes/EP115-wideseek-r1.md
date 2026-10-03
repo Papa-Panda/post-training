@@ -1,0 +1,137 @@
+# EP115 — 从 Depth Scaling 到 Width Scaling！WideSeek-R1：通过多智能体 RL 探索大模型的广度扩展
+
+> 📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP115-wideseek-r1.html
+
+> 「随着任务在广度上不断扩展，系统的瓶颈正在发生转移——从原来的个体能力，逐渐转向 agent 的组织能力。」——讲者引入 width scaling 的判词
+
+## 元信息
+
+- 期号：115
+- 标题：从 Depth Scaling 到 Width Scaling！WideSeek-R1：通过多智能体 RL 探索大模型的广度扩展
+- BV：BV1bgQSBnEs6
+- 时长：01:09:29（讲授约 42 分钟 + Q&A 约 27 分钟）
+- 提炼日期：2026-10-02
+- 分享嘉宾：徐哲轩（论文第二作者 Zhexuan Xu；字幕自述大四本科、科大少年班，将赴清华大学电子工程系，导师汪玉教授；正式头衔以论文作者页为准）
+- 相关论文：Zelai Xu, Zhexuan Xu, Ruize Zhang, Chunyang Zhu, Shi Yu, Weilin Liu, Quanlu Zhang, Wenbo Ding, Chao Yu, Yu Wang, *WideSeek-R1: Exploring Width Scaling for Broad Information Seeking via Multi-Agent Reinforcement Learning*，https://arxiv.org/abs/2602.04634 （清华大学与无问芯穹 Infinigence AI）
+- 相关代码：https://github.com/RLinf/RLinf （WideSeek-R1 示例在该仓库内）；数据集 RLinf/WideSeek-R1-train-data、模型 RLinf/WideSeek-R1-4B（HuggingFace）
+- B站链接：https://www.bilibili.com/video/BV1bgQSBnEs6/
+- 字幕原文存档：本地 `transcripts/EP115.txt`（1693 条，带时间戳）
+
+> 📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP115，已存档）清洗提炼。字幕识别误差较多，专名已按论文订正：WideSeek-R1（字幕作 white scar one / YC卡one）、SingleSeek-R1（single scar one）、GRPO（GLPU/GR PU）、Qwen3-4B（千万34B）、ASearcher（a searcher）、Search-R1（search one）、RLinf 框架（RLF/ARLF）、access 工具（exercise）、PRM（PMM/PIM）。论文（arXiv:2602.04634）仅作交叉引用；凡讲授口径与论文版不同，以下标注（字幕口径）。
+
+## 一句话总结
+
+当任务从「深」变「宽」（一次要填满几十上百个信息项的广域检索），单 agent 的 depth scaling 会因 context pollution 很快饱和；WideSeek-R1 用一个只负责拆解调度的 lead agent + 一批上下文隔离、并行执行的 sub agent 组成层次化系统，再以多智能体 RL（共享奖励 + agent 级与 token 级双重加权归一化）端到端联合训练，让 4B 模型在 WideSearch 上做到 item F1 40.0% 、接近单智能体 DeepSeek-R1-671B，并验证了性能随并行 sub agent 数持续上升的 width scaling 曲线。
+
+## 核心
+
+### 背景：scaling 的瓶颈从个体能力转向组织能力
+
+讲者先把 scaling 分成三层：training-time scaling（参数/数据/算力与性能的幂律）、test-time scaling，以及 test-time 内部的两种形态——depth scaling（更长 CoT、更多交互轮次）与本期主角 width scaling（更多并行 agent）。
+
+depth scaling 的收益曲线是问题所在：交互轮数增加初期性能上升，很快收敛，甚至因 context pollution（工具返回不断塞进同一上下文，无关与冲突信息互相干扰）出现下降。与此同时，wide search 这类任务（按约束收集多个实体的多项属性、输出结构化表格，如例子中 13 行 5 列共 65 个 item 的新西兰国家公园表）在结构上要求的是广度：单个 item 不难，难在同时铺开几十个子任务。讲者的判断是：这类任务上系统的瓶颈已从「单个 agent 够不够聪明」转移到「agent 组织得好不好」。
+
+现有方案两头都不够：
+
+- **single agent**：串行执行慢，且所有工具结果共享一个上下文，处理到后面容易把不同实体的数据搞混、字段错位、遗忘前面已获取的信息；
+- **现有多智能体系统**：一是过度依赖 hand-crafted orchestration（AutoGen、CAMEL 式固定 pipeline：先拆任务、再依次调用、最后汇总），复杂任务上缺乏灵活性；二是名为多 agent、实为 turn-taking 轮流发言，仍是串行，并行度没有真正用起来。
+
+### 系统设计：lead 只调度，sub 只执行，上下文全隔离
+
+WideSeek-R1 是层次化的 lead–sub 框架，两点关键设计：
+
+1. **共享参数、角色靠 prompt 与工具区分**。lead agent 与 sub agent 是同一个 Qwen3-4B 模型（字幕口径），靠不同的 system prompt 和工具集扮演不同角色——这使「联合训练」天然成立：所有 agent 的轨迹进同一个 buffer 一起更新，不存在两个模型分别优化的问题（Q&A 中讲者反复确认这一点）。
+2. **工具极简且不对称**。lead agent 只有一个工具：派发子任务（字幕作 call up agent）。它不参与任何子问题的具体求解，目的就是不让工具返回的大量结果污染 lead 的上下文——lead 只接收 sub agent 最后一轮的精炼结论（一句话量级），专注于高层决策：拆解、调度、汇总、判断是直接给答案还是再拆一轮。sub agent 配两个工具：search（自然语言查询→文本片段与链接摘要）和 access（给定 URL 与意图→网页内容摘要），在各自独立的上下文里多轮「边检索边推理」完成子任务，失败时返回失败信号，lead 可在下一轮重新派发。
+
+值得注意的是编排策略不写死：拆多细、开多少个 sub agent，都由 RL 后训练让 lead 自己学，训练时 lead 最多并行 10 个 sub agent（infra 层并行度无硬上限，放开主要是 rollout 变慢，字幕口径）。
+
+### 算法：GRPO 上的多智能体改造
+
+基座算法选 GRPO 而非 PPO：无 critic、省资源，且业界反馈在 agentic 任务上稳定性与效率更好（字幕口径）。针对多智能体多回合场景做两项关键设计：
+
+1. **多智能体优势分配（multi-agent advantage assignment）**：不用 PRM 给每个 agent 中间打分，而是把同一样本的最终奖励共享给所有 agent——「荣辱与共」。好处是避开 credit assignment 的不稳定，也规避 PRM 可能带来的 reward hacking（PRM 可能给偏离主线的 sub agent 高分）。奖励本体以最终答案的 item F1 为主（二值之外的连续量，0 到 1 之间），外加格式奖励（输出表格是否符合 markdown 语法）与过长 reasoning 的长度惩罚等小项（讲者在 Q&A 后段更正了自己前面「0/1 二元奖励」的说法，以 item F1 口径为准）。
+2. **advantage 双重加权**：agent 级平均（公式中对每个样本内的 agent 数 $N_i$ 做归一化）保证「多开 agent」只有在真的带来更高奖励时才被强化，防止 lead 学会无意义地堆 sub agent 让 rollout 主导梯度；token 级平均（类 DAPO 的处理）让信息密集、推理更深的长步骤拿到更高训练权重，避免标准 GRPO 按 turn 平均把长推理的贡献稀释。
+
+讲者坦白：这个损失形式是按先验看法人为选定的，没有逐一做超参搜索——多智能体训练一跑就是约 100 小时，没有时间逐个试（字幕口径）。这是全篇最需要打折扣的一处：双重加权各自的必要性没有消融背书。
+
+### 数据：全自动构建的 2 万条 broad 信息检索任务
+
+讲者自陈「数据质量很多时候比算法更重要」，数据流水线三步（全程用 Gemini 3 Pro 生成，字幕口径）：
+
+1. **问题生成**：从 HybridQA（multi-hop QA 数据集）提取用户意图作背景，再随机采样 10~50 的整数作为目标答案行数，让模型构造出要求输出 markdown 表格的 wide search 问题；随后做改写增强，消除歧义（如人口列必须注明量级与保留位数），得到结构受约束的查询。
+2. **答案生成**：同一问题让模型独立生成两份答案并给出表格主列（类数据库主键，用于行级对齐），用 cell 级自一致性匹配检验答案可靠性。
+3. **QA 对筛选**：剔除一致性差与难度不足的样本（如最终只需输出一列的问题）。
+
+最终 2 万条，行数在 10~50 间均匀分布、列数集中在 5~6 列（字幕口径）；数据构造总花费约 \$1500–\$2000（字幕口径，含前期 pipeline 迭代）。主实验训练用其中 1 万条 + 1 万条 ASearcher 的 deep search 数据混合（下面消融说明为什么各半）。
+
+### 实验：数字全部按字幕口径
+
+设置：base model 为 Qwen3-4B（默认开启 reasoning）；对照组 SingleSeek-R1 是同数据同设置的单智能体版本（可理解为 Search-R1/ASearcher 式的串行组织）；训练工具基于 Wiki2018 语料构建，评测用在线搜索 API；WideSeek-R1 训练用 32 张 H100、约 100 小时，同步训练，infra 基于 RLinf。
+
+**主结果（WideSearch 基准，字节提出，200 题 = 中文 100 + 英文 100；中文题平均约 2000 个 item、英文约 1000 个）**：WideSeek-R1-4B 取得 item F1 40.0% 、row F1 5.3 、success rate 0.4（字幕口径，后两项单位与精确口径以论文为准），为 4B/8B 级别最佳；相比未训练的多智能体基线 item F1 提升 8.8 ，相比同参数训练的 SingleSeek-R1 提升 11.9 ；性能已接近单智能体 DeepSeek-R1-671B，而参数量仅为其约 1/170 。论文摘要口径与此一致（item F1 40.0% ，comparable to DeepSeek-R1-671B）。
+
+**行为分析（训练到底改变了什么）**：
+
+- 格式稳健性来自上下文隔离：SingleSeek-R1 的答案格式分从 87.7 提升到 94.2 ，仍低于多智能体系统的 95.2 / 97.1（字幕口径）——单 agent 把所有工具结果注入同一上下文，噪声导致格式逐渐漂移；
+- 总交互轮数接近 base model 的 4 倍（约 23 → 91 ，字幕口径），其中 lead 轮数约 ×1.6 、sub 轮数约 ×2.1 ；lead 平均轮次 2.3 → 3.8（扣掉最后输出答案的一轮，base 实际只有约 1.3 轮用于任务拆解，高层编排能力弱）；每个 sub agent 平均轮次 2.9 → 6.6 ；
+- 平均派发的 sub agent 数 7.2 → 14.1（约 2 倍）；access 工具调用占比 33.8% → 46.9% ——模型学会了 search 摘要太简略、要顺链接用 access 取更丰富证据再下结论。
+
+**核心发现：depth 先饱和，width 经 RL 后持续上升**。固定轮次上限、把并行 sub agent 数从 0、2、5 扩到 10：未训练的 base model 初期有收益、随后反而下降（多个 sub 输出互相冲突、噪声淹没，lead 没有整合能力，width 上限约 20%）；RL 训练后的系统则随 sub agent 数稳定提升，10 个时达到主实验的 40% 。讲者在 Q&A 中把增益拆成两段（字幕口径）：item F1 从 20.1 → 31.2 来自多智能体架构本身（并行检索 + 上下文隔离），31.2 → 40.0 来自 RL 学到的编排与检索策略——换用无 RL 的启发式编排，补不上后面这段差距。
+
+**两个消融**：
+
+1. **联合优化的协同效应**：lead / sub 分别换回 base model 的四种组合中，两边都用训练后模型最好；只换一边也各有部分提升，说明端到端训练同时增强了编排能力与执行能力，且结合时有明显协同——任何一边用 base 都会短板。
+2. **数据配比**：wide 数据与 deep 数据各半（hybrid）在三个指标上稳定优于 wide-only 与 deep-only（总量同为 2 万条）：wide 数据教编排，deep 数据教子任务的检索与求解，互补。
+
+**通用 QA 不掉**：在 ASearcher 的标准 QA 评测（NQ、PopQA 等 single-hop 与 2Wiki、HotpotQA 等 multi-hop）上平均 59.0 ，较 base 提升 7.1 ，比 SingleSeek-R1 还高约 2 ，并超过参数更大的多智能体系统（字幕作 mio flow，专名以论文为准）——多智能体框架在标准 QA 上也有稳定收益。
+
+### Q&A 要点（含讲者最坦白的边界）
+
+- **为什么不用 PRM 做 credit assignment**：没时间试，且先验担心 PRM 打分与主任务目标背离会引入 reward hacking；共享奖励下所有 agent 目标一致，不会学偏。但「共享奖励是否导致 sub agent 偷懒（free-rider）」被追问时，讲者承认损失函数的其他设计空间没有探索过，欢迎在他们框架上试。
+- **训练成本与 rollout 膨胀**：随着训练进行，模型生成更多 agent、更多 turn，单个 rollout 从约 15 分钟涨到约 1 小时——这是多智能体 RL 的主要 infra 瓶颈。省时办法只有堆卡或上异步 infra；他们选同步是怕异步带来性能损失，代价自认。
+- **评测成本与方差**：WideSearch 只有 200 题、单题方差大，但主指标多次测 item F1 从未低于 39 、未高于 41；在 16 卡上完整评测一遍约 7 小时，所以没有对所有 baseline 反复多测（字幕口径）。
+- **一个反直觉小现象**：训练后模型在答不出的题上会直接放弃输出（sorry 类回复），反而拉低答案格式分；未训练模型则「装模作样」输出格式正确的表格。讲者说原因不明，可能是方差，也可能与训练后行为模式有关。
+- **对比公平性**：与 Search-R1、ASearcher 等比时对方用的是各自训练数据（任务新、缺对齐基线），所以他们用同数据同设置的 SingleSeek-R1 做受控对照，prompt 与工具在评测时对齐。
+- **适用边界**：这套设计专为子任务彼此独立的 wide search 而建；sub agent 之间不通信。更复杂场景（如 coding agent 多个 sub 处理同一件事）需要 one-to-one / all-to-all 式通信机制，是 WideSeek-R2 想探索的方向，但 workflow 如何设计、用什么 benchmark 测，都是开放问题。
+- **迁移到 deep research**：workflow 本身应该能迁移（不同 sub 探索同一问题不同侧面、lead 汇总），但 deep research 的 reward 设计是真正难点，本工作未测。
+
+## 关键数字总表
+
+| 指标 | 基线/口径 | 结果/数值 | 来源 |
+|---|---|---|---|
+| 数据集规模 | — | 2 万条 broad 信息检索任务（行数 10–50 均匀、列数 5–6） | 字幕 |
+| 数据构造 | Gemini 3 Pro 全自动三步流水线 | 花费约 \$1500–\$2000 | 字幕 |
+| 训练配置 | Qwen3-4B、32×H100、同步训练 | 约 100 小时；RLinf 框架 | 字幕 |
+| WideSearch item F1 | WideSeek-R1-4B | 40.0%（接近 DeepSeek-R1-671B，参数约其 1/170） | 字幕 + 论文摘要一致 |
+| WideSearch row F1 / success rate | WideSeek-R1-4B | 5.3 / 0.4（单位口径以论文为准） | 字幕 |
+| item F1 提升 | 未训练多智能体基线 / SingleSeek-R1 | +8.8 / +11.9 | 字幕 |
+| 增益分解 | base 20.1 → 架构 31.2 → RL 40.0 | 架构与 RL 各贡献一段 | 字幕（Q&A） |
+| width scaling 上限 | base model 约 20% 后下降 | RL 后随 sub 数（0→10）稳定升至 40% | 字幕 |
+| 总交互轮数 | base 约 23 | 约 91（约 4 倍；lead ×1.6、sub ×2.1） | 字幕 |
+| sub agent 平均轮次 | 2.9 | 6.6 | 字幕 |
+| 平均 sub agent 数 | 7.2 | 14.1 | 字幕 |
+| access 调用占比 | 33.8% | 46.9% | 字幕 |
+| 答案格式分 | SingleSeek-R1 94.2（base 87.7） | 多智能体 95.2 / 97.1 | 字幕 |
+| 标准 QA 平均分 | base model | 59.0（+7.1；比 SingleSeek-R1 高约 2） | 字幕 |
+| rollout 时长漂移 | 训练初期约 15 分钟 | 后期约 1 小时（agent/turn 持续变多） | 字幕（Q&A） |
+| 评测成本 | 16 卡完整评测 WideSearch | 约 7 小时；item F1 多次测 39–41 | 字幕（Q&A） |
+
+## 可迁移
+
+- **「lead 只看精炼结论」的上下文隔离模式**：让调度者永远不接触原始工具输出、sub 只回传一句话级结论，本质是把 context 当稀缺资源做分层管理——对任何多 agent / 长 horizon agent 的 infra 设计都直接适用，格式漂移与实体混淆两类故障都源于共享上下文。
+- **agent 级归一化防「堆人头」**:多智能体 RL 里若不按 agent 数归一化，梯度会被 sub 多的 rollout 主导，模型学到的是多开 agent 而不是办成事。这个坑与奖励设计无关、纯在损失归一化层，任何 MARL 训练框架都该先检查。
+- **同步训练的隐藏成本是 rollout 自我膨胀**：策略变好→轨迹变长→rollout 变慢，训练吞吐随进程衰减。做多智能体 RL infra 预算时要按末期 rollout 时长（本例 4 倍漂移）估算，或提前设计异步 rollout；这也是讲者自己点名的 infra 优化方向。
+- **wide/deep 数据互补**：编排能力与执行能力是两种可分别喂养的数据——构造 agent 训练集时按「教调度」与「教求解」分开配比，比一锅烩更有效。
+
+## 疑问 / 下一步
+
+- 损失函数的双重加权没有消融与超参搜索支持（讲者自承没时间试），两个归一化各自的贡献、以及是否存在更优形式，仍是开放问题；共享奖励下的 free-rider 行为也没有正面实验回答。
+- width scaling 只验证到 10 个并行 sub agent；继续放大时 lead 的整合能力与汇总上下文会不会成为新瓶颈，未测。
+- WideSearch 仅 200 题、单题方差大（讲者自承），且完整评测约 7 小时——这类宽任务的评测 infra 本身（采样次数、方差控制、成本）需要更系统的方案，才能支撑更细的结论。
+- 任务假设了「子任务彼此独立」；子任务间有依赖或冲突时（如 coding agent），需要 sub 间通信，WideSeek-R2 方向未落地。
+
+## 原文金句（1-2句）
+
+> 「随着任务在广度上不断扩展，系统的瓶颈正在发生转移——从原来的个体能力，逐渐转向（agent 的）组织能力。」——讲者引入 width scaling 的动机（字幕 02:26–02:39，按干净口径转写）
+
+> 「我们其实并没有很多时间去考虑究竟 loss function 应该设计成什么样子……（这个损失形式）至少保证了在各个方面比较均衡，然后 reward 能涨，最终实现效果也不错。」——Q&A 中被追问损失设计依据时讲者的坦白
