@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F07 — 加速机器人物理仿真：GJK++、线性 NCP 求解与可微引擎——接触计算三块拼图各自在快什么</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Robotics 收藏夹</span>
+    <h1>F07 — 加速机器人物理仿真：GJK++、线性 NCP 求解与可微引擎——接触计算三块拼图各自在快什么</h1>
+    <p class="sub">标题其实把现代机器人仿真加速的三层栈一次性点完了：碰撞检测层要算得快还要能求导（GJK 的 witness 点是经典入口，新工作在解决 GJK+EPA 不可微的老问题）；接触求… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">依据来源</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/episodes/F07-icra2026-physics-sim.html</p>
+<p>⚠️ <strong>还原版声明（非字幕实录）</strong>：本视频经实测<strong>无 AI 字幕轨</strong>，本篇是基于公开资料（相关论文与引擎公开文档/报道）围绕标题关键词重构的<strong>还原版</strong>，不是字幕实录；「GJK++」「线性 NCP」为 UP 拟题中的速记式表述，公开文献中并无同名标准术语，本篇按其最可能的技术指涉展开，与原解说口径可能有出入，请勿当作原话引用。文中数字均标明来源口径。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>F07（收藏夹 Robotics 系列）</dd><dt>标题</dt><dd>[ICRA2026]加速机器人物理仿真：GJK++、线性NCP求解与可微引擎（UP 拟题）</dd><dt>讲者</dt><dd>未标注（UP「geek_UNCLE」解说视频）</dd><dt>来源</dt><dd>Bilibili 收藏夹「Robotics」（UP geek_UNCLE），原视频链接 <a href="https://www.bilibili.com/video/BV1AYe46NEWT/">https://www.bilibili.com/video/BV1AYe46NEWT/</a></dd><dt>BV</dt><dd>BV1AYe46NEWT</dd><dt>时长</dt><dd>00:30:08</dd><dt>场合</dt><dd>ICRA 2026 相关议题综述（UP 解说）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd><strong>公开资料主题还原</strong>（非字幕）。主要依据见文末「依据来源」。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>标题其实把现代机器人仿真加速的三层栈一次性点完了：碰撞检测层要算得快还要能求导（GJK 的 witness 点是经典入口，新工作在解决 GJK+EPA 不可微的老问题）；接触求解层是每步仿真的成本中心（接触力被写成互补问题，LCP 与带二阶锥约束的 NCP 是两条主线，求解器从迭代法走向内点法与 GPU 并行）；引擎层则把前两层打包成可微的、可批量并行的训练基础设施（Dojo、Nimble 一类隐式微分引擎与 Newton/MuJoCo Warp 一类 GPU 引擎）。三层各有「快」的含义：检测层快在几何查询，求解层快在每步迭代成本，引擎层快在吞吐乘以梯度可用性。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 碰撞检测层：GJK 给的是 witness 点，梯度过不去是老毛病</h3>
+<p>GJK 算法对两个凸体做 Minkowski 差上的最近点迭代，产出 witness 点对——分离时的最近点对、穿透时由 EPA 补出的最深穿透点对。这对点决定了接触位置与法线方向，是下游一切接触建模的输入。问题在标题后半段就埋下了：GJK+EPA 的迭代是分段的、组合式的，witness 点对物体位姿的导数在传统实现里不存在，于是梯度流在这一层被截断，基于梯度的轨迹优化与系统辨识在接触点处失明。</p>
+<p>这一层的最新公开进展可以直接锚定：北大王鹤团队（Chen et al.，arXiv:2511.06267，2025 年 11 月）提出可微碰撞检测框架，指出此前的一阶随机平滑方案基于 GJK 最优性条件构造、只适用于凸物体且对复杂几何鲁棒性不足；他们改用基于距离的一阶随机平滑加自适应采样与等价梯度输运，把 witness 点导数推广到凸与凹物体，在 DexGraspNet 与 Objaverse 的复杂网格上验证，并直接用于灵巧抓取合成的梯度精修。标题里的「GJK++」并无公开同名工作，本篇按「GJK 一系的加速与可微化」这一最合理的指涉处理：几何查询本身在 GPU 时代又被 SDF 等表示分流，但 witness 点语义仍是接触建模的通用货币。</p>
+<h3>2. 接触求解层：互补问题是每一步的成本中心，「线性」指的是求解结构</h3>
+<p>碰撞检测只回答「碰在哪」，每一步仿真真正贵的是把接触力解出来。刚体接触的经典写法的核心是无穿透与力的单边性：记接触点法向间隙为 $\phi(q)$ ，法向接触力为 $\lambda$ ，则有：</p>
+<p>$$0 \le \lambda \perp \phi(q) \ge 0$$</p>
+<p>摩擦再把切向力约束进摩擦锥。这一互补结构在速度层展开，就是各引擎分道扬镳的地方（据 Le Cleac'h 一系的可微仿真梳理工作，公开论文口径）：接触点速度与力之间由 Delassus 矩阵联系，写作：</p>
+<p>$$\sigma = G \lambda + g$$</p>
+<p>其中 ， $G = J_c M^{-1} J_c^\top$ ，是把接触力映射到接触点速度的算子， $g$ ，则表示无接触力时的自由接触点速度。在此之上：线性互补问题（LCP）用多面体摩擦锥近似、可用直接法精确求解（Nimble 的路线，见下条）；非线性互补问题（NCP）保留二阶锥摩擦锥、精度更高，但要求解非线性系统（Dojo 的路线）。标题的「线性 NCP 求解」公开文献中同样没有逐字对应的术语，最合理的解读是求解器层面的线性化：内点法每步解牛顿系统的线性方程组、投影 Gauss-Seidel 类迭代每步做线性投影——即每步成本由「解多少个多大线性系统」决定。这也解释了为什么求解器是引擎性能的第一变量：接触点数一多， $G$ 的规模与条件数直接吃掉步长预算。</p>
+<p>两条路线的公开代表作（公开论文口径）：Dojo（Howell et al.，arXiv:2203.00806）用带二阶锥约束的 NCP 建模硬接触与摩擦，自研原始-对偶内点法求解，并用隐函数定理从求解器里取出光滑梯度近似，还把内点法的中心路径参数做成用户可调旋钮——调高得到光滑的接触近似与好用的梯度，调低得到精确的硬接触前向仿真；且在 xArm 6 真机上做过 sim-to-real 差距评估。MuJoCo/MJX 一系则用凸优化（CCP）表述加自动微分换取 GPU 批量吞吐。没有哪条路线在「精度、速度、可微性」三角上全赢，选型就是选在这三角里站哪条边。</p>
+<h3>3. 可微引擎层：梯度可用性变成引擎的一等规格</h3>
+<p>第三层是把前两层打包成「可微引擎」，其规格表在公开综述里已经可以并排比较（据 <em>End-to-End and Highly-Efficient Differentiable Simulation for Robotics</em> 的公开对照表）：MJX 走 CCP + 自动微分，碰撞求导只覆盖基本几何体且大网格退化；Nimble（Werling et al.，arXiv:2103.16021）走 LCP + 隐式微分，在 DART 分叉上实现了与传统引擎同等的功能完整度，其解析雅可比相对有限差分在单核上有 87 倍加速（公开论文口径），并提出 complementarity-aware 梯度避免优化在接触鞍点处停滞；Dojo 走 NCP + 隐式微分。软体一侧，Ménager et al.（arXiv:2501.18956，INRIA 一线，<em>Differentiable Simulation of Soft Robots with Frictional Contacts</em>）把 FEM、GJK 碰撞检测与 NCP 接触力的导数统一进一个框架，演示了可微仿真在软体机器人标定（参数辨识）与控制中的直接用途——这恰是标题三关键词在同一篇工作里的合流点：GJK 负责检测、NCP 负责接触、可微负责把误差信号送回参数。</p>
+<p>引擎层最近的产业级变量是 NVIDIA 的 Newton（与 Google DeepMind、Disney Research 共同开发，Linux Foundation 托管）：2025 年 9 月发布 beta，2026 年 3 月 GTC 发布 1.0。据公开报道（NVIDIA 技术博客口径），其 MuJoCo Warp 求解器在 RTX PRO 6000 Blackwell 上相对 MJX 在运动任务上最高 252 倍、操作任务最高 475 倍加速，还内置面向线缆/布料的可变形求解器、SDF 碰撞库与水弹性接触模型。这类数字均为厂商在特定硬件与任务上的峰值口径，本篇只确认其方向：引擎层的竞争已经从「准不准」扩展到「每秒多少个并行世界乘以梯度质量」。</p>
+<h3>4. 结论：三层各有各的「快」，标题把栈说全了</h3>
+<p>回看标题的三个词，恰好是这条栈的三层：GJK 层决定接触信息从哪来、可不可微；NCP/LCP 求解层决定每一步的成本与精度站在哪条边；可微引擎层决定这些能力能否以训练基础设施的形态被规模化调用。对 RL 后训练的使用者而言，实务结论有二：一是选引擎先看梯度形态（自动微分、隐式微分还是随机平滑），它决定你能做的优化类型（系统辨识、轨迹优化还是只能做 zeroth-order 的策略搜索）；二是峰值加速倍数全部按「特定硬件乘特定任务」打折，真正该比的是自己任务上的每步毫秒数乘以并行世界数。至于 ICRA 2026 现场在这一议题上的具体议程（如相关 workshop 名单），本次公开检索未核实到与本视频逐一对应的场次，本篇不虚构。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<blockquote class="pq">
+<p>以下数字均来自公开论文/报道，非本视频字幕；厂商峰值口径已注明。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nimble 解析雅可比 vs 有限差分</td>
+<td>单核 87 倍加速（8.5ms vs 749ms）</td>
+<td>Nimble 论文（arXiv:2103.16021）</td>
+</tr>
+<tr>
+<td>MuJoCo Warp 相对 MJX 加速</td>
+<td>运动任务最高 252 倍、操作任务最高 475 倍</td>
+<td>NVIDIA 技术博客（经 Dataconomy 报道，特定硬件口径）</td>
+</tr>
+<tr>
+<td>可微碰撞检测适用范围</td>
+<td>凸 + 凹物体（DexGraspNet/Objaverse 网格验证）</td>
+<td>Chen et al.（arXiv:2511.06267）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>给自己的仿真选型建一张三层表：碰撞表示（凸体 witness 点 / SDF / 网格）、接触求解（LCP / NCP-SOC / CCP）、梯度形态（隐式微分 / 自动微分 / 随机平滑）。三层独立选型，避免被单一引擎的营销口径绑架。</li>
+<li>系统辨识是可微仿真最被低估的入口：真机标定（摩擦、质量、执行器参数）用梯度法收敛的速度远快于进化策略式调参，做 sim-to-real 时应排在加域随机化之前。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>「GJK++」是否为 UP 对某篇具体新工作的昵称（如某个加速 GJK 变体）？本篇按技术指涉重构而非同名检索，若日后能取得原视频信息应回头校正。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>依据来源</h2>
+<ol>
+<li>Chen et al., <em>Robust Differentiable Collision Detection for General Objects</em>, arXiv:2511.06267（2025-11）——GJK+EPA witness 点不可微问题、距离基随机平滑、凸凹推广；Ménager et al., <em>Differentiable Simulation of Soft Robots with Frictional Contacts</em>, arXiv:2501.18956——FEM + GJK 检测 + NCP 接触的统一求导。</li>
+<li>Howell et al., <em>Dojo: A Differentiable Physics Engine for Robotics</em>, arXiv:2203.00806——NCP 二阶锥接触、原始-对偶内点法、隐函数定理梯度；Werling et al., <em>Fast and Feature-Complete Differentiable Physics for Articulated Rigid Bodies with Contact</em>（Nimble）, arXiv:2103.16021——LCP 解析梯度与 87 倍口径；<em>End-to-End and Highly-Efficient Differentiable Simulation for Robotics</em>（公开对照表）——MJX/Nimble/Dojo 三引擎接触模型与求导方式对比；Newton 1.0 发布与 MuJoCo Warp 加速数字据 NVIDIA 技术博客的公开报道（Dataconomy，2026-03）。</li>
+</ol>
+<blockquote class="pq">
+<p>⚠️ <strong>还原版声明（重申）</strong>：本视频经实测无 AI 字幕轨，本篇为基于公开资料的<strong>主题还原版</strong>而非字幕实录；标题中的「GJK++」「线性 NCP」在公开文献中无同名术语，本篇按技术指涉重构，原解说的具体论述可能与本文有出入，请勿当作原话引用。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

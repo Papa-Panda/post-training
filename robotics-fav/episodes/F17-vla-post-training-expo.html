@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F17 — 揭秘 VLA 后训练：Progress-to-Go 优势条件化与 EXPO 极速微调——给生成式策略装上「知道好坏」的旋钮</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Robotics 收藏夹</span>
+    <h1>F17 — 揭秘 VLA 后训练：Progress-to-Go 优势条件化与 EXPO 极速微调——给生成式策略装上「知道好坏」的旋钮</h1>
+    <p class="sub">标题把 VLA 后训练的三个关键件并排摆了出来：用进度（progress）提供稠密的过程信号、用优势（advantage）给生成式策略的条件化旋钮、用 EXPO 系方法把微调做… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">依据来源</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/episodes/F17-vla-post-training-expo.html</p>
+<p>⚠️ <strong>还原版声明（非字幕实录）</strong>：截至本次提炼，未能取得本视频合格字幕（字幕接口串台/无轨）。本篇是<strong>公开资料还原版</strong>，不是字幕实录。特别说明：<strong>本次检索未找到与标题中「Progress-to-Go」同名的公开工作</strong>，本篇按标题关键词（进度信号、优势条件化、EXPO 微调）就近还原其最可能的论点主线；唯一有扎实公开实据的部分是 EXPO-FT（见依据来源），其余机制层面的重构属推断性梳理，请勿当作原话引用。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>F17（收藏夹 Robotics 系列）</dd><dt>标题</dt><dd>[ICRA2026]揭秘VLA后训练：基于Progress-to-Go的优势条件化与Diffusion策略的ExPO极速微调（UP 拟题）</dd><dt>讲者</dt><dd>未标注（字幕未取到，公开渠道亦未确认本场讲者身份）</dd><dt>来源</dt><dd>Bilibili 收藏夹「Robotics」（UP geek_UNCLE），原视频链接 <a href="https://www.bilibili.com/video/BV142et65EeG/">https://www.bilibili.com/video/BV142et65EeG/</a></dd><dt>BV</dt><dd>BV142et65EeG</dd><dt>时长</dt><dd>00:31:59</dd><dt>场合</dt><dd>ICRA 2026 具身/RL 相关场次（与同批收藏的 Levine、Platt、Held 等演讲同一上下文）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd><strong>公开资料还原</strong>（非字幕），且为本批还原版中证据最弱的一篇——「Progress-to-Go」未检索到同名公开工作，下文凡涉及该名称的部分一律按「就近还原」标注。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>标题把 VLA 后训练的三个关键件并排摆了出来：用<strong>进度（progress）</strong>提供稠密的过程信号、用<strong>优势（advantage）</strong>给生成式策略的条件化旋钮、用 <strong>EXPO 系方法</strong>把微调做到分钟级真机数据。其中 EXPO 一翼有硬实据：Stanford 的 EXPO-FT（公开论文口径）在真机上平均约 19.1 分钟在线数据内把一系列高难操作任务做到 30/30 全成功，其后续 Real-Time EXPO-FT 更把在线数据压到每任务不超过 10 分钟、平均性能从 42% 拉到 97%（公开论文口径）；而「Progress-to-Go」作为命名未检索到同名公开工作，本篇按「进度信号 + 优势条件化」的最合理解读重构，即：把「还差多少步/多少进度到完成」估计出来，作为优势信号的条件变量，让 Diffusion 策略在采样时朝高优势方向倾斜，而不是回传梯度穿过去噪网络。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">进度</div><div class="farrow">→</div><div class="fnode">优势</div><div class="farrow">→</div><div class="fnode">条件化采样</div></div>
+<h3>1. 背景/问题：VLA 预训练给了「会做」，后训练要补「做得稳」</h3>
+<p>公开共识（EXPO-FT 论文的开场白也是这么写的）：VLA 模型靠大规模模仿学习拿到跨任务泛化，但预训练策略的可靠性达不到真机部署门槛——成功率八九成、失败模式不可控。而 RL 微调这条路在生成式策略（Diffusion / flow 类动作头）上一直不好走，公开文献里有三条公认的难点（本篇按公开综述口径梳理）：</p>
+<ul>
+<li><strong>梯度回传贵且不稳</strong>：把 Q 函数的梯度穿过几十步去噪链回传到策略参数，随着去噪步数变多又贵又容易炸。</li>
+<li><strong>蒸馏丢表达力</strong>：把多步 Diffusion 策略蒸馏成一步/两步策略再做 RL，等于先自残多模态表达力。</li>
+<li><strong>模仿信号封顶</strong>：纯监督微调（SFT）与加权回归类方法被示范分布封顶，做不出示范之外的恢复行为。</li>
+</ul>
+<p>本场标题给出的解法拼图是：进度信号解决「奖励太稀疏、只知道成败不知道走到哪一步」，优势条件化解决「怎么把价值信息喂给生成式策略而不回传梯度」，EXPO 解决「微调的样本效率与稳定性」。</p>
+<h3>2. 方法/设计（就近还原）：进度 → 优势 → 条件化采样</h3>
+<p><strong>进度信号（Progress 一翼，就近还原）</strong>。二值成败奖励对长时程操作几乎不提供梯度信息量；一个自然的稠密化方案是训练一个进度估计器，输出当前状态的任务完成比例（0 到 1）。这一机制在公开工作里有对应物（口径各异，均非同名「Progress-to-Go」）：Dyna 的奖励/进度模型用进度曲线非单调回落自动检出失败（见本系列 F19），Progress-Think 的 PG-VLA 把语义进度估计作为行动生成的显式条件（导航领域，公开论文口径）。标题里的「Progress-to-Go」最合理的解读，是把「剩余进度」估计作为后续优势计算与条件化的输入。</p>
+<p><strong>优势条件化（Advantage Conditioning 一翼）</strong>。核心想法是把优势 $A(s, a)$ 从「损失函数的权重」改造成「策略的输入条件」：训练时让策略在观测之外再吃一个优势/进度条件变量，推理时把条件拨到「高优势」一端，生成式采样自然朝高价值动作倾斜。其公开谱系清楚：优势加权回归（AWR）是权重版的原型——按指数优势给演示样本加权做回归；DPPO 一线对 Diffusion Policy 的微调（DAWR 变体，公开论文口径）是把 TD 优势做成去噪损失的样本权重；条件化版本则进一步把优势显式写进条件输入，与 return-conditioned policy 同属一个思想家族。这样做的工程好处是：<strong>不需要把梯度回传穿过去噪链</strong>，价值信息以「条件」而非「梯度」进入策略。</p>
+<p><strong>EXPO 一翼（有公开实据）</strong>。EXPO（Expressive Policy 的稳定 RL，公开论文口径）的关键动作是不碰基底生成策略的梯度，而是另训一个轻量「编辑策略」：先从基底策略采样动作，再用 Q 函数的动作梯度指引编辑策略对动作做爬山式修正，以最大化 Q 值。EXPO-FT（Stanford，Dong、Hung、Gao、Sadigh、Finn，arXiv:2605.25477）把这套框架接到预训练 VLA 上，处理其分块（action chunk）动作表示，并允许真人在环纠错数据进入回放池。后续 Real-Time EXPO-FT 再把「慢而强的 VLA 提议动作块 + 快而轻的编辑策略用最新观测实时修正」拆成双速架构，正面处理 VLA 推理延迟导致观测过期的分布移位问题（公开论文口径）。</p>
+<h3>3. 实验/实证：EXPO-FT 的分钟级真机数字（公开论文口径）</h3>
+<ul>
+<li><strong>EXPO-FT 真机主结果</strong>：在一组高难真机操作任务上——包括串灯布线并插插头点亮、台球击球入袋、把花插入酒瓶等高精度 + 动态 + 初始状态多变的组合——系统在平均约 19.1 分钟在线机器人数据内达到全部任务 30/30 全成功。</li>
+<li><strong>同场对比（公开结果表口径）</strong>：以成功次数计（每项 x/30，四项平均），SFT 约 18.8、HG-DAgger 约 20.5、DSRL 约 19、HIL-SERL 约 5.5，而 EXPO-FT 为 30.0——注意这里的反差本身是个论点：从零训练路线的 HIL-SERL 在大初始状态分布下反而吃亏，说明「预训练先验 + RL 微调」的组合才是正解。</li>
+<li><strong>Real-Time EXPO-FT</strong>：在四个动态真机任务（物体传递、平衡球、桌式足球射门、动态抓取）上，在线数据每任务封顶 10 分钟、零人工干预，平均性能从 42% 提升到 97%；在 Kinetix 仿真基准上于 10/10 个环境中击败含无延迟在内的全部基线（公开论文口径）。</li>
+</ul>
+<p>对照标题「ExPO 极速微调」的说法，以上正是「极速」二字的公开出处：微调预算以分钟计、且终点是 100% 成功而不是「显著提升」。</p>
+<h3>4. 结论/观点（重组，非原话）</h3>
+<ul>
+<li><strong>后训练的分工正在定型</strong>：预训练管「广度与先验」，后训练管「可靠性与恢复行为」；把可靠性问题留给 SFT，等于是要求示范数据事先覆盖所有失败情形，不现实。</li>
+<li><strong>价值信息进入生成式策略的姿势之争</strong>，是这条线真正的技术分水岭：梯度回传（贵、不稳）、蒸馏（丢表达力）、采样筛选（受限于先验众数）、编辑/条件化（EXPO 与优势条件化所在的家族）——本场把优势条件化与 EXPO 并列，等于公开站队后者。</li>
+<li><strong>进度信号是长时程任务的便宜稠密奖励</strong>：在只有成败二值信号时，优势估计方差极大；进度把每一步都变成可监督的，这也解释了标题为何把 Progress 放在优势条件化之前——顺序即数据流。</li>
+<li><strong>边界（本篇按公开证据主动标注）</strong>：EXPO-FT 的实证任务均为实验室可控设置，「42% → 97%」量的是动态但封闭的任务分布；「Progress-to-Go」若确为本场提出的新命名，其确切定义与实验无从公开核对，本篇的机制重构仅供建立预期。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<blockquote class="pq">
+<p>以下数字均来自 EXPO-FT / Real-Time EXPO-FT 公开论文，非本场字幕。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>真机任务成功（四项平均，x/30）</td>
+<td>SFT 18.8 / HG-DAgger 20.5 / DSRL 19 / HIL-SERL 5.5</td>
+<td>EXPO-FT 30.0，且平均约 19.1 分钟在线数据达成</td>
+<td>EXPO-FT（arXiv:2605.25477，公开论文口径）</td>
+</tr>
+<tr>
+<td>动态真机任务平均性能</td>
+<td>42%</td>
+<td>97%（每任务在线数据 ≤10 分钟，零人工干预）</td>
+<td>Real-Time EXPO-FT（公开论文口径）</td>
+</tr>
+<tr>
+<td>Kinetix 仿真基准</td>
+<td>含无延迟基线</td>
+<td>10/10 环境最佳</td>
+<td>Real-Time EXPO-FT（公开论文口径）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 RL post-training infra 的直接启发：微调生成式策略时优先考虑「编辑/条件化」类接口（不动基底策略梯度），这把「训练稳定性」问题从优化层移到了系统层——基底策略冻结、编辑策略与 critic 在线更新，天然适合 rollout 与 learner 解耦的异步架构。</li>
+<li>评测口径的迁移：后训练的汇报单位应该是「达成目标成功率所需的真机分钟数」，而不是 epoch 或步数；EXPO-FT 把这一口径打成了标杆。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>「Progress-to-Go」的真身：若后续能拿到本场字幕或讲稿，第一件要核对的是它是进度条件化、优势条件化，还是进度加权的优势估计——三种解读对应不同的实现与复现路径。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>依据来源</h2>
+<ol>
+<li>Dong, Hung, Gao, Sadigh &amp; Finn, <em>EXPO-FT: Sample-Efficient Reinforcement Learning Finetuning for Vision-Language-Action Models</em>, arXiv:2605.25477（Stanford）及 <em>Reinforcement Learning for Real-Time Vision-Language-Action Policies</em>（Real-Time EXPO-FT）—— EXPO 编辑策略机制、真机 30/30 与 42% → 97% 数字、基线对比表；底层方法见 <em>EXPO: Stable Reinforcement Learning with Expressive Policies</em>（公开论文口径）。</li>
+<li>就近参照（非同名，特此标注）：<em>Progress-Think / PG-VLA</em>（CVPR 2026，进度条件化策略，导航领域）；DPPO 的 DAWR 变体（优势加权去噪损失，公开论文口径）；本系列 F19 中 Dyna 的奖励/进度模型。<strong>「Progress-to-Go」未检索到同名公开工作</strong>，标题该词的准确所指以本场内容为准。</li>
+</ol>
+<blockquote class="pq">
+<p>⚠️ <strong>还原版声明（重申）</strong>：本篇未能取得本视频合格字幕，系<strong>公开资料还原版</strong>而非字幕实录，且其中「Progress-to-Go」部分为按标题关键词的就近还原；演讲现场的具体论述与数字可能与本文重构有出入，请勿当作原话引用。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

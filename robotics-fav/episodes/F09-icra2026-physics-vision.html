@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F09 — 物理感知视觉：逆向图形学与具身智能的世界模型——从「看对」到「算对」</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Robotics 收藏夹</span>
+    <h1>F09 — 物理感知视觉：逆向图形学与具身智能的世界模型——从「看对」到「算对」</h1>
+    <p class="sub">正向图形学是把三维世界渲染成像素，逆向图形学是反过来从像素把三维几何、材质与物理参数估回去；当估计出的世界状态要拿去驱动机器人的仿真与决策时，这条逆向管线就接上了「世界模型」。… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">依据来源</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/episodes/F09-icra2026-physics-vision.html</p>
+<p>⚠️ <strong>还原版声明（非字幕实录）</strong>：本视频经实测<strong>无 AI 字幕轨</strong>，本篇是基于公开资料（世界模型分类法与代表论文）围绕标题两要素重构的<strong>还原版</strong>，不是字幕实录；与原解说口径可能有出入，请勿当作原话引用。文中数字均标明来源口径。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>F09（收藏夹 Robotics 系列）</dd><dt>标题</dt><dd>[ICRA2026]物理感知视觉：逆向图形学与具身智能的世界模型（UP 拟题）</dd><dt>讲者</dt><dd>未标注（UP「geek_UNCLE」解说视频）</dd><dt>来源</dt><dd>Bilibili 收藏夹「Robotics」（UP geek_UNCLE），原视频链接 <a href="https://www.bilibili.com/video/BV1vKe46XEkM/">https://www.bilibili.com/video/BV1vKe46XEkM/</a></dd><dt>BV</dt><dd>BV1vKe46XEkM</dd><dt>时长</dt><dd>00:33:41</dd><dt>场合</dt><dd>ICRA 2026 相关议题综述（UP 解说）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd><strong>公开资料主题还原</strong>（非字幕）。主要依据见文末「依据来源」。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>正向图形学是把三维世界渲染成像素，逆向图形学是反过来从像素把三维几何、材质与物理参数估回去；当估计出的世界状态要拿去驱动机器人的仿真与决策时，这条逆向管线就接上了「世界模型」。本篇的公开锚点是一套 2026 年成形的分类法：李飞飞与 World Labs 一线把世界模型按产物分成渲染器（出像素）、模拟器（出物理状态）、规划器（出动作）三类，并指出三者正在收敛为同一表示的不同投影。围绕这一框架，公开进展可核查的有：物理对齐的视频世界模型（拿物理标注与偏好优化压制穿模等不物理行为）、从生成视频经逆动力学落到可执行动作的管线、把视觉鲁棒性直接用渲染方程分解的评测基准。共同的问题意识一致：视觉系统「看对」（像素逼真）不等于「算对」（物理自洽），具身智能缺的是后者。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 逆向图形学：渲染方程反着解，就是物理感知</h3>
+<p>正向渲染的经典骨架是渲染方程：出射光由自发光与半球上入射光经 BRDF 加权积分得到，示意写作：</p>
+<p>$$L_o(\omega_o) = L_e + \int_{\Omega} f_r(\omega_i, \omega_o) \, L_i(\omega_i) \cos\theta_i \, d\omega_i$$</p>
+<p>正向问题是已知几何、材质 $f_r$ 与光照，求像素 $L_o$ ；逆向图形学是反过来由像素反推几何、材质、光照乃至质量、摩擦等物理参数。这正是标题「物理感知视觉」的定义层含义：感知输出的不再只是类别标签或深度图，而是能被物理引擎直接消费的状态估计。公开代表工作之一是神经对象路线（Le Cleac'h et al.，arXiv:2210.09420，斯坦福一线）：从 RGB 图像训练神经密度场表示物体几何，再为没有显式表面的神经表示设计概率化接触模型，把质量、质心、惯量估计与接触仿真接起来，在仅有视觉输入的条件下得到与真实几何仿真难以区分的轨迹（公开论文口径）。这条管线是逆向图形学通向世界模型的最小闭环：图像进、物理状态出、仿真可跑。</p>
+<h3>2. 世界模型三分法：标题后半句的坐标系</h3>
+<p>2026 年 6 月，李飞飞的 World Labs 团队发布了对世界模型的功能分类（公开报道口径，下同）：</p>
+<ul>
+<li><strong>渲染器（Renderers）</strong>：输入动作、输出像素，目标是让世界「看起来真」——视频生成模型是主力；</li>
+<li><strong>模拟器（Simulators）</strong>：输出几何、物理与动力学状态，目标是让世界「行为对」——可被人和软件查询、编辑、交互；</li>
+<li><strong>规划器（Planners）</strong>：输入观察与目标、直接输出动作，目标是让机器人「做得对」。</li>
+</ul>
+<p>关键论断是：规划器是渲染器的逆运算，三者本是同一底层世界表示的三个投影，且边界正在消失——视频模型开始接受动作指令，3D 模型开始输出碰撞网格，规划器开始在内部想象与评估未来。World Labs 自家的 Marble 已能由单一网络同时产出视觉模型与碰撞网格（公开报道口径），恰是「规划器侧的逆向」与「模拟器侧的正向」在同一个表示里合流的实例。把这一框架套到 ICRA 的语境里，「具身智能的世界模型」之争就不是模型名单之争，而是表示之争：哪一类产物才是机器人真正需要的世界知识。</p>
+<h3>3. 物理对齐：视频世界模型开始被按物理规律打分与后训练</h3>
+<p>渲染器一侧的公开进展集中回答一个问题：像素逼真的生成视频里物体穿模、摩擦缺失、动量不守恒，怎么办？代表性公开工作 ABot-PhysWorld（arXiv:2603.23376，2026 年 3 月）：14B 参数的 Diffusion Transformer，用 300 万条带物理感知标注的片段做数据管线，再以 DPO 偏好优化做后训练，专门压制物体穿透等不物理行为；同时发布训练无关的零样本评测基准 EZSbench 度量具身视频生成的物理合理性（公开论文口径）。这类工作的意义不在参数规模，而在于<strong>评测口径的迁移</strong>：世界模型开始像语言模型一样被配上独立的、按物理维度拆解的基准，物理一致性从「看起来行」变成可量化、可优化的目标。另一条公开管线 TC-IDM（arXiv:2601.18323）则从规划器一侧补课：生成式世界模型给出像素级计划后，如何落成物理可执行的动作？其做法是以工具为中心的逆动力学——从生成视频里提取工具的点云轨迹，再由解耦的动作头投影成 6 自由度末端位姿与控制信号，真机平均成功率 61.11%（公开论文口径），在零样本可变形物体任务上显著优于端到端 VLA 式基线（公开论文口径）。渲染器的「想象」只有经过逆向管线（逆图形学估状态、逆动力学出动作）才能变成具身智能的决策。</p>
+<h3>4. 逆向图形学反哺评测：把视觉失效按物理成因拆开</h3>
+<p>逆向框架还有一个直接的方法论收益：解释视觉模型为什么在真机上失效。RoboStressBench（arXiv:2606.00828）把这一思路做成基准（公开论文口径）：从逆向图形学视角出发，按渲染方程的成因把物理视觉压力分解为材质（Material）、视角（Viewpoint）、光照（Lighting）、几何（Geometry）四个维度，逐维评测主流 VLM 在具身场景中的鲁棒性；结论是不同物理因素退化的是不同具身能力，聚合精度会把这一结构掩盖掉，并给出一个先检测压力源、再调用视觉编辑技能的 stress-aware 解法。这与第 1 节形成呼应：渲染方程不仅是估计物理的出发点，也是诊断感知的坐标轴——「算对」与「看对」的差距，可以沿光照、材质、几何逐维定位，而不是笼统归因于「域差距」。</p>
+<h3>5. 结论：逆向是方法，世界模型是目标，表示是战场</h3>
+<p>收束本篇：标题两要素的关系是，前者是方法论（从像素反推可仿真的物理状态），后者是目标形态（能被机器人查询、编辑并用来规划的世界表示）。2026 年的公开图景是三侧合流：渲染器被物理对齐与逆动力学拉向可执行，模拟器被单图重建与神经表示拉向低成本，规划器被内部想象拉向带评测的闭环；李飞飞分类法给出的判据也随之明确——一个世界模型值不值钱，看它产出的表示能否同时供渲染、仿真与规划消费。对 ICRA 2026 现场与此对应的具体场次，本次公开检索未逐一核实，本篇不虚构议程，只重构公开方法版图。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<blockquote class="pq">
+<p>以下数字均来自公开论文/报道，非本视频字幕；口径已注明。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ABot-PhysWorld 规模 / 数据</td>
+<td>14B DiT / 300 万条物理标注片段</td>
+<td>arXiv:2603.23376（公开论文口径）</td>
+</tr>
+<tr>
+<td>TC-IDM 真机平均成功率</td>
+<td>61.11%（简单任务 77.7% 、零样本可变形物体 38.46% ）</td>
+<td>arXiv:2601.18323（公开论文口径）</td>
+</tr>
+<tr>
+<td>世界模型三分法发布时间</td>
+<td>2026 年 6 月（李飞飞 / World Labs）</td>
+<td>公开报道口径</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>评测具身感知时借 RoboStressBench 的拆法：把真机失效沿材质/视角/光照/几何四维归因，比报一个总成功率更能指导补数据或改传感配置——这条可直接进入自己的评测 checklist。</li>
+<li>对 post-training 的映射：ABot-PhysWorld 用 DPO 把「物理不合理」做成偏好对来后训练，与语言模型后训练的工具链完全同构；视频世界模型的物理对齐在方法上就是偏好数据的构造问题，可迁移的工程经验在数据标注与基准设计，不在模型结构。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>单一表示同时供渲染、仿真、规划消费，目前的公开实例（Marble 一线）尚属定性演示；三侧合流在多大参数规模与数据规模上成立、逆向估计的物理参数误差如何沿闭环放大，是这条叙事接下来要过的量化关口。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>依据来源</h2>
+<ol>
+<li>李飞飞 / World Labs 世界模型三分法（2026 年 6 月公开文章，经 LinkedIn「Physical AI+」等公开报道与 Medium 技术复盘转述）——渲染器/模拟器/规划器分类与「规划器是渲染器的逆运算」论断；SIGGRAPH 2026 公开日程中 NVIDIA 的世界模型主题演讲（Ming-Yu Liu，「World Models: The Frontier of Physical AI, Unlocked By Graphics」，Cosmos 3）作为同期产业口径。</li>
+<li>ABot-PhysWorld, arXiv:2603.23376（14B DiT、300 万物理标注片段、DPO 后训练压制穿透、EZSbench）；TC-IDM, arXiv:2601.18323（工具中心逆动力学、真机 61.11% ）；RoboStressBench, arXiv:2606.00828（逆向图形学四维压力分解）；Le Cleac'h et al., <em>Differentiable Physics Simulation of Dynamics-Augmented Neural Objects</em>, arXiv:2210.09420（从 RGB 估计物理与神经表示接触建模）。</li>
+</ol>
+<blockquote class="pq">
+<p>⚠️ <strong>还原版声明（重申）</strong>：本视频经实测无 AI 字幕轨，本篇为基于公开资料的<strong>主题还原版</strong>而非字幕实录；渲染方程为本篇示意写法。原解说的具体论述可能与本文重构有出入，请勿当作原话引用。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F14 — 结构化世界模型：机器人策略训练与评估的可扩展数据引擎</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Robotics 收藏夹</span>
+    <h1>F14 — 结构化世界模型：机器人策略训练与评估的可扩展数据引擎</h1>
+    <p class="sub">这期讲世界模型从「像素级视频预测」向「结构化数据引擎」的转位：用分割掩码、物体状态、运动学渲染等结构化中间表示承载动力学，让世界模型同时承担三件可扩展的活——生成训练数据、在想… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">依据来源</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/episodes/F14-structured-world-model.html</p>
+<p>⚠️ <strong>还原版声明（非字幕实录）</strong>：本视频字幕轨存在，但字幕接口当前串台、暂时取不到合格字幕。本篇是基于该主题的公开资料（论文与公开报道）重构论点主线的<strong>主题还原版</strong>，不是字幕实录；文中数字与论点以所引公开工作为准，可能与本场讲解的具体取舍有出入，请勿当作原话引用。拿到字幕后将升级为字幕实录版。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>F14（收藏夹 Robotics 系列）</dd><dt>标题</dt><dd>[ICRA2026]结构化世界模型：机器人策略训练与评估的可扩展数据引擎（UP 拟题）</dd><dt>讲者</dt><dd>未标注（本篇按主题还原，不虚构讲者）</dd><dt>来源</dt><dd>Bilibili 收藏夹「Robotics」（UP geek_UNCLE），原视频链接 <a href="https://www.bilibili.com/video/BV17Neb6wEtC/">https://www.bilibili.com/video/BV17Neb6wEtC/</a></dd><dt>BV</dt><dd>BV17Neb6wEtC</dd><dt>时长</dt><dd>00:32:48（1968 秒）</dd><dt>场合</dt><dd>ICRA 2026 相关技术讲解（UP 剪辑/转述，具体场次未公开）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd><strong>公开资料主题还原</strong>（非字幕）。主要依据见文末「依据来源」。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这期讲世界模型从「像素级视频预测」向「结构化数据引擎」的转位：用分割掩码、物体状态、运动学渲染等结构化中间表示承载动力学，让世界模型同时承担三件可扩展的活——生成训练数据、在想象空间里评估策略、按失败模式定向补数据——成为策略训练与评估的统一基础设施。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 背景/问题：像素世界模型的三个不可扩展</h3>
+<p>动作条件世界模型（给动作、预测未来观测）本可同时服务于规划、策略评估与数据增广，但单体像素预测路线有三处硬伤：<strong>动作可控性差</strong>——模型学到的是场景外观的统计延续，细粒度关节动作对未来帧的影响被淹没；<strong>分布外泛化差</strong>——换物体、换场景就要重训或大幅微调；<strong>评估不可信</strong>——想象空间里策略「成功」可能只是模型幻觉，无法替代真机评测。机器人数据本就昂贵，若数据引擎本身每换一个场景就失效，可扩展性无从谈起。「结构化」的提出正是针对这三点。</p>
+<h3>2. 方法/设计：把动力学从像素里拆出来</h3>
+<p>按公开工作线还原，「结构化世界模型」的共同设计语言是<strong>用结构化中间表示解耦动力学与外观</strong>，代表形态有三：</p>
+<ol>
+<li><strong>掩码即状态</strong>（Mask2Real-WM，arXiv:2607.04546）：两阶段动作条件世界模型——动力学模型在分割掩码空间预测未来（输入过去掩码 + 23 自由度动作序列），渲染模型再把预测掩码经 ControlNet 增强的视频扩散骨干映射回真实感 RGB。掩码空间的 sim-to-real 差距远小于像素空间，于是动力学可先吃大规模仿真数据预训练（超过 50 小时合成数据），再用不到 2.5 小时真实示范微调；</li>
+<li><strong>运动学渲染即动作接口</strong>（GeniWorld，arXiv:2608.06332）：基于预训练视频生成模型，用 URDF 渲染把数值动作转成视觉动作表示，显式解耦本体运动学与环境动力学，缓解场景过拟合；再配高频运动学控制做自回归闭环，既能与策略交互、也能供人类遥操作；</li>
+<li><strong>世界模型即评估器</strong>：同一世界模型一鱼两吃——闭环中作可扩展策略评估器（在环境扰动下仍可靠），又能生成多样操作轨迹反哺下游策略训练（GeniWorld 实验口径：仅用有限固定场景数据训练，即在高度随机化的未见环境中保持域内性能与零样本泛化）。</li>
+</ol>
+<p>三条形态共享同一个判断：<strong>可扩展性不来自动力学模型更大，而来自中间表示选对</strong>——掩码、URDF 渲染、物体状态这些结构把「什么随动作变、什么只是长相」在表示层先分开。</p>
+<h3>3. 实验/实战：消融给出的因果链</h3>
+<p>Mask2Real-WM 在灵巧抓放基准上的消融（论文口径）把因果链钉得很实：掩码条件与仿真预训练<strong>两者都不可或缺</strong>，缺一则 23 个自由度无法实现逐关节的动作可控性；单体基线只能抓住手与末端的大轨迹，反映不出细粒度逐关节动作效应。这条消融恰好解释了第 1 节的三宗罪：像素单体模型不是容量不够，而是表示里没给「逐关节因果」留位置。GeniWorld 侧则给出评估器形态的证据：世界模型作策略评估器在环境扰动下保持可靠，并能以有限真实示范生成轨迹、提升下游策略在复杂环境中的表现（论文口径）。</p>
+<h3>4. 结论/观点：数据引擎视角（按公开工作线重组，非本场原话）</h3>
+<ul>
+<li><strong>世界模型的岗位变了</strong>：从「给规划器用的预测器」变成「训练与评估共用的数据引擎」——生成数据、评估策略、定向补失败样本在同一个想象空间里完成，真机只承担最终校验与少量微调。</li>
+<li><strong>结构先行于规模</strong>：逐关节可控性、跨场景泛化这类性质是表示层决定的，堆像素模型参数换不来；先选掩码/状态/运动学这类结构化接口，再谈预训练规模。</li>
+<li><strong>评估可信度是入场券</strong>：数据引擎能否替代真机轮次，取决于想象空间评估与真机结果的相关性；扰动下仍可靠的评估器（GeniWorld 口径）才是可扩展的起点，否则生成再多数据也只是自娱自乐。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<blockquote class="pq">
+<p>以下数字均来自所引公开工作，非本场字幕；口径已注明。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mask2Real-WM 动力学预训练数据</td>
+<td>超过 50 小时合成仿真数据（掩码空间）</td>
+<td>arXiv:2607.04546</td>
+</tr>
+<tr>
+<td>Mask2Real-WM 真实微调数据</td>
+<td>不到 2.5 小时真实示范</td>
+<td>arXiv:2607.04546</td>
+</tr>
+<tr>
+<td>动作可控自由度</td>
+<td>23 自由度逐关节可控（掩码条件 + 仿真预训练缺一不可）</td>
+<td>arXiv:2607.04546 消融</td>
+</tr>
+<tr>
+<td>GeniWorld 评估器形态</td>
+<td>固定场景有限数据训练 → 高度随机化未见环境零样本泛化（定性口径）</td>
+<td>arXiv:2608.06332</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 RL infra 的启发：<strong>评估器与生成器应共用一个世界模型/仿真资产</strong>。做 agentic RL 时把「在模型里评估策略」与「在模型里合成训练数据」建成同一底座，真机（或真实环境）预算只花在相关性校验上——这与把评估 harness 和数据合成管线分开维护的常见做法相反，值得一试。</li>
+<li>表示层先行：与其扩大轨迹生成模型，不如先定义结构化中间态（工具调用的中间状态、代码执行的抽象状态），让信用分配与可控性在表示层就成立——Mask2Real-WM 的消融是这个原则在机器人上的硬证据。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>想象空间评估与真机成功率的相关性目前多是定性声称（"reliable under perturbations"），缺跨工作的统一相关性基准；没有这把尺，数据引擎替代真机轮次的比例无法定量规划。</li>
+<li>结构化表示目前靠人工设计（掩码、URDF），当任务从抓放走向长程多物体交互时，结构本身会不会成为新的覆盖瓶颈，公开材料未见讨论。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>依据来源</h2>
+<ul>
+<li>Mask2Real-WM: Segmentation Masks as a Sim-to-Real Bridge for Controllable Dexterous World Models（arXiv:2607.04546）——掩码动力学 + 渲染解耦、仿真预训练/真实微调数据量与逐关节可控性消融</li>
+<li>GeniWorld: A Generalizable Interactive World Model for Robotic Manipulation via Visual Actions（arXiv:2608.06332）——URDF 视觉动作表示、世界模型作策略评估器与轨迹生成器</li>
+</ul>
+<blockquote class="pq">
+<p>⚠️ <strong>还原版声明重申</strong>：字幕暂未取得，本篇为基于公开资料的主题还原版而非字幕实录，拿到字幕后将升级为字幕实录版；数字与论点以所引公开工作为准、可能与本场有出入。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

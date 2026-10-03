@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F20 — Robert Platt：几何等变性与机器人学习的 Scaling Curve——对称性到底能顶多少数据</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Robotics 收藏夹</span>
+    <h1>F20 — Robert Platt：几何等变性与机器人学习的 Scaling Curve——对称性到底能顶多少数据</h1>
+    <p class="sub">这一场的核心问题是：当机器人学习进入 scaling 时代、大家都在堆数据时，把几何对称性（等变性）写进网络结构，到底等价于省下多少数据？Platt 一线工作的答案是：等变结构… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">依据来源</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/episodes/F20-platt-equivariance-scaling.html</p>
+<p>⚠️ <strong>还原版声明（非字幕实录）</strong>：截至本次提炼，未能取得本视频合格字幕（字幕接口串台/为空）。本篇是基于讲者公开工作（论文与公开报道）重构演讲论点主线的<strong>还原版</strong>，不是字幕实录；文中数字与论点以讲者公开论文为准，可能与本场有出入，请勿当作原话引用。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>F20（收藏夹 Robotics 系列）</dd><dt>标题</dt><dd>[ICRA2026]Robert Platt演讲：几何等变性与机器人学习的Scaling Curve（UP 拟题；官方场次为研讨会邀请报告，英文题目未公开）</dd><dt>讲者</dt><dd>Robert Platt，美国东北大学（Northeastern University）教授，Helping Hands 实验室负责人；合作者 Robin Walters 等为校内等变机器学习一线的核心成员</dd><dt>来源</dt><dd>Bilibili 收藏夹「Robotics」（UP geek_UNCLE），原视频链接 <a href="https://www.bilibili.com/video/BV1Gneh6fE3n/">https://www.bilibili.com/video/BV1Gneh6fE3n/</a></dd><dt>BV</dt><dd>BV1Gneh6fE3n</dd><dt>时长</dt><dd>00:30:03</dd><dt>场合</dt><dd>ICRA 2026 具身/RL 相关场次邀请报告（据同批收藏视频语境推断为「RL in the Era of IL」研讨会一线，未逐项核实）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd><strong>公开资料还原</strong>（非字幕）。主要依据见文末「依据来源」；凡属转述的数字均标（公开论文口径）。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>这一场的核心问题是：当机器人学习进入 scaling 时代、大家都在堆数据时，把几何对称性（等变性）写进网络结构，到底等价于省下多少数据？Platt 一线工作的答案是：等变结构不是小修小补的正则化，而是直接改写 scaling 曲线的位置——在固定数据量下系统性抬高成功率（Equivariant Diffusion Policy 在 12 个 MimicGen 任务上平均比基线 Diffusion Policy 高 21.9 个百分点，公开论文口径），且在小样本真机场景把「学不出来」变成「学得出来」；但对称性只管几何那一轴，补不了物体多样性与语义多样性，所以它是 scaling 的乘数，不是 scaling 的替代品。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 背景/问题：机器人数据贵，scaling 曲线必须每一分都算清</h3>
+<p>机器人模仿学习的数据扩展规律已有公开实证（他人工作，本篇仅作问题背景引用）：在四万多条演示、一万五千多次真机 rollout 的规模上（公开论文口径），策略对新物体/新环境的泛化大致随训练物体数、环境数呈幂律提升，但<strong>每个物体的演示条数过了阈值就基本平台化</strong>——多样性比数量值钱。这条曲线对机器人特别残酷：演示要靠人遥操作采集，每条都有真金白银的成本。于是问题自然变成：在数据轴之外，还有没有另一条能移动这条曲线的轴？Platt 的候选答案是<strong>归纳偏置</strong>，具体说就是把任务的几何对称性硬编码进策略网络。</p>
+<h3>2. 方法/设计：等变性——让一次演示在群轨道上被「重复使用」</h3>
+<p>抓取、放置这类操作任务有一个近乎免费的结构性事实：把桌面连同物体、目标位姿一起绕竖直轴旋转一个角度，最优动作也应随之旋转同一角度。用群论语言，记群 $G$ 作用于观测与动作，若策略满足：</p>
+<p>$$\pi(g \cdot o) = g \cdot \pi(o), \quad \forall g \in G$$</p>
+<p>则称策略对 $G$ 等变。把这个约束做进网络（而不是靠数据增强去「学」），等价于让训练集里的每条演示同时监督整条群轨道上的所有旋转版本：网络不需要从数据里逐个角度地学出「转 30° 应该怎么动」，这一维度的泛化在架构层面被先验地解决了。Platt 一线的代表作是 <strong>Equivariant Diffusion Policy</strong>（CoRL 2024 Oral，公开论文口径）：理论上刻画了完整 6 自由度控制中 $SO(2)$ 对称性的等变条件，把去噪网络做成等变结构，让 Diffusion Policy 的表达力花在真正多模态的决策部分，而不是浪费在重新学习旋转协变性上。后续 <strong>EquAct</strong>（公开报道口径）把这一思路推进到完整的 $SE(3)$ 等变多任务 Transformer，用球面 Fourier 特征与等变注意力处理 3D 场景级操作；更早的 $SO(2)$ 等变 RL 工作（ICLR 2022，公开论文口径）则把同样的约束用到了 Q 学习与 actor-critic 上。</p>
+<h3>3. 实验/实证：等变性把 scaling 曲线往上推，且越缺数据推得越狠</h3>
+<p>公开实证主要有三块（均为公开论文/报道口径，非本场数据）：</p>
+<ul>
+<li><strong>同数据量下的成功率差</strong>：Equivariant Diffusion Policy 在 MimicGen 的 12 个仿真任务上，平均成功率比基线 Diffusion Policy 高 21.9 个百分点。</li>
+<li><strong>小样本真机的有无之别</strong>：在真机评估中，等变版本用相对很少的训练样本就能学出有效策略，而基线 Diffusion Policy 在同样的样本量下学不出来——即等变性把可用数据的下限往下打了。</li>
+<li><strong>相邻领域的 scaling 证据</strong>：在分子力场等同样讲对称性的领域，已有公开工作系统比较了等变与非等变架构的 scaling 指数，发现等变模型的数据 scaling 指数显著更大（公开论文口径）——即对称性不只平移曲线，还可能改善曲线的斜率：数据每翻一倍，等变模型赚得更多。这是「等变性 × scaling」最值得注意的一条外部证据，但它来自机器人之外的领域，本场是否引用未知，本篇仅作为论点背景列出。</li>
+</ul>
+<p>把这三块合起来，演讲题目的两个关键词就对上了：<strong>几何等变性</strong>是方法，<strong>Scaling Curve</strong> 是问题意识——核心追问是「对称性在数据轴上到底值多少倍」。</p>
+<h3>4. 结论/观点：等变是数据的乘数，但乘的只是几何那一维</h3>
+<p>以下按讲者团队一贯公开立场重组，均非本场逐字原话：</p>
+<ul>
+<li><strong>对称性是免费的监督</strong>：凡是能明确写出的任务对称性（桌面操作的旋转、平移，抓取的镜像等），都不该让网络从数据里重新学——那是在用最贵的资源（真机演示）买最便宜的知识（群论事实）。</li>
+<li><strong>但等变只解决几何轴</strong>：回到第 1 节的 scaling 规律，泛化由物体多样性、环境多样性、语义多样性共同决定；等变结构压缩的是位姿变化这一维，对新物体、新任务语义毫无帮助。指望靠架构先验替代数据多样性，会在 scaling 曲线上撞墙。</li>
+<li><strong>硬等变 vs 数据增强</strong>：数据增强是软约束，只在训练分布覆盖的角度上近似成立；硬等变是架构保证，分布外依然精确。在真机小样本这种「训练分布注定覆盖不全」的场景，两者的差距正是第 3 节里「学得出 vs 学不出」的差距。</li>
+<li><strong>开放问题（推测本场会落在此处）</strong>：等变性对 scaling 曲线的改变量化——是平移（等价于数据量乘以常数倍）、改斜率（指数变大）、还是降低不可约误差下限，三种效应对应完全不同的数据战略，目前机器人领域尚无与数据 scaling 律同等规模的对照实证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<blockquote class="pq">
+<p>以下数字均来自讲者团队公开论文，非本场字幕；口径差异已注明。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MimicGen 12 任务平均成功率</td>
+<td>Diffusion Policy</td>
+<td>Equivariant Diffusion Policy 平均高 21.9 个百分点</td>
+<td>Equivariant Diffusion Policy（CoRL 2024，公开论文口径）</td>
+</tr>
+<tr>
+<td>真机小样本学习</td>
+<td>基线在少量样本下学不出有效策略</td>
+<td>等变版本以相对少的样本学成</td>
+<td>同上（定性结论，公开论文口径）</td>
+</tr>
+<tr>
+<td>机器人数据 scaling 形态（背景）</td>
+<td>演示条数/物体过阈值后平台化</td>
+<td>泛化随物体数、环境数近似幂律</td>
+<td>Data Scaling Laws in IL（ICLR 2025，他人工作，公开论文口径）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 post-training / RL infra 工作的启发：scaling 讨论不要只盯数据量一条轴。「先验等价于多少数据」是个可以实测的问题——在自己的任务上做一条「有/无结构先验 × 数据量」的二维曲线，比单点对比（同数据量比成功率）信息量大得多，也能直接指导数据采集预算往哪边花。</li>
+<li>评估侧的迁移：汇报样本效率时，把「等价数据倍数」（达到同一性能所需的演示条数比）作为一等指标，比只报成功率差值更能支撑工程决策。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>等变性收益随数据量增大如何衰减？在十万条演示量级，等变与大模型 + 数据增强的差距还剩多少——公开文献里这条曲线的右侧基本是空白。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>依据来源</h2>
+<ol>
+<li>Wang et al., <em>Equivariant Diffusion Policy</em>, CoRL 2024（Oral），arXiv:2407.01812 —— 等变去噪网络、$SO(2)$ 理论刻画、MimicGen 12 任务 +21.9 个百分点、真机小样本结论。</li>
+<li>Zhu et al., <em>EquAct: An SE(3)-Equivariant Multi-Task Transformer for Open-Loop Robotic Manipulation</em>（东北大学团队，公开报道口径）—— $SE(3)$ 等变多任务架构；Wang, Walters &amp; Platt, <em>SO(2)-Equivariant Reinforcement Learning</em>, ICLR 2022 —— 等变约束在 RL 中的早期形态；<em>Data Scaling Laws in Imitation Learning for Robotic Manipulation</em>, ICLR 2025（他人工作）—— 机器人数据 scaling 幂律背景。</li>
+</ol>
+<blockquote class="pq">
+<p>⚠️ <strong>还原版声明（重申）</strong>：本篇未能取得本视频合格字幕，系基于讲者公开工作的<strong>还原版</strong>而非字幕实录；演讲现场的具体论述顺序、案例与数字可能与本文重构有出入，请勿当作原话引用。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F04 — ICRA 2026 机器人巡礼：触觉觉醒、端到端大模型与中国军团——从现场信号重构今年大会的三条主线</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Robotics 收藏夹</span>
+    <h1>F04 — ICRA 2026 机器人巡礼：触觉觉醒、端到端大模型与中国军团——从现场信号重构今年大会的三条主线</h1>
+    <p class="sub">标题的三个短语对应今年大会现场最可核查的三条信号：触觉从「附加传感器」变成数据采集与操作闭环的一等公民（灵巧手标配视触觉、专门的触觉数据采集设备开始产品化）；端到端大模型（VL… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">依据来源</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/episodes/F04-icra2026-robot-tour.html</p>
+<p>⚠️ <strong>还原版声明（非字幕实录）</strong>：本视频经实测<strong>无 AI 字幕轨</strong>，本篇是基于公开资料（会议官方信息、公开报道与参展方公开材料）重构主题的<strong>还原版</strong>，不是字幕实录；与原解说的具体口径、顺序与取舍可能有出入，请勿当作原话引用。文中数字均标明来源口径。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>F04（收藏夹 Robotics 系列）</dd><dt>标题</dt><dd>[ICRA 2026]机器人巡礼：触觉觉醒、端到端大模型与中国军团的全面碾压（UP 拟题）</dd><dt>讲者</dt><dd>未标注（UP「geek_UNCLE」解说视频）</dd><dt>来源</dt><dd>Bilibili 收藏夹「Robotics」（UP geek_UNCLE），原视频链接 <a href="https://www.bilibili.com/video/BV1ZteX6YEbe/">https://www.bilibili.com/video/BV1ZteX6YEbe/</a></dd><dt>BV</dt><dd>BV1ZteX6YEbe</dd><dt>时长</dt><dd>00:24:13</dd><dt>场合</dt><dd>IEEE ICRA 2026（2026 年 6 月 1–5 日，奥地利维也纳，主题「Robots for All」）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd><strong>公开资料主题还原</strong>（非字幕）。主要依据见文末「依据来源」；展商宣传材料中的说法按「厂商公开口径」标注，未独立核实者不作为事实断言。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>标题的三个短语对应今年大会现场最可核查的三条信号：触觉从「附加传感器」变成数据采集与操作闭环的一等公民（灵巧手标配视触觉、专门的触觉数据采集设备开始产品化）；端到端大模型（VLA / 具身基础模型）从论文演示走向真机长程任务与竞赛评测的主角；中国团队在官方挑战赛中包揽冠军、展商与供应链全面在场，成为「中国军团」叙事的实证基础。本篇按这三条线重构巡礼，并对每条线给出可核查的锚点与保留意见。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 大会底盘：投稿与参会的量先创了纪录</h3>
+<p>ICRA 2026 于 2026 年 6 月 1–5 日在维也纳举行，主题「Robots for All」。据 IEEE RAS 公开口径：本届收到投稿 5,088 篇（会议史上最高），录用约 1,800 篇（录用率约 35% ，较 2025 年亚特兰大站的 38.7% 继续下探），参会者 8,000 人以上。录用率在投稿暴涨下不升反降，本身就是「全行业都在往机器人涌」的量化注脚。最佳论文方面，据 Franka Robotics 公开材料，Nadia Figueroa 团队的 SymSkill 同时拿到 Best Paper in Planning and Control 与 Best Conference Paper Award——获奖工作运行在 Franka 机械臂上，主办方与展商口径一致，这一锚点相对可靠。8,000 人的现场意味着「巡礼」类内容本质上是抽样：解说视频挑什么、不挑什么，立场就藏在选样里，读者应按此折扣看待任何「全面」表述。</p>
+<h3>2. 触觉觉醒：从传感器选配件变成数据管线入口</h3>
+<p>本届触觉信号的密度确实高于往年，最具代表性的公开锚点有二，均来自中国展商的公开材料（厂商公开口径）：</p>
+<ul>
+<li><strong>TARS Robotics（他山科技系）</strong> 全球首发 21 自由度 DexHand：1:1 人手尺度，指尖集成微型相机与弹性体触觉传感，用视触觉同时读纹理与力状态，现场演示 26 个英文字母手语手势与亚毫米线束插接（该公司自称持有该项目的吉尼斯世界纪录，未独立核实）；其 A1 机器人配 DexHand 做多步打包、拉链闭合，并在人为挪动线束端口后自主再感知、再规划完成任务。公司首席科学家丁文超（Dr Ding）做了题为「General Physical Intelligence」的大会 keynote 发言（展商口径）。</li>
+<li><strong>Xense Robotics</strong> 展示多模态触觉传感器产品矩阵（指尖、夹爪、平面、曲面）与可穿戴两指触觉数据采集设备 TacCap-Gripper：同步采集视觉、触觉、IMU 与编码器数据，把接触起止、压力分布、滑移趋势变成可训练的具身数据。</li>
+</ul>
+<p>把这两家放在一起看，触觉的角色变化才是真正的新闻：过去触觉是「装上之后策略未必用得上」的选配，今年它被当作<strong>数据入口</strong>在卖——操作任务中最难采的恰恰是接触之后那段动态过程，谁能低成本采到带触觉的交互数据，谁就握有下一轮策略迭代的原料。标题说「觉醒」，从数据管线的角度看不算夸张；但也要指出，公开演示仍集中在结构化任务上，触觉数据进入大规模训练闭环的收益尚缺公开对照数字，本篇不替任何一方下结论。</p>
+<h3>3. 端到端大模型：从展台 demo 进到竞赛评分表</h3>
+<p>第二条线是端到端大模型（VLA 与具身基础模型）的常态化在场：TARS 的 AWE 3.0 具身基础模型驱动真机长程多步任务；Franka 展台用 Gemini Robotics 在 FR3 Duo 上把自然语言实时转成双臂动作；NVIDIA 一线的 GR00T 系列 VLA 已成为各家对比与部署的默认参照（公开报道口径）。更硬的证据来自官方赛事（见下条）：推理-操作赛道与世界模型赛道的设置本身，就是把「端到端决策」与「世界模型」立为官方考核维度。换言之，端到端不再是展台上的表演项目，而是被写进评分表的竞技项目。这与 F16（Levine）、F20（Platt）等同批收藏的讨论互为表里：模型范式之争（端到端学习 vs 结构先验）正在从口头争论变成赛道设置。</p>
+<h3>4. 中国军团：挑战赛包揽是可核查的硬锚点</h3>
+<p>「全面碾压」是 UP 的标题修辞，但其下有可核查的事实层。据新浪科技转封面新闻的公开报道，ICRA 旗下「智元世界挑战赛 2026」于 6 月 5 日在维也纳收官，汇聚 27 个国家和地区共 526 支队伍，设 Reasoning to Action（推理-操作）与 World Model（世界模型）两大核心赛道，外加首个真实商超场景全链路决策评测赛道（WBC）：</p>
+<ul>
+<li>世界模型赛道冠军：中科院自动化所联合高德 CV Lab 的 NeoVerse-ABot；亚军中科院工业人工智能研究院 PAI@IAII，季军中科大 Loop 团队；</li>
+<li>推理-操作赛道冠军：vivo 旗下 PrismBot；上海萝博派对 RP-VLA 第二，俄罗斯 GreenVLA 第三；</li>
+<li>WBC 商超赛道冠军：小米机器人「周熊队」，综合得分 99.2 分、整体任务成功率 94%（赛事报道口径）。</li>
+</ul>
+<p>线下真机决赛统一使用精灵 G2 人形机器人（智元）作为平台——连竞赛硬件都是中国整机。再叠加展商层（TARS、Xense 等中国公司在主展区做全球首发）与供应链层（据 MERICS 今年对具身智能供应链的梳理，中国约占全球人形机器人关键零部件主要企业的 63% ，公开报道口径），「中国军团」在本届至少有三层含义：算法队伍赢比赛、整机公司供平台、零部件生态供底盘。需要泼的冷水是：挑战赛冠军与学术最佳论文并不等价，本届最佳论文花落欧洲团队（Figueroa）；把「赢了官方挑战赛」直接读成「学术全面领先」是标题党的滑移，本篇只确认前者。</p>
+<h3>5. 保留意见：巡礼体裁的先天折扣</h3>
+<p>最后按惯例记下本篇的证据边界。其一，24 分钟巡礼不可能覆盖 1,800 篇论文，UP 的选样（偏整机、偏演示、偏中国团队）决定了这条叙事线的形状；其二，展商材料中的「全球首发」「世界纪录」类表述均为厂商公开口径，本篇已逐一标注，未做独立核实；其三，中国团队在挑战赛的包揽有官方赛事报道背书，属本篇最硬的锚点，但赛事维度（推理-操作、世界模型、商超全链路）本身是主办方选定的，反映的是产业化导向的评价体系，而非学术共同体的全部议程。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<blockquote class="pq">
+<p>以下数字均来自公开来源，非本视频字幕；口径已注明，未独立核实者已标注。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源口径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ICRA 2026 投稿量</td>
+<td>5,088 篇（史上最高）</td>
+<td>IEEE RAS 公开口径</td>
+</tr>
+<tr>
+<td>录用 / 录用率</td>
+<td>约 1,800 篇 / 约 35%</td>
+<td>IEEE RAS、TechTimes 公开报道口径</td>
+</tr>
+<tr>
+<td>参会规模</td>
+<td>8,000+ 人</td>
+<td>公开报道口径</td>
+</tr>
+<tr>
+<td>智元世界挑战赛参赛队伍</td>
+<td>27 国 526 支</td>
+<td>新浪科技转封面新闻赛事报道</td>
+</tr>
+<tr>
+<td>WBC 商超赛道冠军成绩</td>
+<td>99.2 分、成功率 94%（小米机器人周熊队）</td>
+<td>赛事报道口径</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>读任何「大会巡礼」类内容，先把叙事拆成「可核查锚点（官方赛事结果、获奖名单、投稿数据）」与「选样叙事（展台印象）」两层，前者可直接引用，后者按体裁打折——这条可直接套用到自己跟踪 CoRL/RSS 的信息流上。</li>
+<li>触觉的定位变化值得记一笔：当触觉硬件开始以「数据采集设备」形态单独售卖时，它在 infra 栈里的位置就从传感器驱动问题变成了数据管线问题，评测口径（同步精度、标定、数据格式）会随之变成选型的一等指标。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>智元世界挑战赛的世界模型赛道具体评测口径（EWMBench、Genie Sim Benchmark 的指标构成）与开源程度如何？这决定了「包揽冠军」在学术坐标系里该如何计价，值得单独查赛事官方文档。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>依据来源</h2>
+<ol>
+<li>IEEE RAS 官方口径与 TechTimes 对 ICRA 2026 的公开报道（投稿 5,088 篇、录用约 1,800 篇、录用率约 35% 、参会 8,000+ 人、会期 2026 年 6 月 1–5 日于维也纳）；Franka Robotics 公开材料（Nadia Figueroa 团队 SymSkill 获 Best Paper in Planning and Control 与 Best Conference Paper Award）。</li>
+<li>新浪科技转封面新闻《ICRA 2026 智元世界挑战赛落幕 中国团队包揽全部赛道冠军》（2026-06-06）——三大赛道冠亚季军名单、526 支队伍、WBC 冠军 99.2 分 / 94% 成功率、决赛使用精灵 G2；TARS Robotics 与 Xense Robotics 在 ICRA 2026 的公开新闻稿（DexHand 21 自由度、AWE 3.0、TacCap-Gripper，均按厂商公开口径引用）。</li>
+</ol>
+<blockquote class="pq">
+<p>⚠️ <strong>还原版声明（重申）</strong>：本视频经实测无 AI 字幕轨，本篇为基于公开资料的<strong>主题还原版</strong>而非字幕实录；原解说的具体论述、案例与措辞可能与本文重构有出入，请勿当作原话引用。厂商宣传口径已逐一标注，未独立核实。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
