@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP100 — 2025 “青稞” AI 嘉年华（青稞Talk 第 100 期特辑）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP100 — 2025 “青稞” AI 嘉年华（青稞Talk 第 100 期特辑）</h1>
+    <p class="sub">青稞Talk 第 100 期不做单场技术报告，改办线上嘉年华：2025-12-28 全天五个板块（Infra、RL、具身智能、Agentic、LLM/MLLM），5 位主持人 … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">活动概览</a><a href="#sec-4">各环节嘉宾（海报阵容；讲题官网未披露）</a><a href="#sec-5">特别环节：青稞 AMA（Ask Me Anything）</a><a href="#sec-6">可迁移（从这期特辑看 2026 的选题与工程方向）</a><a href="#sec-7">疑问 / 信息缺口</a><a href="#sec-8">原文金句（官网活动页原文）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP100-ai-carnival.html</p>
+<p><strong>主旨引文</strong>（官网活动页）：「从“更大”走向“更高效”，从单体模型迈向智能体协同，从虚拟对话延伸至真实具身交互，LLM + RL 架构正成为下一代智能系统的核心引擎。」—— 青稞社区对 2025 年 AI 演进逻辑的定调。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP100（青稞Talk 第 100 期特辑）</dd><dt>标题</dt><dd>2025 “青稞” AI 嘉年华</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>活动时间</dt><dd>2025-12-28（周日）10:00–19:30，线上直播（官网海报）</dd><dt>BV</dt><dd>无。公开台账（<code>episode-index.csv</code>）记录「official-only（官网有预告，B站合集无对应视频）」；本期在 B站合集 sid=6759670 中无对应视频</dd><dt>材料来源</dt><dd><a href="<a href="https://qingkeai.online/blog/2025-AI-Meetup">https://qingkeai.online/blog/2025-AI-Meetup</a>">官网活动页 qingkeai.online/blog/2025-AI-Meetup</a>（预告正文 + 议程海报图）；另检索到 CSDN 转载（QingKeLab，2025-12-18 发布）内容与官网预告一致，未检索到活动后的回顾报道</dd><dt>提炼方式</dt><dd><strong>无视频、无字幕，基于官网活动页与议程海报整理，非逐字稿。</strong> 本篇只记录官网材料能确证的事实；议程细节、嘉宾讲题、讨论结论等官网未披露处，统一在「疑问 / 信息缺口」里标明，不做推测性补写。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>青稞Talk 第 100 期不做单场技术报告，改办线上嘉年华：2025-12-28 全天五个板块（Infra、RL、具身智能、Agentic、LLM/MLLM），5 位主持人 + 22 位青年科学家（官网口径「20+ 位」），主题定为「回顾 2025，展望 2026」，外加一个向观众征集问题的青稞 AMA 特别环节。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>活动概览</h2>
+<p>官网正文给出的三条主线议题：</p>
+<ol>
+<li>回顾 2025 年最具突破性的 AI 技术瞬间；</li>
+<li>预判 2026 年智能演进的关键拐点；</li>
+<li>探讨高效 Infra、Agentic、具身学习与 LLM+RL 融合的未来路径。</li>
+</ol>
+<p>议程海报给出的环节安排（线上直播）：</p>
+<table>
+<thead>
+<tr>
+<th>时段</th>
+<th>板块</th>
+<th>主持人</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10:00–12:00</td>
+<td>Infra</td>
+<td>万信逸（Sea AI Lab（新加坡）算法工程师、新加坡国立大学博士生）</td>
+</tr>
+<tr>
+<td>13:30–15:00</td>
+<td>RL</td>
+<td>吕兴泰（清华大学博士生，导师为周伯文教授）</td>
+</tr>
+<tr>
+<td>15:00–16:30</td>
+<td>具身智能</td>
+<td>陈星宇（北京中关村学院研究员）</td>
+</tr>
+<tr>
+<td>16:30–18:00</td>
+<td>Agentic</td>
+<td>张桂彬（新加坡国立大学博士生，导师颜水成教授）</td>
+</tr>
+<tr>
+<td>18:00–19:30</td>
+<td>LLM/MLLM</td>
+<td>程家乐（清华大学博士生，师从黄民烈教授）</td>
+</tr>
+</tbody>
+</table>
+<p>12:00–13:30 海报未标注环节（见信息缺口）。</p>
+<p>共创伙伴：减论平台、DINQ.me、Mooncake、趋境科技（APPROACHING.AI）；合作伙伴：WebAgentLab、ModelScope 魔搭社区。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>各环节嘉宾（海报阵容；讲题官网未披露）</h2>
+<p>以下只记录海报印出的嘉宾姓名与头衔；每位嘉宾在环节内的具体分享题目与讨论问题，官网材料未披露，见文末缺口清单。</p>
+<p><strong>Infra（10:00–12:00，主持人万信逸）</strong></p>
+<ul>
+<li>章明星：清华大学计算机系副教授</li>
+<li>庄博涵：浙江大学研究员</li>
+<li>游凯超：vLLM Core Maintainer、清华大学博士</li>
+<li>朱子霖：智谱 AI RL Infra 工程师、slime 开源项目作者</li>
+<li>朱力耕：NVIDIA 研究员、MIT 博士</li>
+<li>张晗：RLite 作者、Founder of Yiven AI</li>
+</ul>
+<p><strong>RL（13:30–15:00，主持人吕兴泰）</strong></p>
+<ul>
+<li>崔淦渠：上海人工智能实验室青年科学家</li>
+<li>胡健：OpenRLHF 作者</li>
+<li>郑楚杰：通义千问研究员，Qwen3、QwQ 系列开源模型核心贡献者</li>
+<li>李英儒：CUHK 博士、某厂研究科学家</li>
+</ul>
+<p><strong>具身智能（15:00–16:30，主持人陈星宇）</strong></p>
+<ul>
+<li>于超：清华大学助理教授</li>
+<li>李浩然：中国科学院自动化研究所副研究员</li>
+<li>焦健浩：伦敦大学高级研究员</li>
+<li>王光明：剑桥博士后</li>
+</ul>
+<p><strong>Agentic（16:30–18:00，主持人张桂彬）</strong></p>
+<ul>
+<li>张绍磊：中国人民大学助理教授</li>
+<li>王鸿儒：爱丁堡大学博士后</li>
+<li>徐海洋：阿里通义实验室高级算法专家</li>
+<li>潘家怡：UC Berkeley 博士</li>
+</ul>
+<p><strong>LLM/MLLM（18:00–19:30，主持人程家乐）</strong></p>
+<ul>
+<li>刘子纬：新加坡南洋理工大学副教授</li>
+<li>薛复昭：Senior Research Scientist @ Google DeepMind</li>
+<li>谢天宝：香港大学博士，即将入职 OpenAI</li>
+<li>神秘嘉宾：海报标注「敬请期待」，身份未披露</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>特别环节：青稞 AMA（Ask Me Anything）</h2>
+<p>官网预告的互动环节：观众扫码加入「2025 “青稞” AI 嘉年华交流群」提交问题，优质提问在活动现场由嘉宾实时解答。预告页给出的示例问题方向：RL 训练为何难以稳定、具身智能离真实落地还有多远、Agentic 如何工程化落地、AGI 可行路径是否存在共识。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可迁移（从这期特辑看 2026 的选题与工程方向）</h2>
+<ul>
+<li>五个板块的切分本身是一份「2026 年值得继续跟踪的问题清单」：Infra 与 RL 各占一个整块，说明青稞社区把「RL 训练/推理 infra」当作独立于传统 LLM infra 的议题在组织——与本仓库后训练主线的关注点一致（可对照本合集 EP49 verl、EP68 slime、EP92 RLinf 等框架期）。</li>
+<li>AMA 的示例问题里，「RL 训练为何难以稳定」被放在第一个：训推一致性/数值精度类问题（参见 EP97 BF16→FP16、EP75 FlashRL 的 TIS）在 2026 仍是社区级共识痛点，值得在自己的 infra 实践里优先验证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>疑问 / 信息缺口</h2>
+<p>以下为官网材料<strong>未披露</strong>、本篇无法确证的内容（检索范围：官网活动页、海报、CSDN 转载；未找到活动后回顾报道）：</p>
+<ol>
+<li><strong>各环节的具体议题与圆桌题目未披露</strong>：海报只有板块名、时段与人员，没有每场的讨论主题清单。</li>
+<li><strong>每位嘉宾的分享题目未披露</strong>：无法判断各嘉宾是以个人报告、圆桌对谈还是闪电分享形式参与，及其各自讲题。</li>
+<li><strong>12:00–13:30 的空档未标注</strong>：海报在 Infra（结束 12:00）与 RL（开始 13:30）之间留白，是否午休或有未列环节，未说明。</li>
+<li><strong>神秘嘉宾身份未披露</strong>，且无事后报道可核实其最终人选。</li>
+<li><strong>活动实际执行与回放未披露</strong>：官网预告页未更新活动后回顾，未找到公开回放视频或图文实录；嘉宾是否全部按海报出席、AMA 实际答了哪些问题，均无从核实。</li>
+<li><strong>观众规模、报名方式细节未披露</strong>：仅有扫码预约/进群两个二维码，无人数数据。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句（官网活动页原文）</h2>
+<blockquote class="pq">
+<p>我们愿做“青年 AI 研究员 idea 加油站，AI 开发者的新能源充电桩”。</p>
+<p>—— 青稞社区自我定位，2025 “青稞” AI 嘉年华预告页</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

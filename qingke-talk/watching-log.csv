@@ -98,7 +98,7 @@ No,Title,BV,Duration,Date,Status,Notes
 97,从 BF16 到 FP16：如何解决RL训练-推理不匹配问题,,,2025-12-13,要点已提炼,episodes/EP97-bf16-fp16-rl.md
 98,SANA-Series：探索图像视频扩散模型的高效设计与加速,,,2025-12-16,要点已提炼,episodes/EP98-sana-series.md
 99,TRPO重生：大模型时代的信任域策略优化,BV1UgrKBNEJc,01:02:29,2025-12-20,要点已提炼,episodes/EP99-trpo-rebirth.md
-100,2025 “青稞” AI 嘉年华（第100期特辑）,,,2025-12-28,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
+100,2025 “青稞” AI 嘉年华（第100期特辑）,,,2025-12-28,要点已提炼,episodes/EP100-ai-carnival.md
 101,MiniMax M2.1：Agent 后训练经验与认知,BV1H8iCBEEgT,,2026-01-06,要点已提炼,episodes/EP101-minimax-m21-agent-posttraining.md
 102,从 TRPO 到 SAPO：大模型 RL 算法演进,,,2026-01-10,要点已提炼,episodes/EP102-trpo-sapo.md
 103,Decoupled DMD & DMDR: 在扩散模型步数蒸馏的实践及 Z-Image-Turbo 应用,BV1ZzrHB8ESf,00:44:22,2026-01-13,要点已提炼,episodes/EP103-decoupled-dmd-dmdr.md
@@ -117,7 +117,7 @@ No,Title,BV,Duration,Date,Status,Notes
 116,"RISE: 组合式世界模型，在""想象""中实现机器人策略的自主进化",BV1rnXhB9Ekf,01:11:16,2026-03-28,要点已提炼,episodes/EP116-rise.md
 117,OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾,BV1gp9LBwECf,01:04:46,2026-03-31,要点已提炼,episodes/EP117-openclaw-rl.md
 118,Puffin: 统一多模态空间智能大模型——从任意视角理解和生成世界,BV1aUDpB1Eyx,01:05:42,2026-04-07,要点已提炼,episodes/EP118-puffin.md
-119,,,,,todo,官网无预告文，标题/日期待补；B站119 Farm 为 bilibili-only，未回填本行
+119,FIPO：面向未来影响的策略优化,BV1cXDyBWEwr,,,要点已提炼,episodes/EP119-fipo-future-kl.md
 120,"VLANeXt：12条设计准则，从入门到精通的 VLA 终极""配方""",BV1Ztd6BDEDj,01:01:48,2026-04-14,要点已提炼,episodes/EP120-vlanext.md
 121,SimScale：真实世界仿真重塑端到端自动驾驶学习范式,BV1SQoUBcETB,00:52:51,2026-04-21,要点已提炼,episodes/EP121-simscale.md
 122,从 TTRL 到 URLVR：大模型的无监督强化学习还能走多远？,BV1w49rBsEr7,01:08:02,2026-04-27,要点已提炼,episodes/EP122-ttrl-urlvr.md
