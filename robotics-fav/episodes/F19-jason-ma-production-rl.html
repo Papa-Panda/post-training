@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F19 — Jason Ma：生产级机器人的 RL 迷思与数据飞轮——从 99.4% 成功率倒推什么才是真问题</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Robotics 收藏夹</span>
+    <h1>F19 — Jason Ma：生产级机器人的 RL 迷思与数据飞轮——从 99.4% 成功率倒推什么才是真问题</h1>
+    <p class="sub">Jason Ma 要破的是机器人行业对「演示成功率」的集体误读：演示视频里的 85% 成功率在生产环境等价于不可用，真正的基准是像折餐巾这种任务上的 99.4% 可靠性；而通往… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">公开报道中的讲者原话（非本场原话，仅供体味其口径）</a><a href="#sec-8">依据来源</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/episodes/F19-jason-ma-production-rl.html</p>
+<p>⚠️ <strong>还原版声明（非字幕实录）</strong>：截至本次提炼，未能取得本视频合格字幕（字幕接口当前串台/无轨）。本篇是基于讲者公开工作（论文、公司公告与公开演讲报道）重构演讲论点主线的<strong>还原版</strong>，不是字幕实录；文中数字与论点以讲者公开论文/演讲为准，可能与本场有出入，请勿当作原话引用。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>F19（收藏夹 Robotics 系列）</dd><dt>标题</dt><dd>[ICRA 2026]Jason Ma演讲：生产级机器人的RL迷思与数据飞轮（UP 拟题；官方场次为研讨会邀请报告，英文题目未公开）</dd><dt>讲者</dt><dd>Jason Ma（Yecheng Ma），Dyna Robotics 联合创始人；此前为 Google DeepMind 研究科学家，UPenn 机器人学习博士（Eureka、SERL、HIL-SERL 一线作者）</dd><dt>来源</dt><dd>Bilibili 收藏夹「Robotics」（UP geek_UNCLE），原视频链接 <a href="https://www.bilibili.com/video/BV1pFeh6VE5f/">https://www.bilibili.com/video/BV1pFeh6VE5f/</a></dd><dt>BV</dt><dd>BV1pFeh6VE5f</dd><dt>时长</dt><dd>00:36:09</dd><dt>场合</dt><dd>ICRA 2026「RL in the Era of IL」研讨会邀请报告（2026-06-01，维也纳；同场有 Robert Platt、Pulkit Agrawal、David Held、Sergey Levine 等，研讨会官网 <a href="https://rl4il-icra.github.io/">https://rl4il-icra.github.io/</a> ）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>提炼方式</dt><dd><strong>公开资料还原</strong>（非字幕）。主要依据见文末「依据来源」；凡属转述的数字均标（公开报道口径）。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Jason Ma 要破的是机器人行业对「演示成功率」的集体误读：演示视频里的 85% 成功率在生产环境等价于不可用，真正的基准是像折餐巾这种任务上的 99.4% 可靠性；而通往这种可靠性的路径不是更大的实验室演示集，而是「预训练 → 后训练 → 部署数据飞轮」的闭环——奖励模型把稀有失败自动转成可扩展的监督信号，真机 RL（人机在环）把策略练到超越示范者。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>1. 背景/问题：演示成功率是一场集体错觉</h3>
+<p>这是标题里「RL 迷思」的总纲，也是他近期公开演讲（如 AI Engineer 播客专场，公开报道口径）反复讲的开场。一段两分钟的演示视频看起来完美，但如果模型单次成功率只有 80%–90%，那它是一个「演示品」而不是「产品」。设单次成功率为 $p$ ，连续 $n$ 次全成功的概率为：</p>
+<p>$$P = p^n$$</p>
+<p>$p = 0.9$ 、 $n = 100$ 时， $P$ 只有约 $2.7 \times 10^{-5}$ 。餐厅折餐巾、洗衣房折毛巾、酒店处理布草这类任务要求的是整天连续运行， 80%–90% 的单次成功率在这种口径下是不可用的（nonstarter）。于是行业被夹在两个极端之间：<strong>通用基础模型</strong>能做很多任务、演示惊艳，但部署成功率上不去；<strong>专用流水线</strong>在单一任务上可靠，却无法迁移到新任务。Dyna 的立场（其创立命题）是：弥合这个鸿沟的唯一办法，是让商业部署本身成为研究流程的一部分，而不是研究做完之后的收尾环节。</p>
+<h3>2. 方法/设计之一：可靠性的来源是「失败信号」，不是更多成功演示</h3>
+<p>Dyna 的第一个公开结果 DYNA-1 正是为讲清这件事选的任务——折餐巾：商业上真实存在（餐厅后厨有专人手工折餐巾）、对并联夹爪的精度要求苛刻（必须从一摞里恰好拈出一张、第二道折缝偏差约一英寸即低于餐厅验收标准），且是可变形物体操作、状态空间近乎无限，无法穷举错误情形采集数据（讲者原话大意，公开报道口径）。</p>
+<p>标准预训练 + 后训练配方只能到约 80% 成功率，且失败模式很典型：<strong>模型在初始阶段表现正常，一旦出错就滑出训练分布、卡住、无法恢复</strong>——大多数演示视频正是在这里剪辑结束的。Dyna 的技术核心是让一个<strong>奖励/进度模型</strong>看机器人视频、输出 0 到 1 的任务进度分数：机器人出错时进度曲线会出现非单调回落，这就给出了失败的自动检测信号。由此形成「可扩展监督」（scalable supervision）：不需要人盯着一台已经 90% 正确的机器人去捕捉稀有失败，奖励模型在自主 rollout 中后台运行、标记失败，研究者据此做靶向的错误恢复数据采集、微调、再部署，循环往复。多个主动学习周期之后，模型泛化出了未被训练过的恢复行为（报道中最出彩的例子：机器人意外把整摞餐巾带翻后，自行执行拉拽、展开动作恢复并继续），成功率推进到 <strong>99.4%</strong>（公开报道口径）。可靠性验证的方式也很「生产级」：让机器人连续跑 24 小时（他引用了四次独立的 24 小时运行，含环境光随清晨变化而模型继续工作的片段）。</p>
+<h3>3. 方法/设计之二：数据飞轮——部署数据是金字塔顶端</h3>
+<p>为什么实验室数据不够？因为实验室与客户现场（餐厅、洗衣房、酒店的真实光照、人流干扰、物体堆放方式）之间存在分布鸿沟，再多「摆拍式」演示也补不上。Dyna 的数据策略是一个三层金字塔（公开报道口径）：塔底是离体数据（穿戴相机的人体第一视角视频、公开数据集，部分仿真数据在考虑中）；中层是在机器人本体上多场景、多任务采集的数据；塔顶最稀少也最有价值的是<strong>部署数据</strong>——只有它与任务真实分布同分布，能直接闭合训练—部署的差距。配合的模型架构是「高层推理模型 + 低层世界动作模型（world action model）」双层：前者负责语义理解，后者输出精细、高频的灵巧动作，因为真实物理任务既需要知道「这是什么」，也需要在出错时即时恢复。金字塔的回报体现在样本效率：若干基准任务（清垃圾、开箱、折毛巾、折 T 恤）根本不在预训练数据里，用不到 1 小时的任务数据后训练就能「反复完成而不失败」（公开报道口径）。</p>
+<p>飞轮闭环的极端演示是把机器人直接空运到没采集过数据的环境：CoRL 2025（韩国）展会现场，机器人抵达展位后连续折 T 恤三天，期间观众反复捣乱（甚至用 T 恤盖住摄像头）；以及与 Red Bull 合作在音乐节现场开罐（背景光照不断变化）。他给出的目标形态是：把机器人带到现场，它直接开始工作。</p>
+<h3>4. 结论/观点：几条「迷思」与对应的反命题</h3>
+<p>以下按讲者一贯公开论点重组，均非本场逐字原话：</p>
+<ul>
+<li><strong>迷思：成功率 80%–90% 就「基本解决了」</strong>。反命题：按连续运行口径，生产级基准是 99%+；评估方式应该是 24 小时连续运行 + 多客户站点，而不是剪辑好的演示片段。</li>
+<li><strong>迷思：通用与专用是二选一</strong>。反命题：预训练的「广度」恰恰是可靠性的来源——模型在上千个任务上见过的恢复行为能被插值迁移到新任务，在新任务上「按需执行」；从一开始就专用化，等于放弃这批物理经验，模型反而更脆弱。配方是<strong>预训练（通用物理先验）→ 后训练（少量任务数据）→ 主动学习（失败驱动）</strong>。</li>
+<li><strong>迷思：RL 在真机上不可行，要靠纯模仿</strong>。反命题来自他自己的学术工作：HIL-SERL（人机在环 SERL）在真实机器人上 1–2.5 小时训练即达到近完美成功率（连接器装配、插 RAM、穿同步带等精密任务）；在相同人类数据量下，RL 策略的成功率平均比模仿学习高 101%、周期时间快 1.8 倍——因为 RL 不被示范者的水平锁死，还能学到示范里没有的快速闭环恢复策略。更早的 Eureka 则说明奖励这一环可以被规模化：LLM 生成的奖励函数在 29 个任务中 83% 胜过人类专家手写奖励（平均归一化提升 52%），并练出了 Shadow Hand 转笔。Dyna 的奖励模型做法是这条学术线（奖励设计自动化）在工业部署中的续篇。</li>
+<li><strong>迷思：数据质量是数据的固有属性</strong>。他另一个反复讲的观点是「数据质量随机器人形态而变」：2020 年前后发布的四千小时量级第一视角数据集当年近乎无用，直到人形机器人形态足够接近人类才被盘活（公开报道口径）；因此数据管线应该能随硬件演进重新估值、持续接入新分布，而不是一次性清洗定稿。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<blockquote class="pq">
+<p>以下数字均来自讲者公开论文/公司报道，非本场字幕；口径差异已注明。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>折餐巾单次成功率</td>
+<td>预训练+后训练约 80%（出错即出分布、无法恢复）</td>
+<td>99.4%（奖励模型 + 多轮主动学习/恢复数据采集后；含 24 小时连续运行验证）</td>
+<td>DYNA-1，公开报道口径</td>
+</tr>
+<tr>
+<td>新任务后训练数据量</td>
+<td>预训练数据中无该任务</td>
+<td>不到 1 小时任务数据即可反复完成不失败</td>
+<td>公开报道口径</td>
+</tr>
+<tr>
+<td>数据金字塔总量</td>
+<td>机器人真实交互数据稀缺</td>
+<td>训练管线 20 万+ 小时（三层：离体/本机/部署）</td>
+<td>公开报道口径</td>
+</tr>
+<tr>
+<td>HIL-SERL 真机训练时长</td>
+<td>早期方法被认为不可行的真机 RL</td>
+<td>1–2.5 小时达到近完美成功（多项精密装配/灵巧任务）</td>
+<td>HIL-SERL 论文（arXiv:2410.21845）</td>
+</tr>
+<tr>
+<td>RL vs IL（同等人类数据量）</td>
+<td>IL</td>
+<td>成功率平均 +101%、周期时间 1.8×</td>
+<td>HIL-SERL 论文</td>
+</tr>
+<tr>
+<td>Eureka 奖励设计</td>
+<td>人类专家手写奖励</td>
+<td>29 个任务 83% 胜出，平均归一化提升 52%</td>
+<td>Eureka 论文（arXiv:2310.12931）</td>
+</tr>
+</tbody>
+</table>
+<p>（注：讲者所在公司 2026 年 8 月发布的后继工作 DYNA-2 宣称用 100 万+ 小时人类第一视角视频预训练、零机器人数据、新任务 13 分钟微调——晚于本场演讲两个月，不计入本场内容，仅供对照其后续走向；该数据为公司自报、未经独立基准验证。）</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 coding data / RL infra 工作的直接可试点：<strong>把「失败自动检测」做成一等公民基础设施</strong>。Dyna 的奖励进度模型（进度曲线非单调 ⇒ 失败）本质是轨迹级 verifier：对 agent 训练同理，逐步进度/回落信号比终局成败更适合做靶向数据采集——优先回灌「出错点附近」的恢复轨迹，而不是均匀加数据。这与 HIL-SERL「人在失败边界处纠偏」的数据分布是同一件事的自动化版本。</li>
+<li>Infra 视角的启发：<strong>评测口径决定上限</strong>。单次成功率是演示口径，连续运行成功率（ $p^n$ ）是产品口径；agent 评测若只报单 episode pass@1，会系统性高估长程任务的可用性，长程基准应报「连续 N 次全成功率」一类口径。</li>
+<li>泛化不是可靠性的敌人：广预训练攒下的「恢复行为库」可被新任务插值调用——在后训练里保留任务多样性（而非过早收窄到目标分布），可能比极致专用化更鲁棒。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>99.4% 是在「现场采集过数据」的部署里拿到的；CoRL/Red Bull 的零现场数据演示到底依赖多少隐性适配（标定、夹爪、任务选择），公开报道没有量化，这是判断「飞轮已转起来」还是「精心准备的演示」的关键。</li>
+<li>奖励进度模型自身的误检率、以及它对新任务需要多少标注才能冷启动，没有公开数字；这是该配方能否横向复制到其他公司的决定性细节。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>公开报道中的讲者原话（非本场原话，仅供体味其口径）</h2>
+<blockquote class="pq">
+<p>「你不可能为所有错误情形穷举采集数据。」（"It's impossible to exhaustively collect data for all the error cases"，AI Engineer 播客专场，谈及折餐巾这种可变形物体操作时，公开报道口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>依据来源</h2>
+<ul>
+<li>研讨会官网（场次、日程、讲者名单）：https://rl4il-icra.github.io/</li>
+<li>HIL-SERL: Precise and Dexterous Robotic Manipulation via Human-in-the-Loop Reinforcement Learning（Luo et al. 2024，arXiv:2410.21845）</li>
+<li>Eureka: Human-Level Reward Design via Coding Large Language Models（Ma et al. 2023，arXiv:2310.12931，ICLR 2024）</li>
+<li>Dyna Robotics / DYNA-1、DYNA-2 公开报道与公司公告（含 AI Engineer 播客专场报道）</li>
+</ul>
+<blockquote class="pq">
+<p>⚠️ <strong>还原版声明重申</strong>：未能取得本视频合格字幕，本篇为基于讲者公开工作的还原版而非字幕实录，数字与论点以讲者公开论文/演讲为准、可能与本场有出入。日后若拿到本视频字幕，应以字幕实录版替换本篇。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
