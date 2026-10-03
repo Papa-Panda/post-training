@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">问答补充</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -147,7 +147,10 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Post-shield 为什么不破坏 learner 的收敛保证？</strong> Shield 在 learner 之后改写动作，agent 实际交互的已经是"被修正过的 MDP"了——Alshiekh 凭什么还能谈收敛？Minimal intervention 在这里起了什么关键作用？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">期望级</div><div class="farrow">→</div><div class="fnode">概率级</div><div class="farrow">→</div><div class="fnode">逐时刻证书</div><div class="farrow">→</div><div class="fnode">证书+运行时仲裁</div></div>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充</h2>
+<p>（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">期望级</div><div class="farrow">→</div><div class="fnode">概率级</div><div class="farrow">→</div><div class="fnode">逐时刻证书</div><div class="farrow">→</div><div class="fnode">证书+运行时仲裁</div></div>
 <h3>1. Motivation</h3>
 <ul>
 <li>Baseline 为什么不行：Day19 的 PPO / Day20 的 RLPD / Day11–14 的 VLA 全是 <strong>reward 最大化器</strong>——它们的数学里没有"不许"这个词。真机上，一次关节超限可能烧电机、一次跌倒可能砸坏人形机器人（Day07/08 的 H1/XBot）、一次误抓可能伤人。仿真里 cost 只是数字，真机上 cost 是硬件和人身。</li>
@@ -211,7 +214,7 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>统一到之前 Days 的数学线</strong>：Day06 Dreamer 的 RSSM 学的是信念 $b(s)$ （"世界长什么样"），Day29 的 $h$ / $Q_{\text{risk}}$ 学的是<strong>危险度量</strong>（"离灾难多远"）——一个管认知，一个管生存。Day21 的 $p_\phi$ 管"世界分布多宽"，Day29 的 $\mathcal{C}$ 管"状态空间哪里不许去"——分布覆盖 vs 集合禁区。Day28 的二项估计 $\hat{J}$ 回答"多成功"，Day29 的四层栈回答"多安全"——<strong>成功率和安全是两个正交的测度</strong>，Day30 的数据飞轮 gate 必须同时看两者。</p>
 <p><strong>数学模型没覆盖的</strong>：① CBF 要<strong>手写</strong> $h$ ——"离人不小于 $d_{\min}$ "好写，"别把热汤洒到小孩身上"难写成 $h(x)\ge 0$ ；学 CBF（learning CBF）正在补，但证书的"证"字就打了折；② 高相对度系统（relative degree &gt; 1，如位置约束靠力矩控制，中间隔了两阶导）CBF 条件退化，需要 high-order CBF，公式变复杂、保守性上升；③ Shield 要<strong>离散抽象</strong>——连续机器人状态得先抽象成有限自动机，抽象本身可能漏掉真风险；④ RTA 的 monitor 谓词若太保守，备份控制器频繁接管，ML 策略等于没部署——"安全但无用"是 RTA 最常见的死法。</p>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
 <ul>
 <li>方法在 held-out 上是否 transfer？安全方法的 transfer 形态特殊：<strong>证书 transfer，策略不 transfer</strong>——CBF 的 $h$ （如"关节限位""最小人机距离"）是物理常识，换机器人、换任务照用；而 CMDP 的 $\lambda$ / $Q_{\text{risk}}$ 跟任务绑定。Shield 的 LTL 规范是任务相关的，但"合成 shield"的<strong>工具链</strong>可复用。模型 vs 框架：这里<strong>框架（四层栈的划分方式）贡献 &gt;&gt; 单个算法</strong>。</li>
 <li>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</li>
@@ -220,33 +223,30 @@ pre code{background:none;padding:0;color:inherit}
 <li>Infra 视角：可扩展性（CBF-QP 是每步一个小 QP，kHz 可解；shield 是查表/自动机，O(1)）/ 成本（safe-control-gym 的符号动力学让约束可审计，省掉真机试错成本）/ 评测自动化（Safety-Gymnasium 把 $J_c$ 变成标准 API 字段）/ 可复现性（约束写成 $h$ / $\varphi$ 就是可版本化的合同）。</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：High-order CBF（相对度 &gt; 1）在实际机械臂力矩控制里到底多保守？论文多是仿真和小车——人形机器人（Day07/08 的 H1/XBot）上有没有 CBF 落地的实证？这是 Q2 的实证缺口。</li>
 <li>如果要复现 / 小规模试，第一个实验做什么：pip 装 safe-control-gym，跑通 cart-pole 的约束稳定任务；先训一个无约束 PPO 记录约束违反率，再套 CBF-QP 滤波器（手写 $h(x)=x_{\text{lim}}-|x|$ ）看违反率 → 0 且任务性能掉多少——亲手摸一下"安全税"（safety tax）。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>"Reinforcement learning algorithms discover policies that maximize reward, but do not necessarily guarantee safety during learning or execution phases."（Alshiekh et al., Shielding 摘要首句——整个 Day29 的合法性来源：reward 最大化器天生没有"不许"。）
 "Safety conditions are specified in terms of forward invariance of a set, and are verified via two novel generalizations of barrier functions."（Ames et al., CBF-QP 摘要——安全的数学定义：一个集合的前向不变性。）</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 System（四层栈）/ Training（安全基准）/ Key Tricks / Results / 可迁移</li>
 <li>保留并完善「和之前工作的关系」小节</li>
 <li>数学视角：安全三级跳 $\max J_r \to J_c\le d \to \dot h\ge -\alpha(h) \to \text{monitor}\triangleright(u_c,u_s)$ ；期望可平均、逐点不可平均； $\alpha$ / $\gamma$ 是保守-灵活旋钮；shield 最小干预保收敛；贯穿"端热汤"四层实例</li>
 </ul>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
 <ul>
 <li>上一篇: day-28-maniskill-robosuite-eval（ManiSkill3 / robosuite 可复现评测基准；Day28 的 $S$ 只判成功不判安全 → Day29 补安全维度）</li>
 <li>下一篇预告: day-30-physical-ai-eval-data-flywheel（Physical AI Eval + Data Flywheel — 成功率 $\hat{J}$ 与安全四层栈合流，组成 release gate 的双测度）</li>
 </ul>
-</section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>问答补充</h2>
-<p>（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）</p>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RLPD</h4><ul><li>油门</li><li>50/50 采样 + 高 UTD 让真机在线 RL 可行</li></ul></div><div class="vscol vs-b"><h4>安全栈</h4><ul><li>刹车</li><li>shield/CBF</li><li>没有刹车不敢上真机</li></ul></div></div>
 <div class="viz viz-flow flow"><div class="fnode">CMDP 期望约束</div><div class="farrow">→</div><div class="fnode">CBF 逐轨迹证书</div><div class="farrow">→</div><div class="fnode">RTA 运行时监护</div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-29-safe-robot-learning/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

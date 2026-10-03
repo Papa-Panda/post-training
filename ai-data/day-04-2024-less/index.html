@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">官方 Repo</a><a href="#sec-8">第二轮复习（2026-09-04）</a><a href="#sec-9">原文链接</a><a href="#sec-10">问答补充（2026-09-04）</a><a href="#sec-11">问答补充（2026-09-11）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">可迁移</a><a href="#sec-5">疑问 / 下一步</a><a href="#sec-6">原文金句 (1-2句)</a><a href="#sec-7">官方 Repo</a><a href="#sec-8">第二轮复习（2026-09-04）</a><a href="#sec-9">问答补充（2026-09-04）</a><a href="#sec-10">问答补充（2026-09-11）</a><a href="#sec-11">原文链接</a></nav>
   </details>
   <section class="sec" id="sec-0"><blockquote class="pq">
 <p>📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/</p>
@@ -237,13 +237,7 @@ $$\lambda\to 0,\qquad \lambda\to\infty$$</li>
 </ul>
 <p>答案不许只复述 LESS 原文；必须实质用到至少两篇对比论文的机制。</p>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>原文链接</h2>
-<ul>
-<li>Paper: https://arxiv.org/abs/2402.04333</li>
-<li>GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less</li>
-</ul>
-</section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>问答补充（2026-09-04）</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>问答补充（2026-09-04）</h2>
 <p>本节收录 2026-09-04 晚侧聊中的用户问答（已按"先问题、再推导、最后几何含义"整理为结构化条目），不改动上方既有内容。</p>
 <h3>Q1：BM25 是什么</h3>
 <p>BM25 是经典的信息检索相关度公式：给定查询 $q$ 与文档池，按相关度排序文档。核心三项——词频（边际递减）、逆文档频率（罕见词权重高）、长度归一化（惩罚堆词长文档）：</p>
@@ -293,7 +287,7 @@ $$\lambda\to 0,\qquad \lambda\to\infty$$</li>
 <p>中间是一个"去掉大小、只看对齐"的类比跳跃，<strong>不是等价变换</strong>。LESS 的价值在于把 TracIn 的 SGD 近似换成了更接近训练现实的 Adam 视角；但若把它当成严格的反事实数学，就走远了。</p>
 <p><strong>知识图谱关系</strong>：Q3–Q5 共同构成了"LESS 计分规则的完整推导链条"，上接本 NOTES"核心 §2 Data Pipeline（Adam 修正后的 influence）"与"第二轮复习 §1 核心命题"，下接 Day 19 Vendi / Day 24 D4 的"单均值 + 无 diversity"缺口讨论。Q1–Q2 澄清了 BM25 的准确位置：LESS 实验的文本相似度对照基线（与 random、DSIR、RDS 并列），非 30 篇阅读路线成员。</p>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>问答补充（2026-09-11）</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>问答补充（2026-09-11）</h2>
 <p>本节收录 2026-09-11 晚侧聊中的用户问答，问题来自上方"疑问 / 下一步"的两个开放问题。不改动上方既有内容。</p>
 <h3>Q6：code generation 的 target 靶子怎么写（execution trace + rejection sampling）</h3>
 <p>用户在初读疑问的基础上进一步提出：code generation 搜索空间更大，few-shot 靶子应该用 rejection sampling。</p>
@@ -314,7 +308,13 @@ $$\lambda\to 0,\qquad \lambda\to\infty$$</li>
 <p><strong>反直觉的一半</strong>：proxy 太强也坏。若在靶子上 $\text{pass@1} \approx 1$ 、loss $\approx 0$ ，梯度趋于 0，Adam 归一化 $\hat{m}/\sqrt{\hat{v}}$ 退化为小量比值，方向被残余的个别难 token 主导 → 噪声。因此 sweet spot 是 $0 &lt; \text{pass@k} &lt; 1$ ：靶子落在 proxy 自己的最近发展区（ZPD）内——ZPD 概念在 Day11 用于数据选择，这里平移到 proxy 选择。</p>
 <p><strong>临界点不是模型大小，是 (proxy, target) 的关系</strong>：靶集 $\mathcal{V}$ 是否落在 proxy 的 ZPD 内。可操作的 pilot test（跑完整 LESS 前先做）：① 可达性门槛：proxy 在靶难度上测 $\text{pass@k}$ （ $k=10$ 或 $50$ ）； $\approx 0$ 直接判死刑， $\approx 1$ 则信号太弱。② 排名相关性：在 1–2k 候选子集上分别用小 proxy 与 7B 参考算 LESS 分数，看 Spearman 相关性；显著低则梯度几何对不上，transfer 不可信。</p>
 <p><strong>对 coding 1B 的判断</strong>：取决于靶难度。HumanEval-easy 级（基础函数合成），1B code 模型通常 $\text{pass@k} &gt; 0$ ，错误是技能相关的 → 可能够，应用上述测试验证而非直接否定；LiveCodeBench-hard / 竞赛级 $\text{pass@k} \approx 0$ ，正确解在其可达分布外 → 不够。经验法则（待验证的 heuristic，非定理）：proxy 在靶难度上最好有 20%+ 的 $\text{pass@k}$ ；选 proxy 不是越大越好，是选"刚好够得着靶子"的那个。</p>
-<p><strong>知识图谱关系</strong>：Q6 承接 §4.1"target 锚点误设"与 §6 思考题（单均值 + 无 diversity 缺口），并把 Day11 的 outcome-only 盲区与"蒸馏 frontier 数据"逻辑复用到 target 构造；Q7 把 Day11 的 ZPD 从数据选择平移到 proxy 选择，并给出 transfer 可信度的可操作检验。</p></section>
+<p><strong>知识图谱关系</strong>：Q6 承接 §4.1"target 锚点误设"与 §6 思考题（单均值 + 无 diversity 缺口），并把 Day11 的 outcome-only 盲区与"蒸馏 frontier 数据"逻辑复用到 target 构造；Q7 把 Day11 的 ZPD 从数据选择平移到 proxy 选择，并给出 transfer 可信度的可操作检验。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文链接</h2>
+<ul>
+<li>Paper: https://arxiv.org/abs/2402.04333</li>
+<li>GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less</li>
+</ul></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-04-2024-less/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>

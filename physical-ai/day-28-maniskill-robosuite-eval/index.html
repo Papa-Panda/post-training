@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">问答补充</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -146,7 +146,10 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Benchmark 的覆盖 vs 可比 trade-off</strong>：robosuite 的"模块化"（robot × arena × object × controller 正交组合，组合爆炸）vs ManiSkill3 的"12 类任务模板"（固定协议、模板可扩展）。评测设计上，覆盖广度（能测的组合越多越好）和可比性（所有人测的是同一份试卷）如何取舍？为什么 ManiSkill3 选择"多做模板、少做穷举"（论文明说核心不是每个类别建很多环境，而是建很多用户可扩展的模板）？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">采集</div><div class="farrow">→</div><div class="fnode">回放</div><div class="farrow">→</div><div class="fnode">利用 demo 数据学习</div></div>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充</h2>
+<p>（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">采集</div><div class="farrow">→</div><div class="fnode">回放</div><div class="farrow">→</div><div class="fnode">利用 demo 数据学习</div></div>
 <h3>1. Motivation</h3>
 <ul>
 <li>机器人学不像 vision/language，没有好的数据集可训（论文原话："there are still no good datasets for robotic manipulation"）。两条路：真机遥操作采集（贵、慢、成功率低）或真机 RL（setup 贵、reward/reset 难）。</li>
@@ -204,7 +207,7 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>与 Day21 DR 的统一</strong>：Day21 的 $J_{\text{DR}}(\theta)=\mathbb{E}_{\xi\sim p_\phi}[J(\theta;\xi)]$ 里 $p_\phi$ 是<strong>训练</strong>分布；Day28 的 $J(\pi)$ 里 $p_\phi$ 是<strong>评测</strong>分布——同一个数学对象，两种角色。Day24 SimOpt 的"有锚辨识"（用真机行为残差更新 $p_\phi$ ）则是在<strong>校准</strong>这个分布：benchmark 固定 $p_\phi$ 当合同，SimOpt 让合同向真机对齐。Day30 的数据飞轮 gate，本质上就是" $p_\phi$ 校准 → 大 $N$ 评测 → 达标放行"的闭环。</p>
 <p><strong>数学模型没覆盖的</strong>：① 成功判据 $S$ 是二值的，掩盖了"怎么成功的"（轨迹质量、力控安全性）——Day29 的 CBF/shield 正是补这一块；② $p_\phi$ 再宽也只是<strong>参数化不确定性</strong>，结构性缺失（没建模的接触模态、线缆、阴影）不在支撑集里——论文 Appendix VIII 的 Koch sim2real 诚实注脚（没建模阴影/线缆仍成功）恰好说明：transfer 的充分条件比"测度覆盖真机"更弱，这是理论空白；③ FPS/显存数字是特定任务+分辨率+GPU 下的点估计，换任务可能不成立（论文 Fig 2 caption 自己声明了这点）。</p>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
 <ul>
 <li>方法在 held-out 上是否 transfer？ManiSkill3 的 transfer 证据是 Koch pickcube 的 sim2real（Fig 13）与 digital twin setups；robosuite 的 transfer 证据是下游（robomimic 等）沿用其任务/数据协议。模型 vs 框架：这里<strong>框架贡献 &gt;&gt; 单个模型</strong>——benchmark 的价值在于被复用，不在于单次 SOTA。</li>
 <li>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</li>
@@ -213,33 +216,30 @@ pre code{background:none;padding:0;color:inherit}
 <li>Infra 视角：可扩展性（30k FPS、异构仿真）/ 成本（显存 2–3×↓ ⇒ 单卡可跑）/ 评测自动化（基线套件 + demo 管线开箱）/ 可复现性（Apache-2.0 + 固定 $p_\phi$ + 轨迹回放）——ManiSkill3 是"评测即服务"的开源实现。</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：异构仿真下 PPO 的 batch 内跨 env advantage 方差到底多大？论文没有给"同构 vs 异构"的 RL 收敛曲线对照——这是 Q2 的实证缺口，值得自己跑一个对照实验（固定总 env 数，一组同构、一组异构，看 sample efficiency 与最终 $J$ ）。</li>
 <li>如果要复现 / 小规模试，第一个实验做什么：pip 装 ManiSkill3，跑通 PickCube 的 PPO visual baseline，记录 sim+render FPS 与 128 env 显存占用，复现论文 Fig 2/Fig 4 的数量级；再把 $N=1000$ 的 $\hat{J}$ 置信区间算出来，体会"吞吐→精度"的链条。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>"Simulation has enabled unprecedented compute-scalable approaches to robot learning."（摘要首句——整个 Day28 的合法性来源：仿真让机器人学习第一次有了"算力可扩展"的入场券。）
 "Tasks that used to take hours to train can now take minutes."（贡献①——visual RL 的 wall-clock 从小时到分钟，这是 benchmark 能跑出统计显著性的物质基础。）</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 System / Training / Key Tricks / Results / 可迁移</li>
 <li>保留并完善「和之前工作的关系」小节</li>
 <li>数学视角：评测 = 固定测度 $p_\phi$ 下的 $J(\pi)$ 估计；二项方差公式给出 $N$ 预算；异构仿真 = 空间平均替代时间平均；与 Day21/24/27/30 的统一</li>
 </ul>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
 <ul>
 <li>上一篇: day-27-2025-cosmos-world-foundation（Cosmos 世界基础模型平台；Day27 Q3"缺评测协议"→ Day28 正解）</li>
 <li>下一篇预告: day-29-safe-robot-learning（Safe Robot Learning — 约束 MDP / CBF / shield / runtime monitor： $S$ 只判成功不判安全，Day29 补"怎么成功"的约束）</li>
 </ul>
-</section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>问答补充</h2>
-<p>（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）</p>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">128×</div><div class="l">128 单相机</div></div></div>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>MuJoCo CPU 栈</h4><ul><li>模块化标准</li><li>无并行渲染</li></ul></div><div class="vscol vs-b"><h4>ManiSkill3</h4><ul><li>GPU 并行渲染</li><li>visual RL 几分钟 vs 几小时</li></ul></div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-28-maniskill-robosuite-eval/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

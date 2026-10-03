@@ -37,6 +37,9 @@ Roadmap Day29 的官方主题就是"约束 MDP、control barrier function、shie
 2. **CBF-QP 里 class- $\mathcal{K}$ 函数 $\alpha$ 的物理含义是什么？** 约束 $L_f h+L_g h\,u\ge -\alpha(h)$ 中取 $\alpha(h)=\gamma h$ （线性）时， $\gamma$ 大/小分别对应什么驾驶风格？保守和灵活的 trade-off 在公式里藏在哪？
 3. **Post-shield 为什么不破坏 learner 的收敛保证？** Shield 在 learner 之后改写动作，agent 实际交互的已经是"被修正过的 MDP"了——Alshiekh 凭什么还能谈收敛？Minimal intervention 在这里起了什么关键作用？
 
+## 问答补充
+（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）
+
 ## 核心
 
 ### 1. Motivation
@@ -152,9 +155,6 @@ $$\underbrace{\max_\pi J_r}_{\text{Day19 PPO}}\;\to\; \underbrace{\max_\pi J_r\ 
 ## 连接
 - 上一篇: day-28-maniskill-robosuite-eval（ManiSkill3 / robosuite 可复现评测基准；Day28 的 $S$ 只判成功不判安全 → Day29 补安全维度）
 - 下一篇预告: day-30-physical-ai-eval-data-flywheel（Physical AI Eval + Data Flywheel — 成功率 $\hat{J}$ 与安全四层栈合流，组成 release gate 的双测度）
-
-## 问答补充
-（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）
 
 <!-- viz:vs: RLPD | 油门; 50/50 采样 + 高 UTD 让真机在线 RL 可行 || 安全栈 | 刹车; shield/CBF; 没有刹车不敢上真机 -->
 <!-- viz:flow: CMDP 期望约束 → CBF 逐轨迹证书 → RTA 运行时监护 -->

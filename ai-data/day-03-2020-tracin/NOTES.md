@@ -64,7 +64,6 @@ Influence Functions 要 $H^{-1}$ ，贵、不稳、非凸不成立。作者问�
 - PyTorch toy: `tracin_demo.py` (本文件夹)
 - Blog: https://research.google/blog/tracin-a-simple-method-to-estimate-training-data-influence/
 
-
 ## 第二轮复习（2026-09-03）
 
 ### 1. 核心命题
@@ -153,12 +152,53 @@ $$\mathrm{TracInCP}(z,z)=\sum_k\eta_k\|\nabla\ell(w_{t_k},z)\|_2^2\ge 0.$$
 - 如何给 LESS 加上 language / repo / task coverage 约束，防止目标平均梯度吞掉 Rust 长尾；
 - 哪些跨 seed、跨 target slice、固定 token budget 的证据，才足以把该样本从默认保留改为删除。
 
+## 问答补充（2026-09-04）
+
+本节收录 2026-09-04 晚侧聊中关于 TracIn 的用户问答，不改动上方既有内容。
+
+### Q：TracIn 的数学怎么做
+
+记号： $z=(x,y)$ 为训练样本， $z_{\text{target}}$ 为目标样本， $z_t$ 为第 $t$ 步实际采到的数据。
+
+TracIn 的问题：**在真实的训练路径上，训练样本 $z$ 在哪一步、朝哪个方向改变了目标 loss？**它不问"删掉它会怎样"（那是 Influence 的问题），也不问"文本有多像"（那是 BM25 的问题），而是问训练中**实际发生过什么**。
+
+**理想版本：loss 降幅的逐点分解**
+
+$$\mathrm{TracIn}_{\text{ideal}}(z,z_{\text{target}})=\sum_{t:\,z_t=z}\left[L(z_{\text{target}},\theta_t)-L(z_{\text{target}},\theta_{t+1})\right]$$
+
+这是一个完美守恒账本：对所有训练样本求和，恰好等于目标样本从训练开始到结束的**总 loss 降幅**。
+
+**关键一步：SGD 一阶展开把 loss 降幅写成梯度点积**
+
+$$\theta_{t+1}=\theta_t-\eta_t g(z_t,\theta_t)\quad\Longrightarrow\quad S_{\text{TracIn}}(z,z_{\text{target}})\approx\sum_{t:\,z_t=z}\eta_t\,g_{\text{target}}(\theta_t)^\top g(z_t,\theta_t)$$
+
+点积含义：同向 → 帮目标 loss 下降（proponent）；反向 → 让目标 loss 上升（opponent）。
+
+**现实版本：TracInCP 的两个近似**
+
+$$S_{\text{TracInCP}}(z,z_{\text{target}})=\sum_{k=1}^{K}\eta_k\,g_{\text{target}}(\theta_{t_k})^\top g(z,\theta_{t_k})$$
+
+近似 1：区间内样本真正被访问时的参数，用 checkpoint 参数替代；近似 2：假设每个区间每条数据被访问一次、学习率恒定。checkpoints 不是越晚越好：早期 loss 震荡大一阶近似差，完全收敛后梯度太小没信息；最好选在 **loss 稳定快速下降的阶段**。
+
+**Self-influence 的几何含义**：令目标等于自己：
+
+$$S_{\text{TracInCP}}(z,z)=\sum_k\eta_k\|g(z,\theta_{t_k})\|_2^2\ge 0$$
+
+永远非负，本质是**沿训练路径累计的梯度能量**。错标数据常因长期难拟合而梯度大，排名靠前；但正确的长尾/长 sequence/难题也一样——它是**人工审计优先级**，不是自动删除的判决。
+
+**与 Influence 的数学关系**（呼应本 NOTES"数学补充"第 3 节）：把 $g_*,g_z$ 在 Hessian 特征方向上的分量记为 $a_i,b_i$ 、曲率为 $\lambda_i$ ，则
+
+$$S_{\text{IF}}=\sum_i\frac{a_i b_i}{\lambda_i},\qquad S_{\text{TracIn}}\propto\sum_i a_i b_i$$
+
+TracIn 对所有方向做普通点积；Influence 用 $1/\lambda_i$ 做曲率校正。Influence 是**一次扰动经未来优化传播后的总效果**，TracIn 是**真实训练路径上的即时记账**（真实 trajectory 隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式精确的 $H^{-1}$ ）。
+
+一句话：**TracIn 是 loss 降幅的训练路径分解；Influence 是删点权重变化的重新优化响应。**
+
 ## 原文链接
 - Paper: https://arxiv.org/abs/2002.08484
 - NeurIPS PDF: https://proceedings.neurips.cc/paper/2020/file/e6385d39ec9394f2f3a354d9d2b88eec-Paper.pdf
 - Official code: https://github.com/frederick0329/TracIn
 - GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-03-2020-tracin
-
 
 ## 数学补充：TracIn 与 Influence Functions 的统一推导
 
@@ -235,45 +275,3 @@ $$H^{-1}\approx\eta\sum_{j=0}^{\infty}(I-\eta H)^j.$$
 $$L_*(\theta+\Delta\theta_z)-L_*(\theta)\approx g_*^\top\Delta\theta_z,$$
 
 其中 $\Delta\theta_z$ 包含一阶矩、二阶矩、裁剪、weight decay 与学习率调度。直接使用 $\eta g_*^\top g_z$ 只是 SGD 近似，这正是 Day 04 LESS 引入 optimizer-aware update representation 的动机。
-
-## 问答补充（2026-09-04）
-
-本节收录 2026-09-04 晚侧聊中关于 TracIn 的用户问答，不改动上方既有内容。
-
-### Q：TracIn 的数学怎么做
-
-记号： $z=(x,y)$ 为训练样本， $z_{\text{target}}$ 为目标样本， $z_t$ 为第 $t$ 步实际采到的数据。
-
-TracIn 的问题：**在真实的训练路径上，训练样本 $z$ 在哪一步、朝哪个方向改变了目标 loss？**它不问"删掉它会怎样"（那是 Influence 的问题），也不问"文本有多像"（那是 BM25 的问题），而是问训练中**实际发生过什么**。
-
-**理想版本：loss 降幅的逐点分解**
-
-$$\mathrm{TracIn}_{\text{ideal}}(z,z_{\text{target}})=\sum_{t:\,z_t=z}\left[L(z_{\text{target}},\theta_t)-L(z_{\text{target}},\theta_{t+1})\right]$$
-
-这是一个完美守恒账本：对所有训练样本求和，恰好等于目标样本从训练开始到结束的**总 loss 降幅**。
-
-**关键一步：SGD 一阶展开把 loss 降幅写成梯度点积**
-
-$$\theta_{t+1}=\theta_t-\eta_t g(z_t,\theta_t)\quad\Longrightarrow\quad S_{\text{TracIn}}(z,z_{\text{target}})\approx\sum_{t:\,z_t=z}\eta_t\,g_{\text{target}}(\theta_t)^\top g(z_t,\theta_t)$$
-
-点积含义：同向 → 帮目标 loss 下降（proponent）；反向 → 让目标 loss 上升（opponent）。
-
-**现实版本：TracInCP 的两个近似**
-
-$$S_{\text{TracInCP}}(z,z_{\text{target}})=\sum_{k=1}^{K}\eta_k\,g_{\text{target}}(\theta_{t_k})^\top g(z,\theta_{t_k})$$
-
-近似 1：区间内样本真正被访问时的参数，用 checkpoint 参数替代；近似 2：假设每个区间每条数据被访问一次、学习率恒定。checkpoints 不是越晚越好：早期 loss 震荡大一阶近似差，完全收敛后梯度太小没信息；最好选在 **loss 稳定快速下降的阶段**。
-
-**Self-influence 的几何含义**：令目标等于自己：
-
-$$S_{\text{TracInCP}}(z,z)=\sum_k\eta_k\|g(z,\theta_{t_k})\|_2^2\ge 0$$
-
-永远非负，本质是**沿训练路径累计的梯度能量**。错标数据常因长期难拟合而梯度大，排名靠前；但正确的长尾/长 sequence/难题也一样——它是**人工审计优先级**，不是自动删除的判决。
-
-**与 Influence 的数学关系**（呼应本 NOTES"数学补充"第 3 节）：把 $g_*,g_z$ 在 Hessian 特征方向上的分量记为 $a_i,b_i$ 、曲率为 $\lambda_i$ ，则
-
-$$S_{\text{IF}}=\sum_i\frac{a_i b_i}{\lambda_i},\qquad S_{\text{TracIn}}\propto\sum_i a_i b_i$$
-
-TracIn 对所有方向做普通点积；Influence 用 $1/\lambda_i$ 做曲率校正。Influence 是**一次扰动经未来优化传播后的总效果**，TracIn 是**真实训练路径上的即时记账**（真实 trajectory 隐式经历曲率动力学，但有限 checkpoint 的 TracInCP 不等于显式精确的 $H^{-1}$ ）。
-
-一句话：**TracIn 是 loss 降幅的训练路径分解；Influence 是删点权重变化的重新优化响应。**

@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：MimicGen 的 SE(3) 搬运 × 合成数据的支撑扩张 × sim2real 的 gap 分解</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充（2026-09-09）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-09-09）</a><a href="#sec-7">数学视角：MimicGen 的 SE(3) 搬运 × 合成数据的支撑扩张 × sim2real 的 gap 分解</a><a href="#sec-8">核心</a><a href="#sec-9">可迁移 / Transfer</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -150,7 +150,40 @@ pre code{background:none;padding:0;color:inherit}
 <li>仿真 72K vs 真机 150 条演示（3 任务 × 50 条），co-train 时真机信号不会被淹没吗？混合权重 $\alpha$ 该怎么理解，$\alpha$ 太大/太小各发生什么？（见数学视角 §4；和 Day16 DROID co-train、Day14 π₀.₅ knowledge insulation 的两阶段配方对照）</li>
 </ol>
 </section>
-<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角：MimicGen 的 SE(3) 搬运 × 合成数据的支撑扩张 × sim2real 的 gap 分解</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-09-09）</h2>
+<blockquote class="pq">
+<p>以下 2 组问答来自 2026-09-09 当晚用户对 Day18 RoboCasa 卡片（MimicGen 搬运公式）的追问，原样归档。</p>
+</blockquote>
+<h3>Q1：RoboCasa 是数学论文吗？</h3>
+<p><strong>问题原文</strong>："这是个数学论文？"</p>
+<p><strong>核心答案</strong>：不是。RoboCasa 是<strong>数据集/仿真系统论文</strong>，不是数学论文——它的贡献是"数据工厂"本身：120 个程序化厨房、MimicGen 轨迹搬运管线、100K+ 轨迹、BC-Transformer 的评测结果。</p>
+<p>NOTES 里的 $SE(3)$ 、pushforward、支撑扩张这些数学，是按学习模板加的"数学视角"——用统一框架把"为什么生成数据有用"讲清楚。论文原文里没有这些推导，它讲的是工程：怎么搭仿真、怎么搬运轨迹、怎么评测。</p>
+<p><strong>结论</strong>：区分"论文的创新"（系统和数据）与"我们的理解工具"（数学视角）。归档和复述时把两者分开写，避免把解读误记成论文主张。</p>
+<h3>Q2：MimicGen 的 $\Delta T$ 搬运是啥意思？ $SE(3)$ 等变假设三处哪一步先破？</h3>
+<p><strong>问题原文</strong>："1/ 啥意思？我都看不懂 MimicGen 用 $\Delta T=T_{\text{new}}\cdot T_{\text{old}}^{-1}$ 搬运轨迹，这个 $SE(3)$ 等变假设在铰链物体、插入任务、遮挡变化时哪一步先破？"</p>
+<p><strong>核心答案</strong>：</p>
+<p><strong>MimicGen 在干什么</strong>：人用 SpaceMouse 遥操作采了一条演示（"从桌上拿起杯子"），MimicGen 想把这条演示<strong>搬</strong>到 100 个新厨房里（杯子位置变了、桌子换了），自动变出 100 条新演示，不用人再采。</p>
+<p><strong>三步</strong>：
+1. <strong>分解</strong>：把演示切成"以物体为中心"的段——"靠近杯子"段锚定杯子，"抓起"段锚定杯子；每段轨迹都表示成<strong>相对于杯子</strong>的运动。
+2. <strong>搬运</strong>：新场景里杯子挪了位置，把整段轨迹做一次刚体变换跟过去。
+3. <strong>验证</strong>：在仿真里重播一遍，成功的留下，失败的扔掉。</p>
+<p><strong>字母表</strong>：
+- $SE(3)$ ：三维空间所有刚体运动的集合 = 旋转 + 平移；一个位姿 $T \in SE(3)$ 即 4×4 矩阵（ $R$ 为旋转、 $t$ 为平移）：</p>
+<p>$$\begin{bmatrix} R &amp; t \\ 0 &amp; 1 \end{bmatrix}$$</p>
+<ul>
+<li>$T_{\text{old}}$ ：采演示时杯子的位姿（如在 (1,0,0) 处）。</li>
+<li>$T_{\text{new}}$ ：新场景里杯子的位姿（如挪到了 (2,1,0) 处）。</li>
+<li>$\Delta T = T_{\text{new}} \cdot T_{\text{old}}^{-1}$ ：杯子这一次"动了多少"——先乘 $T_{\text{old}}^{-1}$ 把轨迹换算到"杯子自己"的坐标系（跟杯子绑定），再乘 $T_{\text{new}}$ 把绑定好的轨迹放到新位置；例子里 $\Delta T$ 就是"往 $x$ 平移 1、往 $y$ 平移 1"。</li>
+</ul>
+<p><strong>" $SE(3)$ 等变假设"</strong>：<strong>把物体和轨迹一起刚体搬运，任务照样成功</strong>——成功只取决于"手和物体的相对位姿"，跟它们在世界里的绝对位置无关。</p>
+<p><strong>三处哪一步先破</strong>：
+1. <strong>铰链物体（门/抽屉）——第一步"分解"先破</strong>。铰链物体的位姿不是单个刚体 $T$ ，而是"底座位姿 + 关节角 $\phi$ "；开门轨迹是<strong>绕铰链轴画圆弧</strong>， $\Delta T$ 只能做刚体平移旋转，搬过去的圆弧不再绕新场景的铰链轴——拉的方向一开始就错了。
+2. <strong>插入任务（peg-in-hole）——"运动学等变 ⇒ 成功等变"这一步先破</strong>。插入的成功不只看几何相对位姿，还看接触动力学：摩擦、几毫米的对准；刚体搬运只保证了几何对应，毫米级误差在变换和重播中被放大，直接卡住。这也是论文评测里 insertion 最难的原因（见本 NOTES §核心第 5 点）。
+3. <strong>遮挡/新障碍物——第二步"搬运"的隐含假设先破</strong>。 $\Delta T$ 里只有杯子的位姿、<strong>没有障碍物</strong>；新场景多了个挡路的东西，搬过去的轨迹直接穿模——这就是论文承认的"残留碰撞"的来源。</p>
+<p><strong>顺带</strong>：移动底盘的导航任务 MimicGen 直接<strong>不支持</strong>——基座轨迹没法锚定到某个物体上，"object-centric"这个前提就不成立。</p>
+<p><strong>和之前工作的关系</strong>：三处失效正是本 NOTES §6"假设与数学没有覆盖的真实误差"第一条（ $\Delta T$ 是纯几何操作）的具体展开；铰链/插入的边界也反衬 Day12 Diffusion Policy 的路线——接触丰富的任务不靠刚体搬运，而靠扩散模型直接拟合多模态接触行为分布。</p>
+</section>
+<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角：MimicGen 的 SE(3) 搬运 × 合成数据的支撑扩张 × sim2real 的 gap 分解</h2>
 <p>RoboCasa 是数据论文，数学就是三块：<strong>MimicGen 的轨迹变换</strong>、<strong>合成数据为什么带来增益</strong>（覆盖论）、<strong>sim2real co-training 的分布视角</strong>。统一框架接 Day15/16/17 的覆盖三轴：泛化误差 $\lesssim d(P_{\text{test}}, \mathrm{supp}(P_{\text{train}}))$ ， $P_{\text{test}}$ 是部署分布， $\mathrm{supp}(P_{\text{train}})$ 是训练混合的支撑——RoboCasa 的全部设计都是在<strong>用程序化手段把支撑撑大</strong>。</p>
 <h3>1) State / observation / action / objective</h3>
 <ul>
@@ -205,7 +238,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>LLM 任务设计的生态统计假设没被验证</strong>："LLM 捕捉人类行为的生态统计"是个漂亮的直觉，但 75 个复合任务里"偶尔有不合直觉的任务逻辑"（论文自认）——任务质量的上界还是人工。</li>
 </ul>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">复合任务微调后最好</div><div class="bartrack"><div class="barfill" style="width:15.2%"></div></div><div class="barval">12%</div></div><div class="barrow"><div class="barlabel">真机 seen 物体</div><div class="bartrack"><div class="barfill" style="width:17.2%"></div></div><div class="barval">13.6%</div></div><div class="barrow"><div class="barlabel">（相对</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">79%</div></div><div class="barrow"><div class="barlabel">unseen</div><div class="bartrack"><div class="barfill" style="width:3.3%"></div></div><div class="barval">2.6%</div></div></div>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>核心</h2><div class="viz viz-bars"><div class="barrow"><div class="barlabel">复合任务微调后最好</div><div class="bartrack"><div class="barfill" style="width:15.2%"></div></div><div class="barval">12%</div></div><div class="barrow"><div class="barlabel">真机 seen 物体</div><div class="bartrack"><div class="barfill" style="width:17.2%"></div></div><div class="barval">13.6%</div></div><div class="barrow"><div class="barlabel">（相对</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">79%</div></div><div class="barrow"><div class="barlabel">unseen</div><div class="bartrack"><div class="barfill" style="width:3.3%"></div></div><div class="barval">2.6%</div></div></div>
 <ol>
 <li><strong>Motivation</strong>: CV/NLP 靠大数据 + 大模型拿到泛化，机器人学想抄但真实数据采集贵到不现实（Day16 DROID：52 栋建筑、50 个采集员）。问题：能不能用<strong>仿真当数据工厂</strong>，把"场景 × 任务 × 数据"三件事一起规模化？和 Physical AGI 的关系：这是数据飞轮里"合成数据"那一环的奠基配方——如果仿真数据能用，机器人学的 scaling 定律就有了燃料。</li>
 <li><strong>System / Method</strong>: robosuite（MuJoCo）后端 + 120 程序化厨房（layout × style）+ 2,500+ 物体（text-to-3D 为主）+ text-to-image 纹理 + LLM 建议的 75 复合任务；100 任务 = 25 原子（8 大 sensorimotor 技能）+ 75 复合；跨 embodiment（移动单臂、humanoid、带臂四足）；Omni-Frankie（Franka Panda + Omron 基座）为主力评测身体。</li>
@@ -217,7 +250,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: 原子任务 Human-50 28.8% → Generated-3000 <strong>47.6%</strong>，Generated-100/300 的中间点形成单调 scaling 曲线；复合任务微调后最好 12.0%（ArrangeVegetables），4/5 非零 vs scratch 4/5 挂零；真机 seen 物体 13.6% → <strong>24.4%</strong>（相对 +79%），unseen 2.6% → 9.3%；技能难度：开关门/抽屉好学，pick-place（几十类物体）和 insertion 难学。</li>
 </ol>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移 / Transfer</h2>
 <ul>
 <li>方法在 held-out 上是否 transfer？是——评测设计本身就是 held-out（未见物体实例、2 个未见风格场景、真机未见物体）；模型 vs 框架贡献：<strong>框架（数据工厂）贡献主导</strong>——同一套 BC-Transformer，数据从 1,250 换到 72K，28.8% → 47.6%，增益几乎全由数据解释；MimicGen 的变换质量是框架内的关键变量（jerky/collision 是它的税）。</li>
 <li>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</li>
@@ -226,62 +259,29 @@ pre code{background:none;padding:0;color:inherit}
 <li>Infra 视角：仿真数据工厂的 infra 三件套——<strong>资产管线</strong>（text-to-3D/text-to-image 的生成 + 5GB 资产分发）、<strong>生成管线</strong>（MimicGen 分解-搬运-拼接-验证，失败自动丢弃）、<strong>质量门控</strong>（用特权仿真状态做 sim2sim 数据筛选，呼应 Day08）；发布标准：代码 MIT + 资产 CC BY 4.0 + gym 接口 + 主流策略库对接示例——数据集发布的黄金标准又多了一块砖；评测成本锚点：50 trials/任务 × 5 场景是"仿真数据论文"的 eval 预算参考线。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：MimicGen 的段间拼接缝（free-space 过渡段不是 object-centric 的）到底贡献了多少失败？论文把 jerky/collision 归为"可自动检测剔除"，但没有量化<strong>剔除率</strong>和<strong>剔除后 vs 剔除前的性能差</strong>——如果拼接缝是主要误差源，那么"原子技能预训练 → 复合任务微调"的低成功率（最高 12%）可能主要不是策略容量问题，而是数据质量问题。值得翻 MimicGen 原论文（arXiv 2310.17596）的附录找消融。</li>
 <li>如果要复现 / 小规模试，第一个实验做什么？用官方 <code>robocasa/robocasa</code> 仓库跑通 1 个原子任务（如 <code>PnPCounterToCab</code>）的 MimicGen 生成管线：拿 5 条人类演示生成 500 条，对比"生成数据训练"vs"5 条直接训练"的成功率——验证支撑扩张在最小规模下是否成立，顺手统计生成失败/被剔除的比例，摸清 MimicGen 在你关心的任务上的"税"是多少。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>"We advocate using realistic physical simulation as a means to scale environments, tasks, and datasets for robot learning methods."（abstract 原文——整篇论文一句话的 thesis）</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 System / Training / Key Tricks / Results / 可迁移 ✅</li>
 <li>保留并完善「和之前工作的关系」小节 ✅（接 Day15/16/17 数据三角 + Day02/10/12 的横向对照）</li>
 <li>数学视角：MimicGen SE(3) 搬运三步 + 支撑扩张的 pushforward 解释 + sim2real 四项 gap 分解 + co-training 的 α 权衡 ✅</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>连接</h2>
 <ul>
 <li>上一篇: Day17 BridgeData V2（真实廉价数据的 skill 轴）— Day18 是同一"平民化规模化"问题的合成解</li>
 <li>下一篇预告: Day19 PPO for Robotics——从数据回到算法：clipped surrogate + GAE + 并行 rollout 的 robot policy optimization 基线</li>
 </ul>
-</section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-09）</h2>
-<blockquote class="pq">
-<p>以下 2 组问答来自 2026-09-09 当晚用户对 Day18 RoboCasa 卡片（MimicGen 搬运公式）的追问，原样归档。</p>
-</blockquote>
-<h3>Q1：RoboCasa 是数学论文吗？</h3>
-<p><strong>问题原文</strong>："这是个数学论文？"</p>
-<p><strong>核心答案</strong>：不是。RoboCasa 是<strong>数据集/仿真系统论文</strong>，不是数学论文——它的贡献是"数据工厂"本身：120 个程序化厨房、MimicGen 轨迹搬运管线、100K+ 轨迹、BC-Transformer 的评测结果。</p>
-<p>NOTES 里的 $SE(3)$ 、pushforward、支撑扩张这些数学，是按学习模板加的"数学视角"——用统一框架把"为什么生成数据有用"讲清楚。论文原文里没有这些推导，它讲的是工程：怎么搭仿真、怎么搬运轨迹、怎么评测。</p>
-<p><strong>结论</strong>：区分"论文的创新"（系统和数据）与"我们的理解工具"（数学视角）。归档和复述时把两者分开写，避免把解读误记成论文主张。</p>
-<h3>Q2：MimicGen 的 $\Delta T$ 搬运是啥意思？ $SE(3)$ 等变假设三处哪一步先破？</h3>
-<p><strong>问题原文</strong>："1/ 啥意思？我都看不懂 MimicGen 用 $\Delta T=T_{\text{new}}\cdot T_{\text{old}}^{-1}$ 搬运轨迹，这个 $SE(3)$ 等变假设在铰链物体、插入任务、遮挡变化时哪一步先破？"</p>
-<p><strong>核心答案</strong>：</p>
-<p><strong>MimicGen 在干什么</strong>：人用 SpaceMouse 遥操作采了一条演示（"从桌上拿起杯子"），MimicGen 想把这条演示<strong>搬</strong>到 100 个新厨房里（杯子位置变了、桌子换了），自动变出 100 条新演示，不用人再采。</p>
-<p><strong>三步</strong>：
-1. <strong>分解</strong>：把演示切成"以物体为中心"的段——"靠近杯子"段锚定杯子，"抓起"段锚定杯子；每段轨迹都表示成<strong>相对于杯子</strong>的运动。
-2. <strong>搬运</strong>：新场景里杯子挪了位置，把整段轨迹做一次刚体变换跟过去。
-3. <strong>验证</strong>：在仿真里重播一遍，成功的留下，失败的扔掉。</p>
-<p><strong>字母表</strong>：
-- $SE(3)$ ：三维空间所有刚体运动的集合 = 旋转 + 平移；一个位姿 $T \in SE(3)$ 即 4×4 矩阵（ $R$ 为旋转、 $t$ 为平移）：</p>
-<p>$$\begin{bmatrix} R &amp; t \\ 0 &amp; 1 \end{bmatrix}$$</p>
-<ul>
-<li>$T_{\text{old}}$ ：采演示时杯子的位姿（如在 (1,0,0) 处）。</li>
-<li>$T_{\text{new}}$ ：新场景里杯子的位姿（如挪到了 (2,1,0) 处）。</li>
-<li>$\Delta T = T_{\text{new}} \cdot T_{\text{old}}^{-1}$ ：杯子这一次"动了多少"——先乘 $T_{\text{old}}^{-1}$ 把轨迹换算到"杯子自己"的坐标系（跟杯子绑定），再乘 $T_{\text{new}}$ 把绑定好的轨迹放到新位置；例子里 $\Delta T$ 就是"往 $x$ 平移 1、往 $y$ 平移 1"。</li>
-</ul>
-<p><strong>" $SE(3)$ 等变假设"</strong>：<strong>把物体和轨迹一起刚体搬运，任务照样成功</strong>——成功只取决于"手和物体的相对位姿"，跟它们在世界里的绝对位置无关。</p>
-<p><strong>三处哪一步先破</strong>：
-1. <strong>铰链物体（门/抽屉）——第一步"分解"先破</strong>。铰链物体的位姿不是单个刚体 $T$ ，而是"底座位姿 + 关节角 $\phi$ "；开门轨迹是<strong>绕铰链轴画圆弧</strong>， $\Delta T$ 只能做刚体平移旋转，搬过去的圆弧不再绕新场景的铰链轴——拉的方向一开始就错了。
-2. <strong>插入任务（peg-in-hole）——"运动学等变 ⇒ 成功等变"这一步先破</strong>。插入的成功不只看几何相对位姿，还看接触动力学：摩擦、几毫米的对准；刚体搬运只保证了几何对应，毫米级误差在变换和重播中被放大，直接卡住。这也是论文评测里 insertion 最难的原因（见本 NOTES §核心第 5 点）。
-3. <strong>遮挡/新障碍物——第二步"搬运"的隐含假设先破</strong>。 $\Delta T$ 里只有杯子的位姿、<strong>没有障碍物</strong>；新场景多了个挡路的东西，搬过去的轨迹直接穿模——这就是论文承认的"残留碰撞"的来源。</p>
-<p><strong>顺带</strong>：移动底盘的导航任务 MimicGen 直接<strong>不支持</strong>——基座轨迹没法锚定到某个物体上，"object-centric"这个前提就不成立。</p>
-<p><strong>和之前工作的关系</strong>：三处失效正是本 NOTES §6"假设与数学没有覆盖的真实误差"第一条（ $\Delta T$ 是纯几何操作）的具体展开；铰链/插入的边界也反衬 Day12 Diffusion Policy 的路线——接触丰富的任务不靠刚体搬运，而靠扩散模型直接拟合多模态接触行为分布。</p>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">120</div><div class="l">程序化厨房 × 生成纹理</div></div></div>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Bridge</h4><ul><li>真实廉价臂扩张 skill 轴</li></ul></div><div class="vscol vs-b"><h4>RoboCasa</h4><ul><li>仿真扩张 scene × object 轴</li><li>MimicGen 程序化放大</li></ul></div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-18-2024-robocasa/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

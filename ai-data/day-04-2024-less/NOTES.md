@@ -47,7 +47,6 @@
 ## 官方 Repo
 - GitHub: https://github.com/princeton-nlp/LESS — 包含 warmup / datastore / selection / train / eval 全流程代码
 
-
 ## 第二轮复习（2026-09-04）
 
 ### 1. 核心命题
@@ -126,10 +125,6 @@ $$\lambda\to 0,\qquad \lambda\to\infty$$
 - 最后用 DEITA 三因子回答：LESS 的 influence score 对应 c / q / diversity 中的哪一个？缺的两个在 coding SFT 里分别对应什么可计算的 proxy（各举一个，并说明为什么 IFD 只能算其中之一）？
 
 答案不许只复述 LESS 原文；必须实质用到至少两篇对比论文的机制。
-
-## 原文链接
-- Paper: https://arxiv.org/abs/2402.04333
-- GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less
 
 ## 问答补充（2026-09-04）
 
@@ -261,3 +256,7 @@ $$\bar{\Gamma}_p = \frac{1}{K}\sum_{k=1}^K \Gamma(c_k)$$
 **对 coding 1B 的判断**：取决于靶难度。HumanEval-easy 级（基础函数合成），1B code 模型通常 $\text{pass@k} > 0$ ，错误是技能相关的 → 可能够，应用上述测试验证而非直接否定；LiveCodeBench-hard / 竞赛级 $\text{pass@k} \approx 0$ ，正确解在其可达分布外 → 不够。经验法则（待验证的 heuristic，非定理）：proxy 在靶难度上最好有 20%+ 的 $\text{pass@k}$ ；选 proxy 不是越大越好，是选"刚好够得着靶子"的那个。
 
 **知识图谱关系**：Q6 承接 §4.1"target 锚点误设"与 §6 思考题（单均值 + 无 diversity 缺口），并把 Day11 的 outcome-only 盲区与"蒸馏 frontier 数据"逻辑复用到 target 构造；Q7 把 Day11 的 ZPD 从数据选择平移到 proxy 选择，并给出 transfer 可信度的可操作检验。
+
+## 原文链接
+- Paper: https://arxiv.org/abs/2402.04333
+- GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-04-2024-less

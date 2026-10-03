@@ -44,7 +44,6 @@
 
 > DataInf is orders of magnitude faster than existing influence methods while accurately approximating influence scores.
 
-
 ## 第二轮复习（2026-09-05）
 
 ### 1. 核心命题
@@ -142,10 +141,6 @@ DataInf 的分数为 $$I(z_j, z_{test}) = -g_{test}^\top (S + \lambda I)^{-1} g_
 
 答案不许只复述 DataInf 原文；必须实质用到至少两篇对比论文的机制，数学推导要写全。
 
-## 原文链接
-- Paper: https://arxiv.org/abs/2310.00902
-- GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-05-2024-datainf
-
 ## 问答补充（2026-09-06）
 
 ### Q1: LESS 里的 H 是什么？模型的 Hessian 吗？
@@ -182,3 +177,7 @@ $$\boxed{\mathbb{E}[\nabla^2 \ell(\theta)] = \mathbb{E}[g_z g_z^\top]}$$
 1. **Fisher 替代**（统计）：$$H \approx S + \lambda I$$，解决"能不能算"——把 LiSSA 几百次 HVP 变成一次 Cholesky。
 2. **LoRA**（结构）：解决"算出来对不对"——小空间里 S 满秩良态，逆存在且闭式可算；全参空间下第一步算出来也是垃圾。
 3. **重排摊销**（工程）：先算 $$v = (S+\lambda I)^{-1} g_{test}$$ 一次，之后每条样本只是一次点积 $$I(z_j) = -v^\top g_j$$——解决"算得够不够快"，是 nightly 扫 50 万条的计算基础（第 3 节 (e)）。
+
+## 原文链接
+- Paper: https://arxiv.org/abs/2310.00902
+- GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-05-2024-datainf

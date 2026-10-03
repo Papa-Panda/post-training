@@ -39,6 +39,25 @@ GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的
 
 相关讨论（Gemini 网页版，2026-09-25）：https://gemini.google.com/app/f1c99bff069872fe
 
+## 问答补充（2026-09-30）
+
+### GPT-6/Astra 坐在哪一层：数字世界的 sense-plan-act（2026-09-30）
+
+**问**：gpt 6（接上条——GPT-6 在 physical AI 部件栈里坐哪？）
+
+**答**：Astra 坐在**认知/规划层**，只不过它玩的是数字世界，不是物理世界。它的 computer-use 就是数字世界的 sense-plan-act：看屏幕（感知， $o_t$ 像素+DOM）→ 拆任务（规划）→ 点鼠标/调 API（执行， $a_t$ UI 原语+坐标）。
+
+Day04 复习里的横向对照说它是"数字世界的 Genie"：两者都是把无标注轨迹（屏幕录像 / 互联网视频）变成可交互环境，区别只在公理层——Astra 的公理是 OS/API，Genie 的公理是物理。
+
+两个关键区别：
+
+1. **数字世界没有 sim2real**。Astra 的执行是调 API、点坐标，动作是精确的；物理执行的动作是扭矩，要过摩擦、延迟、接触。所以 computer-use 进展快、机器人慢——不是智能差一截，是执行层在收"物理税"。
+2. **但 infra 同构**。rollout、verifier、数据飞轮、RL 训法这套在两个世界是通的。这正是 Day32 被破例收进路线的原因，也是 post-training / agentic RL infra 方向的立足点：在数字 agent 上练的 infra 肌肉，平移到 physical 时差的主要就是执行层那一坨物理。
+
+呼应李昊那条：他说的"GPT/Astra-style VLM + robot harness"低成本泛化架构，意思就是把 Astra 这套认知/规划能力（便宜、可 scale）嫁接到机器人执行栈（贵、gap 大）上——赌的是智能层通用化之后，只剩执行层需要啃。
+
+**关联**：Day32 速查表 19–25（数字身体 vs 物理身体）/ Day04（"数字世界的 Genie"横向对照）/ README 问答「李昊对 sim2real gap 的判断及应对（2026-09-29）」/ Day19–24（执行层 gap 连篇）/ Day30（数据飞轮）。
+
 ## 核心
 
 ### 1. Motivation：从"回答"到"执行"
@@ -151,22 +170,3 @@ GPT-6 Astra（OpenAI，2026-09-03）是首个以 computer-use 为旗舰卖点的
 <!-- viz:stats: 92.7% ScreenSpot-Pro | 1.9 倍 Mind2Web 比 GPT-5.6 快 -->
 <!-- viz:vs: π₀ | 50 步连续动作 chunk; 毫秒级控制 || Astra | 分钟级任务几百步 UI 动作; 控制频率差 3–4 数量级 -->
 <!-- viz:flow: 看屏幕（感知） → 拆任务（规划） → 点鼠标调 API（执行） -->
-
-## 问答补充（2026-09-30）
-
-### GPT-6/Astra 坐在哪一层：数字世界的 sense-plan-act（2026-09-30）
-
-**问**：gpt 6（接上条——GPT-6 在 physical AI 部件栈里坐哪？）
-
-**答**：Astra 坐在**认知/规划层**，只不过它玩的是数字世界，不是物理世界。它的 computer-use 就是数字世界的 sense-plan-act：看屏幕（感知， $o_t$ 像素+DOM）→ 拆任务（规划）→ 点鼠标/调 API（执行， $a_t$ UI 原语+坐标）。
-
-Day04 复习里的横向对照说它是"数字世界的 Genie"：两者都是把无标注轨迹（屏幕录像 / 互联网视频）变成可交互环境，区别只在公理层——Astra 的公理是 OS/API，Genie 的公理是物理。
-
-两个关键区别：
-
-1. **数字世界没有 sim2real**。Astra 的执行是调 API、点坐标，动作是精确的；物理执行的动作是扭矩，要过摩擦、延迟、接触。所以 computer-use 进展快、机器人慢——不是智能差一截，是执行层在收"物理税"。
-2. **但 infra 同构**。rollout、verifier、数据飞轮、RL 训法这套在两个世界是通的。这正是 Day32 被破例收进路线的原因，也是 post-training / agentic RL infra 方向的立足点：在数字 agent 上练的 infra 肌肉，平移到 physical 时差的主要就是执行层那一坨物理。
-
-呼应李昊那条：他说的"GPT/Astra-style VLM + robot harness"低成本泛化架构，意思就是把 Astra 这套认知/规划能力（便宜、可 scale）嫁接到机器人执行栈（贵、gap 大）上——赌的是智能层通用化之后，只剩执行层需要啃。
-
-**关联**：Day32 速查表 19–25（数字身体 vs 物理身体）/ Day04（"数字世界的 Genie"横向对照）/ README 问答「李昊对 sim2real gap 的判断及应对（2026-09-29）」/ Day19–24（执行层 gap 连篇）/ Day30（数据飞轮）。

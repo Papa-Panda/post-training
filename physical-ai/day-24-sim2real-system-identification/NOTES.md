@@ -40,6 +40,17 @@ Roadmap 给 Day24 的任务是"用参数辨识、sim2sim、hardware-in-the-loop 
 
 相关讨论（Gemini 网页版，2026-09-16）：https://gemini.google.com/app/290dacd4af1b7a57
 
+## 问答补充
+（本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）
+
+### 2026-09-15：Day24 NOTES 的 `$$...$$` 块在 GitHub 上仍显示裸 LaTeX
+
+**问题原文**（用户，2026-09-15 16:17 PDT）："[Day24 NOTES 链接] 数学符号又没修理好 1/修一下 2/你的prompt是不是出问题了？修理下 之后 查看下其他类似的scheduledjob也修理"
+
+**核心答案**（side chat 内的诊断 + 修复）：第一轮只修了行内公式 `$ x $` 的内侧空格，没有修到根上。真凶是 Day24 的 `$$...$$` 块与相邻文字挤在同一个段落里：GitHub 的 markdown 层根本不把它识别为公式，块内的 `_` 被解析成 `<em>` 斜体，整块显示成裸 LaTeX。之前猜的"标题后必须空行"也被证伪——对照检查了 Day20 和 ai-data Day13 的单行 `$$...$$` 块渲染正常，说明根因是"块公式必须独占段落"。验证方法：curl GitHub blob 页 HTML，先确认 currentOid 与推送的 commit 一致（排除缓存），再从 GitHub 自己的渲染标记（`<math-renderer class="js-inline-math">`）看它到底认了哪些块——认出的块带 math-renderer 标记，没认出的直接看源码 `<p>`。修复：所有 `$$` 块前后各加空行独占段落；`tools/check_repo.py` gate 强制三条规则（行内公式外侧空格、`$` 内侧紧贴、`$$` 块独占段落）；四个会写公式的 cron prompt 全部补上新规则并要求提交前跑 lint 门。commit `80df815`（另有 `f896397` 消掉 check_repo.py 的 SyntaxWarning），已 push。
+
+**关联**：这是 AGENTS.md 里那条"块公式必须独占段落"规则的实战来源——旧的"标题后空行"理论被自己的验证数据推翻并修正，调试方法论见该条目。与 2026-09-14 的 Day23 行内公式事件（day-23-2019-residual-rl/NOTES.md 问答补充）是同一主题的连续两天抓包；两次合起来形成了仓库现行的三条数学排版规则。
+
 ## 核心
 1. **Motivation**: DR 之后社区留下一个尴尬问题：随机化范围全靠手工调——调宽了策略学不动（Day21 ADR 论文里明确记录了过宽分布导致训练崩溃），调窄了真机不在支撑集里。更深层的问题是**物理参数不可辨识**：接触、摩擦、柔顺性这些量，真机上根本测不准，辨识一个"真值"既不现实也没必要。SimOpt 的赌注：**我们不需要仿真器"对"，只需要"行为对得上"**——在分布层面匹配行为，点估计的不可辨识问题就绕过去了。
 2. **System / Method**: 双循环闭环（见数学视角 §1–3）：
@@ -129,17 +140,5 @@ SimOpt 只解决了"calibrate"；roadmap 要求的 gate 需要四件套拼齐：
 ## 连接
 - 上一篇: day-23-2019-residual-rl（先验=经典控制器，真机小量在线学）
 - 下一篇预告: day-25-2022-gato（离开 RL for Robotics 块，进入 Day25–30 "Physical AGI / Eval / Safety"：统一 token 序列的 generalist 范式）
-
-
-## 问答补充
-（本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）
-
-### 2026-09-15：Day24 NOTES 的 `$$...$$` 块在 GitHub 上仍显示裸 LaTeX
-
-**问题原文**（用户，2026-09-15 16:17 PDT）："[Day24 NOTES 链接] 数学符号又没修理好 1/修一下 2/你的prompt是不是出问题了？修理下 之后 查看下其他类似的scheduledjob也修理"
-
-**核心答案**（side chat 内的诊断 + 修复）：第一轮只修了行内公式 `$ x $` 的内侧空格，没有修到根上。真凶是 Day24 的 `$$...$$` 块与相邻文字挤在同一个段落里：GitHub 的 markdown 层根本不把它识别为公式，块内的 `_` 被解析成 `<em>` 斜体，整块显示成裸 LaTeX。之前猜的"标题后必须空行"也被证伪——对照检查了 Day20 和 ai-data Day13 的单行 `$$...$$` 块渲染正常，说明根因是"块公式必须独占段落"。验证方法：curl GitHub blob 页 HTML，先确认 currentOid 与推送的 commit 一致（排除缓存），再从 GitHub 自己的渲染标记（`<math-renderer class="js-inline-math">`）看它到底认了哪些块——认出的块带 math-renderer 标记，没认出的直接看源码 `<p>`。修复：所有 `$$` 块前后各加空行独占段落；`tools/check_repo.py` gate 强制三条规则（行内公式外侧空格、`$` 内侧紧贴、`$$` 块独占段落）；四个会写公式的 cron prompt 全部补上新规则并要求提交前跑 lint 门。commit `80df815`（另有 `f896397` 消掉 check_repo.py 的 SyntaxWarning），已 push。
-
-**关联**：这是 AGENTS.md 里那条"块公式必须独占段落"规则的实战来源——旧的"标题后空行"理论被自己的验证数据推翻并修正，调试方法论见该条目。与 2026-09-14 的 Day23 行内公式事件（day-23-2019-residual-rl/NOTES.md 问答补充）是同一主题的连续两天抓包；两次合起来形成了仓库现行的三条数学排版规则。
 
 <!-- viz:vs: ADR | 成功率驱动分布扩张; 世界只会变宽 || SimOpt | 轨迹差异驱动分布校准; 世界可向真值收缩 -->

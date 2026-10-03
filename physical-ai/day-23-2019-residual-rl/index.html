@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充</a><a href="#sec-7">核心</a><a href="#sec-8">数学视角</a><a href="#sec-9">可迁移 / Transfer</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -146,7 +146,14 @@ pre code{background:none;padding:0;color:inherit}
 </ol>
 <p>相关讨论（Gemini 网页版，2026-09-14）：https://gemini.google.com/app/1db272bf9b7e80f2</p>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充</h2>
+<p>（本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）</p>
+<h3>2026-09-14：Day23 NOTES 在 GitHub 上公式渲染失效</h3>
+<p><strong>问题原文</strong>（用户，2026-09-14 18:40 PDT）："[Day23 NOTES 链接] 这里面有很多数学公式 format 完全不对 没有渲染好"</p>
+<p><strong>核心答案</strong>：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 <code>（ $\pi_H$ ）</code> 里的 <code>（$\pi_H$）</code>、<code>$s_m$，</code>。GitHub 的渲染规则是行内 <code>$...$</code> 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，<code>$$...$$</code> 独立公式块本来就是好的未动。<code>tools/check_repo.py</code> lint 门过，Day23 零新增问题。commit <code>f297c17</code>，已 push。</p>
+<p><strong>关联</strong>：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
 <ol>
 <li><strong>Motivation</strong>: 工厂里的机器人做重复任务，缺的是对不确定性的适应力。经典反馈控制（PID、computed torque）跟轨迹很高效，但一碰到<strong>接触和摩擦</strong>就脆——接触参数辨识极难，调参成本"可能和机器人硬件本身相当"（论文原话）。纯 RL 能处理接触，但从零学：① 真机交互贵且初期不安全；② block insertion 这种任务随机探索几乎撞不到成功。Residual RL 的赌注：<strong>任务里"能被经典控制高效解决的部分"和"必须靠交互学的部分"是可分的</strong>——前者用先验免费吃掉，RL 只学后者。</li>
 <li><strong>System / Method</strong>: 核心方程（论文式 5）：
@@ -167,7 +174,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>失败/局限（论文 Discussion 诚实标注）：依赖精心搭建的视觉系统估计位姿，限制新场景应用；若手写视觉丢掉边缘等关键信息，学出的反馈控制器质量受限；未来方向是端到端视觉输入。</li>
 </ol>
 </section>
-<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
+<section class="sec sec-math" id="sec-8"><h2><span class="n">8</span>数学视角</h2>
 <blockquote class="pq">
 <p>符号统一： $s_t=(s_{m,t},s_{o,t})$ ， $s_m$ 全驱动机器人状态， $s_o$ 欠驱动物体状态； $u_t$ 控制输入； $\pi_H$ 手写控制器（ $s_m\mapsto u$ ）； $\pi_\theta$ 残差策略（ $(s_m,s_o)\mapsto u_{\text{res}}$ ）； $u'_t=u_{\text{res},t}+\pi_H(s_t)$ 实际执行； $r_t=f(s_m)+g(s_o)$ ； $B(s_m,s_o)$ 未知接触耦合矩阵； $\gamma$ 折扣因子。</p>
 </blockquote>
@@ -243,7 +250,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Wrapped MDP 的代价</strong>：critic 仍要在 $(s,u_{\text{res}})$ 全空间学 $Q$ ——先验只帮了<strong>探索</strong>，没帮<strong>函数逼近</strong>。 $Q$ 的拟合难度（接触动力学的非光滑性）一点没少，这也是为什么底层必须用 TD3 这种 sample-efficient 的 off-policy 方法。</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移 / Transfer</h2>
 <ul>
 <li><strong>方法在 held-out 上是否 transfer？模型 vs 框架 哪个贡献更大？</strong> 贡献在<strong>框架</strong>： $u=\pi_H+\pi_\theta$ + wrapped MDP + 奖励/信息分工。证据：① 同一框架被并发独立提出（Silver et al. "Residual Policy Learning", arXiv:1812.06298，仿真长程稀疏奖励任务）——框架收敛，任务各异；② 后续 RRLfD（arXiv:2106.08050）把 residual 从"控制器先验"推广到"演示先验"，框架复用；③ sim2real 实验里 $\pi_H$ 本身就是"sim 训出的 RL 策略"——先验可以是任何东西（手写、MPC、sim policy），接口不变。</li>
 <li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发</strong>：</li>
@@ -252,37 +259,30 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性</strong>：residual 把"工程师可维护的 $\pi_H$ "和"数据驱动的 $\pi_\theta$ "解耦—— $\pi_H$ 可单元测试、可形式化验证（指数稳定是定理）， $\pi_\theta$ 走数据飞轮；这是 Day29（安全）的前置思想：<strong>安全关键的部分用可验证的先验 covering，学习只发生在安全包络内</strong>。评测上"2/20 vs 15/20"的人工计数 + 相机可测位姿是接触任务评测的诚实写法（Day28 评测主题会 formalize）。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
 <ul>
 <li><strong>没看懂的 / 想深挖的 1 个问题</strong>： $\pi_\theta$ 学出的残差场 $u_{\text{res}}(s)$ 的几何——在"block 已对准" vs "block 倾斜 20°"两种状态下，残差是"常值偏置抵消"主导还是"状态相关反馈"主导？把残差场画出来，能直接验证 §5 的"积分动作"解释 vs 纯反馈解释。</li>
 <li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> MuJoCo 里最小闭环：① 写一个笛卡尔 PD 控制器当 $\pi_H$ （setpoint = 目标缝隙上方，5 行代码）；② 用 stable-baselines3 的 TD3 学残差，任务 = 论文的简化版（固定立块，只学插入）；③ 先复现"无扰动下手写控制器 20/20、加 ±20° 扰动掉到 ~2/20、residual 拉回 15/20"的三段对比——先验证框架，再谈真机。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>"The final control policy is a superposition of both control signals."（摘要）
 "We believe this approach can accelerate learning of many tasks, especially those where the control problem can be solved in large part by prior knowledge but requires some model-free reasoning to solve perfectly."（Discussion）</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
 <ul>
 <li>[x] 按模板补齐 System / Training / Key Tricks / Results / 可迁移（含数学视角 §1–7）</li>
 <li>[x] 保留并完善「和之前工作的关系」小节（Day19–23 四路线统一坐标系）</li>
 <li>[x] 论文逐节核验（arXiv HTML 全文 761 行已读，公式/数据/引用均来自原文非记忆）</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>连接</h2>
 <ul>
 <li>上一篇: day-22-2021-rma（RMA：privileged 两阶段 + 显式在线辨识，零真机交互）</li>
 <li>下一篇预告: day-24-sim2real-system-identification（System Identification + Sim2Real Evaluation——把"先验有多准"变成 release gate；residual 学出的 $\pi_\theta$ 本身就是模型误差的测量）</li>
 </ul>
-</section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充</h2>
-<p>（本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）</p>
-<h3>2026-09-14：Day23 NOTES 在 GitHub 上公式渲染失效</h3>
-<p><strong>问题原文</strong>（用户，2026-09-14 18:40 PDT）："[Day23 NOTES 链接] 这里面有很多数学公式 format 完全不对 没有渲染好"</p>
-<p><strong>核心答案</strong>：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 <code>（ $\pi_H$ ）</code> 里的 <code>（$\pi_H$）</code>、<code>$s_m$，</code>。GitHub 的渲染规则是行内 <code>$...$</code> 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，<code>$$...$$</code> 独立公式块本来就是好的未动。<code>tools/check_repo.py</code> lint 门过，Day23 零新增问题。commit <code>f297c17</code>，已 push。</p>
-<p><strong>关联</strong>：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。</p>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">8000</div><div class="l">步 ≈ 3 小时 从零真机收敛</div></div><div class="stat"><div class="v">1000</div><div class="l">步内 sim 初始化后即解</div></div></div>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RMA</h4><ul><li>辨而不学</li></ul></div><div class="vscol vs-b"><h4>Residual RL</h4><ul><li>带着镣铐学</li><li>u=π_H+π_θ</li><li>加法永远在线可 undo 有偏先验</li></ul></div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-23-2019-residual-rl/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

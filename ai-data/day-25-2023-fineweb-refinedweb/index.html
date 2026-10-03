@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">问答补充（2026-10-02）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-10-02）</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -149,7 +149,15 @@ pre code{background:none;padding:0;color:inherit}
 <li>迁移到 coding / SFT / RL data 时，怎样建立“规则或模型过滤器 → 小规模训练/评测 → 保留或回滚”的可审计闭环，避免高分过滤器把长尾、难例或新颖解法一起删掉？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">待读后填写] Common Crawl 获取</div><div class="farrow">→</div><div class="fnode">URL/语言/文本质量过滤</div><div class="farrow">→</div><div class="fnode">重复控制</div><div class="farrow">→</div><div class="fnode">数据混合与质量评测</div><div class="farrow">→</div><div class="fnode">发布数据集</div></div>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-10-02）</h2>
+<p><strong>Q1：FineWeb 从 Common Crawl 到 15T-token 语料依次经过哪些 data gates？每级应记录什么？</strong></p>
+<p>答：顺序是 URL 黑名单过滤 → trafilatura 正文抽取（弃用 WET 现成文本）→ fastText 语言识别（英文分数 &gt; 0.65，这是单步削减最大的一级）→ Gopher 启发式质量规则（文档词数、平均词长、符号比、项目符号行占比、字母词占比）→ C4 规则及 FineWeb 自定义行级过滤 → MinHash 近重复去重（5-gram；关键选择是按每个 dump 分片独立去重、不做全局去重，用全局最优换可扩展和增量更新）→ PII 正则匿名化（邮箱/IP）。每一级至少记录三件事：保留率、被删集的分层抽样快照（可回溯）、以及小模型消融结论（删掉这一级，下游指标变好还是变坏）。误杀率靠被删集抽检估计。RefinedWeb 的根本问题就是流程不可复现、增益无法归因到具体哪一级；FineWeb 的主要贡献恰是把每一级都做成可消融、可复现的开源管线。派生集 FineWeb-Edu 再用合成标注训练教育价值分类器切尾，得到约 1.3T tokens。</p>
+<p><strong>Q2：对比 Day24 D4 与 Day07 Llama3：去重粒度、时机与质量消融如何对应？</strong></p>
+<p>答：粒度是三层递进：FineWeb 的 MinHash 是词面文档级近重复；D4 的 SemDeDup 是 embedding 语义级（改写过的近义重复也能抓），再叠加原型重采样把簇分布拉平（多样化）；Llama3 是 URL 级 + 文档级 + 行级 MinHash 多层词面去重，粒度最细但仍停在词面。时机上，FineWeb 按 dump 分片去重、与增量更新兼容；D4 是全语料离线聚类后簇内剪枝，计算贵、偏一次性；Llama3 的去重在配比与高质量域上采样之前完成，与 mixture 决策耦合。组合顺序应是词面 MinHash 先行（便宜，先删硬重复），SemDeDup 后行（贵，只删语义重复），反过来会把 embedding 预算浪费在硬重复上。质量消融是三者真正的分水岭：FineWeb 每一级都有公开的小模型消融曲线，D4 用下游任务验证语义去重阈值，而 Llama3 只公布最终配方（启发式 + 质量分类器 + 领域分类），无法归因——差别不在步骤多寡，在每一步有没有公开的保留/回滚证据。Llama3 的质量分类器与 FineWeb-Edu 的教育分类器同构，都是模型打分切尾，区别只在标注来源。</p>
+<p><strong>Q3：迁移到 coding / SFT / RL data 的可审计闭环怎么建？</strong></p>
+<p>答：五件套：1）过滤器注册表：规则与分类器全部版本化，记录每级输入/输出量、保留率与被删样本快照，数据集内容寻址、可回滚。2）被删集审计：固定比例抽检被删集估计误杀率；coding 有执行真值，误杀率就是被删集中本可通过测试的题占比，这是任何分类器分数都给不了的信号。3）小规模 A/B 门：过滤器变更先 shadow 训练（小模型、小步数、固定评测集），指标不升即回滚，禁止凭分数好看直接全量。4）长尾保护：按难度与来源分层设保留配额——高分过滤器最容易系统性删掉难例、长解法和非模板化解法，这在网页语料里是特性，搬到 RL 题池就是事故；删除要求双信号（分类器低分且执行失败或规则命中），单信号只降权、不删除。5）上线后持续监控长度、来源、难度分布漂移，并定期重跑被删集回归。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">待读后填写] Common Crawl 获取</div><div class="farrow">→</div><div class="fnode">URL/语言/文本质量过滤</div><div class="farrow">→</div><div class="fnode">重复控制</div><div class="farrow">→</div><div class="fnode">数据混合与质量评测</div><div class="farrow">→</div><div class="fnode">发布数据集</div></div>
 <ol>
 <li><strong>Motivation</strong>: [待读后填写] 为什么仅报告 token 规模不足以定义高质量 web corpus？RefinedWeb 留下了哪些可复现性与过滤归因问题？</li>
 <li><strong>Data Pipeline</strong>: [待读后填写] Common Crawl 获取 → URL/语言/文本质量过滤 → 重复控制 → 数据混合与质量评测 → 发布数据集；记录每级输入、输出、保留率和失败样本。</li>
@@ -157,23 +165,23 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: [待读后填写] 只记录数据规模、保留率、污染/重复变化、与 RefinedWeb/C4 等数据集的控制变量评测及计算成本。</li>
 </ol>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移</h2>
 <ul>
 <li>对你现在 coding data 工作的 1-2 个直接可试的点：[待读后填写]</li>
 <li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>[阅读后补原文，勿凭记忆引用]</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 Data Pipeline / Key Tricks / Results / 可迁移</li>
 <li>保留并完善「和之前工作的关系」小节</li>
@@ -181,15 +189,7 @@ pre code{background:none;padding:0;color:inherit}
 </ul>
 <blockquote class="pq">
 <p>自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步</p>
-</blockquote>
-</section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>问答补充（2026-10-02）</h2>
-<p><strong>Q1：FineWeb 从 Common Crawl 到 15T-token 语料依次经过哪些 data gates？每级应记录什么？</strong></p>
-<p>答：顺序是 URL 黑名单过滤 → trafilatura 正文抽取（弃用 WET 现成文本）→ fastText 语言识别（英文分数 &gt; 0.65，这是单步削减最大的一级）→ Gopher 启发式质量规则（文档词数、平均词长、符号比、项目符号行占比、字母词占比）→ C4 规则及 FineWeb 自定义行级过滤 → MinHash 近重复去重（5-gram；关键选择是按每个 dump 分片独立去重、不做全局去重，用全局最优换可扩展和增量更新）→ PII 正则匿名化（邮箱/IP）。每一级至少记录三件事：保留率、被删集的分层抽样快照（可回溯）、以及小模型消融结论（删掉这一级，下游指标变好还是变坏）。误杀率靠被删集抽检估计。RefinedWeb 的根本问题就是流程不可复现、增益无法归因到具体哪一级；FineWeb 的主要贡献恰是把每一级都做成可消融、可复现的开源管线。派生集 FineWeb-Edu 再用合成标注训练教育价值分类器切尾，得到约 1.3T tokens。</p>
-<p><strong>Q2：对比 Day24 D4 与 Day07 Llama3：去重粒度、时机与质量消融如何对应？</strong></p>
-<p>答：粒度是三层递进：FineWeb 的 MinHash 是词面文档级近重复；D4 的 SemDeDup 是 embedding 语义级（改写过的近义重复也能抓），再叠加原型重采样把簇分布拉平（多样化）；Llama3 是 URL 级 + 文档级 + 行级 MinHash 多层词面去重，粒度最细但仍停在词面。时机上，FineWeb 按 dump 分片去重、与增量更新兼容；D4 是全语料离线聚类后簇内剪枝，计算贵、偏一次性；Llama3 的去重在配比与高质量域上采样之前完成，与 mixture 决策耦合。组合顺序应是词面 MinHash 先行（便宜，先删硬重复），SemDeDup 后行（贵，只删语义重复），反过来会把 embedding 预算浪费在硬重复上。质量消融是三者真正的分水岭：FineWeb 每一级都有公开的小模型消融曲线，D4 用下游任务验证语义去重阈值，而 Llama3 只公布最终配方（启发式 + 质量分类器 + 领域分类），无法归因——差别不在步骤多寡，在每一步有没有公开的保留/回滚证据。Llama3 的质量分类器与 FineWeb-Edu 的教育分类器同构，都是模型打分切尾，区别只在标注来源。</p>
-<p><strong>Q3：迁移到 coding / SFT / RL data 的可审计闭环怎么建？</strong></p>
-<p>答：五件套：1）过滤器注册表：规则与分类器全部版本化，记录每级输入/输出量、保留率与被删样本快照，数据集内容寻址、可回滚。2）被删集审计：固定比例抽检被删集估计误杀率；coding 有执行真值，误杀率就是被删集中本可通过测试的题占比，这是任何分类器分数都给不了的信号。3）小规模 A/B 门：过滤器变更先 shadow 训练（小模型、小步数、固定评测集），指标不升即回滚，禁止凭分数好看直接全量。4）长尾保护：按难度与来源分层设保留配额——高分过滤器最容易系统性删掉难例、长解法和非模板化解法，这在网页语料里是特性，搬到 RL 题池就是事故；删除要求双信号（分类器低分且执行失败或规则命中），单信号只降权、不删除。5）上线后持续监控长度、来源、难度分布漂移，并定期重跑被删集回归。</p></section>
+</blockquote></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-25-2023-fineweb-refinedweb/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>

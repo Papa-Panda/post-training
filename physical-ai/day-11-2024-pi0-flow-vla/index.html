@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：统一成一个部分可观测的条件生成控制问题</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a><a href="#sec-14">问答补充（2026-09-07）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-09-07）</a><a href="#sec-7">数学视角：统一成一个部分可观测的条件生成控制问题</a><a href="#sec-8">核心</a><a href="#sec-9">可迁移 / Transfer</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a><a href="#sec-14">参考链接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -142,7 +142,30 @@ pre code{background:none;padding:0;color:inherit}
 <li>action chunk 有 0.5–0.8 秒 open-loop 执行窗口；接触、遮挡或人类干预使真实状态偏离后，何时应提前重规划，怎样把 uncertainty 接到底层 safety controller？</li>
 </ol>
 </section>
-<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角：统一成一个部分可观测的条件生成控制问题</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-09-07）</h2>
+<blockquote class="pq">
+<p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
+</blockquote>
+<h3>Flow Matching 是什么</h3>
+<p><strong>问</strong>：flow matching 是啥？</p>
+<p><strong>答</strong>：Flow Matching 就是学一个"把噪声推向数据"的速度场。设真实动作块为 $ A $ ，高斯噪声为 $ \epsilon $ ，画一条直线把它们连起来：</p>
+<p>$$A^\tau=(1-\tau)\epsilon+\tau A,\quad \tau\in[0,1].$$</p>
+<p>$ \tau=0 $ 时是纯噪声， $ \tau=1 $ 时是真实数据；这条直线上的瞬时速度很简单，就是 $ A-\epsilon $ 。训练让网络 $ v_\theta(A^\tau,o,\tau) $ 去拟合这个速度：</p>
+<p>$$\mathcal{L}=\mathbb{E}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$</p>
+<p>学好之后，推理时从噪声出发，跟着学到的速度场往前走，解一个常微分方程 $ dA/d\tau=v_\theta $ ，用 Euler 积分 10 步就从噪声走到了一个合法的动作块。跟 Diffusion 的区别：Diffusion 学的是"去噪"，走的是随机的 SDE 路径，有 100 个离散时间步；Flow Matching 学的是"方向"，走的是确定性的直线 ODE，路径更短、更快。π₀ 选它，就是因为要 50Hz 实时控制，10 步生成一个 50 步动作块刚刚好。</p>
+<p><strong>符号</strong>： $ A $ 真实动作块； $ \epsilon $ 高斯噪声； $ \tau $ flow 时间（去噪进行到哪了）； $ o $ 观测（含图像、本体感知、语言）； $ v_\theta $ 速度场网络， $ \theta $ 为参数； $ \mathcal{L} $ 训练 loss 标量。</p>
+<h3>这个 loss 是 tau 的函数吗</h3>
+<p><strong>问</strong>：这个 loss 是 tau 的函数吗？</p>
+<p><strong>答</strong>：对一半。训练时每一个样本的误差项是 $ \tau $ 的函数，网络 $ v_\theta $ 也把 $ \tau $ 当输入（它要知道现在噪声有多大、该用多大的速度）。但最终的 loss 是对 $ \tau\sim\text{Uniform}[0,1] $ 取了期望的标量：</p>
+<p>$$\mathcal{L}=\mathbb{E}_{\tau,A,\epsilon,o}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$</p>
+<p>所以它不是某一个 $ \tau $ 的函数，而是把所有 $ \tau $ 上的误差平均掉了。训练时每次随机采样一个 $ \tau $ 来算，时间长了就相当于把整条路径都学好了。</p>
+<h3>修正：π₀ 有语言输入（澄清前一条回答的表述）</h3>
+<p><strong>问</strong>：day12 有道理，day11 不对啊——因为都没有语言输入，怎么做很多活？</p>
+<p><strong>答</strong>：纠正：π₀ 是<strong>有</strong>语言输入的；前一条"一个模型干很多活"的表述没把条件讲全，容易误会。它的观测 $ o $ 本来就是三件套：多视角图像 + 本体感知 $ q_t $ + <strong>语言指令</strong> $ \ell $ ，PaliGemma 那一半就是专门吃"图像+文字"的。所以"干很多活"靠的是语言切换任务：说"擦桌子"它擦桌子，说"叠衣服"它叠衣服，动作头都是同一个 flow 模型。Day12 的 Diffusion Policy 才是真的没有语言——所以它只能死守一个任务。逻辑是：π₀ "有语言→多任务"，DP "无语言→单任务"，各自自洽。</p>
+<p><strong>符号</strong>： $ q_t $ 本体感知（关节角/末端位姿）； $ \ell $ 语言指令。</p>
+<p><strong>与之前工作的关系</strong>：本节 3 问构成 Day11 的"flow 生成"主线——速度场直觉 → loss 对 $ \tau $ 取期望 → 语言条件带来多任务；与 Day12 的"去噪"参数化对照（对照见 README 问答记录），与 Day14 的 flow 低层执行相接。</p>
+</section>
+<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角：统一成一个部分可观测的条件生成控制问题</h2>
 <h3>1) State / observation / action / objective</h3>
 <p>真实系统可视为 POMDP：隐藏物理状态</p>
 <p>$$x_t=(q_t,\dot q_t,\text{object poses},\text{contact modes},\text{friction},\text{deformation},\ldots),$$</p>
@@ -180,7 +203,7 @@ pre code{background:none;padding:0;color:inherit}
 <h3>4) 假设与数学没有覆盖的真实误差</h3>
 <p>这个 loss 默认示范动作在时间上对齐、归一化和 embodiment mask 正确，也默认观测足以消除关键歧义；它没有显式建模相机延迟、控制通信抖动、joint backlash、力 / 触觉、摩擦变化、柔性物体内部状态、碰撞约束和执行器饱和。更关键的是，0.5–0.8 秒 open-loop 窗口内真实 transition $x_{t+1}=f(x_t,a_t,w_t)$ 仍会受未观测扰动 $w_t$ 影响；flow loss 只拟合示范分布，不保证闭环稳定性、安全性或约束可行性。</p>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">广覆盖 pre-training</div><div class="farrow">→</div><div class="fnode">高质量 post-training</div><div class="farrow">→</div><div class="fnode">复杂任务部署</div></div>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">广覆盖 pre-training</div><div class="farrow">→</div><div class="fnode">高质量 post-training</div><div class="farrow">→</div><div class="fnode">复杂任务部署</div></div>
 <ol>
 <li><strong>Motivation：离散 action token 不够高频、也不够连续</strong></li>
 <li>机器人 foundation model 既要继承 VLM 的语义泛化，又要执行双臂、柔性物体和接触丰富的连续动作；逐 token 自回归动作在控制频率、量化误差和长 action sequence 延迟上受限。</li>
@@ -225,7 +248,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>但大多结果只有每任务 10 次真机 trial，baseline 训练步数并非全部严格匹配；论文也承认尚不清楚不同数据源的边际价值，以及跨得很远的 domain（驾驶、导航、legged locomotion）是否正迁移。</li>
 </ol>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移 / Transfer</h2>
 <ul>
 <li><strong>方法在 held-out 上是否 transfer？模型 vs 框架哪个贡献更大？</strong> 有新物体、新任务、跨机器人和少量数据 fine-tuning 的正迁移证据；但 π₀ 同时改变了模型规模、VLM 初始化、连续 action head、action chunk、数据规模和训练 recipe，单项贡献不能只凭总成绩归因。更严谨的视角是“完整系统栈”的胜利。</li>
 <li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</strong></li>
@@ -234,20 +257,20 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong> 按 task × embodiment × camera config 记录数据权重、action norm stats、mask、loss 与 success；serving 同时记录 flow-step latency、achieved action Hz、stale-observation age、chunk interruption、controller saturation、collision / recovery。官方 openpi 已提供 base checkpoints、JAX / PyTorch 实现和 remote policy server，但截至其文档，PyTorch 路线仍缺 FSDP、LoRA、EMA 与 mixed precision 等能力。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
 <ul>
 <li><strong>没看懂 / 想深挖：</strong> 怎样在保持 chunk-level 多峰性的同时显式引入 closed-loop feedback？固定每 0.5–0.8 秒重规划会把 inference schedule 当超参，但真正需要的是根据接触变化、uncertainty 或 safety residual 自适应中断。</li>
 <li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> 用 openpi 的无机器人 inference / LIBERO example 做 smoke test：固定同一 observation batch，比 10 / 5 / 2 flow steps 的 p50/p95 latency、action smoothness 与 task success；再人为增加 50–150 ms observation delay，测 chunk length 与重规划频率的交互。</li>
 <li><strong>下一步：</strong> Day12 深挖 Diffusion Policy，分离“连续生成式 action head”本身与 π₀ 的 VLM / 大规模跨 embodiment 数据贡献。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>“Our generalist robot policy uses a pre-trained vision-language model (VLM) backbone, as well as a diverse cross-embodiment dataset with a variety of dexterous manipulation tasks.”</p>
 <p>“Intuitively, the diverse (but lower quality) pre-training data allows the model to recover from mistakes and handle highly varied situations, which might not otherwise occur in the high-quality post-training data, while the post-training data teaches the model to perform the task well.”</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
 <ul>
 <li>[ ] 画 <code>multi-view RGB + language + proprioception → VLM prefix / action expert → 10-step flow → H=50 action chunk → low-level controller</code> 数据流图</li>
 <li>[ ] 用 NumPy 写 20 行 conditional flow toy：二维双峰 action distribution，比较 MSE mean 与 flow samples</li>
@@ -256,42 +279,19 @@ pre code{background:none;padding:0;color:inherit}
 <li>[ ] 为 robot data mixture 设计日志字段：task、embodiment、source、quality、recovery flag、sampling weight、held-out success</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>连接</h2>
 <ul>
 <li>上一篇: Day10 — Habitat 3.0（动态人类伙伴、协作环境与分层 skill 评测）</li>
 <li>下一篇预告: Day12 — Diffusion Policy（视觉条件动作扩散与 receding-horizon 控制）</li>
 <li>相关: Day05 UniSim；Day06 DreamerV3；Day09 RT-2 / OpenVLA</li>
 </ul>
 </section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>参考链接</h2>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>参考链接</h2>
 <ul>
 <li>Paper: https://arxiv.org/abs/2410.24164</li>
 <li>Project: https://www.physicalintelligence.company/blog/pi0</li>
 <li>Official code: https://github.com/Physical-Intelligence/openpi</li>
 </ul>
-</section>
-<section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-07）</h2>
-<blockquote class="pq">
-<p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
-</blockquote>
-<h3>Flow Matching 是什么</h3>
-<p><strong>问</strong>：flow matching 是啥？</p>
-<p><strong>答</strong>：Flow Matching 就是学一个"把噪声推向数据"的速度场。设真实动作块为 $ A $ ，高斯噪声为 $ \epsilon $ ，画一条直线把它们连起来：</p>
-<p>$$A^\tau=(1-\tau)\epsilon+\tau A,\quad \tau\in[0,1].$$</p>
-<p>$ \tau=0 $ 时是纯噪声， $ \tau=1 $ 时是真实数据；这条直线上的瞬时速度很简单，就是 $ A-\epsilon $ 。训练让网络 $ v_\theta(A^\tau,o,\tau) $ 去拟合这个速度：</p>
-<p>$$\mathcal{L}=\mathbb{E}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$</p>
-<p>学好之后，推理时从噪声出发，跟着学到的速度场往前走，解一个常微分方程 $ dA/d\tau=v_\theta $ ，用 Euler 积分 10 步就从噪声走到了一个合法的动作块。跟 Diffusion 的区别：Diffusion 学的是"去噪"，走的是随机的 SDE 路径，有 100 个离散时间步；Flow Matching 学的是"方向"，走的是确定性的直线 ODE，路径更短、更快。π₀ 选它，就是因为要 50Hz 实时控制，10 步生成一个 50 步动作块刚刚好。</p>
-<p><strong>符号</strong>： $ A $ 真实动作块； $ \epsilon $ 高斯噪声； $ \tau $ flow 时间（去噪进行到哪了）； $ o $ 观测（含图像、本体感知、语言）； $ v_\theta $ 速度场网络， $ \theta $ 为参数； $ \mathcal{L} $ 训练 loss 标量。</p>
-<h3>这个 loss 是 tau 的函数吗</h3>
-<p><strong>问</strong>：这个 loss 是 tau 的函数吗？</p>
-<p><strong>答</strong>：对一半。训练时每一个样本的误差项是 $ \tau $ 的函数，网络 $ v_\theta $ 也把 $ \tau $ 当输入（它要知道现在噪声有多大、该用多大的速度）。但最终的 loss 是对 $ \tau\sim\text{Uniform}[0,1] $ 取了期望的标量：</p>
-<p>$$\mathcal{L}=\mathbb{E}_{\tau,A,\epsilon,o}\|v_\theta(A^\tau,o,\tau)-(A-\epsilon)\|^2.$$</p>
-<p>所以它不是某一个 $ \tau $ 的函数，而是把所有 $ \tau $ 上的误差平均掉了。训练时每次随机采样一个 $ \tau $ 来算，时间长了就相当于把整条路径都学好了。</p>
-<h3>修正：π₀ 有语言输入（澄清前一条回答的表述）</h3>
-<p><strong>问</strong>：day12 有道理，day11 不对啊——因为都没有语言输入，怎么做很多活？</p>
-<p><strong>答</strong>：纠正：π₀ 是<strong>有</strong>语言输入的；前一条"一个模型干很多活"的表述没把条件讲全，容易误会。它的观测 $ o $ 本来就是三件套：多视角图像 + 本体感知 $ q_t $ + <strong>语言指令</strong> $ \ell $ ，PaliGemma 那一半就是专门吃"图像+文字"的。所以"干很多活"靠的是语言切换任务：说"擦桌子"它擦桌子，说"叠衣服"它叠衣服，动作头都是同一个 flow 模型。Day12 的 Diffusion Policy 才是真的没有语言——所以它只能死守一个任务。逻辑是：π₀ "有语言→多任务"，DP "无语言→单任务"，各自自洽。</p>
-<p><strong>符号</strong>： $ q_t $ 本体感知（关节角/末端位姿）； $ \ell $ 语言指令。</p>
-<p><strong>与之前工作的关系</strong>：本节 3 问构成 Day11 的"flow 生成"主线——速度场直觉 → loss 对 $ \tau $ 取期望 → 语言条件带来多任务；与 Day12 的"去噪"参数化对照（对照见 README 问答记录），与 Day14 的 flow 低层执行相接。</p>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RT-2/OpenVLA</h4><ul><li>动作即 token</li><li>复用 next-token CE infra</li></ul></div><div class="vscol vs-b"><h4>π₀</h4><ul><li>动作块即条件生成轨迹</li><li>10 次 flow integration 换连续精度</li></ul></div></div>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">20</div><div class="l">Hz 每 0.8s 执行 16 步</div></div><div class="stat"><div class="v">50</div><div class="l">Hz 每 0.5s 执行 25 步</div></div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-11-2024-pi0-flow-vla/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

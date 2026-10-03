@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">核心</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句 (1-2句)</a><a href="#sec-8">3 问回顾（Day 8原题）</a><a href="#sec-9">第二轮复习（2026-09-08）</a><a href="#sec-10">问答补充（2026-09-08）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">核心</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句 (1-2句)</a><a href="#sec-8">3 问回顾（Day 8原题）</a><a href="#sec-9">问答补充（2026-09-08）</a><a href="#sec-10">第二轮复习（2026-09-08）</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -177,7 +177,25 @@ pre code{background:none;padding:0;color:inherit}
 <hr />
 <p>生成逻辑：已纳入知识图谱，强调结构非数量，自动产出已开启。</p>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>第二轮复习（2026-09-08）</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>问答补充（2026-09-08）</h2>
+<blockquote class="pq">
+<p>来自 <code>ai data</code> side chat 用户主动问答（2026-09-08 10:26 PDT），归档时精简整理；答案保留原符号定义与结论。</p>
+</blockquote>
+<p><strong>问题（用户）</strong>：Aux-loss-free 啥意思？</p>
+<p><strong>核心答案</strong>：</p>
+<p>先定义符号。MoE 有 $E$ 个 expert，一批 $T$ 个 token。门控网络给 token $t$ 对 expert $i$ 打亲和分 $a_{t,i}$ ，每个 token 选 top- $K$ 个 expert。</p>
+<p><strong>问题</strong>：训练初期路由会坍缩——少数几个 expert 被所有 token 选中，其他 expert 饿死。负载记 $f_i$ = 分到 expert $i$ 的 token 比例，理想是 $f_i \approx K/E$ 。</p>
+<p><strong>传统解法（aux loss）</strong>：在总 loss 里加一项负载均衡惩罚，最常见的是：</p>
+<p>$$L_{\mathrm{aux}} = \alpha \cdot E \sum_{i=1}^{E} f_i \cdot P_i$$</p>
+<p>其中 $P_i$ 是 expert $i$ 的平均路由概率。 $f_i \cdot P_i$ 在均匀分布时最小，失衡时变大，所以最小化它能把负载拉平。代价是：<strong>这项 loss 的梯度和主 LM loss 的梯度打架</strong>——模型要在"预测准"和"负载平"之间妥协， $\alpha$ 选不好两头受损。</p>
+<p><strong>Aux-loss-free（DeepSeek-V2 首创，V3 沿用）</strong>：loss 里<strong>完全没有</strong>这一项。做法是给每个 expert 加一个偏置 $b_i$ ，加在亲和分上再做 top- $K$ ：</p>
+<p>$$\mathrm{选中的\ expert} = \mathrm{topK}_i(a_{t,i} + b_i)$$</p>
+<p>$b_i$ <strong>不走梯度</strong>，而是走一个控制回路（像恒温器）：统计最近 expert $i$ 的实际负载，超载就调小 $b_i$ ，空闲就调大 $b_i$ 。负载均衡从"优化问题"变成了"反馈控制问题"，主 loss 的梯度干干净净。</p>
+<p>V3 论文 §4.2 给的具体数字：前 14.3T tokens， $b_i$ 更新速度 0.001；最后 500B tokens 更新速度设为 <strong>0（冻结）</strong>。另外留了一个权重仅 0.0001 的 sequence-level balance loss 做兜底——"just to avoid extreme imbalance within any single sequence"，防止单个序列内出现极端失衡。</p>
+<p>为什么这事值得在数据视角下单拎出来：bias 控制回路是<strong>跟着数据分布学</strong>的——数据里 code 多，code 擅长的 expert 的 $b_i$ 就被调到合适位置。一旦最后 500B 把 $b_i$ 冻结，而此时换入分布不同的 annealing 数据（比如突然加了很多数学），token 的路由分布变了，expert 负载失衡，但<strong>没有任何机制能把它拉回来</strong>（loss 里没有 aux loss，bias 也不更新了）。所以 aux-loss-free 把"负载均衡"这个职责在训练末期<strong>移交给了数据管线</strong>：annealing 窗口的数据域分布必须和之前保持兼容，否则 expert 直接失衡。这就是"架构-数据耦合"最锋利的一个实例。</p>
+<p><strong>关联</strong>：Day 08 DeepSeek-V3 §4.2（aux-loss-free 负载均衡）；与第二轮复习（2026-09-08）思考题 (b)"冻结的路由与换挡的数据"直接呼应——本问答是该思考题的前置机制解释。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>第二轮复习（2026-09-08）</h2>
 <blockquote class="pq">
 <p>本轮已对照论文原文 §4.1–§4.2（arXiv 2412.19437 v2，2025-02-18 修订版）逐项核对初读 NOTES；发现四处把"推断"写成"论文事实"的偏差，已在 §4 开头明示纠正。核对方法：全文检索 "30%" / "MinHash" / "deduplication" / "20T" 四词在论文中均零命中。</p>
 </blockquote>
@@ -234,25 +252,7 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>(b) 冻结的路由与换挡的数据。</strong> V3 用 aux-loss-free 做负载均衡，且最后 500B tokens 把 expert bias 更新速度设为 0（§4.2）。从数据视角论证：这个选择对"训练末期换入高质 annealing 数据"是利还是弊？给出完整机制链条（数据域分布变化 → token 路由分布变化 → expert 负载失衡 → loss 里无惩罚项 → ？），并设计一个<strong>不许改架构</strong>的数据管线侧对冲方案：annealing 窗口的数据域分布要满足什么约束，才能保证冻结的路由不失衡？把这个约束写成在你 500k 池子上可执行的检查规则（输入：候选 annealing 数据集的域直方图；输出：通过 / 降权 / 拒绝；并说明阈值怎么定——不能拍脑袋，要给出定阈值用的 proxy 实验）。</p>
 <hr />
 <p><strong>论文原文</strong>：https://arxiv.org/abs/2412.19437
-<strong>GitHub NOTES</strong>：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/NOTES.md</p>
-</section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>问答补充（2026-09-08）</h2>
-<blockquote class="pq">
-<p>来自 <code>ai data</code> side chat 用户主动问答（2026-09-08 10:26 PDT），归档时精简整理；答案保留原符号定义与结论。</p>
-</blockquote>
-<p><strong>问题（用户）</strong>：Aux-loss-free 啥意思？</p>
-<p><strong>核心答案</strong>：</p>
-<p>先定义符号。MoE 有 $E$ 个 expert，一批 $T$ 个 token。门控网络给 token $t$ 对 expert $i$ 打亲和分 $a_{t,i}$ ，每个 token 选 top- $K$ 个 expert。</p>
-<p><strong>问题</strong>：训练初期路由会坍缩——少数几个 expert 被所有 token 选中，其他 expert 饿死。负载记 $f_i$ = 分到 expert $i$ 的 token 比例，理想是 $f_i \approx K/E$ 。</p>
-<p><strong>传统解法（aux loss）</strong>：在总 loss 里加一项负载均衡惩罚，最常见的是：</p>
-<p>$$L_{\mathrm{aux}} = \alpha \cdot E \sum_{i=1}^{E} f_i \cdot P_i$$</p>
-<p>其中 $P_i$ 是 expert $i$ 的平均路由概率。 $f_i \cdot P_i$ 在均匀分布时最小，失衡时变大，所以最小化它能把负载拉平。代价是：<strong>这项 loss 的梯度和主 LM loss 的梯度打架</strong>——模型要在"预测准"和"负载平"之间妥协， $\alpha$ 选不好两头受损。</p>
-<p><strong>Aux-loss-free（DeepSeek-V2 首创，V3 沿用）</strong>：loss 里<strong>完全没有</strong>这一项。做法是给每个 expert 加一个偏置 $b_i$ ，加在亲和分上再做 top- $K$ ：</p>
-<p>$$\mathrm{选中的\ expert} = \mathrm{topK}_i(a_{t,i} + b_i)$$</p>
-<p>$b_i$ <strong>不走梯度</strong>，而是走一个控制回路（像恒温器）：统计最近 expert $i$ 的实际负载，超载就调小 $b_i$ ，空闲就调大 $b_i$ 。负载均衡从"优化问题"变成了"反馈控制问题"，主 loss 的梯度干干净净。</p>
-<p>V3 论文 §4.2 给的具体数字：前 14.3T tokens， $b_i$ 更新速度 0.001；最后 500B tokens 更新速度设为 <strong>0（冻结）</strong>。另外留了一个权重仅 0.0001 的 sequence-level balance loss 做兜底——"just to avoid extreme imbalance within any single sequence"，防止单个序列内出现极端失衡。</p>
-<p>为什么这事值得在数据视角下单拎出来：bias 控制回路是<strong>跟着数据分布学</strong>的——数据里 code 多，code 擅长的 expert 的 $b_i$ 就被调到合适位置。一旦最后 500B 把 $b_i$ 冻结，而此时换入分布不同的 annealing 数据（比如突然加了很多数学），token 的路由分布变了，expert 负载失衡，但<strong>没有任何机制能把它拉回来</strong>（loss 里没有 aux loss，bias 也不更新了）。所以 aux-loss-free 把"负载均衡"这个职责在训练末期<strong>移交给了数据管线</strong>：annealing 窗口的数据域分布必须和之前保持兼容，否则 expert 直接失衡。这就是"架构-数据耦合"最锋利的一个实例。</p>
-<p><strong>关联</strong>：Day 08 DeepSeek-V3 §4.2（aux-loss-free 负载均衡）；与第二轮复习（2026-09-08）思考题 (b)"冻结的路由与换挡的数据"直接呼应——本问答是该思考题的前置机制解释。</p></section>
+<strong>GitHub NOTES</strong>：https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/NOTES.md</p></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/day-08-2024-deepseek-v3/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>

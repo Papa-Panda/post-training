@@ -36,6 +36,9 @@ Roadmap Day28 的官方主题就是"统一任务、资产、传感器和成功�
 2. **异构仿真对 on-policy RL 是帮助还是伤害？** 每 env 不同场景/物体/关节数 ⇒ 一个 batch 内 $\xi$ 直接覆盖整个 $p_\phi$ ——对 PPO 这种 on-policy 算法，这是"分布匹配"的帮助（rollout 分布 = 训练分布），还是"方差爆炸"的伤害（不同 env 的 advantage 尺度不一致）？和 Day19 的 GPU 向量化 rollout（legged_gym 8192 env）在数学上是什么关系？
 3. **Benchmark 的覆盖 vs 可比 trade-off**：robosuite 的"模块化"（robot × arena × object × controller 正交组合，组合爆炸）vs ManiSkill3 的"12 类任务模板"（固定协议、模板可扩展）。评测设计上，覆盖广度（能测的组合越多越好）和可比性（所有人测的是同一份试卷）如何取舍？为什么 ManiSkill3 选择"多做模板、少做穷举"（论文明说核心不是每个类别建很多环境，而是建很多用户可扩展的模板）？
 
+## 问答补充
+（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）
+
 ## 核心
 
 ### 1. Motivation
@@ -124,9 +127,6 @@ $J=0.5$ 时要分辨 5 个点的提升需要 $N\approx 1500$ ； $J=0.9$ 时分�
 ## 连接
 - 上一篇: day-27-2025-cosmos-world-foundation（Cosmos 世界基础模型平台；Day27 Q3"缺评测协议"→ Day28 正解）
 - 下一篇预告: day-29-safe-robot-learning（Safe Robot Learning — 约束 MDP / CBF / shield / runtime monitor： $S$ 只判成功不判安全，Day29 补"怎么成功"的约束）
-
-## 问答补充
-（本篇暂无 side chat 问答；跨篇通识问答见 README 问答记录。）
 
 <!-- viz:stats: 128×128 单相机 | 仿真 120Hz 控制 60Hz | 显存 3.5GB vs 14.1GB -->
 <!-- viz:vs: MuJoCo CPU 栈 | 模块化标准; 无并行渲染 || ManiSkill3 | GPU 并行渲染; visual RL 几分钟 vs 几小时 -->

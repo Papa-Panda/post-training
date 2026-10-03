@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移 / Transfer</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">连接</a><a href="#sec-12">参考链接</a><a href="#sec-13">问答补充（2026-09-07）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-09-07）</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -142,7 +142,33 @@ pre code{background:none;padding:0;color:inherit}
 <li>对真实机器人而言，VLA 的核心瓶颈究竟是模型规模、robot data mixture、控制频率，还是缺少 proprioception / temporal history；应该怎样做独立消融？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-09-07）</h2>
+<blockquote class="pq">
+<p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
+</blockquote>
+<h3>VLA 是类别名，不是具体架构</h3>
+<p><strong>问</strong>：VLA 不是一种模型而是模型架构？类似 transformer？</p>
+<p><strong>答</strong>：VLA 更像一个<strong>类别名</strong>，定义的是输入输出契约：图像和语言进来，动作出去，即 $ \pi(A \mid O, \text{language}) $ ，其中 $ A $ 为动作（序列/块）， $ O $ 为观测。凡是满足这个契约的都算 VLA。Transformer 是实现引擎（积木），VLA 是用积木搭出来的车型：RT-2/OpenVLA 用 Transformer 解码器加离散 action token，π₀ 用 VLM 加 flow matching 动作头，Octo 用 Transformer 加 diffusion head——三个都是 VLA，但内部引擎完全不同。反例：Day12 的 Diffusion Policy 连语言输入都不吃，严格讲不算 VLA，只是 action diffusion。这说明语言那个 L 是 VLA 的身份特征：去掉语言，它就退化成纯动作生成模型。</p>
+<p><strong>关联</strong>：Day09（RT-2/OpenVLA）/ Day11（π₀）/ Day12（Diffusion Policy）/ Day13（Octo）。</p>
+<h3>VLA 与 transformer 的关系</h3>
+<p><strong>问</strong>：VLA 也是 transformer？</p>
+<p><strong>答</strong>：定义上不是必须，现实中几乎全是。VLA 只要求"图像+语言→动作"这个契约（CNN 编码器加 RNN 理论上也算），但 VLA 的价值在于借用预训练 VLM 的语义（知道"杯子"是什么、"放进水槽"意味着什么），而今天好用的 VLM 都是 transformer；连 π₀ 的 flow matching 动作头，前面半个 PaliGemma 也是 transformer。结论：<strong>VLA 名义上是类别，实际上市面上 99% 都是 transformer 实现</strong>。</p>
+<h3>Day09 "以什么为条件"：芒果的例子</h3>
+<p><strong>问</strong>：Day09 解决的是"以什么为条件"……没看懂。</p>
+<p><strong>答</strong>：假设机器人训练数据里只有"拿苹果"和"拿香蕉"的演示，现在指令是"拿起那个芒果"——纯机器人策略会懵：它这辈子没见过芒果，图像里那坨黄色的东西跟它学过的"抓取目标"对不上号。RT-2 的做法：拿一个在互联网上看过几百万张图片的 VLM（它在网上见过芒果，知道"芒果"长什么样、跟"黄色水果"是什么关系），把机器人动作也变成 token，跟语言放在同一个词表里一起训练。于是模型用它在网上学到的"芒果长这样"的知识，在当前图像里定位芒果，再输出对应的动作 token。<strong>语义知识是从 web 数据里"借"来的，机器人数据只负责教它"看到东西之后手该怎么动"</strong>。这就是"解决语义问题"：之前机器人是文盲，只能认训练里见过的几样东西；RT-2 让它识字了。代价：动作被量化成 256 个 bin、频率只有几 Hz——认得字，不代表手就稳。</p>
+<h3>VLM 是什么</h3>
+<p><strong>问</strong>：VLM 是啥？</p>
+<p><strong>答</strong>：VLM = Vision-Language Model，视觉语言模型：图片和文字一起吃进去，文字出来（比如给它一张照片问"这是什么"，它回答"一只芒果"）。它在互联网规模的图文对上训练，认识的东西远超任何机器人数据集——这就是 RT-2 要"借"的语义。一句话关系：<strong>VLA = VLM + 动作输出</strong>。RT-2 是把 VLM 的词表扩充了动作 token；π₀ 是拿 PaliGemma 当 VLM 底座再外挂一个动作头。</p>
+<h3>t₁..t₇ 不是文字：Day09 的突破点</h3>
+<p><strong>问</strong>： $ p(t\mid I,\ell) $ 里 t 是文字？那这不就是一个 VLM 吗？Day09 有啥突破？</p>
+<p><strong>答</strong>：t 不是文字，是<strong>动作 token</strong>：7 维连续动作 $ a=(\Delta x,\Delta y,\Delta z,\Delta r_x,\Delta r_y,\Delta r_z,\text{gripper}) $ 每维切成 256 个 bin，每个 bin 分配一个 token ID， $ t_1 $ 到 $ t_7 $ 就是"这次手该怎么动"的离散编码。公式长得像 VLM 完全是故意的——<strong>突破恰恰是这个表示上的 trick</strong>：把动作塞进 VLM 的词表，让"预测下一个动作 token"和"预测下一个文字 token"变成同一个任务、同一个 transformer、同一套交叉熵 loss。在此之前是两个世界：VLM 认识芒果但手不会动，机器人策略手会动但不认识芒果。RT-2 第一个把它们打通——web 数据教它认识世界，机器人数据教它把"认识"翻译成"动作"，翻译的桥梁就是"动作即 token"。所以 Day09 的突破不是新数学（自回归 CE 都是现成的），而是证明了：<strong>VLM 的语义能力可以通过 token 化迁移到机器人控制上</strong>。</p>
+<p><strong>符号</strong>： $ t $ 动作 token 序列； $ I $ 输入图像； $ \ell $ 语言指令 token； $ a $ 连续动作向量，各分量为末端位姿增量与夹爪开合。</p>
+<h3>目标动作 token 来自哪里</h3>
+<p><strong>问</strong>：预测下一个动作 token，那这个目标动作来自于哪里？</p>
+<p><strong>答</strong>：来自人类演示，标准的 behavior cloning。训练数据是人遥操作机器人录下来的：操作员用 VR 手柄或 spacemouse 控制机械臂做"拿杯子"，系统同步记录每一时刻的图像、指令和 7 维连续动作；训练时把这些连续动作按 256 bin 离散化成 token，就成了交叉熵 loss 的 target（模型预测 $ t_3 $ ，target 就是演示里那一刻真实的 $ t_3 $ ）。RT-2 的 co-finetraining 有意思在 target 是两种混在一起的：web 数据的 target 是文字 token（看图说话、问答），机器人数据的 target 是动作 token。同一个 loss 下，模型自己学会了"看到芒果图片时输出描述文字，看到机器人视角+指令时输出动作"。</p>
+<p><strong>与之前工作的关系</strong>：本节 6 问构成 Day09 的"表示"主线——VLA 的契约定义 → 语义从 web 借 → 动作 token 化 → 演示数据即 target；与 Day11/12 的"生成式连续动作"路线形成对照（对照见 README 问答记录）。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
 <ol>
 <li><strong>Motivation：把 Internet-scale 语义先验直接接到机器人控制</strong></li>
 <li>传统 imitation policy 能在训练分布内学会动作，却容易在新物体、背景、指令与概念上失效；纯 VLM planner 又通常只负责高层分解，低层 controller 并没有共享 web-scale 预训练知识。</li>
@@ -190,7 +216,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>边界</strong>：OpenVLA 只看单帧图像、无 proprioception / history / action chunking，通常仍低于 90% success；RT-2 与 OpenVLA 的 1–15 Hz 控制频率离 humanoid 低层控制所需频率很远。</li>
 </ol>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
 <ul>
 <li><strong>方法在 held-out 上是否 transfer？模型 vs 框架哪个贡献更大？</strong> RT-2 的 unseen semantics 与 OpenVLA 的跨 WidowX / Google Robot 结果支持 visual、semantic、physical 和 motion generalization；但 OpenVLA 自己的分析把收益归因于数据规模/清洗、双视觉 encoder 和架构多项因素，不能把 16.5-point 提升只归给“开源 7B 更强”。</li>
 <li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</strong></li>
@@ -199,20 +225,20 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong> 每个 checkpoint 同时记录 action-token accuracy、per-dataset loss、mixture sampling weight、机器人 success / recovery / safety violation、p50/p95 inference latency 与 achieved control Hz；按 embodiment / task / semantic novelty 分桶，防止 aggregate success 掩盖 semantic forgetting 或单一机器人过拟合。</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
 <ul>
 <li><strong>没看懂 / 想深挖：</strong> 动作逐维量化并用 token-level cross-entropy 优化，默认各维在 decoder 中按固定顺序分解；它对多峰 action distribution、跨维几何耦合和 contact-rich precision 的代价有多大？</li>
 <li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> 用 OpenVLA 官方代码在 LIBERO 或 BridgeData V2 子集上做 LoRA：固定同一数据与 seed，对比 <code>1–99 percentile bins vs min/max bins</code>、<code>frozen vs trainable vision encoder</code>，同时报告 action-token accuracy、task success、p95 latency 和 achieved control Hz。</li>
 <li><strong>下一步：</strong> Day10 进入 Habitat 3.0 / Habitat Lab，从桌面 manipulation 转向 embodied navigation、human-robot interaction 与 simulator benchmark infrastructure。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>“We represent robot actions as another language, which can be cast into text tokens and trained together with Internet-scale vision-language datasets.” — RT-2 project page</p>
 <p>“OpenVLA demonstrates strong results for generalist manipulation, outperforming closed models such as RT-2-X (55B) by 16.5% in absolute task success rate across 29 tasks and multiple robot embodiments, with 7x fewer parameters.” — OpenVLA abstract</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
 <ul>
 <li>[ ] 画一张 <code>image + instruction → visual tokens → LLM → action tokens → de-tokenize → low-level controller</code> 数据流图</li>
 <li>[ ] 做 RT-2 vs OpenVLA 对照表：web co-finetuning、robot data、参数量、开放性、控制频率、semantic retention</li>
@@ -221,14 +247,14 @@ pre code{background:none;padding:0;color:inherit}
 <li>[ ] 写清 VLA 与 Day08 locomotion policy 的分层边界：VLA 做低频语义动作建议，安全/稳定由高频 controller 兜底</li>
 </ul>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
 <ul>
 <li>上一篇: Day08 — Humanoid-Gym（高频 proprioceptive locomotion + sim2sim gate）</li>
 <li>下一篇预告: Day10 — Habitat 3.0 / Habitat Lab（embodied navigation 与 human-robot interaction）</li>
 <li>相关: Day04 Genie；Day05 UniSim；Day06 DreamerV3；Day07 H2O</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>参考链接</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>参考链接</h2>
 <ul>
 <li>RT-2 paper: https://arxiv.org/abs/2307.15818</li>
 <li>RT-2 project: https://robotics-transformer2.github.io/</li>
@@ -236,32 +262,6 @@ pre code{background:none;padding:0;color:inherit}
 <li>OpenVLA project: https://openvla.github.io/</li>
 <li>OpenVLA official code: https://github.com/openvla/openvla</li>
 </ul>
-</section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-07）</h2>
-<blockquote class="pq">
-<p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
-</blockquote>
-<h3>VLA 是类别名，不是具体架构</h3>
-<p><strong>问</strong>：VLA 不是一种模型而是模型架构？类似 transformer？</p>
-<p><strong>答</strong>：VLA 更像一个<strong>类别名</strong>，定义的是输入输出契约：图像和语言进来，动作出去，即 $ \pi(A \mid O, \text{language}) $ ，其中 $ A $ 为动作（序列/块）， $ O $ 为观测。凡是满足这个契约的都算 VLA。Transformer 是实现引擎（积木），VLA 是用积木搭出来的车型：RT-2/OpenVLA 用 Transformer 解码器加离散 action token，π₀ 用 VLM 加 flow matching 动作头，Octo 用 Transformer 加 diffusion head——三个都是 VLA，但内部引擎完全不同。反例：Day12 的 Diffusion Policy 连语言输入都不吃，严格讲不算 VLA，只是 action diffusion。这说明语言那个 L 是 VLA 的身份特征：去掉语言，它就退化成纯动作生成模型。</p>
-<p><strong>关联</strong>：Day09（RT-2/OpenVLA）/ Day11（π₀）/ Day12（Diffusion Policy）/ Day13（Octo）。</p>
-<h3>VLA 与 transformer 的关系</h3>
-<p><strong>问</strong>：VLA 也是 transformer？</p>
-<p><strong>答</strong>：定义上不是必须，现实中几乎全是。VLA 只要求"图像+语言→动作"这个契约（CNN 编码器加 RNN 理论上也算），但 VLA 的价值在于借用预训练 VLM 的语义（知道"杯子"是什么、"放进水槽"意味着什么），而今天好用的 VLM 都是 transformer；连 π₀ 的 flow matching 动作头，前面半个 PaliGemma 也是 transformer。结论：<strong>VLA 名义上是类别，实际上市面上 99% 都是 transformer 实现</strong>。</p>
-<h3>Day09 "以什么为条件"：芒果的例子</h3>
-<p><strong>问</strong>：Day09 解决的是"以什么为条件"……没看懂。</p>
-<p><strong>答</strong>：假设机器人训练数据里只有"拿苹果"和"拿香蕉"的演示，现在指令是"拿起那个芒果"——纯机器人策略会懵：它这辈子没见过芒果，图像里那坨黄色的东西跟它学过的"抓取目标"对不上号。RT-2 的做法：拿一个在互联网上看过几百万张图片的 VLM（它在网上见过芒果，知道"芒果"长什么样、跟"黄色水果"是什么关系），把机器人动作也变成 token，跟语言放在同一个词表里一起训练。于是模型用它在网上学到的"芒果长这样"的知识，在当前图像里定位芒果，再输出对应的动作 token。<strong>语义知识是从 web 数据里"借"来的，机器人数据只负责教它"看到东西之后手该怎么动"</strong>。这就是"解决语义问题"：之前机器人是文盲，只能认训练里见过的几样东西；RT-2 让它识字了。代价：动作被量化成 256 个 bin、频率只有几 Hz——认得字，不代表手就稳。</p>
-<h3>VLM 是什么</h3>
-<p><strong>问</strong>：VLM 是啥？</p>
-<p><strong>答</strong>：VLM = Vision-Language Model，视觉语言模型：图片和文字一起吃进去，文字出来（比如给它一张照片问"这是什么"，它回答"一只芒果"）。它在互联网规模的图文对上训练，认识的东西远超任何机器人数据集——这就是 RT-2 要"借"的语义。一句话关系：<strong>VLA = VLM + 动作输出</strong>。RT-2 是把 VLM 的词表扩充了动作 token；π₀ 是拿 PaliGemma 当 VLM 底座再外挂一个动作头。</p>
-<h3>t₁..t₇ 不是文字：Day09 的突破点</h3>
-<p><strong>问</strong>： $ p(t\mid I,\ell) $ 里 t 是文字？那这不就是一个 VLM 吗？Day09 有啥突破？</p>
-<p><strong>答</strong>：t 不是文字，是<strong>动作 token</strong>：7 维连续动作 $ a=(\Delta x,\Delta y,\Delta z,\Delta r_x,\Delta r_y,\Delta r_z,\text{gripper}) $ 每维切成 256 个 bin，每个 bin 分配一个 token ID， $ t_1 $ 到 $ t_7 $ 就是"这次手该怎么动"的离散编码。公式长得像 VLM 完全是故意的——<strong>突破恰恰是这个表示上的 trick</strong>：把动作塞进 VLM 的词表，让"预测下一个动作 token"和"预测下一个文字 token"变成同一个任务、同一个 transformer、同一套交叉熵 loss。在此之前是两个世界：VLM 认识芒果但手不会动，机器人策略手会动但不认识芒果。RT-2 第一个把它们打通——web 数据教它认识世界，机器人数据教它把"认识"翻译成"动作"，翻译的桥梁就是"动作即 token"。所以 Day09 的突破不是新数学（自回归 CE 都是现成的），而是证明了：<strong>VLM 的语义能力可以通过 token 化迁移到机器人控制上</strong>。</p>
-<p><strong>符号</strong>： $ t $ 动作 token 序列； $ I $ 输入图像； $ \ell $ 语言指令 token； $ a $ 连续动作向量，各分量为末端位姿增量与夹爪开合。</p>
-<h3>目标动作 token 来自哪里</h3>
-<p><strong>问</strong>：预测下一个动作 token，那这个目标动作来自于哪里？</p>
-<p><strong>答</strong>：来自人类演示，标准的 behavior cloning。训练数据是人遥操作机器人录下来的：操作员用 VR 手柄或 spacemouse 控制机械臂做"拿杯子"，系统同步记录每一时刻的图像、指令和 7 维连续动作；训练时把这些连续动作按 256 bin 离散化成 token，就成了交叉熵 loss 的 target（模型预测 $ t_3 $ ，target 就是演示里那一刻真实的 $ t_3 $ ）。RT-2 的 co-finetraining 有意思在 target 是两种混在一起的：web 数据的 target 是文字 token（看图说话、问答），机器人数据的 target 是动作 token。同一个 loss 下，模型自己学会了"看到芒果图片时输出描述文字，看到机器人视角+指令时输出动作"。</p>
-<p><strong>与之前工作的关系</strong>：本节 6 问构成 Day09 的"表示"主线——VLA 的契约定义 → 语义从 web 借 → 动作 token 化 → 演示数据即 target；与 Day11/12 的"生成式连续动作"路线形成对照（对照见 README 问答记录）。</p>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">7B</div><div class="l">Prismatic backbone</div></div><div class="stat"><div class="v">7</div><div class="l">D 相对动作输出</div></div></div>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RT-2</h4><ul><li>fine-tune 混入 web data</li><li>generalization 好</li></ul></div><div class="vscol vs-b"><h4>robot-only FT</h4><ul><li>困难概念上落后</li></ul></div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-09-2024-rt2-openvla/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

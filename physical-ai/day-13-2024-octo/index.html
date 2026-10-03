@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：POMDP 上的多域条件行为克隆</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a><a href="#sec-14">问答补充（2026-09-07）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-09-07）</a><a href="#sec-7">数学视角：POMDP 上的多域条件行为克隆</a><a href="#sec-8">核心</a><a href="#sec-9">可迁移 / Transfer</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a><a href="#sec-14">参考链接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -142,7 +142,30 @@ pre code{background:none;padding:0;color:inherit}
 <li>约 80 万条轨迹能带来哪些真正的 zero-shot generalization，哪些能力仍必须靠约 100 条目标域示范微调；怎样用部署 gate 区分“新物体”“新场景”“新技能”和“新 embodiment”？</li>
 </ol>
 </section>
-<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角：POMDP 上的多域条件行为克隆</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-09-07）</h2>
+<blockquote class="pq">
+<p>以下问答归档自 physical AI side chat（2026-09-06）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。</p>
+</blockquote>
+<h3>Day13 Octo 如何"结合"起来：三层</h3>
+<p><strong>问</strong>：仔细讲一下 day 13 如何结合起来的。</p>
+<p><strong>答</strong>：Octo 的"结合"分三层：输入怎么统一、表示怎么共享、动作怎么生成。问题先摆出来：25 个数据集，机器人、相机数量、传感器、动作空间全不一样，直接拼数据会炸——维度对不上、有的缺语言、坐标系也不同。</p>
+<p><strong>第一层：分模态 tokenizer + mask（输入统一）</strong>。图像走 ViT 切 patch tokens，本体感知走 MLP 投成 tokens，语言走 text embedding，目标图像复用图像 tokenizer。某个数据集缺某个模态（比如没有语言、只有一个相机），就在 attention 里把对应位置 mask 掉。含义：不同 embodiment 只是"缺不同的块"，模型结构完全一样——异构被隔离在了输入端。</p>
+<p><strong>第二层：readout token（表示解耦）</strong>。加几个特殊的 readout token，它们的输出 embedding 喂给动作 head。Transformer 只负责"理解"，readout embedding 是 embodiment 无关的瓶颈表示，head 只认这个表示不认机器人。这就是为什么换新机器人 100 条 demo 就能微调：要调的只是"理解→动作"这个薄映射，理解部分是跨身体共享的。</p>
+<p><strong>第三层：加权混合 diffusion（训练与推理）</strong>。</p>
+<p>$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$</p>
+<p>$ q_d $ 是各域采样权重； $ \mathcal{L}_{\text{diffusion}} $ 和 Day12 同家族（ $ \mathbb{E}\|\epsilon-\epsilon_\theta(O,A^k,k)\|^2 $ ），一次预测 4 步动作块。推理时大 Transformer 只跑 1 次提特征，轻量 MLP head 做 20 步去噪，输出 $ A_t\in\mathbb{R}^{4\times d_a} $ ，执行 1–4 步后重规划。</p>
+<p><strong>串起来</strong>：数据侧是 Day15 OXE 提供的 80 万轨迹（Octo 是 OXE 的下游消费者），Octo 贡献的是"怎么吃进去"——输入端模块化、中间共享表示、输出端小 head。</p>
+<p><strong>天花板（诚实标注）</strong>：新物体约 80%、新场景约 40%、新技能只有约 5%。Imitation 学的是"数据里接下来怎么动"，mixture 没覆盖的技能在 support 之外，长不出来。所以它的真实定位是强初始化，不是万能策略——这点和 Day14 π₀.₅ 想突破的方向正好接上。</p>
+<p><strong>符号</strong>： $ d $ 数据域编号（共 25 个）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ A_t $ 时刻 $ t $ 的动作块， $ d_a $ 为动作维度； $ O $ 观测； $ A^k $ 第 $ k $ 步加噪后的动作轨迹； $ \epsilon_\theta $ 噪声预测网络。</p>
+<p><strong>与之前工作的关系</strong>：Day13 回答"在什么数据上训"（对照 README 问答记录的 2×2）；它的模块化 readout 接口与 Day14 π₀.₅ 的单 backbone hybrid 路线形成"接口即泛化 vs 配方即泛化"的对照（见 README 问答记录）。</p>
+<h3>追问：Octo 也不是固定硬件吧</h3>
+<p><strong>问</strong>：octo也不是吧？（Day16 讨论中的追问：Octo 也不是固定硬件吧？）</p>
+<p><strong>答</strong>：对，Octo 也不是——它恰恰是跨 embodiment 的典型：25 个数据集、约 80 万条轨迹，训练目标里专门有一个机器人域下标 $ d \in \{1,\dots,25\} $ ：</p>
+<p>$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$</p>
+<p>整个 token/mask/readout 设计就是为了让一个模型吃下多种身体——各模态独立 tokenizer + 缺模态 mask（输入端隔离异构）、readout token（embodiment 无关的瓶颈表示）、加权混合 diffusion head（输出端）。详见本篇"Octo 如何'结合'起来：三层"。</p>
+<p><strong>符号</strong>： $ d $ 数据域编号（共 25 个，对应 25 种机器人身体）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ \theta $ 网络权重； $ \mathcal{L}_{\text{diffusion}} $ diffusion 训练 loss。</p>
+</section>
+<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角：POMDP 上的多域条件行为克隆</h2>
 <h3>1) State / observation / action / objective</h3>
 <p>把第 $d$ 个机器人数据域写成部分可观测动力系统：</p>
 <p>$$x_{t+1}=f_d(x_t,a_t,w_t),\qquad o_t=h_d(x_t,v_t),\qquad c\in\{\ell,g\}.$$</p>
@@ -191,7 +214,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>上面的 POMDP/BC 模型隐含假设：不同数据集的时间同步可靠，动作单位/坐标系可对齐，成功示范覆盖部署状态，语言或目标图像足以消除任务歧义。它没有显式建模 camera calibration drift、控制频率不一致、动作延迟、backlash、接触冲击、夹爪力、object mass/friction、operator style、失败恢复和安全约束。</p>
 <p>论文的实证也暴露这些边界：只有 27% 预训练数据含 wrist camera，56% 含语言标注；新场景成功率下降，新技能更差。模型在 imitation objective 下只学“数据里接下来怎么动”，没有 reward、动力学可达性或 constraint satisfaction 保证。部署仍需要 schema validator、时间戳/坐标系检查、低层反馈控制、限位/限力、collision shield、OOD gate 和分桶闭环评测。</p>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>核心</h2>
 <ol>
 <li><strong>Motivation：通用策略的瓶颈不只是规模，而是 I/O contract</strong></li>
 <li>机器人数据横跨相机布局、任务定义、action space 和 embodiment；固定输入顺序或固定输出头会让预训练权重难以复用。</li>
@@ -236,7 +259,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>数据缺口直接映射成模型缺口：wrist camera 只占 27%、language annotation 只占 56%，相应模态表现也不稳定。</li>
 </ol>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移 / Transfer</h2>
 <ul>
 <li><strong>方法在 held-out 上是否 transfer？模型 vs 框架哪个贡献更大？</strong> 新物体 transfer 较强，新场景下降，新技能几乎失败；约 100 条目标域示范后的迁移则很强。消融显示数据 breadth、diffusion objective 和 Transformer-first 架构都贡献明显，不能把收益只归因于参数量。</li>
 <li><strong>对你 Infra → Post-training → Physical AI 迁移的直接启发：</strong></li>
@@ -245,20 +268,20 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong> 训练需要多数据集并行读取、解码前 shuffle、每域采样权重和缺失模态 mask；部署要记录 <code>observation age → transformer latency → 20-step head latency → action queue → controller tracking error</code>。建议评测矩阵按新物体/新场景/新技能/新 embodiment 分桶，并把 p50/p95 latency、schema validation failure 和 safety intervention 与成功率并列。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
 <ul>
 <li><strong>没看懂 / 想深挖：</strong> 如果把数据 mixture 权重 $q_d$ 从手调变成基于 gradient conflict、coverage 或 downstream validation 的自适应优化，能否在不增加总轨迹数的情况下改善 novel-scene / novel-skill transfer？这与 model-aware data curation 的 gradient-space 视角可以直接连接。</li>
 <li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> 不直接复现 1.2TB 预训练；先用官方 checkpoint 跑 inference shape smoke test，打印 <code>observation/task/action</code> spec，再用一个小 RLDS 数据集做 full 与 head-only finetuning，对比 validation diffusion loss、闭环 success、动作 jerk 和 p95 inference latency。</li>
 <li><strong>下一步：</strong> Day14 读 $\pi_{0.5}$ ，重点看 open-world generalization、co-training 与 knowledge insulation 如何处理 Octo 暴露的新场景/新技能短板。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>“Our evaluation highlights the utility of scale and flexibility: our best models are those trained on the widest data mixtures, with the least restrictive inductive biases, and with policy objectives that can fit the diversity of behaviors in the pretraining data.”</p>
 <p>“This flexibility is crucial to make Octo a truly ‘generalist’ model: since we cannot cover all possible robot sensor and action configurations during pretraining, being able to adapt Octo’s inputs and outputs during finetuning makes it a versatile tool for the robotics community.”</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
 <ul>
 <li>[ ] 跑 <code>OctoModel.load_pretrained</code> + <code>get_pretty_spec()</code>，确认两帧 observation、task mask 与 <code>(4, d_a)</code> action chunk</li>
 <li>[ ] 画 <code>task/image tokenizers → block-wise Transformer → passive readout → 20-step diffusion head → execute H_e</code> 数据流图</li>
@@ -267,42 +290,19 @@ pre code{background:none;padding:0;color:inherit}
 <li>[ ] 设计四桶闭环评测：novel object / scene / skill / embodiment，并同时记录 success、jerk、p95 latency、safety intervention</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>连接</h2>
 <ul>
 <li>上一篇: Day12 — Diffusion Policy（条件动作扩散 + receding-horizon control）</li>
 <li>下一篇预告: Day14 — $\pi_{0.5}$ （open-world VLA + co-training / knowledge insulation）</li>
 <li>相关: Day09 RT-2 / OpenVLA；Day11 $\pi_0$ ；Day15 Open X-Embodiment / RT-X</li>
 </ul>
 </section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>参考链接</h2>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>参考链接</h2>
 <ul>
 <li>Paper: https://arxiv.org/abs/2405.12213</li>
 <li>Project: https://octo-models.github.io/</li>
 <li>Official code: https://github.com/octo-models/octo</li>
 </ul>
-</section>
-<section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-07）</h2>
-<blockquote class="pq">
-<p>以下问答归档自 physical AI side chat（2026-09-06）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。</p>
-</blockquote>
-<h3>Day13 Octo 如何"结合"起来：三层</h3>
-<p><strong>问</strong>：仔细讲一下 day 13 如何结合起来的。</p>
-<p><strong>答</strong>：Octo 的"结合"分三层：输入怎么统一、表示怎么共享、动作怎么生成。问题先摆出来：25 个数据集，机器人、相机数量、传感器、动作空间全不一样，直接拼数据会炸——维度对不上、有的缺语言、坐标系也不同。</p>
-<p><strong>第一层：分模态 tokenizer + mask（输入统一）</strong>。图像走 ViT 切 patch tokens，本体感知走 MLP 投成 tokens，语言走 text embedding，目标图像复用图像 tokenizer。某个数据集缺某个模态（比如没有语言、只有一个相机），就在 attention 里把对应位置 mask 掉。含义：不同 embodiment 只是"缺不同的块"，模型结构完全一样——异构被隔离在了输入端。</p>
-<p><strong>第二层：readout token（表示解耦）</strong>。加几个特殊的 readout token，它们的输出 embedding 喂给动作 head。Transformer 只负责"理解"，readout embedding 是 embodiment 无关的瓶颈表示，head 只认这个表示不认机器人。这就是为什么换新机器人 100 条 demo 就能微调：要调的只是"理解→动作"这个薄映射，理解部分是跨身体共享的。</p>
-<p><strong>第三层：加权混合 diffusion（训练与推理）</strong>。</p>
-<p>$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$</p>
-<p>$ q_d $ 是各域采样权重； $ \mathcal{L}_{\text{diffusion}} $ 和 Day12 同家族（ $ \mathbb{E}\|\epsilon-\epsilon_\theta(O,A^k,k)\|^2 $ ），一次预测 4 步动作块。推理时大 Transformer 只跑 1 次提特征，轻量 MLP head 做 20 步去噪，输出 $ A_t\in\mathbb{R}^{4\times d_a} $ ，执行 1–4 步后重规划。</p>
-<p><strong>串起来</strong>：数据侧是 Day15 OXE 提供的 80 万轨迹（Octo 是 OXE 的下游消费者），Octo 贡献的是"怎么吃进去"——输入端模块化、中间共享表示、输出端小 head。</p>
-<p><strong>天花板（诚实标注）</strong>：新物体约 80%、新场景约 40%、新技能只有约 5%。Imitation 学的是"数据里接下来怎么动"，mixture 没覆盖的技能在 support 之外，长不出来。所以它的真实定位是强初始化，不是万能策略——这点和 Day14 π₀.₅ 想突破的方向正好接上。</p>
-<p><strong>符号</strong>： $ d $ 数据域编号（共 25 个）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ A_t $ 时刻 $ t $ 的动作块， $ d_a $ 为动作维度； $ O $ 观测； $ A^k $ 第 $ k $ 步加噪后的动作轨迹； $ \epsilon_\theta $ 噪声预测网络。</p>
-<p><strong>与之前工作的关系</strong>：Day13 回答"在什么数据上训"（对照 README 问答记录的 2×2）；它的模块化 readout 接口与 Day14 π₀.₅ 的单 backbone hybrid 路线形成"接口即泛化 vs 配方即泛化"的对照（见 README 问答记录）。</p>
-<h3>追问：Octo 也不是固定硬件吧</h3>
-<p><strong>问</strong>：octo也不是吧？（Day16 讨论中的追问：Octo 也不是固定硬件吧？）</p>
-<p><strong>答</strong>：对，Octo 也不是——它恰恰是跨 embodiment 的典型：25 个数据集、约 80 万条轨迹，训练目标里专门有一个机器人域下标 $ d \in \{1,\dots,25\} $ ：</p>
-<p>$$\min_\theta\sum_{d=1}^{25}q_d\,\mathbb{E}_{\tau\sim\mathcal{D}_d}[\mathcal{L}_{\text{diffusion}}(\theta;\tau,d)].$$</p>
-<p>整个 token/mask/readout 设计就是为了让一个模型吃下多种身体——各模态独立 tokenizer + 缺模态 mask（输入端隔离异构）、readout token（embodiment 无关的瓶颈表示）、加权混合 diffusion head（输出端）。详见本篇"Octo 如何'结合'起来：三层"。</p>
-<p><strong>符号</strong>： $ d $ 数据域编号（共 25 个，对应 25 种机器人身体）； $ q_d $ 第 $ d $ 个域的采样权重； $ \mathcal{D}_d $ 第 $ d $ 个域的数据集； $ \tau $ 采样到的轨迹； $ \theta $ 网络权重； $ \mathcal{L}_{\text{diffusion}} $ diffusion 训练 loss。</p>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">27M</div><div class="l">Octo-Small</div></div><div class="stat"><div class="v">93M</div><div class="l">Octo-Base</div></div><div class="stat"><div class="v">2048</div><div class="l">batch TPUv4-128 300k steps 约 14 小时</div></div></div>
 <div class="viz viz-bars"><div class="barrow"><div class="barlabel">diffusion head</div><div class="bartrack"><div class="barfill" style="width:100.0%"></div></div><div class="barval">83%</div></div><div class="barrow"><div class="barlabel">MSE</div><div class="bartrack"><div class="barfill" style="width:42.2%"></div></div><div class="barval">35%</div></div><div class="barrow"><div class="barlabel">离散 CE</div><div class="bartrack"><div class="barfill" style="width:21.7%"></div></div><div class="barval">18%</div></div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-13-2024-octo/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

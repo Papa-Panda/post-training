@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">数学视角：POMDP 上的条件轨迹生成 + receding-horizon control</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">参考链接</a><a href="#sec-14">问答补充（2026-09-07）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-09-07）</a><a href="#sec-7">数学视角：POMDP 上的条件轨迹生成 + receding-horizon control</a><a href="#sec-8">核心</a><a href="#sec-9">可迁移 / Transfer</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a><a href="#sec-14">参考链接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -142,7 +142,17 @@ pre code{background:none;padding:0;color:inherit}
 <li>去噪 loss 只保证拟合专家动作分布，不保证动力学可行、安全或稳定；真实部署中应在哪一层加入碰撞约束、延迟补偿、uncertainty gate 与底层反馈控制？</li>
 </ol>
 </section>
-<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角：POMDP 上的条件轨迹生成 + receding-horizon control</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-09-07）</h2>
+<blockquote class="pq">
+<p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。</p>
+</blockquote>
+<h3>Day12（Diffusion Policy）有什么用</h3>
+<p><strong>问</strong>：day12 有啥用啊？</p>
+<p><strong>答</strong>：它的用处恰恰在于"只会一招"。工厂里的机械臂不需要听懂人话，它需要把同一个零件插一百万次、成功率 99.9%——Diffusion Policy 就是为这种场景生的：小模型、百来条演示就能训、没有 VLM 的包袱，在推、翻、插这类接触丰富的单技能上精度极高。更大的用处是方法论：它发明的"动作 chunk + 生成式建模 + $ T_o/T_p/T_a $ 重规划"这套东西，后来被 Octo、π₀.₅ 全盘吸收。可以说 Day12 是个"零件供应商"——自己不做整车，但发动机技术铺到了全行业。</p>
+<p><strong>符号</strong>： $ T_o $ 观测历史帧数； $ T_p $ 预测 horizon（动作块长度）； $ T_a $ 执行 horizon（执行前 $ T_a $ 步后重观测、重规划）。</p>
+<p><strong>与之前工作的关系</strong>：Day12 是"无语言→单任务"逻辑自洽的代表（对照 Day11"有语言→多任务"）；它的方法论遗产（chunk + 生成式建模 + 三 horizon 重规划）被 Day13 Octo 和 Day14 π₀.₅ 直接继承。</p>
+</section>
+<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角：POMDP 上的条件轨迹生成 + receding-horizon control</h2>
 <h3>1) State / observation / action / objective</h3>
 <p>把真实机器人写成部分可观测状态空间模型：</p>
 <p>$$x_{t+1}=f(x_t,a_t,w_t),\qquad o_t=h(x_t,v_t).$$</p>
@@ -190,7 +200,7 @@ pre code{background:none;padding:0;color:inherit}
 <h3>5) 假设与数学没有覆盖的真实误差</h3>
 <p>这个框架假设示范中的 action timestamp、相机帧和 proprioception 已正确同步，动作归一化和控制接口一致，且观测足以辨别任务阶段。它没有显式建模 actuator saturation、backlash、contact impulse、friction drift、camera exposure/occlusion、网络 jitter、碰撞和硬件安全约束；也不保证从训练分布外状态恢复。DDPM loss 能让动作“像数据”，却不等价于满足 $x_{t+1}=f(x_t,a_t,w_t)$ 下的可达性、稳定性或 constraint feasibility。因此真机还需要低层 position/impedance loop、限速/限力、collision checker、watchdog 与 OOD/uncertainty gate。</p>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>核心</h2>
 <ol>
 <li><strong>Motivation：显式回归和普通 implicit BC 各有硬伤</strong></li>
 <li>单一 Gaussian/MSE 容易在多峰动作上做均值；mixture/categorical action 随维度增加而难扩展。</li>
@@ -235,7 +245,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>局限也很具体：训练仍受示范覆盖限制，去噪比 LSTM-GMM 等单步 policy 计算更贵；action chunk 只能部分掩盖延迟，对真正高频 torque control 仍不够。</li>
 </ol>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移 / Transfer</h2>
 <ul>
 <li><strong>方法在 held-out 上是否 transfer？模型 vs 框架 哪个贡献更大？</strong> Push-T 的遮挡和物理扰动实验显示短期恢复：被挡 3 秒仍继续完成、T 块被移动后会重新规划；但这不是跨任务 foundation-model transfer。结果主要证明 policy representation、action space、视觉训练和 control loop 的系统组合，而不是互联网语义或跨 embodiment 泛化。</li>
 <li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</strong></li>
@@ -244,20 +254,20 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：</strong> 官方代码把 observation/action tensor 明确成 <code>(B,To,Do)</code> 与 <code>(B,Ta,Da)</code>，适合做 shape/schema contracts。可扩展训练还应版本化 normalizer、noise schedule、camera latency、horizon 配置和 controller mode；评测必须在固定 initial-condition buckets 上跑闭环成功率，不能只看 MSE。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
 <ul>
 <li><strong>没看懂 / 想深挖：</strong> 怎样把固定 $T_a$ 改为 event-triggered replanning？例如接触突变、视觉残差、去噪样本方差或 safety monitor 触发时提前中断 chunk，同时避免频繁重采样造成动作不连续。</li>
 <li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> 跑官方 Push-T low-dim Colab/仓库，以相同 demonstrations 比较 <code>single-step MSE BC</code> 与 <code>Diffusion Policy</code>；做 $T_a\in\{1,4,8,16\}$ 、DDIM steps $\in\{2,5,10\}$ 的矩阵，记录 success、轨迹 jerk、p95 inference latency 与受扰后恢复时间。</li>
 <li><strong>下一步：</strong> Day13 读 Octo，观察 diffusion action head 放入 Open X-Embodiment 数据和通用 Transformer policy 后，真正增加的是跨任务/跨机器人 transfer，还是只是模型与数据规模。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>“Diffusion policy refines noise into actions via a learned gradient field. This formulation provides stable training, allows the learned policy to accurately model multimodal action distributions, and accommodates high-dimensional action sequences.”</p>
 <p>“This design allows the policy to continuously replan its action in a closed-loop manner while maintaining temporal action consistency — achieving a balance between long-horizon planning and responsiveness.”</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
 <ul>
 <li>[ ] 画 <code>To observations → visual encoder once → K denoising steps → Tp actions → execute Ta → re-observe</code> 时序图</li>
 <li>[ ] 跑官方 Push-T low-dim smoke test，记录输入 <code>(B,To,Do)</code>、输出 <code>(B,Ta,Da)</code> 与 checkpoint config</li>
@@ -266,29 +276,19 @@ pre code{background:none;padding:0;color:inherit}
 <li>[ ] 注入 1–4 step observation delay 与一次 block perturbation，测恢复时间并定义 deployment gate</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>连接</h2>
 <ul>
 <li>上一篇: Day11 — π₀（VLM + flow matching + high-frequency action chunks）</li>
 <li>下一篇预告: Day13 — Octo（Open X-Embodiment 上的开放通用机器人策略 + diffusion readout）</li>
 <li>相关: Day05 UniSim；Day06 DreamerV3；Day09 RT-2 / OpenVLA</li>
 </ul>
 </section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>参考链接</h2>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>参考链接</h2>
 <ul>
 <li>Paper: https://arxiv.org/abs/2303.04137v5</li>
 <li>Project: http://diffusion-policy.cs.columbia.edu</li>
 <li>Official code: https://github.com/real-stanford/diffusion_policy</li>
 </ul>
-</section>
-<section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-07）</h2>
-<blockquote class="pq">
-<p>以下问答归档自 physical AI side chat（2026-09-05）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。</p>
-</blockquote>
-<h3>Day12（Diffusion Policy）有什么用</h3>
-<p><strong>问</strong>：day12 有啥用啊？</p>
-<p><strong>答</strong>：它的用处恰恰在于"只会一招"。工厂里的机械臂不需要听懂人话，它需要把同一个零件插一百万次、成功率 99.9%——Diffusion Policy 就是为这种场景生的：小模型、百来条演示就能训、没有 VLM 的包袱，在推、翻、插这类接触丰富的单技能上精度极高。更大的用处是方法论：它发明的"动作 chunk + 生成式建模 + $ T_o/T_p/T_a $ 重规划"这套东西，后来被 Octo、π₀.₅ 全盘吸收。可以说 Day12 是个"零件供应商"——自己不做整车，但发动机技术铺到了全行业。</p>
-<p><strong>符号</strong>： $ T_o $ 观测历史帧数； $ T_p $ 预测 horizon（动作块长度）； $ T_a $ 执行 horizon（执行前 $ T_a $ 步后重观测、重规划）。</p>
-<p><strong>与之前工作的关系</strong>：Day12 是"无语言→单任务"逻辑自洽的代表（对照 Day11"有语言→多任务"）；它的方法论遗产（chunk + 生成式建模 + 三 horizon 重规划）被 Day13 Octo 和 Day14 π₀.₅ 直接继承。</p>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">15</div><div class="l">任务平均提升 46.9%</div></div><div class="stat"><div class="v">0.1</div><div class="l">s 推理延迟</div></div></div>
 <div class="viz viz-flow flow"><div class="fnode">高斯噪声</div><div class="farrow">→</div><div class="fnode">迭代去噪出动作序列</div><div class="farrow">→</div><div class="fnode">执行前 Ta 步</div><div class="farrow">→</div><div class="fnode">观察重规划</div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-12-2023-diffusion-policy/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

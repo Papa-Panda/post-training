@@ -37,6 +37,17 @@ Roadmap Day23 的标题就是它。这是"控制理论 × 深度 RL"结合最干
 
 相关讨论（Gemini 网页版，2026-09-14）：https://gemini.google.com/app/1db272bf9b7e80f2
 
+## 问答补充
+（本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）
+
+### 2026-09-14：Day23 NOTES 在 GitHub 上公式渲染失效
+
+**问题原文**（用户，2026-09-14 18:40 PDT）："[Day23 NOTES 链接] 这里面有很多数学公式 format 完全不对 没有渲染好"
+
+**核心答案**：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 `（ $\pi_H$ ）` 里的 `（$\pi_H$）`、`$s_m$，`。GitHub 的渲染规则是行内 `$...$` 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，`$$...$$` 独立公式块本来就是好的未动。`tools/check_repo.py` lint 门过，Day23 零新增问题。commit `f297c17`，已 push。
+
+**关联**：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。
+
 ## 核心
 1. **Motivation**: 工厂里的机器人做重复任务，缺的是对不确定性的适应力。经典反馈控制（PID、computed torque）跟轨迹很高效，但一碰到**接触和摩擦**就脆——接触参数辨识极难，调参成本"可能和机器人硬件本身相当"（论文原话）。纯 RL 能处理接触，但从零学：① 真机交互贵且初期不安全；② block insertion 这种任务随机探索几乎撞不到成功。Residual RL 的赌注：**任务里"能被经典控制高效解决的部分"和"必须靠交互学的部分"是可分的**——前者用先验免费吃掉，RL 只学后者。
 2. **System / Method**: 核心方程（论文式 5）：
@@ -145,17 +156,6 @@ $$\pi_\theta(s)\;\approx\;-b\;+\;\text{feedback correction}(s_m,s_o).$$
 ## 连接
 - 上一篇: day-22-2021-rma（RMA：privileged 两阶段 + 显式在线辨识，零真机交互）
 - 下一篇预告: day-24-sim2real-system-identification（System Identification + Sim2Real Evaluation——把"先验有多准"变成 release gate；residual 学出的 $\pi_\theta$ 本身就是模型误差的测量）
-
-## 问答补充
-（本日 side chat 若有用户提问，在此归档；推送卡片类消息跳过。）
-
-### 2026-09-14：Day23 NOTES 在 GitHub 上公式渲染失效
-
-**问题原文**（用户，2026-09-14 18:40 PDT）："[Day23 NOTES 链接] 这里面有很多数学公式 format 完全不对 没有渲染好"
-
-**核心答案**：病因是 NOTES 里有 109 处行内公式直接贴着中文/中文标点写，例如 `（ $\pi_H$ ）` 里的 `（$\pi_H$）`、`$s_m$，`。GitHub 的渲染规则是行内 `$...$` 前后必须有空白分隔，贴着中文就直接显示成源码不渲染。修复：按仓库既定规则（AGENTS.md "GitHub math rendering"）给所有行内公式前后补了空格，`$$...$$` 独立公式块本来就是好的未动。`tools/check_repo.py` lint 门过，Day23 零新增问题。commit `f297c17`，已 push。
-
-**关联**：这是 AGENTS.md 里那条数学排版规则第一次被用户在实战中抓包触发（之前只是 lint 门里躺着）。教训：每日 NOTES 生成完就跑一遍 spacing 检查，不等用户来抓——side chat 里已向用户承诺。
 
 <!-- viz:stats: 8000 步 ≈ 3 小时 从零真机收敛 | 1000 步内 sim 初始化后即解 -->
 <!-- viz:vs: RMA | 辨而不学 || Residual RL | 带着镣铐学; u=π_H+π_θ; 加法永远在线可 undo 有偏先验 -->

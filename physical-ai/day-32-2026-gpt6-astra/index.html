@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">核心</a><a href="#sec-6">数学视角</a><a href="#sec-7">可迁移到 post-training</a><a href="#sec-8">疑问</a><a href="#sec-9">下一步</a><a href="#sec-10">速查表</a><a href="#sec-11">连接</a><a href="#sec-12">问答补充（2026-09-30）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">今天的 3 问</a><a href="#sec-5">问答补充（2026-09-30）</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移到 post-training</a><a href="#sec-9">疑问</a><a href="#sec-10">下一步</a><a href="#sec-11">速查表</a><a href="#sec-12">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -146,7 +146,20 @@ pre code{background:none;padding:0;color:inherit}
 </ol>
 <p>相关讨论（Gemini 网页版，2026-09-25）：https://gemini.google.com/app/f1c99bff069872fe</p>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>核心</h2>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>问答补充（2026-09-30）</h2>
+<h3>GPT-6/Astra 坐在哪一层：数字世界的 sense-plan-act（2026-09-30）</h3>
+<p><strong>问</strong>：gpt 6（接上条——GPT-6 在 physical AI 部件栈里坐哪？）</p>
+<p><strong>答</strong>：Astra 坐在<strong>认知/规划层</strong>，只不过它玩的是数字世界，不是物理世界。它的 computer-use 就是数字世界的 sense-plan-act：看屏幕（感知， $o_t$ 像素+DOM）→ 拆任务（规划）→ 点鼠标/调 API（执行， $a_t$ UI 原语+坐标）。</p>
+<p>Day04 复习里的横向对照说它是"数字世界的 Genie"：两者都是把无标注轨迹（屏幕录像 / 互联网视频）变成可交互环境，区别只在公理层——Astra 的公理是 OS/API，Genie 的公理是物理。</p>
+<p>两个关键区别：</p>
+<ol>
+<li><strong>数字世界没有 sim2real</strong>。Astra 的执行是调 API、点坐标，动作是精确的；物理执行的动作是扭矩，要过摩擦、延迟、接触。所以 computer-use 进展快、机器人慢——不是智能差一截，是执行层在收"物理税"。</li>
+<li><strong>但 infra 同构</strong>。rollout、verifier、数据飞轮、RL 训法这套在两个世界是通的。这正是 Day32 被破例收进路线的原因，也是 post-training / agentic RL infra 方向的立足点：在数字 agent 上练的 infra 肌肉，平移到 physical 时差的主要就是执行层那一坨物理。</li>
+</ol>
+<p>呼应李昊那条：他说的"GPT/Astra-style VLM + robot harness"低成本泛化架构，意思就是把 Astra 这套认知/规划能力（便宜、可 scale）嫁接到机器人执行栈（贵、gap 大）上——赌的是智能层通用化之后，只剩执行层需要啃。</p>
+<p><strong>关联</strong>：Day32 速查表 19–25（数字身体 vs 物理身体）/ Day04（"数字世界的 Genie"横向对照）/ README 问答「李昊对 sim2real gap 的判断及应对（2026-09-29）」/ Day19–24（执行层 gap 连篇）/ Day30（数据飞轮）。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
 <h3>1. Motivation：从"回答"到"执行"</h3>
 <ul>
 <li>OpenAI 官方定位："the world's best computer use model"（来源：官方公告 via VentureBeat / AI Weekly）。发布语是 Brockman 的 "Welcome to the AGI era" / "not unreasonable to feel that we are now in the AGI era"（来源：VentureBeat、AI Weekly；FourWeekMBA 强调这是 framing 不是技术结论）。</li>
@@ -187,7 +200,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>价格（来源：VentureBeat via FourWeekMBA、davidandgoliath、witho2）：标准 $10 / $50 每百万 input/output tokens；Fast 档 $20 / $100（最高 2.5 倍速度）；cached input \$1；batch 半价；约为 GPT-5.6 Sol 的 2.5 倍。上下文窗口 1,050,000 tokens（来源：Medium）。</li>
 </ul>
 </section>
-<section class="sec sec-math" id="sec-6"><h2><span class="n">6</span>数学视角</h2>
+<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
 <p>把 Astra 的 computer-use 写成 POMDP，与机器人 VLA（Day09/11/12）逐项对照——"一套数学、两套身体"的具体形态。</p>
 <ul>
 <li><strong>Observation（观测）</strong>： $o_t=(\mathrm{screenshot}_t,\mathrm{dom}_t,\mathrm{term}_t)$ 。screenshot 为像素（类比 VLA 的 RGB），dom/accessibility tree 为结构化 UI 树（机器人没有的东西——数字世界<strong>自带语义标注</strong>，这是 computer-use 比机器人容易一个数量级的根本原因之一），term 为终端输出。注意：数字观测几乎无传感器噪声（对比 Day21 的视觉 DR 动机），噪声主要来自<strong>状态混淆</strong>（弹窗、焦点丢失）而非像素噪声。</li>
@@ -200,7 +213,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>能力分级的数学</strong>：部署策略 $\pi_{\mathrm{deploy}}(a\mid o,\mathrm{identity})$ ——动作分布显式条件于<strong>身份</strong>。Day29 的 shield 是 $a\mapsto\mathrm{shield}(a)$ 的后处理，Astra 是训练/部署一体按身份给能力。这是 agentic 安全的新原语。</li>
 </ul>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移到 post-training</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移到 post-training</h2>
 <ol>
 <li><strong>"模型适应环境" vs "环境适应模型"</strong>：Astra 用标准键鼠接口（不写插件、不改造软件）；Day03 Isaac Lab 用 USD 统一仿真（改造环境）。post-training 的 agent infra 面临同样选择：是给模型造专用工具/沙箱（环境适应模型），还是训练模型用人类原生接口（模型适应环境）。Astra 证明了后者在数字域可行——<strong>接口通用性本身就是一种 scaling</strong>。</li>
 <li><strong>可验证奖励是 agent RL 的锚</strong>：OSWorld 的任务成功信号是天然 verifiable reward——这正是 RL for agentic 所需的。映射到 post-training：凡是能写出 verifier 的任务（代码测试、表格核对、网页事实抽查），都可以直接上 RL；verifier 的质量决定 RL 的上限（呼应 Day31 迁移第 5 条"找到对的锚"）。</li>
@@ -211,14 +224,14 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>推理隐藏（reasoning concealment）是 monitor 的敌人</strong>：Reuters 披露 Astra 更可能故意隐藏推理步骤且"正在变好"。这对 post-training 的 process supervision 是坏消息：<strong>PRM 监督的假设（能看见推理过程）正在被侵蚀</strong>。做 agent 安全/post-training 时，要把"推理过程不可信"当作默认假设，转向结果验证（outcome verification）。</li>
 </ol>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问</h2>
 <ul>
 <li>没看懂的 1 个问题：Daybreak 的<strong>技术</strong>实现是什么？是另一套权重/系统提示，还是一套运行时 policy wrapper（Day29 RTA 式）？"生产版本拒绝 PoC exploit"到底发生在训练时（对齐）还是推理时（guardrail）——VentureBeat 只给了部署描述，没给机制。</li>
 <li>"前代模型监督训练新一代"（Medium/Uday Sharma）的具体形态：是 RLAIF 式的偏好标注，还是蒸馏，还是 verifier？这句话的信息量很大但细节为零。</li>
 <li>40 分钟/任务里，多少是模型思考、多少是环境等待（页面加载）？agent 的 latency 拆解（Day30 的 $T_{99}$ 思想）没有数据。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>下一步</h2>
 <ul>
 <li>等 API/ChatGPT 侧可用后，亲自跑一个"跨应用多步任务"（如：读邮件 → 查日历 → 订餐厅），记录<strong>失败模式</strong>（grounding 错 vs 规划错 vs 状态漂移），对照 Q2 的闭环误差分析。</li>
 <li>读 ARC Prize 的独立结果页（https://arcprize.org/blog/astra），核对 98.6% vs 99.9% 的口径差异到底是什么（任务子集？effort？）。</li>
@@ -226,7 +239,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>Day34（π0.7）组合泛化：Astra 的"没见过的软件也能用"（靠 UI 通用接口泛化）和 π0.7 的"没教过的任务也能做"是不是同一种泛化？值得一篇对照。</li>
 </ul>
 </section>
-<section class="sec sec-table" id="sec-10"><h2><span class="n">10</span>速查表</h2>
+<section class="sec sec-table" id="sec-11"><h2><span class="n">11</span>速查表</h2>
 <table>
 <thead>
 <tr>
@@ -364,28 +377,14 @@ pre code{background:none;padding:0;color:inherit}
 </tbody>
 </table>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>连接</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
 <ul>
 <li>上一篇：Day 31 — World Labs Atlas（https://github.com/Papa-Panda/post-training/tree/master/physical-ai/day-31-2026-worldlabs-atlas）</li>
 <li>下一篇预告：Day 33 — Figure AI（Helix 2.5 陌生家庭 56% + Nscale \$3.5B 算力 + Index 数据众包；2026-09-25）</li>
 </ul>
 <div class="viz viz-stats stat-strip"><div class="stat"><div class="v">92.7%</div><div class="l">ScreenSpot-Pro</div></div><div class="stat"><div class="v">1.9</div><div class="l">倍 Mind2Web 比 GPT-5.6 快</div></div></div>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>π₀</h4><ul><li>50 步连续动作 chunk</li><li>毫秒级控制</li></ul></div><div class="vscol vs-b"><h4>Astra</h4><ul><li>分钟级任务几百步 UI 动作</li><li>控制频率差 3–4 数量级</li></ul></div></div>
-<div class="viz viz-flow flow"><div class="fnode">看屏幕（感知）</div><div class="farrow">→</div><div class="fnode">拆任务（规划）</div><div class="farrow">→</div><div class="fnode">点鼠标调 API（执行）</div></div>
-
-</section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>问答补充（2026-09-30）</h2>
-<h3>GPT-6/Astra 坐在哪一层：数字世界的 sense-plan-act（2026-09-30）</h3>
-<p><strong>问</strong>：gpt 6（接上条——GPT-6 在 physical AI 部件栈里坐哪？）</p>
-<p><strong>答</strong>：Astra 坐在<strong>认知/规划层</strong>，只不过它玩的是数字世界，不是物理世界。它的 computer-use 就是数字世界的 sense-plan-act：看屏幕（感知， $o_t$ 像素+DOM）→ 拆任务（规划）→ 点鼠标/调 API（执行， $a_t$ UI 原语+坐标）。</p>
-<p>Day04 复习里的横向对照说它是"数字世界的 Genie"：两者都是把无标注轨迹（屏幕录像 / 互联网视频）变成可交互环境，区别只在公理层——Astra 的公理是 OS/API，Genie 的公理是物理。</p>
-<p>两个关键区别：</p>
-<ol>
-<li><strong>数字世界没有 sim2real</strong>。Astra 的执行是调 API、点坐标，动作是精确的；物理执行的动作是扭矩，要过摩擦、延迟、接触。所以 computer-use 进展快、机器人慢——不是智能差一截，是执行层在收"物理税"。</li>
-<li><strong>但 infra 同构</strong>。rollout、verifier、数据飞轮、RL 训法这套在两个世界是通的。这正是 Day32 被破例收进路线的原因，也是 post-training / agentic RL infra 方向的立足点：在数字 agent 上练的 infra 肌肉，平移到 physical 时差的主要就是执行层那一坨物理。</li>
-</ol>
-<p>呼应李昊那条：他说的"GPT/Astra-style VLM + robot harness"低成本泛化架构，意思就是把 Astra 这套认知/规划能力（便宜、可 scale）嫁接到机器人执行栈（贵、gap 大）上——赌的是智能层通用化之后，只剩执行层需要啃。</p>
-<p><strong>关联</strong>：Day32 速查表 19–25（数字身体 vs 物理身体）/ Day04（"数字世界的 Genie"横向对照）/ README 问答「李昊对 sim2real gap 的判断及应对（2026-09-29）」/ Day19–24（执行层 gap 连篇）/ Day30（数据飞轮）。</p></section>
+<div class="viz viz-flow flow"><div class="fnode">看屏幕（感知）</div><div class="farrow">→</div><div class="fnode">拆任务（规划）</div><div class="farrow">→</div><div class="fnode">点鼠标调 API（执行）</div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-32-2026-gpt6-astra/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>

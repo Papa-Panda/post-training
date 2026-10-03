@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充</a><a href="#sec-14">问答补充（2026-09-13）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充</a><a href="#sec-7">问答补充（2026-09-13）</a><a href="#sec-8">核心</a><a href="#sec-9">数学视角</a><a href="#sec-10">可迁移 / Transfer</a><a href="#sec-11">疑问 / 下一步</a><a href="#sec-12">原文金句 (1-2句)</a><a href="#sec-13">今晚产出</a><a href="#sec-14">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -149,7 +149,42 @@ pre code{background:none;padding:0;color:inherit}
 <li>DR 和 RLPD 是两条相反的路——什么时候该"把仿真做宽"（DR），什么时候该"直接在真机上学"（RLPD）？（提示：交互成本 × 仿真可信度 × 接触复杂度，三轴决策。）</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">表现高于阈值</div><div class="farrow">→</div><div class="fnode">向外扩张边界；低于阈值</div><div class="farrow">→</div><div class="fnode">收缩</div></div>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充</h2>
+<p>（本日暂无用户追问。）</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>问答补充（2026-09-13）</h2>
+<blockquote class="pq">
+<p>以下 3 组问答来自 2026-09-13 上午用户对 Day21 DR/ADR 卡片的追问（quiz 三题），原样归档。</p>
+</blockquote>
+<h3>Q1：DR 的数学是"鲁棒优化"还是"贝叶斯平均"？transfer 的精确条件是什么？</h3>
+<p><strong>问题原文</strong>："DR 的数学是\"鲁棒优化\"（max-min）还是\"贝叶斯平均\"（期望）？transfer 发生的精确条件是什么？"</p>
+<p><strong>核心答案</strong>："贝叶斯平均"是主答案：</p>
+<p>$$J_{\text{DR}} = \mathbb{E}_{\xi \sim p_\phi}[J(\theta; \xi)]$$</p>
+<ul>
+<li>$\xi$ ：物理参数向量（摩擦、质量、阻尼等）——"真相"；</li>
+<li>$p_\phi$ ：随机化分布，由超参 $\phi$ 决定——充当先验；</li>
+<li>$\theta$ ：策略参数；</li>
+<li>$J(\theta; \xi)$ ：在参数 $\xi$ 的世界里策略 $\theta$ 的回报。</li>
+</ul>
+<p><strong>transfer 精确条件</strong>： $\xi_{\text{real}} \in \text{support}(p_\phi)$ ，且附近有足够密度——用户原话"先验盖住真相"完全正确。</p>
+<p>但"鲁棒优化"不是错答案，两者是<strong>分布宽度的插值</strong>： $p_\phi$ 窄 → 贝叶斯平均；把 $p_\phi$ 拉得很宽，期望就退化成软 max-min——策略被迫"在支撑集里最坏情况也别太烂"，这正是 hedging（魔方 60% 而不是 99% 的来源）。两种失败模式各对应一种解读用错地方：<strong>先验拍错</strong>（贝叶斯失败，真机掉出支撑集）vs <strong>分布太宽吃掉峰值</strong>（鲁棒过头）。考试时答"贝叶斯平均为主，宽分布下退化为软鲁棒"，满分。</p>
+<h3>Q2：ADR 的边界扩张为什么是 curriculum？为什么 LSTM 策略会涌现 meta-learning？</h3>
+<p><strong>问题原文</strong>："ADR 的边界扩张为什么是一个 curriculum？为什么（LSTM）策略在 ADR 下会涌现 meta-learning？"</p>
+<p><strong>核心答案</strong>：</p>
+<p><strong>curriculum</strong>：熵 $H[p_\phi] = \sum_i \log(hi_i - lo_i)$ 随边界扩张单调增（ $hi_i, lo_i$ 为第 $i$ 个参数区间的上下界），难度永远比能力高一格——这就是 curriculum。</p>
+<p><strong>"hidden state 是对 $\xi$ 的在线后验"</strong>：ADR 每个 episode 采样一个<strong>固定</strong>的 $\xi$ （比如摩擦=0.3），但 policy <strong>看不到</strong> $\xi$ ，只能看到观测 $o_t$ 。想走好，它必须先回答"我在哪个世界里？"——证据全在历史里：发出力矩 $\tau$ ，观测到关节速度 $\omega$ 比预期小 → 摩擦大或负载重；几个 timestep 下来，历史 $h_t = (o_1, a_1, \dots, o_t)$ 里就藏着 $\xi$ 的全部证据。</p>
+<p>LSTM 干的事： $m_t = f_\theta(m_{t-1}, o_t, a_{t-1})$ ，把历史压缩成一个向量（ $m_t$ 为 LSTM 隐状态），policy 按 $\pi(a \mid o_t, m_t)$ 行动。它的<strong>功能角色</strong> = 后验 $p(\xi \mid h_t)$ ：把"到目前为止身体感受到的一切"压缩成"对环境的信念"，再基于信念行动。贝叶斯后验是 $p(\xi \mid h) \propto p(h \mid \xi) p(\xi)$ ；LSTM 不显式算 Bayes 公式，但 ADR 训练（ $\xi$ 一直在变 + reward 只奖励"适应对了的"行为）<strong>逼着</strong> $m_t$ 成为 $\xi$ 的充分统计量——"在线后验"说的就是这个功能等价，不是说它手算贝叶斯。</p>
+<p><strong>为什么叫 emergent meta-learning</strong>：meta-learning = "学会如何适应"。外层 PPO 在 $\xi$ 变化的 episodes 上训练，学的不是"某个 $\xi$ 下的步态"，而是 LSTM 的<strong>更新规则</strong> $f_\theta$ 本身——即"如何从历史中推断 $\xi$ "。部署时权重一动不动，适应全靠 $m_t$ 更新 → 学会了"适应"这件事。而它是被 ADR <strong>逼出来</strong>的： $\xi$ 不变 → 没必要辨识；难度不递增 → 躺平学个保守步态（hedging 解）就够了。只有"环境一直在变 + 越来越难"，policy 才被迫"先辨识、再行动"。这正是 Day22 RMA 要<strong>显式化</strong>的东西——Day21 是隐式版。</p>
+<h3>Q3：DR vs RLPD——什么时候"把仿真做宽"，什么时候"直接在真机上学"？</h3>
+<p><strong>问题原文</strong>："DR vs RLPD 两条相反的路——什么时候\"把仿真做宽\"，什么时候\"直接在真机上学\"？"</p>
+<p><strong>核心答案</strong>：最锋利的一刀——<strong>接触复杂度本身不决定方向，决定方向的是"仿真器结构对不对"</strong>：</p>
+<ul>
+<li><strong>结构对、参数错</strong>（MuJoCo 的接触模型 OK，只是摩擦/质量测不准）→ DR，把参数做宽盖住真相；</li>
+<li><strong>结构都不对</strong>（揉面团、线缆、流体——仿真器原理性建模不了）→ 做宽也盖不住 → 别仿真，直接 RLPD 真机学。</li>
+</ul>
+<p>接触复杂度高的两种去向正好说明这点：灵巧手魔方 → ADR（大力出奇迹）；揉面团 → 真机 RLPD。另外两条路线可以叠：Isaac Lab 里训 locomotion 就是"DR 先做宽 + 真机 RLPD 微调"的组合拳，Day07/08 的 H1 都是这个配方——三选一是伪命题，成年人全都要，只是比例问题。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">表现高于阈值</div><div class="farrow">→</div><div class="fnode">向外扩张边界；低于阈值</div><div class="farrow">→</div><div class="fnode">收缩</div></div>
 <ol>
 <li><strong>Motivation</strong>: sim2real 的核心障碍是 <strong>reality gap</strong>：仿真器的接触动力学（摩擦、弹性、延迟、柔性）和真实世界永远对不准，而真机数据贵（时间/安全/硬件磨损）。两条经典出路——system identification（把仿真调准，Day24 主题）和 domain adaptation（用真机数据对齐）——都要真机数据。DR 问了一个反直觉的问题：<strong>能不能不做准、只做宽？</strong> Tobin 2017（IROS）先证明了视觉侧可行：纯仿真随机纹理/光照/相机位姿训出的物体检测器，直接转真机抓取。OpenAI 2018（Dactyl 方块重定向）证明了动力学侧可行：摩擦/质量/外观/延迟全随机化，Shadow hand 真机 vision-based 重定向成功。但手工 DR 有个致命工程痛点：<strong>随机化范围是人拍的</strong>——太窄，真机掉出去；太宽，策略学不出来（hedging 吃掉所有性能）。ADR 就是为杀掉这个"人拍参数"而生的。</li>
 <li><strong>System / Method</strong>: 系统 = <strong>ADR（环境分布生成器）+ 分布式 PPO（OpenAI Five 同款栈）+ LSTM memory policy + vision pose estimator + Kociemba 子目标分解 + 为 ML 定制的硬件平台</strong>。</li>
@@ -163,7 +198,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: 真机完整打乱魔方 <strong>60% 成功率</strong>，极限难度打乱 20%（论文/博客原文）。鲁棒性 demo：戴橡胶手套、绑住几根手指、被毛绒长颈鹿捅——全是训练分布外的扰动，策略不崩。Vision estimator 真机位姿估计误差在可操作范围内（PhaseSpace ground truth 对照）。消融：无 ADR（固定窄随机化）的策略真机直接失败；无 memory（feedforward）的策略在宽分布上学不出来——<strong>ADR 和 LSTM 是绑定的</strong>，缺一不可。预算：OpenAI Five 级别的分布式 infra（数千 CPU + 数十 GPU，数周）——这是 DR 路线的"明码标价"。</li>
 </ol>
 </section>
-<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
+<section class="sec sec-math" id="sec-9"><h2><span class="n">9</span>数学视角</h2>
 <blockquote class="pq">
 <p>符号统一：$\xi \in \Xi$ 环境参数向量（摩擦系数、质量、延迟、纹理、光照……每个维度一个物理/视觉量）；$p_\phi(\xi)$ 参数为 $\phi$ 的随机化分布（ADR 里 $\phi = \{(lo_i, hi_i)\}_{i=1}^d$）；$p_\xi(s'\mid s,a)$、$p_\xi(o\mid s)$ 为参数 $\xi$ 下的转移/观测模型；$\pi_\theta(a\mid o, m)$ 为带 memory $m$ 的策略；$\xi_{\text{real}}$ 真实世界的（未知）参数；$J(\theta; \xi)$ 为固定 $\xi$ 下的期望回报。</p>
 </blockquote>
@@ -252,7 +287,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>60% 的天花板</strong>：hedging 代价（§5）+ 稀疏奖励 + LSTM 辨识的滞后——ADR 没有回答"宽分布上的期望最优"离"真机最优"还差多远。</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>可迁移 / Transfer</h2>
 <ul>
 <li>方法在 held-out 上是否 transfer？模型 vs 框架 哪个贡献更大？<strong>框架贡献远大于模型</strong>：ADR 的 policy 就是普通 LSTM+PPO，没有结构创新——transfer 的功劳全在"环境分布生成器"这个<strong>训练框架</strong>。证据：同一套 ADR 管线从 2018 block 重定向搬到 2019 魔方（任务复杂度跃升一个量级），只换了任务和随机化维度，框架不动。这正是"把泛化归因于训练配方"的又一个案例（呼应 README 问答里 Day13 vs Day14 的"接口即泛化 vs 配方即泛化"——ADR 是配方派最极端的形态：<strong>连任务都不用换，换分布就行</strong>）。</li>
 <li>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</li>
@@ -261,65 +296,30 @@ pre code{background:none;padding:0;color:inherit}
 <li>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性：① ADR 的算力账是"数千年仿真经验"——Infra 视角这是<strong>用算力买数据</strong>，和 Day20 RLPD"用梯度买数据"（UTD=20）是同一笔账的不同记法；② ADR 的边界评估是天然的<strong>自动化评测门</strong>：每个维度的 $\bar J_i^{\text{hi}}$ 就是 sim2real readiness 的分项指标——这正是 Day24（system identification + sim2real evaluation）要讲的"release gate"的雏形；③ 可复现性差：无官方代码，随机化维度全是论文附录里的表——这是 DR 路线至今的工程短板，也是 Isaac Lab 的 randomization manager（Day03）要解决的"把 DR 做成可复用算子"的问题。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：ADR 的阈值 $t_H/t_L$ 和扩张步长 $\Delta_i$ 是怎么定的？论文说"performance above a threshold"，但阈值本身是不是又成了新的"人拍参数"？——ADR 号称杀掉手工调参，但可能只是把"调随机化范围"变成了"调阈值"。有没有后续工作把阈值也自动化（比如按分位数自适应）？</li>
 <li>如果要复现 / 小规模试，第一个实验做什么？在 Isaac Lab（Day03）里拿一个单维度做最小 ADR：固定其他参数，只随机化<strong>地面摩擦</strong>，实现"边界评估→扩张/收缩"循环，观察 $H[p_\phi]$ 曲线和策略成功率曲线的关系——这是整套 ADR 最便宜的"啊哈时刻"（一个维度的 entropy-performance 曲线）。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>"We demonstrate that models trained only in simulation can be used to solve a manipulation problem of unprecedented complexity on a real robot. This is made possible by two key components: a novel algorithm, which we call automatic domain randomization (ADR) and a robot platform built for machine learning."（摘要）
 "ADR automatically generates a distribution over randomized environments of ever-increasing difficulty."（摘要）</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 System / Training / Key Tricks / Results / 可迁移 ✅</li>
 <li>保留并完善「和之前工作的关系」小节 ✅</li>
 <li>数学视角：DR 目标函数（MDP 分布）、贝叶斯平均 vs 鲁棒优化、ADR 熵增 curriculum、LSTM 隐式辨识、hedging 代价方程、三路线决策表 ✅</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>连接</h2>
 <ul>
 <li>上一篇: day-20-2023-rlpd — RLPD：交互贵时的 off-policy 解法（用数据覆盖不确定性）；Day21 是其对偶——用世界分布覆盖不确定性，零真机数据</li>
 <li>下一篇预告: day-22-2021-rma — RMA：rapid motor adaptation——把 ADR 里 LSTM 隐式做的"在线辨识"显式化为 adaptation module，毫秒级适应地形与载荷</li>
 </ul>
-</section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充</h2>
-<p>（本日暂无用户追问。）</p>
-</section>
-<section class="sec" id="sec-14"><h2><span class="n">14</span>问答补充（2026-09-13）</h2>
-<blockquote class="pq">
-<p>以下 3 组问答来自 2026-09-13 上午用户对 Day21 DR/ADR 卡片的追问（quiz 三题），原样归档。</p>
-</blockquote>
-<h3>Q1：DR 的数学是"鲁棒优化"还是"贝叶斯平均"？transfer 的精确条件是什么？</h3>
-<p><strong>问题原文</strong>："DR 的数学是\"鲁棒优化\"（max-min）还是\"贝叶斯平均\"（期望）？transfer 发生的精确条件是什么？"</p>
-<p><strong>核心答案</strong>："贝叶斯平均"是主答案：</p>
-<p>$$J_{\text{DR}} = \mathbb{E}_{\xi \sim p_\phi}[J(\theta; \xi)]$$</p>
-<ul>
-<li>$\xi$ ：物理参数向量（摩擦、质量、阻尼等）——"真相"；</li>
-<li>$p_\phi$ ：随机化分布，由超参 $\phi$ 决定——充当先验；</li>
-<li>$\theta$ ：策略参数；</li>
-<li>$J(\theta; \xi)$ ：在参数 $\xi$ 的世界里策略 $\theta$ 的回报。</li>
-</ul>
-<p><strong>transfer 精确条件</strong>： $\xi_{\text{real}} \in \text{support}(p_\phi)$ ，且附近有足够密度——用户原话"先验盖住真相"完全正确。</p>
-<p>但"鲁棒优化"不是错答案，两者是<strong>分布宽度的插值</strong>： $p_\phi$ 窄 → 贝叶斯平均；把 $p_\phi$ 拉得很宽，期望就退化成软 max-min——策略被迫"在支撑集里最坏情况也别太烂"，这正是 hedging（魔方 60% 而不是 99% 的来源）。两种失败模式各对应一种解读用错地方：<strong>先验拍错</strong>（贝叶斯失败，真机掉出支撑集）vs <strong>分布太宽吃掉峰值</strong>（鲁棒过头）。考试时答"贝叶斯平均为主，宽分布下退化为软鲁棒"，满分。</p>
-<h3>Q2：ADR 的边界扩张为什么是 curriculum？为什么 LSTM 策略会涌现 meta-learning？</h3>
-<p><strong>问题原文</strong>："ADR 的边界扩张为什么是一个 curriculum？为什么（LSTM）策略在 ADR 下会涌现 meta-learning？"</p>
-<p><strong>核心答案</strong>：</p>
-<p><strong>curriculum</strong>：熵 $H[p_\phi] = \sum_i \log(hi_i - lo_i)$ 随边界扩张单调增（ $hi_i, lo_i$ 为第 $i$ 个参数区间的上下界），难度永远比能力高一格——这就是 curriculum。</p>
-<p><strong>"hidden state 是对 $\xi$ 的在线后验"</strong>：ADR 每个 episode 采样一个<strong>固定</strong>的 $\xi$ （比如摩擦=0.3），但 policy <strong>看不到</strong> $\xi$ ，只能看到观测 $o_t$ 。想走好，它必须先回答"我在哪个世界里？"——证据全在历史里：发出力矩 $\tau$ ，观测到关节速度 $\omega$ 比预期小 → 摩擦大或负载重；几个 timestep 下来，历史 $h_t = (o_1, a_1, \dots, o_t)$ 里就藏着 $\xi$ 的全部证据。</p>
-<p>LSTM 干的事： $m_t = f_\theta(m_{t-1}, o_t, a_{t-1})$ ，把历史压缩成一个向量（ $m_t$ 为 LSTM 隐状态），policy 按 $\pi(a \mid o_t, m_t)$ 行动。它的<strong>功能角色</strong> = 后验 $p(\xi \mid h_t)$ ：把"到目前为止身体感受到的一切"压缩成"对环境的信念"，再基于信念行动。贝叶斯后验是 $p(\xi \mid h) \propto p(h \mid \xi) p(\xi)$ ；LSTM 不显式算 Bayes 公式，但 ADR 训练（ $\xi$ 一直在变 + reward 只奖励"适应对了的"行为）<strong>逼着</strong> $m_t$ 成为 $\xi$ 的充分统计量——"在线后验"说的就是这个功能等价，不是说它手算贝叶斯。</p>
-<p><strong>为什么叫 emergent meta-learning</strong>：meta-learning = "学会如何适应"。外层 PPO 在 $\xi$ 变化的 episodes 上训练，学的不是"某个 $\xi$ 下的步态"，而是 LSTM 的<strong>更新规则</strong> $f_\theta$ 本身——即"如何从历史中推断 $\xi$ "。部署时权重一动不动，适应全靠 $m_t$ 更新 → 学会了"适应"这件事。而它是被 ADR <strong>逼出来</strong>的： $\xi$ 不变 → 没必要辨识；难度不递增 → 躺平学个保守步态（hedging 解）就够了。只有"环境一直在变 + 越来越难"，policy 才被迫"先辨识、再行动"。这正是 Day22 RMA 要<strong>显式化</strong>的东西——Day21 是隐式版。</p>
-<h3>Q3：DR vs RLPD——什么时候"把仿真做宽"，什么时候"直接在真机上学"？</h3>
-<p><strong>问题原文</strong>："DR vs RLPD 两条相反的路——什么时候\"把仿真做宽\"，什么时候\"直接在真机上学\"？"</p>
-<p><strong>核心答案</strong>：最锋利的一刀——<strong>接触复杂度本身不决定方向，决定方向的是"仿真器结构对不对"</strong>：</p>
-<ul>
-<li><strong>结构对、参数错</strong>（MuJoCo 的接触模型 OK，只是摩擦/质量测不准）→ DR，把参数做宽盖住真相；</li>
-<li><strong>结构都不对</strong>（揉面团、线缆、流体——仿真器原理性建模不了）→ 做宽也盖不住 → 别仿真，直接 RLPD 真机学。</li>
-</ul>
-<p>接触复杂度高的两种去向正好说明这点：灵巧手魔方 → ADR（大力出奇迹）；揉面团 → 真机 RLPD。另外两条路线可以叠：Isaac Lab 里训 locomotion 就是"DR 先做宽 + 真机 RLPD 微调"的组合拳，Day07/08 的 H1 都是这个配方——三选一是伪命题，成年人全都要，只是比例问题。</p>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>PPO</h4><ul><li>优化一个 MDP</li><li>trust region 管策略别走太远</li></ul></div><div class="vscol vs-b"><h4>ADR</h4><ul><li>优化 MDP 分布</li><li>边界扩张管世界别太窄</li></ul></div></div>
 <div class="viz viz-flow flow"><div class="fnode">ξ_real ∈ support(p_φ)</div><div class="farrow">→</div><div class="fnode">期望/鲁棒优化</div><div class="farrow">→</div><div class="fnode">真机可用</div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-21-2019-domain-randomization/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>

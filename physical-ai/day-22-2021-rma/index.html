@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">数学视角</a><a href="#sec-8">可迁移 / Transfer</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">连接</a><a href="#sec-13">问答补充（2026-09-13）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-09-13）</a><a href="#sec-7">核心</a><a href="#sec-8">数学视角</a><a href="#sec-9">可迁移 / Transfer</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -145,7 +145,57 @@ pre code{background:none;padding:0;color:inherit}
 <li>RMA 的"适应"和 RL 的"学习"在数学上差在哪？为什么真机上 $\varphi,\pi$ 权重 frozen 也算 adaptation？（提示：adaptation = inference 时条件变量 $\hat z_t$ 更新；learning = 权重更新。RMA 把"学"全部留在仿真，真机只做"辨"——辨识是前向推理，不是梯度更新。）</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-09-13）</h2>
+<blockquote class="pq">
+<p>以下 3 组问答来自 2026-09-13 当晚用户对 Day22 RMA 卡片的追问（三问 quiz：Q1 用户先抛砖、助手拆三层；Q2/Q3 助手出题、用户作答、助手判卷），原样归档。</p>
+</blockquote>
+<h3>Q1：为什么 $\varphi$ 预测 8 维 $z$ ，而不是 17 维 $e$ ？</h3>
+<p><strong>问题原文</strong>："为了正则化？意思是形状更好预测一点 要不然真实的区域可能是一个形状奇怪的"</p>
+<p><strong>字母表</strong>：
+- $e \in \mathbb{R}^{17}$ ：完整物理参数向量（摩擦、质量、电机增益等）——"物理学家眼中的世界"；
+- $z \in \mathbb{R}^8$ ：encoder $\mu$ 从 $e$ 学出的低维环境指纹；
+- $\varphi$ ：adaptation module，从本体感知历史 $h_t$ 预测 $\hat z_t = \varphi(h_t)$ ；
+- $\pi$ ：base policy， $\pi(a \mid x, a_{t-1}, \hat z_t)$ ， $x$ 为本体感知观测。</p>
+<p><strong>核心答案</strong>：用户"形状奇怪"的直觉全踩中，三层意思拧紧：</p>
+<ol>
+<li><strong>正则化（信息瓶颈）</strong>：17 维的 $e$ 里很多组合对行为根本没区别——瓶颈逼着 policy 只依赖"真正影响动力学"的因子。</li>
+<li><strong>"形状奇怪"（最深的一点）</strong>：从本体感知历史出发，很多物理参数是<strong>不可辨识</strong>的。具体例子：躯干重了 0.5kg，和电机弱了 10%，从关节编码器 + IMU 的感受来看几乎一模一样——都是"腿变迟钝了"。 $\varphi$ 既分不清、也没必要分清。 $e$ 空间里"产生相同动力学的参数集合"是一个很扭曲的流形（多对一），而 $\mu$ 学出来的 8 维 $z$ 把它熨平了：只保留动力学上可区分的"环境指纹"，扔掉冗余自由度。所以不是 $e$ 不好，是 $e$ 的"真实有效区域"形状太怪，直接预测它等于让 $\varphi$ 去解一个病态问题。</li>
+<li><strong>工程</strong>： $e$ 的 17 个分量量纲不同（kg、摩擦系数、无量纲增益……），Phase 2 的 MSE loss 会被大尺度分量绑架；压到归一化的 8 维 $z$ ，loss 才 well-behaved。</li>
+</ol>
+<p><strong>结论</strong>： $e$ 是"物理学家眼中的世界"， $z$ 是"机器人身体感受到的世界"—— $\varphi$ 只能预测后者。</p>
+<h3>Q2：Phase 2 为什么要用当前 $\varphi$ 的预测去 rollout，而不是只用真 $z$ 跑完美轨迹？</h3>
+<p><strong>问题原文</strong>："Q2 不太懂"</p>
+<p><strong>核心答案</strong>：一句话——<strong>因为 $\varphi$ 部署时一定会犯错，而"只在完美轨迹上训练"等于没收了它"犯错后如何恢复"的训练数据。</strong></p>
+<p>naive 做法的崩溃链条：
+1. Phase 1 的 $\pi$ 配上<strong>真</strong> $z$ 走得极其漂亮 → 在这些完美轨迹上收集 $(h_t, z_t)$ → 训 $\varphi$ ；
+2. 部署时 $\varphi$ 第一步就可能把 $\hat z$ 估偏一点（比如把沙地误判成硬地）；
+3. $\pi$ 拿到错误的 $\hat z$ ，用了硬地步态 → 脚陷进沙子 → 机身前倾；
+4. 此时历史 $h_t$ = "下陷 + 前倾 + 挣扎"，<strong>这种历史在完美轨迹数据里从没出现过</strong>；
+5. $\varphi$ 被问了一个训练分布外的问题 → 输出更离谱 → 下一步更错 → 雪崩。</p>
+<p>这就是行为克隆的 compounding error / covariate shift：<strong>训练分布（专家的状态分布）≠ 部署分布（学生自己诱导出的状态分布）</strong>。Day12 的 Diffusion Policy 用 closed-loop 重规划治的是同一个病，RMA 用的是 DAgger 的思路。</p>
+<p>DAgger 式解法：
+1. 用<strong>当前</strong> $\varphi_k$ 的预测 $\hat z$ 去 rollout（注意：仿真器<strong>免费知道真 $z_t$ </strong>，这是 privileged 信息）；
+2. $\varphi_k$ 会犯错 → 机器人踉跄、下陷、挣扎 → 这些"犯错 + 恢复"的历史 $h_t$ 被收集下来，<strong>标注上真 $z_t$ </strong>（如"沙地"）；
+3. 在这批数据上训出 $\varphi_{k+1}$ ，重复。附赠彩蛋：第一轮 $\varphi_0$ 是随机初始化的，随机预测 $\hat z$ ≈ 最大熵 exploration，白送探索。</p>
+<p>公式点睛就在这里：</p>
+<p>$$\mathcal{L}(\varphi) = \mathbb{E}_{(h_t, z_t) \sim \mathcal{D}(\varphi)}[\|\varphi(h_t) - z_t\|_2^2]$$</p>
+<p>注意期望的下标 $\mathcal{D}(\varphi)$ ——<strong>数据分布本身依赖于正在优化的 $\varphi$ </strong>，这不是普通监督学习，是一个不动点问题 $\varphi^* = \arg\min_\varphi \mathcal{L}(\varphi; \mathcal{D}(\varphi^*))$ 。DAgger 就是解这类问题的标准姿势。</p>
+<p><strong>用户自己答对的题眼</strong>："真实世界中完美的 $z$ 不存在——训练时假装它存在，部署时就要还债。"</p>
+<p><strong>判卷校准</strong>：用户说" $\pi$ 没有在不准确的 $z$ 上训练过"——对了一半。 $\pi$ 在 Phase 1 确实只见过真 $z$ ，但崩溃的<strong>直接导火索</strong>是 $\varphi$ 那一环： $\varphi$ 在没见过的 $h$ （下陷+挣扎）上输出垃圾 $\hat z$ ， $\pi$ 拿到垃圾输入才跟着错。整个 $\varphi \to \pi$ 链条在完美数据下训练，对"辨识误差"零容忍、零恢复余量。DAgger 式迭代就是给系统<strong>买容错</strong>：提前在训练时摔够，部署时才摔不倒。</p>
+<h3>Q3：部署时 $\varphi$ 和 $\pi$ 的权重完全 frozen，为什么这仍然叫 adaptation？</h3>
+<p><strong>问题原文</strong>："这个简单 因为z事变的 RL在学习真实的物理参数"</p>
+<p><strong>核心答案</strong>：</p>
+<p><strong>对的部分</strong>：变的是条件变量 $\hat z_t$ ，不是权重——部署时 $\varphi, \pi$ 的参数 frozen，但 $\hat z_t = \varphi(h_t)$ 每 0.1 秒更新一次， $\pi(a \mid x, a_{t-1}, \hat z_t)$ 的行为跟着变。</p>
+<p><strong>校准一句</strong>："RL 在学习真实的物理参数"——RL 学的不是物理参数本身，而是<strong>权重</strong> $\theta$ （策略/价值函数的参数）： $\theta \leftarrow \theta + \eta \nabla J$ ，函数本身变了。RMA 的对比是：</p>
+<ul>
+<li><strong>Learning</strong>：函数变（权重更新），同一个输入 → 不同输出；</li>
+<li><strong>Adaptation</strong>：函数不变（权重 frozen），输入的条件变（ $\hat z_t$ 更新）→ 不同输出。</li>
+</ul>
+<p>类比： $\pi$ 是司机， $\varphi$ 是副驾驶。副驾驶不断报路况"现在是沙地"（ $\hat z_t$ ），司机切换驾驶模式——司机本人没重新学开车，但行为适应了路况。<strong>适应的定义看的是"行为是否随环境变"，不是"权重动没动"。</strong></p>
+<p><strong>与 Day21 的关系</strong>：Day21 ADR 里 LSTM 的 hidden state $m_t$ 干的正是这件事——inference 时更新的条件变量。RMA 只是把它从黑盒 hidden state 里拎出来，变成可监督、可可视化的显式向量 $\hat z_t$ 。隐式 → 显式，这就是 Day21 到 Day22 的那条线。</p>
+<p><strong>三条 sim2real 路线齐了</strong>：Day20 RLPD（真机学，权重更新）、Day21 ADR（仿真做宽，隐式适应）、Day22 RMA（仿真做宽 + 显式辨识，条件变量更新）。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
 <ol>
 <li><strong>Motivation</strong>: 腿式机器人换地形就摔：沙地一脚踩空、重心一偏就是一次硬件损伤。真机试错成本让"多摔几次再优化"不可行——论文开宗明义：<strong>收集 3–5 分钟真机行走数据做 adaptation 在实践中都不可行</strong>，"适应"必须在仿真里预先学会、真机上零样本执行。Baseline 为什么不行：① 纯 DR 策略对所有环境用同一套保守步态（Day21 的 hedging 代价）；② system identification 需要停下来做激励实验、拟合参数——慢，还要真机交互；③ 手调 controller 遇到分布外地形直接崩。RMA 的赌注：<strong>人换鞋走路不需要知道摩擦系数，但小脑一直在"辨"</strong>——把这个"辨"显式学出来。</li>
 <li><strong>System / Method</strong>: 双系统 $\pi$（base policy）+ $\varphi$（adaptation module）。</li>
@@ -160,7 +210,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: <strong>同一个策略、无仿真标定、无真机微调</strong>，Unitree A1 真机：沙地/泥地/徒步小径/高草/土堆<strong>全部 trial 零失败</strong>；沿徒步小径下楼梯 70%；水泥堆/石子堆 80%——而训练从未见过松软下陷地面、植被和楼梯。Berkeley/CMU 官方报道口径：<strong>超越无 adaptation、纯 DR、系统辨识等对照系统</strong>（"outperformed competing systems"），是"第一个完全基于学习、不依赖任何手写动作、从零开始在世界中探索交互来适应环境的腿式系统"。消融定性：去掉 $\varphi$（只用 DR）→ 未见地形性能塌；去掉 Phase 2 的迭代数据收集 → 部署时预测误差累积崩。</li>
 </ol>
 </section>
-<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角</h2>
+<section class="sec sec-math" id="sec-8"><h2><span class="n">8</span>数学视角</h2>
 <blockquote class="pq">
 <p>符号统一：$s_t$ 真实状态；$x_t$ 本体感知状态；$a_t\in\mathbb{R}^{12}$ 期望关节位置；$e_t\in\mathbb{R}^{17}$ privileged 环境参数；$z_t=\mu(e_t)$ latent extrinsics（环境指纹）；$\hat z_t=\varphi(h_t)$ 在线估计；$h_t=(x_{t-50:t},a_{t-50:t-1})$ 历史窗口；$\xi$ 沿用 Day21 的"环境参数"记号，$e_t$ 是它的 privileged 可测版本。</p>
 </blockquote>
@@ -230,7 +280,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>$z$ bottleneck 的信息损失</strong>：低维指纹可能把"重载荷+高摩擦"和"轻载荷+低摩擦"压到同一点——encoder 宽度是拍脑袋的超参，论文未给选择理论。</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移 / Transfer</h2>
 <ul>
 <li><strong>方法在 held-out 上是否 transfer？模型 vs 框架 哪个贡献更大？</strong> 贡献在<strong>框架</strong>：privileged 两阶段 + 显式辨识 + 双频部署。证据：同一框架被原样搬到灵巧手（HORA: Humanoid Object Rotation via RMA）、双足 Cassie（A-RMA），base policy 本体只是标准 PPO——换身体、换任务，框架复用，policy 重训。</li>
 <li><strong>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发</strong>：</li>
@@ -239,14 +289,14 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Infra 视角：可扩展性 / 成本 / 评测自动化 / 可复现性</strong>：Phase 2 的"用当前模型的错误分布收集下一轮数据"是<strong>数据飞轮</strong>的雏形——和 RLHF/DPO 的 on-policy 数据迭代同构，Day30 的 flywheel 主题在这里预演；双频部署是"按时间尺度分配算力"的 edge 范式；评测上 RMA 的"同一策略、零标定、多地形 trial 成功率"是 sim2real 评测的 gold 标准写法（Day24 系统辨识/评测主题会 formalize）。</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
 <ul>
 <li><strong>没看懂的 / 想深挖的 1 个问题</strong>：$z$ 的"环境指纹"流形几何——不同地形在 $z$ 空间里是否聚类？$\hat z_t$ 随地形变化的轨迹是检验"真辨识 vs 死记历史模式"的关键实验，论文的可视化值得单独看一眼。</li>
 <li><strong>如果要复现 / 小规模试，第一个实验做什么？</strong> Isaac Gym（或 MuJoCo）里复刻两阶段最小闭环：① 训带 privileged $e_t$（先只做摩擦+载荷 2 维）的速度跟踪 base policy，$e_t$ 每 episode 随机化；② 训 $\varphi$ 从 50 步本体感知历史回归 $z$；③ 先在"高/低摩擦二分类"上验证 $\hat z$ 可分，再谈泛化。先别碰 17 维。</li>
 <li><strong>A-RMA（arXiv:2205.15299）</strong>：2022 把 RMA 搬到 Cassie 双足，核心增量是"用 imperfect $\hat z$ finetune $\pi$"——直接回答本节 §8 的第二个诚实标注，值得在 Day23/24 对照读。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>"It's not an afterthought, but a forethought. That's our secret sauce."
 —— Ashish Kumar（Berkeley Engineering 官方报道原话；论文正文金句本次未逐字核对，不臆引）</p>
@@ -254,68 +304,18 @@ pre code{background:none;padding:0;color:inherit}
 —— 同上出处。呼应本篇核心：适应发生在 inference 时与世界交互的 0.5 秒历史里，不发生在权重里。</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 System / Training / Key Tricks / Results / 可迁移</li>
 <li>保留并完善「和之前工作的关系」小节（含 Day21 预告的第一问的正面回答）</li>
 <li>数学视角 8 节：Phase 1 开天眼 RL、encoder bottleneck、Phase 2 贝叶斯反演、DAgger 式数据收集、隐式 vs 显式对照表、双频时间尺度分离、适应≠学习三分法、诚实标注 4 条</li>
 </ul>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>连接</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>连接</h2>
 <ul>
 <li>上一篇: Day21 Domain Randomization / ADR（隐式在线辨识的涌现版本）</li>
 <li>下一篇预告: Day23 Residual RL——"在模型控制器动作上学习 residual"：另一条"先验 + 学习"的 sim2real 路线，先验从"privileged 仿真"换成"经典控制器"，对照着看哪种先验更便宜。</li>
 </ul>
-</section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>问答补充（2026-09-13）</h2>
-<blockquote class="pq">
-<p>以下 3 组问答来自 2026-09-13 当晚用户对 Day22 RMA 卡片的追问（三问 quiz：Q1 用户先抛砖、助手拆三层；Q2/Q3 助手出题、用户作答、助手判卷），原样归档。</p>
-</blockquote>
-<h3>Q1：为什么 $\varphi$ 预测 8 维 $z$ ，而不是 17 维 $e$ ？</h3>
-<p><strong>问题原文</strong>："为了正则化？意思是形状更好预测一点 要不然真实的区域可能是一个形状奇怪的"</p>
-<p><strong>字母表</strong>：
-- $e \in \mathbb{R}^{17}$ ：完整物理参数向量（摩擦、质量、电机增益等）——"物理学家眼中的世界"；
-- $z \in \mathbb{R}^8$ ：encoder $\mu$ 从 $e$ 学出的低维环境指纹；
-- $\varphi$ ：adaptation module，从本体感知历史 $h_t$ 预测 $\hat z_t = \varphi(h_t)$ ；
-- $\pi$ ：base policy， $\pi(a \mid x, a_{t-1}, \hat z_t)$ ， $x$ 为本体感知观测。</p>
-<p><strong>核心答案</strong>：用户"形状奇怪"的直觉全踩中，三层意思拧紧：</p>
-<ol>
-<li><strong>正则化（信息瓶颈）</strong>：17 维的 $e$ 里很多组合对行为根本没区别——瓶颈逼着 policy 只依赖"真正影响动力学"的因子。</li>
-<li><strong>"形状奇怪"（最深的一点）</strong>：从本体感知历史出发，很多物理参数是<strong>不可辨识</strong>的。具体例子：躯干重了 0.5kg，和电机弱了 10%，从关节编码器 + IMU 的感受来看几乎一模一样——都是"腿变迟钝了"。 $\varphi$ 既分不清、也没必要分清。 $e$ 空间里"产生相同动力学的参数集合"是一个很扭曲的流形（多对一），而 $\mu$ 学出来的 8 维 $z$ 把它熨平了：只保留动力学上可区分的"环境指纹"，扔掉冗余自由度。所以不是 $e$ 不好，是 $e$ 的"真实有效区域"形状太怪，直接预测它等于让 $\varphi$ 去解一个病态问题。</li>
-<li><strong>工程</strong>： $e$ 的 17 个分量量纲不同（kg、摩擦系数、无量纲增益……），Phase 2 的 MSE loss 会被大尺度分量绑架；压到归一化的 8 维 $z$ ，loss 才 well-behaved。</li>
-</ol>
-<p><strong>结论</strong>： $e$ 是"物理学家眼中的世界"， $z$ 是"机器人身体感受到的世界"—— $\varphi$ 只能预测后者。</p>
-<h3>Q2：Phase 2 为什么要用当前 $\varphi$ 的预测去 rollout，而不是只用真 $z$ 跑完美轨迹？</h3>
-<p><strong>问题原文</strong>："Q2 不太懂"</p>
-<p><strong>核心答案</strong>：一句话——<strong>因为 $\varphi$ 部署时一定会犯错，而"只在完美轨迹上训练"等于没收了它"犯错后如何恢复"的训练数据。</strong></p>
-<p>naive 做法的崩溃链条：
-1. Phase 1 的 $\pi$ 配上<strong>真</strong> $z$ 走得极其漂亮 → 在这些完美轨迹上收集 $(h_t, z_t)$ → 训 $\varphi$ ；
-2. 部署时 $\varphi$ 第一步就可能把 $\hat z$ 估偏一点（比如把沙地误判成硬地）；
-3. $\pi$ 拿到错误的 $\hat z$ ，用了硬地步态 → 脚陷进沙子 → 机身前倾；
-4. 此时历史 $h_t$ = "下陷 + 前倾 + 挣扎"，<strong>这种历史在完美轨迹数据里从没出现过</strong>；
-5. $\varphi$ 被问了一个训练分布外的问题 → 输出更离谱 → 下一步更错 → 雪崩。</p>
-<p>这就是行为克隆的 compounding error / covariate shift：<strong>训练分布（专家的状态分布）≠ 部署分布（学生自己诱导出的状态分布）</strong>。Day12 的 Diffusion Policy 用 closed-loop 重规划治的是同一个病，RMA 用的是 DAgger 的思路。</p>
-<p>DAgger 式解法：
-1. 用<strong>当前</strong> $\varphi_k$ 的预测 $\hat z$ 去 rollout（注意：仿真器<strong>免费知道真 $z_t$ </strong>，这是 privileged 信息）；
-2. $\varphi_k$ 会犯错 → 机器人踉跄、下陷、挣扎 → 这些"犯错 + 恢复"的历史 $h_t$ 被收集下来，<strong>标注上真 $z_t$ </strong>（如"沙地"）；
-3. 在这批数据上训出 $\varphi_{k+1}$ ，重复。附赠彩蛋：第一轮 $\varphi_0$ 是随机初始化的，随机预测 $\hat z$ ≈ 最大熵 exploration，白送探索。</p>
-<p>公式点睛就在这里：</p>
-<p>$$\mathcal{L}(\varphi) = \mathbb{E}_{(h_t, z_t) \sim \mathcal{D}(\varphi)}[\|\varphi(h_t) - z_t\|_2^2]$$</p>
-<p>注意期望的下标 $\mathcal{D}(\varphi)$ ——<strong>数据分布本身依赖于正在优化的 $\varphi$ </strong>，这不是普通监督学习，是一个不动点问题 $\varphi^* = \arg\min_\varphi \mathcal{L}(\varphi; \mathcal{D}(\varphi^*))$ 。DAgger 就是解这类问题的标准姿势。</p>
-<p><strong>用户自己答对的题眼</strong>："真实世界中完美的 $z$ 不存在——训练时假装它存在，部署时就要还债。"</p>
-<p><strong>判卷校准</strong>：用户说" $\pi$ 没有在不准确的 $z$ 上训练过"——对了一半。 $\pi$ 在 Phase 1 确实只见过真 $z$ ，但崩溃的<strong>直接导火索</strong>是 $\varphi$ 那一环： $\varphi$ 在没见过的 $h$ （下陷+挣扎）上输出垃圾 $\hat z$ ， $\pi$ 拿到垃圾输入才跟着错。整个 $\varphi \to \pi$ 链条在完美数据下训练，对"辨识误差"零容忍、零恢复余量。DAgger 式迭代就是给系统<strong>买容错</strong>：提前在训练时摔够，部署时才摔不倒。</p>
-<h3>Q3：部署时 $\varphi$ 和 $\pi$ 的权重完全 frozen，为什么这仍然叫 adaptation？</h3>
-<p><strong>问题原文</strong>："这个简单 因为z事变的 RL在学习真实的物理参数"</p>
-<p><strong>核心答案</strong>：</p>
-<p><strong>对的部分</strong>：变的是条件变量 $\hat z_t$ ，不是权重——部署时 $\varphi, \pi$ 的参数 frozen，但 $\hat z_t = \varphi(h_t)$ 每 0.1 秒更新一次， $\pi(a \mid x, a_{t-1}, \hat z_t)$ 的行为跟着变。</p>
-<p><strong>校准一句</strong>："RL 在学习真实的物理参数"——RL 学的不是物理参数本身，而是<strong>权重</strong> $\theta$ （策略/价值函数的参数）： $\theta \leftarrow \theta + \eta \nabla J$ ，函数本身变了。RMA 的对比是：</p>
-<ul>
-<li><strong>Learning</strong>：函数变（权重更新），同一个输入 → 不同输出；</li>
-<li><strong>Adaptation</strong>：函数不变（权重 frozen），输入的条件变（ $\hat z_t$ 更新）→ 不同输出。</li>
-</ul>
-<p>类比： $\pi$ 是司机， $\varphi$ 是副驾驶。副驾驶不断报路况"现在是沙地"（ $\hat z_t$ ），司机切换驾驶模式——司机本人没重新学开车，但行为适应了路况。<strong>适应的定义看的是"行为是否随环境变"，不是"权重动没动"。</strong></p>
-<p><strong>与 Day21 的关系</strong>：Day21 ADR 里 LSTM 的 hidden state $m_t$ 干的正是这件事——inference 时更新的条件变量。RMA 只是把它从黑盒 hidden state 里拎出来，变成可监督、可可视化的显式向量 $\hat z_t$ 。隐式 → 显式，这就是 Day21 到 Day22 的那条线。</p>
-<p><strong>三条 sim2real 路线齐了</strong>：Day20 RLPD（真机学，权重更新）、Day21 ADR（仿真做宽，隐式适应）、Day22 RMA（仿真做宽 + 显式辨识，条件变量更新）。</p>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>RMA</h4><ul><li>真机权重 frozen</li><li>适应=在线更新条件变量 ẑ_t</li><li>辨而不学</li></ul></div><div class="vscol vs-b"><h4>RLPD</h4><ul><li>真机在线更新权重</li><li>学</li></ul></div></div>
 <div class="viz viz-vs vs"><div class="vscol vs-a"><h4>ADR</h4><ul><li>隐式适应</li><li>世界做宽</li></ul></div><div class="vscol vs-b"><h4>RMA</h4><ul><li>显式辨识</li><li>DR 做宽 + 在线辨识多一层保险</li></ul></div></div></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-22-2021-rma/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
