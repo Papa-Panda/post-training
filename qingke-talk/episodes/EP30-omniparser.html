@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP30 — OminiParser：基于纯视觉的 GUI Agent</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP30 — OminiParser：基于纯视觉的 GUI Agent</h1>
+    <p class="sub">GPT-4V 做 GUI Agent 跨平台跨应用不行的瓶颈不在推理，而在没有可靠的纯视觉屏幕解析：OmniParser 用 67k 网页 DOM 框微调一个「可交互元素检测模… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP30-omniparser.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP30（官网 EP30，2024-11-30）</dd><dt>标题</dt><dd>OminiParser：基于纯视觉的 GUI Agent（官网登记标题作「OminiParser」，论文与项目原名拼写为 <strong>OmniParser</strong>，疑官网笔误，以下按论文作 OmniParser）</dd><dt>讲者</dt><dd>鲁亚东（微软研究院 AI Frontiers 实验室高级研究员；据官网预告嘉宾介绍，且为论文第一作者 Yadong Lu）</dd><dt>BV</dt><dd>无（official-only，官网有预告、B站合集无对应视频）</dd><dt>时长</dt><dd>未知（官网预告 2024-11-30 上午 11:00 直播，未见回放存档）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>相关论文</dt><dd>Yadong Lu, Jianwei Yang, Yelong Shen, Ahmed Awadallah, <em>OmniParser for Pure Vision Based GUI Agent</em>，arXiv:2408.00203（2024-08-01 提交），<a href="https://arxiv.org/abs/2408.00203">https://arxiv.org/abs/2408.00203</a></dd><dt>相关代码</dt><dd><a href="https://github.com/microsoft/OmniParser">https://github.com/microsoft/OmniParser</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/ZXoBVSOE">https://qingkeai.online/blog/ZXoBVSOE</a></dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本期为 official-only，B站合集无对应视频、无字幕可用，本纪要基于对应论文（arXiv:2408.00203）还原，<strong>非逐字稿</strong>；讲授环节的展开顺序、口头补充与 AMA 内容均无法确证，以下内容以论文为准，凡涉及「讲者观点」的表述均指论文作者在文中给出的判断。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>GPT-4V 做 GUI Agent 跨平台跨应用不行的瓶颈不在推理，而在没有可靠的纯视觉屏幕解析：OmniParser 用 67k 网页 DOM 框微调一个「可交互元素检测模型」+ 7k 图标描述对微调一个「图标功能描述模型」+ OCR，把截图解析成带编号框与局部语义的结构化文件，让不依赖 HTML/view hierarchy 的 GPT-4V 在 ScreenSpot 上从 16.2% 涨到 73.0%，并在 Mind2Web、AITW 上超过需要额外结构化输入的 GPT-4V 基线。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li><strong>背景/问题</strong>：VLM 做跨平台（Windows/macOS/iOS/Android）、跨应用 GUI Agent 的核心短板是 action grounding——GPT-4V 给不出精确的点击 xy 坐标。Set-of-Mark（SoM）用带编号的框把「输出坐标」换成「输出框 ID」绕开了坐标问题，但框从哪来？已有方案从网页 DOM 或手机 view hierarchy 取真值框，桌面应用与任意截图场景拿不到。讲者一方的判断（论文原话）：GPT-4V 作为通用 agent 的能力被严重低估，缺的只是一个稳健的屏幕解析技术——(1) 可靠识别可交互图标，(2) 理解各元素语义并把目标动作关联到正确区域（来源：arXiv:2408.00203，§1 与摘要）。</li>
+<li><strong>方法/设计</strong>：三件套流水线。① 检测：从热门网页 DOM 树抽可交互元素框，构建 67k 张截图的检测数据集，微调 YOLO 系检测模型（论文称 interactable region detection model），与 OCR 的文字框合并、去重（重叠 &gt; 90% 去一）并给每框编号；② 描述：用 GPT-4o 造 7k 图标-描述对，微调 BLIP-v2 给每个检出图标生成一句功能语义（如「设置」「最小化」），OCR 文字直接作语义；③ 喂给 GPT-4V 的是 SoM 标注截图 + 局部语义文本 prompt，模型只需输出框 ID（来源：arXiv:2408.00203，§3.1、§3.2）。</li>
+<li><strong>实验/实战</strong>：三个基准全用现成 GPT-4V 不微调。ScreenSpot（600+ 跨平台截图）：纯 GPT-4V 平均 16.2%，OmniParser（局部语义 + 微调检测）73.0%，压过专门在 GUI 数据上微调的 SeeClick（53.4%）与 CogAgent（47.4%）；消融显示微调检测模型比现成 Grounding DINO 多 +4.3%。自建 SeeAssign 诊断集：加上局部语义后 GPT-4V 选对框 ID 的准确率 0.705 → 0.938。Mind2Web（网页多步导航）：仅截图输入的 OmniParser 在 Cross-Domain/Cross-Website/Cross-Task 三个切分的步骤成功率（Step SR）为 42.0% / 36.5% / 39.4%，全面超过用 HTML 的 GPT-4（36.2% / 30.1% / 26.4%）与用真值框 SoM 的 GPT-4V。AITW（手机导航）：总分 57.7%，比最佳 GPT-4V+history 基线（53.0%）高 4.7 个百分点（来源均同上，§4.1–§4.4）。</li>
+<li><strong>结论/观点</strong>（论文口径，非讲者原话）：作者认为「屏幕理解好的小模型 + 通用大模型」是比分工端到端微调更可扩展的路线——解析质量（可交互框准不准、语义给没给）是上限，谁掌握解析层谁就解锁了冻结大模型的 agent 能力。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ScreenSpot 平均准确率（GPT-4V）</td>
+<td>16.2%（纯 GPT-4V）</td>
+<td>73.0%（OmniParser：局部语义+微调检测）</td>
+<td>arXiv:2408.00203，Table 2</td>
+</tr>
+<tr>
+<td>ScreenSpot 对比微调型模型</td>
+<td>SeeClick 53.4% / CogAgent 47.4%</td>
+<td>OmniParser 73.0%</td>
+<td>arXiv:2408.00203，Table 2</td>
+</tr>
+<tr>
+<td>检测模型消融</td>
+<td>Grounding DINO 现成检测</td>
+<td>微调检测模型再 +4.3%</td>
+<td>arXiv:2408.00203，§4.2</td>
+</tr>
+<tr>
+<td>SeeAssign 选对框 ID 率</td>
+<td>0.705（无局部语义）</td>
+<td>0.938（加局部语义）</td>
+<td>arXiv:2408.00203，Table 1</td>
+</tr>
+<tr>
+<td>Mind2Web 步骤成功率（跨域/跨站/跨任务）</td>
+<td>GPT-4（用 HTML）：36.2% / 30.1% / 26.4%</td>
+<td>OmniParser（纯截图）：42.0% / 36.5% / 39.4%</td>
+<td>arXiv:2408.00203，Table 3</td>
+</tr>
+<tr>
+<td>AITW 总分</td>
+<td>GPT-4V+history 53.0%</td>
+<td>OmniParser 57.7%</td>
+<td>arXiv:2408.00203，Table 4</td>
+</tr>
+<tr>
+<td>训练数据</td>
+<td>—</td>
+<td>检测集 67k 截图（网页 DOM 框）；描述集 7k 图标-描述对（GPT-4o 生成）</td>
+<td>arXiv:2408.00203，§3.1、§3.2</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>环境观测的结构化中间层是 agent 的「感知 API」：OmniParser 的关键动作是把原始截图变成「编号元素 + 功能语义」的结构化文件再喂策略——同样的分工可搬到 coding/terminal agent：把终端输出、DOM、日志先解析成可寻址的结构化状态（元素 ID + 语义注解），让冻结的大模型只做选择与规划，不让策略模型自己兼任感知。感知层可以独立评测（SeeAssign 式「指对了吗」的最小诊断集，先量解析层上限，再谈端到端）。</li>
+<li>「小而专的解析模型放大冻结大模型」是数据飞轮的一种形态：67k/7k 这种可从程序化来源（DOM、真值结构）自动造的标注，比端到端行为克隆便宜一个量级；做 post-training 数据管线时，先问有没有可以从结构真值自动生成监督的解析子任务。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>论文自陈三类失败：重复图标/文字无法消歧、OCR 框粒度粗导致点击点落在框外、图标描述模型只看裁剪小图会误读（如三点图标读成「加载中」）——纯视觉解析在高密度桌面 UI 上的准确率天花板与误检如何随分辨率缩放，论文未系统分析，等待后续工作（该项目已有 V2 迭代，未包含在本期与本篇范围）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>（论文原句，arXiv:2408.00203 §1）"we argue that the power of multimodal models like GPT-4V as a general agent ... is largely underestimated due to the lack of a robust screen parsing technique"</p>
+<p>说明：本期无字幕，上引为论文原文，非讲者口述。</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

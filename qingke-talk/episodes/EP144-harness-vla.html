@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP144 — 从端到端 VLA 到 Harness VLA：给 VLA 装上 Harness Layer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP144 — 从端到端 VLA 到 Harness VLA：给 VLA 装上 Harness Layer</h1>
+    <p class="sub">端到端 VLA 的局部接触技能其实够强，坏就坏在部署扰动下：指令换个目标、物体挪个位置，模型还会照着训练分布的老轨迹走完，一次接触失败整条 rollout 就废。本期的工作 H… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">未确证项</a><a href="#sec-8">原文金句（论文原话，非讲者语录）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP144-harness-vla.html</p>
+<p>"Rather than adding more skills, the harness teaches the planner the operating range of each fixed primitive" —— 论文 §1，点明本期主线：不扩技能库、不训大模型，而是把冻结 VLA 当原语、让规划器学会怎么编排它</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>144</dd><dt>标题</dt><dd>从端到端 VLA 到 Harness VLA（官网原始标题含副题「聊聊具身智能下一站：给 VLA 装上 Harness Layer」）</dd><dt>BV</dt><dd>无。B站合集无本场视频（official-only 期）</dd><dt>时长</dt><dd>直播计划 1 小时（讲授 + AMA），无视频存档可核</dd><dt>直播时间</dt><dd>2026-08-08（周六）10:00–11:00（官网预告）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>张翼显（Yixian Zhang；清华大学深圳国际研究生院硕士在读，于超教授团队。论文第一作者；官网预告嘉宾介绍与论文作者表一致：已在 ICLR 发表多篇第一作者论文、参与 RSS 等会议论文，累计发表论文 10 余篇）</dd><dt>相关论文</dt><dd>Yixian Zhang, Huanming Zhang, Feng Gao, et al., <em>Harness VLA: Steering Frozen VLAs into Reliable Manipulation Primitives via Memory-Guided Agents</em>，<a href="https://arxiv.org/abs/2607.08448（v1">https://arxiv.org/abs/2607.08448（v1</a> 2026-07-09 提交，v5 2026-09-24 修订；Chao Yu、Wenbo Ding 为通讯作者）</dd><dt>相关代码</dt><dd><a href="https://github.com/RLinf/RPent">https://github.com/RLinf/RPent</a> （项目页 <a href="https://harnessvla.github.io/">https://harnessvla.github.io/</a> ）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/Harness-VLA">https://qingkeai.online/blog/Harness-VLA</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：<strong>无视频、无字幕，基于对应论文/官方材料还原，非逐字稿。</strong> 本场在 B站无对应视频、无字幕轨，本纪要依据官网预告（含嘉宾介绍与六点讲授提纲）与讲者团队论文 <em>Harness VLA</em>（arXiv:2607.08448，本文采用 v5 正文）还原。讲授提纲为：（1）具身智能的困境：端到端 VLA 的能力边界；（2）Harness VLA 的系统核心架构与原语设计；（3）Agentic Planner、记忆机制与动态失败恢复流程；（4）在扰动布局、长程任务和跨场景迁移中的实验验证；（5）应用价值与未来技术趋势探讨；（6）AMA 环节。以下以论文 §1–§6 为据写；AMA 与讲者现场口头发挥无书面材料，不复述、不虚构。凡数字均为论文口径，关键数字总表逐项标注出处（版本说明见文末「未确证项」）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>端到端 VLA 的局部接触技能其实够强，坏就坏在部署扰动下：指令换个目标、物体挪个位置，模型还会照着训练分布的老轨迹走完，一次接触失败整条 rollout 就废。本期的工作 Harness VLA 不动 VLA 一根参数：把冻结的 VLA 封装成一个可重试的接触密集原语 $vla\_act$ ，再配一小组固定的解析原语（移动、旋转、夹爪、导航）负责非接触的走位与摆位；上层由 LLM 规划器（Codex / Claude Code 一类 coding agent）以 JSON 调用方式回合制地编排，配两层记忆——成功轨迹沉淀为 Task-Specific Memory、跨任务的成功规则与失败模型沉淀为 Global Memory。结果是：在 LIBERO-Pro 扰动基准上整体成功率从直接调用同一冻结 VLA 的 50.0% 提到 82.4%（Claude Code 规划器），比此前最强基线 RATS 高 38.6 个百分点；真机双 Franka 上同一冻结 VLA 还能做目标重定向、抓取恢复与新任务组合。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：VLA 刷爆了 Benchmark，却搞不定真实世界的细微变化</h3>
+<p>官网预告把问题抛得很直白：VLA 在标准基准上分数很高，但真实部署里「语义重定向、目标重绑定、空间布局漂移、局部接触不稳定」四类扰动一来就垮。论文 §1 给出机理：端到端 VLA 是在分布内任务轨迹上训出来的，它把「语言 grounding、长程组合、低层控制」全压进一个策略里；部署时指令换了目标，视觉场景还长得和训练时差不多，策略会直接复放熟悉的旧行为，而不是听新指令——语言通道某种程度上是摆设（论文引 OpenVLA/π0.5 的观察原话是语言通道 "largely vestigial"）。一次不稳定的接触失败又会沿单体 rollout 一路传导，没有恢复机制。</p>
+<p>另一条路线是 LLM coding agent + 解析原语（Code as Policies、ProgPrompt 一系）：语义与组合推理强，但纯解析控制器（IK 搬运、腕部旋转、夹爪开合）做不来不规则抓取、紧公差放置、铰接物体操作。论文的判断是两个范式各自「让错误组件承担了过多责任」：单体 VLA 被迫吸收全部组合与 grounding；coding agent 被迫用手工 API 实现精细物理交互。Claude Code 这类数字 Agent 的经验是另一条路：突破不只来自更强的模型，还来自模型之外的执行组织系统（Harness Layer）——模型负责思考，Harness 负责维护上下文、调度工具与纠错容错。本期就是把这套搬到具身：不扩原语库，而是让规划器学会用好一小组固定原语。</p>
+<h3>方法/设计：冻结 VLA 当原语，规划器回合制编排</h3>
+<p>论文 §2 的形式化：环境是刚体物理引擎（MuJoCo/Robosuite 一类），每步观测 $o_t$ 包含 RGB 图像、深度图与本体状态（末端位姿 + 夹爪状态），任务由语言描述 $\ell$ 与二值完成谓词 $\mathcal{G}$ 定义。所有低层控制——冻结的预训练 VLA 与全部确定性解析控制器——统一收进一个预定义原语库 $\mathcal{P}$ 。每一回合，规划器 $\Pi$ 读当前观测、任务描述与两层记忆里检索到的上下文，输出一个 JSON 序列化的原语调用 $c_t \in \mathcal{P}$ ，物理引擎执行到该原语的内部后置条件满足为止，再返回新观测。一直循环到 $\mathcal{G}$ 满足或步数预算耗尽。</p>
+<p>原语库刻意保持小而固定（论文 §2.3、附录）：</p>
+<ul>
+<li>$vla\_act$ ：唯一的学习型原语，把冻结 VLA 封装为「接触密集专家」，负责抓取、不规则物体操作、紧约束放置、按钮按压、水龙头/抽屉/咖啡机等接触丰富的局部阶段；</li>
+<li>解析原语： <code>move_to</code>（世界坐标笛卡尔目标搬运，后端可为操作空间伺服/Jacobian/IK，暴露的语义一致）、 <code>move_pose</code>（位置+俯仰联动）、 <code>rotate_wrist</code> / <code>rotate_pitch</code>（原地调姿）、 <code>set_gripper</code> / <code>release</code>（夹爪开合）、 <code>navigate_to</code>（移动底盘走位）。</li>
+</ul>
+<p>关键在于调用语义： $vla\_act$ 不是一次性黑盒调用，而是一次「可重试的局部接触尝试」。规划器先用解析原语把机器人摆到有利于接触的预接触位姿（staging），再触发 VLA，观察接触结果；若抓空或放置不稳，就重新摆位、再调用一次。失败被局域化在这一个接触子任务里，不会污染整条长程 rollout。论文把它总结为一句话：harness 教的是每个固定原语的「工作范围」——哪类子问题该解析地解、什么时候该调用 $vla\_act$ 、失败后如何重摆位——而不是靠往库里加新技能扩张。</p>
+<p>Harness 本体是 REPL 式运行时契约（论文 §2.2）：暴露原语 schema、把决策序列化为 JSON 命令、执行并刷新 RGB-D 与本体观测、记录轨迹、检索记忆、执行重置与预算策略、用基准谓词检查进度。本质上就是 coding agent 的执行-反馈闭环搬到机器人上，所以规划器可以直接复用现成的 Codex、Claude Code 作为骨干，只换提示与工具面。</p>
+<h3>记忆机制：两层记忆 + 两阶段生命周期</h3>
+<p>讲授提纲第 3 点对应论文 §2.2 的两层记忆：</p>
+<ul>
+<li><strong>Task-Specific Memory</strong>：探索式自举阶段在单个参考 seed 上成功解出的原语调用序列，序列化为 JSONL 轨迹存档；部署时按当前任务检索，做 few-shot 的重新 grounding（把旧轨迹里的目标、位置重新绑定到当前观测，而不是机械复放）。</li>
+<li><strong>Global Memory</strong>：从探索轨迹里提炼的跨任务可复用的成功规则与失败模型（哪些摆位容易抓空、哪类布局要先退后等），以启发式形式注入规划器上下文。</li>
+</ul>
+<p>生命周期分两段：<strong>探索式自举</strong>——规划器在参考实例上被给予 reset 原语与宽松时间预算，反复试摆位次序、预接触位姿、 $vla\_act$ 调用时机与提前终止阈值，成功后把轨迹与规则写入记忆；<strong>部署评估</strong>——在扰动后的新实例上检索记忆、重新绑定目标与状态后执行。注意部署阶段会根据当前 RGB-D 观测重新绑定目标、位置与状态，而非复现旧轨迹，这是它能抗布局扰动的关键。</p>
+<p>还有一个部署形态 <strong>Flash Mode</strong>（论文 §4.1）：把成功运行编译成「任务卡」（动作顺序、VLA 提示、非空间参数；空间航点相对任务相关物体存储），部署时由 VLM 在 RGB 里定位目标、反投影成 3D 坐标更新航点，顺序复放，不再做在线规划。Flash 在 LIBERO-Pro 上达 72.63% 成功率（581/800），介于 Codex 高推理与无推理两档之间。论文也明说 Flash 目前只适用于子目标顺序固定、目标可直接定位的简单任务；新子目标、动作重排或意外恢复仍需在线规划。</p>
+<h3>实验/实战：同一冻结 VLA，换上 Harness 前后</h3>
+<p>评测覆盖三类仿真基准 + 真机（论文 §3）：</p>
+<ul>
+<li><strong>LIBERO-Pro</strong>（桌面操作，指令重定向 T 与位置交换 S 两类扰动，Spatial/Object/Goal/LIBERO-10 四套件）：冻结后端是 RLinf 发布的 π0.5-SFT 检查点 $\pi_{\mathrm{RLinf}}$ 。直接调用该 VLA 整体成功率只有 50.0%，端到端 VLA 基线在扰动下普遍塌陷（π0.5 整体 11.0%、OpenVLA 0.0%）；此前最强的 agent 式基线 RATS 为 43.8%。Harness VLA 以 Codex 规划器达 72.1%、Claude Code 规划器达 82.4%，对 RATS 的 +38.6 个百分点就是官网与摘要的口径（82.4 − 43.8，非增幅百分比）。同表的消融对照说明增益不是来自后端更强：同一个 $\pi_{\mathrm{RLinf}}$ 检查点，直调 50.0%，套上 harness 后 82.4%。</li>
+<li><strong>RoboCasa365</strong>（家居厨房、移动底盘、长程复合任务）：直接冻结 VLA 基线 RLDX-1 整体 30.0%；Harness VLA（Codex）达 57.1%（+27.1 个百分点，v5 口径），Claude Code 版 48.6%。</li>
+<li><strong>RoboTwin C2R</strong>（clean→randomized 零样本迁移，记忆只从 clean 设置探索得到，不在随机化设置里再探索、也不微调 VLA）：冻结后端换成 LingBot-VLA，直调 50.4%，Harness VLA 提到 58.0%（Codex）/ 58.4%（Claude Code）；对照 GR00T-N1.7 的 20.7%、π0.5 的 47.9%。</li>
+<li><strong>真机</strong>（双 Franka，两套装置，论文 §4.2）：Codex（GPT-5.5）调用冻结 π0.5 桌面清理策略做抓取、交接与放置，展示目标重定向、抓取恢复与新任务组合。</li>
+</ul>
+<p>机制分析（论文 §3.3 三个 Key Finding）：第一，语义重 grounding 在规划器层完成——解析任务描述、从实时 RGB-D 里解出当前接触目标，让 VLA 只在规划器给定的绑定下做局部接触；第二，staging 决定成败——扰动后原始预接触位姿往往不再把目标暴露在 VLA 熟悉的局部构型里，规划器绕当前场景重新摆位，等于「学会让 VLA 从哪里开始动手」，而不是要求策略自己吸收分布漂移；少量规划器选定的 $vla\_act$ 调用就能越过直调基线，随后饱和（Fig. 4）；第三，解析原语把非接触结构（自由空间搬运、预接触摆位、腕/底盘调姿、撤退、接触后重新定位）从 VLA 身上剥离，LIBERO 里 $move\_to$ 占全部调用的 61.8%、 $vla\_act$ 只占 15.8%（论文附录 F 用量统计）——VLA 用得很稀疏，但可重摆位与可重试是鲁棒性的来源。</p>
+<p>零样本消融能分离记忆的贡献（论文 §3.2，LIBERO-Pro Goal）：不检索任何自举记忆时，指令重定向（Goal-T）还有 79.0%（few-shot 为 87.0%），但位置交换（Goal-S）从 87.0% 掉到 31.0%——语义重绑定主要靠规划器在线推理，而空间扰动下的原语组织方式最依赖探索阶段沉淀的任务级记忆。</p>
+<h3>结论/观点</h3>
+<ul>
+<li>论文结论（§6）：可靠操作不只来自训更强的策略，也可以来自给冻结策略套一个可审计的执行环：固定原语契约、记忆、反馈与任务级验证。把语义与空间绑定从 VLA 身上抽象出去，能避免单体部署里常见的灾难性失败。这正是官网预告的问题意识：与其继续堆参数与数据，不如承认具身智能的下一站可能是给 VLA 装上 Harness Layer。</li>
+<li>作者自陈的三个限制（论文 §6，按原文）：（1）规划器与低层 VLA 之间是开环反馈——规划器看不到 VLA 内部状态，只能事后看接触结果；（2）没有用环境奖励与人类偏好做联合微调，后续需要样本高效的强化学习（原文举例 GRPO）；（3）缺少细粒度图像描述，高度杂乱的长程任务里结构化推理受限。未来方向提了与 ASPIRE 一类自动技能发现系统结合：当重复的原语组合暴露出缺失的抽象时，允许 agent 提议、验证并接纳新技能，但保留可审计的原语接口。</li>
+<li>本期的讲授侧信息（官网提纲第 5 点「应用价值与未来技术趋势」）在论文里对应 §6 与 Flash Mode 一节：样本高效（一个参考 seed 探索即可自举）、跨场景迁移（记忆重绑定）、长期自主执行（失败局域化 + 重试）。讲者现场如何展开、AMA 问了什么，无书面材料可核，本纪要不代拟。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LIBERO-Pro 整体成功率（T+S 扰动，800 回合口径）</td>
+<td>同一冻结 π_RLinf 直调 50.0%</td>
+<td>Codex 规划器 72.1%、Claude Code 规划器 82.4%</td>
+<td>论文 §3.2、Table 3</td>
+</tr>
+<tr>
+<td>对最强先行基线的提升（LIBERO-Pro）</td>
+<td>RATS 43.8%</td>
+<td>+38.6 个百分点（82.4%）</td>
+<td>论文摘要、§3.2</td>
+</tr>
+<tr>
+<td>端到端 VLA 在 LIBERO-Pro 扰动下</td>
+<td>π0.5 整体 11.0%、OpenVLA 0.0%、π0 0.3%</td>
+<td>说明扰动下单体 VLA 普遍塌陷</td>
+<td>论文 Table 3</td>
+</tr>
+<tr>
+<td>RoboCasa365 整体成功率</td>
+<td>RLDX-1（直调冻结 VLA）30.0%</td>
+<td>Codex 57.1%（+27.1 个百分点）、Claude Code 48.6%</td>
+<td>论文 §3.2、Table 4</td>
+</tr>
+<tr>
+<td>RoboTwin C2R 成功率（clean→随机化零样本迁移）</td>
+<td>LingBot-VLA 直调 50.4%；GR00T-N1.7 20.7%、π0.5 47.9%</td>
+<td>Codex 58.0%、Claude Code 58.4%</td>
+<td>论文 §3.2、Table 6</td>
+</tr>
+<tr>
+<td>零样本（无自举记忆）LIBERO-Pro Goal</td>
+<td>Cap-X：位置交换 25.6% / 指令重定向 16.8%</td>
+<td>Harness VLA（CC）零样本：位置交换 31.0% / 指令重定向 79.0%；带记忆 few-shot 两项均为 87.0%</td>
+<td>论文 §3.2、Table 5</td>
+</tr>
+<tr>
+<td>Flash Mode（任务卡复放，无在线规划）</td>
+<td>Codex 高/无推理两档之间</td>
+<td>LIBERO-Pro 72.63%（581/800）</td>
+<td>论文 §4.1、Table 7</td>
+</tr>
+<tr>
+<td>原语调用结构（LIBERO）</td>
+<td>—</td>
+<td>$move\_to$ 占 61.8%， $vla\_act$ 占 15.8%</td>
+<td>论文附录 F（§3.3 引述）</td>
+</tr>
+<tr>
+<td>自举成本</td>
+<td>每任务 1 个参考 seed 探索</td>
+<td>部署用 5 个 held-out seed 评估（RoboCasa365 共 250 rollouts）</td>
+<td>论文 §3.2、Table 4</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>「冻结模型 + 可重试原语 + 小型固定工具库 + 两层记忆」是 agent 系统的一套通用骨架</strong>（直接可试）：把手头任何不稳定的生成式组件（代码生成、检索、VLA、数据构造模型）封装成带明确后置条件的可重试原语，上层用回合制 planner 编排，失败局域化到单个原语再重排/重试，而不是让单次长链生成承担全程。本期实测里非接触（非核心生成）部分用确定性代码兜底、核心生成只占 15.8% 的调用，这个比例感对 coding agent 的工具设计同样成立：能解析解的别让模型生成。</li>
+<li><strong>记忆分两层存：轨迹级与规则级</strong>（Infra / 评测视角）：成功轨迹按「可重绑定的参数化模板」存（存相对锚点而非绝对坐标），失败模式与成功规则单独蒸馏成全局启发式。对应到后训练数据管线：SFT/RL 里跑通的解法与典型翻车模式也可以这样分账——轨迹进样本库，规则进系统提示/工具说明/过滤器；本期的零样本消融给了量化依据（空间类扰动最吃轨迹记忆，语义重绑定更吃在线推理）。</li>
+<li><strong>评测要单独测「扰动轴」而非只测标准集</strong>（评测自动化）：LIBERO-Pro 的 T/S 双扰动 + 「同一冻结后端直调 vs 加 harness」的同后端对照，把增益干净地归因到系统组织而非模型变强；给自己的 agent/RL 评测加指令改写、目标替换、布局随机化三类扰动列，并固定后端做 harness 前后对照，才能分辨涨分来自模型还是来自脚手架。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>现场内容不可还原：AMA 与讲者口头发挥无书面材料。提纲第 4 点「扰动布局、长程任务和跨场景迁移中的实验验证」与论文 §3 的对应是按主题推断的；讲者现场是否演示真机、如何评价规划器成本（Codex/Claude Code 的调用开销论文未给统一账），本纪要不臆测。</li>
+<li>论文内部数字存在版本差异：arXiv 摘要页（abs 页）RoboCasa365 写 +25.4 个百分点，v5 正文 §3.2 与 Table 4 为 57.1% vs 30.0%（即 +27.1）。本纪要采用 v5 正文口径；若日后引用以 v5 表格为准。</li>
+<li>规划器是外部变量：同一 harness 换 Codex 与 Claude Code，在 LIBERO-Pro 上差 10 个百分点（72.1 vs 82.4），RoboCasa365 上顺序反转（57.1 vs 48.6）——「harness 增益」与「规划器能力」的解耦程度值得注意，迁移到自有系统时规划器选型本身就是超参。</li>
+<li>开源仓库 RPent 里记忆的实际存储格式与检索方式、Flash 任务卡的生成脚本，值得后续直接读代码核对论文附录 A/E 的 REPL 协议与提示细节。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>未确证项</h2>
+<ol>
+<li><strong>无视频、无字幕</strong>：本期为 official-only，全部内容基于官网预告与论文 arXiv:2607.08448（v5）还原；讲授顺序、现场演示与 AMA 均无法确证，未写入或已明确标注为推断。</li>
+<li><strong>版本差异</strong>：论文已经历 v1（2026-07-09）至 v5（2026-09-24）多次修订，直播（2026-08-08）时对应版本介于其间，讲者当时引用的具体数字可能与 v5 正文略有出入；关键数字总表采用 v5 口径并逐项标注。</li>
+<li><strong>RoboCasa365 提升幅度</strong>：abs 摘要页的 +25.4 个百分点与 v5 正文 +27.1 个百分点不一致（见「疑问」节），以 v5 Table 4 的 57.1% / 30.0% 著录。</li>
+<li>讲者仅按官网嘉宾介绍著录（张翼显，清华深研院硕士在读、于超团队）；团队 PI 于超教授等是否参与本场分享，无信息，不另列。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句（论文原话，非讲者语录）</h2>
+<blockquote class="pq">
+<p>"reliable manipulation can come not only from training a stronger policy, but also from surrounding a frozen policy with an auditable execution loop, fixed primitive contracts, memory, feedback, and task-level verification." —— 论文 §6，本期立场的原文表述</p>
+<p>"it learns where the VLA should begin acting, rather than asking the policy to absorb the full distribution shift by itself." —— 论文 §3.3，解释 staging 为什么能在不改参数的前提下提升冻结 VLA</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

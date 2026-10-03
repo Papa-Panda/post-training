@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP151 — 从 Harness 看 AI4AI 如何实现：测试时强→弱能力迁移</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP151 — 从 Harness 看 AI4AI 如何实现：测试时强→弱能力迁移</h1>
+    <p class="sub">通常说强模型带弱模型，第一反应是蒸馏/OPD：更新弱模型的参数。本期问了一个更本质的问题：完全不改参数，强模型能不能在测试时直接给弱模型"搭好思考方式"？ 工作把强模型设为 b… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">未确证项</a><a href="#sec-8">原文金句（论文原话，非讲者语录）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP151-harness-ai4ai.html</p>
+<p>"capability is transferred not through model weights, but through the harness that shapes how the weak model receives, reasons, and responds." —— 论文 §1，点明本期主线：能力迁移不必改参数，可以改模型身外的推理环境</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>151</dd><dt>标题</dt><dd>从 Harness 看 AI4AI 如何实现（讲授标题：《AI4AI at Test-Time：从 Harness 看 AI4AI 如何实现以及未来》）</dd><dt>BV</dt><dd>无。B站合集无本场视频（official-only 期）</dd><dt>时长</dt><dd>直播计划 1 小时（讲授 + AMA），无视频存档可核</dd><dt>直播时间</dt><dd>2026-09-05（周六）10:00–11:00（官网预告）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>
+分享嘉宾</dt><dd>钱成（Cheng Qian；UIUC 计算机学院博士生，导师季姮教授；本科毕业于清华大学，师从刘知远教授。ToolRL、UserRL 等工作一作，论文为本期工作第一作者，署名单位含 Salesforce AI Research 与 UIUC；以上据官网预告嘉宾介绍与论文作者表）</p>
+</dd><dt>
+相关论文</dt><dd>Cheng Qian, Wenting Zhao, Liangwei Yang, Heng Wang, Jielin Qiu, Heng Ji, Silvio Savarese, Huan Wang, Shelby Heinecke, <em>AI4AI at Test-Time: Strong-to-Weak Capability Transfer via Harnesses</em>，<a href="https://arxiv.org/abs/2608.12307（2026-08-12">https://arxiv.org/abs/2608.12307（2026-08-12</a> 提交）</p>
+</dd><dt>相关代码</dt><dd>论文未附官方代码仓库链接（以论文正文为准；官网预告亦未给出）</dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/Harness-AI4AI">https://qingkeai.online/blog/Harness-AI4AI</a></dd></dl>
+<blockquote class="pq">
+<p>⚠️ 提炼方式说明：<strong>无视频、无字幕，基于对应论文/官方材料还原，非逐字稿。</strong> 本场在 B站无对应视频、无字幕轨，本纪要依据官网预告（含嘉宾介绍与六点讲授提纲）与讲者团队论文 <em>AI4AI at Test-Time</em>（arXiv:2608.12307）还原。讲授提纲为：（1）从蒸馏、OPD 到 Harness，AI4AI 范式的演进；（2）测试时能力迁移：AI4AI 最本质的实现方式；（3）让强模型当架构师：自动构建弱模型的 Harness；（4）一个有效 Harness 由什么组成；（5）从实验结果看 Harness 的价值边界；（6）探讨 AI4AI 的未来与 AMA。以下以论文 §1、§4–§7 为据写；AMA 与讲者现场口头发挥无书面材料，不复述、不虚构。凡数字均为论文口径，关键数字总表逐项标注出处。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>通常说强模型带弱模型，第一反应是蒸馏/OPD：更新弱模型的参数。本期问了一个更本质的问题：<strong>完全不改参数，强模型能不能在测试时直接给弱模型"搭好思考方式"？</strong> 工作把强模型设为 builder、弱模型设为 target：builder 只拿到 5% 的验证集，在多轮迭代里为 target 自动构建一个 inference-time harness（任务路由、结构化抽取、确定性代码、校验、输出格式控制），target 本身零训练。四个 Theory-of-Mind（ToM）基准、3900 道隐藏测试上，最佳 scaffold 把 GPT-5.4-mini 的宏平均准确率从 0.488 抬到 0.912（+87% 相对提升），且 72 次运行里每一组 builder 配置都正向。机制分析表明，收益主要来自把弱模型不稳定的隐式推理"卸载"成确定性代码与规则，而不是让弱模型想得更久——强模型的推理被一次性编译成了可复用的推理时结构。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>背景/问题：能力迁移除了改权重，还有第二条路</h3>
+<p>官网预告把问题抛在一句话上：「我们能否在不更新任何模型参数的情况下，把强模型的能力迁移给弱模型？」论文 §1 给了理论支点（借 Sweller 的认知负荷理论）：小模型在任务上失败，未必全是内在能力不足，也可能是任务的呈现方式给它压了过高的认知负荷。于是改进有两条路：让模型更能干（蒸馏路线：数据蒸馏、rationale 蒸馏、on-policy distillation，都是改参数），或者让任务对模型更容易（harness 路线：路由逻辑、提示模板、校验、记忆与工具使用，改的是模型 reason 时的条件）。</p>
+<p>第二条路缺的恰恰是系统账本：现成的 agent 系统里小模型早就被包在管线里用了，但为什么 harness 有效、何时稳定、哪些设计真正起作用、增益里有多少是真实推理支持而多少是基准特定的捷径，此前没人系统测过。这就是本期工作的切入点：把 strong-to-weak scaffolding 形式化为一个独立的测试时能力迁移设定，并做大规模受控实验。</p>
+<h3>方法/设计：builder 写脚手架，target 只管执行</h3>
+<p>设定（论文 §1、§4）：强模型 builder 构建一个 scaffold，即 task routing、prompt 模板、确定性求解器、few-shot 例证、校验过程与答案格式约束的任意组合；目标是提升一个固定的弱模型 target 在隐藏测试集上的表现。规则有三条硬约束：</p>
+<ol>
+<li>target 不做任何训练，参数与提示外的一切都不动；</li>
+<li>builder 永远看不到完整测试集，只能用一个 195 题（5%）的验证样本迭代改进 scaffold；</li>
+<li>scaffold 必须迁移到未见样本上，所以它被迫捕获可复用的技能与任务结构，而不是背实例答案。</li>
+</ol>
+<p>换个说法：builder 要做的不是解题，而是把自己的解题方式外化成 target 能执行的程序——论文的原话是把 builder 比作 "compiler of task competence"：花一次性推理预算，把任务的决策程序编码进 harness；之后每道题上 target 的认知负担被摊薄，它只处理规则编译不掉的残余情况。</p>
+<p>实验设计（论文 §4）：测试床选 ToM（心智理论）推理——需要追踪嵌套信念、视角切换、隐藏信息与贝叶斯目标推断，对小模型难，但结构上又有可路由、可分解、可符号化求解的空间。四个基准合成 3900 题隐藏测试集：BigToM 1200 题（智能体是否观察到世界变化的二值问题）、Hi-ToM 1200 题（0–4 阶递归的嵌套信念，含欺骗设定）、MMToM-QA 600 题（从动作轨迹做贝叶斯目标/信念推断）、MuMA-ToM 900 题（三选多智能体信念问题）。主 target 是 GPT-5.4-mini，另以 Gemini-3.5-flash 做 target 对照；builder 阵容包括 GPT-5.5、Opus-4.7（四档推理强度）、Sonnet-4.6、Gemini-3.5-flash、Gemini-3.1-Pro、GPT-5.4-mini、Codex-5.3、Grok-0.1，且 builder 自己也跑在三种平台之一（Cursor、Claude Code、GPT Codex）里——builder 的 harness 也是变量。总计 72 次运行，每个配置重复 3 次测稳定性。参照系有两个：Vanilla（target 裸调用，GPT-5.4-mini 宏平均 0.488、Gemini-3.5-flash 0.761）与 Human-Inspired Harness——特意用了讲者自己先前的工作 UserHarness（Qian et al., 2026）作为人类手工 harness 的上限参照（同一 GPT-5.4-mini 上达 0.939）。</p>
+<h3>实验/实战：0.49 → 0.91，且每次运行都正向</h3>
+<p>主结果（论文 §5、Table 1）：57 次以 GPT-5.4-mini 为 target 的运行，scaffold 后的宏平均准确率均值 0.763（相对基线 +0.275），100% 的运行超过裸调用基线，11 个 builder 配置无一例外正向。最佳单次运行是 GPT-5.5 在 GPT Codex 平台上构建的 scaffold：0.912，即 +0.423、相对 +87%——官网预告所说的「仅仅改变模型外部的 harness，就能让 GPT 在不同 Benchmark 上的准确率提升将近翻倍」指的就是这个口径（0.488 → 0.912）。</p>
+<p>三个值得记的对照：其一，最佳 scaffold 后的 GPT-5.4-mini 在四个基准上全面超过裸调用的 GPT-5.4（0.619）与 GPT-OSS-120B——「给小模型配好脚手架」在这些任务上胜过「直接换大一号的裸模型」；其二，与人类手工 UserHarness 比，自动 scaffold 在结构最显式的 BigToM 上打平甚至反超（1.00 vs 0.95），但在 Hi-ToM（0.80 vs 0.87）、MMToM-QA（0.84 vs 0.98）、MuMA-ToM（0.88 vs 0.96）上仍有清晰差距——差距集中在不容易编译成确定性结构的部分；其三，换 target 的对照说明增益看余量：Gemini-3.5-flash 本来就强（裸调用 0.761），scaffold 的增益几乎全集中在 BigToM 一项（占其宏平均涨幅 0.42 的 96%），弱 target 从脚手架里拿到的东西系统性更多。</p>
+<p>机制层面的量化（论文 §5 后段，这是全篇最有价值的部分）：</p>
+<ul>
+<li><strong>确定性卸载是主因</strong>。定义 determinism fraction 为 scaffold 中由确定性代码/规则直接作答、无需 target 模型推理的题目比例；它与最终准确率的相关达 $r = 0.72$ ——builder 把越多工作编译成可执行结构，target 剩的推理负担越少。而 scaffold 代码量本身与准确率只有 $r \approx 0.22$ 的弱相关：写得多没用，卸载得对才有用。</li>
+<li><strong>每个基准的"可编译度"不同</strong>：BigToM 几乎全可编译（determinism 均值约 0.94，因为题目常直接暴露"观察到/未观察到"这个判别）；Hi-ToM 约 0.51（常靠符号化信念状态追踪）、MMToM-QA 约 0.44、MuMA-ToM 只有约 0.36（自由对话式推理最难编译成规则）。论文称之为四个基准的 compilability 排序。对应地，BigToM 上 builder 经常直接写出确定性求解器或混合规则，MuMA-ToM 几乎总是模型中介的提示式 scaffold。</li>
+<li><strong>收益不是靠验证集刷出来的</strong>：builder 平均只用 5 次验证评估（中位数 5，范围 2–15）；最佳验证分与最终全集分的相关 $r = 0.96$ ，验证→全集的乐观偏差均值仅 0.021；而验证迭代次数与最终分数的相关只有 $r = 0.17$ ——builder 本身的质量远比它探验证集的次数重要。</li>
+<li><strong>稳定性与强弱排序</strong>：同一配置重复构建的宏平均标准差均值 0.036，比主涨幅小一个数量级；但方差集中在确定性求解器策略上——一条规则里的逻辑错误能在一个 1000+ 题的基准上摆动几十分。builder 身份是主要变量、平台只是二阶效应；Opus-4.7 的推理强度与其 scaffold 质量单调正相关（Spearman $\rho = 0.77$ ）。实务配方由此很清楚：用最强 builder、高推理强度构建、只花少量验证评估、优先卸载可证明子任务，有预算时多建几个独立 scaffold 再按验证分选或集成。</li>
+<li><strong>残差错误的形状</strong>：最强的 8 个 scaffold 平均修复了基线答错题的 83%、只弄坏基线答对题的 7%，接近帕累托改进；剩下错误集中在最难编译的核：Hi-ToM 随递归阶数下降（0 阶 0.999 → 4 阶 0.700，欺骗设定再降）、MMToM-QA 的贝叶斯目标推断子类、MuMA 的 social-goal 与 belief-of-goal 标签。</li>
+</ul>
+<h3>结论/观点</h3>
+<ul>
+<li>论文结论（§6）：scaffolding 不替代原始推理能力，而是重新分配它——"scaffolding does not replace raw reasoning capability; it reallocates it." builder 做一次性的结构推理，target 处理残余的模型依赖部分。能力不必只以权重形式存在，也可以外化成 tools、code、routing、verification 与 harness；这正是官网预告里 AI4AI 视角的落点：未来的 AI4AI 不只是有一个更聪明的模型，而是让 AI 学会为 AI 构建更好的思考环境。</li>
+<li>一个反直觉但被数据支持的细节：让弱模型"想得更久"（更长推理、更多采样）不是增益来源；增益来自结构外化、确定性卸载与严格的答案格式约束。讲授提纲第 4 点「一个有效 Harness 由什么组成」在论文里对应的配方是：近乎普适的可靠性地板（格式强制、路由、贪心解码）+ 高价值的任务结构利用（极性逻辑、结构化抽取、确定性求解）。</li>
+<li>作者对适用边界有明示（论文 §7）：目前只在 ToM 这一类测试床上验证，它是有意选的——同时包含可脚手架化的结构与残余推理难度，能区分浅层提示优化与真正的任务结构发现；更广的基准族（不同的符号结构/歧义/开放推理配比）是未来工作。论文还提出把这个设定本身做成 builder 的标准基准：测的不是 builder 能不能答题，而是它能不能让另一个模型答得更好。</li>
+<li>本期与已完成期次的坐标：讲者钱成的 UserRL 是他先前的一作工作（本仓库已有相应期次），本期的参照系 UserHarness 同样出自其团队——三期连起来看是同一条线：从"训 agent"（ToolRL/UserRL）走到"不训模型、训环境"。另外本期与 EP144 是同一批的 Harness 双联：EP144 把 Harness Layer 装到冻结 VLA 外面，本期把 Harness 装到弱语言模型外面，机制同构（固定被服务对象、外层确定性结构兜底、残余难题留给模型）。讲者现场如何展开第 6 点「AI4AI 的未来」、AMA 问了什么，无书面材料可核，本纪要不代拟。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/对照</th>
+<th>结果</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-5.4-mini 宏平均准确率（四 ToM 基准）</td>
+<td>裸调用 0.488</td>
+<td>全部 scaffold 运行均值 0.763（+0.275）；最佳单次 0.912（+0.423，相对 +87%）</td>
+<td>论文 §5、Table 1</td>
+</tr>
+<tr>
+<td>正向率</td>
+<td>—</td>
+<td>72 次运行中全部 builder 配置正向；57 次 GPT-5.4-mini 运行 100% 超过基线</td>
+<td>论文 §5、§6</td>
+</tr>
+<tr>
+<td>人类手工 harness 参照（UserHarness，讲者团队 2026）</td>
+<td>同一 GPT-5.4-mini 裸调用 0.488</td>
+<td>0.939（Gemini-3.5-flash 上 0.941）</td>
+<td>论文 §4、§5</td>
+</tr>
+<tr>
+<td>裸调用强模型参照</td>
+<td>GPT-5.4 裸调用 0.619</td>
+<td>最佳 scaffold 后的 GPT-5.4-mini 四个基准全面超过之（及 GPT-OSS-120B 裸调用）</td>
+<td>论文 §5、Table 1</td>
+</tr>
+<tr>
+<td>Builder 配置排序（GPT-5.4-mini 为 target，跨平台均值）</td>
+<td>基线 0.488</td>
+<td>GPT-5.5 0.875、Opus-4.7（x-high）0.856 最强；最弱 Grok-0.1 0.563</td>
+<td>论文 §5、Fig. 3</td>
+</tr>
+<tr>
+<td>Builder 推理强度效应</td>
+<td>Opus-4.7 四档强度</td>
+<td>scaffold 质量随推理强度单调升，Spearman 相关 $\rho = 0.77$</td>
+<td>论文 §6（Aspect 6）</td>
+</tr>
+<tr>
+<td>确定性卸载与准确率的关系</td>
+<td>scaffold 代码量相关仅 $r \approx 0.22$</td>
+<td>determinism fraction 与最终准确率 $r = 0.72$</td>
+<td>论文 §5（Aspect 8/机制分析）</td>
+</tr>
+<tr>
+<td>各基准可编译度（determinism 均值）</td>
+<td>—</td>
+<td>BigToM 约 0.94、Hi-ToM 约 0.51、MMToM-QA 约 0.44、MuMA-ToM 约 0.36</td>
+<td>论文 §5、Fig. 11</td>
+</tr>
+<tr>
+<td>验证集使用</td>
+<td>195 题（5%）验证样本</td>
+<td>平均 5 次验证评估；最佳验证分 vs 全集分 $r = 0.96$ ；验证→全集乐观偏差 0.021；迭代次数 vs 最终分 $r = 0.17$</td>
+<td>论文 §4、§5（Aspect 2）</td>
+</tr>
+<tr>
+<td>构建稳定性</td>
+<td>—</td>
+<td>同配置重复构建标准差均值 0.036；最大单配置极差 0.201（集中在确定性求解器策略）</td>
+<td>论文 §5（Aspect 1）</td>
+</tr>
+<tr>
+<td>Target 依赖（Gemini-3.5-flash）</td>
+<td>裸调用 0.761</td>
+<td>增益的 96%（宏平均涨幅 0.42）集中在 BigToM 一项</td>
+<td>论文 §5（Aspect 5）</td>
+</tr>
+<tr>
+<td>残差错误（8 个最强 scaffold  pooled）</td>
+<td>基线答错题</td>
+<td>修复 83%、弄坏基线答对题 7%；Hi-ToM 0 阶 0.999 → 4 阶 0.700</td>
+<td>论文 §5（Aspect 9、Table 5）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>把"写脚手架"当成后训练的一种廉价替代，先于蒸馏试一轮</strong>（直接可试）：在 coding-data / agent 工作里，当小模型在某类任务上系统性翻车，先让强模型（或自己）把判别规则、结构化抽取、确定性求解与输出格式控制编译成 harness，再测增益；本期的量化结论是：卸载质量与准确率的相关为 $r = 0.72$ ，写更多脚手架代码的相关只有 $r \approx 0.22$ 。若 harness 后残差仍大，再考虑把这些失败模式蒸馏进权重——两条路线互补而非互斥（论文 §7 的定位）。</li>
+<li><strong>Builder 配方可直接抄到 agent 基础设施</strong>（Infra 视角）：最强 builder + 高推理强度一次性构建、少量验证评估迭代（本设定 5 次中位数即够）、按 5% 验证分选 2–3 个独立 scaffold 再集成；验证→全集相关 0.96 说明小验证集足够当选型信号，不必为调 harness 烧全量评测。这套同样适用于自动生成评测检查器、数据清洗规则、工具路由策略等"一次性构建、长期复用"的工件。</li>
+<li><strong>"可编译度"是一把给任务/评测分层的尺</strong>（评测自动化）：先测一个任务有多少比例能被确定性规则覆盖（本期四个 ToM 基准从 0.94 到 0.36），再决定资源押注：高可编译任务用代码求解+弱模型兜底，低可编译任务才值得上大模型或 RL；给自有基准做这个分层，能避免在规则可解的题型上白白消耗推理预算，也能解释为什么同一脚手架在不同基准上增益差一个数量级。</li>
+<li><strong>与 EP144 合看的组织原则</strong>：两期是同一个 Harness 模板的两个实例——冻结被服务对象（VLA / 弱 LLM），外层用固定原语与确定性结构兜住可解析部分，模型只处理残差；且两边的记忆/规则都是"一次探索、多次复用"。做 agent 系统时先问哪部分可编译、可路由、可校验，往往比先问换哪个模型更划算。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>现场内容不可还原：AMA 与讲者口头发挥无书面材料。提纲第 1 点「从蒸馏、OPD 到 Harness 的范式演进」论文只在 §2 相关工作里简述，讲者现场如何定位 OPD 与 Harness 的互补关系（例如 harness 产生的轨迹能否反过来当 on-policy 蒸馏数据），是本纪要最想补的一节。</li>
+<li>论文只在 ToM 单一领域验证；四个基准里最亮眼的 BigToM 恰是结构最可被"利用"的（作者自己承认这不算 cheating，但也意味着增益上限部分来自基准的程序化生成方式）。迁移到代码、数学、真实 agent 任务时可编译度分布未知，需要在自己的任务上先测 determinism 上限再谈预期。</li>
+<li>论文未附官方代码仓库链接，scaffold 的具体形态（各 builder 的运行轨迹与生成的 harness 代码）无法直接复现核对；日后若放出，先核对最佳 scaffold（GPT-5.5 + GPT Codex）的 BigToM 求解器实现与格式强制细节。</li>
+<li>成本账未给：72 次运行中强 builder 的构建开销与 target 的推理成本没有统一美元口径，与"直接用强模型裸调用"的性价比对比无法从论文直接算出；落地时要自己补这笔账（尤其 target 推理量放大到生产规模时）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>未确证项</h2>
+<ol>
+<li><strong>无视频、无字幕</strong>：本期为 official-only，全部内容基于官网预告与论文 arXiv:2608.12307 还原；讲授顺序、现场演示与 AMA 均无法确证，未写入或已明确标注为推断。</li>
+<li><strong>官网口径与论文口径</strong>：官网预告称「仅仅改变模型外部的 harness，就能让 GPT 在不同 Benchmark 上的准确率提升将近翻倍」，对应论文最佳单次运行的 0.488 → 0.912（相对 +87%）；全部运行均值口径是 0.763（+0.275 绝对值）。两者已在正文区分，引用时勿混。</li>
+<li><strong>论文作者与讲者的对应</strong>：钱成为论文第一作者、官网嘉宾介绍的 UIUC 博士生身份与论文署名单位（Salesforce AI Research、UIUC）一致；官网简介称其导师为季姮教授（论文作者表含 Heng Ji），本科导师为刘知远教授，均按官网/论文著录，未另行核对个人主页。</li>
+<li>论文提交时间为 2026-08-12，直播为 2026-09-05，讲者现场引用的应为该版；论文若此后修订，数字以 arXiv 当前版为准复核。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原文金句（论文原话，非讲者语录）</h2>
+<blockquote class="pq">
+<p>"a successful scaffold must capture reusable skills and task structure rather than memorize instance-specific answers" —— 论文 §1，测试时能力迁移的判据</p>
+<p>"Strong-to-weak scaffolding works because a capable builder can act as a compiler of task competence." —— 论文 §6，全篇主张的浓缩</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

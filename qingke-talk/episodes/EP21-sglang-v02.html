@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP21 — SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP21 — SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎</h1>
+    <p class="sub">LLM 的用法已经从「单次聊天」变成「多调用、可分支、带结构化输出的程序」，而现成推理引擎对程序结构一无所知：SGLang 把程序结构暴露给运行时，用 RadixAttenti… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（论文原话，非讲者语录）</a><a href="#sec-8">未确证项</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP21-sglang-v02.html</p>
+<p><strong>主旨引文</strong>（论文 arXiv:2312.07104，摘要）：「Experiments show that SGLang achieves up to $6.4\times$ higher throughput compared to state-of-the-art inference systems.」—— 核心机制：把「多调用、结构化」的 LM 程序当成一级公民，用前端语言 + 运行时协同复用 KV 缓存、加速受约束解码。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>EP21（官网期号 21；青稞Talk 第 21 期）</dd><dt>标题</dt><dd>SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎</dd><dt>讲者</dt><dd>盛颖（Ying Sheng；Databricks Mosaic Research 研究科学家，斯坦福大学博士；节目页时任介绍）</dd><dt>讲者来源</dt><dd><a href="<a href="https://qingkeai.online/blog/1npUmMSk">https://qingkeai.online/blog/1npUmMSk</a>">节目页 qingkeai.online/blog/1npUmMSk</a>（嘉宾介绍为公开署名；论文作者表同名作者 Ying Sheng 列于末位）</dd><dt>观看/提炼日期</dt><dd>2026-10-02</dd><dt>直播时间</dt><dd>2024-09-03 11:00–12:00（节目页）</dd><dt>BV</dt><dd>official-only（官网有预告，B站合集无对应视频，台账 <code>episode-index.csv</code> 著录）</dd><dt>相关论文</dt><dd><a href="<a href="https://arxiv.org/abs/2312.07104">https://arxiv.org/abs/2312.07104</a>">SGLang: Efficient Execution of Structured Language Model Programs</a>（arXiv:2312.07104，v1 2023-12-12 提交，v2 2024-06-06；本期于 2024-09-03 直播，数字采 v2 正文）</dd><dt>相关代码</dt><dd><a href="<a href="https://github.com/sgl-project/sglang">https://github.com/sgl-project/sglang</a>">github.com/sgl-project/sglang</a>（节目页成果链接）</dd><dt>提炼方式</dt><dd><strong>无视频、无字幕，基于对应论文/技术报告还原，非逐字稿。</strong> 数字、结论均标注论文出处；讲演题名中的「v0.2」是运行时版本沿革，论文只给系统本体，现场讲到的 v0.2 增量无法从本文复原，见文末未确证清单。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2><div class="viz viz-stats stat-strip"><div class="stat"><div class="v">6.4×</div><div class="l">吞吐</div></div><div class="stat"><div class="v">3.7×</div><div class="l">延迟降低</div></div></div>
+<p>LLM 的用法已经从「单次聊天」变成「多调用、可分支、带结构化输出的程序」，而现成推理引擎对程序结构一无所知：SGLang 把程序结构暴露给运行时，用 RadixAttention 跨调用复用 KV 缓存、压缩有限状态机加速 JSON 等约束解码，在 LLaMA/Mixtral/LLaVA 等模型上做到最高 $6.4\times$ 吞吐、最高 $3.7\times$ 延迟降低（相对 Guidance、vLLM、LMQL 等基线，论文口径）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li><strong>背景/问题</strong>：单次生成只是 chat 的形态；真实应用是 LM 程序（Language Model Programs）：agent 控制流、few-shot、self-consistency、tree-of-thought、RAG 流水线，本质都是多次 dependent 的生成调用拼控制流与结构化输入输出。单次视角下可复用的 KV 缓存前缀（如 few-shot 示例、共享 system prompt、agent 模板、多轮历史）在请求边界处被丢弃，受约束解码（JSON schema 等）也只能逐 token 踩刹车。论文的判定：引擎「workload-agnostic」是通用性的代价，但也让每个具体 workload 都在重复付钱。</li>
+<li><strong>方法/设计（语言与运行时协同）</strong>：前端是嵌入 Python 的 DSL，提供生成（ <code>gen</code> 、带正则约束的 <code>gen(regex=...)</code> ）、选择（ <code>select</code> ）、并行控制（ <code>fork</code> / <code>join</code> ）与多模态（ <code>image</code> / <code>video</code> ）原语，prompt 状态按流处理；解释器把原语异步提交、程序内的并行自然暴露（也可编译为计算图）。同一程序手写 OpenAI 风格接口要多 $2.1\times$ 代码量（论文 §2）。运行时三项关键优化：(a) <strong>RadixAttention</strong>——把所有请求的 KV 缓存放进一棵 radix tree 按前缀索引，LRU 淘汰 + cache-aware scheduling，让跨调用、跨实例、多级共享（含图像 token 的哈希键）都自动命中，命中率在本组 benchmark 上 50%–99%，调度达到理论最优命中率的 96% 左右（论文 §6.2）；无复用场景（ShareGPT）管理开销 &lt;0.3%（论文 §6.3）；(b) <strong>compressed finite state machine</strong>——分析正则/语法约束，把可一次解码的多 token 路径压成单步，JSON 解码吞吐 + $1.6\times$ ，且状态机预处理须跨请求复用，否则反而慢 $2.4\times$ （论文 §6.3）；(c) <strong>API speculative execution</strong>——对 OpenAI 这类 API-only 模型，用小模型/启发式预生成后续可能字段、命中再校验，GPT-3.5 三字段抽取场景输入 token 成本约降为 1/3（论文 §6.2）。</li>
+<li><strong>实验/实战</strong>：工作负载包括 5-shot MMLU、20-shot HellaSwag、ReAct agent 与 generative agents 轨迹回放、Tree-of-Thought 解 GSM-8K、Skeleton-of-Thought 提示生成、branch-solve-merge 式 LLM 裁判、JSON 解码、4 轮多轮对话、DSPy 官方 RAG 流水线；模型 Llama-7B/70B、Mixtral 8 $\times$ 7B（tensor parallel）、LLaVA-v1.5-7B（图像）、LLaVA-NeXT-34B（视频），硬件 A10G/A100；基线为 Guidance、vLLM、LMQL。端到端：吞吐最高 $6.4\times$ 、延迟最高 $3.7\times$ （论文 §6.2）；多模态：LLaVA-v1.5-7B 0.18 → 1.15 image/s、LLaVA-NeXT-34B 0.02 → 0.10 frame/s（对比作者原生 HF 实现，论文 Table 2）。同一图像上的多问题共享图像 token 的 KV，是多模态侧的主要命中来源。</li>
+<li><strong>生产与结论</strong>（论文口径）：SGLang 已上线 Chatbot Arena 服务开源模型，一个月观测：LLaVA-NeXT-34B 的 RadixAttention 命中率 52.4%、Vicuna-33B 74.1%，Vicuna-33B 首 token 延迟平均降 $1.7\times$ （论文 §6.2）。结论：LM 程序的结构（共享前缀、分支、约束语法）是可系统化榨取的运行时信号，语言与运行时必须 co-design——消融里关掉前端 fork hint 或并行暴露都会掉速（论文 §6.3）。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数字</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>端到端吞吐提升（相对 Guidance/vLLM/LMQL 等基线）</td>
+<td>最高 $6.4\times$</td>
+<td>论文摘要、§6.2</td>
+</tr>
+<tr>
+<td>延迟降低</td>
+<td>最高 $3.7\times$</td>
+<td>论文 §6.2</td>
+</tr>
+<tr>
+<td>基准组 KV 命中率 / 调度达成率</td>
+<td>50%–99% / 约最优 96%</td>
+<td>论文 §6.2</td>
+</tr>
+<tr>
+<td>LLaVA-v1.5-7B 吞吐</td>
+<td>0.18 → 1.15 image/s</td>
+<td>论文 Table 2（基线为作者原生实现）</td>
+</tr>
+<tr>
+<td>LLaVA-NeXT-34B 吞吐</td>
+<td>0.02 → 0.10 frame/s</td>
+<td>论文 Table 2</td>
+</tr>
+<tr>
+<td>Chatbot Arena 线上命中率</td>
+<td>LLaVA-NeXT-34B 52.4%、Vicuna-33B 74.1%</td>
+<td>论文 §6.2（上线一个月观测）</td>
+</tr>
+<tr>
+<td>首 token 延迟降低（Vicuna-33B）</td>
+<td>平均 $1.7\times$</td>
+<td>论文 §6.2</td>
+</tr>
+<tr>
+<td>压缩状态机对 JSON 解码吞吐</td>
+<td>+ $1.6\times$ ；状态机不跨请求复用则慢 $2.4\times$</td>
+<td>论文 §6.3</td>
+</tr>
+<tr>
+<td>RadixAttention 管理开销（无复用时）</td>
+<td>&lt;0.3%</td>
+<td>论文 §6.3（ShareGPT）</td>
+</tr>
+<tr>
+<td>API speculative execution 输入成本</td>
+<td>约降至 1/3（GPT-3.5 三字段抽取）</td>
+<td>论文 §6.2</td>
+</tr>
+<tr>
+<td>等价程序代码量（vs OpenAI 风格接口）</td>
+<td>1 / $2.1\times$</td>
+<td>论文 §2</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li><strong>把「程序级结构」当运行时信号的通式</strong>：共享前缀、并行分支、输出约束是跨调用的全局事实；落到后训练/推理基建就是三件事——(1) KV/中间结果按「前缀树」而非「单请求」组织与淘汰，rollout 侧的采样树（tree search、best-of-n、beam、agent 多分支）先验天然有共享前缀，按树索引能把 prefill 摊薄；(2) 约束（JSON schema、动作空间、格式校验）在解码器里前置为状态机/掩码预编译，且必须跨请求复用预处理结果（论文给了反例：每请求重建反而慢 $2.4\times$ ）；(3) 调度要感知缓存亲和性（cache-aware scheduling 逼近最优），而不是纯 FIFO——批推理、eval harness、多租户 serving 排队都适用。</li>
+<li><strong>Infra 视角</strong>：本期给「serving 系统优化」立了量化基线——先测命中率分布（50%–99% 才是可榨空间），再谈结构优化；无命中场景的优化必须证明开销可忽略（&lt;0.3%）才配默认开启。评测口径上，论文用 «programs/s» 而非 tokens/s 衡量 LM 程序吞吐，对 agent/裁判/采样链路的 eval harness 选指标有直接借鉴：端到端任务吞吐比 token 吞吐更接近成本。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲演题名是「v0.2」，而论文止于系统本体：v0.2 运行时相对论文版的增量（例如更完整的 RadixAttention、多模态部署细节、当时路线图）讲了多少，本文无法确认，想补需另找 v0.2 发布说明或当期回放（无 B站视频）。</li>
+<li>RadixAttention 的跨机/分布式 KV 共享在论文里只作展望（related work 提及支持 distributed cases）；放到大批量 rollout 的场景（训练内推理），前缀命中率分布与调度收益需要按真实轨迹重测。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（论文原话，非讲者语录）</h2>
+<blockquote class="pq">
+<p>"The core idea is to systematically exploit the multi-call structure in LM programs for efficient execution."</p>
+<p>"This complexity significantly reduces the readability of even simple programs ... Secondly and importantly, executing LM programs is inefficient due to redundant computation and memory usage."</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>未确证项</h2>
+<ol>
+<li><strong>无视频、无字幕</strong>：本期为 official-only，B站合集无对应视频；全文基于论文 arXiv:2312.07104 v2 与节目页，现场讲解顺序、v0.2 的具体增量、问答内容均未覆盖。</li>
+<li><strong>讲者身份</strong>：以节目页嘉宾介绍为准（盛颖，Databricks Mosaic Research 研究科学家、斯坦福博士）；论文作者表末位 Ying Sheng 与之同名、为论文共同作者，但「讲演即论文作者亲述」未拿到节目页外的第三方佐证，按节目页署名著录。</li>
+<li><strong>版本差</strong>：论文 v1（2023-12）→ v2（2024-06）之间正文有修订，直播（2024-09-03）时口头数字可能引用 v2 之后的代码版本；文中数字一律按 arXiv v2 标注出处。</li>
+<li><strong>节目页时间</strong>：节目页只写直播时段 2024-09-03 11:00–12:00，未见回放链接，未确证。</li>
+</ol></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -19,16 +19,16 @@ No,Title,BV,Duration,Date,Status,Notes
 18,InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界,BV1mDaYzuEif,01:15:21,2024-08-06,要点已提炼,episodes/EP18-internvl2.md
 19,AWQ：激活值感知的LLM低位权重量化,BV1mDaYzuE7o,00:49:46,2024-08-14,要点已提炼,episodes/EP19-awq.md
 20,S-LoRA：实现多 LoRA 大模型的高效并行化推理,BV1mDaYzuEqK,01:00:14,2024-08-26,要点已提炼,episodes/EP20-s-lora.md
-21,SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎,,,2024-09-03,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
+21,SGLang v0.2：面向 LLM 和 VLM 的快速、高效通用服务引擎,,,2024-09-03,要点已提炼,episodes/EP21-sglang-v02.md
 22,mPLUG-Owl3：探索长序列模型架构的通用多模态大模型,BV1KsYVzJEUg,01:04:49,2024-09-10,要点已提炼,episodes/EP22-mplug-owl3.md
 23,CogVideoX 视频生成开源模型上手实践,BV1PbYVz2E6d,01:01:00,2024-09-23,要点已提炼,episodes/EP23-cogvidex.md
 24,使用CAMEL Agents构建GraphRAG及应用实践,BV1feNZeYEbm,00:49:57,2024-09-26,要点已提炼,episodes/EP24-camel-graphrag.md
 25,LLMC：大语言模型的量化基准,BV1SjNzeAEXe,01:10:39,2024-10-11,要点已提炼,episodes/EP25-llmc-benchmark.md
-26,VITA：开源交互式多模态基础大模型,,,2024-10-14,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
+26,VITA：开源交互式多模态基础大模型,,,2024-10-14,要点已提炼,episodes/EP26-vita.md
 27,GenAD & Vista：构建通用可泛化的自动驾驶世界模型,BV1bJYVzXET3,01:02:06,2024-10-17,要点已提炼,episodes/EP27-genad-vista.md
 28,DuQuant：基于正交变换实现大型语言模型的 SOTA级 4 bit 量化,BV16CaRzWEvx,01:01:44,2024-11-05,要点已提炼,episodes/EP28-duquant.md
 29,VILA^2：视觉语言模型能力的自我提升,BV1cHYNzJE77,01:11:06,2024-11-23,要点已提炼,episodes/EP29-vila2.md
-30,OminiParser：基于纯视觉的 GUI Agent,,,2024-11-30,todo,official-only（官网有预告，B站合集无对应视频）；原备注：missing-in-collection（官网有、合集无视频）
+30,OminiParser：基于纯视觉的 GUI Agent,,,2024-11-30,要点已提炼,episodes/EP30-omniparser.md
 31,Rectified Flow：矫正流生成式模型的概念及应用实践,BV1pqHezrED5,01:26:06,2024-12-14,要点已提炼,episodes/EP31-rectified-flow.md
 32,LLMC：大语言模型压缩工具的开发实践,BV1BeNZeeEQy,01:51:01,2024-12-16,要点已提炼,episodes/EP32-llmc-toolkit.md
 33,XGrammar：高效实现 LLM灵活且可移植的结构化生成,BV1WiHezGEWU（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2024-12-21,要点已提炼,episodes/EP33-xgrammar.md
@@ -94,7 +94,7 @@ No,Title,BV,Duration,Date,Status,Notes
 93,通过量化与稀疏性实现高效注意力机制（SageAttention）,BV1d8UfB2EpP,02:00:47,2025-11-29,要点已提炼,episodes/EP93-quant-sparse-attention.md
 94,RLinf-VLA 实践：从零上手 VLA（OpenVLA）强化学习,,,2025-12-02,要点已提炼,episodes/EP94-rlinf-vla.md
 95,从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架,BV1Tt2sBPEix（有视频；本期字幕经接口多次尝试均返回串台内容、无法验证，未取得可用字幕，故走论文还原路线）,,2025-12-06,要点已提炼,episodes/EP95-pi-rl.md
-96,Fast-dLLM v2：高效训练推理的块扩散大语言模型框架,,,2025-12-09,todo,official-only（官网有预告，B站合集无对应视频）
+96,Fast-dLLM v2：高效训练推理的块扩散大语言模型框架,,,2025-12-09,要点已提炼,episodes/EP96-fast-dllm-v2.md
 97,从 BF16 到 FP16：如何解决RL训练-推理不匹配问题,,,2025-12-13,要点已提炼,episodes/EP97-bf16-fp16-rl.md
 98,SANA-Series：探索图像视频扩散模型的高效设计与加速,,,2025-12-16,要点已提炼,episodes/EP98-sana-series.md
 99,TRPO重生：大模型时代的信任域策略优化,BV1UgrKBNEJc,01:02:29,2025-12-20,要点已提炼,episodes/EP99-trpo-rebirth.md
@@ -104,7 +104,7 @@ No,Title,BV,Duration,Date,Status,Notes
 103,Decoupled DMD & DMDR: 在扩散模型步数蒸馏的实践及 Z-Image-Turbo 应用,BV1ZzrHB8ESf,00:44:22,2026-01-13,要点已提炼,episodes/EP103-decoupled-dmd-dmdr.md
 104,The Prism Hypothesis 视觉统一表征假说：从语义到像素的统一自编码（UAE）,BV1X1zjBPErQ,00:33:46,2026-01-20,要点已提炼,episodes/EP104-prism-hypothesis-uae.md
 105,InternVLA-A1，虚实贯通：理解、生成、执行一体化的具身操作大模型,,,2026-01-27,要点已提炼,episodes/EP105-internvla-a1.md
-106,"GDPO：解决 GRPO 在多奖励 RL 训练中的""优势崩溃""问题",,,2026-01-30,todo,official-only（官网有预告，B站合集无对应视频）；原备注：conflict: B站标题为 Intern-S1，与官网枚举 GDPO 冲突，待终裁（官网标题保留）
+106,"GDPO：解决 GRPO 在多奖励 RL 训练中的""优势崩溃""问题",,,2026-01-30,要点已提炼,episodes/EP106-gdpo.md
 107,"JustRL: 用""最笨""的 RL 方法刷新 1.5B 推理模型新基线",BV155fZBKE64,01:05:22,2026-02-03,要点已提炼,episodes/EP107-justrl.md
 108,BOAD：引入多臂老虎机，自动化搜索层级结构的多 Agent 架构设计,,,2026-02-28,要点已提炼,episodes/EP108-boad.md
 109,线性轨迹：揭示 LLM 强化学习中的高效捷径,BV1sdPAzjEbX,01:00:21,2026-03-03,要点已提炼,episodes/EP109-rlvr-linearity.md
@@ -122,7 +122,7 @@ No,Title,BV,Duration,Date,Status,Notes
 121,SimScale：真实世界仿真重塑端到端自动驾驶学习范式,BV1SQoUBcETB,00:52:51,2026-04-21,要点已提炼,episodes/EP121-simscale.md
 122,从 TTRL 到 URLVR：大模型的无监督强化学习还能走多远？,BV1w49rBsEr7,01:08:02,2026-04-27,要点已提炼,episodes/EP122-ttrl-urlvr.md
 123,DeepSeek V4 模型在 SGLang 中的系统级优化与全栈适配,BV12YRdBzEM2,01:00:16,2026-05-09,要点已提炼,episodes/EP123-deepseek-v4-sglang.md
-124,大模型强化学习的Scaling Law,,,2026-05-12,todo,official-only（官网有预告，B站合集无对应视频）；原备注：conflict: B站标题为「拒绝阈值化：迈向共生关系的新型人机信任」，与官网枚举「大模型强化学习的Scaling Law」冲突，待终裁（官网标题保留）
+124,大模型强化学习的Scaling Law,,,2026-05-12,要点已提炼,episodes/EP124-rl-scaling-law.md
 125,重探 On-Policy Distillation（OPD）：三类典型失败以及修复路径,BV1CMLg6rENd,,2026-05-16,要点已提炼,episodes/EP125-revisiting-opd.md
 126,STream3R & 4RC: 面向几何与运动理解的流式前馈 3D/4D 重建,,,2026-05-19,要点已提炼,episodes/EP126-stream3r-4rc.md
 127,δ-mem：从长上下文到在线记忆，动态演化原生记忆的一次尝试,BV1H7Eg6jEus,00:35:29,2026-05-26,要点已提炼,episodes/EP127-delta-mem.md
@@ -142,7 +142,7 @@ No,Title,BV,Duration,Date,Status,Notes
 141,Qwen-Robot Suite 的设计原理,BV114GV6LEMB,01:23:25,2026-08-01,要点已提炼,episodes/EP141-qwen-robot-suite.md
 142,LA4VLA：从 VLA 预训练中解耦语言-动作监督,BV1A9My6WEvW,01:02:58,2026-08-04,要点已提炼,episodes/EP142-la4vla.md
 143,ACE-Data-0：新一代具身智能数据范式,,,2026-08-06,要点已提炼,episodes/EP143-ace-data-0.md
-144,从端到端 VLA 到 Harness VLA,,,2026-08-08,todo,official-only（官网有预告，B站合集无对应视频）
+144,从端到端 VLA 到 Harness VLA,,,2026-08-08,要点已提炼,episodes/EP144-harness-vla.md
 145,JitRL——无需梯度更新的即时强化学习,BV1X5g56xEme,00:53:52,2026-08-11,要点已提炼,episodes/EP145-jitrl.md
 146,AI for AI 的前世今生：从进化、自进化与元进化，迈向递归自我改进（RSI）,BV13ZgA64Ept,01:11:34,2026-08-13,要点已提炼,episodes/EP146-ai4ai-rsi.md
 147,大语言模型在 latent space（隐空间）里的优化和推理,BV1Bw8m6GEd7,01:08:10,2026-08-22,要点已提炼,episodes/EP147-latent-space-reasoning.md
