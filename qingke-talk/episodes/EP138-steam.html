@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP138 — STEAM：面向真实世界机器人学习的、无需人工标注的帧级优势估计框架</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP138 — STEAM：面向真实世界机器人学习的、无需人工标注的帧级优势估计框架</h1>
+    <p class="sub">STEAM 不学 reward/value 模型、不要任何人工标注：它把专家轨迹自身的时间顺序当作免费监督，训练一个预测「两帧之间时间偏移」的分布型 predictor，再以「… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP138-steam.html</p>
+<p>「我们把以前的『我该保留哪些轨迹』的问题，变成了一个更精细的『我该保留哪些 frame』的问题。」——讲者总结（[40:34] 附近，字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>138（官网编号；编号冲突见下文专节）</dd><dt>标题</dt><dd>STEAM：面向真实世界机器人学习的、无需人工标注的帧级优势估计框架（官网预告标题作《STEAM：自监督帧级别优势建模算法》）</dd><dt>BV</dt><dd>BV1kngS6MEKy</dd><dt>时长</dt><dd>01:05:10（讲授约 41 分钟 + Q&amp;A 约 24 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>刘志豪（中科院自动化所与北京中关村学院联培博士生，博士四年级；导师吴宇超、范国梁；[00:05] 字幕自述，正式头衔以论文作者页为准）</dd><dt>相关论文</dt><dd>STEAM（讲者称已挂 arXiv 并建项目网站，含全部真机 demo 与各 baseline 的 advantage 可视化；arXiv 编号待从论文页补录。字幕中工作全称识别作「面向军事机器人学习的资监督持续集成优势建模」，系 AI 字幕识别误差，以论文原文为准）</dd><dt>相关代码</dt><dd>讲者称已开源（[41:15] 附近，具体仓库地址待从论文页补录）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1kngS6MEKy/">https://www.bilibili.com/video/BV1kngS6MEKy/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/STEAM-Talk">https://qingkeai.online/blog/STEAM-Talk</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP138.txt</code>（1259 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>编号冲突说明：本仓库台账（episode-index.csv）原将 BV1kngS6MEKy 按 B站合集位置记为「B138 Occlumency：提升海外商家的智能客服能力」，并将官网 EP138 STEAM 标为 official-only（官网有预告、B站合集无对应视频）。本次实测该 BV 的字幕内容为 STEAM 本场（讲者刘志豪自述 + 全程机器人帧级优势主题，1259 条内容连贯一致），与 Occlumency 完全无关。按本系列「纪要按实际视频内容写」的裁决，本期归官网 EP138 STEAM；Occlumency 一期是否另有视频，待后续枚举合集时核对。</p>
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP138，已存档）清洗提炼。AI 字幕个别专名有识别误差，如「点毛金」为叠毛巾、「sic clip」疑为 SigLIP、「派林的模型」为所用 VLA 策略，均以论文与公开资料为准；凡讲授口径与论文版可能不同，以下关键数字来源标注「字幕」。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>STEAM 不学 reward/value 模型、不要任何人工标注：它把专家轨迹自身的时间顺序当作免费监督，训练一个预测「两帧之间时间偏移」的分布型 predictor，再以「预测偏移期望 − 真实偏移」定义帧级 advantage，配合倒放合成失败样本与 ensemble 取最小值压制 OOD 高估，最后按分位数筛帧（专家保留 80%、非专家保留前 30%）用 CFG-RL 训练 VLA 策略——在四个真机任务上全面超过 behavior cloning、HG-DAgger 与 RECAP，叠毛巾任务相对 BC 提升 59%（字幕口径）。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>问题：轨迹内部好坏帧混杂，episode 级筛选两头浪费</h3>
+<p>VLA 训练依赖专家示范，但专家数据贵、规模难扩。现实做法是混入便宜数据：机器人自 rollout、人类接管纠正（DAgger 式）、甚至失败轨迹本身。问题在于同一条轨迹内部，好帧和坏帧通常混在一起——前段正常、中间失败、人工接管后恢复、后面又失败（[03:17] 附近讲者举例）。整条保留会把坏帧吸进训练集，整条丢掉又浪费好帧。所以需要的不是轨迹级标签，而是一个不需要真实奖励、能逐帧打的质量分数。讲者把这个分数定义为 advantage：这一帧把任务向前推进的程度相对预期超出了多少（[05:01] 附近）。</p>
+<h3>旧路线的三类失败模式</h3>
+<p>讲者先盘点了以往「先学 reward/value 模型、再导出 advantage」的两阶段路线为什么难（[05:48] 附近）：</p>
+<ol>
+<li><strong>标注贵</strong>：学中间模型通常需要昂贵的人类标注，或人工设计一个并不好的奖励函数，数据难规模化。</li>
+<li><strong>预训练 VLM 当 reward 模型不准</strong>：需要海量数据训练，且迁移到具体任务上给出的 reward/value 标注并不准。</li>
+<li><strong>单调进度假设不成立</strong>：旧方法多假设任务完成度随时间单调递增，但真实 rollout 会倒退、会恢复，还会进入训练中没见过的 OOD 状态；此时学出的奖励反而给坏帧虚高分（false positive），把策略往坏方向推。</li>
+</ol>
+<h3>关键洞察：不问「进度是多少」，问「两帧隔了多远」</h3>
+<p>STEAM 的出发点是：专家数据本身自带一个 dense 且免费的监督信号——它的时间顺序（[07:52] 附近）。这个信号是 relative 的（帧与帧之间可比）、local 的（不用重建整条轨迹的全局进度曲线、不用跨 episode）。于是问题被换掉：不再问「这一帧的进度值是多少」，而是问「从同一 episode 取两帧，它们在时间上隔了多远」。要算某一帧的 advantage，本质上也只需要把它和其后固定窗口 $H$ 处的帧比较，而不需要和中间任何帧比较（[10:06] 附近）。围绕这个转变有两个关键技巧：把专家帧<strong>倒着配对</strong>，让模型在从未见过失败标签的情况下学会识别「倒退」；对 OOD 样本用 ensemble 取最小值兜底。</p>
+<h3>方法三步</h3>
+<p><strong>第一步：自监督目标（只在专家数据上）</strong>。给定专家轨迹中的两帧 $i$ 与 $j$ ，定义带符号时间偏移（[13:12] 附近）：</p>
+<p>$$\Delta_{ij} = j - i$$</p>
+<p>$j &gt; i$ 为正向偏移， $j &lt; i$ 为反向偏移。反向配对等价于把专家录像倒放，从成功数据里合成出「失败的样子」——模型无需采集任何真实失败数据，就能知道「倒退」长什么样（[13:45] 附近）。讲者强调这一步重要：否则模型只见过成功，遇到失败型 OOD 数据无从判断。另一个细节是长度归一化：不同 episode 长短不同，相同帧偏移的推进含义不同，因此用该任务的参考长度（实现上取 episode 长度的 80%–90% 分位而非最长，避免个别忘关录制的超长 episode 带偏，[54:44] 附近 Q&amp;A）除以本 episode 长度作缩放因子，使偏移跨 episode 可比。</p>
+<p><strong>第二步：分布型 predictor 与 advantage 的定义</strong>。Predictor 以帧对 + 语言指令为输入（讲者称其可理解为一个 VLM），输出的不是标量，而是 $N$ 个带符号偏移区间之上的类别分布，用交叉熵训练（[16:12] 附近）。用分布而非直接回归连续值，是因为真实数据来自不同采集者/策略、偏移分布多峰，直接回归会带来训练不稳定（[17:09] 附近）。算 advantage 时固定前瞻窗口 $H$ ，把帧 $i$ 与 $i+H$ 输入 predictor，取分布期望与真实偏移之差；当 $H$ 固定时真实偏移项是常数，可整体减去，于是符号直接可读（[18:17]、[20:09] 附近）：</p>
+<p>$$A_i = E[\hat{\Delta}_{i,i+H}] - \Delta_{i,i+H}$$</p>
+<p>$A_i &gt; 0$ 表示任务在正常推进， $\approx 0$ 表示停滞， $&lt; 0$ 表示后退。由于 predictor 只在专家数据上训练，直接用到 rollout 数据时可能对没见过的状态高估、产生 false positive；解法是训练一组 predictor（ensemble），取各自输出的<strong>最小值</strong>（[21:16] 附近）。分布内样本各 predictor 输出接近，取 min 与取均值差别不大；OOD 样本则把偶发的高估压下去，代价是召回略降——讲者明确说，训练中「不让坏样本进来」比多保留好样本更重要（[22:15] 附近）。</p>
+<p><strong>第三步：打分、筛帧、训策略</strong>。用 predictor 给混合数据集（专家 + rollout + DAgger）逐帧打分，按分位数划正负样本：专家数据默认大部分是好的，保留 advantage 前 80%；非专家数据较保守，只保留前 30%，其余作 negative（[22:52] 附近，讲者称此处理与 RECAP 类似）。随后用 CFG-RL 训练 VLA 策略，使策略偏向输出高 advantage 的动作分布（[23:42] 附近）。STEAM 的 backbone 约为 SigLIP 加解码器，策略为一个 VLA 模型（专名均为字幕口径，以论文为准）。</p>
+<h3>实验：四个真机任务</h3>
+<p>任务为叠毛巾、pick and place、薯片装袋、可乐上货（[24:21] 附近）。讲者组织了三个问题：</p>
+<ol>
+<li>
+<p><strong>能不能分开好坏帧</strong>。在叠毛巾任务上可视化四类轨迹的 advantage 曲线：专家数据大部分时间处于高值，仅在 retry 段（约第 1200–1300 帧）掉落回升；rollout 成功数据整体为正、约 0.5，但低于专家且波动更大；rollout 失败数据在卡住后掉到零附近徘徊；DAgger 数据在进入失败段明显下降、人工接管后回升（[26:01] 附近）。定量上把每帧 advantage 画密度分布：专家集中在 1 附近，成功 rollout 在 0–1，失败峰值在 0 左右或偏负；把整条轨迹的 advantage 求和后，成功与失败轨迹几乎不重叠（[29:42] 附近）。讲者还指出一个细节：失败发生得越晚（如叠毛巾、薯片装袋多在后期失败），轨迹 advantage 总和越高——这个信号甚至能反映失败发生在哪个时间段。</p>
+</li>
+<li>
+<p><strong>筛完能不能涨性能</strong>。与 behavior cloning、HG-DAgger、RECAP 对比，STEAM 在四个任务上均最好，叠毛巾相对 BC 提升 59%，且完成得更干脆、throughput 也最高——不是靠放慢执行换成功率（[31:51]、[33:46] 附近；讲者对比视频指出 RECAP 因混入 rollout 数据后筛选不佳，执行明显更慢且可能失败）。数据消融显示专家、DAgger、rollout 数据各自都有正贡献；尤其值得注意的是：<strong>只用专家数据、只做 STEAM 筛选这一步，性能也能提升</strong>——专家数据里本来就存在执行不好的帧（[35:11] 附近）。</p>
+</li>
+</ol>
+<p>也有反例：pick and place 任务太简单、专家数据几乎没有次优帧（advantage 分布尖锐集中在 1），用 80% 阈值筛掉一部分反而使性能下降；把 rollout 与 DAgger 数据加回来后又回升（[36:03] 附近）。讲者据此划定 STEAM 的适用范围：它该起作用的地方，是从混合质量数据中提取可用帧。</p>
+<ol>
+<li><strong>设计消融</strong>。分布 bin 数从 2 增至 32，成功率随之上升（bin=2 时大跌，32 为实验取值、最优）——时间偏移判得越细效果越好（[37:48] 附近）。Ensemble 个数为 1 时成功率 72.7%，3 时 92.3%，5 时 90.9%，故取 3（[38:44] 附近）。</li>
+</ol>
+<h3>Q&amp;A 要点</h3>
+<ul>
+<li><strong>为什么取 min 而不是均值/加权</strong>：加权不知道该信哪个 predictor；目标是降 false positive 率，取 min 最直接，均值压不下去（[41:59] 附近）。</li>
+<li><strong>前瞻窗口 $H$ 取多大</strong>：实验在 30 Hz 机器人上取 32 帧；讲者经验是按物理时间往前看 1–2 秒较合适，3 秒也能用，不要太大或太小（[44:38] 附近）。</li>
+<li><strong>帧率不一致会不会让信号失效</strong>：STEAM 是离线打分工具，不部署到真机做在线 RL，帧率问题属于 VLA 侧，与 STEAM 无关（[47:16] 附近）。</li>
+<li><strong>会不会只是学会识别慢动作</strong>：讲者的定义里「慢」本就是低推进；同时还有「与专家数据像不像」这一维，OOD 动作同样低分。慢而完成任务者全程约 0.5，快而未完成者则前段高、进入失败段后低——这是 frame 级评价与 episode 级评价的区别（[55:32]、[62:14] 附近）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值/结论</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>真机任务数</td>
+<td>4（叠毛巾、pick and place、薯片装袋、可乐上货）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>相对 behavior cloning 提升</td>
+<td>最高 59%（叠毛巾）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>基线对比</td>
+<td>STEAM 在四任务上均优于 BC、HG-DAgger、RECAP</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>专家数据 advantage 分布</td>
+<td>峰值集中在 1 附近</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>rollout 成功数据 advantage</td>
+<td>约 0.5（叠毛巾可视化口径），为正但低于专家</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>筛选阈值</td>
+<td>专家保留前 80%；rollout/DAgger 保留前 30%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>分布 bin 数消融</td>
+<td>bin=2 成功率大跌；bin=32 最优（实验取值）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>ensemble 个数消融</td>
+<td>1 → 72.7%；3 → 92.3%；5 → 90.9%（取 3）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>前瞻窗口 $H$</td>
+<td>32 帧 @30 Hz；经验值往前看 1–2 秒</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>长度归一化参考</td>
+<td>episode 长度 80%–90% 分位（而非最长）</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 post-training 数据筛选：轨迹级过滤（整条留/丢）可以细化到 step/frame 级——用「与参考分布的相对推进」打分，比训一个全局 reward 模型便宜。STEAM 的监督完全来自成功轨迹内部的时间顺序，这对应到 LLM 侧就是：从高质量轨迹内部构造相对监督（前后步对比），而不是先标一个绝对分数。</li>
+<li>False positive 优先压制：ensemble 取 min 的取舍明确是「宁可少召回、不能让坏样本进训练」，且只在专家数据上筛一遍就有收益——对 SFT/RL 数据清洗是一个可直接借用的优先级排序。</li>
+<li>分布式（distributional）输出 + 期望读数：当标签本身多峰、来源异质时，把回归改成区间分类再取期望，训练更稳；bin 粒度（32 vs 2）对效果的影响值得在自家打分器上做一次消融。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Predictor 只在单任务专家数据上训练，跨任务/跨机器人本体时时间偏移的可比性如何，讲授未展开，待查论文。</li>
+<li>与 RECAP 的定量差距（各任务成功率原表）字幕未逐项口播，需查论文表格核对。</li>
+<li>CFG-RL 的具体形式、STEAM 打分与策略训练的算力开销，讲授只给口径，待查论文与代码。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「我们能不能不依赖任何人工的标注，然后就给每一帧动作去打一个比较可靠的质量分数。」（[00:37] 附近）</p>
+<p>「不要让那些坏样本进入训练，其实是相对而言对这个策略影响更大的这么一件事。」（[22:15] 附近，字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

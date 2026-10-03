@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP117 — OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP117 — OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾</h1>
+    <p class="sub">OpenClaw-RL 想解决的是：个人 agent 在真实使用中没有现成奖励信号，怎么边用边学。它的做法是只从「下一状态」里挖信号——用户或环境的下一句反馈既可以被 PRM … · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字总表</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP117-openclaw-rl.html</p>
+<p>「Any agent, simply by talking.」——讲者对 OpenClaw-RL 项目的定位：任何 agent，只要正常跟它对话，它就会在使用中变强（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>117</dd><dt>标题</dt><dd>OpenClaw-RL: 结合 GRPO + OPD，在使用中自适应变强的龙虾</dd><dt>BV</dt><dd>BV1gp9LBwECf</dd><dt>时长</dt><dd>01:04:46（讲授约 33 分钟 + Q&amp;A 约 32 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>王应杰（芝加哥大学博士二年级，与王梦迪老师的 Princeton AI Lab 合作紧密；中科大少年班数学专业毕业。字幕自述；主持人口播作「尹杰」，以自述为准）</dd><dt>相关论文/项目</dt><dd>OpenClaw-RL 开源项目与配套技术报告（讲授提及 repo 与 tech report，字幕未给出确切链接，以项目页为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1gp9LBwECf/">https://www.bilibili.com/video/BV1gp9LBwECf/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/OpenClaw-RL">https://qingkeai.online/blog/OpenClaw-RL</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP117.txt</code>（1584 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP117，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 OpenClaw 在字幕中多作「open cloud/open cl」，PRM 作「PM」，SLIME 作「SLG/SLAN」，均以项目与公开资料为准）。凡讲授口径与项目文档可能不同，以下数字均标「字幕」。</p>
+<p>编号说明：仓库总表 <code>episode-index.csv</code> 中该 BV 旧挂在 bilibili-only 行「B117 OpenLM.ai &amp; FreedomIntelligence：探索模型组合」名下。本次取字幕核验后确认，该视频实际内容即官网 EP117 OpenClaw-RL 本期（讲者开场即自报 OpenClaw-RL 工作），B 行旧标题已过时；本纪要按实际视频内容编号。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>OpenClaw-RL 想解决的是：个人 agent 在真实使用中没有现成奖励信号，怎么边用边学。它的做法是只从「下一状态」里挖信号——用户或环境的下一句反馈既可以被 PRM 判成好/坏的二值奖励（Binary RL），也可以被总结成一句提示塞回原 prompt、构造出带特权信息的教师来做 token 级蒸馏（OPD）；讲者发现两者缺点互补，于是把两个 loss 直接相加成 Hybrid，并用一套异步 RL server 让收集、打分、训练全部离开用户对话的关键路径。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>系统形态：训练藏在对话背后</h3>
+<p>项目被讲者拆成两部分共用同一目标：对 personal agent（以本地运行的 OpenClaw 为代表）做个性化强化学习，以及对通用 computer-use agent（Terminal、GUI、SWE、工具调用四类）做大规模 GRPO。系统侧是一台独立的 RL server，内部再分 policy、PRM、训练引擎三块：用户在任何地方调用部署在 server 上的 policy 模型，PRM 在下一状态到达后立刻异步收到打分任务，攒够一条完整训练数据（回复加奖励）就入队，数量达到阈值后自动在后台开训。整个过程与用户交互解耦，只有模型权重更新的那两三秒会有短暂影响（字幕口径）。</p>
+<p>讲者反复强调的设计约束是：不要求用户做任何显式打分。现实产品里让用户给偏好对、给整场对话打分、给 0–3 分都是负担，OpenClaw-RL 要的是完全从对话本身提取训练信号。</p>
+<h3>信号从哪来：next-state feedback 的两种读法</h3>
+<p>两种基础方法都建立在同一个观察上：policy 回复完之后到来的下一状态（用户的下一句话、环境的报错或执行结果）天然携带对上一步的评价。</p>
+<p><strong>第一种是 evaluative 信号（Binary RL）</strong>：PRM 读下一状态，判断上一步回答是好是坏，输出 1、-1 或 0（0 表示中性或判断不明确，相当于一道数据质量控制）。为提高准确性，PRM 独立判很多轮、每轮带思考过程，最后用 majority voting 的结果作为奖励。这里有个结构上的特殊点：每个状态只有一个样本，没有 GRPO 式的组内多回答，所以 advantage 直接等于 reward，这也是它需要靠 0 分与中心化倾向来控制噪声的原因。</p>
+<p><strong>第二种是 directional 信号（OPD）</strong>：用户的下一句反馈往往不止于好坏，还指明了该往哪改（比如「讲得太 AI 了，换个说法」「评语要更具体友好」）。PRM 把这类反馈总结成一句 hint，拼回上一步生成时的原 prompt，得到一个「带后见之明」的完整 prompt；同一个模型在这个增强 prompt 下就是教师，原 prompt 下就是学生，两者的对数概率差就是 token 级 advantage，再用标准的 PPO-clip 式 ratio 目标优化。教师与学生是同一个模型、只差一段 hint，这正是 OPD 在此处的含义。</p>
+<p>两种信号的取舍被讲者讲得很直白：Binary RL 没有方向性，只知道好坏，但数据密度高——只要有反馈甚至情绪反应就能收，用户跳过某个问题直接问下一个，PRM 也能据上下文猜测任务是否已完成；OPD 有方向性、是 token 级信号，但数据收集苛刻得多，必须能从反馈中提取出明确的 hint 才收得到一条。讲者给的经验数字是，Binary/Hybrid 的数据收集速度大约能达到 OPD 的四倍左右（字幕口径）。</p>
+<h3>Hybrid：把两个 loss 直接相加</h3>
+<p>技术报告阶段的核心发现就是把两者加权相加，权重默认都设为 1（字幕口径，讲者称尚未尝试其他取值效果就已经很好）。实现上很统一：无论是 sequence 级的二值 advantage 还是 token 级的 OPD advantage，最终都是 advantage 乘上 probability ratio 的同一类目标函数，所以 Hybrid 只是逐 token 把两边算出的量按权重合并；哪一边能收集到信号哪一边就生效，两边都有就同时优化。讲者认为这也说明 OPD 与 RL 在此框架下本就是同一个 loss 的两种 advantage 估计。</p>
+<h3>个性化实验：36 道题改变输出风格</h3>
+<p>个性化部分没有标准基准（讲者直言 RLHF 式任务主要看输出风格的肉眼变化），实验用 LLM 模拟两类带明确偏好的用户：一名用 OpenClaw 写作业、且不想被看出在用 AI 的学生；一名用 OpenClaw 改作业、希望评语具体友好的老师。每个作业题是一个对话 session，用户第一条消息是固定写死的 prompt，以便事后在完全相同的输入下比较输出风格的变化；评分由模拟用户按偏好打 0 到 1 的五档分（0、0.25、0.5、0.75、1）再聚合（以上均为字幕口径）。</p>
+<p>同等训练时间下三方对比的结论是：Hybrid 效果显著，Binary RL 基本没有可见优化，OPD 刚开始效果低、后面才追上来，主因就是数据收集太慢。定性效果上，学生场景大约 36 道题的优化后，输出从满是加粗标记与步骤编号的「AI 腔」变得随意自然；老师场景更快，大约 24 道题后评语就明显更具体友好（讲者还提到后期模型甚至开始自发输出表情，偏好被学得有点过头）。工程参数上，每攒满 16 条数据就在后台触发一次更新（字幕口径）；讲者后来发现把每批数据的训练轮数提高、不拘泥于严格 on-policy，优化速度还能明显加快，大约二十几道题就能见效。</p>
+<p>实验模型为 Qwen3-4B（字幕作「千万 34B thinking 2507」，应为 Qwen3-4B-Thinking-2507）；算力口径是 A100 上 4 卡训练、2 卡 policy 推理、2 卡 PRM 推理，H100 或消费级卡可以更少（字幕口径）。</p>
+<h3>通用 agent 部分：stepwise reward 与按步索引标准化</h3>
+<p>第二部分面向 computer-use agent 的长程交互（GUI/Terminal 场景正常要交互约 30 轮），此时只有终局 outcome 奖励会过于稀疏。讲者的改法是把 PRM 的逐步打分与 outcome 结合成 stepwise reward（PRM 打分取 -1/0/1，与 outcome 合并），再解决 advantage 怎么算的问题：标准做法要么对同一状态采样多条轨迹做组内标准化，要么训一个 value model；但在 Terminal、GUI 这类环境里连「两个状态是否相同」都难以判定，状态聚类不现实。他们的经验性解法是按 step index 标准化：同一轨迹位置附近的 step 状态近似相似，直接对相同 step index 上的 reward 做标准化得到 advantage，实测能稳定训练且效果明显好于只用 outcome 的 GRPO（字幕口径）。环境侧则把 Docker/VM 环境部署到云上以提高大规模训练的交互效率。</p>
+<h3>Q&amp;A 要点与讲者自陈的边界</h3>
+<ul>
+<li><strong>稳定性是这个方向最难的问题之一</strong>：给模型喂天马行空的数据、或学习率开太大，输出会逐渐「变怪」；如何平衡优化效率与长期稳定性，讲者认为这是 lifelong learning 里值得做的学术问题。相对而言，他承认当前最立竿见影的自进化手段仍是 skills 与 memory（不改权重、最稳定），权重级训练胜在能容纳的信息量大得多。</li>
+<li><strong>奖励全为正会漂移</strong>：如果某个用户给的反馈恒为正，advantage 不中心化必然不稳定；缓解靠数据筛选与正负样本平衡等质量控制。讲者也说理论上最正确的是训 value model，但这个场景数据太少、不适合。</li>
+<li><strong>闭源模型无法用这套方法更新参数</strong>，只能走 skills/memory 路线；权重更新只适用于开源模型（包括部署到推理平台上的开源模型）。</li>
+<li><strong>灾难性遗忘尚未测试</strong>：讲者坦承目前先测的是稳定性，遗忘问题还没测；他预期 RL 因相对温和会比 SFT 好一些。</li>
+<li><strong>与同类工作的关系</strong>：AREAL 团队在他们开源约两周后也做了一个 OpenClaw 版实现；讲者称自己主要用 SLIME 框架，胜在灵活、适合多人协作。仓库整体定位仍是 computer-use agent 的大规模 RL，OpenClaw 个性化是后加进来的一部分。</li>
+<li><strong>评估短板</strong>：个性化 RLHF 没有合适的公开基准，现用的是自设的模拟用户加固定 prompt 前后对比；PRM 打分的波动较大，只有当方法间差距明显超过标准差时结论才可靠。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字总表</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>基线/口径</th>
+<th>结果/数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>数据收集速度</td>
+<td>OPD 单独</td>
+<td>Binary/Hybrid 约为其 4 倍左右</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Hybrid 权重</td>
+<td>Binary RL 与 OPD 两项</td>
+<td>默认各为 1，未尝试其他取值</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>个性化见效题量（学生场景）</td>
+<td>固定首条 prompt 前后对比</td>
+<td>约 36 道题输出风格明显改变；提高每批训练轮数后约二十几道</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>个性化见效题量（老师场景）</td>
+<td>同上</td>
+<td>约 24 道题评语明显更具体友好</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>触发更新的攒样阈值</td>
+<td>每批</td>
+<td>16 条数据触发一次后台更新</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>权重更新对交互的影响</td>
+<td>正常对话</td>
+<td>约 2–3 秒短暂暂停</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>实验算力</td>
+<td>A100</td>
+<td>4 卡训练 + 2 卡 policy 推理 + 2 卡 PRM 推理</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>长程交互长度</td>
+<td>GUI/Terminal 场景</td>
+<td>约 30 轮交互</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>PRM 打分取值</td>
+<td>好/中性/坏</td>
+<td>1 / 0 / -1，多轮独立判定加 majority voting</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「下一状态即反馈」是一个可直接搬的信号挖掘范式：凡是 agent 与用户/环境有多轮交互的系统，都可以让一个 judge 模型异步地把下一轮输入读成二值奖励或一句 hint，前者做 RL、后者做带特权信息的自蒸馏，两者共用同一个 PPO 式目标函数合并训练，不需要用户显式打分。</li>
+<li>Hint 式 OPD 的构造值得单独借用：教师不需要更强的外部模型，同一个模型加上「事后信息」就是教师，token 级对数概率差直接当 advantage——这给没有教师模型可用时的稠密监督提供了一个便宜实现。</li>
+<li>Infra 视角：把 policy、judge、训练引擎拆成异步解耦的三块、攒够小批量（如 16 条）就后台更新，是把 RL 训练塞进在线服务而不打断交互的可行形态；代价是 off-policy 程度与数据质量控制（中性样本丢弃、正负平衡）必须在数据入队时就做掉，事后补救很难。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>Hybrid 两个权重默认都取 1 的敏感性如何、step index 标准化的窗口与分组细节、以及技术报告中 Hybrid 相对两单项的完整定量曲线，讲授只给结论，需查项目技术报告核对。</li>
+<li>个性化实验依赖模拟用户与自设评分，讲者自己也承认 PRM 评分波动大；真实用户、长周期下风格漂移与灾难性遗忘会到什么程度，目前没有数据。</li>
+<li>多用户共用一个模型一起优化（讲者提到的组织级部署场景）会放大数据收集效率，但不同用户偏好冲突时信号如何隔离，本期没有展开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>「Use your agent, and it will get stronger and more personalized.」——讲者对系统形态的一句概括（字幕 04:50–04:54 口径）</p>
+<p>「我个人觉得这种最立竿见影的自进化，还是通过 skills 和 memory，它是最稳定的。」——Q&amp;A 中讲者对权重级训练与记忆级手段的坦率排序（字幕 40:15–40:24 口径）</p>
+<p>「如何平衡这种优化效率，还有长期训练的稳定性，我觉得是一个比较有意思的事情。」——讲者自陈的未解问题（字幕 38:53–38:57 口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

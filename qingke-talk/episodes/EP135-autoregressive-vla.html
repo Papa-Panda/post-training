@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP135 — 如何设计一个好的自回归 VLA：从问题构建到工程落地的探索之旅</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP135 — 如何设计一个好的自回归 VLA：从问题构建到工程落地的探索之旅</h1>
+    <p class="sub">讲者用两年工作论证一条路线：VLA 的问题定义应先于动作拟合（先定义要继承 VLM 的语言、常识与推理能力），建模上坚持自回归——前提是把 action tokenizer 做… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP135-autoregressive-vla.html</p>
+<p>「适合 LM 学习的一门语言，才是一个好的 tokenization。」——讲者论 action tokenizer 的评判标准（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP135（官网期号；本视频经字幕内容互证为自回归 VLA 一讲。台账 B135 行旧标题 DCR 持续指令微调已过时，实际视频为本期）</dd><dt>标题</dt><dd>如何设计一个好的自回归 VLA：从问题构建到工程落地的探索之旅</dd><dt>BV</dt><dd>BV1aTM86bEND</dd><dt>时长</dt><dd>01:07:45（讲授约 51 分钟 + Q&amp;A 约 17 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>张士铎（字幕自述「我是世铎」，主持人结尾称「张士铎」；单位字幕未明示，以论文作者页为准）</dd><dt>相关论文</dt><dd>讲授涉及讲者团队多篇工作——VLA 能力定义与仿真基准（字幕作「VLA Bench」）、FASTER action tokenizer、Action Codec、coarse-to-control 规划、ETC 训练 recipe（Q&amp;A 提示检索其 Google Scholar，recipe 论文名近「One Pathway, Two Bridges」，字幕口径）；均未在字幕中给出编号，以论文原文为准</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1aTM86bEND/">https://www.bilibili.com/video/BV1aTM86bEND/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/Autoregressive-VLA">https://qingkeai.online/blog/Autoregressive-VLA</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP135.txt</code>（1754 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP135，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如 VLA 在字幕中多作「标 A/VRA」、LIBERO 作「LIBR」、flow matching 作「flow mansion」，均以论文与公开资料为准）。讲者的方法论自称「3S principles」（字幕作 skating/simple/search，按 Scaling、Simple、Search 理解）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>讲者用两年工作论证一条路线：VLA 的问题定义应先于动作拟合（先定义要继承 VLM 的语言、常识与推理能力），建模上坚持自回归——前提是把 action tokenizer 做成「适合 LM 学习的语言」（高保真、高压缩、语义一致、可跨本体），再用 ETC 式分阶段 recipe 桥接 VL 数据与具身数据的分布 gap；结论是 AR 在语言跟随与 zero-shot 上天然占优，短板不在范式而在 tokenizer 与训练桥接。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>先定义问题：VLA 不是更大的 imitation learning</h3>
+<p>讲者开场先立定义：现有 VLA（3D-VLA、OpenVLA、π 一系）从根上强调动作拟合与 skill acquisition，忽略高层智能。他在 2024 年（OpenVLA 之前）做的第一件事是把期望能力写进基准：丰富纹理/OCR 认知、常识指代（「抓索尔的弟弟」）、空间关系推理、语义鲁棒（揣测「味道有点淡」背后的需求）、物理规律与组合推理。配套的仿真平台可无限扩任务、做数据自动化，定位是站住 position 而非刷榜。</p>
+<p>他对仿真的态度明确：仿真长期只是原型与辅助——开发成本可能比扩真实数据还高，真机数据来得比预期快得多。仿真数据的用法是 co-train 的中间态；他在 8 张 H100 上一天可生成 200 小时不重样数据（字幕口径）。他同时点名任务定义翻车案例：LIBERO 把 vision 或 language 去掉成功率仍能到 90（字幕口径），说明基准本身没在测语言——「这就是任务定义和 benchmark 设计的问题」。</p>
+<h3>为什么押注自回归：平台实验给的底气</h3>
+<p>转折来自他自己平台上的对照：在相同数据与初始化下，π-FAST 一类自回归模型在语言鲁棒与 language following 上明显好于 flow matching。他的解释是结构性的：AR 保持 next-token prediction 目标，对 VLM 语言能力的结构保持更好；而智能目前只在 language 上涌现，加了视觉模态都会打折，所以用 VLM 做 backbone 就必须强化其语言理解，这一点被 robotics 背景的研究者长期 overlook。</p>
+<p>AR 的附带红利：zero-shot 更好、收敛更快更稳；且与 LM/VLM 全部基建（in-context learning、CoT 等范式）无缝兼容。他的生成范式类比：视频生成是「头轻脚重」、LM 是头尾均衡、VLA 是「头重脚轻」（一个 V 一个 L 进、一小段 action 出），低维输出空间本就适合 AR，flow matching 对它是「大材小用」——团队另一篇 one-step flow matching 工作侧面验证：一次 denoise step 的精度已足够（字幕口径）。</p>
+<h3>AR 的两个真问题，都指向 action tokenizer</h3>
+<p>讲者不回避 AR 的短板：</p>
+<ol>
+<li><strong>离散化重建损失</strong>。tokenizer 重建失真等于给 LM 喂错误的学习目标（「学了个词叫 apple，重建后变成 APLE」）；VQ 类方法重建甚至不如分箱。</li>
+<li><strong>推理速度</strong>。以 LIBERO 的 10×7 action chunk 为例（字幕口径）：朴素分箱生成 70 个 token、FAST 压到 17 个、π0 只需 10 个 denoise step；同等单步耗时下 AR 解码慢 7~8 倍，不可接受。</li>
+</ol>
+<p>他给 tokenizer 定了四条设计准则：重建保真、压缩率高、利用 action chunk 的 2D 结构（时间×维度，像图像一样做 2D tokenization）、跨本体灵活（单臂/双臂、EEF/joint position/joint velocity 通吃）。</p>
+<h3>FASTER：把语音 tokenizer 的经验搬过来</h3>
+<p>FASTER 本质是把基本盘做对：借鉴语音模型的 RVQ（讲者明言「RVQ 本身没有任何创新，工程鲁棒已经足够」），外加两处改动——频域（DCT）重建 loss，让高频细微动作与低频信号在同一尺度受监督；按行优先（沿时间维逐维度）压缩，10×7 的 chunk 用 RVQ 深度 3 压到约 20 个 token（字幕口径）。配套加速：blockwise decoding——同一维度的 3 个 RVQ token 并无强时序依赖，可整块并行生成（深度 3 时效果最好，再往前就是整块并行解码）；action expert 后被证明没用，在后续版本中舍弃。结果：LIBERO 上刷到 87（字幕口径），与 π 系列大体持平或略优；真实机器人表现才是团队的验收标准。</p>
+<p>两个 tokenizer 层面的 insight：</p>
+<ul>
+<li><strong>数据 scaling 性</strong>：tokenizer 是在「拟合一门语言」，见的数据越杂，词表分布越趋于稳定（大数定律式论证）。</li>
+<li><strong>跨本体与 zero-shot</strong>：单臂 EEF 数据训的 tokenizer 可直接给双臂 joint space 做重建编码。zero-shot 差距可从词表统计解释：只在单一数据集训的 FAST 词表利用率显著更低、某个 token 出现频率高达 10%（字幕口径），这种长尾失衡的词表分布不利于 LM 学习——「从 tokenizer 本身就开始过拟合了」。</li>
+</ul>
+<h3>Action Codec：从重建正确到语义正确，再到原生规划</h3>
+<p>下一步是语义：相同 token 在不同本体/任务上应表示相似动作（如「下坠」）。Action Codec 把语义部分定义为动作相似度：训练时用 VL feature 对齐，让相近行为落到相近 token；配套发现——词表不是越大越好（高频噪声被学进去）、相邻 chunk 的 token overlap 越大越像一门「流畅的语言」、模型约 5K step 即收敛（字幕口径）。工程细节：不同本体用 soft prompt 区分、Perceiver cross-attention、两阶段（先按语义分箱、再用 RVQ 残差层补重建）。</p>
+<p>再进一步是把规划变成动作 tokenization 的原生能力：把 16 秒轨迹联合编码得到的粗粒度 token 就是 planning token；coarse-to-control 工作从生成侧做同样的粗到细——先生成 planning token 再生成 execution token，用规划约束探索空间。讲者强调对照实验的严谨：所有 backbone 对齐、用 π 初始化、复现基线而非引原文数字；planning token 比文本 CoT（256 token、真机太慢）生成的 token 更少、效果更好（字幕口径）。</p>
+<h3>ETC recipe：VLA 训练的两个 mismatch 与三阶段桥接</h3>
+<p>最后一部分是训练 recipe。讲者把 VLM→VLA 的 gap 拆成两个 mismatch：输入侧（普通视觉编码器特征不满足 manipulation 需要，冻结 vision encoder 训练效果大掉）和输出侧（next-token 交叉熵与 flow matching 的 L2 目标不同；即便同为 AR，text token 的理解与 action token 的生成在语义上也错位）。数据分布上，VL 数据与具身数据交集很小，只用 action 数据硬训等于把模型分布强行拽到具身分布、与 VL 分布几乎无重叠，OOD 即失效；普通 co-train 只是把桥搭在原有小交集上。</p>
+<p>ETC（Embodied Trajectory Couple，字幕口径）的做法是构造与 mid-training 匹配的具身多模态数据，把桥加宽。三阶段：</p>
+<ol>
+<li><strong>预训练</strong>：不用任何本体/action 数据，用具身 VL 数据再增强一次 VLM——讲者称只要起点是增强过的 VLM，后续任何形式效果都更好，在其基准上不用 π/FAST 式预训练也能到约 70 成功率（字幕口径）。</li>
+<li><strong>Mid-training</strong>：才引入 action 生成目标，此时视觉编码器与 backbone 已在图文上对齐，只剩生成侧 mismatch 要补；消融显示 2D trajectory planning 数据的桥接作用最好（文本理解任务生成 2.5D 动作），其余 VQA、grounding、caption 数据加上都有益、叠加更好。</li>
+<li><strong>Post-training（retention）</strong>：in-distribution 上 co-train 收益不大；关键在 OOD 组合泛化——物体从 ABC 换成 DEF 时成功率直接砍半（如 90 到 40、50 到 25，字幕口径），补救办法是给新物体造只有 VL 理解标签、无 action 标签的数据，靠已搭好的桥把已知 action 映射到新物体的视觉分布上。而且每个环节都要加 co-train，中途停掉效果大掉。</li>
+</ol>
+<h3>Q&amp;A 中的明确表态</h3>
+<ul>
+<li>精度质疑：AR 做亚毫米级精细操作没问题（插 5mm 宽的环、错 1mm 就掉一类任务，字幕口径），与 π0.5 的差距在 60 与 70 分量级（字幕口径）。</li>
+<li>On-policy RL：直言「真机不要指望 on-policy」，只能做短程任务；长程问题大概率靠 offline RL；常识类能力用 online RL 几乎不可能。</li>
+<li>落地阻碍排序：技术路线未收敛 &gt; 场景与需求定义不清 &gt; 算法侧瓶颈（最小）；硬件稳定性被低估。</li>
+<li>潜力估计：当前 VLA 对 VLM 潜力的挖掘只有 5% 到 10%（字幕口径）——VLM context 是 8K/32K/100K 量级，VLA 还不到 1~2K。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LIBERO 去 vision/language 的成功率</td>
+<td>仍达 90</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>仿真数据生成</td>
+<td>8 张 H100 一天 200 小时不重样数据</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>朴素分箱 / FAST / π0 的解码量（10×7 chunk）</td>
+<td>70 token / 17 token / 10 步 denoise</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>AR 相对解码速度差</td>
+<td>慢约 7~8 倍（同等单步耗时假设）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>FASTER 压缩结果</td>
+<td>10×7 chunk 约 20 token（RVQ 深度 3）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>FASTER 在 LIBERO</td>
+<td>87（成功率口径）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>单数据集 FAST 的最高频 token 占比</td>
+<td>10%</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Action Codec 收敛</td>
+<td>约 5K step</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>ETC 预训练起点效果</td>
+<td>基准约 70 成功率（无 π/FAST 式预训练）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>OOD 物体替换的成功率跌落</td>
+<td>90 到 40、50 到 25</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>VLA 对 VLM 潜力的挖掘估计</td>
+<td>5% 到 10%</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「先定义能力、再选范式」对 post-training 同样适用：先把要继承的基座能力（语言、常识、推理）写成可测的基准，再谈 SFT/RL recipe；LIBERO 去语言仍 90 的例子说明，基准测不出能力，训练就不会保留能力。</li>
+<li>Tokenizer 评判标准可直接借用：不只看重建误差，还要看词表分布是否均衡、是否利于 LM 学习——评估任何离散化（动作、工具调用、结构化输出）时都该加上「LM 可学习性」这一维。</li>
+<li>ETC 的桥接思路是通用的 continual-learning 叙事：两个分布交集太小时，与其在小交集上 co-train，不如构造与下游对齐的中间数据把桥加宽；且抗遗忘要全程在场，不能只在最后一个阶段补。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲授涉及的 VLA Bench、FASTER、Action Codec、ETC 四篇工作的正式名称与出处字幕均未给出（Q&amp;A 只提示查 Google Scholar），引用具体数字前需按讲者姓名检索论文核对。</li>
+<li>FASTER 的约 20 token 与 blockwise decoding 的实际闭环频率（20Hz 落地）只在 Q&amp;A 被追问时一句带过，工程细节需查论文。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「你给他一个错误的学习目标，那他基本上就是学了一个错误的知识。」——论离散化重建失真（字幕口径）</p>
+<p>「我真的认为现在的 VLA 对 VLM 的潜力挖掘只开发了 5% 到 10%。」——Q&amp;A 论建模空间（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

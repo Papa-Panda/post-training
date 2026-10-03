@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EP118 — Puffin: 统一多模态空间智能大模型——从任意视角理解和生成世界</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>EP118 — Puffin: 统一多模态空间智能大模型——从任意视角理解和生成世界</h1>
+    <p class="sub">Puffin 把相机几何作为一种独立模态塞进统一多模态模型：理解侧用几何对齐的视觉编码器 + 「Thinking with Camera」推理链预测相机参数，生成侧用像素级 c… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/EP118-puffin.html</p>
+<p>「我们把相机参数转换成这种非常直观、跟物理世界相关的表征之后，去替代相机参数作为有效的 condition。」——讲者论 camera map 的设计动机（字幕口径）</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>期号</dt><dd>青稞Talk EP118（官网期号；本视频经字幕内容互证为 Puffin 一讲。台账 B118 行旧标题 HiDream-O1-Image 已过时，实际视频为本期）</dd><dt>标题</dt><dd>Puffin: 统一多模态空间智能大模型——从任意视角理解和生成世界</dd><dt>BV</dt><dd>BV1aUDpB1Eyx</dd><dt>时长</dt><dd>01:05:42（讲授约 55 分钟 + Q&amp;A 约 10 分钟）</dd><dt>提炼日期</dt><dd>2026-10-02</dd><dt>分享嘉宾</dt><dd>廖小康（南洋理工大学 MMLab；字幕中主持人称「廖小康博士」，正式头衔以论文作者页为准）</dd><dt>相关论文</dt><dd>Puffin（字幕口径：ICLR 2026 接收；讲授中称「今年的 ICLR 的一篇论文」）</dd><dt>相关代码</dt><dd>讲者称模型、代码、数据集已全部开源（字幕口径，具体仓库地址以论文页为准）</dd><dt>B站链接</dt><dd><a href="https://www.bilibili.com/video/BV1aUDpB1Eyx/">https://www.bilibili.com/video/BV1aUDpB1Eyx/</a></dd><dt>官网预告</dt><dd><a href="https://qingkeai.online/blog/Puffin">https://qingkeai.online/blog/Puffin</a></dd><dt>字幕原文存档</dt><dd>本地 <code>transcripts/EP118.txt</code>（1317 条，带时间戳）</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于 B站 AI 字幕原文（青稞Talk EP118，已存档）清洗提炼，信息来源为 AI 字幕原文（经人工清洗；个别专名可能有识别误差，如模型名在字幕中多作「poppy/party/popping」，实为 Puffin；数据集 Puffin-4M 在字幕中作「puffin o m ping four」，均以论文与公开资料为准）。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Puffin 把相机几何作为一种独立模态塞进统一多模态模型：理解侧用几何对齐的视觉编码器 + 「Thinking with Camera」推理链预测相机参数，生成侧用像素级 camera map 替代裸参数控制扩散模型，再以 400 万（字幕口径）相机-语言-视觉三元组数据打通两侧，实验证明统一训练在理解与生成上双向增益。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<h3>为什么以相机为中心：理解与生成是一对互补映射</h3>
+<p>讲者把相机定位为连接物理世界与感知世界的中间接口，相关任务分两类：相机理解（从图像反推相机几何，经典 3D 视觉问题，如标定与位姿估计）和相机生成（把相机参数当作控制语言注入生成模型）。他的核心论点是两者概念上互补：理解是把相机几何从世界中「解码」出来，生成是把相机几何再「编码」回世界，因此应该在同一个模型里做，并检验是否互相促进。</p>
+<p>现有统一多模态模型（讲者点名 BAGEL、Janus-Pro、BLIP3-o 等）不能直接套用：它们只有「往前看」的简单相机假设，没有 360 度任意视角，焦距也只有离散几档，做不了连续变焦。Puffin 的四项能力也由此定义：单图相机几何理解、任意视角条件生成、空间想象（推断看不见的方位）、世界探索（相机轨迹驱动的连续视角生成 + 3D 重建）。</p>
+<h3>两个瓶颈与两项改造</h3>
+<p>讲者明确说直接拿现有 VLM 或扩散模型在数据上微调不 work，原因有二：</p>
+<ol>
+<li><strong>视觉编码器丢几何</strong>。主流 VLM 的 vision encoder 为 object grounding、图文检索等高层任务设计，特征压缩太狠，精细几何信息留不住；讲者称直接微调 InternVL、Qwen 系列的效果甚至不如一个轻量级视觉编码器。改造：设计 geometry-aligned vision encoder，从语义与视觉中心的教师网络逐步蒸馏出既带精细几何特征又保留高层语义的学生编码器，再与语言模型对齐。</li>
+<li><strong>裸相机参数不可理解</strong>。内参外参只是数字（角度多少度、焦距多少毫米），大模型不懂其物理含义，直接喂参数会出现「天地颠倒」。改造：把相机参数无损映射为像素空间的 camera map——通道一是纬度场（标记真实水平线位置，即赤道面），通道二、三是重力场方向向量；camera map 与图像同尺寸、取值范围归一到 -1 到 1 ，可直接复用图像 VAE tokenizer 编码成连续 latent（字幕口径）。</li>
+</ol>
+<p>架构上，理解侧把文本、图像、相机三模态统一打成 token 送入语言模型，自回归地先输出场景描述再接相机几何；生成侧用 MetaQuery 式 connector 把语言模型的可学习 query 注入扩散模型，扩散 loss 经 connector 回传语言模型，camera map 同样作为条件注入。</p>
+<h3>Thinking with Camera：把相机参数变成可推理的语言</h3>
+<p>为弥合文本、图像、相机三模态的 gap，讲者提出 Thinking with Camera：纯文本的链式推理过程。先把连续的相机参数（roll、pitch、FOV）映射到离散摄影术语区间（如 FOV 映射到 close-up、medium shot、wide angle、ultra wide angle），再分三步推理——由画面倾斜判断 roll（对应「荷兰角」一类术语）、由天空与树冠占比判断 pitch、由多维特征综合判断 FOV——最后在 answer 标签里给出精细参数。术语是桥梁：语言模型在预训练中见过这些摄影概念，推理链把视觉特征与标准术语挂钩。</p>
+<p>训练标签的构造是反向的：数据管线已知每张图的真实相机参数，先把参数转成术语答案，再让大模型反向检索与答案相关的视觉线索，拼成 think 标签。讲者还给图像在创新性、主体强调等四个维度打美学分（满分 10 分），作为拍照指导类下游任务的标签。</p>
+<h3>数据：Puffin-4M 的构造与矫正</h3>
+<p>由于同时含相机、视觉、语言三元组的数据稀缺，团队构建 Puffin-4M（字幕口径：400 万个 camera-language-vision 三元组）。管线：收集约 20 万张高质量 360 度全景图（多为 4K、部分 10K，字幕口径），投影到球面后放置虚拟相机任意改变参数渲染透视图，相机参数天然已知并可无损编码为 camera map；文本描述由 VLM 生成再经语言模型凝练。分 single-view 与 cross-view 两类样本，后者记录多视角间的相机偏移。</p>
+<p>脏数据处理有两招：全景图常因拍摄未摆正而水平线弯曲，用消失点估计在球面上旋转做 horizon 对齐；自驾类场景大量单调区域，手动裁剪到有效区域。发布后反响：讲者称数据集在 HuggingFace 上线数日排在首页前列，三个月下载量达 223 万（字幕口径）。</p>
+<p>训练分四阶段：预训练对齐语言模型与扩散模型、mid-training/SFT 做相机理解与可控生成、注入 Thinking with Camera 的空间推理、cross-view 指令微调；全程约 4 天、64 张 A100（字幕口径作「64 张 A1 版」，按 A100 理解）。</p>
+<h3>结果：统一训练双向增益，及两个反直觉观察</h3>
+<p>相机理解：在 MegaDepth 等四个 benchmark 上，pitch 与 FOV 精度达最强基线（讲者称 GeoCalib 一系）误差的近一半（字幕口径）。讲者给出机制解释：roll 估计只依赖低/中层几何特征、收敛快，先天简单；pitch 与 FOV 需要丰富的空间上下文，这正是带空间推理的语言模型胜过纯视觉模型的原因，也是后两者需要大量多样数据缓慢爬升的原因。</p>
+<p>生成侧自建了带相机与语言三元组的 benchmark，用方向向量、纬度、重力场三维误差评估 GPT-4o、Qwen-Image 等专业模型与 Puffin，Puffin 三维均为最优（字幕口径）。一个与理解侧相反的观察：生成时 roll 的仿真反而比 pitch、FOV 更难，讲者归因于 dataset bias——如 RealEstate10K 中 roll 角只分布在 -5 到 5 度（字幕口径），模型拟合不到更宽范围；这反过来论证了 Puffin 数据集的必要性。</p>
+<p>消融结论：Thinking with Camera 对理解与生成两端都降误差；去掉 camera map 会出现天地颠倒；统一训练显著优于单任务训练——理解侧尤甚，生成侧在 FOV 维度更明显。讲者的机制解释是：扩散 loss 给语言模型补上了低层外观空间的监督，帮它捕获更精细的几何特征。</p>
+<h3>应用、局限与 Puffin Pro</h3>
+<p>应用三类：世界探索（初始视角 + 目标 camera map 迭代生成新视角，再用 VGGT 重建 3D 世界，可扩到近 360 度全景）；空间想象（猜测身后场景，再把想象结果送回模型生成，形成多轮交错对话，也可反向用生成图自检参数）；拍照指导（给出相机位移建议改善构图）与虚拟 3D 物体插入（按估计的重力场调整物体姿态）。</p>
+<p>局限在数据本身：Puffin-4M 只有 512×512 固定尺寸，长宽比差异大的数据集要先裁成方形、丢信息。后续 Puffin-15M（字幕口径）：全景图从 20 万扩到约 90 万、透视图从 600 万扩到 1500 万，引入鱼眼相机模型，支持 1:1、2:3、16:9 等多画幅；重训的 Puffin Pro 在此前较差的数据集上精度几乎翻倍（字幕口径），并把一对一生成扩展为多进多出的 camera trajectory 控制。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Puffin-4M 三元组规模</td>
+<td>400 万（camera-language-vision）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>全景图收集量</td>
+<td>约 20 万张（多为 4K、部分 10K）</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>数据集三个月下载量</td>
+<td>223 万</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>训练算力</td>
+<td>约 4 天、64 张 A100</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>相机理解精度</td>
+<td>MegaDepth 上 pitch/FOV 误差约为最强基线的一半</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>RealEstate10K 的 roll 分布</td>
+<td>-5 到 5 度</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>Puffin-15M 扩展</td>
+<td>全景约 90 万张、透视图 1500 万、多画幅</td>
+<td>字幕</td>
+</tr>
+<tr>
+<td>美学打分</td>
+<td>满分 10 分，四维度</td>
+<td>字幕</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>「把不可理解的连续参数转成与数据同构的稠密表征」是通用招：camera map 与图像同尺寸同 tokenizer，等于让新模态蹭已有模态的编码器与先验；给 RL/infra 里的连续控制量、几何量做条件注入时可借鉴。</li>
+<li>Thinking with Camera 的标签构造法（已知答案→术语化→反向检索视觉线索拼推理链）是一种零人工标注造 CoT 数据的模板，适用于任何「答案可程序化获得、推理过程需合成」的任务。</li>
+<li>统一 vs 单任务的消融结论值得复用：扩散 loss 回传语言模型带来低层监督增益——多任务互补的证据要靠这种双向消融，而不是默认同训更好。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>讲者称 Puffin 在四个理解 benchmark 上「pitch/FOV 误差近一半」，但字幕未给出各 benchmark 的具体数值与基线全名，引用前需查论文表格核对。</li>
+<li>camera map 取值归一到 -1 到 1 复用图像 VAE：量化/压缩误差对极端倾斜角（如大 roll）的影响字幕未涉及，可查论文消融。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句</h2>
+<blockquote class="pq">
+<p>「估计 roll 它其实直接跟图像的 low level 或者 middle level 的几何 feature 相关……但是估计 pitch 和 FOV，它需要在图像里面理解更丰富的空间信息。」（字幕口径）</p>
+<p>「生成模型它生成的结果好坏是不是那么重要，它如果能够帮助下游任务，比如把重建结果用于 agent 或机器人训练，这还是比较有意思。」（字幕口径）</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
