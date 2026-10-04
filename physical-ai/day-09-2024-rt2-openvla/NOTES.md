@@ -17,6 +17,23 @@
 ## 一句话总结
 RT-2 证明了把连续机器人动作离散成语言 token、再把 web-scale vision-language data 与 robot trajectories 联合训练，可以把语义知识迁移到闭环控制；OpenVLA 则把这条路线变成可复现的 7B 开源系统，用 970k Open X-Embodiment demonstrations、DINOv2+SigLIP 双视觉编码器和 Llama 2，在 29 个跨 embodiment 任务上以少 7 倍参数超过 RT-2-X 16.5 个绝对成功率百分点，并支持 LoRA 与量化部署。
 
+## 大纲
+- 问题：纯机器人策略不认识训练外物体与指令，纯 VLM 又不会输出低层动作；缺的是语义到控制的桥
+- 表示：7 维末端动作逐维切 256 个 bin，动作即 token，与文字共用词表、自回归与交叉熵
+- 训练：RT-2 用 web 与 robot 数据 co-fine-tuning 保语义；OpenVLA 用 970k 条 Open X-Embodiment 演示训 7B 开源模型
+- 系统：DINOv2 加 SigLIP 双编码器接 Llama 2，单帧图像加语言进，7 维相对动作出，低层控制器兜底执行
+- 证据：未见物体与 emergent 语义上约为基线 2 倍；OpenVLA 在 29 个任务上超 RT-2-X 16.5 个百分点；代价是 1–6 Hz 与量化精度
+
+## 流程图
+```mermaid
+graph LR
+  A[图像与指令输入] --> B[双编码器提特征]
+  B --> C[语言模型推理]
+  C --> D[动作令牌生成]
+  D --> E[解码末端动作]
+  E --> F[低层控制器执行]
+```
+
 ## 和之前工作的关系
 
 - **接了哪条线：** Day04 Genie、Day05 UniSim、Day06 DreamerV3 都在回答“如何得到可预测、可交互的环境模型”；Day09 转向另一条 Physical AI 主线：不显式 rollout 世界模型，而是从图像与语言直接 autoregressive 地输出动作 token。
@@ -41,7 +58,7 @@ RT-2 证明了把连续机器人动作离散成语言 token、再把 web-scale v
 
 **问**：VLA 不是一种模型而是模型架构？类似 transformer？
 
-**答**：VLA 更像一个**类别名**，定义的是输入输出契约：图像和语言进来，动作出去，即 $ \pi(A \mid O, \text{language}) $ ，其中 $ A $ 为动作（序列/块）， $ O $ 为观测。凡是满足这个契约的都算 VLA。Transformer 是实现引擎（积木），VLA 是用积木搭出来的车型：RT-2/OpenVLA 用 Transformer 解码器加离散 action token，π₀ 用 VLM 加 flow matching 动作头，Octo 用 Transformer 加 diffusion head——三个都是 VLA，但内部引擎完全不同。反例：Day12 的 Diffusion Policy 连语言输入都不吃，严格讲不算 VLA，只是 action diffusion。这说明语言那个 L 是 VLA 的身份特征：去掉语言，它就退化成纯动作生成模型。
+**答**：VLA 更像一个**类别名**，定义的是输入输出契约：图像和语言进来，动作出去，即 $\pi(A\mid O,\text{language})$ ，其中 $A$ 为动作（序列/块）， $O$ 为观测。凡是满足这个契约的都算 VLA。Transformer 是实现引擎（积木），VLA 是用积木搭出来的车型：RT-2/OpenVLA 用 Transformer 解码器加离散 action token，π₀ 用 VLM 加 flow matching 动作头，Octo 用 Transformer 加 diffusion head——三个都是 VLA，但内部引擎完全不同。反例：Day12 的 Diffusion Policy 连语言输入都不吃，严格讲不算 VLA，只是 action diffusion。这说明语言那个 L 是 VLA 的身份特征：去掉语言，它就退化成纯动作生成模型。
 
 **关联**：Day09（RT-2/OpenVLA）/ Day11（π₀）/ Day12（Diffusion Policy）/ Day13（Octo）。
 
@@ -65,17 +82,17 @@ RT-2 证明了把连续机器人动作离散成语言 token、再把 web-scale v
 
 ### t₁..t₇ 不是文字：Day09 的突破点
 
-**问**： $ p(t\mid I,\ell) $ 里 t 是文字？那这不就是一个 VLM 吗？Day09 有啥突破？
+**问**： $p(t\mid I,\ell)$ 里 t 是文字？那这不就是一个 VLM 吗？Day09 有啥突破？
 
-**答**：t 不是文字，是**动作 token**：7 维连续动作 $ a=(\Delta x,\Delta y,\Delta z,\Delta r_x,\Delta r_y,\Delta r_z,\text{gripper}) $ 每维切成 256 个 bin，每个 bin 分配一个 token ID， $ t_1 $ 到 $ t_7 $ 就是"这次手该怎么动"的离散编码。公式长得像 VLM 完全是故意的——**突破恰恰是这个表示上的 trick**：把动作塞进 VLM 的词表，让"预测下一个动作 token"和"预测下一个文字 token"变成同一个任务、同一个 transformer、同一套交叉熵 loss。在此之前是两个世界：VLM 认识芒果但手不会动，机器人策略手会动但不认识芒果。RT-2 第一个把它们打通——web 数据教它认识世界，机器人数据教它把"认识"翻译成"动作"，翻译的桥梁就是"动作即 token"。所以 Day09 的突破不是新数学（自回归 CE 都是现成的），而是证明了：**VLM 的语义能力可以通过 token 化迁移到机器人控制上**。
+**答**：t 不是文字，是**动作 token**：7 维连续动作 $a=(\Delta x,\Delta y,\Delta z,\Delta r_x,\Delta r_y,\Delta r_z,\text{gripper})$ 每维切成 256 个 bin，每个 bin 分配一个 token ID， $t_1$ 到 $t_7$ 就是"这次手该怎么动"的离散编码。公式长得像 VLM 完全是故意的——**突破恰恰是这个表示上的 trick**：把动作塞进 VLM 的词表，让"预测下一个动作 token"和"预测下一个文字 token"变成同一个任务、同一个 transformer、同一套交叉熵 loss。在此之前是两个世界：VLM 认识芒果但手不会动，机器人策略手会动但不认识芒果。RT-2 第一个把它们打通——web 数据教它认识世界，机器人数据教它把"认识"翻译成"动作"，翻译的桥梁就是"动作即 token"。所以 Day09 的突破不是新数学（自回归 CE 都是现成的），而是证明了：**VLM 的语义能力可以通过 token 化迁移到机器人控制上**。
 
-**符号**： $ t $ 动作 token 序列； $ I $ 输入图像； $ \ell $ 语言指令 token； $ a $ 连续动作向量，各分量为末端位姿增量与夹爪开合。
+**符号**： $t$ 动作 token 序列； $I$ 输入图像； $\ell$ 语言指令 token； $a$ 连续动作向量，各分量为末端位姿增量与夹爪开合。
 
 ### 目标动作 token 来自哪里
 
 **问**：预测下一个动作 token，那这个目标动作来自于哪里？
 
-**答**：来自人类演示，标准的 behavior cloning。训练数据是人遥操作机器人录下来的：操作员用 VR 手柄或 spacemouse 控制机械臂做"拿杯子"，系统同步记录每一时刻的图像、指令和 7 维连续动作；训练时把这些连续动作按 256 bin 离散化成 token，就成了交叉熵 loss 的 target（模型预测 $ t_3 $ ，target 就是演示里那一刻真实的 $ t_3 $ ）。RT-2 的 co-finetraining 有意思在 target 是两种混在一起的：web 数据的 target 是文字 token（看图说话、问答），机器人数据的 target 是动作 token。同一个 loss 下，模型自己学会了"看到芒果图片时输出描述文字，看到机器人视角+指令时输出动作"。
+**答**：来自人类演示，标准的 behavior cloning。训练数据是人遥操作机器人录下来的：操作员用 VR 手柄或 spacemouse 控制机械臂做"拿杯子"，系统同步记录每一时刻的图像、指令和 7 维连续动作；训练时把这些连续动作按 256 bin 离散化成 token，就成了交叉熵 loss 的 target（模型预测 $t_3$ ，target 就是演示里那一刻真实的 $t_3$ ）。RT-2 的 co-finetraining 有意思在 target 是两种混在一起的：web 数据的 target 是文字 token（看图说话、问答），机器人数据的 target 是动作 token。同一个 loss 下，模型自己学会了"看到芒果图片时输出描述文字，看到机器人视角+指令时输出动作"。
 
 **与之前工作的关系**：本节 6 问构成 Day09 的"表示"主线——VLA 的契约定义 → 语义从 web 借 → 动作 token 化 → 演示数据即 target；与 Day11/12 的"生成式连续动作"路线形成对照（对照见 README 问答记录）。
 
@@ -154,3 +171,60 @@ RT-2 证明了把连续机器人动作离散成语言 token、再把 web-scale v
 
 <!-- viz:stats: 7B Prismatic backbone | DINOv2+SigLIP 双编码器 | 7D 相对动作输出 -->
 <!-- viz:vs: RT-2 | fine-tune 混入 web data; generalization 好 || robot-only FT | 困难概念上落后 -->
+
+## 第二轮复习（2026-10-04）
+
+> 本轮做三处元信息校准（两篇的会议定位、OpenVLA 等贡献标注、RT-2 评测规模措辞）＋补大纲与流程图（初读缺失，本轮补齐）。核心收获：把 Day09 从「动作变成 token 的技巧」重读为「接口复用换表示瓶颈」的交易——复用 VLM 词表与训练栈买到语义重组，代价是逐维量化、自回归顺序与单帧无本体感知；这笔交易的价格后来由 Day11–14 用连续动作头分期偿还，又在 Day34 被组合泛化重新定价。
+
+### 元信息修正
+
+1. **发表定位**：RT-2 为 CoRL 2023（第 7 届 Conference on Robot Learning，Atlanta）；OpenVLA 为 CoRL 2024（第 8 届，Munich；PMLR v270, pp. 2679–2713；arXiv v3 为 2024-09-05）。NOTES 元信息只记 arXiv，本轮补上会议定位。
+2. **作者标注**：RT-2 论文作者按字母序排列（贡献见其附录 A），「Brohan et al.」只是首名缩写，不表示贡献排序；OpenVLA 的 Moo Jin Kim、Karl Pertsch、Siddharth Karamcheti 三人为等贡献（论文以星号标注），NOTES 原记未标此项。
+3. **评测规模措辞**：RT-2 摘要原文为 6k evaluation trials；NOTES 原写「约 6,000 条 evaluation trajectories」，本轮校准为 trials（试验次数），不与训练轨迹数混同。
+4. **定位校准**：初读把 16.5 个百分点记成「7B 开源模型更强」的证据；复习校准为**数据混合、双编码器与架构的合成结果**——论文自身未做单因子归因（见边界第 1 条）。
+
+### 一句话总结
+
+三十多天后回看，Day09 的耐久贡献不是「动作即语言」这句口号，而是证明了一笔可审计的交易：把动作塞进 VLM 词表，就能用同一套自回归训练栈把 web 语义重组到机器人已有的运动技能上；OpenVLA 则证明这笔交易可以开源复现（970k 条演示、29 个任务、超 RT-2-X 16.5 个百分点）。但交易的价格写在表示里：256 bin 逐维量化吃精度、固定顺序自回归吃多峰耦合、1–6 Hz 吃闭环动态——后续 VLA 的演进史，基本就是逐项赎回这三笔抵押。
+
+### 和之前工作的关系
+
+- **vs Day08 Humanoid-Gym（直接对比）**：Day08 是 100 Hz 本体感知步态加 1000 Hz PD 的执行层，语义为零但闭环快；Day09 是 1–6 Hz 的语义层，认得出芒果但手不稳。两者不是替代关系，是同一栈的上下两层：Day09 输出的末端增量必须落到 Day08 一类高频控制器上才算动作。这也解释了为什么本篇 NOTES 一开始就把「低层 controller 兜底」写进系统位置——VLA 从第一天起就是分层架构的上层，不是端到端全身控制。
+- **vs Day11 / Day12 / Day13（分专题，同轴分叉）**：四篇学的是同一个条件动作分布 $p_\theta(A\mid O,c)$ ，差别在表示。Day09 用离散 token 加自回归；Day11 π₀ 用 flow matching 一次生成 50 步连续动作块；Day12 Diffusion Policy 用去噪生成连续轨迹但不吃语言；Day13 Octo 保留 diffusion 头，把创新让给跨 embodiment 的模块化数据接口。复习后看得更清：Day09 解决的是「以什么为条件」（语义），Day11/12 解决的是「预测什么」（连续多峰动作），Day13 解决的是「在什么数据上训」（跨身体混合）——三个问题被初读混成了一个，后来在 README 问答里才被拆成 2×2。
+- **跨阶段 vs Day15–18（数据专题）**：OpenVLA 的 970k 条演示来自 Day15 Open X-Embodiment 的统一数据，其 DROID 低权重与末段移除（NOTES §3 自记）正是 Day16/17 的数据质量问题在训练侧的显形：异构数据不是越多越好，mixture 兼容性要在线监控。Day09 是数据专题的第一个消费者证据。
+- **跨阶段 vs Day25–30 与 Day31–34（评测、安全与最新进展）**：Day09 的评测以 seen / unseen 与 emergent 语义分桶，这是 Day28「固定测度下的成功率估计」与 Day30 分桶门禁的早期形态，但缺 Day29 的安全层（动作合法性、超时与约束全在模型外）。到 Day34 π0.7，组合泛化要求模型做没教过的任务——那正是 Day09「web 语义重组已有技能」命题的严格化版本：重组被单独拎出来当评测轴，而不是混在 emergent 示例里展示。
+
+### 核心
+
+1. **动机重读：赌「接口复用 > 表示保真」**：2023 年机器人缺的不是又一个动作回归头，而是把互联网语义接进控制的桥。RT-2 的赌注是让动作与文字共用词表、共用交叉熵、共用 serving 栈，语义迁移就免费搭车。两年后看赌下对了方向、也标好了价格：被复用的是 VLM 的指代与常识，被抵押的是动作本身的几何——逐维独立量化默认各维可分，接触任务的跨维耦合不在这个表示的语言里。
+2. **机制深挖：自回归分解把顺序写进先验**：观测是一帧图像 $I$ 加语言指令 $\ell$ ，真实状态（物体位姿、摩擦、遮挡关系）不可见，是 POMDP 而非 MDP；动作 $a\in\mathbb{R}^{7}$ 为末端位姿增量加夹爪，每维切 256 bin 成 token $t_{1:7}$ 。模型学的是
+
+$$p_\theta(t_{1:7}\mid I,\ell)=\prod_{j=1}^{7}p_\theta(t_j\mid t_{<j},I,\ell)$$
+
+   训练即对此分布做 behavior cloning 的交叉熵，target 来自人类演示（web 数据的 target 是文字 token，同一 loss 里混训）。固定解码顺序意味着平移与旋转的误差会沿 token 链传播，且单值采样难以表达「绕左还是绕右都行」的多峰抓取——这正是 Day12 要用扩散、Day11 要用 flow 赎回的那一笔。OpenVLA 的 1–99 percentile 定 bin 是表示内的小修：不用 min/max 定范围，避免离群动作吞掉有效分辨率。
+3. **语义重组，不是技能创造**：RT-2 的消融钉死了边界——co-fine-tuning 优于只训机器人数据、55B 优于 5B，但 web 预训练不会给模型训练数据里不存在的新运动。换句话说， $p_\theta$ 的动作支撑集由机器人演示决定，web 数据只改条件分布的语义索引。Day34 π0.7 的「组合泛化」之所以是进展，正因为它把这个重组能力从定性示例推进到可测的任务组合。
+4. **延迟即动态**：RT-2 55B 云端 1–3 Hz、OpenVLA bf16 约 6 Hz，而 int8 因量化算子开销掉到 1.2 Hz 时真机成功率反而下降、更快的 int4 接近 bf16（NOTES §4 自记）。离线 action-token accuracy 超过 95% 不等于闭环好：控制周期进入了被控对象的有效动力学，评测必须报告 achieved control Hz 与 p95 latency，不能只报 token 级指标——这是本篇对 Day28/30 评测线最硬的一条遗产。
+
+### 边界
+
+1. **证据没有证明什么**：OpenVLA 超 RT-2-X 的 16.5 个百分点是数据规模与清洗、双视觉编码器、架构三者的合成，论文未隔离单因子，不能引用为「开源 7B 架构更强」；OpenVLA 在困难语义泛化上仍逊于 RT-2-X，聚合成功率掩盖了这一轴（NOTES §5 自记）。RT-2 的 emergent 能力以分类评测与示例为主，不是可复现的成功率曲线。
+2. **何时失效**：接触丰富的精细操作（量化吃精度、多峰被自回归顺序压平）、需要历史与本体的任务（单帧、无 proprioception、无 action chunking，成功率通常仍低于 90%）、高频稳定任务（1–6 Hz 进不了 Day08 的稳定环）、以及演示支撑集之外的全新运动（语义再对也变不出没练过的动作）。
+3. **系统边界**：动作合法性、安全约束与超时不在模型内，由外部低层控制器与人工规则兜底；把 Day09 单独部署成端到端控制器，等于把 Day29 的安全层整层拆掉。
+
+### 迁移到 post-training / Agentic RL Infra
+
+可执行的同构：把「co-fine-tuning 保语义」做成 agentic post-training 的防遗忘门禁。每次混入新域 tool-use 数据训练后，不只看新域成功率，必须同时跑三桶回归——旧域任务成功率、语义新颖桶（未见指令表述与对象指代）、以及端到端 p95 latency 与实际 achieved step 频率；任一桶相对上一 checkpoint 出现排序翻转，就回滚该域的 mixture 采样权重并把翻转样本回流做 failure triage。配套记录直接抄本篇 NOTES 的 transfer 清单：per-dataset loss、mixture sampling weight、action-token（tool-call token）accuracy、按任务与语义新颖度分桶的成功率。验收标准写死：离线 token accuracy 上升但闭环成功率或控制频率下降的 checkpoint 不放行——对应本篇 int8 的教训。
+
+### 思考题（综合 Day08 / Day09 / Day11 / Day12 / Day15 / Day29 / Day34）
+
+- **(a) 表示赎回的顺序**：Day09 的三笔抵押——256 bin 量化、固定顺序自回归、单步无 chunking——Day11 用 flow 一次赎回「连续加整块」，Day12 用扩散赎回「多峰」，但两者都放弃了与文字共用词表的接口红利。若只能保留一项 Day09 接口（词表共享 / web co-fine-tuning / 自回归 serving 栈），哪一项对 Day34 式组合泛化的贡献最不可替代？请用「动作支撑集由演示决定、web 只改语义索引」这条边界论证，并设计一个能把三项贡献分开测的消融。
+- **(b) 频率分工的合同**：Day09 在 1–6 Hz 出末端增量，Day08 在 100 Hz 站稳。若把 OpenVLA 直接接到一个人形机器人上做家庭整理，上层语义错一次（抓错物体）与下层稳定慢一拍（失衡）分别由谁的指标先报警？请按 Day29 的安全四层栈，给这条 VLA 到 locomotion 的接口写一份合同：哪些检查在 token 解码后、哪些在 PD 之前、超时多久触发降级动作，并说明为什么 token 级 accuracy 不能充当任何一层的放行指标。
+- **(c) 16.5 个百分点该怎么拆**：OpenVLA 的优势被归因于数据混合、双编码器与架构三者，Day15 的教训又是「异构数据要在线监控兼容性」。若算力只够跑两个消融，你选哪两个因子先拆？请写清每个消融固定什么、变什么、看哪一桶（29 任务聚合 / 困难语义桶 / Franka 适配桶），并预判哪种结果会推翻「接口复用 > 表示保真」这个 Day09 命题本身。
+
+参考链接（本轮复习）：
+- RT-2（arXiv，CoRL 2023）：https://arxiv.org/abs/2307.15818
+- OpenVLA（arXiv，CoRL 2024）：https://arxiv.org/abs/2406.09246
+- OpenVLA 正式版（PMLR v270）：https://proceedings.mlr.press/v270/kim25c.html
+- OpenVLA 项目页：https://openvla.github.io/
+
+GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-09-2024-rt2-openvla/NOTES.md
