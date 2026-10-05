@@ -4,7 +4,7 @@
 > Scope：Physical AI 全链路，不谈纯 LLM data curation（那是 ai-data）。
 > 命名对齐 `ai-data/day-01-xxx`，`physical-ai/day-01-xxx` ~ `day-30-xxx`，便于 Day N 直连。
 
-## 第二轮深度复习（9/34）
+## 第二轮深度复习（10/34）
 
 > 复习期：2026-09-22 → 2026-10-29；2026-09-23 → 2026-09-26 先插播 Day31–34 四篇最新进展（World Labs Atlas / GPT-6 Astra / Figure AI / Physical Intelligence π0.7），复习从 2026-09-27 恢复（02/34），一天一篇，只更新已有 NOTES，不新增论文。复习重点不是重述摘要，而是 34 天全路线在手边后重建知识结构、画出跨 Day 连接。
 
@@ -19,6 +19,7 @@
 | 07/34 | 2026-10-02 | 07 | H2O 人形全身遥操作 — 校准 IROS 2024 (oral) 场地与 OmniH2O/HOVER 谱系；sim-to-data 可行性过滤 + 特权训练/可部署观测非对称设计；修正"单 RGB"叙事（root 速度仍靠 50 Hz MoCap） | ✅ 完成 |
 | 08/34 | 2026-10-03 | 08 | Humanoid-Gym 周期步态 locomotion — 修正代码链接为 fork（官方 RobotEra 上游；同组 RSS 2024 DWL 后续）与 ICRA 2024 Workshop 定位、Isaac Gym 已 deprecated；15 帧历史 = RMA 显式辨识的隐式前身；sim2sim gate 经真机校准后独立性打折，确立"执行层最小闭环 / 训练-评测引擎解耦"定位 | ✅ 完成 |
 | 09/34 | 2026-10-04 | 09 | RT-2 / OpenVLA 动作 token 化 — 补 CoRL 2023 / CoRL 2024 会议定位与 OpenVLA 等贡献标注、RT-2 评测规模 trials 措辞；补大纲与流程图；确立"语义层"定位（接口复用换表示瓶颈：256 bin 量化与自回归顺序由 Day11–14 连续动作头赎回，延迟即动态） | ✅ 完成 |
+| 10/34 | 2026-10-05 | 10 | Habitat 3.0 人机共居 — 校准 HITL relative efficiency 口径与陈旧 Day11 指针；确立"协作层"定位（伙伴即分布：对伙伴策略分布取期望 = Day21 随机化的社会版；oracle→learned skill 层间坍塌 71.79%→21.44%） | ✅ 完成 |
 
 ## 结构
 
