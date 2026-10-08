@@ -39,6 +39,23 @@ Self-Instruct 给了 coding SFT / RL 冷启动的“造池”起点，但真实 
 2. 对比 Day21 Self-Instruct 的 ROUGE-L 去重与分类/非分类分池，递归演化后还需要哪些门禁来拦截语义漂移、不可解任务、重复约束和答案幻觉？
 3. 把 Evol-Instruct 迁移到 coding data 时，如何把“增加约束/具体化/增加推理步骤”改写成边界条件、多文件依赖、性能约束与测试用例，并在进 SFT / RL 数据池前接 Day16 的 parser + execution filter？
 
+## 问答补充（2026-10-07）
+
+> 来自 `ai data` side chat 用户主动问答（2026-10-07 10:47 PDT），归档时精简整理。
+
+**问题（用户）**：我们读过一篇讲 synthetic data generation 用 LLM 来做 seed 的深入推演、变化来得到更多 seed 的，是哪篇？
+
+**核心答案**：是本篇 **Day22 Evol-Instruct（WizardLM）**。它拿种子指令当起点，让 LLM 做两类演化：纵深演化（In-depth：加约束、深化、具体化、增加推理步数、复杂化输入，把简单指令改难）和广度演化（In-breadth：仿照种子生成全新任务），迭代几轮后得到量更大、难度分布更宽的指令池，再筛掉退化 / 失败的演化结果。这正是问题里说的「深入推演 + 变化，从 seed 长出更多 seed」。
+
+**不要混淆的两篇同线工作**：
+
+- **Day21 Self-Instruct** 是源头：175 条人工种子自举出 52k 指令，靠 ROUGE-L 去重；它解决的是「从少量种子扩规模」，不显式提升复杂度。
+- **Day27 OSS-Instruct** 换的是种子来源：拿真实代码片段当 seed，让 LLM 出题 + 解题；它动的是来源分布，不是难度演化。
+
+**关联**：Day22 Evol-Instruct（WizardLM，arXiv:2304.12244）；对照 Day21 Self-Instruct、Day27 OSS-Instruct。
+
+**图谱关系**：合成指令主线中，Day21 解决「无中生有扩规模」→ Day22 在种子之上做深度 / 广度演化「控难度」→ Day27 把 seed 路线迁移到真实代码片段；三篇同属 seed 驱动的 synthetic data generation，但改动的轴不同（规模 / 难度 / 来源）。
+
 ## 核心
 1. **Motivation**: [待读后填写] 为什么普通 instruction-tuning 数据偏简单？复杂指令覆盖有什么缺口？
 2. **Data Pipeline**: [待读后填写] 种子从哪来 → In-depth / In-breadth 怎么演化 → 怎么过滤失败样本 → 如何形成约 70k 数据集 → 如何评估。

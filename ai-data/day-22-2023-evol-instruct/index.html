@@ -107,11 +107,11 @@ pre code{background:none;padding:0;color:inherit}
   <header class="hero">
     <span class="kicker">ai-data · Day 22</span>
     <h1>Paper 模板 - Day 22</h1>
-    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成 · 含第二轮复习</p>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">第二轮复习（2026-09-22）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-10-07）</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">第二轮复习（2026-09-22）</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -150,7 +150,21 @@ pre code{background:none;padding:0;color:inherit}
 <li>把 Evol-Instruct 迁移到 coding data 时，如何把“增加约束/具体化/增加推理步骤”改写成边界条件、多文件依赖、性能约束与测试用例，并在进 SFT / RL 数据池前接 Day16 的 parser + execution filter？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-10-07）</h2>
+<blockquote class="pq">
+<p>来自 <code>ai data</code> side chat 用户主动问答（2026-10-07 10:47 PDT），归档时精简整理。</p>
+</blockquote>
+<p><strong>问题（用户）</strong>：我们读过一篇讲 synthetic data generation 用 LLM 来做 seed 的深入推演、变化来得到更多 seed 的，是哪篇？</p>
+<p><strong>核心答案</strong>：是本篇 <strong>Day22 Evol-Instruct（WizardLM）</strong>。它拿种子指令当起点，让 LLM 做两类演化：纵深演化（In-depth：加约束、深化、具体化、增加推理步数、复杂化输入，把简单指令改难）和广度演化（In-breadth：仿照种子生成全新任务），迭代几轮后得到量更大、难度分布更宽的指令池，再筛掉退化 / 失败的演化结果。这正是问题里说的「深入推演 + 变化，从 seed 长出更多 seed」。</p>
+<p><strong>不要混淆的两篇同线工作</strong>：</p>
+<ul>
+<li><strong>Day21 Self-Instruct</strong> 是源头：175 条人工种子自举出 52k 指令，靠 ROUGE-L 去重；它解决的是「从少量种子扩规模」，不显式提升复杂度。</li>
+<li><strong>Day27 OSS-Instruct</strong> 换的是种子来源：拿真实代码片段当 seed，让 LLM 出题 + 解题；它动的是来源分布，不是难度演化。</li>
+</ul>
+<p><strong>关联</strong>：Day22 Evol-Instruct（WizardLM，arXiv:2304.12244）；对照 Day21 Self-Instruct、Day27 OSS-Instruct。</p>
+<p><strong>图谱关系</strong>：合成指令主线中，Day21 解决「无中生有扩规模」→ Day22 在种子之上做深度 / 广度演化「控难度」→ Day27 把 seed 路线迁移到真实代码片段；三篇同属 seed 驱动的 synthetic data generation，但改动的轴不同（规模 / 难度 / 来源）。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2>
 <ol>
 <li><strong>Motivation</strong>: [待读后填写] 为什么普通 instruction-tuning 数据偏简单？复杂指令覆盖有什么缺口？</li>
 <li><strong>Data Pipeline</strong>: [待读后填写] 种子从哪来 → In-depth / In-breadth 怎么演化 → 怎么过滤失败样本 → 如何形成约 70k 数据集 → 如何评估。</li>
@@ -158,23 +172,23 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: [待读后填写] 只记录数据规模、质量/复杂度评估和 downstream 对照，不展开 optimizer / RLHF 等算法细节。</li>
 </ol>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移</h2>
 <ul>
 <li>对你现在 coding data 工作的 1-2 个直接可试的点：[待读后填写]</li>
 <li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>[阅读后补原文，勿凭记忆引用]</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 Data Pipeline / Key Tricks / Results / 可迁移</li>
 <li>保留并完善「和之前工作的关系」小节</li>
@@ -184,7 +198,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>第二轮复习（2026-09-22）</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>第二轮复习（2026-09-22）</h2>
 <blockquote class="pq">
 <p>本轮核验：arXiv:2304.12244 v2/v3 全文（§2 Evol-Instruct、§4.2 实验细节）+ 多方独立转录交叉核对。初读 NOTES 基本是骨架（多处"待读后填写"），关键数字有一处实质性误读，本轮已修正并补齐数据事实。</p>
 </blockquote>
