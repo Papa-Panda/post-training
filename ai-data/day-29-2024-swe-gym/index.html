@@ -145,6 +145,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>论文最终用于训练的 491 条轨迹如何从 rollout 池中选择：只留成功轨迹会不会损失失败诊断信号，又会引入多大的 agent scaffold 偏置？</li>
 <li>对比 Day 27 OSS-Instruct 与 Day 16 Qwen2.5-Coder：SWE-Gym 的真实 repo + 单元测试到底补了哪些静态合成 / execution-filter 无法覆盖的数据维度，代价又是什么？</li>
 </ol>
+<p>相关讨论（Gemini网页版，2026-10-15）：https://gemini.google.com/app/bc6e3cbf805f2fa3</p>
 </section>
 <section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">GitHub 真实 issue / 代码库</div><div class="farrow">→</div><div class="fnode">固定仓库状态与依赖</div><div class="farrow">→</div><div class="fnode">封装可执行 runtime</div><div class="farrow">→</div><div class="fnode">配套 unit tests</div><div class="farrow">→</div><div class="fnode">agent rollout</div><div class="farrow">→</div><div class="fnode">按测试结果形成可验证轨迹数据</div></div>
 <ol>

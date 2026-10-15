@@ -31,6 +31,8 @@ SWE-Gym 从 11 个开源 Python 仓库整理 2,438 个真实 issue 任务，为�
 2. 论文最终用于训练的 491 条轨迹如何从 rollout 池中选择：只留成功轨迹会不会损失失败诊断信号，又会引入多大的 agent scaffold 偏置？
 3. 对比 Day 27 OSS-Instruct 与 Day 16 Qwen2.5-Coder：SWE-Gym 的真实 repo + 单元测试到底补了哪些静态合成 / execution-filter 无法覆盖的数据维度，代价又是什么？
 
+相关讨论（Gemini网页版，2026-10-15）：https://gemini.google.com/app/bc6e3cbf805f2fa3
+
 ## 核心
 1. **Motivation**: 静态 coding 数据缺少真实仓库上下文、依赖环境和可执行验证，无法直接支持仓库级软件工程 agent 的训练数据闭环。
 2. **Data Pipeline**: GitHub 真实 issue / 代码库 → 固定仓库状态与依赖 → 封装可执行 runtime → 配套 unit tests → agent rollout → 按测试结果形成可验证轨迹数据。
