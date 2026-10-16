@@ -16,6 +16,27 @@
 ## 一句话总结
 Octo 把 25 个 Open X-Embodiment 数据集中的约 80 万条轨迹统一成“任务/观测 token → block-masked Transformer → diffusion action chunk”的开放通用策略；它真正有价值的不是零样本万能，而是能在约 100 条目标域示范、单张消费级 GPU 数小时内，适配新传感器、新动作空间和新机器人。
 
+## 大纲
+- 问题：25 个数据集的机器人、相机、任务条件与动作空间全不一致，固定 I/O 的策略无法共享预训练权重
+- 接口：分模态 tokenizer + block-wise mask 把异构隔离在输入端，passive readout token 把异构隔离在输出端
+- 训练：约 80 万条轨迹按人工权重 $q_d$ 混合，diffusion 目标拟合多域示范分布；batch 2048、300k steps
+- 适配：新传感器加 tokenizer、新动作空间换 readout head，约 100 条示范 full finetuning 数小时完成
+- 证据与边界：微调六设置平均 72%（scratch 20%）；零样本新物体 80%、新场景 40%、新技能仅 5%——强初始化而非技能组合器
+
+## 流程图
+```mermaid
+graph TD
+  A[25 个数据集 80 万轨迹] --> B[分模态 tokenizer]
+  B --> C[block-wise mask Transformer]
+  C --> D[passive readout token]
+  D --> E[diffusion head 生成动作块]
+  E --> F[执行 1 至 4 步后重规划]
+  C --> G[新传感器加 tokenizer]
+  D --> H[新动作空间换 readout head]
+  G --> I[约 100 条示范全量微调]
+  H --> I
+```
+
 ## 和之前工作的关系
 
 - **接了哪条线：** Day09 的 RT-2 / OpenVLA 建立 VLA 总览，Day11 的 π₀ 用 flow matching 生成高频 action chunk，Day12 解释了 Diffusion Policy 的条件动作扩散与 receding horizon；Day13 把 Day12 的 diffusion readout 放进跨数据集、跨 embodiment 的通用 Transformer policy。
@@ -216,3 +237,57 @@ $$\theta^\star=\arg\min_\theta\;\mathbb E_{\tau\sim\mathcal D_{d^\star}}[\mathca
 
 <!-- viz:stats: 27M Octo-Small | 93M Octo-Base | 2048 batch TPUv4-128 300k steps 约 14 小时 -->
 <!-- viz:bars: diffusion head 83% | MSE 35% | 离散 CE 18% -->
+
+<!-- viz:bars: 分布内 85% | 新物体 80% | 新场景 40% | 新技能 5% -->
+
+## 第二轮复习（2026-10-16）
+
+> 本轮补两处口径（零样本四桶数字的出处与样本量、v1.5 checkpoint 的后续发布）＋补大纲与流程图（初读缺失，本轮补齐）。核心收获：把 Day13 从「开源版通用策略」重读为**接口层**的确立——Octo 的「通用」首先是一个 schema 与 adapter 合同，其次才是能力；它证明了异构可以被隔离在输入端与输出端，但也用 full finetuning 优于 head-only 这个自家消融承认：表示本身并不冻结，接口模块化买到的是改造便宜，不是零成本迁移。
+
+### 元信息修正
+
+1. **零样本四桶数字的口径钉死**：初读正文写的「in-distribution 85%、新物体 80%、新场景 40%、新技能 5%」出自论文 Table VII，对象是 **Octo-Small 在 WidowX 单平台**上的测试，每桶只有 2 个任务、每任务 20 次试验（每桶共 40 次）。这是方向性证据，不是大样本统计结论；引用时必须带「Small / WidowX / 每桶 40 trials」，不能当作 Octo-Base 的跨平台泛化率。
+2. **版本与后续发布**：arXiv 现行版为 v2（2024-05-26 修订），论文正式发表于 RSS 2024（Delft）；初读元信息无误但未注版本。另补一条初读时不存在的事实：官方仓库后续发布了 v1.5 checkpoint（ `octo-small-1.5` / `octo-base-1.5` ，托管于 HuggingFace `rail-berkeley` ），现行 `load_pretrained` 示例默认指向 1.5 版——复现实验时要先确认用的是哪一代权重，两代不可混引。
+3. **定位校准**：初读把 Octo 记成「π₀ 的开源小号对照」；复习校准为**接口层**——Day09 是语义层（动作 token 化），Day11/12 是生成层（连续动作块怎么采样），Day13 回答的是生成层之外的另一半问题：异构数据与异构身体如何插进同一个 backbone。它与 Day14 的分工是「接口即泛化 vs 配方即泛化」，不是同层竞争。
+
+### 一句话总结
+
+三十多天后回看，Day13 的耐久贡献是把「通用机器人策略」从一句口号拆成三件可记账的工程：输入端用 tokenizer + mask 吸收异构、中间用 readout token 划出表示与动作的接缝、训练侧用手调 mixture 权重 $q_d$ 决定模型到底在拟合哪个分布；它交付的不是零样本万能，而是一个能在约 100 条示范内完成再校准的强初始化——泛化的上限由 mixture 的支持集决定，不由架构决定。
+
+### 和之前工作的关系
+
+- **vs Day12 Diffusion Policy（直接对比，同专题相邻篇）**：Day13 的 diffusion head 与 Day12 同家族、同目标函数，唯一实质变化是条件从单机观测 $O_t$ 换成多域混合下的 readout 表示 $e_t$ 。连读两篇的结论很硬：动作生成数学在 Day12 就已定型，Day13 的全部增量都在它之外——数据接口、mask 语义、mixture 权重、微调合同。这再次印证 Day12 复习的判断：2023 年后这个专题的进步顺序是先生成、再接口、再配方。
+- **vs Day15 Open X-Embodiment / RT-X（跨阶段，数据段）**：Octo 是 OXE 的下游消费者，Day15 是它的数据来源本身。Day13 的 mixture 权重 $q_d$ 是手调的（丰富者加权、重复者降权），Day15 的 RT-X 则证明同一批数据换一种训练配方就能得到不同的跨 embodiment 行为——两篇拼起来说明：OXE 的价值不在「数据量」而在「带 embodiment 与采集域标注的混合分布」，而 $q_d$ 至今没有原理化的设定方法，是数据 curation 的开放债。
+- **vs Day24 系统辨识（跨阶段，sim2real 段）**：Day24 一系把动力学参数显式化（辨识出摩擦、质量再喂给策略），Octo 则把 embodiment 差异全部隐式压进权重与 $d$ 的分布身份里，没有任何显式动力学参数。代价在边界一节会看到：新身体超出预训练覆盖时，隐式路线没有任何可单独校准的旋钮，只能靠 100 条示范整体再拟合；显式路线慢但可诊断，隐式路线快但不可归因。
+- **vs Day30 数据飞轮（跨阶段，eval / safety 段）**：Octo 的「预训练 → 约 100 条示范微调 → 分桶评测」其实就是 Day30 飞轮里 retrain 一环的手工原型：差别是 Day30 要求失败先 triage 再决定 recollect / resimulate，而 Octo 的微调合同默认「新域一律全量微调」，没有失败归因环节。把 Day30 的 gate 套回 Day13，正好补上它缺的那一课：先分清是 schema 错位、覆盖不足还是技能缺失，再决定微调、补数据还是拒部署。
+- **跨阶段 vs Day34 π0.7（最新进展段）**：Day13 零样本新技能只有 5%，是整条路线最刺眼的一个数字；Day34 的组合泛化（做没教过但可由已学技能组合出的任务）正是冲着这 5% 来的。两篇相隔 21 天读，问题意识完全连续：BC 混合分布的支持集是并集不是组合闭包，要突破就必须在条件结构或数据构造上做组合，而不能指望 scale 自己长出来。
+
+### 核心
+
+1. **动机重读：通用性的第一瓶颈是 I/O contract，不是参数量**：25 个数据集之间对不齐的是相机数、坐标系、夹爪语义、控制频率与动作标度——这些是 schema 问题，模型再大也绕不过。Octo 的解法是把异构推到两端：输入端每模态独立 tokenizer + 缺模态 mask，输出端 readout token 之后才接 embodiment 相关的 head，中间 backbone 只处理统一 token 序列。这是整篇最可迁移的设计：先让接口可组合，再谈表示是否共享。
+2. **机制深挖：readout token 是一道「接缝」，不是免费的解耦**：readout 只读上下文、不被输入 token 反向注意，于是换 head 时 backbone 的输入侧结构不动。但论文自己的消融说 full finetuning 优于只调 head——这意味着接缝两侧的表示仍是共同适应的，readout  embedding 并不是 embodiment 无关的语义瓶颈（初读问答里「薄映射」的说法要打折）。准确的说法是：模块化降低的是改造成本与回归风险，不是把迁移变成零梯度适配；把它读成「冻结 backbone + 换头即用」是过度推销。
+3. **机制深挖： $q_d$ 才是这个系统真正的「架构」**：混合目标 $\sum_d q_d \, \mathbb{E}_{\mathcal{D}_d}[\mathcal{L}]$ 里，架构决定可表示的函数类， $q_d$ 决定实际被拟合的分布。WidowX 消融里 mixture 从全量缩到 RT-X 子集掉 23 个点（83% → 60%）、再缩到单机器人 Bridge 掉到 43%，跌幅大于任何架构消融——数据混合比就是这个系统里最贵的超参数，而它至今靠手调。谁掌握 $q_d$ 的设定方法，谁就掌握了通用策略的实际行为。
+4. **机制深挖：支持集论证解释 85 / 80 / 40 / 5 的全部形状**：BC 拟合的是混合分布下「数据里接下来怎么动」，新物体落在已有技能的视觉邻域内（插值），新场景要求对背景与布局外推（弱外推），新技能要求轨迹模式的组合（支持集之外）。四个数字的落差不是四个独立现象，而是同一条「离支持集越远、掉得越狠」的曲线。这也预言了它的修复路径只有两条：扩支持集（采更多组合数据）或改条件结构让组合可表达（Day14 的高层子任务条件、Day34 的组合泛化都在这条路上）。
+
+### 边界
+
+1. **证据没有证明什么**：零样本四桶出自 Octo-Small、WidowX 单平台、每桶 40 次试验，置信区间很宽，不能外推为「Octo 的新技能泛化率是 5%」这种全称结论；微调平均 72% 是六个约 100-demo 设置的均值，各设置的任务难度与基线不可比。它证明的是「同一初始化在多类新域上可被便宜地再校准」，没有证明 zero-shot 通用，也没有证明 readout 表示 embodiment 无关（full FT 消融恰恰是反证方向）。
+2. **何时失效**：目标域的动力学、观测语义或技能支持超出预训练 mixture 覆盖时，低 diffusion loss 与闭环成功脱钩——loss 只度量「像不像示范」，不度量可达性与约束；语言标注只覆盖 56% 数据、腕部相机只占 27%，依赖这些模态的下游任务会继承数据缺口而非模型能力。
+3. **系统边界**：没有 reward、没有安全约束、没有失败恢复；「消费级 GPU 数小时」的前提是目标域示范已按 Octo 的 schema（delta 末端控制、夹爪语义对齐）采集完毕，真实部署里 schema 对齐与数据清洗往往比微调本身更耗时——接口层的成本没有消失，只是从训练前移到了数据接入环节。
+
+### 迁移到 post-training / Agentic RL Infra
+
+可执行的同构：把 agentic post-training 的多源轨迹管线按 Octo 的三件套重构，并逐项记账。其一，**每条轨迹自带 schema 描述符**：来源域、工具集版本、动作（工具调用）空间、观测模态与缺失 mask、成功/失败标签，缺字段的数据在接入层就被拒，不许进 mixture——对应 Octo 的 tokenizer + mask 合同。其二，**mixture 权重 $q_d$ 从手调改为受控实验对象**：每个数据源设权重版本，按下游分桶验证集（新实体 / 新上下文 / 新任务型 / 新工具 API 四桶，正是 Octo 四桶的 agent 版）做权重消融并记录，而不是凭数据量默认配比。其三，**适配新域走 Octo 式两段合同**：先只训「薄适配层」（新工具的调用格式映射 + 系统提示侧适配）测一遍，若分桶评测显示表示层也不匹配，再升级为全量继续训练，并用 full-vs-thin 的差值决定以后同类新域的默认档位——把 Day13 「full 优于 head-only」的教训变成一条可复用的决策规则，而不是每次重新争论。
+
+### 思考题（综合 Day12 / Day13 / Day15 / Day30 / Day34）
+
+- **(a) $q_d$ 的原理化设定**：Day13 的 mixture 权重靠手调，Day15 说明同一批 OXE 数据换配方行为就变。若把 $q_d$ 改为按「各域对下游四桶验证集的边际贡献」在线调整，怎样避免权重塌缩到最易拟合的大域、把稀有 embodiment 饿死？请给出一个带下限约束或覆盖正则的更新规则，并说明你用什么观测量判断它优于手调权重。
+- **(b) 给 Octo 接上 RL 会先修好哪一桶**：Day13 四桶是 85 / 80 / 40 / 5。若在 Octo 初始化上按 Day20 的思路加在线 RL（示范常驻 replay + $Q$ 学习），你预判哪一桶涨幅最大、哪一桶几乎不动？请用支持集论证回答：RL 能爬出示范分布的机理对「新场景」与「新技能」为何不对称，并指出这个预判被什么实验结果证伪。
+- **(c) 微调前的 triage 门**：Day30 要求失败先归因再行动。给一个 Octo 式系统设计部署前 gate：目标域闭环失败时，如何用只读诊断（schema 校验、观测分布距离、readout 表示邻域密度、试探性 thin-adapt 前后差值）区分「接口错位」「覆盖不足」「技能缺失」三类病因，并分别映射到换 adapter、补采数据、拒绝部署三种处置？请说明每一类病因至少一个不可互相冒充的判别信号。
+
+参考链接（本轮复习）：
+- Octo 论文（arXiv v2，RSS 2024）：https://arxiv.org/abs/2405.12213
+- Octo 官方代码与 v1.5 checkpoint 说明：https://github.com/octo-models/octo
+- RSS 2024 论文集条目（Octo）：https://enriquecoronadozu.github.io/rssproceedings2024/rss20/p090.pdf
+
+GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-13-2024-octo/NOTES.md
