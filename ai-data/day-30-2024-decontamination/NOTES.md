@@ -31,6 +31,8 @@
 2. 论文如何把 HumanEval / MBPP 与 The Stack / The Pile 做规模化匹配，并证明被判为污染的子集确实带来更高模型得分，而不只是题目更容易？
 3. 对比 Day 24 D4 和 Day 29 SWE-Gym：若要为 repo-level SFT / RL 数据建立防污染门，应该按文件、函数、issue、commit 时间和执行语义分别做哪些 split 与去重？
 
+相关讨论（Gemini网页版，2026-10-16）：https://gemini.google.com/app/710255d88e40d3bf
+
 ## 核心
 1. **Motivation**: 代码 benchmark 可能进入预训练或微调语料；仅靠精确字符串匹配会漏掉变量重命名、格式变化和语义近似实现，导致评测分数被污染抬高。
 2. **Data Pipeline**: HumanEval / MBPP 测试题与参考解法 → 在 The Stack / The Pile 中检索候选 → surface-level 字符串相似度 + semantic-level code matching → 阈值判定与人工检查 → 比较污染 / 干净子集上的模型表现。
