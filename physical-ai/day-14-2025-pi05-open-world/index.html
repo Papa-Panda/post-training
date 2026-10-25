@@ -107,11 +107,11 @@ pre code{background:none;padding:0;color:inherit}
   <header class="hero">
     <span class="kicker">physical-ai · Day 14</span>
     <h1>Day14 — π₀.₅: a Vision-Language-Action Model with Open-World Generalization</h1>
-    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成 · 含第二轮复习</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-09-07）</a><a href="#sec-7">数学视角：统一成一个双层时间尺度的条件生成控制问题</a><a href="#sec-8">核心</a><a href="#sec-9">可迁移 / Transfer</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">连接</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">大纲</a><a href="#sec-4">流程图</a><a href="#sec-5">和之前工作的关系</a><a href="#sec-6">为什么今天读它</a><a href="#sec-7">今天的 3 问</a><a href="#sec-8">问答补充（2026-09-07）</a><a href="#sec-9">数学视角：统一成一个双层时间尺度的条件生成控制问题</a><a href="#sec-10">核心</a><a href="#sec-11">可迁移 / Transfer</a><a href="#sec-12">疑问 / 下一步</a><a href="#sec-13">原文金句 (1-2句)</a><a href="#sec-14">今晚产出</a><a href="#sec-15">连接</a><a href="#sec-16">第二轮复习（2026-10-25）</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -125,7 +125,27 @@ pre code{background:none;padding:0;color:inherit}
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>π₀.₅ 在 π₀ 的 VLM + flow-matching action expert 基础上，用<strong>异构 co-training</strong>（多机器人数据 + web/VLM 数据 + 高层语义子任务预测 + 目标检测 + hybrid 多模态样本）加<strong>两阶段 knowledge insulation</strong> 训练 recipe，首次让端到端 VLA 在<strong>完全没见过的真实家庭</strong>里完成长时程灵巧任务（clean kitchen / bedroom），并在测试时显式做高层子任务推理。</p>
 </section>
-<section class="sec" id="sec-3"><h2><span class="n">3</span>和之前工作的关系</h2>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>大纲</h2>
+<ul>
+<li>问题： π₀ 的泛化止步于已见环境；真实家庭要求物理、视觉、语义三个层级同时泛化，靠堆目标域机器人数据不可行</li>
+<li>配方：约 400 小时移动操作数据（MM）+ 多环境静态数据（ME）+ 跨 embodiment 实验室数据（CE）+ 高层子任务标注（HL）+ web 多模态数据（WD），第一阶段 97.6% 的样本不来自目标移动平台</li>
+<li>两阶段：预训练 280k 步只用 FAST 离散动作 token；后训练 80k 步才加入随机初始化的 flow matching 动作专家，并保留 web 数据与文本预测防遗忘</li>
+<li>推理：同一模型先自回归预测语义子任务，再以子任务为条件生成 50 步（1 秒）连续动作块，形成慢语义环 + 快控制环</li>
+<li>证据与边界：训练地点从 3 增至 104 时未见家庭表现逼近「直接在测试家庭训练」的基线；定量主战场是 mock 家庭，真实家庭只有 3 个；显式高层推理的收益小于训练期混入 HL 数据的收益</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>流程图</h2>
+<p><div class="mermaid">graph TD
+  A[异构数据混合] --&gt; B[预训练只学离散 token]
+  B --&gt; C[后训练加动作专家]
+  C --&gt; D[同一模型双层推理]
+  D --&gt; E[先预测语义子任务]
+  E --&gt; F[生成连续动作块]
+  F --&gt; G[在未见家庭执行]
+  G --&gt; D
+</div></p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>和之前工作的关系</h2>
 <ul>
 <li>接了哪条线：Day09 VLA 总览 → Day11 π₀（flow-matching 连续动作专家）→ Day14 开放世界泛化，是 π₀路线的直接续作。</li>
 <li>补了哪个短板：Day11 的 π₀ 强在 in-lab / 已见场景的高频精细操作，但泛化止步于"新物体、已知环境"；π₀.₅ 把泛化边界推到"<strong>新环境、新家庭</strong>"和<strong>长时程（多分钟）任务</strong>。</li>
@@ -136,17 +156,17 @@ pre code{background:none;padding:0;color:inherit}
 <li>对之前 Day X 的直接对比：Day09-13 的泛化论证都停留在"训练分布内/邻域的桌案任务"，π₀.₅ 的论文标题就是 open-world generalization，评估直接搬到 4 个未见过的真实家庭；它的核心变量是<strong>训练混合配方的成分设计</strong>，不是更大的模型。</li>
 </ul>
 </section>
-<section class="sec" id="sec-4"><h2><span class="n">4</span>为什么今天读它</h2>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>为什么今天读它</h2>
 <p>路线图中 Day11–14 是 VLA 专题扩展的闭环收尾（Day09/10 总览 → Day11-14 专题）。Day11 学了流匹配动作专家、Day12 学了扩散动作、Day13 学了模块化泛化策略，π₀.₅ 把"<strong>如何让 VLA 离开实验室</strong>"这一真实产品问题的训练 recipe 补齐，是 VLA → 真实部署的关键一站。它的 co-training 配方思想（异构数据源混合）也是后天 Day15–18（Open X-Embodiment / DROID / BridgeData）机器人数据规模化的直接前置。</p>
 </section>
-<section class="sec" id="sec-5"><h2><span class="n">5</span>今天的 3 问</h2>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>今天的 3 问</h2>
 <ol>
 <li>π₀.₅ 的异构 co-training 配方里，<strong>每个成分（多机器人数据、web 数据、高层子任务预测、目标检测）分别补了哪一类泛化</strong>？ablation 显示缺了哪个最致命？</li>
 <li>"Knowledge insulation" 到底在绝缘什么？预训练混合与 post-training 的分工如何防止机器人数据把 web 语义"洗掉"？</li>
 <li>高层语义子任务预测为什么要在<strong>测试时</strong>也显式做（high-level inference）？它相对直接输出动作的增益来自哪里，代价是什么？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-09-07）</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>问答补充（2026-09-07）</h2>
 <blockquote class="pq">
 <p>以下问答归档自 physical AI side chat（2026-09-06）的用户主动提问；Day N 推送卡片与提醒类消息已跳过。每个条目保留问题原文（精简）、核心答案与符号定义。</p>
 </blockquote>
@@ -203,7 +223,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>$ k $ 数据源编号（robot / subtask / web / det 四类）； $ w_k $ 第 $ k $ 类数据的混合权重； $ \mathcal{L}_k $ 第 $ k $ 类数据上的 loss； $ \theta $ 网络权重。</p>
 <p>和 Day16 DROID 正好是两个方向：DROID 固定身体、扩张场景多样性；π₀.₅ 拥抱身体异构，靠配方让共享表示自己长出"语义"和"控制"的分工——这正是 README 问答记录里"接口即泛化（Octo）vs 配方即泛化（π₀.₅）"对照的另一面。</p>
 </section>
-<section class="sec sec-math" id="sec-7"><h2><span class="n">7</span>数学视角：统一成一个双层时间尺度的条件生成控制问题</h2>
+<section class="sec sec-math" id="sec-9"><h2><span class="n">9</span>数学视角：统一成一个双层时间尺度的条件生成控制问题</h2>
 <p>把 Day11 的 POMDP 扩展成<strong>分层（options/层次化）POMDP</strong>：观测 $o_t=[I_t,\ell_t,q_t]$ 不变，语言指令 $\ell$ 变成长程任务（如"打扫厨房"），模型内部生成一个慢变量——语义子任务 $s_t$ （如"拿起海绵"、"擦桌子"），再由快变量动作块 $A_t$ 落实到关节。</p>
 <h3>1) State / observation / action / objective</h3>
 <ul>
@@ -250,7 +270,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>"未见过的家"仍是发达国家中产家庭的分布；对极端杂乱、非标准家具的泛化未被评估。</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>核心</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>核心</h2>
 <ol>
 <li><strong>Motivation</strong>: VLA 在实验室桌案上很强，但"离开实验室去真实家庭做长程任务"仍是开放问题。Baseline（纯 π₀式训练）的问题：训练分布=实验室，泛化只到"新物体、旧环境"；长程任务需要任务分解能力，而纯动作克隆没有显式的分解表示。和 Physical AGI 的关系：这是 foundation model for robots 从"demo"走向"product"的第一块拼图。</li>
 <li><strong>System / Method</strong>: 架构沿用 π₀（VLM + flow matching action expert）+ FAST 离散动作 tokenization；方法核心是训练配方——异构 co-training 混合 + hybrid 多模态样本 + 两阶段 knowledge insulation；推理时显式高层子任务预测再生成动作块（双层闭环）。</li>
@@ -262,7 +282,7 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: 在 4 个完全未见的真实家庭中完成长程灵巧操作（厨房/卧室清洁类任务）；相对 π₀基线和其他 VLA 有显著的成功率提升；ablation 证实每个混合成分（多机器人数据、web 数据、高层子任务预测、高层推理）都不可或缺。论文自称首次（"for the first time"）让端到端学习系统在全新家庭做长程灵巧操作。</li>
 </ol>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移 / Transfer</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>可迁移 / Transfer</h2>
 <ul>
 <li>方法在 held-out 上是否 transfer？是——评估本身就是 held-out homes，泛化结论直接来自测试集。模型贡献 vs 框架贡献：框架（配方+双层推理）贡献更大，backbone 沿用 π₀量级。</li>
 <li>对你 Infra → Post-training → Physical AI 迁移的 1-2 个直接启发：</li>
@@ -271,19 +291,19 @@ pre code{background:none;padding:0;color:inherit}
 <li>Infra 视角：FAST tokenization 解决的是大规模 co-training 的算力效率问题——离散 token 让动作数据能进 VLM 的高效训练管线；评测上"未见过的真实家庭"是最贵的评测（人力+场地），论文用 4 个家庭做 gate，这对 Physical AI 的 eval infra 设计是直接参考：仿真评测再多，最终 gate 必须是真实分布。</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：knowledge insulation 在论文里到底是"混合比例设计"还是有显式的参数隔离机制（如冻结 VLM backbone、adapter、梯度mask）？今天的理解偏向前者，需要精读 IV-C/IV-D 确认——这决定了抄作业时是调 $w_k$ 还是改架构。</li>
 <li>如果要复现 / 小规模试，第一个实验做什么？在 openpi 的 π₀.₅ checkpoint 上做最小消融：关掉测试时高层推理（直接用总指令生成动作），在同一个未见场景里对比长程任务成功率，验证"方差分解"增益是否在小规模下依然成立。</li>
 </ul>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>"We describe π₀.₅, a new model based on π₀ that uses co-training on heterogeneous tasks to enable broad generalization."
 "we demonstrate for the first time that an end-to-end learning-enabled robotic system can perform long-horizon and dexterous manipulation skills, such as cleaning a kitchen or bedroom, in entirely new homes."（摘要原文）</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>今晚产出</h2>
 <ul>
 <li>[x] 按模板补齐 System / Training / Key Tricks / Results / 可迁移</li>
 <li>[x] 保留并完善「和之前工作的关系」小节（含 Day09/11/12/13 对比）</li>
@@ -291,13 +311,63 @@ pre code{background:none;padding:0;color:inherit}
 <li>[ ] 精读 IV-C/IV-D 确认 knowledge insulation 的确切机制（疑问/下一步）</li>
 </ul>
 </section>
-<section class="sec" id="sec-13"><h2><span class="n">13</span>连接</h2>
+<section class="sec" id="sec-15"><h2><span class="n">15</span>连接</h2>
 <ul>
 <li>上一篇: day-13-2024-octo — Octo 的模块化 readout vs π₀.₅的单 backbone hybrid 样本：两条泛化路线</li>
 <li>下一篇预告: day-15-2023-open-x-embodiment-rtx — 回到数据源头：Open X-Embodiment 的 22 种机器人统一 schema 与跨 embodiment scaling</li>
 </ul>
 <div class="viz viz-flow flow"><div class="fnode">高层语义子任务重规划</div><div class="farrow">→</div><div class="fnode">action chunk</div><div class="farrow">→</div><div class="fnode">执行短前缀</div><div class="farrow">→</div><div class="fnode">双层闭环</div></div>
-<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Day09-13</h4><ul><li>训练分布内桌案任务泛化</li></ul></div><div class="vscol vs-b"><h4>π₀.₅</h4><ul><li>4 个未见真实家庭</li><li>核心变量是训练混合配方</li></ul></div></div></section>
+<div class="viz viz-vs vs"><div class="vscol vs-a"><h4>Day09-13</h4><ul><li>训练分布内桌案任务泛化</li></ul></div><div class="vscol vs-b"><h4>π₀.₅</h4><ul><li>3 个未见真实家庭 + mock 家庭</li><li>核心变量是训练混合配方</li></ul></div></div>
+<!-- viz:stats: 约 400 小时 MM 数据 | 第一阶段 97.6% 样本非目标平台 | 预训练 280k 步 | 后训练 80k 步 -->
+
+</section>
+<section class="sec" id="sec-16"><h2><span class="n">16</span>第二轮复习（2026-10-25）</h2>
+<blockquote class="pq">
+<p>本轮答上初读留下的 open question（knowledge insulation 到底是什么机制），并修正三处口径（真实家庭数量、venue、「每个成分不可或缺」的过强表述）＋补大纲与流程图（初读缺失，本轮补齐）。核心收获：把 Day14 从「配方即泛化」重读为<strong>时间层</strong>的确立—— π₀.₅ 的真正发明不是某个新模块，而是把泛化拆成三个可分别记账的轴：数据成分（补哪一层抽象）、训练阶段（什么时候允许哪种梯度进来）、推理层级（先想再做）；而它自家消融给出的最反直觉结论是，这三轴里训练期的 HL 数据混入比测试期的显式子任务推理更值钱。</p>
+</blockquote>
+<h3>元信息修正</h3>
+<ol>
+<li><strong>「knowledge insulation」的出处与机制钉死（初读悬案结案）</strong>：初读把 knowledge insulation 记成 π₀.₅ 自带的两阶段机制并标注待精读——精读原文（arXiv:2504.16054 全文）后确认：<strong>该词在 π₀.₅ 论文中一次都没有出现</strong>。原论文里的真实机制是两阶段课程：预训练 280k 步只用 FAST 离散 token 训练（根本没有 flow 动作专家），后训练 80k 步才随机初始化动作专家、以联合目标（式 1， $\alpha = 10.0$ ）同时练 next-token 与 flow matching，且后训练混合里刻意保留 web 数据（WD）以保住语义与视觉能力、动作数据只取成功且长度受限的 episode（MM + ME 子集 + HL 切片 + VI）。「Knowledge Insulation」是<strong>后续单独一篇论文</strong>（Driess et al.，《Knowledge Insulating Vision-Language-Action Models》，2025-05-29，arXiv:2505.23705，NeurIPS 2025）的标题概念，产物称 π₀.₅-KI：它才提出显式的梯度隔离——动作专家的 flow 梯度 stop-gradient 不回传 VLM backbone，backbone 改由离散 FAST 动作 token 的交叉熵学习动作信息。初读问答里「Day11 共享 attention 的半隔离由 Day14 还账」的说法据此修正：还账的是 π₀.₅-KI 这篇续作，不是 Day14 原文；抄作业时两者要分开——原版调的是阶段与混合，KI 版改的是梯度通路。</li>
+<li><strong>真实家庭数量：4 → 3</strong>：初读正文与 viz 多处写「4 个完全未见的真实家庭」。论文 §V-A 与 Fig. 7 的口径是 <strong>3 个真实家庭</strong>（三厨房、三卧室的清洁任务，每任务 10 trials 量级、按 rubric 进度打分），定量对比的主战场另有可复现的 <strong>mock 家庭</strong>。博客与论文一致说「entirely new homes」，但数字是 3，不是 4；本轮已同步修正文末 viz。</li>
+<li><strong>Venue 补录</strong>：π₀.₅ 为 <strong>CoRL 2025 Oral</strong>（初读元信息只记 arXiv 与日期，未记会议）。</li>
+<li><strong>「每个成分不可或缺」过强，改为分工口径</strong>：初读 Results 写「ablation 证实每个混合成分都不可或缺」。论文 Fig. 10 的 mock 整任务上，no WD（去掉 web 数据）的差异<strong>不显著</strong>；WD 的大作用出现在另外两处——OOD 物体类别的语言跟随（Fig. 11）与高层子任务推理（Fig. 13）。ME / CE 两路机器人数据在所有评测上都大掉点。准确表述是：成分不是个个全域不可或缺，而是各补一层——ME/CE 补环境与身体覆盖，WD 补语义层（新物体类别 + 高层推理），VI（仅占 HL 移动操作样本约 11% ）补高层策略的对齐。另补一个初读漏掉的关键量：第一阶段训练样本的 <strong>97.6% 不来自目标移动平台</strong>——目标域数据是配方里的少数派，这是整篇最值得记住的比例。</li>
+</ol>
+<h3>一句话总结</h3>
+<p>三十多天后回看，Day14 的耐久贡献是给出了一张「泛化资产负债表」：约 400 小时的目标平台数据只占第一阶段样本的 2.4% ，其余全部是借来的知识——别家的机器人、别的环境、web 语义、人类口头指令——而借来的知识要真正变成自家能力，靠的是三件记账工具：成分消融（每类数据补哪一层）、阶段隔离（离散 token 先行、连续专家后入）、地点数 scaling（3 → 104 个地点、等样本量对照）。它交付的不是「更大的 VLA」，而是一个可审计的配方：任何一类泛化主张，都能指回配方里的某一行。</p>
+<h3>和之前工作的关系</h3>
+<ul>
+<li><strong>vs Day11 π₀（直接对比，同专题相邻源头）</strong>：架构几乎未动（PaliGemma + 动作专家 + $H = 50$ 动作块），π₀.₅ 的全部增量都在架构之外：数据混合、两阶段课程、测试时高层推理。连读两篇得到的硬结论是：Day11 解决「连续动作怎么生成」，Day14 解决「生成器吃什么、什么时候吃、吃之前先想什么」——2025 年这条线的进步已经从生成数学转移到训练课程设计。这也解释了 Day11 复习里留下的悬念（共享 attention 会不会互相污染）：原版 π₀.₅ 用「专家晚入场 + 后训练保留文本目标」绕开它，π₀.₅-KI 才正面用 stop-gradient 回答。</li>
+<li><strong>vs Day13 Octo（直接对比，同专题相邻篇）</strong>：Day13 是接口即泛化（tokenizer / mask / readout 把异构隔离在两端， $q_d$ 手调），Day14 是配方即泛化（同一 backbone 吃 hybrid 样本，异构不隔离、靠混合与阶段消化）。复习后看，两者其实在回答同一个问题——异构数据的梯度该如何共存——只是答案相反：Octo 靠结构隔离，π₀.₅ 靠课程隔离。哪条对，取决于污染发生在哪：输入 schema 对不齐时 Octo 对，表示会被动作梯度冲坏时 π₀.₅-KI 对；真实系统大概率两层都要。</li>
+<li><strong>vs Day09 RT-2 / OpenVLA（跨阶段，总览脚手架段）</strong>：Day09 的离散动作 token 路线在 Day11 被 flow matching「赎回」后并没有死——在 Day14 它以 FAST token 的身份回到预训练主位，理由从「表达动作」变成了「保护 backbone 并让动作数据进 VLM 的高效训练管线」。三篇连起来是一条完整的表示辩证法：token 化（Day09）→ 连续生成（Day11/12）→ 离散管训练、连续管推理的分工（Day14）。</li>
+<li><strong>vs Day30 评测与数据飞轮（跨阶段，eval / safety 段）</strong>：π₀.₅ 的评测设计是 Day30 四轴里最超前的一篇：它不用单一成功率，而用 rubric 进度分 + 语言跟随率双指标，且把最终 gate 放在 3 个真实家庭、把可复现的定量对比放在 mock 家庭——这正是 Day30 说的「仿真/mock 做回归、真实分布做 gate」的两层评测。但它缺 Day30 飞轮的后半圈：失败只被统计，没有 triage → 定向补采 → 再训的闭环记录；论文局限一节列出的三类失败（异形抽屉把手、遮挡导致的 partial observability、高层推理被干扰反复开关抽屉）如果按 Day30 的流程走，本应分别映射到 CE 补采、记忆/上下文增强、HL 数据纠偏——这张映射表就是把 Day14 升级成飞轮的第一步。</li>
+<li><strong>跨阶段 vs Day34 π0.7（最新进展段）</strong>：Day14 泛化的是<strong>地点</strong>（新家庭里做学过的清洁技能），Day34 泛化的是<strong>技能组合</strong>（做没教过、但可由已学技能重组出的任务）。两者之间隔着 Day13 那条 5% 的新技能曲线：π₀.₅ 的高层子任务机制其实已经站在组合的门口——它能把长任务拆成见过的原子子任务——但它的评测从未要求它处理「原子本身没教过的新组合目标」，子任务词表仍来自标注分布。Day34 的组合泛化正是来收这笔账的：三篇连读，泛化轴的迁移一目了然——物体（Day13）→ 环境（Day14）→ 组合（Day34）。</li>
+</ul>
+<h3>核心</h3>
+<ol>
+<li><strong>动机重读：泛化是三个层级的问题，不是scale 的问题</strong>：论文引言把未见家庭里的失败拆成物理层（没见过的勺子要捏柄、盘子要捏边）、视觉层（杂乱布局里找到目标）、语义层（衣服该进洗衣篮而不是床上）。三层的知识来源完全不同——物理靠机器人数据、语义靠 web 与语言——所以「多采目标机器人数据」在原理上补不齐三层：400 小时 MM 之外必须借数据。这解释了 97.6% 这个比例不是凑数，而是动机本身：目标域数据在原理上就是少数派，配方设计的目标函数是「每层抽象都有对应的数据源」，不是「数据总量最大」。</li>
+<li><strong>机制深挖一：两阶段课程才是原版的「绝缘层」，且绝缘的是梯度出生顺序</strong>：预训练 280k 步只有离散 token 目标，backbone 在没有随机初始化动作专家干扰的环境里先把语义 + 动作 token 的联合表示长好；后训练 80k 步专家才入场，且文本预测目标全程保留、WD 继续在混合里。这是一个「先长表示、后接执行头」的顺序设计，和 LLM 圈先 SFT 表示后接 RL 头的直觉同构。把它与 π₀.₅-KI 对照读收获更大：KI 的消融表明即便专家晚入场，flow 梯度仍会伤 backbone，于是再加 stop-gradient 硬隔离——绝缘强度是沿着「混合保留 → 阶段隔离 → 梯度隔离」逐级加码的历史，不是一个静态技巧。</li>
+<li><strong>机制深挖二：分层收益的大头在训练期，不在推理期（本轮最反直觉）</strong>：初读用方差分解解释高层推理，默认收益来自测试时先想再做。论文 §V-E 的消融把这笔账拆开了：完整模型（训练混 HL + 推理用 HL）最好，甚至<strong>超过人类 oracle 高层</strong>；但第二名是 implicit HL——训练混了 HL 数据、推理时<strong>不做</strong>显式子任务预测——它甩开 no HL（训练也不混）一大截。也就是说，子任务标注作为训练信号的收益 &gt; 子任务作为推理中间变量的收益：HL 数据先把「任务结构」写进了表示，显式推理只是把已内化的结构再外显一遍、拿到可干预性与边际增益。方差分解没有错，但它解释的是较小的一半。推论很硬：抄 π₀.₅ 时若预算只够做一件事，先给数据加子任务标注，不要先搭双层推理管线。</li>
+<li><strong>机制深挖三：地点数 scaling 给出了「多样性 &gt; 总量」的受控证据</strong>：§V-B 在等样本量（post-training 固定 40k 步、同等 unique samples）下只变地点数 3 / 12 / 22 / 53 / 82 / 104 ，未见家庭表现单调上升，104 地点时逼近「直接在测试家庭采数据训练」的对照。这条曲线是整篇方法论上最干净的一块：它把 Day13 只能定性说的「覆盖决定上限」变成了可复现的剂量-反应关系，也给数据采集预算提供了边际定价——下一个地点的价值可以对着这条曲线估，而不是拍脑袋。</li>
+</ol>
+<h3>边界</h3>
+<ol>
+<li><strong>证据没有证明什么</strong>：真实家庭只有 3 个、定量结论主要来自 mock 家庭与每任务 10 trials 量级，rubric 口径是「任务进度百分比」而非二值成功率，与 Day11/Day13 的成功率数字不可直接横比；「for the first time」是作者自述，无第三方在同口径下复现。环境 scaling 的「逼近在测试家庭训练的基线」同样出自 mock 评测。它证明的是「配方能让未见环境的差距收敛到可接受范围」，没有证明任意新家庭、任意长程任务的可靠部署。</li>
+<li><strong>何时失效（论文自列，§VI）</strong>：不熟悉的抽屉把手、物理上难开的柜门（物理层长尾）；手臂遮挡待擦污渍这类 partial observability（模型上下文短、无记忆，跨房间与「记得东西放哪」明确不在能力内）；高层推理被干扰——放东西时反复开关同一抽屉（语义环没有进度状态机，子任务预测错了会级联且不自知）。三类失效恰好对应三层泛化各漏一层，是很好的失败分类学，但论文只列举未量化各类占比。</li>
+<li><strong>系统与复现边界</strong>：平台是 18–19 DoF 双臂移动操作机器人、4 相机、50 Hz 直接下发位姿目标 + 简单 PD，无轨迹规划与碰撞检测——安全完全寄托于策略本身，按 Day25–30 的 safety 口径这在真实家庭里是不设防的。复现侧：混合权重 $w_k$ 未公开、训练数据不开放（openpi 后续放出的 π₀.₅ checkpoint 不等于配方可复现）；提示复杂度被论文自承「relatively simple」，带偏好与约束的复杂指令不在评测内。</li>
+</ol>
+<h3>迁移到 post-training / Agentic RL Infra</h3>
+<p>可执行的一条主映射：<strong>把 agent post-training 做成 π₀.₅ 式的两阶段 + 三记账</strong>。其一，<strong>阶段隔离</strong>：第一阶段只用离散监督（工具调用 token、子任务/计划标注、文档与 web 语义数据）做广混合 SFT，目标任务轨迹占比刻意压到少数（参照 2.4% 的量级感，先以 10% 为上限做消融），这一阶段不接任何连续优化头（RL / 价值头）；第二阶段才引入 RL 或 verifier 驱动的继续训练，且混合里强制保留固定比例的通用语义回放数据（WD 的 agent 版），用通用能力验证集做遗忘 gate，回放比例与 π₀.₅-KI 的 stop-gradient 一样被当作「绝缘强度」的旋钮记账。其二，<strong>先标注、后推理</strong>：按 implicit HL 的教训，预算优先给轨迹加子任务/计划标注并混入训练，而不是先搭 planner-executor 双模型推理管线；双层推理只在标注版基线立住后作为增量上线，并用「训练混标注 × 推理用标注」的 2×2 消融决定去留。其三，<strong>环境多样性定价</strong>：把「不同工具版本 / 不同站点 / 不同任务环境数」当作独立 scaling 轴，按 §V-B 的等样本量对照法测剂量-反应曲线，给数据采集排优先级——而不是默认堆同一环境的轨迹总量。三件事都落到 harness 的实验配置与评测分桶里，每项有明确的对照与判读标准，不是口号。</p>
+<h3>思考题（综合 Day11 / Day13 / Day14 / Day30 / Day34）</h3>
+<ul>
+<li><strong>(a) 绝缘强度怎么选</strong>：Day14 原版用阶段隔离、π₀.₅-KI 再加梯度隔离、Day13 的 Octo 用结构隔离（readout 接缝）。给一个 VLA（或 agent）系统设计实验：在同一数据混合下比较「无隔离 / 阶段隔离 / 阶段 + stop-gradient」三档，用哪两个观测量（一个测目标域执行、一个测语义保持）画出绝缘强度的收益-代价曲线？并预判：为什么绝缘过强（backbone 完全收不到动作梯度）反而可能伤低层表现，证据会长什么样？</li>
+<li><strong>(b) 训练期结构 vs 推理期结构</strong>：Day14 的 implicit HL 消融显示「训练混子任务标注」的收益大于「推理时显式预测子任务」。把这个结论搬到 Day34 π0.7 的组合泛化：若一个任务的原子子任务都在训练分布内、但组合没见过，你预判瓶颈在训练期（表示没把组合结构写进去）还是推理期（有结构但不会现场重组）？请设计一个能区分这两种病因的消融（提示：对照 implicit HL 与 oracle HL 两种设定在组合任务上的差距），并说明每种结果分别指向改数据还是改推理管线。</li>
+<li><strong>(c) 给 π₀.₅ 接上 Day30 飞轮</strong>：论文 §VI 三类失效（异形把手、遮挡、子任务打转）目前只被列举。若按 Day30 的 triage → recollect / resimulate → retrain → gated deploy 闭环运行一轮：每一类失效应映射到哪种补采（CE 式跨平台数据、带遮挡标注的 ME 数据、还是 VI 式口头纠偏），再训时动配方的哪一行（成分、阶段、还是绝缘强度），上线 gate 用 mock 回归 + 真实家庭抽检如何分工？请给出一张三行映射表，并指出哪一类失效是飞轮转多少圈都修不好的、必须改架构（记忆 / 状态估计）的，为什么。</li>
+</ul>
+<p>参考链接（本轮复习）：
+- π₀.₅ 论文（arXiv:2504.16054，CoRL 2025 Oral）：https://arxiv.org/abs/2504.16054
+- Physical Intelligence 官方博客（π0.5）：https://www.pi.website/blog/pi05
+- Knowledge Insulation 后续论文（arXiv:2505.23705，NeurIPS 2025）：https://arxiv.org/abs/2505.23705</p>
+<p>GitHub NOTES：https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/NOTES.md</p></section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/physical-ai/day-14-2025-pi05-open-world/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
 </div>
 <script>

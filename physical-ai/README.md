@@ -4,7 +4,7 @@
 > Scope：Physical AI 全链路，不谈纯 LLM data curation（那是 ai-data）。
 > 命名对齐 `ai-data/day-01-xxx`，`physical-ai/day-01-xxx` ~ `day-30-xxx`，便于 Day N 直连。
 
-## 第二轮深度复习（13/34）
+## 第二轮深度复习（14/34）
 
 > 复习期：2026-09-22 → 2026-10-29；2026-09-23 → 2026-09-26 先插播 Day31–34 四篇最新进展（World Labs Atlas / GPT-6 Astra / Figure AI / Physical Intelligence π0.7），复习从 2026-09-27 恢复（02/34），一天一篇，只更新已有 NOTES，不新增论文。复习重点不是重述摘要，而是 34 天全路线在手边后重建知识结构、画出跨 Day 连接。
 
@@ -23,6 +23,7 @@
 | 11/34 | 2026-10-14 | 11 | π₀ flow matching VLA — 补 RSS 2025 venue 与评测口径（进度分不是成功率、direct prompting 任务族在预训练混合内）＋补大纲与流程图；确立"连续动作生成层"定位（赎回 Day09 离散 token 的量化与延迟：整段动作块联合生成、执行 16/25 步重规划；共享 attention 的半隔离由 Day14 knowledge insulation 还账） | ✅ 完成 |
 | 12/34 | 2026-10-15 | 12 | Diffusion Policy 条件动作扩散 — 校准 IJRR 正式版（44:1684–1704, 2025；补漏列作者 Russ Tedrake）与 RSS 2023 原版 12 任务口径（46.9% 为扩展版 15 任务的相对提升均值）；补大纲与流程图；确立"单技能生成层"定位（三 horizon 合同： $T_a = 8$ 胜过每步重规划，反馈非越密越好；后续增益转到观测侧 DP3 与推理侧蒸馏，动作生成侧先饱和） | ✅ 完成 |
 | 13/34 | 2026-10-16 | 13 | Octo 开放通用机器人策略 — 钉死零样本四桶口径（Table VII：Octo-Small / WidowX / 每桶 2 任务 ×20 trials）与 v1.5 checkpoint 后续发布；补大纲与流程图；确立"接口层"定位（tokenizer+mask 吸收输入异构、readout 划接缝、 $q_d$ 决定实际拟合分布；full FT 优于 head-only 说明表示不冻结，85/80/40/5 是同一条支持集距离曲线） | ✅ 完成 |
+| 14/34 | 2026-10-25 | 14 | π₀.₅ 开放世界泛化 — 结案 knowledge insulation 悬案（原论文无此词：实为 280k 步离散 token 预训练 + 80k 步后训练的阶段隔离；显式 stop-gradient 属后续 π₀.₅-KI，arXiv:2505.23705）；修正真实家庭 4→3 与 CoRL 2025 Oral，WD 改为分工口径；补大纲与流程图；确立"时间层"定位（成分/阶段/推理三轴记账；implicit HL 第二名说明训练期 HL 数据比测试期显式推理更值钱，97.6% 样本非目标平台） | ✅ 完成 |
 
 ## 结构
 
