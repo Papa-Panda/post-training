@@ -114,6 +114,8 @@ $$k^*=\arg\max_{z\in C}\big(\alpha\log(1+\text{stars})+\beta\log(1+\text{forks})
 
 答案不能只列过滤器；必须说明每一级的误杀对象、复核抽样和可推翻该设计的证据。
 
+相关讨论（Gemini网页版，2026-11-02）：https://gemini.google.com/app/70bc0f1c1e775496
+
 ## 原文链接
 - Paper: https://arxiv.org/abs/2402.19173
 - GitHub NOTES: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-01-example-starcoder2
