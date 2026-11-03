@@ -107,11 +107,11 @@ pre code{background:none;padding:0;color:inherit}
   <header class="hero">
     <span class="kicker">ai-data · Day 24</span>
     <h1>Paper 模板 - Day 24</h1>
-    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成 · 含第二轮复习</p>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">核心</a><a href="#sec-7">可迁移</a><a href="#sec-8">疑问 / 下一步</a><a href="#sec-9">原文金句 (1-2句)</a><a href="#sec-10">今晚产出</a><a href="#sec-11">第二轮复习（2026-09-24）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-11-03）</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">第二轮复习（2026-09-24）</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -149,7 +149,23 @@ pre code{background:none;padding:0;color:inherit}
 <li>迁移到 coding / SFT / RL data 时，embedding 选型、相似度阈值和簇粒度如何避免误删“表面相似但边界条件不同”的样本？该用哪些覆盖与下游评测验证去重没有伤到长尾？</li>
 </ol>
 </section>
-<section class="sec" id="sec-6"><h2><span class="n">6</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">待读后填写] 文档表示</div><div class="farrow">→</div><div class="fnode">聚类/近邻</div><div class="farrow">→</div><div class="fnode">语义近重复删除</div><div class="farrow">→</div><div class="fnode">原型式多样化剪枝</div><div class="farrow">→</div><div class="fnode">数据规模与覆盖审计</div><div class="farrow">→</div><div class="fnode">进入预训练</div></div>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>问答补充（2026-11-03）</h2>
+<blockquote class="pq">
+<p>来自 <code>ai data</code> side chat 用户主动问答（2026-11-02 17:07 PST），归档时精简整理。</p>
+</blockquote>
+<p><strong>问题（用户）</strong>：看一看 Day 24 D4。</p>
+<p><strong>核心答案</strong>：本篇 <strong>Day24 D4（Document De-Duplication and Diversification，Tirumala et al. / Meta AI，arXiv 2308.12284）</strong>。核心洞察不是「去重 + 多样化」字面拼接，而是<strong>重复会劫持聚类</strong>：原始数据的 k-means 质心被重复模板钉死，所以必须先把重复逐出、重新聚类让质心回到主题中心，再剪新质心周围的密集区。三步走：</p>
+<ol>
+<li><strong>SemDeDup</strong>：文档 embedding（OPT-125M 最后一层）→ 球面 k-means → 簇内余弦相似度超过阈值的判为重复组，每组只留 1 个（默认留离质心最远者），保留率 $R_{dedup} = 0.75$ ；</li>
+<li><strong>re-cluster</strong>：在去重后的数据上重做 k-means——跳过这步效果显著变差，因为旧质心仍被残余重复牵引；</li>
+<li><strong>SSL Prototypes</strong>：按到新质心的距离从小到大剪掉密集区，总保留率 $R = R_{dedup} \times R_{proto}$ 。</li>
+</ol>
+<p>结果：6.7B 模型、16 个任务上约 20% 训练效率增益、最高 +2% 下游平均精度。方法论上最值得抄的是对比协议：固定 token 预算， $R$ 每降一档就等比放大源数据，这样比的纯粹是选择质量而不是数据量。</p>
+<p><strong>欠账</strong>：D4 全程从不显式优化任何多样性标量，「diversification」只是剪质心近邻的密度启发式——它借用了 Day19 Vendi Score 的修辞，却没有用那把尺子量过自己。笔记里留的可执行 coding 迁移：把表示换成 code embedding、簇内保留规则改成「留测试覆盖最全者」，并补上 D4 欠的 Vendi 前后对比消融。</p>
+<p><strong>关联</strong>：Day24 D4；对照 Day19 Vendi Score（度量）与 Day30 防污染（同一套 embedding 近邻机器，D4 删训练集内重复，Day30 检 train–eval 泄漏）。</p>
+<p><strong>图谱关系</strong>：Day19（度量）→ Day24（工程流程）→ Day25（端到端瀑布）；回接 Day07 / Day14 的预训练去重管线。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">待读后填写] 文档表示</div><div class="farrow">→</div><div class="fnode">聚类/近邻</div><div class="farrow">→</div><div class="fnode">语义近重复删除</div><div class="farrow">→</div><div class="fnode">原型式多样化剪枝</div><div class="farrow">→</div><div class="fnode">数据规模与覆盖审计</div><div class="farrow">→</div><div class="fnode">进入预训练</div></div>
 <ol>
 <li><strong>Motivation</strong>: [待读后填写] 大规模预训练语料中的重复与高密度主题如何浪费计算、放大记忆，并挤压长尾覆盖？</li>
 <li><strong>Data Pipeline</strong>: [待读后填写] 文档表示 → 聚类/近邻 → 语义近重复删除 → 原型式多样化剪枝 → 数据规模与覆盖审计 → 进入预训练。</li>
@@ -157,23 +173,23 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: [待读后填写] 只记录数据压缩率、重复率/多样性变化、token/compute 节省和 downstream 对照，不展开 optimizer 等算法细节。</li>
 </ol>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>可迁移</h2>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移</h2>
 <ul>
 <li>对你现在 coding data 工作的 1-2 个直接可试的点：[待读后填写]</li>
 <li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>[阅读后补原文，勿凭记忆引用]</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>今晚产出</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 Data Pipeline / Key Tricks / Results / 可迁移</li>
 <li>保留并完善「和之前工作的关系」小节</li>
@@ -183,7 +199,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>第二轮复习（2026-09-24）</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>第二轮复习（2026-09-24）</h2>
 <h3>元信息修正</h3>
 <ul>
 <li>D4 全称是 <strong>Document De-Duplication and Diversification</strong>（Tirumala et al. / Meta AI，arXiv 2308.12284，2023-08-23），不是 data-diet 式的四个 D。</li>
