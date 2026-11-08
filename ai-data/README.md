@@ -386,3 +386,48 @@ graph TD
 **核心答案**：三个点一个个说：(1) 这三篇已经在主干里读过了（Day29 / Day28 / Day15），不用加。它们是用户已有的 RL data 底子，新系列补的是它们的空白：DeepSeek-R1 给了冷启动 + 纯 RL 的范式，DAPO 是把这个范式在数据工程上做扎实（dynamic sampling、overlong 处理）；SWE-Gym 是 trajectory 数据，Let's Verify 是 verifier 数据，正好配成一对。(2) **DAPO 位置的实质性修正**：助手承认前后不一致（先说"DAPO 是第二批"，转头又把它塞进第一批）——实话是列完 8 篇之后觉得 DAPO 最有用，因为 RL 训练期"什么数据进 rollout"是最贴 infra 转型的，就自作主张提前进了第一批。**机制注**：这是 batch 划分标准的一次实例——划分的变量不是"工程 vs 理论"，而是"离 post-training / agentic RL infra 的数据决策面有多近"。按这个变量，Tülu 3 和 Kimi k1.5 留在第二批（Day38 / Day39），Tülu 先（开源配方最全）、Kimi 后（long-CoT RL 数据）；用户确认"要"后骨架已建（commit b429d10），日程顺延至 10-08。
 
 **关联**：Day15 DeepSeek-R1、Day28 Open-Reasoner-Zero、Day29 SWE-Gym（主干已有 RL data 底子）；Day32–39 RL 补充系列（第一轮 Day32–37：InstructGPT / STaR / Constitutional AI / Let's Verify / RLAIF / DAPO；第二批 Day38–39：Tülu 3 / Kimi k1.5）。
+
+### 2026-11-07 — trajectory embedding：repo 里有没有、找哪 4 篇、Prismatic Synthesis / G-Vendi（跨 Day03 / Day04 / Day17–19 / Day24 / Day28–29）
+
+**问题（用户，13:20 PST）**：我的这个 repo 中有没有对 trajectory or trace 做 embedding 的？
+
+**核心答案**：查过了——没有。trajectory / trace 出现的地方不少，但都不是 embedding：
+
+- **Day 29 SWE-Gym**：trajectory 是数据本身，schema 是 `{issue, repo_snapshot, environment, tests, trajectory, outcome}`，靠单元测试结果筛轨迹，不做向量化。
+- **Day 03 TracIn**：这里的 trajectory 是训练轨迹（优化路径），影响力是沿 checkpoint 的梯度点积记账，不是把轨迹嵌成向量。
+- **Day 04 LESS**：最接近的一处——它用 execution trace 当梯度靶子，算的是 $\nabla_\theta L(\text{trace})$ 的低维投影（LoRA 梯度特征），嵌的是**梯度**，不是 trace 本身。
+- **Day 17 LIMO / Day 18 s1**：trace 指推理链（solution trace），只做质量 / 难度 / 多样性筛选，没向量化。
+- **Day 24 D4 SemDeDup**：嵌的是**文档**（OPT-125M 表示）做语义去重，不是轨迹。
+
+结论：如果要找的是「trajectory embedding」这个技术（比如把 agent rollout 嵌成向量做聚类、去重、检索），这 30 篇里没有现成的。
+
+**问题（用户，15:36 PST）**：可以，先找找（trajectory embedding 方向的论文）。
+
+**核心答案**：最对口的 4 篇，按和这条线的贴合度排：
+
+1. **Divergent Paths: Learning an Outcome-Predictive Representation of LLM Agent Trajectories**（Gill et al., 2026-10）：最直接的一篇——把 agent 的 action–observation 序列嵌进共享空间，成功和失败的 rollout 在里面是分得开的（held-out outcome 预测最高 0.95 AUROC）。基于此做了 Precog-RM，一个 few-shot 元学习判别器，接到 GRPO 控制器上能省 47.3% 训练 FLOPs。直接接 Day 28/29 那条 agent 轨迹数据线。https://arxiv.org/abs/2610.19614
+2. **RL Squeezes, SFT Expands: A Comparative Study of Reasoning LLMs**（Matsutani & Kojima, 2025-09）：轨迹级聚类——把整条推理轨迹聚类去重后发现，RL 压缩错误轨迹、SFT 扩张正确轨迹；步级再把句子嵌成向量建推理图。接 Day 17/18（LIMO / s1 的推理链筛选）那条线。https://arxiv.org/abs/2509.21128
+3. **BREW: Bootstrapping expeRientially-learned Environmental knoWledge**（COLM 2026）：把 agent 轨迹蒸馏成可检索的 recipe 知识库；里面的概念先用 LLM 生成 contextual embedding 再语义聚类去重——轨迹 → 概念 embedding → 去重这条链，和 Day 24 D4 的去重思路是同类操作，只是对象从文档换成了轨迹里提炼的概念。https://arxiv.org/abs/2511.20297
+4. **SkillSynth: Toward Scalable Terminal Task Synthesis via Skill Graphs**（2026-04）：终端 agent 的轨迹多样性分析——用 embedding 模型把轨迹里抽出的 scenario/skill 嵌成向量，聚类去重后算 unique 覆盖，直接是「轨迹 embedding + 聚类去重 + 多样性度量」三件套。https://arxiv.org/abs/2604.25727
+
+**后续（未定）**：助手问先精读哪一篇（第 1 篇和 Day 29 SWE-Gym 的轨迹数据最咬合，第 2 篇和 Day 17/18 的推理链最咬合）；用户尚未回复。
+
+**问题（用户，15:37 PST）**：https://proceedings.neurips.cc/paper_files/paper/2025/hash/82a34882f560db982d1257b5af461605-Abstract-Conference.html 这个呢？
+
+**核心答案**：这篇不是 trajectory embedding，但和这条线咬合得比上面 4 篇还深，值得认真看。
+
+**Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning**（NeurIPS 2025）。核心是两件东西：
+
+- **G-Vendi**：把 Day 19 Vendi Score 的多样性度量从 embedding / 特征空间搬到了**梯度空间**——用模型诱导的 loss 梯度的熵来量多样性。在 300+ 次受控训练 run 上，G-Vendi 和 OOD 泛化性能的 Spearman 相关约 0.9，比 n-gram / embedding 那些启发式多样性指标都强，还能扩展到百万级样本。
+- **Prismatic Synthesis**：基于这个度量做合成数据——专门往梯度空间里代表性不足的区域生成新数据。结果是 PrismMath-7B（从 32B 蒸馏、无人工验证）在 7 个难数学基准里 6 个打赢 R1-Distill-Qwen-7B。
+
+为什么和已有线咬合：
+
+- **Day 19 Vendi**：G-Vendi 就是它的直接后继，同一套熵度量、换了个空间。
+- **Day 04 LESS**：LESS 用梯度选数据，G-Vendi 用梯度量多样性——「梯度即表示」这个家族的两面。
+- **Day 24 D4**：D4 笔记里留的欠账——D4 的 diversification 从没用任何多样性标量量过自己。G-Vendi 正好是补这块的尺子。
+- **合成数据线（Day 21–23、27）**：Prismatic Synthesis 是「往梯度空间的空洞里生成」的合成策略，和 Evol-Instruct 那种改指令的思路正交。
+
+一句话结论：要找 trajectory embedding 的话这篇不算；但要补「多样性度量」这条主线的话，这篇是目前最该读的。**后续（未定）**：助手问要不要给它做一篇精读笔记；用户尚未回复。
+
+**关联**：Day 03 TracIn、Day 04 LESS、Day 17 LIMO、Day 18 s1、Day 19 Vendi Score、Day 24 D4 / SemDeDup、Day 28 Open-Reasoner-Zero、Day 29 SWE-Gym；候选精读：Divergent Paths、RL Squeezes / SFT Expands、BREW、SkillSynth、Prismatic Synthesis / G-Vendi。

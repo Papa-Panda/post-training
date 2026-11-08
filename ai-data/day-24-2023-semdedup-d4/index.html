@@ -111,7 +111,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-11-03）</a><a href="#sec-7">核心</a><a href="#sec-8">可迁移</a><a href="#sec-9">疑问 / 下一步</a><a href="#sec-10">原文金句 (1-2句)</a><a href="#sec-11">今晚产出</a><a href="#sec-12">第二轮复习（2026-09-24）</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">和之前工作的关系</a><a href="#sec-4">为什么今天读它</a><a href="#sec-5">今天的 3 问</a><a href="#sec-6">问答补充（2026-11-03）</a><a href="#sec-7">问答补充（2026-11-07）</a><a href="#sec-8">核心</a><a href="#sec-9">可迁移</a><a href="#sec-10">疑问 / 下一步</a><a href="#sec-11">原文金句 (1-2句)</a><a href="#sec-12">今晚产出</a><a href="#sec-13">第二轮复习（2026-09-24）</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -166,7 +166,22 @@ pre code{background:none;padding:0;color:inherit}
 <p><strong>关联</strong>：Day24 D4；对照 Day19 Vendi Score（度量）与 Day30 防污染（同一套 embedding 近邻机器，D4 删训练集内重复，Day30 检 train–eval 泄漏）。</p>
 <p><strong>图谱关系</strong>：Day19（度量）→ Day24（工程流程）→ Day25（端到端瀑布）；回接 Day07 / Day14 的预训练去重管线。</p>
 </section>
-<section class="sec" id="sec-7"><h2><span class="n">7</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">待读后填写] 文档表示</div><div class="farrow">→</div><div class="fnode">聚类/近邻</div><div class="farrow">→</div><div class="fnode">语义近重复删除</div><div class="farrow">→</div><div class="fnode">原型式多样化剪枝</div><div class="farrow">→</div><div class="fnode">数据规模与覆盖审计</div><div class="farrow">→</div><div class="fnode">进入预训练</div></div>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>问答补充（2026-11-07）</h2>
+<blockquote class="pq">
+<p>来自 <code>ai data</code> side chat 用户主动问答（2026-11-07 13:19 PST），归档时精简整理。</p>
+</blockquote>
+<p><strong>问题（用户）</strong>：semdedup 的主要思路。</p>
+<p><strong>核心答案</strong>：SemDeDup 是 D4 第一步，解决<strong>词面去重抓不住的语义近重复</strong>——比如换个措辞的模板文本、SEO 垃圾、改写过的重复段落。思路很干净：先把文档嵌成向量（D4 用 OPT-125M 最后一层表示；Abbas 等人验证过换 CLIP 也几乎不掉点），做球面 k-means 聚成 5 万量级的大簇；然后在簇内算两两余弦相似度，相似度超过 $1 - \epsilon$ 的就判为一个重复组，每组只留 1 个。</p>
+<p>两个关键细节：</p>
+<ul>
+<li><strong>留谁</strong>：默认留离簇质心余弦相似度最低的那个（离质心最远者）。附录 E.3 的消融说留远 / 随机 / 留近三种策略下游差异可忽略。</li>
+<li><strong>阈值不手调</strong>： $\epsilon$ 由目标保留率 $R_{dedup}$ 反推（D4 里固定 $R_{dedup} = 0.75$ ），而不是凭感觉定一个数。</li>
+</ul>
+<p><strong>它在 D4 里为什么必须放第一步</strong>：重复会劫持聚类——原始数据的 k-means 质心被重复模板钉死，后面任何「按簇剪枝」剪的都是重复的形状而不是主题的分布。所以要先用 SemDeDup 把重复逐出，再重聚类、再做原型剪枝。</p>
+<p><strong>出处</strong>：SemDeDup 本身是 Abbas et al. 2023 的工作；D4 的贡献是「先去重再重聚类」这个串联顺序。</p>
+<p><strong>关联</strong>：Day24 D4；对照 Day19 Vendi Score（度量）与 Day30 防污染（同一套 embedding 近邻机器）。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>核心</h2><div class="viz viz-flow flow"><div class="fnode">待读后填写] 文档表示</div><div class="farrow">→</div><div class="fnode">聚类/近邻</div><div class="farrow">→</div><div class="fnode">语义近重复删除</div><div class="farrow">→</div><div class="fnode">原型式多样化剪枝</div><div class="farrow">→</div><div class="fnode">数据规模与覆盖审计</div><div class="farrow">→</div><div class="fnode">进入预训练</div></div>
 <ol>
 <li><strong>Motivation</strong>: [待读后填写] 大规模预训练语料中的重复与高密度主题如何浪费计算、放大记忆，并挤压长尾覆盖？</li>
 <li><strong>Data Pipeline</strong>: [待读后填写] 文档表示 → 聚类/近邻 → 语义近重复删除 → 原型式多样化剪枝 → 数据规模与覆盖审计 → 进入预训练。</li>
@@ -174,23 +189,23 @@ pre code{background:none;padding:0;color:inherit}
 <li><strong>Results</strong>: [待读后填写] 只记录数据压缩率、重复率/多样性变化、token/compute 节省和 downstream 对照，不展开 optimizer 等算法细节。</li>
 </ol>
 </section>
-<section class="sec" id="sec-8"><h2><span class="n">8</span>可迁移</h2>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>可迁移</h2>
 <ul>
 <li>对你现在 coding data 工作的 1-2 个直接可试的点：[待读后填写]</li>
 <li>Infra 视角：可扩展性 / 成本 / 评测自动化的启发：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-9"><h2><span class="n">9</span>疑问 / 下一步</h2>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>疑问 / 下一步</h2>
 <ul>
 <li>没看懂的 / 想深挖的 1 个问题：[待读后填写]</li>
 </ul>
 </section>
-<section class="sec" id="sec-10"><h2><span class="n">10</span>原文金句 (1-2句)</h2>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>原文金句 (1-2句)</h2>
 <blockquote class="pq">
 <p>[阅读后补原文，勿凭记忆引用]</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-11"><h2><span class="n">11</span>今晚产出</h2>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>今晚产出</h2>
 <ul>
 <li>按模板补齐 Data Pipeline / Key Tricks / Results / 可迁移</li>
 <li>保留并完善「和之前工作的关系」小节</li>
@@ -200,7 +215,7 @@ pre code{background:none;padding:0;color:inherit}
 <p>自动化：reading-log 已追加 / commit 由本次自动化推送 / ai data sheet 由本次自动化同步</p>
 </blockquote>
 </section>
-<section class="sec" id="sec-12"><h2><span class="n">12</span>第二轮复习（2026-09-24）</h2>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>第二轮复习（2026-09-24）</h2>
 <h3>元信息修正</h3>
 <ul>
 <li>D4 全称是 <strong>Document De-Duplication and Diversification</strong>（Tirumala et al. / Meta AI，arXiv 2308.12284，2023-08-23），不是 data-diet 式的四个 D。</li>
