@@ -63,11 +63,11 @@ ai-data/
     └── assets/
 ```
 
-## 发展路线图（30/30 主干闭环完成；主题延伸至 Day 31）
+## 发展路线图（30/30 主干闭环完成；主题延伸至 Day 39）
 
 > **30篇主干** 已闭环：归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重、多样化剪枝→大规模网页过滤→AI反馈偏好数据底座→开源代码锚定合成→可验证RL数据→代码 benchmark 防污染。Day 31 起只补图谱中仍有明确缺口的主题；今日补上跨域数据配比。
 
-### 图谱总览（30篇主干 + 主题延伸）
+### 图谱总览（30篇主干 + 主题延伸 + RL 补充系列 Day32–39）
 
 ```mermaid
 graph TD
@@ -147,6 +147,33 @@ graph TD
     AC --> Q
   end
 
+  subgraph RL 补充系列 Day32-39 已完成
+    BA[Day32 InstructGPT 22 ✅已完成]
+    BB[Day33 STaR 22 ✅已完成]
+    BC[Day34 Constitutional AI 22 ✅已完成]
+    BD[Day35 PRM 23 ✅已完成]
+    BE[Day36 RLAIF 23 ✅已完成]
+    BF[Day37 DAPO 25 ✅已完成]
+    BG[Day38 Tülu 3 24 ✅已完成]
+    BH[Day39 Kimi k1.5 25 ✅已完成]
+    AC --> BA
+    BA --> Y
+    BA --> BC
+    BC --> BE
+    Y --> BE
+    BE --> S
+    T --> BB
+    BB --> O
+    BD --> Z
+    Z --> BF
+    O --> BF
+    Z --> BH
+    BF --> BH
+    O --> BH
+    R --> BG
+    Y --> BG
+  end
+
   style A fill:#ffd700
   style B fill:#ffd700
   style C fill:#ffd700
@@ -164,6 +191,53 @@ graph TD
   style AA fill:#ffd700
   style AB fill:#ffd700
   style AD fill:#ffd700
+  style BA fill:#ffd700
+  style BB fill:#ffd700
+  style BC fill:#ffd700
+  style BD fill:#ffd700
+  style BE fill:#ffd700
+  style BF fill:#ffd700
+  style BG fill:#ffd700
+  style BH fill:#ffd700
+
+  click A href "https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/"
+  click B href "https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/"
+  click C href "https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/"
+  click D href "https://papa-panda.github.io/post-training/ai-data/day-05-2024-datainf/"
+  click E href "https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/"
+  click F href "https://papa-panda.github.io/post-training/ai-data/day-11-2025-limr/"
+  click G href "https://papa-panda.github.io/post-training/ai-data/day-17-2025-limo/"
+  click H href "https://papa-panda.github.io/post-training/ai-data/day-18-2025-s1/"
+  click I href "https://papa-panda.github.io/post-training/ai-data/day-06-2023-phi-1/"
+  click J href "https://papa-panda.github.io/post-training/ai-data/day-07-2024-llama3/"
+  click K href "https://papa-panda.github.io/post-training/ai-data/day-08-2024-deepseek-v3/"
+  click L href "https://papa-panda.github.io/post-training/ai-data/day-09-2024-qwen2.5/"
+  click M href "https://papa-panda.github.io/post-training/ai-data/day-14-2024-starcoder2/"
+  click N href "https://papa-panda.github.io/post-training/ai-data/day-16-2024-qwen2.5-coder/"
+  click O href "https://papa-panda.github.io/post-training/ai-data/day-15-2025-deepseek-r1/"
+  click P href "https://papa-panda.github.io/post-training/ai-data/day-19-2023-vendi-score/"
+  click Q href "https://papa-panda.github.io/post-training/ai-data/day-20-2023-deita/"
+  click R href "https://papa-panda.github.io/post-training/ai-data/day-10-2024-llama3.1-3.2/"
+  click S href "https://papa-panda.github.io/post-training/ai-data/day-13-2025-dpo-reward-gap/"
+  click T href "https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/"
+  click U href "https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/"
+  click V href "https://papa-panda.github.io/post-training/ai-data/day-27-2023-oss-instruct/"
+  click W href "https://papa-panda.github.io/post-training/ai-data/day-25-2023-fineweb-refinedweb/"
+  click X href "https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/"
+  click AD href "https://papa-panda.github.io/post-training/ai-data/day-31-2023-doremi/"
+  click Y href "https://papa-panda.github.io/post-training/ai-data/day-26-2023-ultrafeedback/"
+  click Z href "https://papa-panda.github.io/post-training/ai-data/day-28-2025-deepscaler-openreasoner/"
+  click AA href "https://papa-panda.github.io/post-training/ai-data/day-29-2024-swe-gym/"
+  click AB href "https://papa-panda.github.io/post-training/ai-data/day-30-2024-decontamination/"
+  click AC href "https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/"
+  click BA href "https://papa-panda.github.io/post-training/ai-data/day-32-2022-instructgpt/"
+  click BB href "https://papa-panda.github.io/post-training/ai-data/day-33-2022-star/"
+  click BC href "https://papa-panda.github.io/post-training/ai-data/day-34-2022-constitutional-ai/"
+  click BD href "https://papa-panda.github.io/post-training/ai-data/day-35-2023-lets-verify-step-by-step/"
+  click BE href "https://papa-panda.github.io/post-training/ai-data/day-36-2023-rlaif/"
+  click BF href "https://papa-panda.github.io/post-training/ai-data/day-37-2025-dapo/"
+  click BG href "https://papa-panda.github.io/post-training/ai-data/day-38-2024-tulu-3/"
+  click BH href "https://papa-panda.github.io/post-training/ai-data/day-39-2025-kimi-k1-5/"
 ```
 
 ### 主线 vs 支线 判定（30篇主干已完成；Day31起主题延伸）
