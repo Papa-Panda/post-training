@@ -32,6 +32,7 @@ OSS-Instruct 从开源代码中抽取 80K 个短片段作为多样化现实锚�
 1. 从 starcoderdata 的 80K 个 code documents 中随机截取 1–15 行、覆盖 9 种语言，经过哪些去重与 benchmark decontamination 才落成约 75K 条数据？哪些噪声被有意保留，为什么？
 2. 对比 Day22 Evol-Instruct：真实代码 snippet grounding 与固定 complexity heuristics 分别改变任务分布的哪一维；如何组合两者而不牺牲多样性或放大教师模型偏差？
 3. 回接 Day16 Qwen2.5-Coder：若为 OSS-Instruct 增加 parser / compile / unit-test execution filter，应如何记录 provenance、失败类型与难度，才能把 SFT pool 继续转成可验证 RL data？
+相关讨论（Gemini网页版，2026-11-09）：https://gemini.google.com/app/6ade0e14fbebf23c
 
 ## 核心
 1. **Motivation**: 只靠少量人工 seed tasks 或固定演化规则生成 coding instructions，容易继承教师模型与预定义任务的偏置，覆盖不足。
