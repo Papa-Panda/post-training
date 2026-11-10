@@ -1,0 +1,16 @@
+date,title,authors,tags,one_line_takeaway,folder,link,status
+2026-11-09,SPADE: Self-Play in Adaptive Synthetic Executable Environments,Liu 等,hint-regret;environment-generation;self-play,hint-regret 让环境卡在 Agent 能力边界上，30B 一轮 400 步生成 3310 个环境,day-01-spade,https://arxiv.org/abs/2608.19197,Done
+2026-11-09,Agent Error Dataset: Scaling 50000 Error–Diagnosis Pairs for Failure Analysis and Error-Aware Post-Training,Zhu 等,failure-data;diagnosis;citation-first,50228 条 error–diagnosis 对，失败样本第一次当成主资产,day-02-aed,https://arxiv.org/abs/2609.40111,Done
+,Scaling Verifiable Environments for Long-horizon Work Agents,Zhang 等,work-agents;verifiable-environments;realism,16.7K 真实工作空间，真实感是学会探索的原因,day-03-workforge,https://arxiv.org/abs/2610.04906,Todo
+,ToolLoop: Closed-Loop Tool-Use Data Synthesis via Decomposed Generation and Dynamic Self-Feedback,Zeng 等,tool-use;closed-loop;feedback,闭环比数据量重要：无反馈合成数据比不训还差 2.17 个点,day-04-tooloop,https://arxiv.org/abs/2609.09072,Todo
+,Data Turnstile: A Scalable Open Framework for Function-Calling Data Generation,Ramakrishnan 等,function-calling;dag;small-models,多轮工具交互拆成 DAG 分角色验证；小模型上未加工合成数据有毒,day-05-data-turnstile,https://arxiv.org/abs/2607.29250,Todo
+,ToolRACER: A Robust Agentic Conversation Emulation Resource for Agent Training and Evaluation,Chakraborty 等,failure-scenarios;unhappy;impossible,Happy / Unhappy / Impossible 三种轨迹，专练不合作用户,day-06-toolracer,https://arxiv.org/abs/2610.09163,Todo
+,Bootstrapping Conversational Recommendation Agents At Spotify: Synthetic Data Generation and Self-Improvement Loops,Palumbo 等,industry;self-improvement;synthetic-dialogue,合成对话当测试集 + 方差拆分自改进，线上 A/B 收听时长 +14%,day-07-spotify,https://arxiv.org/abs/2609.30297,Todo
+,Harness-S,Zhang 等,grpo;harness;effective-groups,兄弟 harness 救活 GRPO 有效组,day-08-harness-s,https://arxiv.org/abs/2611.04277,Todo
+,Agent-R²,Pan 等,office-agents;rubric;real-attachments,真实附件 + 交付级 rubric 的办公 agent 数据,day-09-agent-r2,https://arxiv.org/abs/2611.08219,Todo
+,ToolSpace,Dong 等,tool-dependency;executable-graph,以可执行工具依赖为合成单元,day-10-toolspace,https://arxiv.org/abs/2611.05036,Todo
+,Axion 1.0,Jia 等,difficulty;tool-need;data-streams,把“变难”与“真需工具”拆成两条数据流,day-11-axion,https://arxiv.org/abs/2611.03233,Todo
+,CUA-Master,Yu 等,computer-use;workflow-import;rollback,从外部教程 import 工作流 + 失败快照回滚,day-12-cua-master,https://arxiv.org/abs/2611.03126,Todo
+,WebHarbor,Wang 等,web-environments;offline-replay,把真实网站“靠岸”成可离线复现的环境,day-13-webharbor,https://arxiv.org/abs/2611.03634,Todo
+,VidUEU-Agent,Ru 等,video-data;evidence;distribution-feedback,视频数据的证据组织 + 分布反馈外循环,day-14-vidueu-agent,https://arxiv.org/abs/2611.04418,Todo
+,PyRUA-DataFarm,Zhang 等,robotics;data-generation;verification,造数据与批数据分离的机器人数据,day-15-pyrua-datafarm,https://arxiv.org/abs/2611.05320,Todo
