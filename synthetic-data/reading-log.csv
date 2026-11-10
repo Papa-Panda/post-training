@@ -1,7 +1,7 @@
 date,title,authors,tags,one_line_takeaway,folder,link,status
 2026-11-09,SPADE: Self-Play in Adaptive Synthetic Executable Environments,Liu 等,hint-regret;environment-generation;self-play,hint-regret 让环境卡在 Agent 能力边界上，30B 一轮 400 步生成 3310 个环境,day-01-spade,https://arxiv.org/abs/2608.19197,Done
 2026-11-09,Agent Error Dataset: Scaling 50000 Error–Diagnosis Pairs for Failure Analysis and Error-Aware Post-Training,Zhu 等,failure-data;diagnosis;citation-first,50228 条 error–diagnosis 对，失败样本第一次当成主资产,day-02-aed,https://arxiv.org/abs/2609.40111,Done
-,Scaling Verifiable Environments for Long-horizon Work Agents,Zhang 等,work-agents;verifiable-environments;realism,16.7K 真实工作空间，真实感是学会探索的原因,day-03-workforge,https://arxiv.org/abs/2610.04906,Todo
+2026-11-10,Scaling Verifiable Environments for Long-horizon Work Agents,Zhang 等,work-agents;verifiable-environments;realism,16.7K 真实工作空间，真实感是学会探索的原因,day-03-workforge,https://arxiv.org/abs/2610.04906,Done
 ,ToolLoop: Closed-Loop Tool-Use Data Synthesis via Decomposed Generation and Dynamic Self-Feedback,Zeng 等,tool-use;closed-loop;feedback,闭环比数据量重要：无反馈合成数据比不训还差 2.17 个点,day-04-tooloop,https://arxiv.org/abs/2609.09072,Todo
 ,Data Turnstile: A Scalable Open Framework for Function-Calling Data Generation,Ramakrishnan 等,function-calling;dag;small-models,多轮工具交互拆成 DAG 分角色验证；小模型上未加工合成数据有毒,day-05-data-turnstile,https://arxiv.org/abs/2607.29250,Todo
 ,ToolRACER: A Robust Agentic Conversation Emulation Resource for Agent Training and Evaluation,Chakraborty 等,failure-scenarios;unhappy;impossible,Happy / Unhappy / Impossible 三种轨迹，专练不合作用户,day-06-toolracer,https://arxiv.org/abs/2610.09163,Todo
