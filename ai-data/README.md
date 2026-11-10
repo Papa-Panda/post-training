@@ -505,3 +505,17 @@ graph TD
 一句话结论：要找 trajectory embedding 的话这篇不算；但要补「多样性度量」这条主线的话，这篇是目前最该读的。**后续（未定）**：助手问要不要给它做一篇精读笔记；用户尚未回复。
 
 **关联**：Day 03 TracIn、Day 04 LESS、Day 17 LIMO、Day 18 s1、Day 19 Vendi Score、Day 24 D4 / SemDeDup、Day 28 Open-Reasoner-Zero、Day 29 SWE-Gym；候选精读：Divergent Paths、RL Squeezes / SFT Expands、BREW、SkillSynth、Prismatic Synthesis / G-Vendi。
+
+### 2026-11-09 — 知识图谱：补 Day 32–39、全节点加阅读版链接（跨 Day 01–39）
+
+**问题（用户，12:27 PST）**：https://github.com/Papa-Panda/post-training/tree/master/ai-data 图谱中 1/ 加入之后新加的新的论文 2/ 图谱中每个论文加链接 对应论文的阅读版。
+
+**核心答案**：两件事都已做并推送（commit `06f06a3`）：
+
+- **新加 Day 32–39**（RL 补充系列：InstructGPT、STaR、Constitutional AI、PRM、RLAIF、DAPO、Tülu 3、Kimi k1.5），单独成一个 subgraph。边按各篇的承接关系接：LIMA → InstructGPT → UltraFeedback，Constitutional AI → RLAIF，PRM → DeepScaleR，DAPO / Kimi k1.5 接在 R1 和 DeepScaleR 之后。
+- **全图 38 个节点都加了链接**：用 mermaid 的 `click` 指令，每个节点点开就是对应的阅读版。核对过，38 个节点、38 条链接一一对应，没有悬空的边，lint 在这个文件上 0 报错。
+- **浏览器实测通过**：图在 GitHub 上正常渲染成可交互的图（不是 raw 代码）；Day 32–39 八个节点都在「RL 补充系列」分组里（黄色、带 ✅）；点 Day 32 InstructGPT 确实跳到了它的阅读版，页面正常加载。
+
+**待定**：README 下面的「Day N 映射表」目前还只到 Day 31，Day 32–39 的行还没补——Tier 得用户定（InstructGPT 显然是 S，DAPO、Tülu 3 等待定）。
+
+**关联**：Day 32–39 RL 补充系列；ai-data/README.md 知识图谱。
