@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 04 ToolLoop — 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#0f766e; --accent-ink:#115e59; --accent-bg:#f0fdfa;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#134e4a,#0d9488);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 100%);border-color:#99f6e4}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 100%);
+  border:1px solid #99f6e4;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #99f6e4;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e6f5f3;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#2dd4bf,#0f766e);height:100%;border-radius:999px}
+.barfill.bad{background:linear-gradient(90deg,#fca5a5,#dc2626)}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.callout b{color:#92400e}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">synthetic-data · C 系列 Day 04</span>
+    <h1>ToolLoop：闭环比数据量重要</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/day-04-tooloop/</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>ToolLoop: Closed-Loop Tool-Use Data Synthesis via Decomposed Generation and Dynamic Self-Feedback</dd><dt>Authors</dt><dd>Zeng 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2609.09072">https://arxiv.org/abs/2609.09072</a></dd><dt>Date read</dt><dd>2026-11-11</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">tool-use</span><span class="tag">closed-loop</span><span class="tag">feedback</span></div></dd><dt>与前篇的关系</dt><dd>Day 03 WorkForge 讲环境真实感；Day 04 回到工具调用数据的合成方法本身——同样是“真实感 / 质量”问题，但 ToolLoop 的答案不是搬真实，而是闭环：三段分解 + 每步自验证 + 反馈再生，用 11K 样本超过 60K 的 APIGen。与 Day 02 AED 对照：AED 把真实失败当主资产（事后挖），ToolLoop 在合成时就修错（事中拦）。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>工具调用合成数据的老路是先生后筛（generate-then-filter）：静态事后验证，数据低效、特征分布不均衡。ToolLoop 把合成拆成三段——采样函数组合、反向生成 query、正向生成工具调用——每步都有 verifier，出错就带着错误原因重生成，而不是整条丢掉。Qwen3-4B 只用 11K 样本，BFCL 从 82.14% 升到 86.40%，超过 60K 的 APIGen（83.11%）和 55K 的 ToolMind（83.53%）；最反直觉的是去掉反馈的版本掉到 79.97%，比没训过的 base 还低 2.17 个点。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">5,281</div><div class="l">个 API<br>聚成 26 组采样组合</div></div><div class="stat"><div class="v">11K</div><div class="l">合成样本<br>Qwen3-4B 训练用</div></div><div class="stat"><div class="v">82.14% → 86.40%</div><div class="l">BFCL（非推理模式）<br>+4.26 个点</div></div><div class="stat"><div class="v">79.97%</div><div class="l">去掉反馈的版本<br>比 base 还低 2.17 个点</div></div></div>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
+<ol>
+<li>反馈修正的收益来自“修错”还是“筛掉难样本”？</li>
+<li>反向生成 query 会不会引入分布偏差——从 API 组合倒推的 query，和真实用户 query 的分布差在哪？</li>
+<li>无反馈版本 79.97% 比 base 的 82.14% 还低 2.17 个点：合成数据在什么条件下会变成毒药？</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
+<h3>三段分解 + 动态自反馈</h3>
+<div class="viz viz-flow flow"><div class="fnode">5,281 个 API<br>聚成 26 组</div><div class="farrow">→</div><div class="fnode">采样函数组合<br>作为 ground truth</div><div class="farrow">→</div><div class="fnode">反向生成<br>用户 query</div><div class="farrow">→</div><div class="fnode">正向生成<br>工具调用</div></div>
+<div class="viz">
+<pre class="mermaid">flowchart TB
+    A[5,281 个 API 聚成 26 组] --> S[采样函数名组合 作为 ground truth]
+    S --> Q[反向生成用户 query 强关联 API 组合]
+    Q --> C[正向生成工具调用]
+    Q --> V1[Verifier 验 query 与 API 的关联]
+    C --> V2[Verifier 验工具调用]
+    V1 -->|出错| R1[带着错误原因重生成 query]
+    V2 -->|出错| R2[带着错误原因重生成工具调用]
+    R1 --> Q
+    R2 --> C
+    V2 -->|通过| D[11K 高质量样本 Qwen3-4B 训练]
+    D --> B[BFCL 82.14% → 86.40%]
+</pre>
+</div>
+<h3>Motivation：先生后筛，数据低效</h3>
+<p>高质量工具调用数据是训练模型用外部工具的关键，但现有合成方法大多是 generate-then-filter：先生一堆、事后再静态验证过滤。这样生出来的数据低效、特征分布不均衡——量上去了，质量和覆盖没上去。</p>
+<h3>generate-then-filter vs generate-verify-refine</h3>
+<div class="viz vs"><div class="vscol vs-a"><h4>老路：generate-then-filter</h4><ul><li>先生一堆，事后静态验证再过滤</li><li>错了整条丢掉，浪费生成成本</li><li>数据低效、特征分布不均衡</li><li>无反馈版本 79.97%，比 base 还低 2.17 个点</li></ul></div><div class="vscol vs-b"><h4>ToolLoop：generate-verify-refine</h4><ul><li>三段分解，每步都有 verifier</li><li>出错带着错误原因重生成，不整条丢</li><li>动态自反馈，越修越贴合 ground truth</li><li>11K 样本 BFCL 86.40%，超过 60K 的 APIGen</li></ul></div></div>
+<h3>关键数字：11K 赢了 60K</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">Qwen3-4B base</div><div class="bartrack"><div class="barfill" style="width:82.14%"></div></div><div class="barval">82.14%</div></div><div class="barrow"><div class="barlabel">ToolLoop 无反馈</div><div class="bartrack"><div class="barfill bad" style="width:79.97%"></div></div><div class="barval">79.97%</div></div><div class="barrow"><div class="barlabel">APIGen · 60K</div><div class="bartrack"><div class="barfill" style="width:83.11%"></div></div><div class="barval">83.11%</div></div><div class="barrow"><div class="barlabel">ToolMind · 55K</div><div class="bartrack"><div class="barfill" style="width:83.53%"></div></div><div class="barval">83.53%</div></div><div class="barrow"><div class="barlabel">ToolLoop · 11K</div><div class="bartrack"><div class="barfill" style="width:86.40%"></div></div><div class="barval">86.40%</div></div></div>
+<p>BFCL 准确率（非推理模式）。Qwen3-4B 只用 11K 样本从 82.14% 升到 86.40%，超过 60K 的 APIGen 和 55K 的 ToolMind；去掉反馈的版本掉到 79.97%，比 base 还低 2.17 个点。</p>
+<p>$$86.40 - 82.14 = 4.26 \quad\text{；}\quad 79.97 - 82.14 = -2.17$$</p>
+<p>Isolate 变体（去掉与 BFCL 重叠的候选函数）仍有 86.07%；跨评测 ACEBench 上 72.1%，只用了基线 18.3% 的训练数据。数字均为论文自报，经本系列 papers.md 注释核实，11K 与 86.40% 另经 arXiv 摘要核对。</p>
+<div class="callout"><b>反直觉点：</b>没有反馈的合成数据不是“没用”，而是“有毒”——79.97% 比没训过的 base 还低 2.17 个点。数据量从来不是护身符；没有闭环验错，合成数据生得越多，模型学歪得越快。</div>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>边界</h2>
+<ul>
+<li>反向生成 query 的分布偏差：从 API 组合倒推的 query 天生“干净”、贴合 API；真实用户的含糊、省略、纠错、换说法进不来，训出来的模型可能只会接标准 query。</li>
+<li>Verifier 本身是模型：每步的 verifier 判错，会把错误固化进“已验证”的数据；反馈循环跑起来，可能把 verifier 自己的偏见越放越大。</li>
+<li>Isolate 变体 86.07% 只排除了与 BFCL 重叠的候选函数——“重叠”如何定义、排得彻不彻底，决定了这个数字能不能当作无污染证据；BFCL 单一评测上的胜利，ACEBench 的 72.1% 是跨评测证据，但也只是一个点。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>迁移</h2>
+<ul>
+<li>闭环 generate-verify-refine 可搬到任何合成数据：coding、数学、办公 agent——关键不是多生，而是每步都验、错了带着原因重生。</li>
+<li>与 Day 02 AED 构成对照：AED 把真实失败当主资产（事后挖），ToolLoop 在合成时就修错（事中拦）——失败数据的两种用法。</li>
+<li>与 Day 03 WorkForge 构成对照：WorkForge 靠真实环境保真，ToolLoop 靠闭环反馈保真——“真实”与“闭环”是两条保真路线。</li>
+<li>如果复现，第一步先搭一个最小的 per-stage verifier（函数组合合法性 → query 与 API 的关联 → 工具调用可执行），再谈规模；没有 verifier 的反馈循环只是多生垃圾。</li>
+</ul>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
+<ol>
+<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
+<li>数据 pipeline 中哪个环节最容易藏 bug？（反向生成 query 时，query 与 API 组合的关联有没有被 verifier 高估；带着错误原因重生成时，错误原因本身有没有被模型“编”出来）</li>
+<li>换成今天的模型规模，这个方法还成立吗？</li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-04-tooloop/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2609.09072">论文原文 arXiv:2609.09072</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
