@@ -519,3 +519,16 @@ graph TD
 **待定**：README 下面的「Day N 映射表」目前还只到 Day 31，Day 32–39 的行还没补——Tier 得用户定（InstructGPT 显然是 S，DAPO、Tülu 3 等待定）。
 
 **关联**：Day 32–39 RL 补充系列；ai-data/README.md 知识图谱。
+
+### 2026-11-11 — 元信息口径统一：'Date read' → 'Date of publication'（跨全系列 39 篇）
+
+**问题（用户，19:18 PST）**：把所有 NOTES.md 里的 'Date read' 字段改为 'Date of publication'，值改为论文的发表日期（不是阅读日期）。范围：ai-data/ 下每个 day-*/NOTES.md；发表日期以论文原文为准，arXiv 论文查 arXiv API 的 published 日期，不要猜、不要沿用原来的阅读日期。同步改对应 index.html 阅读版里的元信息格，以及 PAPER_TEMPLATE.md（注明填 arXiv published 日期，不要填阅读日期）。改完 commit + push，报改了多少篇，并抽查确认。
+
+**核心答案**：已做并推送（commit `5e5aa26`）：
+
+- **39 篇全改**：每篇按 arXiv ID 调 arXiv API 取 v1 published 日期，脚本批量改 NOTES.md 再用生成器重建 index.html；改完 `Date read` 在 ai-data 目录下 0 处残留，lint 0 报错。
+- **PAPER_TEMPLATE.md 同步改了**，注明填 arXiv published 日期、不是阅读日期。
+- **抽查**：Day 02 Influence Functions 2017-03-14；Day 24 D4 / SemDeDup 2023-08-23；Day 09 Qwen2.5 2024-12-19——这篇 Link 行挂两个 arXiv ID，主论文 2412.15115（2024-12-19），另一个 2409.12186 是 companion 的 Qwen2.5-Coder；取的是主论文那个，Day 16 Coder 那篇才是 2024-09-18。
+- **背景**：C 系列 synthetic-data 刚按同一口径改完 4 篇（SPADE 2026-08-19、AED 2026-09-30、WorkForge 2026-10-04、ToolLoop 2026-09-08，commit 9ce24e0）；physical-ai 34 天也按同一口径改了（commit `1b8eecb`）。
+
+**关联**：全系列 39 篇 Day；ai-data/PAPER_TEMPLATE.md；synthetic-data/ C 系列（commit 9ce24e0）。
