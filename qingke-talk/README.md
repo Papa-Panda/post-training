@@ -154,3 +154,4 @@
 | CUA-PANEL2 | [CUA Panel 下半场（数据合成）](episodes/CUA-panel-2.md) | [阅读版](episodes/CUA-panel-2.html) | 程侃之：困难还有 knowledge gap，闭源轨迹配方不可见 |
 | CUA-MAI-UI | [MAI-UI、UI-Ins 技术报告](episodes/CUA-mai-ui.md) | [阅读版](episodes/CUA-mai-ui.html) | 韩章：把指令角度本身当 grounding 的思考方式，普通 CoT 不 work |
 | CUA-MOBILEWORLD | [MobileWorld 评测基准](episodes/CUA-mobileworld.md) | [阅读版](episodes/CUA-mobileworld.html) | 孔雀鱼：自部署开源 app 拿后端权限，四路确定性校验替代 LLM-as-judge |
+| ARTICLE-tvm-tirx | [陈天奇：构建 Agent 时代的机器学习编译基础层](episodes/ARTICLE-tvm-tirx-agent-compiler-foundation.md) | [阅读版](episodes/ARTICLE-tvm-tirx-agent-compiler-foundation.html) | 文章特辑（非 Talk）：编译器不必再编译东西，但仍需基础层做分析与验证；TVM-TIRx 五元素 |

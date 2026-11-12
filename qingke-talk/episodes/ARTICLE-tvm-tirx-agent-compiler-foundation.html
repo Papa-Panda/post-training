@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>陈天奇：构建 Agent 时代的机器学习编译基础层</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>陈天奇：构建 Agent 时代的机器学习编译基础层</h1>
+    <p class="sub">Agent 已经能自动开发高性能 kernel 与框架优化，编译器作为"编译东西"的工具正在被绕过，但陈天奇认为编译器本身依然重要、只是必须换形态：把其中稳定、轻量、可预测的底… · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">核心</a><a href="#sec-4">关键数字</a><a href="#sec-5">可迁移</a><a href="#sec-6">疑问 / 下一步</a><a href="#sec-7">原文金句（1-2句）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/episodes/ARTICLE-tvm-tirx-agent-compiler-foundation.html</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>编号</dt><dd>ARTICLE-tvm-tirx（文章特辑，非青稞Talk 官网期号）</dd><dt>标题</dt><dd>构建 Agent 时代的机器学习编译器基础层</dd><dt>作者</dt><dd>陈天奇（CMU 机器学习系与计算机科学系助理教授；Apache TVM、XGBoost、MLC LLM 核心开发者与创始人）</dd><dt>原文</dt><dd>知乎专栏《构建 Agent 时代的机器学习编译器基础层》（转载 2026-11-05）</dd><dt>提炼日期</dt><dd>2026-11-11</dd><dt>相关代码</dt><dd><a href="<a href="https://github.com/apache/tvm-tirx">https://github.com/apache/tvm-tirx</a>">apache/tvm-tirx</a>（TVM TIRx：ML Compiler Foundation for the Agentic Era）；项目文档见 <a href="<a href="https://tvm.apache.org/docs/">https://tvm.apache.org/docs/</a>">Apache TVM TIRx Documentation</a></dd><dt>相关工作（文中提及）</dt><dd>TVM FFI（一年前发布）；KernelAgent、CUDA Agent、Cursor 多智能体系统、CAKE、TIRx Harness、KDAgent、EAT；HazyResearch《Retire the Abstractions》；TileLang 社区</dd></dl>
+<blockquote class="pq">
+<p>📝 提炼方式说明：本纪要基于陈天奇公开文章全文提炼，<strong>不是青稞Talk 讲座字幕实录，也没有对应期号/BV</strong>；观点与事实均按原文口径转述，凡原文未给数字处不补数字。</p>
+</blockquote>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>Agent 已经能自动开发高性能 kernel 与框架优化，编译器作为"编译东西"的工具正在被绕过，但陈天奇认为编译器本身依然重要、只是必须换形态：把其中稳定、轻量、可预测的底层抽出来做成 TVM-TIRx 基础层（轻量核心 IR + 稳定底层模块 + 动态扩展 + 三语言混合驱动 + 对接成熟工具链），让 agent 在上面快速构建上层编译器与分析工具。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>核心</h2>
+<ol>
+<li><strong>背景/问题</strong>：2026 年是 Agent 元年，机器学习编译与 kernel 开发感受最深。传统 ML 编译靠领域知识在图、tile、SIMT 各粒度做优化；如今只要 token 足够，底层算子与软件基本都能由 agent 蹬出来，近期 KernelAgent、CUDA Agent、CAKE、KDAgent、EAT 等工作在自动化 GPU kernel 开发上进展显著，人类也终于能从读 nsight 报告、查汇编、手动微调 kernel 的循环中解脱。但随之而来的问题是：agent 开发 kernel 的水平超越人类基本是必然，我们是否在淘汰我们自己？HazyResearch 的《Retire the Abstractions》甚至开始质疑是否还需要 CUDA DSL。当编写程序的主力不再是人类，编译器还存在吗？</li>
+<li><strong>判断：还需要，但形态要变</strong>：作者的答案是编译器本身依然重要，但是必须以不一样的形态出现。即使 agent 能直接出 CUDA/PTX 乃至汇编，仍有两个绕不开的需求：<strong>程序分析</strong>（结构化表示是 agent 快速构建分析工具、收集迭代反馈的凭借，就像人会心算但仍借助计算器）和<strong>程序验证</strong>（正确性需要严格检查与验证，某种结构化的程序表示是必要条件）。所以未来"我们可能不再需要编译器去编译任何东西，但是我们依然需要编译基础架构来帮助我们分析和验证程序本身"——一个相对通用的 IR 成为分析、验证与 agent 构建额外工具的基础层。</li>
+<li><strong>方法/设计（TIRx 基础层的五元素）</strong>：在 TVM FFI 发布一年后，团队继续模块化 TVM 核心，拆分并针对 agent 从头重新设计打磨出轻量级独立仓库 TVM-TIRx，包含：</li>
+<li><strong>轻量级的核心 IR 集合</strong>，用于 DSL 和编译中的常见需求与快速扩展；</li>
+<li><strong>稳定的可复用的底层模块</strong>，负责编译过程中比较"老实"和可预测的部分，剥离高层需要 heuristic 的部分；</li>
+<li><strong>优先支持动态扩展</strong>，扩展 DSL 类型和操作本身可以直接在 off-tree 的包里完成，并动态链接 import 基础层；</li>
+<li><strong>Python、Rust、C++ 三语言自由混合驱动</strong>，给 agent 足够灵活度按场景选择语言开发编译器；</li>
+<li><strong>对接稳定的底层编译工具链</strong>，在保持足够灵活度的前提下对接成熟工具链，把 token 花在该花的地方。
+   总体形态：从原来单一、heuristic 与确定性变化混在黑盒里的编译器，变成更模块化的组合方式，并且给 agent 提供直接针对 IR 数据结构等内部模块的直接访问，方便 agent 自己开发扩展。</li>
+<li><strong>三个设计问题的取舍</strong>：</li>
+<li><strong>是否所有模块都用同一种语言？</strong> 成熟编译器多围绕一门核心语言建、再包 wrapper；但 agent（人也有类似经验）开发时，POC 与快速开发用 Python 最顺手，需要效率或更强类型检查给 agent 反馈时 Rust 与 C++ 更自然。理想是<strong>让 agent 在模块级别自由切换语言</strong>：TIRx 以 TVM-FFI 为基础 ABI，完成了 Python、Rust、C++ 三语言自由混合驱动，agent 可在 Python 做原型，再把需要的部分在 Rust 或 C++ 中实现，并混合调用任意语言实现的其它变换与分析模块。其中 Rust 支持是"世界上第一个比较完美支持 Rust 和 C++ 直接混动开发机器学习编译器"的尝试。</li>
+<li><strong>如何让聪明的 agent 更快迭代？</strong> 编译器项目编译时间长，agent 每次扩展都要改大仓库代码、重编整个编译器、跑测试、失败重来。解法是<strong>优先支持动态扩展</strong>：以 everything as plugin 的方式在独立 repo 迭代，agent pip install 基础层后快速迭代需要的部分。技术上需要仔细设计基础架构：常见 visitor pattern 要求提前知道所有可能的类型节点（这也是 Rust enum 与 LLVM/MLIR 需要静态编译的原因），要支持动态增加类型并保留递归访问、改写、符号表达式约束传递等功能，需要基于 TVM-FFI 的结构化 API 设计。动态扩展支持、独立模块化、符号表达式 Z3 约束等均来自 TileLang 社区对 TIRx 的反馈与支持。</li>
+<li><strong>未来怎么维护代码？</strong> 软件都是 agent 蹬出来之后，仍需维护不同领域相关编译代码，也有 compiler harness 这类以分析而非变换为主的工具需求。核心矛盾是<strong>快速迭代与代码 slop 化之间的矛盾</strong>，且不同模块对迭代速度与 slop 的容忍度完全不同：kernel 迭代可以每几分钟出一个、最后审核前完全无人干预；希望复用可靠代码的部分仍需更多人工审核（或在优化架构的前提下投入大量 token polish）。因此传统项目模块必然按稳定性与迭代速度需求分层，基础层的职责就是负责编译中比较轻量、稳定、"老实"的部分，一旦需求确定不需要特别多针对 heuristic 的调整，同时保持足够灵活性给 agent 扩展编译抽象，让 agent 基于基础层做高层编译器扩展与 compiler harness 快速迭代。</li>
+<li><strong>结论/观点</strong>：今年是技术十字路口，未来很难预测，文中形态不一定是 Agent 时代 ML 编译技术的唯一可能形态。但两点肯定：原有抽象与设计都需要被重新审视；过于限制的抽象会让 agent 开发遇到上限瓶颈，<strong>一定不能限制 agent 的上限</strong>，而有结构且保留灵活可扩展组合边界的设计能让 agent 进入更快的开发迭代流程。TVM FFI 的模块化是去年走出的第一步，TVM TIRx 的模块化是向着这个方向的又一步。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>关键数字</h2>
+<p>本文为观点与设计论述，无实验数字；原文未给任何性能对比数据，故不列表。相关事实点：TVM FFI 发布于约一年前（2025 年）；TIRx 为独立轻量仓库 <a href="https://github.com/apache/tvm-tirx">apache/tvm-tirx</a>。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>可迁移</h2>
+<ul>
+<li>对 post-training / RL infra 工作：TIRx 的"稳定基础层 + 动态扩展"分层思路可直接借鉴到 RL 训练框架设计——把确定性、可验证的部分（权重同步、数据流、verifier 接口）钉死成稳定 ABI，把 heuristic 与快速迭代的部分（reward 设计、采样策略）做成 off-tree 可插拔模块，避免每次改策略都要重编整个大系统。</li>
+<li>Infra 视角：<strong>把 token 花在刀刃上</strong>——对接成熟工具链解决非瓶颈问题（如 host 代码生成优化），只把 agent 的 token 与迭代预算投到真正需要定制的部分；同理，RL infra 里把成熟组件（Megatron、SGLang）当作已解决的底层，精力投在训推一致性与数据流这些真瓶颈上。</li>
+<li>评测自动化启发：编译器基础层存在的核心理由之一是"分析与验证"——RL infra 同样需要先建 verifier 与分析工具（轨迹检查、KL 监控、熵曲线），再谈算法迭代速度，否则 agent/训练跑得越快，错误埋得越深。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>疑问 / 下一步</h2>
+<ul>
+<li>TIRx 的轻量核心 IR 与 MLIR/LLVM 的 dialect 体系如何分工？动态扩展的类型系统在 agent 频繁注册新 op 时，如何保证类型安全与符号约束求解的可判定性？</li>
+<li>三语言混合驱动在真实 agent 迭代中的 token 成本：Python 原型 → Rust/C++ 落地的切换点由谁判断，是否有可量化的切换准则？</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>原文金句（1-2句）</h2>
+<blockquote class="pq">
+<p>"当编写程序的主力不再是人类的时候，我们是否还需要编译器。经过探索和实践，我们的答案是编译器本身依然重要，但是必须以不一样的形态出现。"</p>
+<p>"我们可能不再需要编译器去编译任何东西，但是我们依然需要编译基础架构来帮助我们分析和验证程序本身。"</p>
+</blockquote></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
