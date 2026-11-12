@@ -7,7 +7,7 @@
 - Title: Scaling Verifiable Environments for Long-horizon Work Agents
 - Authors: Zhang 等
 - Link / arXiv: https://arxiv.org/abs/2610.04906
-- Date read: 2026-11-10
+- Date of publication: 2026-10-04
 - Tags: [work-agents, verifiable-environments, realism]
 - 与前篇的关系：Day 01 SPADE 是合成环境（Designer 造题），Day 02 是真实失败（从 rollout 里挖）；Day 03 把“真实”推到环境本身——不造题、不挖失败，直接把真实工作空间搬进来，再从真实专家工作流导出任务与 verifier。
 

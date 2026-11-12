@@ -7,7 +7,7 @@
 - Title: SPADE: Self-Play in Adaptive Synthetic Executable Environments
 - Authors: Liu 等
 - Link / arXiv: https://arxiv.org/abs/2608.19197
-- Date read: 2026-11-09
+- Date of publication: 2026-08-19
 - Tags: [environment-generation, self-play, hint-regret, verification]
 - 与前篇的关系：本系列第一篇，后面 14 篇的对照基线。SPADE 回答“环境从哪长出来”，后面的 ToolLoop、Data Turnstile 回答“生成过程怎么验证、怎么修”。
 

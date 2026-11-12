@@ -7,7 +7,7 @@
 - Title: Agent Error Dataset: Scaling 50000 Error–Diagnosis Pairs for Failure Analysis and Error-Aware Post-Training
 - Authors: Zhu 等
 - Link / arXiv: https://arxiv.org/abs/2609.40111
-- Date read: 2026-11-09
+- Date of publication: 2026-09-30
 - Tags: [failure-data, diagnosis, citation-first]
 - 与前篇的关系：Day 01 SPADE 是合成环境（Designer 造题）；Day 02 反向，从真实 rollout 的失败里挖数据，失败样本第一次当成主资产。SPADE 的验证在环境 verifier 里，AED 的验证在 matched replay 里。
 

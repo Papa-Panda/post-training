@@ -9,7 +9,7 @@
 - Title:
 - Authors:
 - Link / arXiv:
-- Date read: YYYY-MM-DD
+- Date of publication: YYYY-MM-DD（填论文在 arXiv 上的 published 日期，查 arXiv API，不要填阅读日期）
 - Tags: [eval, synthetic-data, verification, decontamination, difficulty, process-supervision, outcome-supervision, rlvr, curation]
 - 与前篇的关系：
 

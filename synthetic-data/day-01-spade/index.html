@@ -127,7 +127,7 @@ pre code{background:none;padding:0;color:inherit}
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>Title</dt><dd>SPADE: Self-Play in Adaptive Synthetic Executable Environments</dd><dt>Authors</dt><dd>Liu 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2608.19197">https://arxiv.org/abs/2608.19197</a></dd><dt>Date read</dt><dd>2026-11-09</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">environment-generation</span><span class="tag">self-play</span><span class="tag">hint-regret</span><span class="tag">verification</span></div></dd><dt>与前篇的关系</dt><dd>本系列第一篇，后面 14 篇的对照基线。SPADE 回答“环境从哪长出来”，后面的 ToolLoop、Data Turnstile 回答“生成过程怎么验证、怎么修”。</dd></dl>
+<dl class="meta-grid"><dt>Title</dt><dd>SPADE: Self-Play in Adaptive Synthetic Executable Environments</dd><dt>Authors</dt><dd>Liu 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2608.19197">https://arxiv.org/abs/2608.19197</a></dd><dt>Date of publication</dt><dd>2026-08-19</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">environment-generation</span><span class="tag">self-play</span><span class="tag">hint-regret</span><span class="tag">verification</span></div></dd><dt>与前篇的关系</dt><dd>本系列第一篇，后面 14 篇的对照基线。SPADE 回答“环境从哪长出来”，后面的 ToolLoop、Data Turnstile 回答“生成过程怎么验证、怎么修”。</dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>同一个 LLM 分饰 Designer 与 Agent 两角，Designer 按 hint 前后 regret 差获得奖励，持续生成卡在 Agent 能力边界上的可执行环境。30B 模型一轮 400 步生成 3,310 个独立环境，Qwen3-30B-A3B 在 8 个 held-out 评测上 50.2 → 58.3。</p>

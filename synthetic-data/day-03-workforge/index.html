@@ -121,7 +121,7 @@ pre code{background:none;padding:0;color:inherit}
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>Title</dt><dd>Scaling Verifiable Environments for Long-horizon Work Agents</dd><dt>Authors</dt><dd>Zhang 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2610.04906">https://arxiv.org/abs/2610.04906</a></dd><dt>Date read</dt><dd>2026-11-10</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">work-agents</span><span class="tag">verifiable-environments</span><span class="tag">realism</span></div></dd><dt>与前篇的关系</dt><dd>Day 01 SPADE 是合成环境（Designer 造题），Day 02 是真实失败（从 rollout 里挖）；Day 03 把“真实”推到环境本身——不造题、不挖失败，直接把真实工作空间搬进来，再从真实专家工作流导出任务与 verifier。</dd></dl>
+<dl class="meta-grid"><dt>Title</dt><dd>Scaling Verifiable Environments for Long-horizon Work Agents</dd><dt>Authors</dt><dd>Zhang 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2610.04906">https://arxiv.org/abs/2610.04906</a></dd><dt>Date of publication</dt><dd>2026-10-04</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">work-agents</span><span class="tag">verifiable-environments</span><span class="tag">realism</span></div></dd><dt>与前篇的关系</dt><dd>Day 01 SPADE 是合成环境（Designer 造题），Day 02 是真实失败（从 rollout 里挖）；Day 03 把“真实”推到环境本身——不造题、不挖失败，直接把真实工作空间搬进来，再从真实专家工作流导出任务与 verifier。</dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>长程工作 agent 的瓶颈不是模型，而是环境太假：直接从真实资源（网络检索 + 真实文件）建工作空间，再从真实专家工作流里导出任务指令、解题计划和“程序化 + 语义”双 verifier，一共 16.7K 个可验证环境，覆盖 40 个专业领域、60 种文件类型。Qwen3.5-35B-A3B-Base 训上 WorkForge 后 GDPval 从 45.5 升到 73.6；27B dense 版 GDPval 82.4，超过 Qwen3.5-397B-A17B 的 79.7。</p>

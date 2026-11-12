@@ -7,7 +7,7 @@
 - Title: ToolLoop: Closed-Loop Tool-Use Data Synthesis via Decomposed Generation and Dynamic Self-Feedback
 - Authors: Zeng 等
 - Link / arXiv: https://arxiv.org/abs/2609.09072
-- Date read: 2026-11-11
+- Date of publication: 2026-09-08
 - Tags: [tool-use, closed-loop, feedback]
 - 与前篇的关系：Day 03 WorkForge 讲环境真实感；Day 04 回到工具调用数据的合成方法本身——同样是“真实感 / 质量”问题，但 ToolLoop 的答案不是搬真实，而是闭环：三段分解 + 每步自验证 + 反馈再生，用 11K 样本超过 60K 的 APIGen。与 Day 02 AED 对照：AED 把真实失败当主资产（事后挖），ToolLoop 在合成时就修错（事中拦）。
 

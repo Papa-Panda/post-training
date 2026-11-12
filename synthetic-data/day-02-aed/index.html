@@ -121,7 +121,7 @@ pre code{background:none;padding:0;color:inherit}
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>Title</dt><dd>Agent Error Dataset: Scaling 50000 Error–Diagnosis Pairs for Failure Analysis and Error-Aware Post-Training</dd><dt>Authors</dt><dd>Zhu 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2609.40111">https://arxiv.org/abs/2609.40111</a></dd><dt>Date read</dt><dd>2026-11-09</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">failure-data</span><span class="tag">diagnosis</span><span class="tag">citation-first</span></div></dd><dt>与前篇的关系</dt><dd>Day 01 SPADE 是合成环境（Designer 造题）；Day 02 反向，从真实 rollout 的失败里挖数据，失败样本第一次当成主资产。SPADE 的验证在环境 verifier 里，AED 的验证在 matched replay 里。</dd></dl>
+<dl class="meta-grid"><dt>Title</dt><dd>Agent Error Dataset: Scaling 50000 Error–Diagnosis Pairs for Failure Analysis and Error-Aware Post-Training</dd><dt>Authors</dt><dd>Zhu 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2609.40111">https://arxiv.org/abs/2609.40111</a></dd><dt>Date of publication</dt><dd>2026-09-30</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">failure-data</span><span class="tag">diagnosis</span><span class="tag">citation-first</span></div></dd><dt>与前篇的关系</dt><dd>Day 01 SPADE 是合成环境（Designer 造题）；Day 02 反向，从真实 rollout 的失败里挖数据，失败样本第一次当成主资产。SPADE 的验证在环境 verifier 里，AED 的验证在 matched replay 里。</dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>把 agent 的失败当成主资产而不是废料：50,228 条 error–diagnosis 对，来自 9,961 个任务；五步 AET 流水线用 citation-first 的 judge 做诊断、用 matched replay 验证修复，再分出诊断与恢复两个 SFT 视图。Qwen3-8B 做诊断，teacher-label 的 exact-step 一致率从 47.19% 升到 63.56%。</p>
