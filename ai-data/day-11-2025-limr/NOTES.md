@@ -6,7 +6,7 @@
 - Title: LIMR: Less is More for RL Scaling
 - Authors / Org: Xuefeng Li, Haoyang Zou, Pengfei Liu - SJTU, SII, GAIR
 - Link / arXiv: https://arxiv.org/abs/2502.11886
-- Date read: 2026-08-13
+- Date of publication: 2025-02-17
 - Tags: [rl-data, coding-data, data-selection, less, influence, reasoning]
 
 ## 一句话总结

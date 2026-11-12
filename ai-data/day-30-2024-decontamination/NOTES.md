@@ -6,7 +6,7 @@
 - Title: Quantifying Contamination in Evaluating Code Generation Capabilities of Language Models
 - Authors / Org: Martin Riddell, Ansong Ni, Arman Cohan / Yale University
 - Link / arXiv: https://arxiv.org/abs/2403.04811
-- Date read: 2026-08-30
+- Date of publication: 2024-03-06
 - Tags: [coding-data, decontamination, benchmark-leakage, semantic-dedup, data-quality, evaluation]
 
 ## 一句话总结

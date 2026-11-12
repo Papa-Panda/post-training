@@ -8,7 +8,7 @@
 - Title: LIMO: Less is More for Reasoning
 - Authors / Org: Yixin Ye, Zhen Huang, Yang Xiao, Ethan Chern, Shijie Xia, Pengfei Liu / SJTU, SII, GAIR
 - Link / arXiv: https://arxiv.org/abs/2502.03387
-- Date read: 2026-08-17
+- Date of publication: 2025-02-05
 - Tags: [rl-data, sft, reasoning, data-selection, less-is-more, coding-data, curation, quality]
 
 ## 一句话总结

@@ -105,9 +105,9 @@ pre code{background:none;padding:0;color:inherit}
 <div class="progress" id="progress"></div>
 <div class="wrap">
   <header class="hero">
-    <span class="kicker">ai-data · Day 09</span>
+    <span class="kicker">ai-data · Day 9</span>
     <h1>Paper 模板</h1>
-    <p class="sub">从 7T 拉到 18T 预训练（2026-09-09 修正：初读的"其中 code ~5.5T 来自 Qwen2.5-Coder 线"表述不准确——5.5T 语料（最终训练集 5.2T）是 Qwen2.5-Coder 自身的预训练规模，主报告只说 18T 并入了 Math/Coder 专用数据，未披露 code 占比，见第二轮复习 §4），文件级+仓库级混合、弱模型分类器过滤、版图更大且多语，1M+ SFT + 多阶段 RL（offline DPO → online GRPO；RM↔SFT 迭代进化是 Qwen2.5-Math 报告的 self-improvement 设计，见 2026-09-09 澄清与第二轮复习 §4）+ MoE Turbo/Plus，72B 与 Llama-3-405B-Instruct 打到 competitive（2026-09-09 修正：初读的"超"为夸大，论文原文用词是 competitive，见第二轮复习 §4），证明 data recipe / flywheel &amp;amp;amp;amp;amp;amp;gt; 单纯参数堆砌。 · 完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
@@ -119,7 +119,7 @@ pre code{background:none;padding:0;color:inherit}
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>Title</dt><dd>Qwen2.5 Technical Report</dd><dt>Authors / Org</dt><dd>Alibaba Cloud Qwen Team (Qwen2.5 / Qwen2.5-Coder / Qwen2.5-Math series)</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2412.15115">https://arxiv.org/abs/2412.15115</a> (main), companion Coder: <a href="https://arxiv.org/abs/2409.12186">https://arxiv.org/abs/2409.12186</a></dd><dt>Date read</dt><dd>2026-08-12</dd><dt>Folder</dt><dd>2024_qwen2.5</dd><dt>Day</dt><dd>9</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">pretraining</span><span class="tag">coding-data</span><span class="tag">curation</span><span class="tag">synthetic-data</span><span class="tag">sft</span><span class="tag">rl-data</span><span class="tag">scaling</span><span class="tag">multilingual</span><span class="tag">moe</span></div></dd></dl>
+<dl class="meta-grid"><dt>Title</dt><dd>Qwen2.5 Technical Report</dd><dt>Authors / Org</dt><dd>Alibaba Cloud Qwen Team (Qwen2.5 / Qwen2.5-Coder / Qwen2.5-Math series)</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2412.15115">https://arxiv.org/abs/2412.15115</a> (main), companion Coder: <a href="https://arxiv.org/abs/2409.12186">https://arxiv.org/abs/2409.12186</a></dd><dt>Date of publication</dt><dd>2024-12-19</dd><dt>Folder</dt><dd>2024_qwen2.5</dd><dt>Day</dt><dd>9</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">pretraining</span><span class="tag">coding-data</span><span class="tag">curation</span><span class="tag">synthetic-data</span><span class="tag">sft</span><span class="tag">rl-data</span><span class="tag">scaling</span><span class="tag">multilingual</span><span class="tag">moe</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>从 7T 拉到 18T 预训练（2026-09-09 修正：初读的"其中 code ~5.5T 来自 Qwen2.5-Coder 线"表述不准确——5.5T 语料（最终训练集 5.2T）是 Qwen2.5-Coder 自身的预训练规模，主报告只说 18T 并入了 Math/Coder 专用数据，未披露 code 占比，见第二轮复习 §4），文件级+仓库级混合、弱模型分类器过滤、版图更大且多语，1M+ SFT + 多阶段 RL（offline DPO → online GRPO；RM↔SFT 迭代进化是 Qwen2.5-Math 报告的 self-improvement 设计，见 2026-09-09 澄清与第二轮复习 §4）+ MoE Turbo/Plus，72B 与 Llama-3-405B-Instruct 打到 competitive（2026-09-09 修正：初读的"超"为夸大，论文原文用词是 competitive，见第二轮复习 §4），证明 data recipe / flywheel &gt; 单纯参数堆砌。</p>

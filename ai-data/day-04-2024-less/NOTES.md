@@ -5,7 +5,7 @@
 - Authors / Org: Mengzhou Xia, Sadhika Malladi, Suchin Gururangan, Sanjeev Arora, Danqi Chen / Princeton NLP
 - Link / arXiv: https://arxiv.org/abs/2402.04333
 - Code: https://github.com/princeton-nlp/LESS
-- Date read: 2026-08-06
+- Date of publication: 2024-02-06
 - Tags: [sft, data-selection, influence, data-attribution, instruction-tuning, curation, targeted]
 
 ## 一句话总结

@@ -6,7 +6,7 @@
 - Title: StarCoder 2 and The Stack v2: The Next Generation
 - Authors / Org: BigCode / ServiceNow / HuggingFace - Anton Lozhkov, Raymond Li, et al.
 - Link / arXiv: https://arxiv.org/abs/2402.19173
-- Date read: 2026-08-14
+- Date of publication: 2024-02-29
 - Tags: [coding-data, curation, pretraining, quality, deduplication, pii, licensing, flywheel]
 - Folder: 2024_starcoder2
 - Day: 14

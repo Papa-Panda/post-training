@@ -5,7 +5,7 @@
 - Authors / Org: Garima Pruthi, Frederick Liu, Mukund Sundararajan, et al. / Google
 - Link / arXiv: https://arxiv.org/abs/2002.08484
 - PDF: https://proceedings.neurips.cc/paper/2020/file/e6385d39ec9394f2f3a354d9d2b88eec-Paper.pdf
-- Date read: 2026-08-05
+- Date of publication: 2020-02-19
 - Review date: 2026-09-03
 - Tags: [data-attribution, tracin, influence-functions, coding-data, data-cleaning, self-influence]
 - Blog: https://research.google/blog/tracin-a-simple-method-to-estimate-training-data-influence/

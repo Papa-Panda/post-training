@@ -6,7 +6,7 @@
 - Title: Training language models to follow instructions with human feedback
 - Authors / Org: Ouyang et al. / OpenAI
 - Link / arXiv: https://arxiv.org/abs/2203.02155
-- Date read: 2026-09-24
+- Date of publication: 2022-03-04
 - Tags: [rl-data, preference-data, rlhf, human-feedback, curation, quality]
 
 ## 一句话总结

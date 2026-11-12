@@ -6,7 +6,7 @@
 - Title: Superfiltering: Weak-to-Strong Data Filtering for Fast Instruction-Tuning
 - Authors / Org: Ming Li, Yong Zhang, Shwai He, Zhitao Li, Hongyu Zhao, et al. - UMD / Ping An
 - Link / arXiv: https://arxiv.org/abs/2402.00530
-- Date read: 2026-08-13
+- Date of publication: 2024-02-01
 - Tags: [sft, data-selection, coding-data, weak-to-strong, instruction-tuning]
 
 ## 一句话总结

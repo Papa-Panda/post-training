@@ -10,7 +10,7 @@
 - Title: "Kimi k1.5: Scaling Reinforcement Learning with LLMs"
 - Authors / Org: Kimi Team / Moonshot AI
 - Link / arXiv: https://arxiv.org/abs/2501.12599
-- Date read: 2026-10-01
+- Date of publication: 2025-01-22
 - Tags: [rl-data, long-cot, rl-training-data, verifiable-reward, long2short, curation, curriculum-sampling, reward-model]
 
 ## 一句话总结

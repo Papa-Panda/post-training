@@ -107,7 +107,7 @@ pre code{background:none;padding:0;color:inherit}
   <header class="hero">
     <span class="kicker">ai-data · Day 20</span>
     <h1>Paper 模板 - Day 20</h1>
-    <p class="sub">在两个对比鲜明的数据池（300K 高质 $X_{sota}$ / 100K 低质冗余 $X_{base}$）上做受控单维消融，证明对齐数据的"好"可分解为复杂度 × 质量 × 多样性三维；配方 $s = c \times q$ 排序 + embedding 最近邻贪心去重，6K 数据在 LLaMA-1/2-13B 与 Mistral-7B 三条基座上打赢 10 倍以上数据量的 SOTA；并发现 scaling 非单调——"好数据"的占比是有限的。完整阅读版 · 由 GitHub NOTES.md 生成</p>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
@@ -120,7 +120,7 @@ pre code{background:none;padding:0;color:inherit}
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>Title</dt><dd>DEITA: What Makes Good Data for Alignment? A Comprehensive Study of Automatic Data Selection in Instruction Tuning</dd><dt>Authors / Org</dt><dd>Wei Liu, Weihao Zeng, Keqing He, Yong Jiang, Junxian He / Virginia Tech, Salesforce AI Research</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2312.15685">https://arxiv.org/abs/2312.15685</a></dd><dt>Date read</dt><dd>2026-08-20</dd><dt>Folder</dt><dd>day-20-2023-deita</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-20-2023-deita">https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-20-2023-deita</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">sft</span><span class="tag">data-selection</span><span class="tag">quality</span><span class="tag">complexity</span><span class="tag">diversity</span><span class="tag">coding-data</span><span class="tag">curation</span><span class="tag">less-is-more</span></div></dd></dl>
+<dl class="meta-grid"><dt>Title</dt><dd>DEITA: What Makes Good Data for Alignment? A Comprehensive Study of Automatic Data Selection in Instruction Tuning</dd><dt>Authors / Org</dt><dd>Wei Liu, Weihao Zeng, Keqing He, Yong Jiang, Junxian He / Virginia Tech, Salesforce AI Research</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2312.15685">https://arxiv.org/abs/2312.15685</a></dd><dt>Date of publication</dt><dd>2023-12-25</dd><dt>Folder</dt><dd>day-20-2023-deita</dd><dt>GitHub</dt><dd><a href="https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-20-2023-deita">https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-20-2023-deita</a></dd><dt>Tags</dt><dd><div class="meta"><span class="tag">sft</span><span class="tag">data-selection</span><span class="tag">quality</span><span class="tag">complexity</span><span class="tag">diversity</span><span class="tag">coding-data</span><span class="tag">curation</span><span class="tag">less-is-more</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>用复杂度×质量×多样性三因子自动选 6k SFT 数据打赢 100k+ 全量，AlpacaEval +5%、IFEval 保持，提出 Evol-Complexity 与 LLM-Quality 双评分 + 近邻多样性去重，是 LIMR/LIMO/s1 少即是多主线的首次三合一配方</p>

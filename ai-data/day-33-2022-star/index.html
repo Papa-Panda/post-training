@@ -119,7 +119,7 @@ pre code{background:none;padding:0;color:inherit}
 </blockquote>
 </section>
 <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
-<dl class="meta-grid"><dt>Title</dt><dd>"STaR: Bootstrapping Reasoning With Reasoning"</dd><dt>Authors / Org</dt><dd>Eric Zelikman, Yuhuai Wu, Jesse Mu, Noah D. Goodman / Stanford（Goodman 另属 Google Research）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2203.14465">https://arxiv.org/abs/2203.14465</a></dd><dt>Date read</dt><dd>2026-09-25</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">rl-data</span><span class="tag">reasoning-data</span><span class="tag">synthetic-data</span><span class="tag">bootstrapping</span><span class="tag">rationalization</span><span class="tag">quality</span></div></dd></dl>
+<dl class="meta-grid"><dt>Title</dt><dd>"STaR: Bootstrapping Reasoning With Reasoning"</dd><dt>Authors / Org</dt><dd>Eric Zelikman, Yuhuai Wu, Jesse Mu, Noah D. Goodman / Stanford（Goodman 另属 Google Research）</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2203.14465">https://arxiv.org/abs/2203.14465</a></dd><dt>Date of publication</dt><dd>2022-03-28</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">rl-data</span><span class="tag">reasoning-data</span><span class="tag">synthetic-data</span><span class="tag">bootstrapping</span><span class="tag">rationalization</span><span class="tag">quality</span></div></dd></dl>
 </section>
 <section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
 <p>用 rationalization 自举推理数据：以 $P = 10$ 条带 rationale 的 few-shot 例子为种子，让 GPT-J 自己对全数据集生成 rationale——答对的保留、答错的把正确答案塞进 prompt 反向生成 rationale 再过滤，多轮外循环把"自产"的推理数据越滚越大；CQA 上 6B 的 GPT-J 做到 72.5%，逼平 30 倍参数的 GPT-3（73.0%），是 SFT 数据与 RL 数据之间"模型自己造数据"的开山之作。</p>

@@ -7,7 +7,7 @@
 - Authors: Jingcheng Hu, Yinmin Zhang, Qi Han, Daxin Jiang, Xiangyu Zhang, Heung-Yeung Shum
 - Link / arXiv: https://arxiv.org/abs/2503.24290
 - Related: ProRL — https://arxiv.org/abs/2505.24864
-- Date read: 2026-08-28
+- Date of publication: 2025-03-31
 - Tags: [rl-data, reasoning-data, verifiable-data, pass-rate, hard-example-mining, prolonged-rl]
 
 ## 一句话总结

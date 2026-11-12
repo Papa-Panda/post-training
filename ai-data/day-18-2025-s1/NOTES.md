@@ -8,7 +8,7 @@
 - Title: s1: Simple test-time scaling
 - Authors / Org: Niklas Muennighoff, Zitong Yang, Weijia Shi, Xiang Lisa Li, Li Fei-Fei, et al. / Stanford, Together AI, Washington
 - Link / arXiv: https://arxiv.org/abs/2501.19393
-- Date read: 2026-08-18
+- Date of publication: 2025-01-31
 - Tags: [sft, reasoning, data-selection, less-is-more, test-time-scaling, coding-data, curation, quality]
 - Folder: day-18-2025-s1
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-18-2025-s1

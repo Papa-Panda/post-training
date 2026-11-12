@@ -6,7 +6,7 @@
 - Title: "Let's Verify Step by Step"
 - Authors / Org: Lightman et al. / OpenAI
 - Link / arXiv: https://arxiv.org/abs/2305.20050
-- Date read: 2026-09-27
+- Date of publication: 2023-05-31
 - Tags: [rl-data, verifier-data, process-supervision, prm, reasoning-data, quality]
 
 ## 一句话总结

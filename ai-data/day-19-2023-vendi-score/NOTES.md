@@ -8,7 +8,7 @@
 - Title: The Vendi Score: A Diversity Evaluation Metric for Machine Learning
 - Authors / Org: Dan Friedman, Adji Bousso Dieng / Princeton / Columbia
 - Link / arXiv: https://arxiv.org/abs/2210.02410
-- Date read: 2026-08-19
+- Date of publication: 2022-10-05
 - Tags: [data-selection, diversity, quality, curation, sft, rl-data, coding-data, less-is-more]
 - Folder: day-19-2023-vendi-score
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-19-2023-vendi-score

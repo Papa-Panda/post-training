@@ -11,7 +11,7 @@
 - Authors / Org: Qiying Yu et al. / ByteDance Seed, Tsinghua AIR, HKU
 - Link / arXiv: https://arxiv.org/abs/2503.14476
 - Project page: https://dapo-sia.github.io/
-- Date read: 2026-09-29
+- Date of publication: 2025-03-18
 - Tags: [rl-data, rl-training-data, dynamic-sampling, overlong-filtering, grpo, curation]
 
 ## 一句话总结

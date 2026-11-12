@@ -6,7 +6,7 @@
 - Title: StarCoder 2 and The Stack v2: The Next Generation
 - Authors / Org: BigCode / Hugging Face / ServiceNow Research et al.
 - Link / arXiv: https://arxiv.org/abs/2402.19173
-- Date read: 2026-08-04
+- Date of publication: 2024-02-29
 - Review date: 2026-09-01
 - Tags: [coding-data, curation, quality, deduplication, decontamination, pii, licensing, provenance]
 

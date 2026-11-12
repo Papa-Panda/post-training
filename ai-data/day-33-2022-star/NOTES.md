@@ -6,7 +6,7 @@
 - Title: "STaR: Bootstrapping Reasoning With Reasoning"
 - Authors / Org: Eric Zelikman, Yuhuai Wu, Jesse Mu, Noah D. Goodman / Stanford（Goodman 另属 Google Research）
 - Link / arXiv: https://arxiv.org/abs/2203.14465
-- Date read: 2026-09-25
+- Date of publication: 2022-03-28
 - Tags: [rl-data, reasoning-data, synthetic-data, bootstrapping, rationalization, quality]
 
 ## 一句话总结

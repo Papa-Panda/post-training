@@ -6,7 +6,7 @@
 - Title: DeepSeek-V3 Technical Report
 - Authors / Org: DeepSeek-AI
 - Link / arXiv: https://arxiv.org/abs/2412.19437
-- Date read: 2026-08-11
+- Date of publication: 2024-12-27
 - Tags: [coding-data, pretraining, curation, moe, quality, scaling, synthetic-data, flywheel]
 
 ## 一句话总结

@@ -8,7 +8,7 @@
 - Title: D4: Improving LLM Pretraining via Document De-Duplication and Diversification
 - Authors / Org: Tirumala et al. / Meta AI
 - Link / arXiv: https://arxiv.org/abs/2308.12284
-- Date read: 2026-08-24
+- Date of publication: 2023-08-23
 - Tags: [pretraining, data-curation, deduplication, diversity, quality, semantic-dedup, coding-data]
 - Folder: day-24-2023-semdedup-d4
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-24-2023-semdedup-d4

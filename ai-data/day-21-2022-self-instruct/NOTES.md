@@ -8,7 +8,7 @@
 - Title: Self-Instruct: Aligning Language Model with Self Generated Instructions
 - Authors / Org: Yizhong Wang, Yeganeh Kordi, Swaroop Mishra, Alisa Liu, Noah A. Smith, Daniel Khashabi, Hannaneh Hajishirzi / UW, AllenAI
 - Link / arXiv: https://arxiv.org/abs/2212.10560
-- Date read: 2026-08-21
+- Date of publication: 2022-12-20
 - Tags: [synthetic-data, sft, coding-data, curation, quality, instruction-tuning, bootstrap]
 - Folder: day-21-2022-self-instruct
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-21-2022-self-instruct

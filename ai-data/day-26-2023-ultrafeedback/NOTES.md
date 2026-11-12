@@ -6,7 +6,7 @@
 - Title: UltraFeedback: Boosting Language Models with Scaled AI Feedback
 - Authors / Org: OpenBMB / Tsinghua University
 - Link / arXiv: https://arxiv.org/abs/2310.01377
-- Date read: 2026-08-26
+- Date of publication: 2023-10-02
 - Tags: [preference-data, ai-feedback, data-quality, diversity, curation, sft, rl-data]
 
 ## 一句话总结

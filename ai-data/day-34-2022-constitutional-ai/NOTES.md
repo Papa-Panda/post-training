@@ -6,7 +6,7 @@
 - Title: "Constitutional AI: Harmlessness from AI Feedback"
 - Authors / Org: Bai et al. / Anthropic（51 作者）
 - Link / arXiv: https://arxiv.org/abs/2212.08073
-- Date read: 2026-09-26
+- Date of publication: 2022-12-15
 - Tags: [rl-data, preference-data, rlaif, constitution, critique-revision, curation]
 
 ## 一句话总结

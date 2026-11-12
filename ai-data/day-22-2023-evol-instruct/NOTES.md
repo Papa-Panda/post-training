@@ -8,7 +8,7 @@
 - Title: WizardLM: Empowering Large Language Models to Follow Complex Instructions
 - Authors / Org: Can Xu et al. / Microsoft Research Asia, Peking University
 - Link / arXiv: https://arxiv.org/abs/2304.12244
-- Date read: 2026-08-22
+- Date of publication: 2023-04-24
 - Tags: [synthetic-data, sft, coding-data, instruction-evolution, complexity, curation, quality]
 - Folder: day-22-2023-evol-instruct
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-22-2023-evol-instruct

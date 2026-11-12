@@ -6,7 +6,7 @@
 - Title: Magicoder: Empowering Code Generation with OSS-Instruct
 - Authors / Org: University of Illinois Urbana-Champaign / Tsinghua University
 - Link / arXiv: https://arxiv.org/abs/2312.02120
-- Date read: 2026-08-27
+- Date of publication: 2023-12-04
 - Tags: [synthetic-data, coding-data, sft, instruction-tuning, open-source-code, diversity, decontamination, quality]
 
 ## 一句话总结

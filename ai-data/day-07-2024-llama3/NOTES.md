@@ -6,7 +6,7 @@
 - Title: The Llama 3 Herd of Models
 - Authors / Org: Meta AI (Llama Team, Aaron Grattafiori et al. ~500 authors)
 - Link / arXiv: https://arxiv.org/abs/2407.21783
-- Date read: 2026-08-10
+- Date of publication: 2024-07-31
 - Tags: [pretraining, coding-data, curation, quality, scaling, flywheel, synthetic-data]
 
 ## 一句话总结

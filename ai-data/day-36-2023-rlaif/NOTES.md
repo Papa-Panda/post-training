@@ -10,7 +10,7 @@
 - Title: "RLAIF vs. RLHF: Scaling Reinforcement Learning from Human Feedback with AI Feedback"
 - Authors / Org: Lee et al. / Google DeepMind
 - Link / arXiv: https://arxiv.org/abs/2309.00267
-- Date read: 2026-09-28
+- Date of publication: 2023-09-01
 - Tags: [rl-data, preference-data, rlaif, ai-feedback, reward-model, curation]
 
 ## 一句话总结

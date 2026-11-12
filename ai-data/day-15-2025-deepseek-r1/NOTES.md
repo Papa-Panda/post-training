@@ -6,7 +6,7 @@
 - Title: DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning
 - Authors / Org: DeepSeek-AI (DeepSeek-R1 Team)
 - Link / arXiv: https://arxiv.org/abs/2501.12948
-- Date read: 2026-08-15
+- Date of publication: 2025-01-22
 - Tags: [rl-data, coding-data, reasoning, sft-vs-rl, cold-start, synthetic-data]
 - Day: 15
 

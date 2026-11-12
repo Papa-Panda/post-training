@@ -8,7 +8,7 @@
 - Title: Qwen2.5-Coder Technical Report
 - Authors / Org: Alibaba Cloud Qwen Team / Qwen Code Team
 - Link / arXiv: https://arxiv.org/abs/2409.12186
-- Date read: 2026-08-16
+- Date of publication: 2024-09-18
 - Tags: [coding-data, execution-filter, curation, quality, synthetic-data, sft, rl-data]
 
 ## 一句话总结

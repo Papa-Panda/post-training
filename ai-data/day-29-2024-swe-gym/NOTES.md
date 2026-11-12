@@ -6,7 +6,7 @@
 - Title: Training Software Engineering Agents and Verifiers with SWE-Gym
 - Authors / Org: Jiayi Pan, Xingyao Wang, Graham Neubig, Navdeep Jaitly, Heng Ji, Alane Suhr, Yizhe Zhang / UC Berkeley, UIUC, CMU, Apple
 - Link / arXiv: https://arxiv.org/abs/2412.21139
-- Date read: 2026-08-29
+- Date of publication: 2024-12-30
 - Tags: [coding-data, rl-data, executable-environment, trajectory-data, unit-tests, curation, quality]
 
 ## 一句话总结

@@ -8,7 +8,7 @@
 - Title: DEITA: What Makes Good Data for Alignment? A Comprehensive Study of Automatic Data Selection in Instruction Tuning
 - Authors / Org: Wei Liu, Weihao Zeng, Keqing He, Yong Jiang, Junxian He / Virginia Tech, Salesforce AI Research
 - Link / arXiv: https://arxiv.org/abs/2312.15685
-- Date read: 2026-08-20
+- Date of publication: 2023-12-25
 - Tags: [sft, data-selection, quality, complexity, diversity, coding-data, curation, less-is-more]
 - Folder: day-20-2023-deita
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-20-2023-deita

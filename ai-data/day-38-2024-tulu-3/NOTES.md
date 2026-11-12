@@ -10,7 +10,7 @@
 - Title: "Tülu 3: Pushing Frontiers in Open Language Model Post-Training"
 - Authors / Org: Lambert et al. / AllenAI
 - Link / arXiv: https://arxiv.org/abs/2411.15124
-- Date read: 2026-09-30
+- Date of publication: 2024-11-22
 - Tags: [rl-data, post-training-recipe, sft, dpo, rlvr, verifiable-reward, decontamination, curation]
 
 ## 一句话总结

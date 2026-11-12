@@ -4,7 +4,7 @@
 - Title: Understanding Black-box Predictions via Influence Functions
 - Authors / Org: Pang Wei Koh, Percy Liang / Stanford
 - Link / arXiv: https://arxiv.org/abs/1703.04730 / https://proceedings.mlr.press/v70/koh17a.html
-- Date read: 2026-08-05
+- Date of publication: 2017-03-14
 - Review date: 2026-09-02
 - Tags: [data-attribution, influence-functions, data-curation, debugging, quality, classic] ## 一句话总结
 用鲁棒统计里的 Influence Function，把黑盒模型的单条预测“回溯”到哪些训练样本最负责，不用重训就能估计删掉/改动某条训练数据对测试 loss 的影响 —— 是数据归因（data attribution）和数据清洗的鼻祖工作。 ## 核心

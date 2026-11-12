@@ -6,7 +6,7 @@
 - Title: Llama 3.1 / 3.2 - Post-training Expansion, Multilingual / Long-Context / Tool Use, Distillation & Pruning for 1B/3B and Vision 11B/90B
 - Authors / Org: Meta AI - Llama Team
 - Link / arXiv: https://arxiv.org/abs/2407.21783 (Llama 3 Herd v3 = 3.1 base, Jul 23 2024 + Nov 23 2024 update) + Model Cards: https://github.com/meta-llama/llama-models/blob/main/models/llama3_2/MODEL_CARD.md (Sep 25 2024) + Llama 3.2-Vision: 无独立论文（2026-09-10 纠正：初读引用的 arXiv 2409.17379 实为四旋翼 MPC 论文，张冠李戴；vision adapter 机制见 Herd 论文 §7–§8 compositional approach + Llama 3.2 Model Card vision section）
-- Date read: 2026-08-13
+- Date of publication: 2024-07-31
 - Tags: [pretraining, sft, rl-data, curation, multilingual, long-context, tool-use, synthetic-data, distillation, pruning, coding-data, vision]
 - Folder: 2024_llama3.1-3.2
 - Day: 10

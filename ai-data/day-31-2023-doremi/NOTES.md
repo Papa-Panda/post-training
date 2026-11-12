@@ -6,7 +6,7 @@
 - Title: DoReMi: Optimizing Data Mixtures Speeds Up Language Model Pretraining
 - Authors / Org: Sang Michael Xie et al. / Google DeepMind & Stanford University
 - Link / arXiv: https://arxiv.org/abs/2305.10429
-- Date read: 2026-08-31
+- Date of publication: 2023-05-17
 - Tags: [pretraining, data-mixture, domain-reweighting, curation, quality, proxy-model]
 
 ## 一句话总结

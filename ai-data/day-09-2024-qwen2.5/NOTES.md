@@ -6,7 +6,7 @@
 - Title: Qwen2.5 Technical Report
 - Authors / Org: Alibaba Cloud Qwen Team (Qwen2.5 / Qwen2.5-Coder / Qwen2.5-Math series)
 - Link / arXiv: https://arxiv.org/abs/2412.15115 (main), companion Coder: https://arxiv.org/abs/2409.12186
-- Date read: 2026-08-12
+- Date of publication: 2024-12-19
 - Tags: [pretraining, coding-data, curation, synthetic-data, sft, rl-data, scaling, multilingual, moe]
 - Folder: 2024_qwen2.5
 - Day: 9

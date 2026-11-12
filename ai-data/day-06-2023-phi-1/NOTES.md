@@ -5,7 +5,7 @@
 - Authors / Org: Suriya Gunasekar et al. / Microsoft Research
 - Link / arXiv: https://arxiv.org/abs/2306.11644
 - Code/Data: https://huggingface.co/microsoft/phi-1 , synthetic CodeTextbook via GPT-3.5
-- Date read: 2026-08-09
+- Date of publication: 2023-06-20
 - Tags: [coding-data, synthetic-data, quality, curation, pretraining, sft, SOTA]
 
 ## 一句话总结

@@ -8,7 +8,7 @@
 - Title: LIMA: Less Is More for Alignment
 - Authors / Org: Zhou et al. / Meta AI, Carnegie Mellon University, University of Southern California, Tel Aviv University
 - Link / arXiv: https://arxiv.org/abs/2305.11206
-- Date read: 2026-08-23
+- Date of publication: 2023-05-18
 - Tags: [sft, alignment-data, data-quality, diversity, curation, less-is-more, coding-data]
 - Folder: day-23-2023-lima
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-23-2023-lima

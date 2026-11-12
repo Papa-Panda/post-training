@@ -5,7 +5,7 @@
 - Authors / Org: Yongchan Kwon, Eric Wu, Kevin Wu, James Zou / Columbia & Stanford
 - Link / arXiv: https://arxiv.org/abs/2310.00902
 - Code: https://github.com/YeonwooSung/DataInf (official), plus https://github.com/UKPLab/datainf community impls
-- Date read: 2026-08-07
+- Date of publication: 2023-10-02
 - Tags: [data-attribution, influence-functions, lora, efficiency, curation, quality]
 
 ## 一句话总结

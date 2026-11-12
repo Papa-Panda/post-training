@@ -6,7 +6,7 @@
 - Title: Difficulty-Based Preference Data Selection by DPO Implicit Reward Gap
 - Authors / Org: Xuan Qi, Rongwu Xu, Zhijing Jin - UW / Tsinghua / MPI
 - Link / arXiv: https://arxiv.org/abs/2508.04149
-- Date read: 2026-08-13
+- Date of publication: 2025-08-06
 - Tags: [rl-data, dpo, preference-data, data-selection, alignment, coding-data]
 
 ## 一句话总结

@@ -30,7 +30,7 @@
 - Title:
 - Authors / Org:
 - Link / arXiv:
-- Date read: YYYY-MM-DD
+- Date of publication: YYYY-MM-DD（填 arXiv published 日期，不是阅读日期）
 - Tags: [coding-data, sft, rl-data, curation, quality, eval, flywheel]
 
 ## 一句话总结

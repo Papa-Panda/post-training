@@ -9,7 +9,7 @@
 - Authors / Org: Penedo et al. / Hugging Face（RefinedWeb: Penedo et al. / Technology Innovation Institute）
 - Link / arXiv: https://arxiv.org/abs/2406.17557
 - Supporting paper: https://arxiv.org/abs/2306.01116
-- Date read: 2026-08-25
+- Date of publication: 2024-06-25
 - Tags: [pretraining, web-data, data-curation, filtering, deduplication, quality, scale]
 - Folder: day-25-2023-fineweb-refinedweb
 - GitHub: https://github.com/Papa-Panda/post-training/tree/master/ai-data/day-25-2023-fineweb-refinedweb
