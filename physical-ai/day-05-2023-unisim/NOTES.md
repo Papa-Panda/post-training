@@ -9,7 +9,7 @@
 - Authors / Org: Sherry Yang, Yilun Du, Seyed Kamyar Seyed Ghasemipour, Jonathan Tompson, Leslie Kaelbling, Dale Schuurmans, Pieter Abbeel / UC Berkeley, Google DeepMind, MIT, University of Alberta
 - Link / arXiv / Project: https://arxiv.org/abs/2310.06114 / https://universal-simulator.github.io
 - First submitted: 2023-10-09
-- Date read: 2026-08-26
+- Date of publication: 2023-10-09
 - Tags: [physical-ai, world-model, unisim, video-diffusion, sim2real, vla, model-based-rl]
 - Thread: physical-ai
 - Folder: day-05-2023-unisim

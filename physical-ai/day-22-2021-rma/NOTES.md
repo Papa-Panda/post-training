@@ -7,7 +7,7 @@
 - Authors / Org: Ashish Kumar, Zipeng Fu, Deepak Pathak, Jitendra Malik（UC Berkeley；RSS 2021）
 - Link / arXiv: https://arxiv.org/abs/2107.04034（2021-07 preprint；RSS 2021 报告）/ 项目页（含视频）https://ashish-kmr.github.io/rma-legged-robots/
 - Official code: 本次运行未检索到可直接验证的官方仓库 URL，不臆测拼接；实现细节与视频以作者项目页为准（诚实标注）
-- Date read: 2026-09-13
+- Date of publication: 2021-07-08
 - Tags: [physical-ai, rma, legged-robots, quadruped, motor-adaptation, privileged-learning, sim2real, unitree-a1]
 - Thread: physical-ai
 - Folder: day-22-2021-rma

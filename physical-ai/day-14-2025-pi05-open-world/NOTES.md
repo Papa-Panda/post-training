@@ -8,7 +8,7 @@
 - Title: π₀.₅: a Vision-Language-Action Model with Open-World Generalization
 - Authors / Org: Physical Intelligence (Kevin Black, Noah Brown, Danny Driess, Chelsea Finn, Karol Hausman, Brian Ichter, Sergey Levine, Karl Pertsch 等 35 人)
 - Link / arXiv / Blog: https://arxiv.org/abs/2504.16054 （2025-04-22）；项目页 https://www.pi.website/blog/pi05；代码 https://github.com/Physical-Intelligence/openpi
-- Date read: 2026-09-05
+- Date of publication: 2025-04-22
 - Tags: [physical-ai, vla, open-world-generalization, pi05, co-training, flow-matching, fast-tokenization, subtask-prediction, mobile-manipulation, knowledge-insulation]
 - Thread: physical-ai
 - Folder: day-14-2025-pi05-open-world

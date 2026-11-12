@@ -8,7 +8,7 @@
 - Title: Meta ARI / MSL / Robotics Studio - Physical AGI via Humanoid
 - Authors / Org: ARI (Xiaolong Wang / Lerrel Pinto) + Meta MSL (Alexandr Wang) + Meta Robotics Studio
 - Link / Blog: https://www.pymnts.com/meta/2026/meta-acquires-ari-to-fuel-humanoid-robot-push/ / https://www.eweek.com/news/meta-acquires-ari-humanoid-robotics-ai/ / https://thejournal.com/articles/2026/05/06/meta-pushes-into-physical-ai-with-acquisition-of-robotics-ai-startup.aspx
-- Date read: 2026-08-23
+- Date of publication: 2026-05-03
 - Tags: [physical-ai, humanoid, physical-agi, msl, robotics-studio, ari, sim2real, whole-body-control]
 - Thread: physical-ai
 - Folder: day-01-2025-ari-msl-robotics-studio

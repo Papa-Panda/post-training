@@ -30,7 +30,7 @@
 - Title:
 - Authors / Org:
 - Link / arXiv / Blog:
-- Date read: YYYY-MM-DD
+- Date of publication: YYYY-MM-DD（填 arXiv published 日期，不是阅读日期）
 - Tags: [physical-ai, humanoid, world-model, sim2real, isaac-lab, habitat, control, vla, rl-robotics]
 - Thread: physical-ai
 - Folder: day-NN-xxx

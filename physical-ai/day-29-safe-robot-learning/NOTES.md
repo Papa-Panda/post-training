@@ -7,7 +7,7 @@
 - Authors / Org: Brunke* / Greeff / Hall / Yuan / Zhou / Panerati / Schoellig（U Toronto UTIAS；Annual Review of Control, Robotics, and Autonomous Systems，arXiv:2108.06266）；Alshiekh / Bloem / Ehlers / Könighofer / Niekum / Topcu（UT Austin / TU Graz / Bremen；AAAI 2018）；Ames / Xu / Grizzle / Tabuada（IEEE TAC 2017）
 - Link / arXiv: 综述 — https://arxiv.org/abs/2108.06266；Shielding — https://arxiv.org/abs/1708.08611；CBF-QP — https://arxiv.org/abs/1609.06408
 - 官方代码：safe-control-gym（UTIAS，PyBullet cart-pole/quadrotor + CasADi 符号动力学 + 可注入扰动的安全基准）— https://github.com/utiasDSL/safe-control-gym；Safety-Gymnasium（CMDP 约束 API 的大规模 safe RL 基准）— https://github.com/PKU-Alignment/safety-gymnasium
-- Date read: 2026-09-20
+- Date of publication: 2021-08-13
 - Tags: [physical-ai, safe-robot-learning, cmdp, constrained-rl, cbf, shielding, runtime-monitor, rta, simplex, safety-filter]
 - Thread: physical-ai
 - Folder: day-29-safe-robot-learning

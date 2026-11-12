@@ -6,7 +6,7 @@
 - Title: Humanoid-Gym: Reinforcement Learning for Humanoid Robot with Zero-Shot Sim2Real Transfer
 - Authors / Org: Xinyang Gu, Yen-Jen Wang, Jianyu Chen / RobotEra, Shanghai Qi Zhi Institute, Tsinghua University
 - Link / arXiv / Blog: https://arxiv.org/abs/2404.05695
-- Date read: 2026-08-29
+- Date of publication: 2024-04-08
 - Tags: [physical-ai, humanoid, locomotion, reinforcement-learning, sim2sim, sim2real, isaac-gym, mujoco, domain-randomization]
 - Thread: physical-ai
 - Folder: day-08-2024-humanoid-gym-locomotion

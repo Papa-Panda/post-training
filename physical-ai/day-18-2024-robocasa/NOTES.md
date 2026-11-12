@@ -8,7 +8,7 @@
 - Title: RoboCasa: Large-Scale Simulation of Everyday Tasks for Generalist Robots
 - Authors / Org: Soroush Nasiriany、Abhiram Maddukuri（equal）、Lance Zhang（equal）、Adeet Parikh、Aaron Lo、Abhishek Joshi、Ajay Mandlekar、Yuke Zhu / The University of Texas at Austin、NVIDIA Research
 - Link / arXiv / Blog: https://arxiv.org/abs/2406.02523 ；项目页 https://robocasa.ai （视频、文档、数据集）；官方代码 https://github.com/robocasa/robocasa （MIT，基于 robosuite/MuJoCo；资产约 5GB，需 `download_kitchen_assets.py`）
-- Date read: 2026-09-09
+- Date of publication: 2024-06-04
 - Tags: [physical-ai, robocasa, robot-data, simulation, sim2real, mimicgen, behavior-cloning, generative-ai, kitchen-manipulation, cross-embodiment, mobile-manipulation]
 - Thread: physical-ai
 - Folder: day-18-2024-robocasa

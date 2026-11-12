@@ -8,7 +8,7 @@
 - Link / arXiv: https://arxiv.org/abs/1810.05687（v1 2018-10-12，v4 2019-03-05；ICRA 2019 接收）
 - 项目页（含实验视频）: https://sites.google.com/view/simopt
 - Official code: 论文未附公开实现仓库（诚实标注）；核心算法是标准组件组合（PPO + REPS + 加权 MLE），可复写
-- Date read: 2026-09-15
+- Date of publication: 2018-10-12
 - Tags: [physical-ai, simopt, system-identification, domain-randomization, sim2real, reps, ppo, behavior-matching, real2sim]
 - Thread: physical-ai
 - Folder: day-24-sim2real-system-identification

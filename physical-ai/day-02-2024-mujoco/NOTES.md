@@ -8,7 +8,7 @@
 - Title: MuJoCo — Multi-Joint dynamics with Contact
 - Authors / Org: Roboti LLC (Emanuel Todorov) → Google DeepMind (acquired Oct 2021, open-sourced May 2022)
 - Link / Docs: https://mujoco.org/ / https://github.com/google-deepmind/mujoco / https://deepmind.google/blog/opening-up-a-physics-simulator-for-robotics/
-- Date read: 2026-08-23
+- Date of publication: 2021-10-18
 - Tags: [physical-ai, mujoco, sim2real, contact-model, humanoid, control, rl-robotics]
 - Thread: physical-ai
 - Folder: day-02-2024-mujoco

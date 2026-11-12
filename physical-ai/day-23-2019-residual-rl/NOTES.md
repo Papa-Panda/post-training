@@ -7,7 +7,7 @@
 - Authors / Org: Tobias Johannink*, Shikhar Bahl*, Ashvin Nair*（*共同一作）, Jianlan Luo, Avinash Kumar, Matthias Loskyll, Juan Aparicio Ojea, Eugen Solowjow, Sergey Levine（Siemens Corporation / UC Berkeley / Hamburg University of Technology；ICRA 2019）
 - Link / arXiv: https://arxiv.org/abs/1812.03201（2018-12-07 v1，v2 2018-12-18；ICRA 2019 接收）/ 项目页（含视频）residualrl.github.io（论文内提及）
 - Official code: 论文未提供官方实现仓库（诚实标注）；底层 TD3 用的是 rlkit 的公开实现，residual 框架本身与 RL 算法解耦
-- Date read: 2026-09-14
+- Date of publication: 2018-12-07
 - Tags: [physical-ai, residual-rl, robot-control, classical-control, feedback-control, actor-critic, td3, sim2real, contact-rich-manipulation]
 - Thread: physical-ai
 - Folder: day-23-2019-residual-rl

@@ -8,7 +8,7 @@
 - Title: DROID: A Large-Scale In-The-Wild Robot Manipulation Dataset
 - Authors / Org: Alexander Khazatsky*, Karl Pertsch*（co-leads，对应 alexkhaz@stanford.edu / pertsch@berkeley.edu），Jitendra Malik、Roberto Martín-Martín、Subramanian Ramamoorthy、Dorsa Sadigh、Shuran Song、Jiajun Wu、Yuke Zhu、Thomas Kollar、Sergey Levine、Chelsea Finn 等 / Stanford、UC Berkeley、CMU 等 13 所机构（北美/亚洲/欧洲）
 - Link / arXiv / Blog: https://export.arxiv.org/abs/2403.12945 ；项目页 https://droid-dataset.github.io （含数据集可视化、训练代码、预训练 checkpoint、硬件复现指南）
-- Date read: 2026-09-07
+- Date of publication: 2024-03-19
 - Tags: [physical-ai, droid, robot-data, in-the-wild, diffusion-policy, data-diversity, co-training, scene-coverage, franka]
 - Thread: physical-ai
 - Folder: day-16-2024-droid

@@ -8,7 +8,7 @@
 - Title: Genie: Generative Interactive Environments
 - Authors / Org: DeepMind — Bruce, Dennis, Edwards, Parker-Holder, Shi et al. (Feb 2024 Genie 1, Dec 2024 Genie 2, Aug 2025 Genie 3)
 - Link / Blog: https://deepmind.google/research/publications/60474/ / https://en.wikipedia.org/wiki/Genie_(world_model) / https://techcrunch.com/2025/08/05/deepmind-thinks-genie-3-world-model-presents-stepping-stone-towards-agi/
-- Date read: 2026-08-25
+- Date of publication: 2024-02-23
 - Tags: [physical-ai, world-model, genie, sim2real, interactive-env, latent-action]
 - Thread: physical-ai
 - Folder: day-04-2024-genie-world-model

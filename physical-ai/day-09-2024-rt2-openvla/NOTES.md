@@ -8,7 +8,7 @@
 - Link / arXiv / Blog: https://arxiv.org/abs/2307.15818 / https://arxiv.org/abs/2406.09246
 - Project: https://robotics-transformer2.github.io/ / https://openvla.github.io/
 - Official code: https://github.com/openvla/openvla （RT-2 未公开训练代码与权重）
-- Date read: 2026-08-30
+- Date of publication: 2023-07-28
 - Tags: [physical-ai, vla, robot-manipulation, action-tokenization, co-finetuning, open-x-embodiment, lora, inference]
 - Thread: physical-ai
 - Folder: day-09-2024-rt2-openvla

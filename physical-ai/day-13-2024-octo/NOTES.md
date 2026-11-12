@@ -7,7 +7,7 @@
 - Authors / Org: Octo Model Team / UC Berkeley, Stanford University, Carnegie Mellon University, Google DeepMind（RSS 2024）
 - Link / arXiv / Blog: https://arxiv.org/abs/2405.12213 / https://octo-models.github.io/
 - Official code: https://github.com/octo-models/octo
-- Date read: 2026-09-03
+- Date of publication: 2024-05-20
 - Tags: [physical-ai, vla, generalist-robot-policy, open-x-embodiment, transformer, diffusion-policy, action-chunking, cross-embodiment, finetuning]
 - Thread: physical-ai
 - Folder: day-13-2024-octo

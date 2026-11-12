@@ -6,7 +6,7 @@
 - Title: Efficient Online Reinforcement Learning with Offline Data (RLPD — Reinforcement Learning with Prior Data)
 - Authors / Org: Philip J. Ball*, Laura Smith*, Ilya Kostrikov* (共同一作), Sergey Levine / UC Berkeley
 - Link / arXiv / Blog: https://arxiv.org/abs/2302.02948 (ICML 2023, v4 2023-05-31)
-- Date read: 2026-09-11
+- Date of publication: 2023-02-06
 - Tags: [physical-ai, rlpd, offline-to-online, reinforcement-learning, actor-critic, sac, sample-efficiency, real-world-rl]
 - Thread: physical-ai
 - Folder: day-20-2023-rlpd

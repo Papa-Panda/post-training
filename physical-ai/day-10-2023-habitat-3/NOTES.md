@@ -9,7 +9,7 @@
 - Project: https://aihabitat.org/habitat3/
 - Official code: https://github.com/facebookresearch/habitat-lab
 - Venue: ICLR 2024
-- Date read: 2026-08-31
+- Date of publication: 2023-10-19
 - Tags: [physical-ai, habitat-3, habitat-lab, embodied-ai, human-robot-interaction, social-navigation, social-rearrangement, multi-agent-rl, human-in-the-loop]
 - Thread: physical-ai
 - Folder: day-10-2023-habitat-3

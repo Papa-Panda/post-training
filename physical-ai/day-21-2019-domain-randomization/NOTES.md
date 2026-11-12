@@ -6,7 +6,7 @@
 - Title: Solving Rubik's Cube with a Robot Hand（Automatic Domain Randomization，ADR）
 - Authors / Org: OpenAI（Ilge Akkaya*, Marcin Andrychowicz*, Maciek Chociej*, Mateusz Litwin*, Bob McGrew*, Arthur Petron*, Alex Paino*, Matthias Plappert*, Glenn Powell*, Raphael Ribas*, Jonas Schneider*, Nikolas Tezak*, Jerry Tworek*, Peter Welinder*, Lilian Weng*, Qiming Yuan*, Wojciech Zaremba*, Lei Zhang*；作者按字母序，引用请用 OpenAI et al.）
 - Link / arXiv / Blog: https://arxiv.org/abs/1910.07113（2019-10-17 preprint）/ 官方博客 http://openai.com/index/solving-rubiks-cube/
-- Date read: 2026-09-12
+- Date of publication: 2019-10-16
 - Tags: [physical-ai, domain-randomization, adr, sim2real, dexterous-manipulation, ppo, meta-learning, rubiks-cube]
 - Thread: physical-ai
 - Folder: day-21-2019-domain-randomization

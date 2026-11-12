@@ -8,7 +8,7 @@
 - Title: Open X-Embodiment: Robotic Learning Datasets and RT-X Models
 - Authors / Org: Open X-Embodiment Collaboration（Quan Vuong, Brian Ichter, Chelsea Finn, Sergey Levine 等 290+ 作者）/ Google DeepMind 牵头 + 21 institutions（Stanford、UC Berkeley、CMU、Meta AI、TRI、NVIDIA、KAIST、东京大学、清华、上海交大等）
 - Link / arXiv / Blog: https://arxiv.org/abs/2310.08864 ；项目页 https://robotics-transformer-x.github.io/ ；代码/数据 https://github.com/google-deepmind/open_x_embodiment
-- Date read: 2026-09-06
+- Date of publication: 2023-10-13
 - Tags: [physical-ai, open-x-embodiment, rtx, cross-embodiment, robot-data, data-mixture, behavior-cloning, emergent-skills, rlds]
 - Thread: physical-ai
 - Folder: day-15-2023-open-x-embodiment-rtx

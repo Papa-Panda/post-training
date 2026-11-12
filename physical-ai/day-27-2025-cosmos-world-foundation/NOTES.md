@@ -11,7 +11,7 @@
   - Cosmos-Transfer1（world-to-world）：https://github.com/nvidia-cosmos/cosmos-transfer1
   - Cosmos-Reason1（物理推理 VLM）：https://github.com/nvidia-cosmos/cosmos-reason1（论文 http://arxiv.org/abs/2503.15558）
   - Cosmos-Drive-Dreams（合成驾驶数据管线）：https://github.com/nv-tlabs/Cosmos-Drive-Dreams
-- Date read: 2026-09-18
+- Date of publication: 2025-01-07
 - Tags: [physical-ai, cosmos, world-foundation-model, video-generation, world-model, synthetic-data, sim2real, tokenizer, diffusion, autoregressive]
 - Thread: physical-ai
 - Folder: day-27-2025-cosmos-world-foundation

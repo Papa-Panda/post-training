@@ -6,7 +6,7 @@
 - Title: Learning Human-to-Humanoid Real-Time Whole-Body Teleoperation (H2O)
 - Authors / Org: Tairan He, Zhengyi Luo, Wenli Xiao, Chong Zhang, Kris Kitani, Changliu Liu, Guanya Shi / Carnegie Mellon University
 - Link / arXiv / Blog: https://arxiv.org/html/2403.04436v1
-- Date read: 2026-08-28
+- Date of publication: 2024-03-07
 - Tags: [physical-ai, humanoid, whole-body-control, teleoperation, sim2real, reinforcement-learning, motion-retargeting]
 - Thread: physical-ai
 - Folder: day-07-2024-h2o-whole-body-control

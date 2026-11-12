@@ -7,7 +7,7 @@
 - Authors / Org: Cheng Chi, Siyuan Feng, Yilun Du, Zhenjia Xu, Eric Cousineau, Benjamin Burchfiel, Shuran Song / Columbia University, Toyota Research Institute, MIT（RSS 2023）
 - Link / arXiv / Blog: https://arxiv.org/abs/2303.04137v5 / http://diffusion-policy.cs.columbia.edu
 - Official code: https://github.com/real-stanford/diffusion_policy
-- Date read: 2026-09-02
+- Date of publication: 2023-03-07
 - Tags: [physical-ai, visuomotor-policy, diffusion, behavior-cloning, action-chunking, receding-horizon-control, robot-manipulation]
 - Thread: physical-ai
 - Folder: day-12-2023-diffusion-policy

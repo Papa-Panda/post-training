@@ -6,7 +6,7 @@
 - Title: Proximal Policy Optimization Algorithms（主论文）+ Legged-Gym / RSL-RL（robotics rollout 系统）
 - Authors / Org: John Schulman, Filip Wolski, Prafulla Dhariwal, Alec Radford, Oleg Klimov — OpenAI（2017，主论文）；Nikita Rudin, David Hoeller, Philipp Reist, Marco Hutter — Robotic Systems Lab, ETH Zurich & NVIDIA（legged_gym, CoRL 2021）；rsl_rl 维护 Mayank Mittal / Clemens Schwarke — ETH Zurich RSL & NVIDIA
 - Link / arXiv / Blog: https://arxiv.org/abs/1707.06347 ｜ https://leggedrobotics.github.io/legged_gym/ ｜ https://arxiv.org/abs/2109.11978
-- Date read: 2026-09-10
+- Date of publication: 2017-07-20
 - Tags: [physical-ai, ppo, reinforcement-learning, actor-critic, rollout, legged-gym, rsl-rl, sim2real]
 - Thread: physical-ai
 - Folder: day-19-2017-ppo-robotics

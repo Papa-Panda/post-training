@@ -8,7 +8,7 @@
 - Link / arXiv: https://arxiv.org/abs/2205.06175?context=cs.LG（v1 2022-05-12；TMLR 11/2022 接收）
 - 官方博客（含训练/部署示意图）: https://deepmind.google/blog/a-generalist-agent/
 - Official code: DeepMind 未公开官方实现（诚实标注）；核心是标准 decoder-only Transformer + BC，无私有算子，可复写
-- Date read: 2026-09-16
+- Date of publication: 2022-05-12
 - Tags: [physical-ai, gato, generalist-agent, tokenization, behavior-cloning, multi-embodiment, deepmind]
 - Thread: physical-ai
 - Folder: day-25-2022-gato

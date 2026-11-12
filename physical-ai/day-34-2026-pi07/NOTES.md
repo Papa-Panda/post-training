@@ -9,7 +9,7 @@
 - 官方技术报告 PDF：https://www.pi.website/download/pi07.pdf （blog 页"Paper"链接）
 - 独立报道：TechCrunch（Brian Heater，2026-04-16；"if the findings hold up" 保留）| The Decoder（数据污染质疑 + "不具备 reasoning" 视角）| TechDogs（发布日期/组合泛化口径确认）
 - 抓取盲区：官方 X 帖子 URL、官方 YouTube π0.7 专属视频 URL 未抓取到（demo 视频嵌在 blog 页内）；Fig. 6/9 部分柱状图精确数值未提取，只确认文字结论；π0.7 **权重未开源**（openpi 只有 π0 / π0-FAST / π0.5）
-- Date read: 2026-09-26
+- Date of publication: 2026-04-16
 - Tags: [physical-ai, vla, pi07, compositional-generalization, steerable, metadata, flow-matching, cross-embodiment, instruction-following, world-model]
 - Thread: physical-ai
 - Folder: day-34-2026-pi07

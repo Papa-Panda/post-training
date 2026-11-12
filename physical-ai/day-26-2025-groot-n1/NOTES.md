@@ -9,7 +9,7 @@
 - 官方页面：https://research.nvidia.com/publication/2025-03_nvidia-isaac-gr00t-n1-open-foundation-model-humanoid-robots
 - Official code: https://github.com/NVIDIA/Isaac-GR00T（Apache 2.0，模型 / 代码 / 数据 / 评测基准全部开源）
 - 模型权重：https://huggingface.co/nvidia/GR00T-N1-2B（GR00T-N1-2B：2.2B 总参数，其中 VLM 1.34B）
-- Date read: 2026-09-17
+- Date of publication: 2025-03-18
 - Tags: [physical-ai, groot-n1, humanoid, vla, dual-system, flow-matching, diffusion-transformer, data-pyramid, sim2real, cross-embodiment]
 - Thread: physical-ai
 - Folder: day-26-2025-groot-n1

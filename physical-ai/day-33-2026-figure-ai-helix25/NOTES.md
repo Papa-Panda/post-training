@@ -10,7 +10,7 @@
 - 配套发布 A：Figure Index 公开（2026-08-25；此前 4 个月 stealth，代号 Project Go-Big）
 - 配套发布 B：Figure × Nscale 战略合作（2026-09-03；Nscale 官方新闻稿，经 Reuters / Bloomberg 同日 corroborated——Techtimes 转述）
 - 独立报道：TechRepublic（2026-09-21）、Sebertech（2026-09-18）、Biped.News、Unite.AI、Humanoids Daily（Adcock 9-17 RoboStrategy livestream 访谈）、TechTimes、The Weighted Average（算力协议限定词分析）
-- Date read: 2026-09-25
+- Date of publication: 2026-09-17
 - Tags: [physical-ai, vla, humanoid, helix, index, data-flywheel, generalization, scaling-law, compute, eval]
 - Thread: physical-ai
 - Folder: day-33-2026-figure-ai-helix25

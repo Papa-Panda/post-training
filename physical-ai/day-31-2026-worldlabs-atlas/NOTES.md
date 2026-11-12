@@ -8,7 +8,7 @@
 - Link / Blog: https://www.worldlabs.ai/blog/atlas（官方博客，2026-09-01 发布）
 - 官方 X 公告：https://x.com/theworldlabs/status/2094839756329041984（2026-09-01）
 - 发布视频：https://www.youtube.com/watch?v=hzvXRHBInx0
-- Date read: 2026-09-23
+- Date of publication: 2026-09-01
 - Tags: [physical-ai, world-model, atlas, spatial-intelligence, camera-control, real-to-sim, 3d-reconstruction, video-generation]
 - Thread: physical-ai
 - Folder: day-31-2026-worldlabs-atlas

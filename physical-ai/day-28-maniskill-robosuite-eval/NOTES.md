@@ -7,7 +7,7 @@
 - Authors / Org: ManiSkill3 — Stone Tao, Fanbo Xiang, Arth Shukla, Yuzhe Qin, Xander Hinrichsen, Xiaodi Yuan, Chen Bao, Xinsong Lin, Yulin Liu, Tse-kai Chan, Yuan Gao, Xuanlin Li, Tongzhou Mu, Nan Xiao, Arnav Gurha, Viswesh Nagaswamy Rajesh, Yong Woo Choi, Yen-Ru Chen, Zhiao Huang, Roberto Calandra, Rui Chen, Shan Luo, Hao Su（UCSD / Hillbot，另有 CMU、TU Dresden、清华、King's College London）；robosuite — Yuke Zhu, Josiah Wong, Ajay Mandlekar, Roberto Martín-Martín, Abhishek Joshi, Kevin Lin, Abhiram Maddukuri, Soroush Nasiriany, Yifeng Zhu（robosuite.ai）
 - Link / arXiv: ManiSkill3 — https://arxiv.org/abs/2410.00425（v2；2024-10-01）；robosuite — http://arxiv.org/abs/2009.12293v3（v3 2025-01-18；v1 2020-09-25，v2 2022-11-15）
 - 官方项目页：ManiSkill3 — maniskill.ai（文档 maniskill.readthedocs.io，Apache-2.0 开源）；robosuite — robosuite.ai（姐妹项目 robomimic，见 https://arise-initiative.github.io/robomimic-web/）
-- Date read: 2026-09-19
+- Date of publication: 2024-10-01
 - Tags: [physical-ai, benchmark, maniskill, robosuite, gpu-simulation, sim2real, reproducibility, evaluation, sapien, mujoco, physx]
 - Thread: physical-ai
 - Folder: day-28-maniskill-robosuite-eval

@@ -8,7 +8,7 @@
 - Title: BridgeData V2: A Dataset for Robot Learning at Scale
 - Authors / Org: Homer Walke、Kevin Black、Abraham Lee（UC Berkeley）、Moo Jin Kim、Max Du（Stanford）、Chongyi Zheng（CMU）、Tony Zhao（Stanford）、Philippe Hansen-Estruch（UC Berkeley）、Quan Vuong（Google DeepMind）、Andre He、Vivek Myers、Kuan Fang（UC Berkeley）、Chelsea Finn（Stanford）、Sergey Levine（UC Berkeley）/ UC Berkeley、Stanford、Google DeepMind、CMU
 - Link / arXiv / Blog: https://arxiv.org/abs/2308.12952 ；项目页 https://rail-berkeley.github.io/bridgedata/ （数据集下载、可视化、评测视频）；官方代码 https://github.com/rail-berkeley/bridge_data_v2 （Jax 实现：GCBC / D-GCBC / GC-IQL / CRL / LCBC + 预训练 checkpoint）
-- Date read: 2026-09-08
+- Date of publication: 2023-08-24
 - Tags: [physical-ai, bridgedata-v2, robot-data, imitation-learning, offline-rl, skill-diversity, low-cost-robot, widowx, language-conditioning, goal-conditioning]
 - Thread: physical-ai
 - Folder: day-17-2023-bridgedata-v2

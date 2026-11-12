@@ -9,7 +9,7 @@
 - Authors / Org: Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, Timothy Lillicrap / DeepMind, University of Toronto
 - Link / arXiv / Nature: https://arxiv.org/abs/2301.04104v2 / https://doi.org/10.1038/s41586-025-08744-2
 - First submitted: 2023-01-10; arXiv v2: 2024-04-17; Nature version: 2025
-- Date read: 2026-08-27
+- Date of publication: 2023-01-10
 - Tags: [physical-ai, world-model, dreamerv3, latent-dynamics, model-based-rl, control, actor-critic]
 - Thread: physical-ai
 - Folder: day-06-2023-dreamerv3

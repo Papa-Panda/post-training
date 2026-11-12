@@ -9,7 +9,7 @@
 - Authors / Org: Mayank Mittal, Kelly Guo, Gavriel State, Spencer Huang et al. / NVIDIA
 - Link / arXiv / Blog: https://arxiv.org/abs/2511.04831v1 / https://research.nvidia.com/publication/2025-09_isaac-lab-gpu-accelerated-simulation-framework-multi-modal-robot-learning
 - Publication date: 2025-09-29
-- Date read: 2026-08-24
+- Date of publication: 2025-11-06
 - Tags: [physical-ai, isaac-lab, isaac-sim, openusd, physx, sim2real, domain-randomization, robotics-rl]
 - Thread: physical-ai
 - Folder: day-03-2025-isaac-lab

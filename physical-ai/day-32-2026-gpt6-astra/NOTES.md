@@ -9,7 +9,7 @@
 - 官方 X 公告：@OpenAI（2026-09-03）："This is GPT-6 Astra. Anything you can do on a computer, Astra can do for you. Fast."（来源：aistify 转述 X 帖）
 - 独立评测参考：ARC Prize 独立结果 https://arcprize.org/blog/astra（来源：wayintoai 笔记引用；独立于 OpenAI 官方数字）
 - 安全细节：首席科学家 Jakub Pachocki 同步发布 "An Alien Mind" 博客（来源：bizscoreai 转述）
-- Date read: 2026-09-24
+- Date of publication: 2026-09-03
 - Tags: [physical-ai, computer-use, agentic-ai, vla, digital-agent, eval, safety, deployment-gating]
 - Thread: physical-ai
 - Folder: day-32-2026-gpt6-astra

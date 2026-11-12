@@ -7,7 +7,7 @@
 - Authors / Org: Kevin Black, Noah Brown, Danny Driess, Adnan Esmail, Michael Equi, Chelsea Finn, Niccolo Fusai, Lachy Groom, Karol Hausman, Brian Ichter, Szymon Jakubczak, Tim Jones, Liyiming Ke, Sergey Levine, Adrian Li-Bell, Mohith Mothukuri, Suraj Nair, Karl Pertsch, Lucy Xiaoyang Shi, James Tanner, Quan Vuong, Anna Walling, Haohuan Wang, Ury Zhilinsky / Physical Intelligence
 - Link / arXiv / Blog: https://arxiv.org/abs/2410.24164 / https://www.physicalintelligence.company/blog/pi0
 - Official code: https://github.com/Physical-Intelligence/openpi
-- Date read: 2026-09-01
+- Date of publication: 2024-10-31
 - Tags: [physical-ai, vla, pi0, flow-matching, action-chunking, cross-embodiment, dexterous-manipulation, robot-foundation-model]
 - Thread: physical-ai
 - Folder: day-11-2024-pi0-flow-vla
