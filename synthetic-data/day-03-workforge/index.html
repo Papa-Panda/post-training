@@ -129,9 +129,9 @@ pre code{background:none;padding:0;color:inherit}
 </section>
 <section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
 <ol>
-<li>真实感的哪一部分最关键——文件数量、类型多样性，还是工作流本身？</li>
-<li>“程序化 + 语义”双 verifier：程序化 verifier 验什么、语义 verifier 验什么？只用其一会漏掉哪类错误？</li>
-<li>27B dense 版 GDPval 82.4 超过 397B 的 79.7——这是 WorkForge 数据赢了规模，还是 GDPval 评测本身偏向 WorkForge 的任务分布？</li>
+<li>真实感的三个成分（文件数量 5.4×、类型多样性 2.4×、大小 21.5KB→279KB）到底哪个在起作用？设计一个消融实验：固定任务与 verifier，三臂——A 完整真实工作空间；B 真实文件但随机打乱目录结构（数量/类型不变，结构破坏）；C LLM 合成文件但按真实分布补足数量与类型。评 GDPval。判据：若 A≈B≫C → 数量/类型是主因；若 A≫B≈C → 结构本身（文件间的真实关联）才是关键。再说漏洞：B 的“打乱结构”会不会同时破坏 verifier 的可验证性（控制变量不干净）？</li>
+<li>“程序化 + 语义”双 verifier：设计一个 3×2：verifier ∈ {只程序化，只语义，双} × 任务类型 ∈ {有唯一客观答案，无唯一答案（如开放式写作/分析）}。先预测六个格子的 pass 率与“误判率”（verifier 说对、实际错）排序并写理由；再问：怎么度量语义 verifier 自己的错误率——它本身就是 LLM judge，谁来 verifier the verifier？</li>
+<li>27B dense 82.4 超过 397B 的 79.7。设计一个检验，区分“WorkForge 数据赢了规模”与“GDPval 偏向 WorkForge 的任务分布”：固定 27B dense 模型，A 在 WorkForge 上训、GDPval 上评；B 在同等 token 量的通用 agentic 数据上训、GDPval 上评；C 把 A 的模型拿到非 WorkForge 分布的评测（如 BFCL/ACEBench）上评。判据：若 A 在 C 上也赢 B → 数据真赢了规模；若 A 只在 GDPval 赢、B 在 C 上反超 → GDPval 与 WorkForge 同分布，分数有水分。</li>
 </ol>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
