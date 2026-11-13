@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 06 ToolRACER — 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#0f766e; --accent-ink:#115e59; --accent-bg:#f0fdfa;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#134e4a,#0d9488);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 100%);border-color:#99f6e4}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 100%);
+  border:1px solid #99f6e4;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #99f6e4;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e6f5f3;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#2dd4bf,#0f766e);height:100%;border-radius:999px}
+.barfill.bad{background:linear-gradient(90deg,#fca5a5,#dc2626)}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.callout b{color:#92400e}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">synthetic-data · C 系列 Day 06</span>
+    <h1>ToolRACER：专门练“不合作用户”</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/day-06-toolracer/</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>ToolRACER: A Robust Agentic Conversation Emulation Resource for Agent Training and Evaluation</dd><dt>Authors</dt><dd>Chakraborty 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2610.09163">https://arxiv.org/abs/2610.09163</a></dd><dt>Date of publication</dt><dd>2026-10-06</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">failure-scenarios</span><span class="tag">unhappy</span><span class="tag">impossible</span></div></dd><dt>与前篇的关系</dt><dd>Day 05 Data Turnstile 是在合成时分角色验证、把错误拦在数据外面；Day 06 反过来，把“失败场景”本身当成训练资产——专门合成 agent 最容易翻车的对话。Day 02 AED 是从真实 rollout 里挖失败（事后挖），ToolRACER 是用三个模拟器合成失败场景（事前造）；Day 04 ToolLoop 是“出错就带着错误原因重生成”，ToolRACER 是“失败轨迹喂回模拟器再生”，都靠反馈循环救样本，但一个救的是单条样本、一个救的是整条对话轨迹。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>只会练“合作用户”的 agent，一遇到摇摆、漂移、含糊、或根本办不到的要求就翻车——而真实用户大多不合作。ToolRACER 用三个模拟模型配合（用户模拟器、助手、工具模拟器），显式生成三种轨迹：Happy（合作 + 可满足）、Unhappy（摇摆、漂移、含糊）、Impossible（工具满足不了，Agent 应该识别并拒绝）；失败轨迹喂回模拟器再生，救回了 65.4% 一开始失败的轨迹；最后得到 5.6K 条多轮对话，约 66% 是容易失败的场景。Qwen3-4B 在 τ²-bench 上从 32.20% 升到 39.20%，和 APIGen-MT 叠加能到 41.25%；只训 Impossible 子集，能把 BFCL 的 Irrelevance 检测从 85.83% 拉到 95.50%。但不同路径会互相干扰：H+I 合起来反而比单路径差，不能简单拼接。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">3</div><div class="l">个模拟模型<br>用户模拟器 / 助手 / 工具模拟器</div></div><div class="stat"><div class="v">5.6K</div><div class="l">条多轮对话<br>约 66% 是容易失败的场景</div></div><div class="stat"><div class="v">65.4%</div><div class="l">失败轨迹救回率<br>喂回模拟器再生</div></div><div class="stat"><div class="v">32.20% → 39.20%</div><div class="l">Qwen3-4B τ²-bench<br>+7.00 个点；叠加 APIGen-MT 到 41.25%</div></div></div>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
+<ol>
+<li>三种轨迹为什么不能简单拼接——干扰到底出在哪一层？论文只报了“H+I 合起来反而比单路径差”，没拆干扰的来源。设计一个实验：固定同一个基座（Qwen3-4B）与同一总样本量，七臂——A 只训 Happy、B 只训 Unhappy、C 只训 Impossible、D H+U、E H+I、F U+I、G 三者全拼（比例与单路径臂的混合比例一致）。评 τ²-bench（多轮成功率）与 BFCL Irrelevance（拒绝无关调用）两个指标。判据：若 E 在 Irrelevance 上 ≈C、但在 τ² 上 ≪A → 干扰是“拒绝”行为与“坚持完成”行为在策略层冲突（模型分不清什么时候该坚持、什么时候该拒绝）；若 E 在两个指标上都 ≪ 单路径 → 干扰在数据层（Impossible 的“拒绝”模板污染了 Happy 的完成轨迹）。再预测一个 2×2 格子：{Happy 为主，Impossible 为主} × {先训 Happy 再训 Impossible，混合一起训}，哪个格子在 τ² 上最高并写理由。漏洞：七臂的混合比例与训练顺序都没控制——“拼接差”可能只是比例不对（Impossible 占比过高把模型训成了“动不动就拒绝”），而不是路径本身冲突；另外 τ² 与 BFCL 的量纲不同，一个臂在一个指标上赢、另一个指标上输时，没有事先定好的加权规则，结论可以随权重翻盘。</li>
+<li>Impossible 训练的泛化边界在哪里——“会拒绝”能跨过工具边界吗？只训 Impossible 子集把 BFCL Irrelevance 从 85.83% 拉到 95.50%，但 Irrelevance 只是“识别无关工具调用”这一种拒绝。设计一个实验：把 Impossible 按失败原因分层——工具不存在、权限不足、参数不可满足、目标本身自相矛盾——只训其中一层（例如只训“工具不存在”），测其余三层上的拒绝准确率，再测 τ²-bench 的 Unhappy 轨迹（用户含糊但可澄清）。判据：若只训一层、其余三层也跟着涨 → Impossible 训练教的是通用的“核查可满足性”能力；若只涨被训的那一层 → 教的只是该层的话术模板。构造一个具体反例：用户说“帮我把这份文件发给上周开会那个人”——表面看像 Impossible（缺收件人、缺文件），实际是 Unhappy（可澄清）；若模型直接拒绝而不是追问，说明 Impossible 训练把“先澄清”挤掉了。漏洞：四层的难度本来就不等——“目标自相矛盾”比“工具不存在”难得多，跨层比较可能只是在比难度；而且拒绝准确率的判定本身需要 judge，judge 对“拒绝 vs 澄清”的边界判错会直接污染结论。</li>
+<li>救回的 65.4% 是真救回，还是模拟器自己放了水？失败轨迹喂回模拟器再生，救回了 65.4% 一开始失败的轨迹——但再生用的还是同一套模拟器，模拟器完全可以把任务改简单（用户变合作了、工具变好调了），然后宣称“救回”。设计一个实验，对照 Day 02 AED 与 Day 04 ToolLoop 的两种失败处理：三臂——A 失败轨迹直接丢弃（只留一次通过的）；B 失败轨迹喂回模拟器再生（ToolRACER）；C 失败轨迹只做 citation-first 诊断、不再生（AED 式：诊断进 SFT，轨迹本身不进训练集）。同时记每臂“救回轨迹的任务难度”（用独立 verifier 或人工抽查：再生后的任务与原任务相比，约束条件少了几个？）。判据：若 B 在 τ² 上 ≫A、且救回轨迹的难度基本不变 → 再生是真救回；若 B ≫A、但救回轨迹的难度系统性下降 → 收益来自“任务被改简单了”，不是模型变强了。再预测一个 2×2 格子：{失败轨迹用，弃} × {再生，诊断} 在 τ² 上的排序并写理由。漏洞：难度判定本身就是个模型判据——独立 verifier 与模拟器可能共享同一种“简单化”偏见；而且三臂的最终样本量不等（B 比 A 多 65.4% 的救回量），“B 更好”可能只是样本更多，不是再生机制更好——必须把总样本量对齐再比。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
+<h3>三模拟器 × 三种轨迹 × 失败再生</h3>
+<div class="viz viz-flow flow"><div class="fnode">用户模拟器</div><div class="farrow">↔</div><div class="fnode">助手</div><div class="farrow">↔</div><div class="fnode">工具模拟器</div></div>
+<div class="viz">
+<pre class="mermaid">flowchart TB
+    U[用户模拟器] <--> A[助手]
+    A <--> T[工具模拟器]
+    A --> H[Happy 轨迹：合作 + 可满足]
+    U --> N[Unhappy 轨迹：摇摆 / 漂移 / 含糊]
+    T --> I[Impossible 轨迹：工具满足不了 → 识别并拒绝]
+    H --> F{轨迹成功？}
+    N --> F
+    I --> F
+    F -->|失败| R[喂回模拟器再生]
+    R -->|救回 65.4%| D[5.6K 条多轮对话 约 66% 易失败场景]
+    F -->|成功| D
+    D --> B[训 Qwen3-4B：τ²-bench 32.20% → 39.20% 叠加 APIGen-MT → 41.25%]
+    D --> C[只训 Impossible：BFCL Irrelevance 85.83% → 95.50%]
+</pre>
+</div>
+<h3>Motivation：只练 Happy path 的 agent 见不得真用户</h3>
+<p>agent 训练数据几乎全是 Happy path——用户配合、需求清晰、工具够用。真实用户摇摆、漂移、含糊，还会提工具根本办不到的要求；只在 Happy 数据上训出来的 agent，遇到这些场景要么硬着头皮乱调工具，要么直接崩。缺的不是更多成功轨迹，是系统性的失败场景数据。</p>
+<h3>只训 Happy vs 三轨迹显式合成</h3>
+<div class="viz vs"><div class="vscol vs-a"><h4>老路：只训 Happy path</h4><ul><li>用户配合、需求清晰、工具够用</li><li>真实用户摇摆、漂移、含糊、提办不到的要求</li><li>agent 要么硬着头皮乱调工具，要么直接崩</li><li>失败轨迹直接丢掉，等于把最值钱的信号扔了</li></ul></div><div class="vscol vs-b"><h4>ToolRACER：三轨迹显式合成</h4><ul><li>三个模拟模型配合：用户模拟器、助手、工具模拟器</li><li>Happy / Unhappy / Impossible 三种轨迹显式生成</li><li>失败轨迹喂回模拟器再生，救回 65.4%</li><li>5.6K 条多轮对话，约 66% 是容易失败的场景</li></ul></div></div>
+<h3>关键数字：τ² +7.00 个点，Irrelevance +9.67 个点</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">Qwen3-4B base · τ²-bench</div><div class="bartrack"><div class="barfill" style="width:71.6%"></div></div><div class="barval">32.20%</div></div><div class="barrow"><div class="barlabel">+ ToolRACER · τ²-bench</div><div class="bartrack"><div class="barfill" style="width:87.1%"></div></div><div class="barval">39.20%</div></div><div class="barrow"><div class="barlabel">+ APIGen-MT 叠加 · τ²-bench</div><div class="bartrack"><div class="barfill" style="width:91.7%"></div></div><div class="barval">41.25%</div></div></div>
+<p>τ²-bench 准确率（条形按 0–45 刻度）。Qwen3-4B 从 32.20% 升到 39.20%，和 APIGen-MT 叠加能到 41.25%。</p>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">BFCL Irrelevance · base</div><div class="bartrack"><div class="barfill" style="width:85.83%"></div></div><div class="barval">85.83%</div></div><div class="barrow"><div class="barlabel">BFCL Irrelevance · 只训 Impossible</div><div class="bartrack"><div class="barfill" style="width:95.50%"></div></div><div class="barval">95.50%</div></div></div>
+<p>BFCL Irrelevance 检测（条形按 0–100 刻度）。只训 Impossible 子集，从 85.83% 拉到 95.50%。</p>
+<p>$$39.20 - 32.20 = 7.00 \quad\text{；}\quad 95.50 - 85.83 = 9.67$$</p>
+<p>数字均为论文自报，经本系列 papers.md 注释核实。</p>
+<div class="callout"><b>反直觉点：</b>“多一种数据”不是单调收益——H+I 合起来反而比单路径差，Impossible 教的“拒绝”和 Happy 教的“坚持完成”会互相打架。但只训 Impossible 子集，Irrelevance 检测反而能从 85.83% 拉到 95.50%：拒绝是一种可以单独练、也值得单独练的能力，只是别把它和“坚持完成”搅在同一个锅里。</div>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>边界</h2>
+<ul>
+<li>三种轨迹互相干扰：H+I 合起来反而比单路径差——“多一种数据”不是单调收益，拼接比例、训练顺序、混合方式都可能翻转结论；论文没有给出最优配比。</li>
+<li>模拟器即是数据生产者又是裁判：三个模拟模型配合生成轨迹，失败轨迹的再生也靠同一套模拟器——模拟器的偏见（什么样的用户算“摇摆”、什么样的要求算“办不到”）会直接进数据，没有独立的外部 verifier 把关。</li>
+<li>评测只有两个点：τ²-bench（多轮）+ BFCL Irrelevance（单点拒绝检测）；Unhappy 场景的真实用户分布（摇摆、漂移、含糊各占多少）没有外部统计对照，5.6K 条对话里的比例是模拟器自己定的。</li>
+<li>救回率 65.4% 的口径不清：注释没有说救回的轨迹是否保持了原任务难度——再生可能把任务改简单了，这个数字本身不能直接读成“模型能力提升”。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>迁移</h2>
+<ul>
+<li>“失败场景当主资产”可搬到任何 agent 训练：办公 agent（Day 09 Agent-R² 的真实附件场景）、计算机操作（Day 12 CUA-Master）、机器人（Day 15 PyRUA-DataFarm）——关键是先把失败分类（Happy / Unhappy / Impossible 这三类是通用骨架），再按类合成，而不是只堆成功轨迹。</li>
+<li>与 Day 02 AED 构成对照：AED 从真实 rollout 里挖失败（真实但稀少、要 citation-first 诊断才敢用），ToolRACER 用模拟器合成失败（量大但分布由模拟器定）——真实失败 vs 合成失败，哪个更值得当主资产，取决于你的场景有没有真实 rollout 可挖。</li>
+<li>与 Day 04 ToolLoop 构成对照：ToolLoop 的反馈再生救的是“单条样本里出错的那一步”，ToolRACER 的再生救的是“整条对话轨迹”——反馈循环的粒度不同，ToolLoop 修错、ToolRACER 救轨迹；两篇都证明了一件事：失败样本丢掉是浪费，喂回去才有价值。</li>
+<li>如果复现，第一步先定三类轨迹的判定标准（什么算 Unhappy、什么算 Impossible，各写 5 条可操作定义 + 正反例子），再搭模拟器；没有判定标准就开合成，Impossible 和 Unhappy 会互相串味——这正是 H+I 拼接会干扰的根源之一。</li>
+</ul>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
+<ol>
+<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
+<li>数据 pipeline 中哪个环节最容易藏 bug？（用户模拟器的“摇摆”是不是只会几种固定话术；工具模拟器“演”的执行结果与真实工具行为差多远；Impossible 的判定是不是模拟器自己说了算）</li>
+<li>换成今天的模型规模，这个方法还成立吗？</li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-06-toolracer/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2610.09163">论文原文 arXiv:2610.09163</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
