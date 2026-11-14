@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 07 Spotify — 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#0f766e; --accent-ink:#115e59; --accent-bg:#f0fdfa;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#134e4a,#0d9488);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 100%);border-color:#99f6e4}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#f0fdfa 0%,#ffffff 100%);
+  border:1px solid #99f6e4;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #99f6e4;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e6f5f3;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#2dd4bf,#0f766e);height:100%;border-radius:999px}
+.barfill.bad{background:linear-gradient(90deg,#fca5a5,#dc2626)}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.callout b{color:#92400e}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">synthetic-data · C 系列 Day 07</span>
+    <h1>Spotify：合成数据 + 自改进闭环直接上生产</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/day-07-spotify/</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Bootstrapping Conversational Recommendation Agents At Spotify: Synthetic Data Generation and Self-Improvement Loops</dd><dt>Authors</dt><dd>Palumbo 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2609.30297">https://arxiv.org/abs/2609.30297</a></dd><dt>Date of publication</dt><dd>2026-09-16</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">industry</span><span class="tag">self-improvement</span><span class="tag">synthetic-dialogue</span></div></dd><dt>与前篇的关系</dt><dd>Day 06 ToolRACER 是用模拟器合成失败轨迹来训练模型；Day 07 是本系列唯一的工业端到端案例——没有微调模型，合成数据不当训练集、当测试集，失败拆分后去修 prompt / 工具描述 / planner 配置。Day 04 ToolLoop 证明了闭环反馈的价值（无反馈合成数据比不训还差 2.17 个点），Spotify 的自改进循环是同一思想在生产侧的落地，只是修的不是模型权重而是 agent 的规划层。Day 02 AED 把真实失败样本当主资产，Spotify 把合成失败再拆一层：可靠性失败 vs 能力缺口，分流处理。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>冷启动的对话推荐 agent 没有真实用户交互可训——Spotify 先把单轮 prompt 规划成对话计划，再由 UserLLM 实现成多轮对话，用 LLM-as-judge 评估，合成对话直接替代真实用户做测试集；再跑自改进循环，对同一问题多次采样算方差，把失败拆成可靠性失败（高方差，同 prompt 结果不稳定）和能力缺口（低方差但系统性错），前者走方差对比优化，后者交给 coding agent 自动修 prompt / 工具描述 / planner 配置。合成对话的人工评审四维都在 90% 以上；质量在已经高度优化过的人工 prompt 之上又涨了 8%；线上 A/B 两周、约 1,500 万用户，收听时长 +14%，WAU +5%，跳过率 −5%。但长对话还是难：7 turn 比 2 turn 的 pass@1 低 11.9 个点。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">+8%</div><div class="l">质量提升<br>在高度优化的人工 prompt 之上</div></div><div class="stat"><div class="v">&gt;90%</div><div class="l">合成对话人工评审<br>四维全部高于 90%</div></div><div class="stat"><div class="v">+14%</div><div class="l">线上 A/B 收听时长<br>两周 · 约 1,500 万用户</div></div><div class="stat"><div class="v">−11.9 pts</div><div class="l">7 turn vs 2 turn pass@1<br>长对话仍是短板</div></div></div>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
+<ol>
+<li>方差拆分在什么情况下会把能力缺口误判成可靠性失败？高方差 = 不稳定、低方差 + 系统性错 = 能力缺口，这个二分法假设“采样方差”能干净地分离两种失败。但采样方差本身受温度、采样数、judge 噪声影响：一个能力缺口如果恰好落在模型“有时蒙对”的边界上，方差会被抬高、误判成可靠性问题，于是走方差对比优化（白费力气），而不是让 coding agent 去修 prompt。设计一个实验：先人工标注一批失败案例的真实原因（可靠性 vs 能力缺口，作为金标准），三臂——A 温度 0.7 采样 8 次、B 温度 1.0 采样 8 次、C 温度 0.7 采样 32 次——每臂都用方差阈值做分类，与金标准比分类准确率；再记每臂误判案例的共同特征（judge 打分是否接近阈值、任务是否跨多工具）。判据：若 C 的准确率 ≫A、且误判集中在“方差接近阈值”的案例 → 误判主因是采样噪声，增大采样数可解；若三臂的误判都集中在同一批案例、且与采样数无关 → 误判是系统性的（这类失败本身就是“边界型能力缺口”），方差拆分在这个区域失效。再预测一个 2×2 格子：{低方差，高方差} × {judge 一致，judge 分歧}，哪个格子最可能是真能力缺口并写理由。漏洞：金标准本身就是人工标注——标注者对“能力缺口”的判断可能与 coding agent 能不能修好它并不一致（标注为能力缺口、但修 prompt 修不好）；而且三臂的采样成本不等，C 的准确率优势可能只是“花了 4 倍算力”，没有控制成本就比不出机制。</li>
+<li>合成测试集的天花板在哪里——UserLLM 和 judge 是不是在互相放水？合成对话替代真实用户做测试集的前提，是 UserLLM 演的用户足够真、judge 的打分足够准。但 UserLLM 和被测 agent、judge 很可能来自同一模型家族、共享同一种“好对话”的偏见：UserLLM 只会提 agent 擅长回答的那类请求，judge 只会奖励自己家族的说话风格，于是合成测试集上的 +8% 可能在真实用户身上缩水。设计一个实验：固定同一批 prompt 变体（人工优化版 vs 自改进循环版），三臂评估——A 合成测试集（UserLLM + LLM-as-judge）、B 真实用户日志回放（有真实交互的留存样本）、C 交叉模型评估（UserLLM 与 judge 换成另一个模型家族）。评三臂下两个版本的相对排序与差距大小。判据：若 A 与 C 的排序一致、但 B 的排序翻转或差距大幅缩小 → 合成测试集的天花板是“家族内偏见”，不是 judge 能力；若 A 与 B 排序一致、只有 C 翻转 → 问题在 judge 的家族偏见，UserLLM 本身没问题。再构造一个具体反例：用户说“推荐点我没听过的意大利独立音乐人”——UserLLM 演的用户会接受任何“听起来像意大利独立”的推荐，但真实用户会立刻听出是不是自己真没听过、是不是真喜欢；若合成测试集上这个请求 pass 率很高、真实用户跳过率也很高，说明 UserLLM 根本演不出“品味”这一维。漏洞：B 的真实用户日志是“已经上线后才有的”——冷启动阶段根本没有 B，实验只能在事后做，事后验证通过不等于事前能用合成测试集做决策；而且 B 的样本是“愿意用旧版功能的用户”，与 A/B 测试里 1,500 万新用户的分布不同。</li>
+<li>“只修 prompt、不动模型”能搬到 Day 04 ToolLoop 的工具数据上吗？Spotify 的自改进循环修的是 prompt / 工具描述 / planner 配置，模型权重一动不动；ToolLoop 的闭环是“出错就带着错误原因重生成数据再训模型”。两者都靠反馈循环，但一个修规划层、一个修模型层。设计一个实验：拿 ToolLoop 的工具调用任务，三臂——A 只修 prompt / 工具描述 / planner（Spotify 式，模型冻结）、B 只重生成数据再 SFT（ToolLoop 式，prompt 冻结）、C 两者都做；每臂内部再按 Spotify 的方差拆分，把失败分成可靠性失败与能力缺口两组，分别看三臂在两组上的提升。判据：若 A 在可靠性失败组 ≫B、但在能力缺口组 ≈B → “修 prompt”只对不稳定问题有效，能力缺口必须动模型；若 C 在两组上都 ≫A、B → 两层都得修，Spotify 的“不动模型”只是工业上线快、不是上限高。再预测一个 2×2 格子：{可靠性失败，能力缺口} × {修 prompt，训模型} 在准确率提升上的排序并写理由。漏洞：三臂的“修”都依赖同一个 coding agent / 同一套反馈信号——A 修不好的 prompt 缺口可能只是 coding agent 不会修，不是 prompt 层修不好的证据；而且 ToolLoop 的任务是工具调用、Spotify 的任务是推荐对话，两边失败的定义本来就不等，直接搬过去可能只是在比任务难度。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
+<h3>合成对话当测试集 + 方差拆分自改进</h3>
+<div class="viz viz-flow flow"><div class="fnode">单轮 prompt</div><div class="farrow">→</div><div class="fnode">对话计划</div><div class="farrow">→</div><div class="fnode">UserLLM 多轮对话</div><div class="farrow">→</div><div class="fnode">LLM-as-judge 评估</div></div>
+<div class="viz">
+<pre class="mermaid">flowchart TB
+    P[单轮 prompt] --> C[规划成对话计划]
+    C --> U[UserLLM 实现成多轮对话]
+    U --> J[LLM-as-judge 评估]
+    J --> T[合成对话 = 测试集 替代真实用户]
+    T --> S{同一问题多次采样 算方差}
+    S -->|高方差| R[可靠性失败 同 prompt 结果不稳定]
+    S -->|低方差且系统性错| G[能力缺口]
+    R --> V[方差对比优化]
+    G --> A[coding agent 自动修 prompt / 工具描述 / planner 配置]
+    V --> O[质量 +8% 超越高度优化的人工 prompt]
+    A --> O
+    O --> B[线上 A/B 两周 约 1500 万用户 收听 +14% WAU +5% 跳过 -5%]
+    O --> L[短板：7 turn 比 2 turn pass@1 低 11.9 个点]
+</pre>
+</div>
+<h3>Motivation：冷启动没有真实用户，规划无从优化</h3>
+<p>对话推荐 agent 是内容发现的新范式，用户用自然语言表达复杂意图（例如“推荐点我没听过的意大利独立音乐人”）。最大的瓶颈是 agent 规划——选什么工具、按什么顺序调——而冷启动阶段根本没有真实用户交互可用来优化。等真实用户来了再迭代，太慢；不上线又拿不到数据。这是一个先有鸡还是先有蛋的问题。</p>
+<h3>只训模型 vs 只修规划层</h3>
+<div class="viz vs"><div class="vscol vs-a"><h4>老路：等真实用户 / 训模型</h4><ul><li>冷启动阶段没有真实用户交互可训</li><li>等上线后再迭代，周期太慢</li><li>修模型权重，改动大、上线慢</li><li>失败样本直接丢掉或全量重训，不分性质</li></ul></div><div class="vscol vs-b"><h4>Spotify：合成测试集 + 分流修规划层</h4><ul><li>合成对话替代真实用户做测试集，上线前就能评</li><li>不微调模型，修 prompt / 工具描述 / planner 配置</li><li>方差拆分：可靠性失败走对比优化，能力缺口交给 coding agent</li><li>质量在高度优化的人工 prompt 之上又涨 8%</li></ul></div></div>
+<h3>关键数字：A/B 收听时长 +14%，WAU +5%，跳过率 −5%</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">收听时长</div><div class="bartrack"><div class="barfill" style="width:93.3%"></div></div><div class="barval">+14%</div></div><div class="barrow"><div class="barlabel">WAU</div><div class="bartrack"><div class="barfill" style="width:33.3%"></div></div><div class="barval">+5%</div></div><div class="barrow"><div class="barlabel">跳过率</div><div class="bartrack"><div class="barfill bad" style="width:33.3%"></div></div><div class="barval">−5%</div></div></div>
+<p>线上 A/B 两周、约 1,500 万用户，相对变化（条形按 0–15% 刻度；跳过率下降是好的方向）。合成对话人工评审四维都在 90% 以上；质量在高度优化的人工 prompt 之上又涨了 8%。</p>
+<p>$$ \mathrm{Var}(r) = \mathbb{E}\left[(r - \bar{r})^2\right] \quad\text{；}\quad \text{高方差} \to \text{可靠性失败} \quad\text{；}\quad \text{低方差且系统性错} \to \text{能力缺口} $$</p>
+<p>数字均为论文自报，经本系列 papers.md 注释与 arXiv 摘要核实。</p>
+<div class="callout"><b>反直觉点：</b>本系列唯一的工业端到端案例，却是唯一没有微调模型的——合成数据不当训练集、当测试集，失败拆分后修的是 prompt / planner 配置。闭环的价值不在“训不训模型”，在“失败信号有没有回流到能修它的那一层”。但长对话还是难：7 turn 比 2 turn 的 pass@1 低 11.9 个点，修规划层没有解决“多轮状态越攒越乱”。</div>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>边界</h2>
+<ul>
+<li>方差拆分的阈值没有公开口径：注释没有说“多高算高方差、采样几次、温度多少”——阈值一变，可靠性失败与能力缺口的划分就跟着变，这个拆分本身没有独立验证。</li>
+<li>合成测试集的天花板：UserLLM 演的用户 + LLM-as-judge 的评估都在同一模型家族内完成——合成对话的人工评审四维都在 90% 以上，评的是“对话像不像真对话”，不是“测不测得出真实用户的品味与挑剔”。</li>
+<li>长对话仍是短板：7 turn 比 2 turn 的 pass@1 低 11.9 个点——对话越长，规划错误越容易累积；自改进循环修 prompt / planner 配置，没有解决“多轮状态越攒越乱”这个根本问题。</li>
+<li>线上 A/B 的对照组是“只支持 session refinement 的旧体验”：+14% 收听时长里有多少来自“对话推荐”本身、多少来自“终于有了个能聊天的入口”，论文没有拆分——新功能上线自带的新鲜感效应没有排除。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>迁移</h2>
+<ul>
+<li>“合成数据当测试集”可搬到任何冷启动 agent：没有真实用户之前，先用 UserLLM + judge 搭一个可跑的评估环——关键是先把“对话计划”这层显式化（单轮 prompt → 对话计划 → 多轮对话），而不是直接让 LLM 自由发挥编对话；没有计划层，合成对话的覆盖度全靠运气。</li>
+<li>“失败先拆分、再分流”可搬到任何自改进循环：Day 02 AED 是把失败诊断进 SFT，Day 04 ToolLoop 是带着错误原因重生成，Day 06 ToolRACER 是把失败轨迹喂回模拟器再生——Spotify 多做了一步：先按方差把失败分成两类，再决定修哪一层；不拆分就全量重训，是把两种不同性质的问题混在一起治。</li>
+<li>与 Day 04 ToolLoop 构成对照：ToolLoop 证明无反馈合成数据比不训还差（−2.17 个点），Spotify 的自改进循环同样是闭环，但修的是 prompt / 工具描述 / planner 配置、模型权重不动——闭环的价值不在“训不训模型”，在“失败信号有没有回流到能修它的那一层”。</li>
+<li>如果复现，第一步先搭“对话计划”层（定义一个单轮意图能展开成哪些多轮计划、每步调什么工具），再写 UserLLM 的 persona（它要演的用户得有明确的品味、预算、耐心上限，否则演出来的全是“好好好”）；没有这两层，合成对话测不出任何东西。</li>
+</ul>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
+<ol>
+<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
+<li>数据 pipeline 中哪个环节最容易藏 bug？（UserLLM 演的用户是不是只会提 agent 擅长答的请求；judge 的打分是不是在奖励自己家族的说话风格；方差拆分的阈值是不是拍脑袋定的）</li>
+<li>换成今天的模型规模，这个方法还成立吗？</li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-07-spotify/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2609.30297">论文原文 arXiv:2609.30297</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
