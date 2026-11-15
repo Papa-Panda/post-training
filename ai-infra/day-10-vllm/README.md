@@ -1,4 +1,6 @@
 # vllm-rollout — vLLM Rollout Stress Test for H100 beyond 7B
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-10-vllm/README.reading.html
+
 
 > Goal: turn `day-07-h100-beyond-7b` theory into reproducible vLLM rollout infra. Train needs FSDP (>7B => 13B/30B/70B), Rollout needs vLLM separation — 80% wall-clock → 90% when CoT 500→5000. This repo is the rollout half.
 

@@ -1,4 +1,6 @@
 # Day 1 - DDP basics
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-01-ddp-basics/README.reading.html
+
 
 - Learning Goal: 理解 DDP 梯度同步原理
 - Task: 用 3 行代码启动 DDP 跑通 mnist，记录通信开销

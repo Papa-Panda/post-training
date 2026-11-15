@@ -1,4 +1,6 @@
 # 03 — Stress Test Procedure
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-10-vllm/03_stress_test.reading.html
+
 
 Based on `day-07-h100-beyond-7b` vllm_rollout_stress_test.py + FSDP profiler.
 

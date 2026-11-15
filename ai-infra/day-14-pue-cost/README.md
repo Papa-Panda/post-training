@@ -1,6 +1,8 @@
 > Connection to Prev: Day13 Reliability / SLO → Day14 Paper3 PUE拆解: SLO 定义了什么算失败但没算出失败浪费多少钱，需要 PUE→\$/有用 rollout 把 GPU 空转/重试/制冷开销翻译成 dollars；Day12 Reward Model 的 reward σ 过滤坑在今天用 useful 分母扣除 + retry 成本单计解决，避免把高不确定 rollout 当成 infra 失败。
 
 # Day 14 — Paper3 PUE拆解: 能效指标 → 训练成本 per token / per useful rollout
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-14-pue-cost/README.reading.html
+
 
 ## 【昨日复盘】Day 13 Reliability / SLO 真数
 - 真数（CPU gloo 2-rank ok, seed42, n=200）：success_rate 0.955 fail 4.5% 5类 timeout5 / vcj_parse3 / tool_retry1 / oom1 / nccl1，queue p50 0.123s p95 0.385s (scaled 1.2s≈真实120s) avg_depth 0.21，power_mean 459.2W σ67.0W jitter0.146 PASS，Tj_max 90.5°C avg73.4°C throttle2.5% 5/200 FAIL → slo_all FAIL。

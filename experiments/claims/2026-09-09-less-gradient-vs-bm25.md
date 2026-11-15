@@ -1,3 +1,5 @@
+> 📖 阅读版：https://papa-panda.github.io/post-training/experiments/claims/2026-09-09-less-gradient-vs-bm25.reading.html
+
 ## [2026-09-09] Claim: gradient alignment 选出的数据优于 BM25（示例）
 
 > 这是一条示例，展示模板怎么填。第一条真实 claim 请按此格式新建文件。

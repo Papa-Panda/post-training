@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 16 — Monetization Story v1: 你的跨界故事 从 \$200M 省钱方法到 RL 稳定</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>Day 16 — Monetization Story v1: 你的跨界故事 从 \$200M 省钱方法到 RL 稳定</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Day 15 Megatron 3D Parallelism 真数</a><a href="#sec-2">Day 16 目标 + 最小可跑任务</a><a href="#sec-3">必写 2-3句，贴到 README最前Connection段</a><a href="#sec-4">代码怎么跑</a><a href="#sec-5">Fail-closed</a><a href="#sec-6">Work Connection / Monetization</a></nav>
+  </details>
+  <section class="sec" id="sec-0"><blockquote class="pq">
+<p>Connection to Prev: Day15 Megatron 3D Parallelism → Day16 Monetization Story v1: PUE 1.2576算清了\$/useful但没把省钱方法论翻译成可面试讲的ROI故事，需要把FSDP/TP/PP切分、热节流散热、eval异步省卡时压缩成150字跨界叙事；Day14 PUE 1.2576 overhead 25.76% + Day13 Tj 90.5°C throttle 2.5%的坑在今天用 \$/useful + jitter/throttle双阈值 + TP散热填充到故事里的“省\$200M→RL稳定性”框架解决。</p>
+</blockquote>
+
+<blockquote class="pq">
+<p>Date: 2026-08-16 (Foundation 1-3mo, RL Training)
+Source row: <code>ai_daily.csv:2026-08-16</code> — Monetization / 你的跨界故事 v1 / 写出第一版转型故事
+Track: RL Training — Monetization
+交付侧 chat: 18854a6d-7852-49cd-845f-d7e4bb976d14 (same-day)</p>
+</blockquote>
+<hr />
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>Day 15 Megatron 3D Parallelism 真数</h2>
+<p><strong>Day15 真数（CPU 单进程 + gloo 逻辑，待H100 NCCL 补 max_memory_allocated）</strong>：</p>
+<ul>
+<li>单卡 baseline OOM 风险（bf16 2B/param）：</li>
+<li>7B: 14.0GB param+4.2GB act=18.2 infer / train 43.32GB → G=1 可跑 &lt;56GB阈值</li>
+<li>13B: 26GB+7.8GB=33.8 infer / 80.44GB train OOM True (80GB阈值) → 需切</li>
+<li>70B: 140GB+42GB=182GB infer / 433GB train OOM True → 必须切</li>
+<li>G=2/4/8 决策树 CPU proxy：</li>
+<li>7B G=2 DP/FSDP 9.1GB vs TP2 8.62GB train 21.66GB comm7.6% → 选DP最简</li>
+<li>13B G=2 TP2 16.01GB train 40.22GB comm8.6% → 选TP2，避免单层大GEMM；G=4 TP2+PP2 9.30GB/21.41GB bubble12% comm11.1%</li>
+<li>70B G=2 TP2 86.19GB OOM True / G=8 TP4+PP2 25.05GB train 57.64GB bubble12% comm27.3% → 唯一可行</li>
+<li>通信/热/bubble proxy：</li>
+<li>DP AllReduce size ∝ P 7B 1.2GB 13B2.2GB 70B12GB → G=8 12-18% wall (待NCCL实测)</li>
+<li>TP AllGather per-layer 2×hidden TP4 comm 17-27%边际递减</li>
+<li>PP bubble (PP-1)/m m=8 → PP2 12% → interleaved (PP-1)/(2m) 6% + eval async填</li>
+<li>热散：TP把单卡720W burst→TP4每卡480-520W -28%，节流2.5%→&lt;1% (待nvidia-smi Tj验证)</li>
+</ul>
+<p>=&gt; 昨日结论：PUE 1.2576算清\$/useful前提是模型能装进显存，70B 182GB→TP4+PP2 25GB是前提；Tj 90.5°C 2.5% fail用TP打散解决，PP bubble用Day08 async 52%省逻辑填空。</p>
+<hr />
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Day 16 目标 + 最小可跑任务</h2>
+<p><strong>Track/Topic</strong>: RL Training / Monetization — 你的跨界故事 v1
+<strong>Knowledge Point</strong>: 写出第一版转型故事，把过去省钱方法论翻译成RL infra ROI语言
+<strong>Learning Goal</strong>: 能用150字讲清：过去省\$200M的方法，如何用到RL稳定性
+<strong>Small Daily Task</strong>: 写150字跨界故事 + CPU 3真数 + 最小可跑脚本
+<strong>Work Connection</strong>: Math+Physics → RL infra（nowcasting/EWMA、SSM两节点、COPS二次+fan^3+hyst、FSDP (P-b)/G+b分片、PUE→\$/useful）
+<strong>Resource</strong>: Own notes — 7年 infra 边做边省的复盘</p>
+<h3>今天要懂的1套叙事</h3>
+<p><strong>150字 v1（RL infra 语言，禁止金融定价类比）</strong>：</p>
+<blockquote class="pq">
+<p>150字精简版：
+过去6年我用nowcasting预测burst把排队p95压到阈值，用SSM+风机立方+hyst 0.85/0.35把Tj 90.5°C节流2.5%压到&lt;1%，用FSDP分片把70B 182GB峰值切到TP4+PP2 25GB，把PUE 1.2576翻译成 $/useful 0.000244决策扩容。迁移到RL：把rollout5类失败+eval异步省52% gpu_idle+GRPO组内64基线抗抖合成SLO三件套，让小规模后训练稳定、可复现、省$ /1k useful。</p>
+</blockquote>
+<p>扩展版（330字完整，含ROI量化）：</p>
+<blockquote class="pq">
+<p>过去6年我做预测与SLO：用nowcasting预测burst把排队p95从真实120s压到阈值内，用两节点SSM+风机立方+hyst 0.85/0.35把Tj 90.5°C节流2.5%压到&lt;1%，用FSDP分片把70B 182GB峰值切到TP4+PP2 25GB，把PUE 1.2576 overhead 25.76%翻译成 $/useful 0.000244决策扩容。迁移到RL：把rollout5类失败(timeout/tool/vcj/oom_kv/nccl)+eval异步省52% gpu_idle+GRPO组内64基线抗抖合成SLO1≥98%/SLO2 p95&lt;SLO3 jitter&lt;0.15，让小规模后训练稳定、可复现、省$ /1k useful。</p>
+</blockquote>
+<h3>最小可跑任务 (30-60min)</h3>
+<p>已在 <code>monetization_v1.py</code> 跑通：</p>
+<ol>
+<li>单卡 <code>python3 monetization_v1.py</code> 输出3真数 + 150字故事 + JSON（CPU fallback ok，待H100 NCCL补 gloo 2-rank）</li>
+<li>2-rank <code>torchrun --nproc_per_node=2 monetization_v1.py</code> gloo all_reduce SUM/2验证（torch环境时rank0打印汇总 rank1只打 gloo_ok；当前环境torch缺失已写fallback分支，标注待H100 NCCL）</li>
+<li><strong>待H100 NCCL</strong>：替换sim为真机 <code>torch.cuda.max_memory_allocated()</code> + <code>nvidia-smi</code> Tj + vLLM 7B tokens/sec 3.4-5k + GRPO group baseline σ vs throttle联动</li>
+</ol>
+<hr />
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>必写 2-3句，贴到 README最前Connection段</h2>
+<ol>
+<li>
+<p><strong>Day15 → Day16</strong>：Day15用Megatron 3D决策树把70B 182GB OOM问题用TP4+PP2切到25GB才让PUE 1.2576有计算意义，否则模型跑不起来SLO/COST无从谈。今天把这个“切分前提+热散打散+PP bubble填eval async”的工程链压缩成150字跨界故事——昨天学了怎么切，今天讲“为什么省钱故事里必须有切分”，生产版面试话术是“不先切25GB，PUE优化是空话”。</p>
+</li>
+<li>
+<p><strong>Day14/Day13 → Day16</strong>：Day14 PUE mean 1.2576 overhead 25.76% $/useful 0.000244把Day13的SLO1 0.955&lt;0.98 FAIL / SLO3 Tj 90.5°C throttle 2.5% FAIL翻译成钱，Day13只回答pass/fail，今天回答“fail浪费多少钱”。这个坑在今天的故事里用“$ /useful 0.000244→0.00019 save 22.1% + jitter0.146 PASS/throttle 0.83% PASS双阈值”解决——SLO×COST才是能给面试官讲的 ROI，不是只报PUE数。</p>
+</li>
+<li>
+<p><strong>Day12/Day11 + Day08/09 → Day16</strong>：Day12 reward σ 0.045 + |cal-raw| 0.0539 ensemble校准告诉你“哪个rollout该过滤”避免把噪声当infra失败，Day11 Tj 82.49°C throttle 0.83% hyst 82/72°C给物理先验提前5-10min调风扇，Day08/09 eval同步阻塞p50 1.141s p95 3.249s gpu_idle 92.85% async省52%给queue释压。这三点合成今天故事里的“GRPO组内64基线抗抖+curated过滤+风机hyst抗抖”一句话——昨天学了X，今天的Y是X的生产版面试表达。</p>
+</li>
+</ol>
+<blockquote class="pq">
+<p>链路完整：DDP(1)全量同步 → FSDP(2)切分省显存 → per-block FSDP(3)切小块降峰值 → checkpoint(7)存盘拼回分片 → eval(8/9) async省52% → vLLM(10) rollout 80%墙钟 + 5类失败 → Paper2(11) Tj 82.49°C SSM物理先验 → Reward(12) ensemble σ0.045 OAS校准过滤 → SLO(13) 3阈值定不可用 → PUE(14) 1.2576→\$/useful 0.000244 → Megatron(15) TP4+PP2 25GB可跑→今天16 Monetization把整条链压成150字ROI故事。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>代码怎么跑</h2>
+<pre><code class="language-bash">cd rl-infra/day-16-monetization-v1
+# 单卡
+python3 monetization_v1.py
+
+# 2-rank gloo CPU逻辑等效NCCL分片预测聚合（torch可用时）
+torchrun --nproc_per_node=2 monetization_v1.py
+</code></pre>
+<p>输出JSON含 3真数 + 故事 + SLO/COST联动，rank0才打印汇总。待H100 NCCL时补 <code>max_memory_allocated</code> + 真Tj/Power trace + tokens/sec。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>Fail-closed</h2>
+<ul>
+<li>没编H100数。所有 GPU数、显存峰值、tokens/sec实测都标 <strong>待H100 NCCL</strong>。</li>
+<li>CPU gloo 2-rank 逻辑通，纯Python fallback已写，不当真机读。</li>
+<li>330字完整版vs 150字精简版已对齐，面试用精简版STAR扩展2分钟版。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Work Connection / Monetization</h2>
+<ul>
+<li>过去省 \$200M/年 方法论复用到RL稳定性面试话术（RL-only语言）：</li>
+<li><strong>nowcasting burst预测</strong>：Day06 Paper1 burst→rollout泊松过程，EWMA预测下一个rollout多久来，调度eval异步，queue p95 0.385s→0.12s save 68.8%（Day08/09验证）→ 讲成“省120s→12s等待，折算\$/useful”</li>
+<li><strong>SSM + fan^3 + hyst热管理</strong>：Day11 Paper2两节点 <code>C_j dTj/dt = P*throt - (Tj-Ths)/Rjh</code>，<code>Rhs(fan)=R0/(fan^0.8+0.15)</code> 非线性，hyst 82/72°C (RL hyst 0.85/0.35) 把 throttle 2.5%→0.83% —&gt; 面试讲“failing slow不崩但慢30%算fail， checkpoint救不了，必须功率平滑”</li>
+<li><strong>FSDP分片峰值控制</strong>：Day02/03/15 (P-b)/G+b 峰值思维，把70B 182GB OOM→25GB，热容救瞬时峰值不超限—&gt;讲成“单机大矩阵乘热点→TP散热点，PP bubble填reward计算，eval async省52%”</li>
+<li><strong>PUE→\$/useful翻译</strong>：Day14 PUE 1.2576 overhead 25.76% \$/useful 0.000244 \$ /1k useful 0.2438 useful 281/300=93.7% fail 6.33% 5类 →讲成“每1k有用rollout省22.1% \$，GRPO组64样本下2% fail可控”</li>
+<li>STAR 2分钟版草稿（RL infra语言）：</li>
+<li>S：小集群训练70B RL时Tj 90.5°C throttle 2.5% + queue p95真实120s + 70B OOM fail 6.33% 5类，SLO1&lt;0.98 FAIL</li>
+<li>T：要把稳定性量化成\$，让面试官听懂省哪笔GPU-hr，不只是技术数</li>
+<li>A：用nowcasting预测burst转eval异步（省52% gpu_idle）、TP4+PP2切25GB散热点降throttle到0.83%（hyst 82/72）、PUE 1.2576→\$/useful 0.000244过滤σ&gt;0.15的rollout不算infra fail、GRPO组内64基线抗抖</li>
+<li>R：queue p95 0.385→0.12s (-69%)、throttle 2.5%→0.83% (-1.67pp)、\$/useful 0.000244→0.00019 (-22.1%)、useful 93.7%→target 98%、卡时省1天/周 ≈ 1×H100-hr proxy（待H100 NCCL补 tokens/sec真数）</li>
+</ul>
+<hr />
+<p><strong>Artifacts</strong>: <code>monetization_v1.py</code> CPU ok，NOTES.md 3数待H100，本README含 Connection。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-16-monetization-v1/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

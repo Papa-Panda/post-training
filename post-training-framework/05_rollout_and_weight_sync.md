@@ -1,4 +1,6 @@
 # 05 — Rollout Engines and Weight Synchronization
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/05_rollout_and_weight_sync.reading.html
+
 
 ## 1. The rollout boundary
 

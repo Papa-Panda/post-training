@@ -1,6 +1,8 @@
 > Connection to Prev: r2-Day04 DDP → r2-Day05 JAX Mesh/pjit: DDP是PyTorch命令式“你管通信AllReduce”，JAX是声明式“你管切分，编译器管通信”，同样8卡，JAX只写PartitionSpec。
 
 # r2-Day05 - JAX Mesh / pjit 声明式切分
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-05-jax-mesh/README.reading.html
+
 
 ## 昨日复盘
 r2-Day04 DDP 每卡全模型，DistributedSampler切数据，AllReduce grad，bucket 25MB，CPU gloo proxy 3.12s。

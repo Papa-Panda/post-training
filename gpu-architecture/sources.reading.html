@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources &amp;amp; Evidence Ledger</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">GPU Architecture</span>
+    <h1>Sources &amp;amp; Evidence Ledger</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. Primary / official sources</a><a href="#sec-2">2. Primary papers</a><a href="#sec-3">3. 用户提供的中文/对话材料：可访问性与使用方式</a><a href="#sec-4">4. Claim discipline</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>原则：官方 programming/tuning guides 与原论文支撑技术结论；中文文章/视频只作为选题线索。未取得正文时不推断内容。访问状态记录于 2026-09-01。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. Primary / official sources</h2>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>来源</th>
+<th>本专题使用范围</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CUDA execution/memory/streams/VM</td>
+<td><a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html">CUDA C++ Programming Guide</a></td>
+<td>grid/block/thread、warp、memory model、streams、Managed Memory/VMM</td>
+</tr>
+<tr>
+<td>Coalescing/shared memory/measurement</td>
+<td><a href="https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html">CUDA C++ Best Practices Guide</a></td>
+<td>CC 6.0+ 的 32-byte segment 教学规则、shared-memory tiling、benchmark 纪律</td>
+</tr>
+<tr>
+<td>Ampere</td>
+<td><a href="https://docs.nvidia.com/cuda/archive/12.0.1/ampere-tuning-guide/index.html">Ampere Tuning Guide</a></td>
+<td>async global→shared copy、Tensor Core precision/instruction evolution</td>
+</tr>
+<tr>
+<td>Hopper</td>
+<td><a href="https://docs.nvidia.com/cuda/hopper-tuning-guide/index.html">Hopper Tuning Guide</a></td>
+<td>thread-block cluster、TMA、异步 transaction、架构限制</td>
+</tr>
+<tr>
+<td>H100 architecture</td>
+<td><a href="https://nvdam.widen.net/content/tdwwiwotwr/original/gtc22-whitepaper-hopper.pdf">NVIDIA H100 Tensor Core GPU Architecture Whitepaper</a></td>
+<td>Hopper SM/Tensor Core/Transformer Engine/NVLink 的官方架构背景</td>
+</tr>
+<tr>
+<td>Blackwell compilation</td>
+<td><a href="https://developer.nvidia.com/blog/nvidia-blackwell-and-nvidia-cuda-12-9-introduce-family-specific-architecture-features/">Blackwell and CUDA architecture-specific features</a></td>
+<td><code>sm_*a</code> 特性非前向兼容的边界</td>
+</tr>
+<tr>
+<td>Profiling</td>
+<td><a href="https://docs.nvidia.com/nsight-compute/NsightCompute/index.html">Nsight Compute Documentation</a></td>
+<td>occupancy、sections、Roofline/profiling 工作流</td>
+</tr>
+<tr>
+<td>Cooperative Groups</td>
+<td><a href="https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#cooperative-groups">CUDA Programming Guide: Cooperative Groups</a></td>
+<td>显式 group 与同步 scope</td>
+</tr>
+<tr>
+<td>GEMM library</td>
+<td><a href="https://docs.nvidia.com/cuda/cublas/">cuBLAS Documentation</a></td>
+<td>GEMM/cuBLASLt 接口与 algorithm selection</td>
+</tr>
+<tr>
+<td>GEMM templates</td>
+<td><a href="https://docs.nvidia.com/cutlass/">CUTLASS Documentation</a></td>
+<td>CTA/warp/instruction tiling、pipeline、epilogue</td>
+</tr>
+<tr>
+<td>Deep-learning library</td>
+<td><a href="https://docs.nvidia.com/deeplearning/cudnn/backend/latest/developer/core-concepts.html">cuDNN Core Concepts</a></td>
+<td>Tensor Core、layout、operation graph</td>
+</tr>
+<tr>
+<td>NCCL semantics</td>
+<td><a href="https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html">NCCL Collective Operations</a></td>
+<td>all-reduce/broadcast/reduce/all-gather/reduce-scatter 的正式语义与 rank 一致性</td>
+</tr>
+<tr>
+<td>NCCL implementation context</td>
+<td><a href="https://developer.nvidia.com/blog/?p=6598">Fast Multi-GPU collectives with NCCL</a></td>
+<td>ring/chunk/monolithic kernel/topology 的实现背景；具体版本行为仍以当前文档为准</td>
+</tr>
+<tr>
+<td>NCCL double-tree</td>
+<td><a href="https://developer.nvidia.com/blog/massively-scale-deep-learning-training-nccl-2-4/">Massively Scale Deep Learning Training with NCCL 2.4</a></td>
+<td>互补树、对数 startup depth 与流水化 bandwidth 设计；不把朴素 tree 式当 NCCL 精确模型</td>
+</tr>
+<tr>
+<td>NVSwitch/ring latency</td>
+<td><a href="https://developer.nvidia.com/blog/3x-faster-allreduce-with-nvswitch-and-tensorrt-llm-multishot/">3x Faster AllReduce with NVSwitch and TensorRT-LLM MultiShot</a></td>
+<td>ring 的 $2p-2$ steps 与 latency 动机；产品宣传数字未用于普遍结论</td>
+</tr>
+<tr>
+<td>AMD architecture</td>
+<td><a href="https://rocm.docs.amd.com/en/docs-6.3.0/conceptual/gpu-arch.html">ROCm GPU architecture documentation</a></td>
+<td>CU/wavefront/CDNA 对照，提醒常数与 CUDA 不可照搬</td>
+</tr>
+<tr>
+<td>AMD CDNA 2 example</td>
+<td><a href="https://rocm.docs.amd.com/en/latest/conceptual/gpu-arch/mi250.html">AMD Instinct MI250 microarchitecture</a></td>
+<td>wavefront/CU/Infinity Fabric/HBM 的官方术语；未把单 SKU 数字泛化</td>
+</tr>
+<tr>
+<td>Arm memory management</td>
+<td><a href="https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Learn%20the%20Architecture/LearnTheArchitecture-MemoryManagement-101811_0100_00_en.pdf?revision=1fdc3375-d81c-4457-b786-04fb98557de0">Arm Memory Management Guide</a></td>
+<td>MMU、VA→PA、SMMU/IOMMU 定位</td>
+</tr>
+<tr>
+<td>Arm SMMU</td>
+<td><a href="https://developer.arm.com/documentation/109242/latest/">Arm SMMU Software Guide</a></td>
+<td>SVA、PASID、PRI/fault、stage translation、P2P/ACS</td>
+</tr>
+<tr>
+<td>GPUDirect RDMA</td>
+<td><a href="https://docs.nvidia.com/cuda/archive/12.3.0/gpudirect-rdma/index.html">GPUDirect RDMA Documentation</a></td>
+<td>PCIe locality，以及该路径对 IOMMU pass-through/identity mapping 的约束</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Primary papers</h2>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>来源</th>
+<th>采用的结论/边界</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Roofline</td>
+<td>Williams, Waterman, Patterson, <em>Roofline: An Insightful Visual Performance Model for Multicore Architectures</em>, CACM 2009, <a href="https://doi.org/10.1145/1498765.1498785">DOI</a></td>
+<td>$P\le\min(P_{peak},BI)$ ；是上界模型而非 cycle simulator</td>
+</tr>
+<tr>
+<td>FlashAttention</td>
+<td>Dao et al., <em>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</em>, NeurIPS 2022, <a href="https://arxiv.org/abs/2205.14135">arXiv</a></td>
+<td>通过 tiling/online softmax 减少 HBM I/O，不将其误述为近似 attention</td>
+</tr>
+<tr>
+<td>Ring all-reduce</td>
+<td>Patarasuk &amp; Yuan, <em>Bandwidth Optimal All-reduce Algorithms for Clusters of Workstations</em>, JPDC 2009, <a href="https://doi.org/10.1016/j.jpdc.2009.05.002">DOI</a></td>
+<td>ring reduce-scatter + all-gather 的带宽模型；真实 NCCL 还会按拓扑/协议选择算法</td>
+</tr>
+<tr>
+<td>Systolic arrays</td>
+<td>Kung &amp; Leiserson, <em>Systolic Arrays for VLSI</em>, 1979, <a href="https://www.cs.cmu.edu/~christos/courses/826-resources/PAPERS+BOOK/systolic.pdf">CMU record</a></td>
+<td>数据随规则阵列传播与局部复用的经典模型；不据此断言未公开 Tensor Core 物理实现</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 用户提供的中文/对话材料：可访问性与使用方式</h2>
+<h3>可见页面标题/摘要，未取得完整转录</h3>
+<ul>
+<li><a href="https://www.bilibili.com/video/BV19gBUBWEh1/?spm_id_from=333.1387.favlist.content.click">Bilibili：掌握 CUDA GPU 并行编程（硬件与软件）中文语音</a>：静态页面可见课程标题和相关推荐，没有可靠完整转录；仅作为 CUDA 软硬件协同选题线索。</li>
+<li><a href="https://www.bilibili.com/video/BV1PFmdBmEdN/?spm_id_from=333.1387.favlist.content.click&amp;vd_source=1fecee762931e992c96e5e166be13b76">Bilibili：Tilelang/Triton/cuTile 的异同与选择</a>：静态页面可见标题、日期和相关主题，没有完整转录；未归因任何具体技术判断。</li>
+<li><a href="https://chatgpt.com/c/69a76e70-87ac-83e8-a363-fe586256755e">ChatGPT 对话</a>：只返回 ChatGPT shell/history 标题，无共享正文；未使用其内容。</li>
+</ul>
+<h3>本次环境未能取得正文，保留为后续阅读入口</h3>
+<p>以下页面均<strong>没有作为事实证据</strong>；章节中的相应结论已回到上面的官方文档/原论文：</p>
+<ul>
+<li><a href="https://zhuanlan.zhihu.com/p/1984294397777568939">GPU 架构演进之 Gemini 问答</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/1952778893720262526">Tensor Core 的软硬件协同设计</a></li>
+<li><a href="https://www.zhihu.com/question/63219175/answer/1997433472390813296">如何理解 NCCL？</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/2019679464053822560">一文看懂 ARM SMMU 内存管理</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/2018433599020507875">线程束基本函数与协作组</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/2019532918247179254">CUDA 标准库的使用</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/2006030247439638741">Blackwell 矩阵乘法：基础介绍</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/2019443617530422289">CUDA 流</a></li>
+<li><a href="https://www.zhihu.com/question/319355296/answer/3374307130">如何系统学习 GPU 架构？—进击的 Bruce</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/1929640607300719712">TensorCore 演进：寄存器的自我救赎之路</a></li>
+<li><a href="https://www.zhihu.com/question/319355296/answer/1931398398445060845">如何系统学习 GPU 架构？—nicholaswilde</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/2015887800717828407">GPU 基础知识 &amp; 模型性能优化</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/678001378">深入理解 GPU 硬件架构及运行机制</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/1994438759010305490">GPU 编程模型与性能调优策略</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/1997608528660153669">GEMM 的脉动阵列、内积、外积硬件架构比较</a></li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Claim discipline</h2>
+<ol>
+<li><strong>硬件规格</strong>必须同时写产品形态、dtype、dense/sparse 与理论/实测口径。</li>
+<li><strong>性能数字</strong>若来自 vendor blog，要保留 workload/config，不外推为普遍倍数。</li>
+<li><strong>教学模型</strong>（32-byte segments、occupancy、 $\alpha$ – $\beta$ 、Roofline）明确标为近似。</li>
+<li><strong>未公开微架构</strong>不从示意图、反汇编或二手文章强推。</li>
+<li><strong>可运行代码</strong>是 CPU analytical model；未声称在 CUDA GPU 上测量。</li>
+</ol></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/gpu-architecture/sources.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

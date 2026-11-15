@@ -1,4 +1,6 @@
 # 02 — Synchronization, Asynchrony, and Staleness
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/02_sync_async_staleness.reading.html
+
 
 ## 1. Three execution regimes
 

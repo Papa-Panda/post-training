@@ -1,4 +1,6 @@
 # 03 — Entropy and DiffAdapt: 熵是 U 型的，预算就该分三档
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/03_entropy_and_diffadapt.reading.html
+
 
 > 生成过程的平均 token 熵随题目难度呈 **U 型**：简单的题熵高但做得对，中等难度熵最低，难题熵高且真的不会。DiffAdapt（Xiang Liu、Xuming Hu、Xiaowen Chu、Eunsol Choi）把这个观察做成三档 inference 路由：Easy / Normal / Hard 各配不同的 prompt、temperature 和 token 预算。
 >

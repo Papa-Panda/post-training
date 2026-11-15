@@ -1,4 +1,6 @@
 # In-Context Learning index
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/index.reading.html
+
 
 The maintained entry point is [`README.md`](README.md).
 

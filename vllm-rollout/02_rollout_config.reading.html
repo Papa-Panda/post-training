@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 — Continuous batching and KV-cache capacity</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">vLLM Rollout</span>
+    <h1>02 — Continuous batching and KV-cache capacity</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. Prefill and decode are different resources</a><a href="#sec-2">2. Logical KV-cache memory</a><a href="#sec-3">3. What PagedAttention changes</a><a href="#sec-4">4. Prefix caching</a><a href="#sec-5">5. Config knobs as hypotheses</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>1. Prefill and decode are different resources</h2>
+<p>Prefill processes many prompt tokens in parallel and is commonly compute-intensive. Autoregressive decode advances each active sequence by one or a small number of tokens per scheduler iteration and repeatedly reads weights plus growing KV state. Mixing them creates a latency/throughput trade-off.</p>
+<p>vLLM V1 enables chunked prefill by default whenever possible. Its documented scheduler prioritizes pending decode work, then uses the remaining <code>max_num_batched_tokens</code> budget for prefills, chunking a prefill that does not fit. The official tuning guide therefore treats this budget as a knob: smaller values can favor ITL, while larger values can improve TTFT and throughput for some workloads. Those are directions, not universal settings; benchmark the installed release.</p>
+<p>Continuous batching means the batch membership can change between engine steps. A completed sequence leaves and a waiting sequence can enter without waiting for the entire original batch. It does <strong>not</strong> remove queueing, KV limits, or head-of-line effects.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Logical KV-cache memory</h2>
+<p>For a decoder with $L$ layers, $H_{kv}$ key/value heads, head dimension $d_h$ , and $b$ bytes per stored scalar, the logical KV bytes per sequence token are:</p>
+<p>$$m_{KV/token}=2LH_{kv}d_hb$$</p>
+<p>The factor 2 is for key and value. For full multi-head attention, $H_{kv}$ equals the number of query heads. Grouped-query or multi-query attention lowers $H_{kv}$ and therefore KV bytes per token.</p>
+<p>For sequence length $S$ and $B$ simultaneously resident sequences, a first-order logical estimate is:</p>
+<p>$$M_{KV}=BSm_{KV/token}$$</p>
+<p>This omits block rounding, cache sharing, padding, temporary workspaces, graph capture, allocator overhead, multimodal state, and backend-specific layout. Tensor or pipeline parallelism can change per-rank storage. Treat the formula as a dimensional check, then compare with engine-reported cache blocks and observed memory.</p>
+<p>The calculator makes the residual-memory assumption explicit:</p>
+<pre><code class="language-bash">python3 code/rollout_lab.py kv \
+  --layers 32 --kv-heads 8 --head-dim 128 --dtype-bytes 2 \
+  --total-memory-gib 80 --gpu-memory-utilization 0.9 \
+  --weights-gib 16 --non-kv-gib 8
+</code></pre>
+<p>Its budget is:</p>
+<p>$$M_{KV,budget}=uM_{device}-M_{weights}-M_{nonKV}$$</p>
+<p>Do not mistake the result for vLLM's actual profiled cache capacity. Startup logs and metrics from the pinned engine are authoritative for the run.</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. What PagedAttention changes</h2>
+<p>The PagedAttention paper stores a sequence's KV state in fixed-size, non-contiguous physical blocks addressed through a block table. This avoids requiring one contiguous region sized for the request's maximum possible length and allows sharing in supported decoding patterns.</p>
+<p>Consequences:</p>
+<ul>
+<li>External holes are not diagnosed with a made-up “largest contiguous KV span” metric.</li>
+<li>The partially filled final block creates bounded internal waste per sequence; block metadata and implementation details still cost memory.</li>
+<li>“Free blocks exist but allocation failed” does not by itself prove fragmentation. Inspect engine logs, block demand, and version-specific metrics.</li>
+<li>KV pressure can trigger request preemption. Current V1 documentation says recomputation is the default preemption mode; preemption count and latency are therefore paired signals.</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Prefix caching</h2>
+<p>Automatic prefix caching reuses KV blocks for identical reusable prompt prefixes. Official design documentation describes block hashes, full-block caching, reference counts, and eviction of unreferenced blocks under pressure.</p>
+<p>What it can improve:</p>
+<ul>
+<li>repeated system or few-shot prefixes;</li>
+<li>repeated long document prefixes;</li>
+<li>repeated multi-turn history when tokenization and cache identity match.</li>
+</ul>
+<p>What it does not improve:</p>
+<ul>
+<li>generation of new output tokens;</li>
+<li>prompts with little token-identical shared prefix;</li>
+<li>policy freshness after weights change unless cache lifecycle and model identity are handled correctly.</li>
+</ul>
+<p>Measure hit <strong>tokens / queried tokens</strong>, not merely hit requests. Record cache salt, adapter identity, model revision, and engine version when relevant.</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Config knobs as hypotheses</h2>
+<table>
+<thead>
+<tr>
+<th>Knob</th>
+<th>Direct constraint</th>
+<th>Likely trade-off to test</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>max_num_seqs</code></td>
+<td>concurrent sequences in a scheduler batch</td>
+<td>more decode concurrency versus more KV pressure and graph sizes</td>
+</tr>
+<tr>
+<td><code>max_num_batched_tokens</code></td>
+<td>scheduler token budget per iteration</td>
+<td>prefill progress/throughput versus decode ITL</td>
+</tr>
+<tr>
+<td><code>gpu_memory_utilization</code></td>
+<td>fraction used when sizing engine memory</td>
+<td>more KV room versus less headroom for other allocations</td>
+</tr>
+<tr>
+<td><code>max_model_len</code></td>
+<td>maximum supported sequence length</td>
+<td>feasibility guard; can affect cache sizing and startup validation</td>
+</tr>
+<tr>
+<td>tensor/pipeline/data parallel sizes</td>
+<td>model placement and replicas</td>
+<td>per-rank memory, communication, latency, and aggregate capacity</td>
+</tr>
+<tr>
+<td>KV dtype</td>
+<td>bytes and numerical representation of cache</td>
+<td>capacity versus accuracy/calibration requirements</td>
+</tr>
+<tr>
+<td>prefix caching</td>
+<td>reuse of compatible full prefix blocks</td>
+<td>lower repeated prefill work versus cache management/security policy</td>
+</tr>
+<tr>
+<td>eager/compilation controls</td>
+<td>graph capture and compiled execution</td>
+<td>runtime speed versus startup time, graph memory, and compatibility</td>
+</tr>
+</tbody>
+</table>
+<p>Never encode a parameter-count-to-GPU-count table as fact. Measure weight memory and non-KV reserve, calculate a safe KV envelope, then run the stress matrix.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/vllm-rollout/02_rollout_config.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

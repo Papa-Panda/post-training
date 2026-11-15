@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 — Reading a Trace: 拿到一条 trace，先问什么</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Reasoning Trace Analysis</span>
+    <h1>07 — Reading a Trace: 拿到一条 trace，先问什么</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. 三遍读法</a><a href="#sec-2">2. 信号速查表</a><a href="#sec-3">3. 收束：trace 的双重身份</a><a href="#sec-4">4. 从读到改：三类动作</a><a href="#sec-5">5. 代码对应</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>前面六章给了三套工具。本章把它们合成一个读 trace 的 checklist：拿到一条 trace，按什么顺序看、每个信号回答什么问题、看完之后能做什么动作。</p>
+<p>The previous six chapters gave three toolkits. This chapter synthesizes them into a checklist for reading a trace: in what order to look, what question each signal answers, and what actions follow.</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. 三遍读法</h2>
+<p><strong>第一遍：结构（01、02）——"里面装了什么？"</strong></p>
+<ul>
+<li>行为视角：标出 planning / compute / verify / backtrack 段。问：verify 段是真验算还是复述？backtrack 是换路还是原地打转？</li>
+<li>机制视角：如果有白盒访问，算 DTR。问：高 DTR 段和答案正确性对得上吗？长 trace 的长度是 deep-thinking token 撑起来的，还是 filler 撑起来的？</li>
+</ul>
+<p><strong>第二遍：效率（03、04、05）——"哪些部分是浪费？"</strong></p>
+<ul>
+<li>熵视角：这题落在哪一档难度？Easy 题的高熵是发散还是困惑？</li>
+<li>行为视角：数 hedging / recheck / re-derive / tangent。算 HVR：光怀疑不验证的段落占比多少？有没有 abandonment（S3，最强失败信号）？</li>
+<li>结构视角：如果这条 trace 是 batch 里的一条，对比单问时的版本——被压掉的是空转还是真推理？</li>
+</ul>
+<p><strong>第三遍：监督（06）——"如果给每步打分，哪里该扣分？"</strong></p>
+<ul>
+<li>标出 false positive 风险点：答案对，但哪一步的推导站不住？</li>
+<li>想清楚 step 切分用的是哪种 contract（换行 / 语义 / checkpoint），因为打分只在该 contract 下有意义。</li>
+<li>如果这条 trace 要进训练：标量 advantage 会误伤哪一段？要不要 segment 级 credit？</li>
+</ul>
+</section>
+<section class="sec sec-table" id="sec-2"><h2><span class="n">2</span>2. 信号速查表</h2>
+<table>
+<thead>
+<tr>
+<th>信号</th>
+<th>章节</th>
+<th>回答的问题</th>
+<th>需要什么访问</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>行为标签（verify/backtrack…）</td>
+<td>01</td>
+<td>trace 在干什么</td>
+<td>文本即可</td>
+</tr>
+<tr>
+<td>DTR</td>
+<td>02</td>
+<td>多少 token 经历了深层修正</td>
+<td>白盒 hidden state</td>
+</tr>
+<tr>
+<td>Token 熵 $\bar{H}$</td>
+<td>03</td>
+<td>当前难度档位</td>
+<td>白盒 logits</td>
+</tr>
+<tr>
+<td>HVR</td>
+<td>04</td>
+<td>光怀疑不验证的比例</td>
+<td>文本即可</td>
+</tr>
+<tr>
+<td>六信号（S1–S6）</td>
+<td>04</td>
+<td>哪种空转模式</td>
+<td>文本即可</td>
+</tr>
+<tr>
+<td>四模式频率</td>
+<td>05</td>
+<td>batch 压掉了什么</td>
+<td>文本即可</td>
+</tr>
+<tr>
+<td>PRM step 分数</td>
+<td>06</td>
+<td>每步对错</td>
+<td>PRM 模型</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 收束：trace 的双重身份</h2>
+<p>读完一条 trace，你同时在回答两个层面的问题——这正是 00 章开篇的框架，也是本专题的收束：</p>
+<p><strong>Trace 作为行为 (behavior)。</strong> 它是策略 $\pi_{\theta}$ 在 reward 下优化出的采样轨迹。R1-Zero 只按最终正确性给 reward，trace 长成什么样——多长、多少 hedging、中英混杂——都是优化过程的副产品。从这个视角读 trace，问题是工程问题：预算怎么分（03 的路由）、空转怎么压（04、05 的检测与干预）、credit 怎么分（06 的 segment advantage）。目标是让下一条 trace 更便宜、更有效。</p>
+<p><strong>Trace 作为证据 (evidence)。</strong> 它是人类审计、debug、给过程打分的依据。从这个视角读 trace，问题是认识论问题：这段 verify 是真验算吗（01 的行为 vs 机制之分）？答案对但步骤错的 false positive 藏在哪里（06 的 PRM）？HVR=0 的 trace 能直接信任吗（04 的 gate 只是筛选器）？目标是让 trace 成为可信的记录。</p>
+<p>两者的 tension 是结构性的：<strong>优化行为的 reward（只看答案）不奖励"写出可信证据"</strong>。R1-Zero 的中英混杂 trace 就是证明——对 reward 有效，对人类读者不友好。所有"把行为变成可用证据"的工作——SFT 对齐格式、PRM 打分、行为分类、DTR 筛选——都是在替 reward 没做的事补课。</p>
+<p><strong>Faithfulness（暂缓）就是这个 tension 的正面战场</strong>：trace 作为证据的可靠性，到底能在多大程度上被信任、被测量、被改进。入口见 README 的 deferred 部分。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. 从读到改：三类动作</h2>
+<table>
+<thead>
+<tr>
+<th>读完发现</th>
+<th>动作</th>
+<th>章节</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空转占比高（高 HVR、多 abandonment）</td>
+<td>干预：Peng 两步法 prompt，或 batch 打包</td>
+<td>04、05</td>
+</tr>
+<tr>
+<td>预算错配（easy 题花满预算、hard 题空转）</td>
+<td>路由：DiffAdapt 三档</td>
+<td>03</td>
+</tr>
+<tr>
+<td>步骤质量参差（false positive 风险）</td>
+<td>监督：PRM 打分 / segment credit</td>
+<td>06</td>
+</tr>
+<tr>
+<td>不知道长短由什么驱动</td>
+<td>诊断：先算 DTR，再看行为标签</td>
+<td>01、02</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. 代码对应</h2>
+<p><code>code/trace_lab.py</code> 的 <code>run_all()</code> 把四个玩具实验串起来：DTR 相关性、路由节省、hedging 压缩、PRM vs ORM。把它当成"读 trace 之前先校准直觉"的沙盒：每个数字都是可复现的（固定 seed），每个断言都在 <code>tests/test_trace_lab.py</code> 里。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/reasoning-trace-analysis/07_reading_a_trace.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,4 +1,6 @@
 # 03 — 内存层次、Coalescing 与数据复用
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/03_memory_hierarchy_coalescing.reading.html
+
 
 ## 1. 性能问题首先是“数据从哪里来”
 

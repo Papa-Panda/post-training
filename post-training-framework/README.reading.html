@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Post-Training Frameworks</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Post-Training Framework</span>
+    <h1>Post-Training Frameworks</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">What this topic answers</a><a href="#sec-2">Reading route: mathematics → system → runnable model</a><a href="#sec-3">Unified architecture</a><a href="#sec-4">Framework-selection decision tree</a><a href="#sec-5">Boundaries with neighboring topics</a><a href="#sec-6">Runnable CPU model</a><a href="#sec-7">Non-negotiable invariants</a><a href="#sec-8">Source policy</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>A framework is not an algorithm name. It is the executable contract that turns prompts, policy versions, rollout engines, environments, rewards, buffers, and learners into a reproducible update.</p>
+</blockquote>
+<p>This topic synthesizes the <strong>Agent RL engineering</strong> section of the shared reading notebook. The notebook is an index of questions and articles, not a specification for a new framework. Here, its questions are reorganized around one system problem:</p>
+<p>$$\text{prompt}\rightarrow\text{rollout}\rightarrow\text{score}\rightarrow\text{advantage}\rightarrow\text{update}\rightarrow\text{publish}\rightarrow\text{evaluate}.$$</p>
+<p>The main architectural reference is <strong>HybridFlow/veRL</strong>. <strong>AReaL</strong>, <strong>slime</strong>, <strong>Hugging Face TRL</strong>, and <strong>Unsloth</strong> are compared at their actual abstraction levels rather than forced into a single leaderboard.</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>What this topic answers</h2>
+<p>A useful post-training framework must make five things explicit:</p>
+<ol>
+<li><strong>Data semantics:</strong> Which policy produced every token, which log-probability was stored, which reward/version/mask belongs to it, and whether a sample may be consumed.</li>
+<li><strong>Control semantics:</strong> Which component owns the global RL dataflow, and which processes collectively execute one model operation.</li>
+<li><strong>Placement semantics:</strong> Which models share devices, when memory changes role, and how weights move from training layout to generation layout.</li>
+<li><strong>Freshness semantics:</strong> How behavior-policy lag is measured, bounded, corrected, rejected, and monitored.</li>
+<li><strong>Evaluation semantics:</strong> Whether throughput gains preserve the intended estimator, trajectory validity, and held-out capability.</li>
+</ol>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Reading route: mathematics → system → runnable model</h2>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Chapter</th>
+<th>Question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><a href="00_problem_and_unified_loop.md">Problem and unified loop</a></td>
+<td>What mathematical object flows through the system, and what must never be ambiguous?</td>
+</tr>
+<tr>
+<td>1</td>
+<td><a href="01_roles_data_contracts.md">Roles and data contracts</a></td>
+<td>Which component owns each field, transition, and failure?</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="02_sync_async_staleness.md">Synchronization and staleness</a></td>
+<td>What changes when rollout and learning overlap?</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="03_control_and_placement.md">Control and placement</a></td>
+<td>How do HybridFlow-style controllers, colocation, and resharding fit together?</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="04_batch_semantics.md">Batch semantics</a></td>
+<td>How do train, mini-, and micro-batches map to optimizer steps and GRPO groups?</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="05_rollout_and_weight_sync.md">Rollout and weight synchronization</a></td>
+<td>When are weights, caches, tokenization, and partial trajectories valid?</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="06_framework_comparison.md">Framework comparison</a></td>
+<td>Which stack fits which research and scale regime?</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="07_observability_correctness.md">Observability and correctness</a></td>
+<td>Which metrics distinguish speed from estimator corruption?</td>
+</tr>
+<tr>
+<td>8</td>
+<td><a href="08_selection_and_build_plan.md">Selection and build plan</a></td>
+<td>How should a project migrate without paying cluster complexity too early?</td>
+</tr>
+<tr>
+<td>9</td>
+<td><a href="sources.md">Evidence ledger</a></td>
+<td>Which claims come from papers, official project docs, or secondary reading leads?</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>Unified architecture</h2>
+<pre><code class="language-text">prompt sampler / curriculum
+          |
+          v
+rollout policy(version=b) &lt;---- published weights ---- learner(version=k)
+          |                                              ^
+          v                                              |
+environment / tools / compiler -&gt; trajectory envelope -&gt; buffer
+                                      |                   |
+                                      v                   |
+                            reward / verifier / critic ---+
+                                      |
+                                      v
+                           advantage + update batch
+                                      |
+                                      v
+                           held-out evaluation + gates
+</code></pre>
+<p>The <strong>trajectory envelope</strong>, not a loose list of strings, is the unit of exchange. It carries prompt/group identity, token IDs, action masks, behavior-policy version and log-probabilities, reward/verifier versions, termination reason, and environment provenance.</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>Framework-selection decision tree</h2>
+<pre><code class="language-text">Need the shortest path from a model and dataset to an RL experiment?
+  ├─ Yes, standard trainer API is enough
+  │    ├─ Need a memory-efficient local/single-node path? -&gt; TRL + Unsloth option
+  │    └─ Prefer a transparent general trainer baseline?  -&gt; TRL
+  └─ No, need distributed rollout/training orchestration
+       ├─ Want synchronous/on-policy-first dataflow and flexible placement? -&gt; veRL
+       ├─ Fully asynchronous agent rollouts are the primary bottleneck?     -&gt; AReaL
+       └─ Want Megatron training + SGLang rollout with a hackable buffer?   -&gt; slime
+</code></pre>
+<p>This is a starting heuristic, not a benchmark result. Model support, licenses, hardware compatibility, operational maturity, and the exact project version must be checked at decision time.</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>Boundaries with neighboring topics</h2>
+<table>
+<thead>
+<tr>
+<th>Existing topic</th>
+<th>Canonical responsibility</th>
+<th>This topic only covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../grpo-vs-ppo/README.md"><code>grpo-vs-ppo/</code></a></td>
+<td>objective derivations and PPO/GRPO comparison</td>
+<td>how estimators constrain batching, freshness, and observability</td>
+</tr>
+<tr>
+<td><a href="../vllm-rollout/README.md"><code>vllm-rollout/</code></a></td>
+<td>rollout-serving metrics, stress tests, failure taxonomy</td>
+<td>how rollout engines connect to the learner and version contract</td>
+</tr>
+<tr>
+<td><a href="../ai-infra/README.md"><code>ai-infra/</code></a></td>
+<td>GPU/distributed compute, communication, memory, collectives</td>
+<td>role placement, resharding, and framework control plane</td>
+</tr>
+<tr>
+<td><a href="../harness-engineering/README.md"><code>harness-engineering/</code></a></td>
+<td>agent state, tools, workflow, permissions, harness promotion</td>
+<td>how an environment/harness produces replayable RL trajectories</td>
+</tr>
+<tr>
+<td><a href="../model-aware-data-curation/README.md"><code>model-aware-data-curation/</code></a></td>
+<td>model-aware sample value, coverage, generation, retention</td>
+<td>buffer hygiene and curriculum interfaces only</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Runnable CPU model</h2>
+<p>The standard-library simulator is deliberately small, but its queue tests are semantic: policy publication, long-tail barriers, queueing, learner-admission staleness gates, and strict GRPO grouped packing are real state transitions rather than printed claims. Separate unit tests cover importance-ratio arithmetic and clipping. The simulator reports makespan, useful trajectory throughput, maximum queue depth, mean/p95/max version lag, dropped trajectories, learner/rollout utilization proxies, and effective sample fraction. It intentionally admits by version lag only, represents one behavior version per trajectory, and does not model evolving target log-probabilities, ratio-based admission, ESS, or mixed-version segments; production interrupted/resumed rollouts require the segment-level schema in Chapters 01, 02, and 05.</p>
+<pre><code class="language-bash">python3 post-training-framework/code/demo.py
+python3 -m unittest discover -s post-training-framework/tests -v
+</code></pre>
+<p>It is <strong>not</strong> a GPU performance predictor. It isolates correctness relationships that should also hold in a real distributed implementation.</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>Non-negotiable invariants</h2>
+<ul>
+<li>A token has one behavior policy, even if the learner later evaluates it under many policies.</li>
+<li><code>policy_version</code> is metadata; the measured log-ratio is evidence. Equal version IDs do not guarantee equal distributions if decoding, tokenizer, masks, or kernels differ.</li>
+<li>A stale sample is not made on-policy by renaming its version. Any reuse must be justified by the estimator and measured ratios.</li>
+<li>GRPO groups remain atomic until group-relative statistics have been computed.</li>
+<li>KV state is valid only for the exact model/cache identity declared by the serving engine.</li>
+<li>Throughput is not an optimization target by itself; the useful unit is accepted, valid training tokens per wall-clock second at controlled quality.</li>
+<li>Reward improvements without held-out task improvement are a debugging signal, not success.</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>Source policy</h2>
+<p>Primary papers and official project documentation support technical claims. The Chinese articles from the notebook remain in <a href="sources.md">sources.md</a> as <strong>secondary navigation leads</strong>. Their unsourced staleness thresholds and unrelated source-leak/runtime claims are not promoted into facts here.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/post-training-framework/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

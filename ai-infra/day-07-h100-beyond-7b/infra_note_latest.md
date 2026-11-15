@@ -1,4 +1,6 @@
 # Deprecated estimate note
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-07-h100-beyond-7b/infra_note_latest.reading.html
+
 
 This file is retained only so old links do not break.
 

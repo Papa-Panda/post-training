@@ -1,4 +1,6 @@
 # Robotics 收藏夹纪要
+> 📖 阅读版：https://papa-panda.github.io/post-training/robotics-fav/README.reading.html
+
 
 来源：Bilibili 收藏夹「Robotics」（UP：geek_UNCLE，fid=8685233），共 21 个视频。与青稞Talk 同体例：字幕存档（transcripts/）+ 纪要 + HTML 阅读版。
 

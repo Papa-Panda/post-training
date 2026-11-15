@@ -1,4 +1,6 @@
 # 08 — GPU Virtual Memory、IOMMU/SMMU 与 UVM
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/08_virtual_memory_iommu_smmu_uvm.reading.html
+
 
 ## 1. 三类地址不要混
 

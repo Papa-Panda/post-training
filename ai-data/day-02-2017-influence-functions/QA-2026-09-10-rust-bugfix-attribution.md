@@ -1,4 +1,6 @@
 # Q&A 归档（2026-09-10）：Rust bug-fix 样本的多目标 / 多时间归因与处置
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/QA-2026-09-10-rust-bugfix-attribution.reading.html
+
 
 - 日期：2026-09-10
 - 关联论文：Day 01 StarCoder2、Day 02 Influence Functions（Koh & Liang 2017）、Day 03 TracIn（Pruthi et al. 2020）

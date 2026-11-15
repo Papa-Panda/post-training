@@ -1,4 +1,6 @@
 # r2-Day04 — DDP：问答归档
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-04-ddp/QNA.reading.html
+
 
 用户在当天 ai 课程聊天中提出的问题与总结。问题原文保留，答案按聊天记录整理；
 术语与中文解释保留英文术语（DDP、TP、PP、GPipe）。

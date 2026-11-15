@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 — Failure taxonomy and response</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">vLLM Rollout</span>
+    <h1>04 — Failure taxonomy and response</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Attempt identity and lineage</a><a href="#sec-2">Diagnostic decision tree</a><a href="#sec-3">Common mistakes corrected</a><a href="#sec-4">Retry budget</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>A useful taxonomy is mutually exclusive at the <strong>attempt</strong> level, while preserving contributing signals. Do not call every dropped trajectory an engine failure.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Boundary</th>
+<th>Example evidence</th>
+<th>Retry guidance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>client_transport</code></td>
+<td>client, proxy, network</td>
+<td>connection reset, client deadline</td>
+<td>retry only if request idempotency and budget allow</td>
+</tr>
+<tr>
+<td><code>admission_reject</code></td>
+<td>validation/admission</td>
+<td>context length exceeds limit, malformed request</td>
+<td>do not retry unchanged</td>
+</tr>
+<tr>
+<td><code>queue_timeout</code></td>
+<td>before or during engine service</td>
+<td>oldest queue age, server/client deadline</td>
+<td>retry with backoff only if load has changed</td>
+</tr>
+<tr>
+<td><code>kv_preemption</code></td>
+<td>scheduler/cache pressure</td>
+<td>preemption counter delta, recompute-token delta, high cache usage</td>
+<td>not automatically fatal; tune capacity/concurrency</td>
+</tr>
+<tr>
+<td><code>worker_failure</code></td>
+<td>engine process or device rank</td>
+<td>worker exit, health check failure, collective error</td>
+<td>restart/fail over; retry with attempt lineage</td>
+</tr>
+<tr>
+<td><code>tool_environment</code></td>
+<td>external action execution</td>
+<td>tool timeout, sandbox crash, invalid tool response</td>
+<td>policy-dependent; distinguish deterministic from transient</td>
+</tr>
+<tr>
+<td><code>response_invalid</code></td>
+<td>generated protocol/content</td>
+<td>parse error, missing required fields</td>
+<td>possibly regenerate; count generated waste</td>
+</tr>
+<tr>
+<td><code>scorer_verifier</code></td>
+<td>reward/scoring path</td>
+<td>scorer timeout, verifier crash, unavailable tests</td>
+<td>preserve rollout; rescore when possible</td>
+</tr>
+<tr>
+<td><code>freshness_drop</code></td>
+<td>learner acceptance gate</td>
+<td>policy lag beyond configured maximum</td>
+<td>do not hide as model-quality failure</td>
+</tr>
+<tr>
+<td><code>cancelled</code></td>
+<td>orchestration</td>
+<td>run cancelled after target batch completed</td>
+<td>normally no retry</td>
+</tr>
+<tr>
+<td><code>unknown</code></td>
+<td>unclassified</td>
+<td>missing evidence</td>
+<td>page on rising rate; never redistribute silently</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>Attempt identity and lineage</h2>
+<p>Each record should include:</p>
+<pre><code class="language-json">{
+  &quot;rollout_id&quot;: &quot;stable logical id&quot;,
+  &quot;attempt_id&quot;: &quot;unique execution id&quot;,
+  &quot;parent_attempt_id&quot;: null,
+  &quot;policy_version&quot;: 41,
+  &quot;engine_instance&quot;: &quot;replica-2&quot;,
+  &quot;prompt_tokens&quot;: 512,
+  &quot;generated_tokens&quot;: 933,
+  &quot;finish_reason&quot;: &quot;stop&quot;,
+  &quot;failure_class&quot;: null,
+  &quot;accepted&quot;: true
+}
+</code></pre>
+<p>Do not reuse an <code>attempt_id</code> after retry. Otherwise token cost, duplicate delivery, and policy age cannot be reconstructed.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Diagnostic decision tree</h2>
+<ol>
+<li><strong>Was the request admitted?</strong> If not, classify validation or admission rejection.</li>
+<li><strong>Did the client lose the response?</strong> Cross-check server completion by rollout/attempt ID before retrying.</li>
+<li><strong>Did engine work begin?</strong> Compare admission/first-scheduled timestamps and queue age.</li>
+<li><strong>Did cache pressure occur?</strong> Inspect version-correct KV usage, preemption, and recomputation counters plus logs.</li>
+<li><strong>Did generation finish?</strong> Preserve finish reason and token counts.</li>
+<li><strong>Did tool or scorer fail after generation?</strong> Attribute failure to that boundary while retaining generated-token cost.</li>
+<li><strong>Was the sample dropped for staleness or filtering?</strong> Mark it as completed-but-not-accepted.</li>
+</ol>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>Common mistakes corrected</h2>
+<ul>
+<li>Paged KV allocation invalidates a generic “contiguous free span” diagnosis. Do not infer fragmentation from fabricated internals.</li>
+<li>A preemption is a performance event, not necessarily a failed request.</li>
+<li>An empty or truncated output can be a stop configuration, transport truncation, or client parser error—not automatically an out-of-memory event.</li>
+<li>P95 greater than a multiple of P50 is a tail symptom, not a timeout definition.</li>
+<li>Enabling CPU swap or changing eager execution is not a universal remedy; both are version- and workload-dependent experiments.</li>
+<li>A verifier rejection must not be mixed with transport or engine availability when computing infrastructure reliability.</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>Retry budget</h2>
+<p>Bound retries by both attempts and tokens:</p>
+<p>$$retry\ amplification = \frac{attempted\ generation\ tokens}{first\ attempt\ generation\ tokens}$$</p>
+<p>Use exponential backoff with jitter only for transient classes. Admission errors and deterministic invalid requests should fail fast. Keep a deduplication key at the downstream dataset boundary so a client timeout does not create duplicate training examples.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/vllm-rollout/04_failure_taxonomy.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

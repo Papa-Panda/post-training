@@ -1,4 +1,6 @@
 # r2-Day15 — 3D 并行 TP/PP/SP：把模型本身切开
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/README.reading.html
+
 
 ## Connection to Prev
 

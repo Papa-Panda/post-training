@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 — Observability and Correctness</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Post-Training Framework</span>
+    <h1>07 — Observability and Correctness</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. Four planes of telemetry</a><a href="#sec-2">2. Throughput funnel</a><a href="#sec-3">3. Latency and utilization</a><a href="#sec-4">4. Freshness dashboard</a><a href="#sec-5">5. Estimator health</a><a href="#sec-6">6. Cross-backend correctness</a><a href="#sec-7">7. Reproducibility manifest</a><a href="#sec-8">8. Debugging ladder</a><a href="#sec-9">9. Failure symptom matrix</a><a href="#sec-10">10. Promotion gate</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>1. Four planes of telemetry</h2>
+<p>A single “tokens/s” dashboard cannot explain an RL system. Organize telemetry into four planes.</p>
+<table>
+<thead>
+<tr>
+<th>Plane</th>
+<th>Main question</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>data</td>
+<td>What samples entered and survived?</td>
+<td>task mix, lengths, groups, duplicates, invalid/reject reasons</td>
+</tr>
+<tr>
+<td>estimator</td>
+<td>Is the update mathematically plausible?</td>
+<td>advantages, ratios, KL, clip fraction, entropy, ESS, gradient norms</td>
+</tr>
+<tr>
+<td>systems</td>
+<td>Where is capacity/time spent?</td>
+<td>queue age, prefill/decode, reward latency, train step, reshard, barriers</td>
+</tr>
+<tr>
+<td>outcome</td>
+<td>Did capability improve safely?</td>
+<td>held-out success, regressions, calibration, reward/evaluator disagreement</td>
+</tr>
+</tbody>
+</table>
+<p>Every metric should carry run, policy, dataset, reward, environment, and code/config identities where applicable.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Throughput funnel</h2>
+<p>Measure successive rates:</p>
+<pre><code class="language-text">scheduled prompts
+  -&gt; completed trajectories
+  -&gt; schema-valid trajectories
+  -&gt; scored trajectories
+  -&gt; estimator-eligible trajectories
+  -&gt; consumed trajectories
+  -&gt; accepted action tokens
+</code></pre>
+<p>For each edge, record count, token count, and reason-coded loss. Define useful throughput as</p>
+<p>$$X_{\rm useful}=\frac{N_{\rm accepted\ action\ tokens}}{T_{\rm wall}}.$$</p>
+<p>A rollout optimization that raises generated token rate but increases timeout, stale rejection, or invalid log-probability rate may reduce useful throughput.</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. Latency and utilization</h2>
+<p>Track distributions, not only averages:</p>
+<ul>
+<li>prompt queue wait;</li>
+<li>prefill and decode time;</li>
+<li>environment/tool wait;</li>
+<li>reward/verifier latency;</li>
+<li>buffer residence time;</li>
+<li>learner batch assembly;</li>
+<li>forward/backward/optimizer time;</li>
+<li>checkpoint, reshard, publication, and worker load acknowledgement;</li>
+<li>end-to-end sample-to-update age.</li>
+</ul>
+<p>Report median, p90/p95/p99, maximum, and task/length buckets. Long-tail rollout creates synchronous barrier bubbles even when mean latency looks healthy.</p>
+<p>Useful utilization proxies include:</p>
+<p>$$U_{\rm rollout}=\frac{\text{worker busy time}}{\text{worker available time}},\qquad U_{\rm learner}=\frac{\text{compute-active time}}{\text{allocated time}}.$$</p>
+<p>High utilization can still be wasteful if work is rejected or duplicated, so pair it with $X_{\rm useful}$ .</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Freshness dashboard</h2>
+<p>At learner consumption, log:</p>
+<ul>
+<li>per-segment version lag $k-b(t)$ and per-trajectory maximum lag;</li>
+<li>wall-clock age;</li>
+<li>mean/max absolute token log-ratio;</li>
+<li>ratio percentiles and non-finite count;</li>
+<li>clip fraction;</li>
+<li>approximate KL by task/length;</li>
+<li>importance-weight ESS;</li>
+<li>stale/ratio rejection counts and wasted tokens.</li>
+</ul>
+<p>Plot held-out improvement and gradient statistics by lag bucket. A version bound is justified only when these diagnostics and outcome tests support it.</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Estimator health</h2>
+<h3>Ratio and clipping</h3>
+<p>TRL's official PPO docs expose metrics such as objective KL, policy clip fraction, entropy, and value/ratio diagnostics. Their exact names vary by implementation; preserve definitions in the run schema.</p>
+<p>Warning patterns:</p>
+<ul>
+<li>ratio median drifts from one: behavior/current mismatch or denominator bug;</li>
+<li>extreme tails increase with lag/length: stale or prefix mismatch;</li>
+<li>clip fraction near one: most samples are outside the useful trust region;</li>
+<li>KL jumps only on one backend: weight/tokenizer/mask mismatch;</li>
+<li>non-finite ratios: missing log-probs, underflow/overflow, or impossible tokens.</li>
+</ul>
+<h3>Advantage and reward</h3>
+<p>Track reward and advantage by prompt group, task, length, and verifier version. Warning patterns:</p>
+<ul>
+<li>all-zero GRPO groups: no within-group learning signal;</li>
+<li>near-zero advantage variance everywhere: normalization or reward collapse;</li>
+<li>reward rises while held-out success falls: reward exploitation, leakage, or narrowing;</li>
+<li>high reward/evaluator disagreement: unstable proxy or environment bug;</li>
+<li>success plateaus within an epoch: repeated data may be exhausted or clipping may dominate.</li>
+</ul>
+<h3>Entropy</h3>
+<p>Token entropy under current policy is</p>
+<p>$$H_t=-\sum_a\pi_k(a\mid s_t)\log\pi_k(a\mid s_t).$$</p>
+<p>A rapid entropy collapse can indicate excessive updates, reward overoptimization, narrow data, or masking errors. The desirable level is task/model-specific; use trends and controlled baselines rather than a universal threshold.</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. Cross-backend correctness</h2>
+<p>For a frozen calibration corpus, compare rollout and learner views:</p>
+<ol>
+<li>exact token IDs and model-visible prefixes;</li>
+<li>action masks and position IDs;</li>
+<li>policy/reference artifact digests;</li>
+<li>per-token log-probability deltas;</li>
+<li>MoE route identity where required;</li>
+<li>stop/truncation classification;</li>
+<li>normalized loss numerators and denominators.</li>
+</ol>
+<p>Fail the run before full training if mismatches exceed the empirically validated tolerance.</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. Reproducibility manifest</h2>
+<p>A run manifest should contain:</p>
+<ul>
+<li>source commit and dirty-state marker;</li>
+<li>framework and backend commits/releases;</li>
+<li>resolved config, environment/container identity, hardware/topology;</li>
+<li>model, tokenizer, adapter, and checkpoint digests;</li>
+<li>dataset/curriculum/filter versions;</li>
+<li>reward/verifier/environment/harness versions;</li>
+<li>random seeds and deterministic-mode limits;</li>
+<li>batching units and remainder/group policy;</li>
+<li>publication/admission/staleness settings;</li>
+<li>evaluation suites and contamination checks.</li>
+</ul>
+<p>Bitwise determinism across distributed GPU kernels may be unavailable. Reproducibility then means the exact nondeterminism is declared and replicated runs show controlled variance.</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>8. Debugging ladder</h2>
+<h3>Level 0 — schema</h3>
+<p>Can every sampled action be joined to token, mask, behavior version, log-probability, group, reward evidence, and termination?</p>
+<h3>Level 1 — frozen equivalence</h3>
+<p>With no optimizer step, do rollout and learner recomputation agree on tokens, masks, and log-probabilities?</p>
+<h3>Level 2 — single batch</h3>
+<p>Can one fixed batch produce finite, manually checked advantages, ratios, losses, gradients, and optimizer changes?</p>
+<h3>Level 3 — single worker loop</h3>
+<p>Does generate → score → update → publish change the next rollout's recorded version and behavior?</p>
+<h3>Level 4 — distributed synchronous</h3>
+<p>Do sharding, reduction, packing, and publication preserve the single-worker result within tolerance? Where is barrier idle?</p>
+<h3>Level 5 — overlap/async</h3>
+<p>Only now introduce queues, mixed versions, interruption, and independent scaling. Compare against the synchronous quality/control baseline at matched tokens and wall-clock.</p>
+<p>Skipping directly to Level 5 makes nearly every failure look like “RL instability.”</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>9. Failure symptom matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>First hypotheses</th>
+<th>Disambiguating evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>reward rises, eval falls</td>
+<td>reward hacking, leakage, task-mix shift</td>
+<td>raw verifier evidence, frozen held-out suite, distribution dashboard</td>
+</tr>
+<tr>
+<td>learner idle</td>
+<td>rollout/reward too slow, batch constraints</td>
+<td>queue depth by stage, group completeness, p95 latency</td>
+</tr>
+<tr>
+<td>queue grows</td>
+<td>producer faster than learner</td>
+<td>arrival/service rates, age/lag histogram</td>
+</tr>
+<tr>
+<td>high stale rejection</td>
+<td>publication too fast or learner too slow</td>
+<td>version/time lag, queue residence, ratio tails</td>
+</tr>
+<tr>
+<td>low GPU use with full queue</td>
+<td>packing/micro-batch/kernel/communication</td>
+<td>tokens per rank, profiler, collective and padding time</td>
+</tr>
+<tr>
+<td>log-ratio tails explode</td>
+<td>wrong denominator, prefix/mask/version mismatch</td>
+<td>frozen cross-backend calibration</td>
+</tr>
+<tr>
+<td>many all-zero groups</td>
+<td>task too hard/easy, verifier bug, homogeneous sampling</td>
+<td>reward evidence and task/difficulty buckets</td>
+</tr>
+<tr>
+<td>throughput collapses after publish</td>
+<td>reshard/load/cache invalidation</td>
+<td>publication phases, bytes, acknowledgements, cache hit by version</td>
+</tr>
+<tr>
+<td>duplicate updates</td>
+<td>lease/retry bug</td>
+<td>trajectory/update manifests and idempotency keys</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>10. Promotion gate</h2>
+<p>A faster system configuration is promotable only when:</p>
+<ol>
+<li>schema and frozen-equivalence tests pass;</li>
+<li>no unexplained shift appears in ratio/KL/advantage diagnostics;</li>
+<li>accepted valid token throughput improves;</li>
+<li>held-out quality is non-inferior under a declared statistical rule;</li>
+<li>resource cost and failure/recovery behavior are acceptable;</li>
+<li>the run is reproducible from a pinned manifest.</li>
+</ol>
+<p>System speed and learning quality are coupled outputs of one experiment, not independent checkboxes.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/post-training-framework/07_observability_correctness.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,4 +1,6 @@
 # r2-Day13 — Attention 变种：问答归档
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/QNA.reading.html
+
 
 用户在 ai 课程聊天中提出的问题与总结。问题原文保留，答案按聊天记录整理；
 英文术语（MHA、MQA、GQA、MLA、KV cache、latent、RoPE、absorption、head、

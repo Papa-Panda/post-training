@@ -1,4 +1,6 @@
 # 01 — PPO：从 policy gradient 到 clipped surrogate
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/01_ppo_objective.reading.html
+
 
 记号见 [`00_notation.md`](00_notation.md)。这里讨论的是 PPO-Clip；PPO 论文还给出了 adaptive-KL 版本。
 

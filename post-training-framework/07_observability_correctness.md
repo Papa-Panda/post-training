@@ -1,4 +1,6 @@
 # 07 — Observability and Correctness
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/07_observability_correctness.reading.html
+
 
 ## 1. Four planes of telemetry
 

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reasoning Trace Analysis</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Reasoning Trace Analysis</span>
+    <h1>Reasoning Trace Analysis</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">核心框架：trace 的双重身份</a><a href="#sec-2">What this topic answers</a><a href="#sec-3">阅读路线：数学 → 系统 → 可运行代码</a><a href="#sec-4">范围边界</a><a href="#sec-5">与相邻专题的边界</a><a href="#sec-6">可运行的 CPU 模型</a><a href="#sec-7">不可协商的不变量</a><a href="#sec-8">来源政策</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>一条 reasoning trace 有两个身份：它是 RL 优化出的<strong>行为</strong>（只按最终答案给 reward 的副产品），也是人类拿来审计和 debug 的<strong>证据</strong>。本专题研究前者如何被解剖、被压缩、被打分；后者的可靠性问题（faithfulness）暂缓，只留入口。</p>
+<p>A reasoning trace has two identities: it is <strong>behavior</strong> optimized by RL (a byproduct of rewarding only final answers), and <strong>evidence</strong> humans use to audit and debug. This topic dissects, compresses, and scores the former; the reliability of the latter (faithfulness) is deferred, with entry points only.</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>核心框架：trace 的双重身份</h2>
+<ul>
+<li><strong>Trace as behavior</strong>：策略 $\pi_{\theta}$ 的采样轨迹。R1-Zero 的 reward 只看最终预测正确性、不约束推理过程本身——trace 的长度、hedging、中英混杂都是优化的副产品。从这个视角看 trace，问题是工程问题：预算怎么分、空转怎么压、credit 怎么分。</li>
+<li><strong>Trace as evidence</strong>：模型"如何想"的记录。人类拿它审计、debug、教小模型、给过程打分。从这个视角看 trace，问题是认识论问题：这段 verify 是真验算吗？答案对但步骤错的解藏在哪里？</li>
+</ul>
+<p>两者的 tension 是结构性的：优化行为的 reward 不奖励"写出可信证据"。本专题的三条线全部站在"行为"一侧，把 trace 当成可测量、可压缩、可打分的对象来处理。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>What this topic answers</h2>
+<ol>
+<li><strong>结构</strong>：trace 里面装了什么？R1 论文到底观察到了哪些行为，机制视角（deep-thinking token）又量到了什么？</li>
+<li><strong>效率</strong>：哪些 token 是浪费？熵的 U 型、self-doubt、hedging 如何被检测，又如何被 batch 结构压缩？</li>
+<li><strong>监督</strong>：怎么给中间步骤打分？PRM 相对 ORM 解决了什么，credit 又该如何分到每个 token？</li>
+</ol>
+</section>
+<section class="sec sec-math" id="sec-3"><h2><span class="n">3</span>阅读路线：数学 → 系统 → 可运行代码</h2>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>章节</th>
+<th>问题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><a href="00_trace_as_object.md">Trace as an Object</a></td>
+<td>trace 的数学对象是什么？step 如何切分？</td>
+</tr>
+<tr>
+<td>1</td>
+<td><a href="01_cognitive_behaviors.md">Cognitive Behaviors</a></td>
+<td>R1 论文原文到底写了什么行为？（只引原文，不发明分类）</td>
+</tr>
+<tr>
+<td>2</td>
+<td><a href="02_deep_thinking_tokens.md">Deep-Thinking Tokens</a></td>
+<td>不数长度，数"想了几层"：settling depth 与 DTR</td>
+</tr>
+<tr>
+<td>3</td>
+<td><a href="03_entropy_and_diffadapt.md">Entropy and DiffAdapt</a></td>
+<td>熵为什么是 U 型的？三档路由如何省 token？</td>
+</tr>
+<tr>
+<td>4</td>
+<td><a href="04_self_doubt_and_hedging.md">Self-Doubt and Hedging</a></td>
+<td>已经做对了为何还在检查？HVR 与六信号</td>
+</tr>
+<tr>
+<td>5</td>
+<td><a href="05_batch_prompting.md">Batch Prompting</a></td>
+<td>为什么打包问题比喊"想短点"更有效？</td>
+</tr>
+<tr>
+<td>6</td>
+<td><a href="06_prm.md">Process Supervision</a></td>
+<td>PRM 如何给每步打分？credit 该分到多细？</td>
+</tr>
+<tr>
+<td>7</td>
+<td><a href="07_reading_a_trace.md">Reading a Trace</a></td>
+<td>拿到一条 trace 的三遍读法与双重身份收束</td>
+</tr>
+<tr>
+<td>—</td>
+<td><a href="sources.md">Sources</a></td>
+<td>每个数字与结论的一手来源</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>范围边界</h2>
+<p><strong>本专题展开的三条线</strong>：trace 结构解剖（00–02）、长度/效率与 overthinking（03–05）、过程监督 PRM（06–07）。</p>
+<p><strong>暂缓：faithfulness</strong>。Trace 作为证据的可信度（模型写下的推理是否真是它推理的过程）是独立的大议题，本专题不展开，只留三个后续入口，一行一个：</p>
+<ul>
+<li>https://arxiv.org/abs/2505.05410</li>
+<li>https://arxiv.org/abs/2510.04040v1</li>
+<li>https://arxiv.org/abs/2509.13334v1</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>与相邻专题的边界</h2>
+<table>
+<thead>
+<tr>
+<th>相邻专题</th>
+<th>它的职责</th>
+<th>本专题只覆盖</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../grpo-vs-ppo/README.md"><code>grpo-vs-ppo/</code></a></td>
+<td>目标函数推导与 PPO/GRPO 对比</td>
+<td>GRPO 的标量 advantage 在 trace 上的 credit 缺陷（06 §6）</td>
+</tr>
+<tr>
+<td><a href="../post-training-framework/README.md"><code>post-training-framework/</code></a></td>
+<td>rollout/learner 数据流与框架 contract</td>
+<td>trace 作为被分析、被打分的对象，不碰框架本身</td>
+</tr>
+<tr>
+<td><a href="../ai-data/README.md"><code>ai-data/</code></a></td>
+<td>数据选择与价值度量</td>
+<td>PRM800K 作为过程监督数据的实例（06 §3）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>可运行的 CPU 模型</h2>
+<p><code>code/trace_lab.py</code> 是纯 NumPy（无 torch）语义仿真器，四组玩具实验对应三条线：</p>
+<ul>
+<li>(a) deep-thinking ratio：settling depth → DTR，复现"DTR 预测准确率优于长度"；</li>
+<li>(b) U 型熵 + 三档路由：uniform 基线 vs DiffAdapt 式路由的 token 节省；</li>
+<li>(c) hedging/self-doubt 检测：正则扫描五类 marker，HVR，长 trace vs batched 压缩对比；</li>
+<li>(d) PRM vs ORM：false positive 玩具数据上的 best-of-N 对比，GRPO 标量 vs segment 级 credit。</li>
+</ul>
+<pre><code class="language-bash">cd reasoning-trace-analysis
+python3 -m pytest tests/ -q
+python3 code/trace_lab.py
+</code></pre>
+<p>它是<strong>语义仿真器，不是性能预测器</strong>：隔离的是"在真实实现中也该成立"的正确性关系（DTR 单调性、HVR 公式、PRM 打分单调性、路由省 token），不是 GPU 上的速度。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>不可协商的不变量</h2>
+<ul>
+<li>引用的论文没有官方"认知行为分类表"：R1 的行为描述是现象举例，不是分类学。</li>
+<li>Figure/Table 里的具体数字（如 $r=0.828$ 、 $96.1\%$ ）是特定实验设定的产物；可迁移的是序关系和机制，不是常数。</li>
+<li>候选解释必须标注为假设：batch prompting 的三个机制解释在论文中是 conjectures，不是定论。</li>
+<li>PRM 的 step 边界是数据与系统的 contract（换行格式），不是语义真理；换切分，打分语义就变。</li>
+<li>HVR=0 的高正确率是筛选器，不是安全保证。</li>
+<li>找不到一手来源的数字写"未核验"，不编造。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>来源政策</h2>
+<p>技术主张只由实际打开过的一手论文页面支撑，见 <a href="sources.md">sources.md</a> 。每个条目注明核验时亲眼看到的事实；faithfulness 三条只确认存在，未核验内容，不引用其结论。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/reasoning-trace-analysis/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

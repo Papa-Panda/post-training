@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 — Entropy and DiffAdapt: 熵是 U 型的，预算就该分三档</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Reasoning Trace Analysis</span>
+    <h1>03 — Entropy and DiffAdapt: 熵是 U 型的，预算就该分三档</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. 数学：token 熵与 trace 熵</a><a href="#sec-2">2. 实证：U 型曲线</a><a href="#sec-3">3. 系统：三档路由</a><a href="#sec-4">4. 效果：oracle 上限与真实结果</a><a href="#sec-5">5. 与 02 的对照：两种"不确定性"量的是不同东西</a><a href="#sec-6">6. 代码对应</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>生成过程的平均 token 熵随题目难度呈 <strong>U 型</strong>：简单的题熵高但做得对，中等难度熵最低，难题熵高且真的不会。DiffAdapt（Xiang Liu、Xuming Hu、Xiaowen Chu、Eunsol Choi）把这个观察做成三档 inference 路由：Easy / Normal / Hard 各配不同的 prompt、temperature 和 token 预算。</p>
+<p>Mean generation entropy is U-shaped in problem difficulty: easy questions have high entropy yet high accuracy, medium difficulty has the lowest entropy, hard questions have high entropy reflecting genuine uncertainty. DiffAdapt turns this into a three-tier inference router with per-tier prompt, temperature, and token budget.</p>
+</blockquote>
+</section>
+<section class="sec sec-math" id="sec-1"><h2><span class="n">1</span>1. 数学：token 熵与 trace 熵</h2>
+<p>对 trace 位置 $t$ ，模型输出词表分布 $p_{t}$ 。<strong>token entropy</strong> 是它的 Shannon 熵：</p>
+<p>$$H_{t}=-\sum_{j}p_{t,j}\log p_{t,j}.$$</p>
+<p><strong>trace entropy</strong> 是整条 trace 的平均：</p>
+<p>$$\bar{H}=\frac{1}{T}\sum_{t=1}^{T}H_{t}.$$</p>
+<p>注意 $\bar{H}$ 和最终答案正确性之间<strong>没有单调关系</strong>——这正是 U 型曲线的要点。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. 实证：U 型曲线</h2>
+<p>把题目按难度 $d$ 排序， $\bar{H}(d)$ 的形状：</p>
+<ul>
+<li><strong>Easy</strong>：熵高，但准确率高。模型"想得多但做得对"——高熵在这里不是困惑，而是解法空间的自然发散。</li>
+<li><strong>Normal / medium</strong>：熵最低。模型走最熟悉的路，分布尖锐。</li>
+<li><strong>Hard</strong>：熵高，准确率低。这里的高熵是<strong>真实不确定性</strong>（genuine uncertainty），不是发散。</li>
+</ul>
+<p>论文报告从 easy 到 medium 熵下降 22–25% 。这个数字的工程含义：如果你只看到"熵下降"，不能直接解读为"模型更确定了"——要先看题目落在哪一段。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 系统：三档路由</h2>
+<p>DiffAdapt 的核心动作是 inference 时路由。路由依据是一个小 probe：读 final hidden state，预测题目难度。三个档位（论文表中的配置）：</p>
+<table>
+<thead>
+<tr>
+<th>档位</th>
+<th>temperature</th>
+<th>token 预算</th>
+<th>直觉</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Easy</td>
+<td>0.5</td>
+<td>$0.4\times\text{Max}$</td>
+<td>直接解 + 验证，低温小预算</td>
+</tr>
+<tr>
+<td>Normal</td>
+<td>0.8</td>
+<td>$1.0\times\text{Max}$</td>
+<td>逐步推导，给满预算</td>
+</tr>
+<tr>
+<td>Hard</td>
+<td>0.4</td>
+<td>$0.5\times\text{Max}$</td>
+<td><strong>fail fast</strong>：超出能力边界时继续生成常常无效，不如限预算止损</td>
+</tr>
+</tbody>
+</table>
+<p>Hard 档的逻辑值得单独说：它的 temperature 比 Normal 还低（0.4 vs 0.8），预算只有一半。这不是"难题多给资源"，而是"难题少浪费资源"——论文认为超出模型能力的问题，拉长 trace 主要是空转。</p>
+<p>三阶段训练流程：</p>
+<ol>
+<li><strong>数据</strong>：用 proxy model 生成 trace，按启发式规则标注难度，得到训练数据。</li>
+<li><strong>探针</strong>：在 final hidden state 上训练一个小 probe 做难度分类。</li>
+<li><strong>路由</strong>：inference 时 probe 先判难度，再进对应档位。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. 效果：oracle 上限与真实结果</h2>
+<ul>
+<li><strong>Oracle 路由</strong>（假设难度已知）：约 $50\%$ 的 token 节省，准确率提升超过 $10\%$ 。这是该方法的上限演示。</li>
+<li><strong>真实结果</strong>（论文摘要）：5 个模型、8 个 benchmark，token 最多下降 $22.4\%$ ，准确率持平或更好。</li>
+</ul>
+<p>两个数字的差距（ $50\%$ vs $22.4\%$ ）就是 probe 误分类和启发式标注噪声的代价——路由系统的精度天花板，永远是难度估计的精度。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. 与 02 的对照：两种"不确定性"量的是不同东西</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Token 熵 $H_{t}$ （本章）</th>
+<th>JSD 轨迹 $D_{t,l}$ （02）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>固定什么</td>
+<td>固定位置 $t$ 、固定层</td>
+<td>固定位置 $t$ ，扫层 $l$</td>
+</tr>
+<tr>
+<td>问的问题</td>
+<td>"这一刻模型有多犹豫？"</td>
+<td>"这个决定被改了多少次？"</td>
+</tr>
+<tr>
+<td>U 型</td>
+<td>对难度 $d$ 呈 U 型</td>
+<td>未在论文中报告对难度的形状</td>
+</tr>
+<tr>
+<td>系统用途</td>
+<td>路由前先估计难度</td>
+<td>在线选高质量样本（Think@n）</td>
+</tr>
+</tbody>
+</table>
+<p>工程上两者可以串联：先用熵/probe 做<strong>难度路由</strong>（花多少钱），再用 DTR 做<strong>样本选择</strong>（选哪条 trace）。预算分配和质量选择是正交的。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. 代码对应</h2>
+<p><code>code/trace_lab.py</code> 的 (b) 部分：</p>
+<ul>
+<li><code>u_entropy(d)</code> ：U 型熵的解析玩具， $d^{\star}=5.5$ 处取最小。</li>
+<li><code>route(d)</code> ：三档路由，返回 <code>(策略, token 预算)</code> ，Easy $0.4\times$ 、Normal $1.0\times$ 、Hard $0.5\times$ ，与论文表一致。</li>
+<li><code>routing_experiment</code> ：uniform 全预算基线 vs 路由预算。玩具设定：easy 题小预算可解、normal 题需近满预算、hard 题任何预算都解不出（fail fast）。断言路由省 token 且准确率不降。</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/reasoning-trace-analysis/03_entropy_and_diffadapt.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

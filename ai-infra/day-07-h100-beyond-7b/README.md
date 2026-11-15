@@ -1,4 +1,6 @@
 # Large-model FSDP Capacity Planning
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-07-h100-beyond-7b/README.reading.html
+
 
 This historical lab previously mixed model-state estimates, synthetic rollout failures, and unverified H100 throughput ranges. It is now narrowed to one defensible task: **make FSDP model-state byte accounting explicit before attempting a hardware run**.
 

@@ -1,6 +1,8 @@
 > Connection to Prev: Day12 Reward Model calibration → Day13 Reliability SLO: Reward校准用ensemble σ和|cal-raw|过滤不确定rollout，但何时算“系统不可用”需要SLO量化定义；Day11 Paper2 Tj_max 82.49°C throttle 0.83%的坑在今天用power_jitter_ratio+throttle_rate双阈值SLO解决。
 
 # Day 13 — Cluster Reliability / SLO
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-13-reliability-slo/README.reading.html
+
 
 > Date: 2026-08-13 (Foundation 1-3mo, Infra Systems)  
 > Source row: `ai_daily.csv:2026-08-13` — Cluster Reliability / SLO / 给训练集群定SLO  

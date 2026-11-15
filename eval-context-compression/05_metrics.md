@@ -1,4 +1,6 @@
 # 05 Metrics — 从 Perplexity 到 Judge 0-5
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-context-compression/05_metrics.reading.html
+
 
 ## 为什么 perplexity 失效
 

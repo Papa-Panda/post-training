@@ -1,4 +1,6 @@
 # Model-aware Data Curation
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/README.reading.html
+
 
 > **基于梯度与模型行为干预的数据价值、覆盖与生成**：不是再做一套逐篇 paper notes，而是把归因、目标化选择、多样性覆盖、主动生成与持续学习接成一个 model-in-the-loop 控制闭环。
 

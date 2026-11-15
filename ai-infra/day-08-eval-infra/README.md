@@ -1,4 +1,6 @@
 # Day 08/09 - Eval Infra 为什么是瓶颈
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-08-eval-infra/README.reading.html
+
 
 > Date: 2026-08-09 (Foundation 1-3mo, RL Training/Eval)  
 > Source row: `ai_daily.csv:2026-08-09` — Eval infra bottleneck  

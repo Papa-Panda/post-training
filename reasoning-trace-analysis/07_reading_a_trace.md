@@ -1,4 +1,6 @@
 # 07 — Reading a Trace: 拿到一条 trace，先问什么
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/07_reading_a_trace.reading.html
+
 
 > 前面六章给了三套工具。本章把它们合成一个读 trace 的 checklist：拿到一条 trace，按什么顺序看、每个信号回答什么问题、看完之后能做什么动作。
 >

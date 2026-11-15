@@ -1,4 +1,6 @@
 # 具身智能"低成本泛化"：一次资本端对话的完整思考记录
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/notes-2026-09-18-embodied-ai-low-cost-generalization.reading.html
+
 
 > 日期：2026-09-18。对话对象：一位资本端（VC/FA）朋友。
 > 本文档的阅读方法：**严格区分四类内容**——(a) 一位资本端朋友原话/用户转述，(b) 已验证的公开事实，

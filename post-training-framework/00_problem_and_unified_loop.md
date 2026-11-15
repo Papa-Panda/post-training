@@ -1,4 +1,6 @@
 # 00 — Problem and Unified Loop
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/00_problem_and_unified_loop.reading.html
+
 
 ## 1. The framework's real optimization object
 

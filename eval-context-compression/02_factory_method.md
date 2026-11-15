@@ -1,4 +1,6 @@
 # 02 Factory Method — Dec 2025 Evaluating Compression
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-context-compression/02_factory_method.reading.html
+
 
 > Source: Factory AI news `evaluating-compression` Dec 2025 — defines agent context compression eval differently from prompt / KV-cache compression.
 

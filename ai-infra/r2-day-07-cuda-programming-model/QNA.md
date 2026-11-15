@@ -1,4 +1,6 @@
 # r2-Day07 — CUDA 编程模型：问答归档
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-07-cuda-programming-model/QNA.reading.html
+
 
 用户在当天 ai 课程聊天中提出的问题与总结。问题原文保留，答案按聊天记录整理；
 英文术语（SM、block、warp、thread、register、shared memory）保留。

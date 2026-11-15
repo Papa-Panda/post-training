@@ -1,4 +1,6 @@
 # 04 Prompt vs Context vs KV — 三条压缩路线对比
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-context-compression/04_prompt_vs_context_vs_kv.reading.html
+
 
 Long context 时有三件不同的事，大家都叫 compression，tradeoff 完全不同。
 

@@ -1,4 +1,6 @@
 # 10 — GPU 架构到 LLM Training / Inference Kernel 的映射
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/10_llm_training_inference_mapping.reading.html
+
 
 ## 1. Transformer 不是一个 kernel
 

@@ -1,4 +1,6 @@
 # r2-Day19 — 复盘周：第二层（分布式训练）收官
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-19-review-week/README.reading.html
+
 
 ## Connection to Prev
 

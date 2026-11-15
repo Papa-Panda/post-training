@@ -1,4 +1,6 @@
 # r2-Day06 — GPU 架构与 HBM Memory Wall
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-06-gpu-architecture/README.reading.html
+
 
 ## Connection to Prev
 

@@ -1,4 +1,6 @@
 # 04 — Tensor Core、GEMM Tiling 与数据流
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/04_tensor_core_gemm_dataflows.reading.html
+
 
 ## 1. Tensor Core 加速的是 tile-level MMA
 

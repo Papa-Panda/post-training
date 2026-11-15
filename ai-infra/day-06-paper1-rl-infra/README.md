@@ -1,4 +1,6 @@
 # Day 6 - 2026-08-07 - Paper1 autoscaling → RL Infra
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-06-paper1-rl-infra/README.reading.html
+
 
 **Goal:** 把你 Paper1 自动扩缩容的 5 个核心方法，翻译成 RL Infra 的语言，做成面试能讲的 bridge。
 

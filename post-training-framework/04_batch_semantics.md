@@ -1,4 +1,6 @@
 # 04 — Batch Semantics
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/04_batch_semantics.reading.html
+
 
 ## 1. Four nested quantities
 

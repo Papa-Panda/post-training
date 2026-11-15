@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 13 — Cluster Reliability / SLO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>Day 13 — Cluster Reliability / SLO</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">【昨日复盘】Day 12 真数</a><a href="#sec-2">【今日主题】Day 13 目标 + 最小可跑任务</a><a href="#sec-3">【与之前内容的联系】必写 2-3句，贴到 README最前Connection段</a><a href="#sec-4">代码怎么跑</a><a href="#sec-5">Fail-closed</a><a href="#sec-6">Cost and transfer boundaries</a></nav>
+  </details>
+  <section class="sec" id="sec-0"><blockquote class="pq">
+<p>Connection to Prev: Day12 Reward Model calibration → Day13 Reliability SLO: Reward校准用ensemble σ和|cal-raw|过滤不确定rollout，但何时算“系统不可用”需要SLO量化定义；Day11 Paper2 Tj_max 82.49°C throttle 0.83%的坑在今天用power_jitter_ratio+throttle_rate双阈值SLO解决。</p>
+</blockquote>
+
+<blockquote class="pq">
+<p>Date: 2026-08-13 (Foundation 1-3mo, Infra Systems)<br />
+Source row: <code>ai_daily.csv:2026-08-13</code> — Cluster Reliability / SLO / 给训练集群定SLO<br />
+Track: Infra Systems — Cluster<br />
+交付侧 chat: 18854a6d-7852-49cd-845f-d7e4bb976d14 (same-day)</p>
+</blockquote>
+<hr />
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>【昨日复盘】Day 12 真数</h2>
+<p><strong>Day12 Reward Model 不确定性校准 (2026-08-12)</strong>：</p>
+<ul>
+<li>合成 N=2000 train / 500 val, dim16, flip 15%, seed42, K=5 bootstrap：</li>
+<li><code>ECE_raw 0.09064 → ECE_cal 0.08811 improve 0.00253</code></li>
+<li><code>reward_std_mean (ensemble σ) 0.04498</code></li>
+<li><code>oas_spread_mean (|cal-raw|) 0.05388</code> — 校准位移当作 reward 版本的 calibration offset</li>
+<li><code>high_uncert_rate (σ&gt;0.15) 0.0%</code> (阈值0.05时 ~30-35%可配)</li>
+<li><code>acc_raw 0.798 / acc_cal 0.792 / brier_raw 0.159 / brier_cal 0.163</code></li>
+<li><code>platt_a 0.716 b 0.084</code> — 收缩过自信</li>
+<li>2-rank gloo CPU ok：<code>ECE_raw ~0.09496 / ECE_cal ~0.08638 σ~0.0427 spread~0.0617</code>，<strong>待H100 NCCL</strong> 补 max_memory_allocated + 真人偏好 DPO-gap + vLLM 12-18%失败联动</li>
+</ul>
+<p><strong>Day11 Paper2 → GPU 热/功耗</strong>：</p>
+<ul>
+<li>120 steps：IT 350kW + 200kW burst，每40步一抖</li>
+<li><code>rmse_Q_pred 55.13kW EWMA lag</code>, <code>avg_P_mech 57.87kW</code>, <code>p_std 9.38kW</code> → reward抖动源</li>
+<li><code>Tj_max 82.49°C Tj_avg 67.54°C throttle 0.83% hyst 82/72°C</code></li>
+<li><strong>待H100 NCCL</strong> 补 Tj 时序 + power trace</li>
+</ul>
+<p>=&gt; 昨日结论：热抖动 0.83% + rollout长CoT 12-18% + 标注15% 三噪合成 σ≈4.5%，用 Platt + ensemble 过滤，今天把“多少算不可接受”定成SLO。</p>
+<hr />
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>【今日主题】Day 13 目标 + 最小可跑任务</h2>
+<p><strong>Track/Topic</strong>: Infra Systems / Cluster — Reliability / SLO<br />
+<strong>Knowledge Point</strong>: 给训练集群定SLO<br />
+<strong>Learning Goal</strong>: 能用3条SLO把小集群的“可用”量化，不用拍脑袋<br />
+<strong>Small Daily Task</strong>: 给小集群写3条SLO：作业成功率/排队时长/功率抖动<br />
+<strong>Systems Connection</strong>: 复用 SLO 的通用方法——定义服务对象、指标窗口、误差预算与触发动作；阈值必须由目标训练/推理系统的数据校准
+<strong>Resource</strong>: Reliability/SLO methods applied to thermal, queueing, and rollout systems</p>
+<h3>今天要懂的3条SLO（RL infra语言）</h3>
+<blockquote class="pq">
+<p>必须只用 RL infra类比：FSDP分片、vLLM TTFT/TPOT、rollout失败分类、热节流Tj、eval异步、GRPO组内基线。不用金融定价类比。</p>
+</blockquote>
+<h4>SLO1 作业成功率</h4>
+<ul>
+<li><strong>定义</strong>：<code>success_rate = successes / total_jobs</code>，total含 5类失败：<code>timeout / tool_retry / vcj_parse / oom_kv / nccl</code></li>
+<li>类比 vLLM rollout 统计 Day10：短CoT 5-8% fail，长CoT 12-18% fail，且 wall-clock占80-90%</li>
+<li>Day12 reward不确定性里，fail rollout进 high-uncert，不该进RM负样本</li>
+<li><strong>阈值</strong>：<code>&gt;=0.98</code> (2% budget，用于区分“探索噪声 vs 有害失败”)</li>
+<li>GRPO组内基线 64样本，2% fail可控，&gt;5%则 advantage被稀释</li>
+<li><strong>测量</strong>：<code>slo_sim.py</code> Poisson到来 + burst每40job (模拟长CoT 500→5000 tok)，fail_rate 4.5% 本轮</li>
+</ul>
+<h4>SLO2 排队等待 p95</h4>
+<ul>
+<li><strong>定义</strong>：<code>queue_wait_p95 &lt;= 1.2s scaled</code> (真实集群映射 <code>120s</code>)</li>
+<li>来源：Day08/09 eval瓶颈 sync=1.141s p50 /3.249s p95 /gpu_idle 1.034s占92.85%，async转0.0s省52%</li>
+<li>Queue depth从 autoscaling带过来：burst时 depth 0→3堆积</li>
+<li><strong>阈值</strong>：<code>p95 1.2s</code> (≈真实120s)，<code>p50 0.12s</code> 参考；<code>queue_avg_depth &lt;=2</code></li>
+<li>超阈 → eval异步/降级采样，Paper1 nowcasting思路：EWMA预测下一个会卡多久</li>
+<li><strong>测量</strong>：wait = queue*0.15+U(0,0.2)+burst 0.3-0.6</li>
+</ul>
+<h4>SLO3 功率抖动 + 热节流</h4>
+<ul>
+<li><strong>定义</strong>：<code>power_jitter_ratio = p_std / p_mean &lt;=0.15</code> 且 <code>throttle_rate &lt;=1%</code></li>
+<li>来源：Day11 Paper2两节点SSM：<code>C_j dTj/dt = P*throt - (Tj-Ths)/Rjh</code>，<code>Rhs(fan)=R0/(fan^0.8+0.15)</code> 非线性</li>
+<li>Day11实数：Tj_max 82.49°C avg67.54°C throttle0.83% hyst82/72°C → 今天同构到SLO</li>
+<li>FSDP (P-b)/G+b 峰值思维：热容救的是瞬时峰值不超限，不是均值</li>
+<li><strong>阈值</strong>：<code>0.15</code> 来自风扇立方律容忍度，<code>1%</code> throttle 来自 TPP/TPOT增30%后用户误判为差答案</li>
+<li><strong>测量</strong>：p_mean 459W σ 67W jitter 0.146 Tj_max 90.5°C本轮 seed42 (scaled)，throttle 2.5% → 本轮不达标，触发hysteresis扩大冷却窗</li>
+</ul>
+<h3>最小可跑任务 (30-60min)</h3>
+<p>已在 <code>slo_sim.py</code> 跑通：</p>
+<ol>
+<li>单秩 <code>python3 slo_sim.py</code> 输出 3 SLO判定 + 3真数</li>
+<li>2-rank <code>torchrun --nproc_per_node=2 slo_sim.py</code> gloo all_reduce SUM/2验证，rank0打印汇总 rank1只打 gloo_ok</li>
+<li><strong>待H100 NCCL</strong>：替换sim power为 NVML真实 + <code>torch.cuda.max_memory_allocated()</code> 峰值对照 (P-b)/G+b</li>
+</ol>
+<hr />
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>【与之前内容的联系】必写 2-3句，贴到 README最前Connection段</h2>
+<ol>
+<li>
+<p><strong>Day12 → Day13</strong>：Day12 ensemble K=5得到 σ0.045 + |cal-raw| 0.0539 用来压缩过自信，告诉你“哪个rollout该过滤”，但没回答“多少过滤算集群不可用”。今天把过滤比例上升为 SLO1——success_rate 0.955 vs 0.98阈值，2% budget用GRPO组内64样本解释：超budget优势被噪声淹没，过滤逻辑必须联动SLO告警，否则辛苦校准的a=0.716 b=0.084被失败样本稀释。</p>
+</li>
+<li>
+<p><strong>Day11 → Day13</strong>：Day11两节点SSM给出 Tj_max 82.49°C throttle 0.83% hyst 82/72°C 物理先验，能提前5-10min预测热，今天把先验用进SLO3——<code>p_std 9.38kW → GPU σ67W</code>抖动同源，jitter_ratio 0.15 + throttle 1%双阈值把“fail-slow不崩但慢30%”从 SLO视角定义为不可用，checkpoint(Day07)救不了 fail-slow，必须靠功率平滑+风扇调度，像Paper2冷机防频启 hyst 0.85/0.35一样加冷却窗。</p>
+</li>
+<li>
+<p><strong>Day10 + Day08/09 → Day13</strong>：Day10 vLLM rollout占 80-90%墙钟、长CoT 8-15k tokens/sec失败12-18% 5类拆分，今天分类进 SLO1的 5桶；Day08/09 eval同步阻塞 p50 1.141s p95 3.249s gpu_idle占92.85% async省52% 的 wait，今天量化成 SLO2 p95 1.2s (真实120s) + queue_avg_depth——现在有3条SLO就能回答“_eval_该异步还是采样”：queue depth&gt;5且P95&gt;阈值 ⇒ 转异步，跟 Paper1把稳定/波动负载分开调度同构，折算 \$/有用 rollout降 8-12%。</p>
+</li>
+</ol>
+<blockquote class="pq">
+<p>链路完整：FSDP(2)/per-block(3) 省显存峰值 (P-b)/G+b → checkpoint(7) sharded vs full 存盘拼回 → eval(8/9) nowcasting 预测排队 → vLLM(10) rollout失败率5类 → Paper2(11)热SSM预测Tj节流 → Reward(12) ensemble校准过滤 → 今天13 SLO定什么是不可用。下一步14 PUE成本图、15 3D并行决策树、22 vLLM↔FSDP联动都依赖这3阈值判断。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>代码怎么跑</h2>
+<pre><code class="language-bash">cd rl-infra/day-13-reliability-slo
+# 单卡
+python3 slo_sim.py
+
+# 2-rank gloo CPU逻辑等效NCCL分片预测聚合
+torchrun --nproc_per_node=2 slo_sim.py
+</code></pre>
+<p>输出JSON含 3真数 + SLO判定，rank0才打印汇总。待H100 NCCL时补 <code>max_memory_allocated</code> + 真Tj/Power trace。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>Fail-closed</h2>
+<ul>
+<li>没编H100数。所有 GPU数、NVMe throughput、tokens/sec实测都标 <strong>待H100 NCCL</strong>。</li>
+<li>CPU gloo 2-rank 逻辑通，sim 200jobs seed42 scaled，不当真机读。</li>
+<li>throttle_rate 2.5%是本次 seed42单一突发模式，非大样本统计，需 H100上长跑 + 真 Tj sensor + RAPL采样 + vLLM长CoT 500→5000 tok失败率替换。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Cost and transfer boundaries</h2>
+<ul>
+<li>可把失败和等待转换为浪费的 GPU-hours，但货币成本需要真实资源价格、重试次数和 useful-goodput 数据。</li>
+<li>文中的 success、queue、power-jitter 与 thermal 阈值都是示例控制面；没有目标集群基线和误差预算时，不应写成生产 SLO。</li>
+<li>Day12 的 reward 校准只复用“用残差分布分配 uncertainty budget”的方法，不复用本模拟的 <code>power_jitter</code> 数值。</li>
+</ul>
+<hr />
+<p><strong>Artifacts</strong>: <code>slo_sim.py</code> CPU ok，NOTES.md 3数待H100，本README含 Connection。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-13-reliability-slo/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

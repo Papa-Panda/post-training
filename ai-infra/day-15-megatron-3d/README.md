@@ -1,6 +1,8 @@
 > Connection to Prev: Day14 Paper3 PUE拆解 → Day15 Megatron 3D Parallelism: PUE 1.2576 算清了 \$/useful 但没解决单卡放不下 7B/13B/70B 权重的问题，需要 DP/TP/PP 三维切分把 per-GPU 显存从 (P·bytes) 降到 (P/G)+活化分片；Day13 Reliability / SLO 的 Tj_max 90.5°C throttle 2.5% 坑在今天用 TP 切块 + PP 流水重叠通信把单卡 burst 450→720W 打散，避免大矩阵乘在单卡热点堆积触发热节流。
 
 # Day 15 — Megatron 3D Parallelism: DP / TP / PP 何时切
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-15-megatron-3d/README.reading.html
+
 
 ## Day 14 Paper3 PUE 真数
 - 真数（CPU gloo 2-rank ok, seed42, n=300）：PUE mean 1.2576 p50 1.2381 p95 1.3427 min 1.1646 max 1.3468 overhead 25.76% (IT 477.4W + cooling 123.8W)， \$/useful 0.000244 \$ /1k useful 0.2438，useful 281/300=93.7% fail 6.33% (timeout7/vcj7/tool3/nccl2)，Tj_avg 72.4°C Tj_max 92.1°C throttle 3.0%。

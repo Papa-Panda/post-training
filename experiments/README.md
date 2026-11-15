@@ -1,4 +1,6 @@
 # Claim → 实验
+> 📖 阅读版：https://papa-panda.github.io/post-training/experiments/README.reading.html
+
 
 把"读论文"转成"做研究"的回路。每周固定 1 个 claim，不必每篇论文都做。
 

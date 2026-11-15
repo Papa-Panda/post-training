@@ -1,4 +1,6 @@
 # Day 5/6 - JAX pjit / sharding
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-05-jax-pjit/README.reading.html
+
 
 **Learning Goal**: 理解 JAX 比 PyTorch 多解决了什么
 

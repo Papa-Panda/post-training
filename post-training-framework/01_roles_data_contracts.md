@@ -1,4 +1,6 @@
 # 01 — Roles and Data Contracts
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/01_roles_data_contracts.reading.html
+
 
 ## 1. Components are roles, not necessarily processes
 

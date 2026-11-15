@@ -1,4 +1,6 @@
 # GRPO vs PPO — estimator、ratio 与 systems trade-offs
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/README.reading.html
+
 
 PPO 和 GRPO 都不是一个固定 recipe。这个专题统一 token/group 记号，从 policy gradient 推到 clipped surrogate，拆开 behavior policy 与 reference policy，并把算法选择落到 memory、communication、rollout-token budget 与 failure diagnostics。
 

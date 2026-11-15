@@ -1,4 +1,6 @@
 # 06 — GLM-5.2 case study：long-horizon compaction 下为何选 critic PPO
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/06_glm52_ppo_comeback.reading.html
+
 
 > 这是一个 **公开系统案例**，不是“PPO 已取代 GRPO”的普遍结论。只保留官方公开材料明确陈述的算法信息；不保留未在本专题逐项核验的参数规模、榜单、价格、训练耗时或“首创”类 headline claims。
 

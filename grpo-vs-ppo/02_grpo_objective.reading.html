@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 — GRPO：group-relative advantage、KL 与边界</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">GRPO vs PPO</span>
+    <h1>02 — GRPO：group-relative advantage、KL 与边界</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. Sampling 与 reward</a><a href="#sec-2">2. 原始 token-level clipped objective</a><a href="#sec-3">3. KL sample estimators</a><a href="#sec-4">4. Group mean 的偏差细节</a><a href="#sec-5">5. Edge cases</a><a href="#sec-6">6. Length aggregation 与后续修正</a><a href="#sec-7">7. GRPO 能否做细粒度 credit assignment？</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>GRPO 的主要动机不是“组内排名”，而是用同一 prompt 的多条 completion reward 构造 baseline，省掉 learned critic。原始 DeepSeekMath 同时给出 outcome-supervision 与 process-supervision 形式；本章先聚焦最常见的 outcome GRPO。</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. Sampling 与 reward</h2>
+<p>对每个 $q$ ，behavior policy 独立采样 $G$ 条 response：</p>
+<p>$$y_1,\ldots,y_G\sim\pi_b(\cdot\mid q),\qquad R_i=R(q,y_i)$$</p>
+<p>组均值与 population standard deviation 为：</p>
+<p>$$\bar R=\frac{1}{G}\sum_{j=1}^{G}R_j,\qquad s_R=\sqrt{\frac{1}{G}\sum_{j=1}^{G}(R_j-\bar R)^2}$$</p>
+<p>原始 outcome GRPO 使用：</p>
+<p>$$A_i^{grp}=\frac{R_i-\bar R}{s_R}$$</p>
+<p>然后令该 response 的所有可训练 token 共享 $A_{i,t}=A_i^{grp}$ 。实现必须显式定义标准差是 population 还是 sample convention；二者只差 scale，但会改变实际 step size。示例代码默认 population standard deviation，与上式一致。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. 原始 token-level clipped objective</h2>
+<p>令 $c(x,l,u)=\min(\max(x,l),u)$ 。忽略 mask 的原始 response-mean 形式为：</p>
+<p>$$J_{GRPO}=\mathbb E\left[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{T_i}\sum_{t=1}^{T_i}\left(\min(\rho_{i,t}A_i^{grp},c(\rho_{i,t},1-\epsilon,1+\epsilon)A_i^{grp})-\beta k_{i,t}\right)\right]$$</p>
+<p>这里 $\rho_{i,t}=\pi_\theta/\pi_b$ ，而 KL 项比较 $\pi_\theta$ 与 $\pi_{ref}$ 。两个 denominator 不同：</p>
+<ul>
+<li>$\pi_b$ 是本批 rollout 的来源，解决数据复用期间的 policy drift。</li>
+<li>$\pi_{ref}$ 是训练锚点，限制长期行为漂移。</li>
+</ul>
+<p>原始 DeepSeekMath 的多次 GRPO update 用 token-level ratio；DeepSeek-R1 论文正文把 objective 压缩成 sequence notation。不要据此把 token product ratio 与单 token ratio 混用。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. KL sample estimators</h2>
+<p>设 sampled token 来自当前 policy $a\sim p=\pi_\theta(\cdot\mid h)$ ，参考分布为 $q=\pi_{ref}(\cdot\mid h)$ ，并定义 $z=\log p(a)-\log q(a)$ 。常见三个量是：</p>
+<p>$$k_1=z$$</p>
+<p>$$k_2=\frac{1}{2}z^2$$</p>
+<p>$$k_3=\exp(-z)-1+z$$</p>
+<p>在 **样本确实来自 $p$ ** 时， $k_1$ 和 $k_3$ 都是 forward KL $D_{KL}(p\Vert q)$ 的 unbiased value estimator； $k_3\ge 0$ pointwise，通常更稳定， $k_2$ 是近 $p=q$ 时的二阶近似而非一般 unbiased estimator。原始 DeepSeekMath 使用 $k_3$ 。</p>
+<p>如果 token 实际来自 $\pi_b$ 且 $\pi_b\neq\pi_\theta$ ，直接平均 $k_3$ 不再是当前-policy KL 的 unbiased value estimate。理论上 value estimation 需要乘 $\pi_\theta/\pi_b$ ；而“把某个 KL estimator 当 differentiable loss”还涉及 sampling-distribution 的 score-function derivative，不能只凭 value estimator 无偏就宣称 gradient 无偏。工程上要明确自己是在做 exact estimate、近似 penalty，还是仅监控指标。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Group mean 的偏差细节</h2>
+<p>“baseline 与 sampled action 独立”是 vanilla baseline 不改变期望梯度的条件。 $\bar R$ 包含 $R_i$ 自身，因此不独立。先不做 std normalization，可直接算出：</p>
+<p>$$\mathbb E\left[\frac{1}{G}\sum_i(R_i-\bar R)\nabla\log\pi(y_i\mid q)\right]=\frac{G-1}{G}\nabla\mathbb E[R\mid q]$$</p>
+<p>它保留方向但缩小 $\frac{G-1}{G}$ 。leave-one-out baseline 则排除自身：</p>
+<p>$$b_{-i}=\frac{1}{G-1}\sum_{j\ne i}R_j,\qquad A_i^{LOO}=R_i-b_{-i}=\frac{G}{G-1}(R_i-\bar R)$$</p>
+<p>在独立 sampling 与无额外非线性时，LOO 恢复 unbiased REINFORCE estimator。GRPO 再除以随机的组内 $s_R$ ，会按 prompt/reward dispersion 重加权，不能再笼统称为 unbiased expected-reward gradient；clipping 和 token-local ratios 又引入额外 surrogate bias。这些偏差可能换来更好的尺度稳定性，但必须准确命名。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Edge cases</h2>
+<table>
+<thead>
+<tr>
+<th>情况</th>
+<th>数学结果</th>
+<th>安全处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$G=1$</td>
+<td>无法构造相对 baseline； $s_R=0$</td>
+<td>拒绝配置或改用 absolute/critic estimator</td>
+</tr>
+<tr>
+<td>全对、全错或全同分</td>
+<td>$s_R=0$ 且 centered reward 全 0</td>
+<td>返回零 advantage；可记录后跳过，或重采样 prompt</td>
+</tr>
+<tr>
+<td>$s_R$ 很小</td>
+<td>除法放大 noise</td>
+<td>threshold/epsilon、batch-level scale，或关闭 std scaling</td>
+</tr>
+<tr>
+<td>大量 ties</td>
+<td>有效比较信号少</td>
+<td>记录 unique rewards 与 non-degenerate-group rate</td>
+</tr>
+<tr>
+<td>reward 各 component 尺度不同</td>
+<td>z-score 掩盖绝对 scale</td>
+<td>分量先校准，并记录 raw reward</td>
+</tr>
+<tr>
+<td>同 prompt rollout 非独立</td>
+<td>标准 group 推导失效</td>
+<td>记录 sampler coupling；不要声称 i.i.d.</td>
+</tr>
+<tr>
+<td>多任务 prompt 难度不同</td>
+<td>每组除 $s_R$ 改变 prompt 权重</td>
+<td>与 no-std / batch-std 做消融</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. Length aggregation 与后续修正</h2>
+<p>原始 response-mean objective 的 $1/T_i$ 让每条 response 总权重相同，因此短 response 的单 token 权重更大。Dr.GRPO 指出 response length normalization 与 per-question std normalization 会造成 response-level length bias 与 question-level difficulty bias，并提出固定 normalization / 去 std 的修正。DAPO 改用全局 token mean、dynamic sampling、asymmetric clipping 和 overlong reward shaping。</p>
+<p>注意：token mean 不是“无偏”的同义词，它改成每个 token 等权，因而长 response 总梯度权重更大。选择 aggregation 必须匹配想优化的是 response distribution 还是 token distribution。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. GRPO 能否做细粒度 credit assignment？</h2>
+<p>不能简单回答“不能”。</p>
+<ul>
+<li>outcome GRPO 把一个 terminal reward 广播到整条 response，确实没有识别哪一步真正贡献了结果。</li>
+<li>DeepSeekMath 原论文还描述了 process-supervision GRPO，可由每一步 reward 的后缀归一化和得到 token-varying advantage。</li>
+<li>但只要没有 learned value/return model，跨很长 horizon 的 bootstrap 与任意截断片段估值仍是短板。</li>
+</ul>
+<p>所以准确边界是：<strong>vanilla outcome GRPO 缺少 token-specific credit；GRPO 框架可接 process reward，但 process labels/verifier 本身有成本。</strong></p>
+<p>来源：<a href="https://arxiv.org/abs/2402.03300">DeepSeekMath</a>、<a href="https://arxiv.org/abs/2501.12948">DeepSeek-R1</a>、<a href="https://arxiv.org/abs/2503.20783">Dr.GRPO</a>、<a href="https://arxiv.org/abs/2503.14476">DAPO</a>、<a href="https://arxiv.org/abs/2506.09477">KL estimator pitfalls</a>。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/grpo-vs-ppo/02_grpo_objective.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

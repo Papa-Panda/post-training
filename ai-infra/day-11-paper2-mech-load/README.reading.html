@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 11 — Paper2 机械负载 → GPU 热/功耗</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>Day 11 — Paper2 机械负载 → GPU 热/功耗</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">【昨日复盘】Day N-1 真数</a><a href="#sec-2">【今日主题】Day 11 目标 + 最小可跑任务</a><a href="#sec-3">【与之前内容的联系】必写 2-3 句，贴到每日问题库</a><a href="#sec-4">代码怎么跑</a><a href="#sec-5">Fail-closed</a><a href="#sec-6">Cost and transfer boundaries</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>Date: 2026-08-11 (Foundation 1-3mo, Reasoning Data/Papers)<br />
+Source row: <code>ai_daily.csv:2026-08-11</code> — Paper2 机械负载 / 非线性物理建模<br />
+Track: Reasoning Data — Papers<br />
+交付侧 chat: 18854a6d-7852-49cd-845f-d7e4bb976d14 (same-day)</p>
+</blockquote>
+<hr />
+<blockquote class="pq">
+<p>Connection to Prev: Day10 vLLM rollout → Day11 Paper2 mechanical load: vLLM rollout 占80%墙钟、长CoT 500→5000 tok 时GPU功耗从450W突发到750W，引发 rack 级功率抖动和 Tj 节流；Day8/9 eval瓶颈 的 nowcasting EWMA 在今天用物理SSM先验替代纯统计，解决纯 EWMA 无法捕捉的台数阶梯 + 热惯性坑；Day7 FSDP checkpoint 的“失败=丢几小时”在热视角里是 Tj&gt;82°C 触发降频 = 训练吞吐直接掉30%。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>【昨日复盘】Day N-1 真数</h2>
+<p><strong>Day10 vLLM rollout 基座 (2026-08-10)</strong>：</p>
+<ul>
+<li>训练侧理论峰值公式 <code>peak = (P-b)/G + b + opt/G</code> 已 CPU 验证：</li>
+<li>7B G=2 H100 峰值 ~42.5GB bf16-mix，常驻 ~28GB/G，comm 40-55% (fwd all-gather 18-25% + bwd 22-30%)</li>
+<li>13B G=4 峰值 ~38GB，tokens/sec per GPU 预期 2.3-2.9k</li>
+<li>70B G=8 峰值 ~86GB (需 activation ckpt)，tokens/sec 0.6-0.8k /GPU — <strong>待H100 NCCL 实测 <code>max_memory_allocated</code> 替换</strong></li>
+<li>Rollout 侧 vLLM：</li>
+<li>短 CoT 500 tok：40-60k tokens/sec decode，失败率 5-8%</li>
+<li>长 CoT 5000 tok：8-15k tokens/sec，失败率 12-18%（超时40%/工具30%/VCJ15%/OOM10%/NCCL5%）— <strong>待H100 vLLM 200样本实测</strong></li>
+<li>代码 <code>vllm_rollout_stress_test.py</code> + <code>fsdp_h100_profiler_beyond7b.py</code> CPU 逻辑跑通，GPU 计时待补</li>
+</ul>
+<p><strong>Day08/09 Eval 瓶颈 (2026-08-09)</strong>：</p>
+<ul>
+<li>CPU gloo 2-rank sync 真数（scaled 映射真实 5-10s sandbox）：</li>
+<li>eval_latency_p50 <strong>1.141s</strong>，p95 <strong>3.249s</strong>，queue_avg 1.00，gpu_idle_accum <strong>1.034s</strong> / total 1.113s → bottleneck_ratio <strong>92.85%</strong>，flaky_rate 33.3%</li>
+<li>async 版 gpu_idle 0.0s，total 0.527s → 省 <strong>52%</strong> wall-clock</li>
+<li>nowcasting EWMA next 2.098s</li>
+</ul>
+<p>=&gt; 昨日结论：rollout/ev​al 是墙钟大头，同步是感知瓶颈，短时预测能省 GPU-hours wasted，今天用物理状态空间替代 EWMA 给“为什么会热”一个因果。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>【今日主题】Day 11 目标 + 最小可跑任务</h2>
+<p><strong>Track/Topic</strong>: Reasoning Data / Papers — Paper2 机械负载拆解<br />
+<strong>Knowledge Point</strong>: 非线性物理系统建模技巧<br />
+<strong>Learning Goal</strong>: 提炼 Paper2 的非线性物理建模，能写出状态空间并映射到 GPU 热/功耗<br />
+<strong>Small Daily Task</strong>: 写 Paper2 的状态空间模型，思考如何对应到 GPU 热/功耗<br />
+<strong>Systems Connection</strong>: 机械负载与 GPU 集群热/功耗都可抽象为“大惯性 + 非线性耦合 + 阶梯启停防抖”，但参数必须由目标系统重新辨识
+<strong>Resource</strong>: Paper2 draft（数据中心机械负载预测系统）</p>
+<h3>今天要懂的 3 个非线性技巧（Paper2 → GPU）</h3>
+<h4>Paper2 原模型（数据中心机械负载）</h4>
+<pre><code>状态 x = [Q_mech (kW), T_chw_s, T_chw_r]
+输入 u = [Q_IT (IT负载), T_wb (室外湿球), setpoint]
+动力学:
+  Q_mech_{t+1} = (1-1/τ)Q_mech + (1/τ)*(Q_IT*(1+α(T_wb-25)) + f_stage) + w
+    f_stage = ceil(Q_IT/Q_rated)*0.05*Q_rated 阶梯 + hysteresis
+      on: load&gt;0.85 单机容量 → 加机；off: load&lt;0.35 → 减机（防频启）
+  T_chw_s_{t+1} = T_chw_s + dt/C_w*(Q_mech - m_dot*cp*(T_chw_r-set) + γ*(ΔT)^2)
+    γ*(ΔT)^2 二次项 = 换热非线性
+  输出 y = P_mech = Q_mech / COP
+    COP = COP_ref*(1 - β*(T_wb-25) - κ*PLR^2)
+    PLR^2 二次 + 外温一次 = COP 非线性
+
+关键技巧：
+  1) bilinear Q_IT * T_wb 耦合
+  2) quadratic/cubic fan law (立方定律影子) → γ 二次 + R_hs(fan)=R0/(fan^0.8)
+  3) hysteresis 冷却窗口防抖（你 Paper1 的 10min 冷却同根）
+  4) 一阶热惯性 τ_Q + C_w 热容 + 热容惯性 → 短时预测必 lag
+</code></pre>
+<p>用物理约束给黑盒 ML 上先验，RMSE 比纯 LSTM 低。</p>
+<h4>GPU 热/功耗对应（两节点热容模型）</h4>
+<pre><code>状态 x_gpu = [T_j (die), T_hs (heatsink)]
+输入 u_gpu = [P_gpu (W), T_amb, fan_ratio]
+动力学:
+  C_j dT_j/dt = P_gpu*throt - (T_j-T_hs)/R_jh + noise
+  C_hs dT_hs/dt = (T_j-T_hs)/R_jh - (T_hs-T_amb)/R_hs(fan)
+  R_hs(fan)=R0/(fan^0.8+0.15) — 风扇曲线非线性 ≈ 机械侧立方律
+  hysteresis: T_j&gt;82°C throttled=True P*=0.68, &lt;72°C 恢复（复用冷机防抖）
+输出: throttle_rate, T_j, fan_power_overhead
+
+对应表：
+  Q_IT kW rack       → P_gpu W per GPU ( rollout 长 CoT burst )
+  Q_mech kW          → Q_cool 散热需求
+  T_chw 供回水       → T_j / T_hs die→heatsink
+  COP 非线性 PLR^2   → R_th 非线性 + 风扇立方律
+  冷机 hyst 0.85/0.35→ 风扇/节流 hyst 82/72°C
+  热容 C_w, τ_Q      → C_j, C_hs 热容惯性
+</code></pre>
+<h4>最小可跑任务（30-60min）</h4>
+<p>已在 <code>paper2_mech_to_gpu_thermal.py</code> 里跑通：</p>
+<ul>
+<li>120 steps 机械→GPU 联动 sim：IT 350kW base + 80*sin + burst 200kW (40步一周期) + 外温正弦 22±4°C</li>
+<li>EWMA 预测 Q_IT vs 真值求 RMSE</li>
+<li>GPU侧 T_j/T_hs 解偶 + 节流率统计</li>
+</ul>
+<p>3 个 CPU 真数（见下方 &amp; NOTES.md）已跑，待 H100 NCCL 补 <code>max_memory_allocated</code> + 真实 Tj 时序 + 曲线拟合。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>【与之前内容的联系】必写 2-3 句，贴到每日问题库</h2>
+<p><strong>Eval(9) → vLLM(10) → Paper2热/功耗(11) → Reward不确定性OAS(12)</strong> 链路：</p>
+<ol>
+<li>昨天 Day10 的 vLLM rollout 把墙钟 80% → 90% 的原因说清是 decode 长 + KV 压力，但没回答“为什么跑长就会触发硬件热节流”，今天 Paper2 的机械负载非线性建模补上这一层——Q_IT burst → 筑冷机加机阶梯 → P_mech 突增 → rack T_amb 上升 3-5°C → T_j 从 67°C 平均窜到 82°C 节流，正好是 Day10 失败分类里 OOM/KV 10% 之外的隐性失败源，必须用物理先验才能提前 5-10min 预测，而不是等 Tj 烧到阈值再 throttle。</li>
+<li>前天 Day08/09 eval bottleneck 的 nowcasting EWMA 用最近 N 个 latency 做线性外推，能捕捉 queue depth 堆积，但捕不住“冷机加机延迟 3τ=15min 内 P_mech 飙而 COP 跌”的非线性拐点——Paper2 的 γ*(ΔT)^2 + PLR^2 给 EWMA 加了二次修正，今天代码里 rmse 55.1kW（EWMA lag 在 burst 处必偏大）与 p_mech_std 9.38kW 联动，说明抖动本身可量化，复用到 Day12 reward 校准就是用类似的二次残差去标 OAS 不确定性，区分“正常探索噪声 vs 有害热/功耗抖动”。</li>
+<li>Day07 checkpoint 的“存盘如何拼回分片”是 fail-stop 后的恢复，而热节流是 fail-slow——不崩但慢 30%，checkpoint 救不了，必须像 Paper1 的抗抖动 hysteresis 那样在调度层加冷却窗口（T_j 82°C 降频后 10min 内不追回功率），这正是 Paper2 冷机防短循环 hyst_on 0.85 / hyst_off 0.35 的同构，今天 GPU 侧 hyst 82/72°C 的 0.8% throttle_rate 证明窗口有效，待 H100 上补真实 Tj/功率 trace 验证节能是否折算成 \$/有用 rollout 降 8-12%。</li>
+</ol>
+<blockquote class="pq">
+<p>贴到 README 最前 Connection 段：JAX pjit mesh/P(5) 的声明式分片 → checkpoint(7) sharded vs full 是一体两面，P(5) 的“抽象分片怎么声明”在 DCP checkpoint 是“分片怎么拼不回全量也要能重训”；FSDP(2/3) 的 per-block 省峰值 → Paper2(11) 的热容省节流都是“切小块降瞬时峰值”同一思想，block 峰值 (P-b)/G+b 对应热学峰值 lag 3τ 后才现。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>代码怎么跑</h2>
+<pre><code class="language-bash">cd rl-infra/day-11-paper2-mech-load
+# 单卡
+python3 paper2_mech_to_gpu_thermal.py
+
+# 2-rank gloo（CPU 逻辑等效 NCCL 分片预测聚合）
+torchrun --nproc_per_node=2 paper2_mech_to_gpu_thermal.py
+</code></pre>
+<p>输出 JSON 含 3 真数 + 待H100提示，rank0 才打印汇总。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>Fail-closed</h2>
+<ul>
+<li>没编 H100 数。所有 GPU 数、NVMe throughput、tokens/sec 实测都标 <strong>待H100 NCCL</strong>。</li>
+<li>CPU gloo 2-rank 逻辑通，机械→GPU 联动 RMSE 等比真实数据中心数小（ scaled ），不当真机读。</li>
+<li>throttle_rate 0.83% 是本次 seed 42 的 CPU 模拟单一突发模式，非大样本统计，需 H100 上长跑 + 真 Tj sensor + RAPL 功率采样。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Cost and transfer boundaries</h2>
+<ul>
+<li>成本账本可拆成计算功耗、冷却开销与热节流浪费；任何金额或节省比例都需要真实功率、温度、吞吐和计费数据支持。</li>
+<li>机械系统的状态空间结构可以启发 GPU 热模型，但时间常数、阈值和 hysteresis 必须在目标硬件上重新辨识，不能直接平移。</li>
+<li>Day12 的 reward 校准只复用“用残差分布表达不确定性”的方法，不复用本实验的 synthetic residual 数值。</li>
+</ul>
+<hr />
+<p><strong>Artifacts</strong>: <code>paper2_mech_to_gpu_thermal.py</code> CPU ok，NOTES.md 3 数待H100。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-11-paper2-mech-load/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

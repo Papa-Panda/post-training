@@ -1,4 +1,6 @@
 # 04 线 III：Induction Circuit 与任务向量
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/04_line_III_circuit.reading.html
+
 
 [← 03 GD](03_line_II_gd.md) · [下一章：比较 →](05_comparison.md)
 

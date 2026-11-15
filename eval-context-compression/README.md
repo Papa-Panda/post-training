@@ -1,4 +1,6 @@
 # eval-compression — 评估压缩 Evaluation for Agent Context Compression
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-context-compression/README.reading.html
+
 
 > 长程 agent 任务里，上下文一定会爆。压缩是必经之路，但压缩的好坏不能只看 perplexity。
 

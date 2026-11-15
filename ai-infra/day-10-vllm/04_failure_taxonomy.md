@@ -1,4 +1,6 @@
 # 04 — Failure Taxonomy (Rollout side, mirrors FSDP taxonomy)
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-10-vllm/04_failure_taxonomy.reading.html
+
 
 Mapping from FSDP failure modes (NCCL timeout, OOM, deadlock) to vLLM rollout failures.
 

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day18 — Checkpoint &amp;amp; Recovery（DCP）：挂了怎么恢复</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day18 — Checkpoint &amp;amp; Recovery（DCP）：挂了怎么恢复</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Connection to Prev</a><a href="#sec-2">0. 符号表（每个字母的含义）</a><a href="#sec-3">1. 可手算例子 A：checkpoint 台账——存什么、不存什么</a><a href="#sec-4">2. 可手算例子 B：full rank0 gather vs sharded DCP</a><a href="#sec-5">3. 可手算例子 C：Young / Daly 最优间隔</a><a href="#sec-6">4. 何时不赚（反例，必读）</a><a href="#sec-7">术语与来源</a><a href="#sec-8">验证状态</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>Connection to Prev</h2>
+<p>r2-Day02 的 <code>state_dict</code>（model + opt + epoch + rng）是<strong>单机版答案</strong>；
+r2-Day17 把训练装进生产框架跑起来。跑起来之后，第一个生产问题就是
+"挂了怎么恢复"——r2-Day18 是 Day02 state_dict 的 <strong>N 卡分布式版</strong>：
+分片写、异步写、换 world size 重分片。</p>
+<p>注意和 r2-Day16 区分：Day16 的 checkpoint（activation checkpointing /
+重计算）省的是 <strong>activation 显存</strong>，是"用计算换显存"；
+Day18 的 checkpoint（训练状态快照）防的是<strong>故障</strong>，是"用写盘换 MTTR"。
+名字一样，对象完全不同。</p>
+<p><strong>牺牲</strong>：写盘 I/O + 存储 + 同步 stall（或 async 的一致性复杂度：
+快照时刻冻结、torn write 处理）。<strong>换取</strong>：故障后 MTTR 从
+O(从头重训) 降到 O(恢复时间)。<strong>何时不赚</strong>：训练总时长
+ $T$  &lt; τ*（最优间隔一次都轮不到）时，只存最终版；
+小模型/短训练的故障期望损失 &lt; checkpoint 开销时，不赚。</p>
+<p>抄百科类比：checkpoint = 游戏存档。full rank0 gather = 全队把装备
+寄到一个人手里再存档（多付一次快递）；sharded DCP = 每人存自己的背包
+（零快递，但换队伍人数要重新分装备）；async = 先截图存内存，
+存档慢慢写（截图那一瞬间不能动）。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>0. 符号表（每个字母的含义）</h2>
+<ul>
+<li>$P$ ：参数量； $N$ ：参与训练的 GPU 卡数</li>
+<li>$B_p$ ：每参数的参数字节（fp16/bf16 取 2，fp32 取 4）</li>
+<li>$B_{opt}$ ：每参数的 optimizer 状态字节（Adam fp32 的 m+v 取 8）</li>
+<li>checkpoint 台账 = params + optimizer states，<strong>不含 grads</strong>
+  （grads 是 step 内瞬态，恢复后第一个 step 重算，存了白存）</li>
+<li>GB：十进制 $10^9$ （与 r2-Day14/15/16/17 口径一致）</li>
+<li>$\delta$ ：一次 checkpoint 写盘耗时（秒）； $M$ ：系统 MTBF（秒）；
+   $\tau$ ：checkpoint 间隔（秒）； $W(τ)$ ：浪费占比</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>1. 可手算例子 A：checkpoint 台账——存什么、不存什么</h2>
+<p>存四件套：<strong>params + optimizer states + step/epoch + rng</strong>
+（rng 要存 python / numpy / torch-cpu / 每 rank torch-cuda 四套，
+ exact resume 全要；本课代码用一整数 LCG 状态演示）。</p>
+<p>先 toy 热身（ $P=100$ ）： $100 \times 10 = 1000$ B。</p>
+<p>7B 实战口径（ $P=7\times 10^9$ ，fp16 参数 + Adam fp32 m/v）：</p>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>字节/参数</th>
+<th>7B 总量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>params（fp16）</td>
+<td>2</td>
+<td>14 GB</td>
+</tr>
+<tr>
+<td>optimizer states（fp32 m+v）</td>
+<td>8</td>
+<td>56 GB</td>
+</tr>
+<tr>
+<td>grads</td>
+<td>—</td>
+<td>0（不存）</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td><strong>10</strong></td>
+<td><strong>70 GB</strong></td>
+</tr>
+</tbody>
+</table>
+<p>为什么 opt state 和 rng 必须存？代码里的反例测试
+<code>test_cold_restart_without_opt_rng_diverges</code> 证明了：
+只恢复 params（momentum 归零、rng 重开），10 步后轨迹与 uninterrupted
+分叉——momentum 是"历史梯度的记忆"，rng 决定采样顺序，
+丢一个，恢复就不是"续训"而是"重开一条分叉的时间线"。
+crash 恢复测试 <code>test_crash_recovery_identical</code> 则证明：
+四件套全存时，crash + 恢复后的 30 步与 uninterrupted 的 30 步
+<strong>逐 bit 一致</strong>（确定性代码下）。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>2. 可手算例子 B：full rank0 gather vs sharded DCP</h2>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>额外通信</th>
+<th>单点负担</th>
+<th>文件数</th>
+<th>换 world size 重启</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>full rank0 gather</td>
+<td>$(N-1)/N \times$ 总量</td>
+<td>rank0 staging = 总量</td>
+<td>1</td>
+<td>天然支持</td>
+</tr>
+<tr>
+<td>sharded DCP</td>
+<td><strong>0</strong></td>
+<td>每 rank = 总量 $/N$</td>
+<td>$N$</td>
+<td>需重分片（一次性全量搬运量级）</td>
+</tr>
+</tbody>
+</table>
+<p>7B / $N=64$ 口径（代码 <code>test_rank0_gather_extra_7b_64</code> 断言）：</p>
+<ul>
+<li>sharded DCP：每 rank 写 1.09375 GB，<strong>零额外通信</strong>
+  （FSDP/ZeRO-3 下 shard 本来就在各 rank 手里，写本地即存档）。</li>
+<li>full rank0 gather：额外搬运 $63/64 \times 70 = 68.90625$ GB，
+  rank0 还要 70 GB staging 内存——这次搬运训练本身完全不需要，
+  纯粹是"为了写成一个文件"付的税。</li>
+</ul>
+<p>$N$ 越大，gather 的税越接近"搬运整个 checkpoint"
+（<code>test_rank0_gather_grows_with_n</code> 锁定单调性），
+而 sharded 恒为 0——<strong>DCP 是 $N \to \infty$ 时的答案</strong>。
+代价是另一面： $N$ 个文件（万卡即万文件，元数据/小文件开销），
+以及换 world size（弹性重启）时要做一次重分片：
+每字节最多搬运一次，总量级 ~70 GB，一次性。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>3. 可手算例子 C：Young / Daly 最优间隔</h2>
+<p>浪费占比 $W(τ) = δ/τ + τ/(2M)$ ：第一项是写盘开销占比，
+第二项是故障期望返工（故障均匀落在间隔内，平均丢 $τ/2$ 进度，
+单位时间故障率 $1/M$ ）。求导：</p>
+<p>$$-δ/τ^2 + 1/(2M) = 0 \quad\Rightarrow\quad τ^* = \sqrt{2δM}$$</p>
+<p>最优点处两项相等（代码 <code>test_waste_at_optimum_equal_split</code> 断言）。</p>
+<p>先 toy（ $δ=10$ s， $M=1000$ s）： $τ^* = \sqrt{20000} \approx 141.4$ s，
+ $W = 14.14%$ （两项各 7.07%）。</p>
+<p>现实口径（<strong>theoretical estimate</strong>，假设 sharded 写盘 $δ=60$ s，
+系统 MTBF $M=10$ h）： $τ^* \approx 2078$ s $\approx 34.6$ min，
+ $W \approx 5.8%$ 。</p>
+<p>async 的算法： $\delta$ 换成 <strong>stall 时间</strong>（HBM→CPU memcpy，
+1.09 GB @ ~20 GB/s $\approx 55$ ms，后台写盘不 stall）：
+ $τ^* \approx 62.9$ s， $W \approx 0.17%$ （theoretical estimate，
+假设成立）。async 没有消灭写盘，只是把 $\delta$ 从"写盘时间"
+换成了"快照时间"——但 Young/Daly 公式照用， $τ^*$ 缩短约 33 倍。</p>
+<p><strong>何时不赚</strong>：若训练总时长 $T &lt; τ^*$ ，按最优间隔一次都轮不到——
+只存最终版（或不存）。 $M \gg T$ 时故障期望损失 $T^2/(2M)$
+量级 &lt; checkpoint 开销，同样不赚。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>4. 何时不赚（反例，必读）</h2>
+<ul>
+<li><strong>训练时长 &lt; τ*</strong>：最优间隔比训练还长，存了就是纯开销。</li>
+<li>** $M \gg T_{train}$ **：训练期内故障概率 $T/M$ 很小，
+  期望返工 &lt; checkpoint 开销。</li>
+<li><strong>间隔 &lt;&lt; τ*</strong>： $δ/τ$ 项主导，存得越勤亏得越多。</li>
+<li><strong>大 $N$ 下用 rank0 gather</strong>：额外流量 $\approx$ 整个 checkpoint，
+  不如 sharded。</li>
+<li><strong>torn write 没兜底</strong>：crash 恰好发生在写盘中途，唯一的 checkpoint
+  是半截文件——还不如不存。生产做法：两槽轮换 + manifest 原子发布</li>
+<li>每 shard 校验（代码 <code>ShardedCheckpointer</code> 全实现并测试）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>术语与来源</h2>
+<ul>
+<li><strong>DCP（torch.distributed.checkpoint）</strong>：PyTorch 分布式 checkpoint
+  语义——planner（谁写哪片）+ storage writer/reader（落盘格式），
+  per-rank 分片写零额外通信，load 时可换 world size 重分片。
+  来源：PyTorch 官方文档 Distributed Checkpoint，
+  https://docs.pytorch.org/docs/stable/distributed.checkpoint.html</li>
+<li><strong>async_save</strong>：先做 D2H 一致性快照（快照点冻结），再后台线程写盘；
+  快照之后训练继续，写盘看到的仍是快照时刻的值
+  （代码 <code>test_async_save_snapshot_isolation</code> 断言）。
+  来源：同上，<code>torch.distributed.checkpoint.async_save</code>。</li>
+<li><strong>Young / Daly 最优间隔</strong>： $τ^* = \sqrt{2δM}$ 。
+  来源：Young, "A First Order Approximation to the Optimum Checkpoint
+  Interval", CACM 1974；Daly, "A higher order estimate of the optimal
+  checkpoint interval for restart dumps", FGCS 2006。</li>
+<li><strong>MTBF / MTTR</strong>：平均故障间隔 / 平均恢复时间；checkpoint 把 MTTR
+  从 O(重训) 降到 O(恢复)。</li>
+<li><strong>torn write / 两槽轮换</strong>：写盘中途 crash 产生半截文件；
+  两槽轮换 + manifest 原子发布保证总有一个好槽。</li>
+<li><strong>activation checkpointing</strong>：r2-Day16 的"重计算"，省 activation
+  显存；与本课"训练状态快照"名字一样、对象完全不同。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>验证状态</h2>
+<ul>
+<li>已验证：Python 语法 + <code>unittest</code> 19/19 通过（纯 CPU，
+  <code>checkpoint_dcp.py</code> + <code>test_checkpoint_dcp.py</code>）。</li>
+<li>未验证：多卡 torch DCP 真实落盘 / NCCL / CUDA / H100
+  （execution not validated，待 H100 验证）。本课状态：blocked。</li>
+<li>公开 repo 无雇主标识。</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-18-checkpoint-dcp/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

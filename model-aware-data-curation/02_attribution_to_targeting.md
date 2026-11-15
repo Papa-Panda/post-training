@@ -1,4 +1,6 @@
 # 02 — 从归因到目标化选择
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/02_attribution_to_targeting.reading.html
+
 
 ## 元信息
 - 内容类型：跨论文方法综述（归因 → 目标化选择）

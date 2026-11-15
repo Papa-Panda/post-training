@@ -1,4 +1,6 @@
 # r2-Day07 — CUDA 编程模型：Grid / Block / Warp 与访存映射
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-07-cuda-programming-model/README.reading.html
+
 
 ## Connection to Prev
 

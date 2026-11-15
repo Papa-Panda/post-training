@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 — Stress-test design and configuration</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">vLLM Rollout</span>
+    <h1>03 — Stress-test design and configuration</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. A benchmark is a workload contract</a><a href="#sec-2">2. Staged matrix</a><a href="#sec-3">3. CPU rehearsal</a><a href="#sec-4">4. Real vLLM benchmark</a><a href="#sec-5">5. Acceptance gates</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>1. A benchmark is a workload contract</h2>
+<p>Record this manifest before running:</p>
+<pre><code class="language-yaml">engine:
+  version_or_commit: REQUIRED
+  engine_mode: v1_or_v0
+  model_revision: REQUIRED
+  tokenizer_revision: REQUIRED
+  dtype: REQUIRED
+  quantization: none_or_named
+  parallelism: {tensor: 1, pipeline: 1, data: 1}
+  scheduler: {max_num_seqs: null, max_num_batched_tokens: null}
+  memory: {gpu_memory_utilization: null, kv_cache_dtype: null}
+workload:
+  arrival_process: poisson_or_trace_or_closed_loop
+  prompt_length_distribution: REQUIRED
+  output_length_distribution: REQUIRED
+  shared_prefix_fraction: REQUIRED
+  candidates_per_prompt: REQUIRED
+  stop_conditions: REQUIRED
+  timeout_s: REQUIRED
+policy:
+  snapshot_id: REQUIRED
+  rollout_logprob_source: REQUIRED
+  max_accepted_version_lag: REQUIRED
+</code></pre>
+<p>A closed-loop client with fixed concurrency answers “how fast when clients always wait for completion?” An open-loop trace answers “what happens at a given offered rate?” Do not compare them as if they measured the same queue.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Staged matrix</h2>
+<h3>A. Correctness and low-load baseline</h3>
+<ul>
+<li>one request, then small concurrency;</li>
+<li>exact prompt/output token counts;</li>
+<li>finish reasons and stop-token behavior;</li>
+<li>deterministic sampling case where supported;</li>
+<li>behavior-policy snapshot and behavior logprobs captured as required by the learner;</li>
+<li>no timeout, preemption, or rejected response hidden by the client.</li>
+</ul>
+<h3>B. Length matrix</h3>
+<p>Test at least short/medium/long prompt crossed with short/medium/long output. Use empirical quantiles if a trace exists. Long prompts stress prefill and initial KV; long outputs stress resident KV and decode duration.</p>
+<h3>C. Offered-load sweep</h3>
+<p>For open-loop arrival rate $\lambda$ , increase load from clearly idle through saturation. Hold the request distribution fixed. At every point record:</p>
+<ul>
+<li>offered and completed requests/s;</li>
+<li>prompt and generation tokens/s;</li>
+<li>accepted-token goodput;</li>
+<li>queue depth and oldest age;</li>
+<li>TTFT, ITL/TPOT, and E2E percentiles;</li>
+<li>KV usage and preemption deltas;</li>
+<li>timeout, transport, engine, application, verifier, and freshness-drop counts;</li>
+<li>policy-version lag.</li>
+</ul>
+<p>The saturation knee is where additional offered load no longer improves useful goodput or violates a constraint. It is not simply the highest generated tokens/s point.</p>
+<h3>D. Scheduler and memory sweep</h3>
+<p>Sweep one dimension at a time around the baseline:</p>
+<ol>
+<li><code>max_num_seqs</code>;</li>
+<li><code>max_num_batched_tokens</code>;</li>
+<li>engine memory utilization or explicit cache sizing;</li>
+<li>prefix caching on/off for a controlled shared-prefix workload;</li>
+<li>parallelism/replica layout.</li>
+</ol>
+<p>Warm up before measurement, repeat runs, and report dispersion. A single run cannot separate scheduler variance from a real effect.</p>
+<h3>E. Failure injection</h3>
+<ul>
+<li>client disconnect and deadline expiry;</li>
+<li>invalid request and impossible context length;</li>
+<li>worker termination/restart;</li>
+<li>slow or failing tool/environment;</li>
+<li>scorer/verifier timeout;</li>
+<li>learner update during a long rollout batch;</li>
+<li>reduced KV capacity to force preemption.</li>
+</ul>
+<p>Ensure retries preserve a stable logical rollout ID while each attempt receives a unique attempt ID.</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. CPU rehearsal</h2>
+<p>The simulator exercises admission, decode-priority scheduling, chunked prefill, finite KV tokens, recompute-shaped preemption, timeout, acceptance filtering, and policy-version age.</p>
+<pre><code class="language-bash">python3 code/rollout_lab.py simulate --config configs/stable.json --out /tmp/stable.json
+python3 code/rollout_lab.py simulate --config configs/overload.json --out /tmp/overload.json
+bash code/sweep.sh configs/stable.json /tmp/sweep.jsonl
+</code></pre>
+<p>Expected qualitative checks, not hardware claims:</p>
+<ul>
+<li>overload grows peak queue and timeout count;</li>
+<li>a prompt larger than total KV-token capacity is rejected as a capacity failure;</li>
+<li>accepted tokens never exceed completed tokens, which never exceed attempted generation;</li>
+<li>tighter KV capacity can increase recomputation/preemption and wasted work;</li>
+<li>longer queue residence can increase completion-time policy-version lag.</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Real vLLM benchmark</h2>
+<p>Use the benchmark command shipped with the <strong>installed</strong> vLLM version; the official benchmark docs describe the current <code>vllm bench</code> suite. Save <code>--help</code> output with the run because flags evolve. Prefer a request dataset/trace that preserves token lengths and shared-prefix structure. Never label CPU-lab output as a vLLM measurement.</p>
+<p>Recommended artifact layout:</p>
+<pre><code class="language-text">runs/&lt;timestamp&gt;/
+  manifest.yaml
+  client-summary.json
+  requests.jsonl
+  metrics.csv
+  engine.log
+  versions.txt
+  environment.txt
+  analysis.md
+</code></pre>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Acceptance gates</h2>
+<p>Choose numeric gates before the sweep. Example categories:</p>
+<ul>
+<li>request success and accepted-trajectory rate;</li>
+<li>P95/P99 TTFT and ITL;</li>
+<li>maximum queue age;</li>
+<li>preemption rate per completed request;</li>
+<li>useful-token goodput;</li>
+<li>maximum accepted policy-version lag;</li>
+<li>zero unexplained token-accounting discrepancy;</li>
+<li>zero silent fallback from real execution to simulation.</li>
+</ul>
+<p>Values are workload-specific. The repository intentionally provides categories and equations rather than unsupported thresholds.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/vllm-rollout/03_stress_test.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

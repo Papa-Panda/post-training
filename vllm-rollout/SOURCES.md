@@ -1,4 +1,6 @@
 # Sources and claim ledger
+> 📖 阅读版：https://papa-panda.github.io/post-training/vllm-rollout/SOURCES.reading.html
+
 
 Accessed 2026-09-01. Versioned links are intentional because CLI flags, defaults, and metric names change.
 

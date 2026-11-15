@@ -1,4 +1,6 @@
 # r2-Day10 — FlashAttention：问答归档
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-10-flashattention/QNA.reading.html
+
 
 用户在 ai 课程聊天中提出的问题与总结。问题原文保留，答案按聊天记录整理；
 英文术语（KV cache、hit rate、prefill、TTFT、block、hash、LRU、ring attention、

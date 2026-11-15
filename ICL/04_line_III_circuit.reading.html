@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 线 III：Induction Circuit 与任务向量</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ICL</span>
+    <h1>04 线 III：Induction Circuit 与任务向量</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. 两层 match-and-copy</a><a href="#sec-2">2. 证据边界</a><a href="#sec-3">3. 从 attention pattern 到因果检验</a><a href="#sec-4">4. Task vectors 与 function vectors 不应混成一个公式</a><a href="#sec-5">5. coding 场景的合适测试</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p><a href="03_line_II_gd.md">← 03 GD</a> · <a href="05_comparison.md">下一章：比较 →</a></p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. 两层 match-and-copy</h2>
+<p>对重复片段：</p>
+<pre><code class="language-text">... [A] [B] ... [A] -&gt; [B]
+</code></pre>
+<p>经典 induction circuit 可分成：</p>
+<ol>
+<li><strong>previous-token head</strong>：在位置 $j$ 的 residual stream 写入前一 token $t_{j-1}$ 的信息；</li>
+<li><strong>induction head</strong>：当前位置 $i$ 的 query 与旧位置 $j$ 携带的 $t_{j-1}$ 匹配；若 $t_{j-1}=t_i$ ，则从位置 $j$ 的 value 复制 $t_j$ 的信息。</li>
+</ol>
+<p>一个理想化 prefix-match score 可写为：</p>
+<p>$$S_{\mathrm{prefix}}=\frac{1}{|Q|}\sum_{i\in Q}\sum_{j&lt;i}{\bf 1}[t_{j-1}=t_i]a_{ij}$$</p>
+<p>其中 $a_{ij}$ 是从当前位置 $i$ 指向历史位置 $j$ 的 attention weight。高分表示 attention 落到“之前相同前缀之后的 token”，但单独高分不是任务因果性证明。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. 证据边界</h2>
+<p>Olsson et al. 报告 induction heads 的形成与其定义的 in-context loss 改善同时出现。[E-synthetic] 对小型 attention-only 模型，他们提供较强因果证据；对含 MLP 的较大模型，论文明确称证据主要是相关性的。[C-causal / E-model]</p>
+<p>因此不应写成：</p>
+<ul>
+<li>任意 token 对都必然由 induction head 完成；</li>
+<li>某个固定训练-token 区间会从 0 跳到固定分数；不同模型曲线不同；</li>
+<li>CoT 的每一步都是 induction；</li>
+<li>induction head 足以解释需要生成未在上下文出现的新答案的 ICL。</li>
+</ul>
+<p>Induction 最直接解释的是 pattern completion / associative retrieval。算法组合、抽象规则与长程规划通常还需要其他组件。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 从 attention pattern 到因果检验</h2>
+<p>证据从弱到强：</p>
+<ol>
+<li><strong>attention visualization</strong>：看到了预期 pattern；</li>
+<li><strong>activation correlation</strong>：head output 与任务标签相关；</li>
+<li><strong>ablation</strong>：移除 head 后目标能力选择性下降；</li>
+<li><strong>activation patching</strong>：从 clean run 注入 corrupt run，恢复目标输出；</li>
+<li><strong>sufficiency intervention</strong>：把提取的表示注入 zero-shot / 新格式，诱发目标函数。</li>
+</ol>
+<p>必须同时做随机 head、相同范数方向、无关任务向量等 controls，否则“中间层有效”可能只是通用扰动敏感。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Task vectors 与 function vectors 不应混成一个公式</h2>
+<p>Hendel et al. 把 ICL 看作将示例集 $D_k$ 压缩为 query-agnostic task vector $\tau(D_k)$ ，再与 query 一起驱动预测：[E-model]</p>
+<p>$$\widehat y=f_\theta(x_q;\tau(D_k))$$</p>
+<p>Todd et al. 先用 causal mediation 找出对 ICL 任务重要的少量 attention heads，再聚合这些 head 的平均输出形成 function vector，并做跨 context 注入。[C-causal] 这不同于简单的“demo residual 均值减 random residual 均值”。</p>
+<p>可靠结论是：某些任务和模型中，可提取紧凑、具有因果效应的 activation direction。它不等于通用程序字节码，也不保证与任意格式、组合任务或模型之间可移植。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. coding 场景的合适测试</h2>
+<h3>适合 induction probe</h3>
+<ul>
+<li>重复标识符后的局部 token；</li>
+<li>paired delimiters 与格式模板；</li>
+<li>先前定义的短 API pattern；</li>
+<li>明确复制型 key-value mapping。</li>
+</ul>
+<h3>不足以只测 induction</h3>
+<ul>
+<li>patch 是否通过隐藏测试；</li>
+<li>跨文件 control/data flow；</li>
+<li>API 语义与版本兼容；</li>
+<li>从失败证据归纳新的 repair strategy。</li>
+</ul>
+<p><a href="icl_mechanisms.py"><code>induction_distribution</code></a> 给出 exact-match 的经验 successor 分布，只作为电路功能的离散基线。真实模型 probe 还应记录 tokenization、layer/head、attention mask、干预位置和 effect size。</p>
+<p>来源：<a href="https://arxiv.org/abs/2209.11895">Olsson et al.</a> · <a href="https://arxiv.org/abs/2310.15916">Hendel et al.</a> · <a href="https://arxiv.org/abs/2310.15213">Todd et al.</a> · <a href="references.md">证据账本</a></p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ICL/04_line_III_circuit.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

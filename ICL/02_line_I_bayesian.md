@@ -1,4 +1,6 @@
 # 02 线 I：隐式 Bayesian 推断
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/02_line_I_bayesian.reading.html
+
 
 [← 01 定义](01_definition_timeline.md) · [下一章：GD 视角 →](03_line_II_gd.md)
 

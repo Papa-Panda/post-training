@@ -1,4 +1,6 @@
 # 04 — Self-Doubt and Hedging: 已经做对了，为什么还在检查
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/04_self_doubt_and_hedging.reading.html
+
 
 > Self-doubt 指模型**已经得到正确信息/答案后**，仍把大量 token 花在重复验证上。三个工作从三个角度处理它：Peng 等给出定义和干预方法，SelfDoubt 给出可计算的 HVR 指标，"Know When to Stop" 给出六个轻量语言信号。
 >

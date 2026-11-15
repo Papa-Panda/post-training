@@ -1,4 +1,6 @@
 # 01 定义、问题设置与证据层级
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/01_definition_timeline.reading.html
+
 
 [← README](README.md) · [下一章：Bayesian 视角 →](02_line_I_bayesian.md)
 

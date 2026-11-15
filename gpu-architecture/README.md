@@ -1,4 +1,6 @@
 # GPU Architecture & Programming
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/README.reading.html
+
 
 > 从晶体管和数据通路一路推到 LLM kernel：**硬件资源 → SIMT 执行 → 内存层次 → Tensor Core/GEMM → CUDA runtime → 多卡通信 → 地址翻译 → Roofline/profiler → 训练与推理系统**。
 

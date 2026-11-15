@@ -1,4 +1,6 @@
 # 07 Coding Data：从失败轨迹到训练样本
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/07_coding_data.reading.html
+
 
 [← 06 Trajectory error](06_trajectory_error_prompt.md) · [下一章：系统与评测 →](08_systems_and_evaluation.md)
 

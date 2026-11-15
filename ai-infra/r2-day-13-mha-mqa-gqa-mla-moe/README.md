@@ -1,4 +1,6 @@
 # r2-Day13 — Attention 变种：MHA→MQA/GQA/MLA（省 KV cache）与 MoE（稀疏换算力）
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/README.reading.html
+
 
 ## Connection to Prev
 

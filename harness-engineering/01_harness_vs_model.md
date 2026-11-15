@@ -1,4 +1,6 @@
 # 01 — Harness vs Model：Frozen Model 的非参数优化
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/01_harness_vs_model.reading.html
+
 
 ## 元信息
 

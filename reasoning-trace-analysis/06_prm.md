@@ -1,4 +1,6 @@
 # 06 — Process Supervision: 给中间步骤打分（PRM）
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/06_prm.reading.html
+
 
 > Outcome supervision 只看答案对错：答案对但步骤错的解会被当成好解（false positive）。"Let's Verify Step by Step"（Hunter Lightman、Vineet Kosaraju、Yura Burda、Harri Edwards、Bowen Baker、Teddy Lee、Jan Leike、John Schulman、Ilya Sutskever、Karl Cobbe；arXiv 2023-05-31，ICLR 2024）训练 **Process-supervised Reward Model (PRM)**：对每一步预测正确性，整解得分为各步正确概率之积。
 >

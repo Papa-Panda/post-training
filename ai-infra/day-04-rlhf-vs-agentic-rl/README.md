@@ -1,4 +1,6 @@
 # Day 4 - 2026-08-05 - Agentic RL vs RLHF
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-04-rlhf-vs-agentic-rl/README.reading.html
+
 
 **Learning Goal**: 能用一句话区分 RLHF / DPO / GRPO
 

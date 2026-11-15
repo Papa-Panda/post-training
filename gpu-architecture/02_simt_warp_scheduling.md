@@ -1,4 +1,6 @@
 # 02 — SIMT、Warp 调度与 Occupancy
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/02_simt_warp_scheduling.reading.html
+
 
 ## 1. 软件层次与硬件执行层次
 

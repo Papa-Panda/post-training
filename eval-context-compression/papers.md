@@ -1,4 +1,6 @@
 # Papers — Eval Compression / Context Management
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-context-compression/papers.reading.html
+
 
 ## Core track
 

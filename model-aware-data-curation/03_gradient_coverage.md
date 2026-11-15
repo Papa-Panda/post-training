@@ -1,4 +1,6 @@
 # 03 — 多样性覆盖：从语义空间到梯度空间
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/03_gradient_coverage.reading.html
+
 
 ## 元信息
 - 内容类型：跨论文方法综述（embedding diversity → gradient diversity）

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GRPO vs PPO — estimator、ratio 与 systems trade-offs</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">GRPO vs PPO</span>
+    <h1>GRPO vs PPO — estimator、ratio 与 systems trade-offs</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">先纠正四个常见误解</a><a href="#sec-2">Map</a><a href="#sec-3">One-screen comparison</a><a href="#sec-4">Minimal equations</a><a href="#sec-5">Selection workflow</a><a href="#sec-6">Run the checks</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>PPO 和 GRPO 都不是一个固定 recipe。这个专题统一 token/group 记号，从 policy gradient 推到 clipped surrogate，拆开 behavior policy 与 reference policy，并把算法选择落到 memory、communication、rollout-token budget 与 failure diagnostics。</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>先纠正四个常见误解</h2>
+<ol>
+<li><strong>GRPO 不等于“按排名训练”</strong>：原始形式用组内 reward 的 mean/std normalization；只有 reward 本身来自 ranking 时才可口头说“排名”。</li>
+<li><strong>PPO 不等于“四个模型常驻”</strong>：actor、critic、reference、reward 的部署方式各异；behavior policy 也可只保存 old log-probs。rule reward 不需要 reward model。</li>
+<li><strong>去 critic 不等于固定省 30–50% 显存</strong>：确定省掉 critic path，但总 peak 还取决于 optimizer state、sharding、activations、reference 与 rollout KV cache。</li>
+<li><strong>critic 不等于 dense ground truth</strong>：GAE 可给 token-specific estimate 和 bootstrap，但 value model 仍只是在拟合 return；错误 reward 不会被 optimizer 修好。</li>
+</ol>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Map</h2>
+<pre><code class="language-text">00_notation.md              unified q / group / token / policy notation
+01_ppo_objective.md         PPO-Clip derivation, sign behavior, GAE, truncation
+02_grpo_objective.md        group advantage, KL estimators, bias and edge cases
+03_math_comparison.md       baseline/ratio/aggregation axes and method boundaries
+04_infra_tradeoffs.md       memory, collectives, token budget, async staleness
+05_code/                    dependency-free reference code + semantic tests
+06_glm52_ppo_comeback.md    sourced long-horizon compaction case study
+papers.md                   primary-source ledger
+</code></pre>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>One-screen comparison</h2>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Critic PPO</th>
+<th>Outcome GRPO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>rollout organization</td>
+<td>每 prompt 可一条或多条</td>
+<td>同 prompt 要 $G&gt;1$ completions</td>
+</tr>
+<tr>
+<td>advantage</td>
+<td>token/state-specific GAE</td>
+<td>group-normalized outcome，通常整条 response 广播</td>
+</tr>
+<tr>
+<td>learned baseline</td>
+<td>$V_\phi(h_t)$</td>
+<td>none</td>
+</tr>
+<tr>
+<td>extra cost</td>
+<td>critic state、forward/backward、collectives</td>
+<td>grouped generation、group sync、可能更多 rollout tokens</td>
+</tr>
+<tr>
+<td>degenerate case</td>
+<td>critic collapse / poor bootstrap</td>
+<td>all-equal reward group gives zero signal</td>
+</tr>
+<tr>
+<td>temporal credit</td>
+<td>可 bootstrap；仍依赖 critic/reward quality</td>
+<td>vanilla outcome form 粗；process-supervision variant 可更细</td>
+</tr>
+<tr>
+<td>ratio unit</td>
+<td>常用 token ratio</td>
+<td>原始 GRPO 也常用 token ratio；不要和 sequence product 混写</td>
+</tr>
+<tr>
+<td>natural starting point</td>
+<td>variable-length segments / critic 可可靠拟合</td>
+<td>short verifiable outcomes / critic 成本高</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>Minimal equations</h2>
+<p>Token ratio uses the behavior snapshot:</p>
+<p>$$\rho_{i,t}=\frac{\pi_\theta(y_{i,t}\mid q,y_{i,&lt;t})}{\pi_b(y_{i,t}\mid q,y_{i,&lt;t})}$$</p>
+<p>PPO-style clipped token surrogate, with $c(x,l,u)=\min(\max(x,l),u)$ :</p>
+<p>$$s(\rho,A)=\min(\rho A,c(\rho,1-\epsilon_l,1+\epsilon_h)A)$$</p>
+<p>PPO usually inserts GAE:</p>
+<p>$$A_{i,t}^{GAE}=\sum_{l\ge0}(\gamma\lambda)^l\delta_{i,t+l}$$</p>
+<p>Outcome GRPO inserts group-normalized reward:</p>
+<p>$$A_i^{grp}=\frac{R_i-\bar R}{s_R}$$</p>
+<p>KL compares the trainable policy to a separate reference anchor:</p>
+<p>$$D_{KL}(\pi_\theta\Vert\pi_{ref})$$</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>Selection workflow</h2>
+<p>不要先问“PPO 还是 GRPO”，先量：</p>
+<ol>
+<li>reward 是 terminal、process 还是可被 hack 的 proxy？</li>
+<li>同 prompt 能否产生独立、可比较且 non-degenerate 的 group？</li>
+<li>固定 generated-token budget 下，增大 $G$ 后 prompt coverage 损失多少？</li>
+<li>critic 在 held-out trajectories 上的 value error / explained variance 如何？</li>
+<li>peak memory 主项是 critic、actor optimizer、activations 还是 KV cache？</li>
+<li>trajectory 是自然终止还是基础设施截断？</li>
+<li>loss 按 response、segment 还是 token 加权？</li>
+</ol>
+<p>没有这些测量时，不给固定 <code>G</code>、KL coefficient、GPU 数或内存节省百分比。原论文里的具体设置是复现实验起点，不是跨任务推荐。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Run the checks</h2>
+<pre><code class="language-bash">cd grpo-vs-ppo/05_code
+python3 ppo_vs_grpo_advantage.py
+python3 -m unittest -v test_rl_objectives.py test_docs.py
+python3 -m py_compile *.py
+</code></pre>
+<p>Primary sources and claim scope are in <a href="papers.md"><code>papers.md</code></a>.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/grpo-vs-ppo/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

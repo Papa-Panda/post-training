@@ -1,4 +1,6 @@
 # Sources and Evidence Ledger
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/sources.reading.html
+
 
 Last checked for this topic: **2026-09-03**.
 

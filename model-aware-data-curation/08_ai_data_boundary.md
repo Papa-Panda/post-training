@@ -1,4 +1,6 @@
 # 08 — 与 `ai-data/` 的边界：不重复，做上层闭环
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/08_ai_data_boundary.reading.html
+
 
 ## 元信息
 - 内容类型：仓库边界与去重规则，不对应单篇论文

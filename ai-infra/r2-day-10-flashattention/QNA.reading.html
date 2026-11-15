@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day10 — FlashAttention：问答归档</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day10 — FlashAttention：问答归档</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">2026-09-06（周日）</a><a href="#sec-2">2026-09-07（周一·复习日）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>用户在 ai 课程聊天中提出的问题与总结。问题原文保留，答案按聊天记录整理；
+英文术语（KV cache、hit rate、prefill、TTFT、block、hash、LRU、ring attention、
+sequence parallelism、online softmax、P2P、NVLink、causal mask）保留。</p>
+<p>归档说明：以下两问于 2026-09-06（周日）提出。KV cache 的完整课程在 roadmap
+第三层"推理"（Day 20–21 TTFT/TPOT &amp; KV Cache）；Ring Attention 的对口位置是
+Day 15（TP/PP/SP 中的 SP）。两者都直接建立在 Day10 的 attention / K-V /
+blockwise 机制之上，故暂归于本目录 QNA，待对应课程日创建时可迁移。</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>2026-09-06（周日）</h2>
+<h3>Q1：kv cache hit rate啥意思？为啥能hit？（需要所有token都一致啊！多难啊）</h3>
+<p><strong>A：</strong> 你直觉的"难"是对的——如果要求整个请求一字不差，hit rate 会是 0。
+关键在于：<strong>它只要求前缀一致，不要求整个请求一致</strong>，而真实负载的前缀高度重合。</p>
+<p><strong>定义。</strong> 一个请求的 prompt 是 token 序列 $x_1, x_2, \dots, x_n$ 。
+vLLM 把 KV cache 按 block 存，block 大小 $B = 16$ （默认）。
+第 $j$ 个 block 存 token $x_{(j-1)B+1} \dots x_{jB}$ 的 K、V 张量。
+每个 block 有一个 hash，hash 内容 =（父 block 的 hash，本 block 的 16 个 token）；
+链式 hash 保证位置也对得上——同一个词出现在位置 5 和位置 500，KV 值不一样，不能混用。
+新请求进来按顺序查：block 1 的 token 序列跟缓存里某个 block 完全一样 → hit，直接复用，不用算；
+第一个 miss 的 block 往后全部重算。
+<strong>hit rate</strong> = 从缓存复用的 prompt token 数 / 总 prompt token 数。</p>
+<p>所以"hit"的门槛是：<strong>从头开始连续的若干个 block，每个 block 内 16 个 token 完全一致</strong>。
+不需要后缀一样。</p>
+<p><strong>为啥现实中真能 hit。</strong> 四个重合来源（以 rollout 场景为例）：</p>
+<ol>
+<li><strong>System prompt</strong>：线上服务每个请求都带同一套 system prompt，几百上千 token，前缀天然一致。</li>
+<li><strong>多轮对话</strong>：第 $t$ 轮的 prompt = 前 $t-1$ 轮全部内容 + 新问题，天然是前缀关系。</li>
+<li><strong>Agentic rollout</strong>：agent 每一步的 prompt = 上一步的完整 trajectory + 新 observation，天然前缀复用。</li>
+<li><strong>GRPO 的 $G$ 个采样</strong>：同一 prompt 采样 $G$ 个 response， $G$ 个请求的 prompt 部分<strong>完全相同</strong>，
+   prefill 直接省掉 $(G-1)/G$ 。</li>
+</ol>
+<p><strong>手算小例子。</strong> $B = 16$ 。100 个请求，共享 160 token 的 system prompt（10 个 block），
+各自后缀 32 token（2 个 block）：</p>
+<ul>
+<li>总 block 数： $100 \times 12 = 1200$</li>
+<li>实际计算：第一个请求算 12 个，后面 99 个只算后缀 2 个 → $12 + 99 \times 2 = 210$</li>
+<li>hit rate = $(1200 - 210) / 1200 =$ <strong>82.5%</strong></li>
+</ul>
+<p><strong>牺牲什么、换取什么、何时不赚。</strong></p>
+<ul>
+<li><strong>换取</strong>：prefill 是 compute-bound（每 token 要跟全序列做 attention），
+  跳过 prefill 直接省 FLOPs 和 TTFT（首 token 时间）。</li>
+<li><strong>牺牲</strong>：GPU HBM 被缓存 block 占用，能同时跑的请求就少了；
+  还有 hash 查表、LRU 淘汰的管理开销。</li>
+<li><strong>何时不赚</strong>：prompt 各不相同、毫无共享前缀 → hit rate 趋近 0，白占内存；
+  或者工作集远大于缓存，LRU 反复淘汰，缓存了也留不住。</li>
+</ul>
+<p>一句话：KV cache 的 hit 不是"两个请求长得一样"，而是"大家从同一起点出发"。
+前缀是起点，后缀各走各的。</p>
+<h3>Q2：ring attention在我们的roadmap的哪个部分？或者和哪个部分相关？</h3>
+<p><strong>A：</strong> 它不在 roadmap 的显式条目里，但它有且只有一个对口的位置：
+<strong>Day 15 "TP/PP/SP" 里的 SP（Sequence Parallelism）</strong>。
+Ring Attention 就是 sequence parallelism 在 attention 层落地的那个具体算法。</p>
+<p><strong>跟已学内容的关系。</strong></p>
+<ul>
+<li><strong>Day10 FlashAttention</strong>：FlashAttention 把 attention 按 block 切分、用 online softmax
+  在单卡 SRAM 里逐块算，避免物化 $N \times N$ 的 $QK^T$ 。
+  Ring Attention 是<strong>同一套 blockwise 思想的跨卡推广</strong>：序列维切分到 $P$ 张卡上排成环，
+  每张卡算自己分到的 query block，同时把 K/V block 在环上传给邻居；
+  传的时候手头有活干（算 attention），通信被计算盖住。</li>
+<li><strong>Day03 通信拓扑</strong>：它依赖的 P2P 带宽就是那天算的 NVLink vs PCIe 的账。</li>
+</ul>
+<p><strong>符号。</strong> $N$ 是序列长度， $P$ 是卡数，每卡分到 $N/P$ 个 query token。
+每个 step，每卡把自己手里的 K/V block 发给下一张卡，
+同时用刚收到的 K/V block 更新本地的 online softmax 统计量
+（ $m$ = row max， $\ell$ = row sum，跟 Day10 一模一样）。
+$P-1$ 轮之后，每卡见过全部 K/V，结果精确等价于全量 attention。</p>
+<p><strong>牺牲 / 换取 / 何时不赚。</strong></p>
+<ul>
+<li><strong>换取</strong>：上下文长度不再受单卡显存限制， $P$ 张卡拼出 $P$ 倍的序列容量；
+  通信被计算掩盖后接近线性扩展。</li>
+<li><strong>牺牲</strong>：每个 K/V block 要在环上走一整圈，通信量是 $O(N \cdot d)$ 每卡；
+  causal mask 下不同 block 的有效计算量不一样，负载不均；实现比 TP 复杂。</li>
+<li><strong>何时不赚</strong>：序列不够长（block 太小，通信盖不住计算）；跨机 P2P 带宽低；
+  batch 维度还有并行度没吃完——能先用 DP 解决就别上 SP。</li>
+</ul>
+<p><strong>在 roadmap 里放哪。</strong> 最合适的是 <strong>Day15 讲 SP 时</strong>，
+作为"SP 不是一句切分序列，而是 attention 层要这样具体地算"的算法实例。
+（Day15 尚未创建；届时可附 $P = 4$ 、 $N = 4096$ 的走查：
+每轮哪个 block 在哪张卡上、传了什么、 $m/\ell$ 怎么更新。）</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2026-09-07（周一·复习日）</h2>
+<p>以下 9 问于 2026-09-07 复习日提出，均为对 Day10 attention 机制的复习与追问，
+问题原文保留，答案按聊天记录整理。Megatron-SP 相关问答的 roadmap 正式归属是
+Day 15（TP/PP/SP 中的 SP），decode / KV cache 问答的正式归属是 Day 20–21；
+因都直接建立在 Day10 的 attention / QKV / softmax 机制上，暂归于此，
+待对应课程日创建时可迁移。英文术语保留，无雇主标识。</p>
+<h3>Q1：帮我复习一下。传统 Megatron-SP：在 Attention 前后需要做 All-Gather 和 Reduce-Scatter，通信的数据量与全量 Activation 挂钩，在超长序列下，单卡要顶住全局的通信压力。</h3>
+<p><strong>A：</strong> 三句基本准确，逐句给精确版与数字。记号： $s$ 序列长， $b$ microbatch，
+ $h$ hidden 维， $t$ TP 卡数；上标 $s$ 表沿 sequence 切，上标 $h$ 表沿 hidden/head 切。</p>
+<p><strong>纠正（重要）：</strong> 第一版回答说"all-gather 的对象是 K 和 V，不包括 Q"——这是错的，
+当场已纠正。按 Megatron-SP 论文 Equation (3)， $g$ （forward 做 all-gather）
+作用在 <strong>QKV 的输入 $Y$ </strong>（LayerNorm 的输出）上。所以 Q、K、V 在每张卡上都是
+全序列 <code>[s, b, h/t]</code> ——"每张卡拿到全量 K/V"效果没错，但机制是 gather 输入 $Y$
+再各自做 QKV projection，不是直接 gather K/V。</p>
+<p><strong>1. "Attention 前后 All-Gather / Reduce-Scatter" ✓</strong></p>
+<p>Attention 后 reduce-scatter 发生在 output projection（row-parallel GEMM）之后，
+MLP 块同理。原理：<code>all-reduce = reduce-scatter + all-gather</code>——纯 TP 里那个
+AllReduce 被拆开，总通信量和纯 TP 一模一样。Megatron-SP 省的是 activation 显存
+（LayerNorm/Dropout 的输入从每卡复制 <code>[s,h]</code> 降到 <code>[s/t,h]</code> ），不是通信量。</p>
+<p><strong>2. "通信量与全量 Activation 挂钩" ✓</strong></p>
+<p>数字： $N=10^6$ 、 $d=4096$ 、 $P=8$ 、fp16、MHA——每张卡每层 forward，
+K/V all-gather 要收到 $2 \times N \times (d/P) \times 2\text{B} = 2\text{GB}$ ；
+式子里 $N$ 是全量， $P$ 只除在 head 维。80 层即每卡每 forward <code>160GB</code> ，
+反向再来一遍。第三方对比：Megatron-SP 每 worker 总通信量级 <code>10Nd</code> ，
+DistFlashAttn 类方案 <code>3Nd</code> ——量级里都是全量 $N$ 。</p>
+<p><strong>3. "单卡顶住全局通信压力"——基本对，精确化</strong></p>
+<p>真正的痛点不是"通信量不随 $P$ 下降"（它随 $P$ 下降，正比于 $N/P$ ），而是两点：
+（1）它是 blocking collective： $P$ 张卡到齐、每张卡收齐 $2Nd/P$ 之后，
+attention 才能开始算第一个 block，没法像 Ring 那样边传边算；
+ $N$ 增大时同步点和延迟按全局 $N$ 涨，加卡分摊不了这个"先收齐"。
+（2）峰值 buffer：每张卡要同时摆下全序列的 K、V（各 <code>[N, d/P]</code> ），
+ $N \to \infty$ 时是硬上限。</p>
+<p>串联：这正是 Ring Attention（2026-09-06 Q2 已归档）要解决的问题——
+每张卡每轮只跟邻居做 P2P 传 K/V block，传的时候手里有活干
+（Day10 的 online softmax 天然支持流式更新 $m/\ell$ ）。</p>
+<h3>Q2：Attention 后 reduce-scatter 发生在 output projection 这一步的数学</h3>
+<p><strong>A：</strong> 输入：卡 $j$ 上 attention 本地算完（ $Y$ 已 gather 成全序列），
+ $A_j \in \mathbb{R}^{s \times b \times (h/t)}$ ，权重行分片
+ $W_j^{out} \in \mathbb{R}^{(h/t) \times h}$ 。本地 GEMM 得部分和
+ $O_j = A_j W_j^{out} \in \mathbb{R}^{s \times b \times h}$ ——注意序列维是全量 $s$ ，
+只在求和维（head 分片）上是部分的。真实输出应为 $O = \sum_j O_j$ 。</p>
+<p>$\bar{g}$ 的 forward = 沿序列维 reduce-scatter：每张卡交出 $O_j$ ，
+collective 先求和再把第 $i$ 个序列分片发给第 $i$ 张卡。
+正确性（一行）： $O_i^s = \sum_j (A_j W_j^{out})|_{\text{shard } i} = (A W^{out})|_{\text{shard } i}$ ，正好是真实输出在第 $i$ 个分片上的值。</p>
+<p>小例子： $t=2, s=4$ 。卡 1 交出 $O_1$ （4 行），卡 2 交出 $O_2$ （4 行）；
+卡 1 拿走 <code>(O_1+O_2)</code> 的第 0–1 行，卡 2 拿走第 2–3 行。</p>
+<h3>Q3：帮我汇一下 all gather reduce scatter</h3>
+<p>（用户接着说"回忆下"，同一轮。）</p>
+<p><strong>A：</strong> 符号： $t$ TP 卡数； $s$ 、 $b$ 、 $h$ 同上；上标 $s$ / $h$ 表切分维。</p>
+<ul>
+<li><strong>All-Gather：只拼接，不求和。</strong> 每张卡手里有分片 $X_i$ ，
+  之后每张卡都得到完整拼接 $X = [X_1; X_2; \dots; X_t]$ 。</li>
+<li><strong>Reduce-Scatter：先求和，再切分。</strong> 每张卡手里有局部结果 $X_j$
+  （通常是部分和），先跨卡求和 $\sum_j X_j$ ，再沿某个维度切开，
+  第 $i$ 张卡只保留第 $i$ 片。</li>
+<li><strong>All-Reduce = Reduce-Scatter + All-Gather</strong>：ring all-reduce 正好拆成这两步，
+  所以这两个算子是 All-Reduce 的两个"半步"。</li>
+</ul>
+<p>放回 Megatron-SP（ $t=2, s=4$ ）：初始 LayerNorm 输出按 sequence 分片，
+每张卡 2 个 token 行，形状 <code>(2, b, h)</code> ；All-Gather 把 $Y$ 拼成全序列
+<code>(4, b, h)</code> （注意 gather 对象是 $Y$ ，见 Q1 纠正）；各卡用自己的 QKV 权重分片
+（column-parallel）做 projection，算自己负责的 heads，得 $A_j$ ；
+output projection 权重是 row-parallel 分片，本地 GEMM 得部分和 $O_j$ ；
+Reduce-Scatter 求和后按 sequence 切回，下游回到 sequence-sharded 区域。</p>
+<h3>Q4：Megatron-SP 是啥？这是TP？</h3>
+<p><strong>A：</strong> 不是 TP 本身，是<strong>建在 TP 之上的一层补充</strong>，全称 Sequence Parallelism
+（Megatron 团队 2022 年论文），专门解决纯 TP 的一个浪费。</p>
+<p>纯 TP 切权重（column-parallel、row-parallel），GEMM 部分每张卡只算一部分。
+但 LayerNorm、Dropout、residual add 不依赖权重切分，输入输出形状是
+<code>(s, b, h)</code> ，纯 TP 里每张卡完整复制一份。SP 把这些操作也沿 sequence 维切开，
+每张卡只存 <code>s/t</code> 行——<strong>TP 切的是权重/GEMM，SP 切的是 activation 的 sequence 维</strong>，
+两者叠加记作 TP+SP。</p>
+<p>但 attention 和 MLP 的 GEMM 需要完整输入（attention 要看全序列，
+GEMM 的输入 hidden 维要完整），所以 SP 引入两种布局区域，用 collective 转换：</p>
+<pre><code>sequence-sharded 区域：LayerNorm、residual、Dropout，每张卡 (s/t, b, h)
+        │ All-Gather（拼成完整序列）
+        ▼
+head/tensor-parallel 区域：QKV GEMM、attention、output GEMM，每张卡 (s, b, h/t)
+        │ Reduce-Scatter（求和后再按 sequence 切开）
+        ▼
+sequence-sharded 区域：Dropout、residual
+</code></pre>
+<p>一个 transformer layer 的 forward 有 2 次 All-Gather 加 2 次 Reduce-Scatter，
+backward 互换，通信量理论上和纯 TP 的 4 次 All-Reduce 相同。
+论文的原始动机之一：activation 变小之后，可以少做 activation recomputation。</p>
+<h3>Q5：megaton主要切啥维度？</h3>
+<p>（"megaton"为用户原文，即 Megatron。）</p>
+<p><strong>A：</strong> 主要切 <strong>hidden 维</strong> $h$ ，两种切法：</p>
+<ol>
+<li><strong>Column-parallel，切权重的列（输出维）</strong>：QKV projection、MLP 第一层线性层。
+   每张卡拿不同的列，算不同的输出通道；在 attention 里体现为每张卡负责一部分
+   attention heads（head 维分片）。</li>
+<li><strong>Row-parallel，切权重的行（输入维）</strong>：output projection、MLP 第二层线性层。
+   每张卡拿不同的行，各自算出全局输出的一个部分和，再 All-Reduce 跨卡求和。</li>
+</ol>
+<p>关键是它<strong>不切什么</strong>：sequence 维 $s$ 和 batch 维 $b$ 在纯 TP 里每张卡完整复制。
+这正是 Megatron-SP 要补上的。</p>
+<h3>Q6：attention layer的数学？</h3>
+<p><strong>A：</strong> 符号： $s$ 序列长； $b$ microbatch； $h$ hidden 维；
+ $n$ attention head 数； $d = h/n$ 每 head 维；
+ $X \in \mathbb{R}^{s \times b \times h}$ 为 attention layer 输入；
+ $W^Q, W^K, W^V \in \mathbb{R}^{h \times h}$ 为 QKV 投影权重；
+ $W^{out} \in \mathbb{R}^{h \times h}$ 为 output projection 权重。</p>
+<p>七步：</p>
+<ol>
+<li><strong>QKV projection</strong>： $Q = XW^Q$ ， $K = XW^K$ ， $V = XW^V$ ，形状都是 <code>(s, b, h)</code> 。</li>
+<li><strong>Split heads</strong>：hidden 维拆成 $n$ 个 head，每个维度 $d$ ，得 <code>(s, b, n, d)</code> ；
+   记第 $k$ 个 head 为 $Q_k, K_k, V_k \in \mathbb{R}^{s \times b \times d}$ 。</li>
+<li><strong>Attention scores</strong>：每 head 独立算 $S_k = Q_k K_k^T / \sqrt{d}$ ，形状 <code>(s, b, s)</code> ；
+   $S_k[i,j]$ 是第 $i$ 个 token 对第 $j$ 个 token 的原始相关度；
+   除以 $\sqrt{d}$ 是让点积方差不随 $d$ 增大而爆炸，否则 softmax 会 saturate。</li>
+<li><strong>Softmax</strong>：对 key 维（最后一个 $s$ ）做 softmax， $P_k$ 每行和为 1；
+   decoder 加 causal mask： $j &gt; i$ 的位置设为 $-\infty$ ，让 token 看不到未来。</li>
+<li><strong>Weighted sum</strong>： $A_k = P_k V_k$ ， $A_k[i] = \sum_j P_k[i,j]\, V_k[j]$ ，
+   第 $i$ 个输出 token 是所有 value 向量的凸组合。</li>
+<li><strong>Merge heads</strong>： $n$ 个 head 拼回 <code>(s, b, h)</code> 。</li>
+<li><strong>Output projection</strong>： $O = A W^{out}$ ，形状 <code>(s, b, h)</code> 。</li>
+</ol>
+<p>为什么 TP 能按 head 切：3–5 步里每个 head 只用自己的 $Q_k, K_k, V_k$ ，
+head 之间完全独立，所以 TP 把 $n$ 个 heads 分给 $t$ 张卡后 attention 内部零通信；
+通信只发生在最后一步（row-parallel 的部分和合并）。</p>
+<h3>Q7：soft Max（Q K^T）之后出来的是一个 1 * 3 的向量？</h3>
+<p><strong>A：</strong> 看切的是哪一层。单 head、 $s=3$ 、忽略 batch：
+ $Q$ 、 $K$ 是 <code>(3, 2)</code> ； $QK^T$ 是 <code>(3, 3)</code> ，第 $i$ 行是第 $i$ 个 token
+对全部 3 个 token 的 scores；softmax 后 <code>(3, 3)</code> 的<strong>每一行</strong>都是一个
+<code>1 x 3</code> 的概率向量，和为 1。你看到的 <code>[0.25, 0.25, 0.50]</code> 就是第 3 行——
+第 3 个 token 的 attention 分布：50% 给自己，25% 给 token 1，25% 给 token 2。
+这行 <code>1 x 3</code> 乘上 $V$ （ <code>(3, 2)</code> ）得到 <code>1 x 2</code> ，正好是第 3 个 token 的输出行。
+每一行独立做一次"拿分布当权重、拌 value"，3 行拼起来就是完整的 <code>(3, 2)</code> 输出。
+加上 batch 和多 head，完整形状是 <code>(s, b, n, s)</code> ：每个 (batch, head) 切片里
+都是一张 <code>s x s</code> 的表，每行是一个 <code>1 x s</code> 的分布。</p>
+<h3>Q8：不对不对  告诉我 QK^T 是什么 softmax QK^T怎么算的</h3>
+<p><strong>A：</strong> 退回最机械的一层，一个数一个数地算。</p>
+<p><strong>QK^T 是什么。</strong> $Q$ 是 <code>(3, 2)</code> ， $K$ 是 <code>(3, 2)</code> 。
+记 $q_i$ 为 $Q$ 的第 $i$ 行（第 $i$ 个 token 的 query 向量），
+ $k_j$ 为 $K$ 的第 $j$ 行（第 $j$ 个 token 的 key 向量）。
+$(QK^T)[i,j] = q_i \cdot k_j = \sum_p q_i[p]\, k_j[p]$ ——
+第 $i$ 个 token 的 query 和第 $j$ 个 token 的 key 有多"对得上"，数值越大越相关。</p>
+<p>例 $Q = K =$ <code>[[1,0],[0,1],[1,1]]</code> ：
+第 1 行 <code>[1, 0, 1]</code> ，第 2 行 <code>[0, 1, 1]</code> ，第 3 行 <code>[1, 1, 2]</code> ；
+再除以 $\sqrt{2} \approx 1.414$ ，得
+<code>S = [[0.707, 0, 0.707],[0, 0.707, 0.707],[0.707, 0.707, 1.414]]</code> 。</p>
+<p><strong>softmax 怎么算。</strong> 逐行，行与行互不干扰。固定第 $i$ 行：
+$P[i,j] = e^{S[i,j]} / \sum_m e^{S[i,m]}$ ，三步：取指数 → 求和 → 相除。
+拿第 3 行 <code>[0.707, 0.707, 1.414]</code> 演示：
+取指数得 <code>2.028, 2.028, 4.113</code> ，求和得 <code>8.169</code> ，
+相除得 <code>[0.248, 0.248, 0.504]</code> 。第 1、2 行同理得
+<code>[0.401, 0.198, 0.401]</code> 和 <code>[0.198, 0.401, 0.401]</code> 。</p>
+<p>整件事就是：先用点积给每对 token 打分，再把每个 token 那一行分数用
+softmax 压成"注意力分配比例"。</p>
+<h3>Q9：对哦 实际中Q一般是不是s= 1啊？告诉我下一个token怎么算的</h3>
+<p><strong>A：</strong> 对，直觉正确。分两个阶段：</p>
+<ul>
+<li><strong>Prefill</strong>：第一次处理 prompt，Q 的序列长度 = 整个 prompt 长度，一次性并行算完。</li>
+<li><strong>Decode</strong>：逐个生成新 token 时，每步的 Q 只有<strong>当前这一个新 token</strong>，
+  所以 Q 的序列长度确实是 1。而 K 和 V 从 <strong>KV cache</strong> 里拿，
+  包含之前所有 token，外加当前这个新算出来的。</li>
+</ul>
+<p>KV cache 就是把之前每步算好的 $k_j, v_j$ 存下来，避免重复计算；
+每步只算新 token 的 $q$ 、 $k$ 、 $v$ ，再把 $k$ 、 $v$ 追加进 cache。</p>
+<p><strong>下一个 token 怎么算（接 Q8 的例子）。</strong>
+假设已生成 token 1、2，cache 里有 $k_1, k_2, v_1, v_2$ ；
+现算第 3 个 token：</p>
+<ol>
+<li>新 token 的 embedding 过 QKV projection 得 $q_3, k_3, v_3$ ，各 <code>(1, 2)</code> 。</li>
+<li>$K =$ <code>[k_1;k_2;k_3]</code> 是 <code>(3, 2)</code> ， $V$ 同理； $k_1, k_2$ 从 cache 直接拿，不重算。</li>
+<li>scores $= q_3 K^T / \sqrt{d}$ ： <code>(1, 2)</code> 乘 <code>(2, 3)</code> 得 <code>(1, 3)</code> ，<strong>只有一行</strong>——
+   正是 Q8 矩阵的第 3 行 <code>[0.707, 0.707, 1.414]</code> ，decode 时这一行就是全部。</li>
+<li>softmax → <code>[0.248, 0.248, 0.504]</code> ，一个 <code>1 x 3</code> 的分布。</li>
+<li>输出 $= 0.248\,v_1 + 0.248\,v_2 + 0.504\,v_3$ ，形状 <code>(1, 2)</code> 。</li>
+</ol>
+<p>之后拼 head → output projection → residual/LayerNorm/MLP 走完所有 layer，
+得 <code>(1, h)</code> ，乘 unembedding <code>(h, vocab)</code> 得 logits，softmax 后采样出下一个 token；
+把它的 $k$ 、 $v$ 存进 cache，循环往复。</p>
+<p>所以 decode 的每一步本质上就是：拿 1 个 query 去查整张 $m \times m$ 表里
+属于自己的那一行。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-10-flashattention/QNA.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 > Connection to Prev: Day15 Megatron 3D Parallelism → Day16 Monetization Story v1: PUE 1.2576算清了\$/useful但没把省钱方法论翻译成可面试讲的ROI故事，需要把FSDP/TP/PP切分、热节流散热、eval异步省卡时压缩成150字跨界叙事；Day14 PUE 1.2576 overhead 25.76% + Day13 Tj 90.5°C throttle 2.5%的坑在今天用 \$/useful + jitter/throttle双阈值 + TP散热填充到故事里的“省\$200M→RL稳定性”框架解决。
 
 # Day 16 — Monetization Story v1: 你的跨界故事 从 \$200M 省钱方法到 RL 稳定
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-16-monetization-v1/README.reading.html
+
 
 > Date: 2026-08-16 (Foundation 1-3mo, RL Training)
 > Source row: `ai_daily.csv:2026-08-16` — Monetization / 你的跨界故事 v1 / 写出第一版转型故事

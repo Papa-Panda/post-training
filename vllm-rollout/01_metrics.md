@@ -1,4 +1,6 @@
 # 01 — Queueing, latency, and token accounting
+> 📖 阅读版：https://papa-panda.github.io/post-training/vllm-rollout/01_metrics.reading.html
+
 
 ## 1. Request timeline
 

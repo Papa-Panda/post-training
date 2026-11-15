@@ -1,4 +1,6 @@
 # 01 metabench — 用 IRT 把 6 个 benchmark 压到 <3%
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-bench-efficiency/01_metabench.reading.html
+
 
 > Source: Metabench — Sparse Benchmarking of Large Language Models, arXiv:2407.12844 (ICLR 2025), OpenReview, GitHub adkipnis/metabench, HF HCAI/metabench.
 

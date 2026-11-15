@@ -1,4 +1,6 @@
 # 08 — Harness、RL 与 Weight Updates：双时间尺度协同优化
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/08_harness_rl_and_weight_updates.reading.html
+
 
 ## 元信息
 

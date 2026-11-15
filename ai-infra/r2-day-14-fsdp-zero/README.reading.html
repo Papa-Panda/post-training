@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day14 — FSDP/ZeRO 显存账：用通信换显存</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day14 — FSDP/ZeRO 显存账：用通信换显存</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Connection to Prev</a><a href="#sec-2">0. 符号表（每个字母的含义）</a><a href="#sec-3">1. 可手算例子 A：7B 显存账（为什么单卡装不下）</a><a href="#sec-4">2. 可手算例子 B：ZeRO 三阶段（ $P=100$ ，fp32 Adam， $N=4$ ）</a><a href="#sec-5">3. 可手算例子 C：FSDP per-block 峰值</a><a href="#sec-6">4. 可执行代码</a><a href="#sec-7">5. 何时不赚</a><a href="#sec-8">状态</a><a href="#sec-9">原始 / 官方来源</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>Connection to Prev</h2>
+<p>r2-Day13 在<strong>架构层面</strong>省 decode 的 KV cache（推理侧：decode 是 memory-bound，
+省字节 = 省时间）。r2-Day14 回到<strong>训练侧</strong>：不管 attention 怎么压缩，
+训练一个 7B 模型要同时放下参数 $14\ \text{GB}$ （fp16）+ 梯度 $14\ \text{GB}$ （fp16）
++ Adam 状态 $56\ \text{GB}$ （fp32 的 m+v） $= 84\ \text{GB} &gt; 80\ \text{GB}$ ——
+单张 H100 根本装不下。FSDP/ZeRO 把 model states（参数/梯度/优化器状态）
+切到 $N$ 张卡上，每张只存 $1/N$ 。</p>
+<p><strong>牺牲</strong>：通信。ZeRO-3 每步通信量是 DDP 的 $1.5\times$ ：forward 和 backward
+各一次 all-gather 参数凑全 + backward 后一次 reduce-scatter 梯度；
+DDP 只有一次 all-reduce 梯度。<strong>换取</strong>：被切分的 states 显存降为 $1/N$ ——
+7B 在 8 卡上每卡 model states 只要 $14\ \text{GB}$ （mixed 口径）/
+ $10.5\ \text{GB}$ （roadmap 口径，不计 fp32 master）。
+<strong>何时不赚</strong>：模型本来就装得下——DDP 更简单、通信只有 ZeRO-3 的 $2/3$ ；
+ZeRO-3 的全量 all-gather 在带宽一般、 $N$ 大时最痛；
+optimizer states 已经是主要矛盾时，ZeRO-1/2 往往就够了。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>0. 符号表（每个字母的含义）</h2>
+<ul>
+<li>$P$ ：参数量（元素个数）； $N$ ：rank 数（数据并行度）</li>
+<li>$b_p, b_g, b_o$ ：参数 / 梯度 / 优化器状态的每参数字节数</li>
+<li>$M$ ：一次 collective 的 payload 字节数</li>
+<li>stage 0 = DDP（全复制），1/2/3 = ZeRO 的三个阶段</li>
+<li>本课 GB 均为十进制（ $10^9$ 字节），与 H100 80GB 等厂商规格一致</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>1. 可手算例子 A：7B 显存账（为什么单卡装不下）</h2>
+<p>mixed precision Adam 的每参数字节：
+fp16 参数 $2\ \text{B}$ + fp16 梯度 $2\ \text{B}$ + fp32 master 参数 $4\ \text{B}$
++ fp32 Adam 一阶矩 $4\ \text{B}$ + fp32 二阶矩 $4\ \text{B}$ $= 16\ \text{B/param}$ ，
+$$7\times10^9 \times 16\ \text{B} = 112\ \text{GB}$$</p>
+<p>roadmap 口径（把 fp32 master 折掉，只算"训起来必须有的"）：
+$2 + 2 + 8 = 12\ \text{B/param}$ ，
+$$14\ \text{GB} + 14\ \text{GB} + 56\ \text{GB} = 84\ \text{GB} &gt; 80\ \text{GB}$$
+→ 单卡放不下。代码 <code>test_7b_roadmap_ledger</code> 断言了 $14/14/56\ \text{GB}$ 精确整数。</p>
+<p>关键洞察：<strong>optimizer states 才是大头</strong>（ $56\ \text{GB}$ &gt; 参数+梯度 $28\ \text{GB}$ ）——
+这就是 ZeRO-1 只切 optimizer states 就能把显存砍掉近一半的原因。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>2. 可手算例子 B：ZeRO 三阶段（ $P=100$ ，fp32 Adam， $N=4$ ）</h2>
+<p>每参数 $16\ \text{B}$ ，model states 总量 $1600\ \text{B}$ 。
+记参数/梯度各 $400\ \text{B}$ ，优化器状态 $800\ \text{B}$ ：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>每卡字节</th>
+<th>算式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DDP</td>
+<td>$1600\ \text{B}$</td>
+<td>全复制</td>
+</tr>
+<tr>
+<td>ZeRO-1（切 opt states）</td>
+<td>$1000\ \text{B}$</td>
+<td><code>400 + 400 + 800/4</code></td>
+</tr>
+<tr>
+<td>ZeRO-2（+ 切 grads）</td>
+<td>$700\ \text{B}$</td>
+<td><code>400 + 400/4 + 800/4</code></td>
+</tr>
+<tr>
+<td>ZeRO-3（+ 切 params）</td>
+<td>$400\ \text{B}$</td>
+<td><code>400/4 + 400/4 + 800/4</code></td>
+</tr>
+</tbody>
+</table>
+<p>通信（ring 公式与 r2-Day03 一致：all-reduce $= 2(N-1)/N \times M$ ，
+all-gather/reduce-scatter $= (N-1)/N \times M$ ）：
+- DDP：all-reduce 梯度 $= 2 \times 3/4 \times 400 = 600\ \text{B}$ ；
+- ZeRO-1/2：reduce-scatter + all-gather 梯度，总量与 all-reduce 相等 $= 600\ \text{B}$ ；
+- ZeRO-3：all-gather 参数（forward 前）+ all-gather 参数（backward 前）
+  + reduce-scatter 梯度 $= 3 \times 3/4 \times 400 = 900\ \text{B} = 1.5\times$ DDP。</p>
+<p>代码断言了 $1600/1000/700/400$ 与 $900/600 = 1.5$ 。
+检验标准一句话：<strong>ZeRO-2 只 all-reduce 梯度；ZeRO-3 连参数也切，
+forward/backward 都要 all-gather 凑全参数，通信是 DDP 的 $1.5\times$ ，
+显存降到 $1/N$ 。</strong></p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>3. 可手算例子 C：FSDP per-block 峰值</h2>
+<p>FSDP 把每个 wrap 单元（通常一个 transformer block）的参数展平成一维
+flat_param 再切分。steady state 每卡只持有 $1/N$ ，但每个 block 的 forward 前
+要 all-gather 出<strong>完整</strong>的 block 参数——瞬时峰值：</p>
+<p>$$\text{peak} = \text{sharded 总量} + \text{一个完整 block（fp16）}$$</p>
+<p>7B，32 个 block， $N=8$ ： $14.0 + 0.4 = 14.4\ \text{GB}$ /卡。
+这是 r2-Day02 的 <code>(P-b)/G + b</code> 峰值公式的 FSDP 版本（Day02 是 DDP 版）。</p>
+<p>为什么按 block wrap 而不是整模型 wrap：整模型 all-gather 的瞬时峰值是整份参数；
+per-block 把峰值压到一个 block，还能让<strong>下一个 block 的 all-gather 与当前 block
+的计算 overlap</strong>（prefetch； <code>limit_all_gathers</code> 控制飞行中的 all-gather 数量，
+避免 prefetch 吃掉省下来的显存）。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>4. 可执行代码</h2>
+<ul>
+<li><code>zero_memory.py</code>：<code>model_state_bytes_per_param</code>（四种精度口径）、
+  <code>sharded_state_bytes</code>（stage 0–3 账本）、<code>collective_bytes</code>
+  （ring 公式）、<code>ddp_step_comm_bytes</code> / <code>zero3_step_comm_bytes</code>
+  （ $1.5\times$ ）、<code>shard_vector</code> / <code>all_gather_sim</code> / <code>reduce_scatter_sim</code>
+  （纯 Python 的分片语义演示，字节精确）、<code>fsdp_peak_bytes</code>。</li>
+</ul>
+<pre><code class="language-bash">python3 ai-infra/r2-day-14-fsdp-zero/zero_memory.py
+python3 -m unittest discover -s ai-infra/r2-day-14-fsdp-zero -p 'test_*.py' -v
+</code></pre>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>5. 何时不赚</h2>
+<ol>
+<li><strong>模型装得下就别上 ZeRO-3</strong>：DDP 每步通信只有 ZeRO-3 的 $2/3$ ，
+   代码路径也简单得多。</li>
+<li><strong>ZeRO-1/2 往往够用</strong>：Adam 下 optimizer states 占 $8/16$ ，
+   只切 states 就去掉了主要矛盾；ZeRO-3 的参数 all-gather 在跨机或低带宽时最痛。</li>
+<li><strong>ZeRO 不切 activations</strong>：长序列的 activation 显存靠重计算解决
+   （r2-Day16），不是 ZeRO 的活——两者正交，可以叠加。</li>
+<li><strong>小 $N$ 时切分收益小</strong>： $N=2$ 时 ZeRO-3 的 all-gather 每卡搬运
+   $(N-1)/N = 1/2$ 的参数，通信占比相对更高；永远看 step time，
+   不只看显存数字。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>状态</h2>
+<ul>
+<li>已验证：Python 语法；13 个 CPU 单元测试（7B 的 $14/14/56\ \text{GB}$ 精确整数、
+  $84 &gt; 80$ 装不下；toy 四阶段 $1600/1000/700/400$ ；通信 $600\ \text{B} / 900\ \text{B} = 1.5\times$ ；
+  shard/all-gather/reduce-scatter roundtrip；7B 8 卡 per-block 峰值 $14.4\ \text{GB}$ ）。</li>
+<li><strong>execution not validated / 待H100验证</strong>：本环境无 torch/CUDA GPU；
+  真实 FSDP 分片训练、all-gather/reduce-scatter 实测带宽、step time、
+  MFU、comm%、设备拓扑均未测量； $14.4\ \text{GB}$ 是理论账本
+  （未含 activations 与通信 buffer）。</li>
+<li>本课状态保持 <code>blocked</code>；没有声称 loss、耗时实测、带宽实测。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原始 / 官方来源</h2>
+<ul>
+<li>ZeRO：Rajbhandari et al., "ZeRO: Memory Optimizations Toward Training
+  Trillion Parameter Models", <a href="https://arxiv.org/abs/1910.02054">https://arxiv.org/abs/1910.02054</a></li>
+<li>FSDP：Zhao et al., "PyTorch FSDP: Experiences on Scaling Fully Sharded
+  Data Parallel", <a href="https://arxiv.org/abs/2304.11277">https://arxiv.org/abs/2304.11277</a></li>
+<li>PyTorch FSDP 文档：<a href="https://pytorch.org/docs/stable/fsdp.html">https://pytorch.org/docs/stable/fsdp.html</a></li>
+<li>DeepSpeed ZeRO 教程：<a href="https://www.deepspeed.ai/tutorials/zero/">https://www.deepspeed.ai/tutorials/zero/</a></li>
+<li>FairScale（FSDP 的前身实现）：<a href="https://github.com/facebookresearch/fairscale">https://github.com/facebookresearch/fairscale</a></li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-14-fsdp-zero/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

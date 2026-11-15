@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Model-aware Data Curation</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Model-Aware Data Curation</span>
+    <h1>Model-aware Data Curation</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">一句话定位</a><a href="#sec-2">八条线，两类模型信号</a><a href="#sec-3">阅读路线：数学 → 系统 → 可运行代码</a><a href="#sec-4">路线图</a><a href="#sec-5">核心判断</a><a href="#sec-6">Verified headline numbers</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p><strong>基于梯度与模型行为干预的数据价值、覆盖与生成</strong>：不是再做一套逐篇 paper notes，而是把归因、目标化选择、多样性覆盖、主动生成与持续学习接成一个 model-in-the-loop 控制闭环。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>一句话定位</h2>
+<p><code>ai-data/</code> 回答 <strong>“原料是什么、怎么洗、怎么构造”</strong>；本专题回答 <strong>“当前模型缺什么、哪条数据最能推动目标、下一批应该生成什么”</strong>。</p>
+<pre><code class="language-text">candidate pool / generator
+        │
+        ▼
+gradient / ICL probe ──► value / target alignment / coverage / conflict
+        │                           │
+        ▼                           ▼
+select or generate ──► train ──► eval ──► refresh gradient map
+        ▲                                      │
+        └──────────────────────────────────────┘
+</code></pre>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>八条线，两类模型信号</h2>
+<p>设候选样本为 $z=(x,y)$ ，当前代理模型参数为 $\theta$ ，目标验证集为 $V$ ：</p>
+<p>$$g_z=-\nabla_\theta\log p_\theta(y\mid x),\qquad \bar g_V=\frac1{|V|}\sum_{v\in V}g_v.$$</p>
+<table>
+<thead>
+<tr>
+<th>线</th>
+<th>核心问题</th>
+<th>几何对象</th>
+<th>代表方法</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>归因基础</td>
+<td>谁导致了这个行为？</td>
+<td>$g_z^\top H^{-1}g_v$ 或轨迹/投影近似</td>
+<td>Influence Functions, TracIn, TRAK</td>
+</tr>
+<tr>
+<td>目标化选择</td>
+<td>哪些样本推动目标能力？</td>
+<td>$\cos(\tilde g_z,\tilde g_V)$</td>
+<td>LESS, DataInf, GradAlign</td>
+</tr>
+<tr>
+<td>无梯度估值</td>
+<td>哪条 demonstration 能立刻改善目标探针集？</td>
+<td>受控 ICL 干预下的 assessment PPL 改善</td>
+<td>RICo, Nuggets / ICP</td>
+</tr>
+<tr>
+<td>多样性覆盖</td>
+<td>当前梯度空间还缺哪些方向？</td>
+<td>梯度核谱熵或 Fisher/log-det</td>
+<td>Vendi, D4/SemDeDup, G-Vendi, FisherSFT</td>
+</tr>
+<tr>
+<td>集合协调</td>
+<td>候选会不会抵消已选集合的平均更新？</td>
+<td>candidate 与 selected-set mean 的负 cosine</td>
+<td>SPICE</td>
+</tr>
+<tr>
+<td>主动生成</td>
+<td>如何补稀疏区域而非继续堆重复样本？</td>
+<td>稀疏梯度簇 + rejection sampling</td>
+<td>Prismatic Synthesis</td>
+</tr>
+<tr>
+<td>安全/持续学习</td>
+<td>新能力如何不破坏明确要保护的能力？</td>
+<td>candidate 与 protected gradient 的冲突</td>
+<td>GrADS, OGS</td>
+</tr>
+<tr>
+<td>可学性门</td>
+<td>孤立方向是稀缺能力，还是当前模型学不进去？</td>
+<td>跨 checkpoint 相似度、reward trend 与训练响应</td>
+<td>RLVR unlearnability analysis</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec sec-math" id="sec-3"><h2><span class="n">3</span>阅读路线：数学 → 系统 → 可运行代码</h2>
+<ol>
+<li><a href="01_problem_formulation.md"><code>01_problem_formulation.md</code></a> — 把“价值/覆盖/冲突”写成统一多目标优化。</li>
+<li><a href="02_attribution_to_targeting.md"><code>02_attribution_to_targeting.md</code></a> — 从 IF/TracIn/TRAK 到 LESS/DataInf/GradAlign；已在 <code>ai-data</code> 的论文只链接、不复述。</li>
+<li><a href="03_gradient_coverage.md"><code>03_gradient_coverage.md</code></a> — 从 embedding diversity 到 G-Vendi 的模型感知覆盖。</li>
+<li><a href="04_prismatic_synthesis.md"><code>04_prismatic_synthesis.md</code></a> — Prismatic 三步循环与已核实实验数字。</li>
+<li><a href="05_safety_continual_learning.md"><code>05_safety_continual_learning.md</code></a> — GrADS/OGS 与遗忘、冲突、动态课程。</li>
+<li><a href="06_system_architecture.md"><code>06_system_architecture.md</code></a> — gradient datastore、近似计算、调度与可观测性。</li>
+<li><a href="07_coding_data_flywheel.md"><code>07_coding_data_flywheel.md</code></a> — coding-data 闭环：失败簇 → 生成 → 验证 → 训练 → 回归。</li>
+<li><a href="08_ai_data_boundary.md"><code>08_ai_data_boundary.md</code></a> — 与 <code>ai-data/</code> 的边界、复用规则和去重清单。</li>
+<li><a href="09_spice_information_conflict.md"><code>09_spice_information_conflict.md</code></a> — SPICE 的 Fisher/log-det、conflict-aware greedy、理论边界，以及 diversity / conflict / retention / unlearnability 四分法。</li>
+<li><a href="10_rico_icl_valuation.md"><code>10_rico_icl_valuation.md</code></a> — RICo 用受控 ICL 干预近似训练贡献，补上 LESS/DataInf 之外的 gradient-free valuation 分支。</li>
+<li><a href="papers.md"><code>papers.md</code></a> — 论文索引、年份、状态与 claim 证据。</li>
+<li><a href="code/"><code>code/</code></a> + <a href="tests/"><code>tests/</code></a> — NumPy 最小 demo：target alignment、G-Vendi、Fisher/log-det、SPICE、稀疏簇选择与安全约束。</li>
+</ol>
+<pre><code class="language-bash">python3 model-aware-data-curation/code/demo.py
+python3 -m unittest discover -s model-aware-data-curation/tests -v
+</code></pre>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>路线图</h2>
+<blockquote class="pq">
+<p>目标：把“选数据”从静态过滤，升级为 <strong>model-in-the-loop 的控制系统</strong>。按下面三阶段走，每阶段都有可验证产出。</p>
+</blockquote>
+<h3>Phase 1 — 统一框架（Day 1–2）</h3>
+<ul>
+<li>读 <code>01</code> 建立 Value × Coverage × Safety 的统一优化式，理解 <strong>选有用的、补缺的、不添乱的</strong>；</li>
+<li>读 <code>02</code> 掌握归因到目标化选择的演进：Influence → TracIn/TRAK → LESS/DataInf → GradAlign；</li>
+<li>读 <code>10</code> 对比 LESS/DataInf 的梯度估值与 RICo 的 ICL 干预估值，理解 function-space proxy 的成本优势与偏差；</li>
+<li>产出：能说清为什么不能把 value、coverage、safety 压成一个 cosine score，也不能把 ICL contribution 直接当成 SGD contribution。</li>
+</ul>
+<h3>Phase 2 — 覆盖与生成（Day 3–5）</h3>
+<ul>
+<li>读 <code>03</code>：embedding diversity → G-Vendi，proxy 选择（Qwen2.5-0.5B-Instruct 不做 warm-up，1024维投影， $\rho=0.909$ /\$0.898 $/$ 0.772\$）；</li>
+<li>读 <code>04</code>：Prismatic 三步循环，稀疏簇生成与质量门；</li>
+<li>读 <code>09</code>：SPICE 的 Fisher/log-det coverage + selected-set conflict，以及四种梯度几何的边界；</li>
+<li>动手：跑 <code>code/demo.py</code> 看 G-Vendi / SPICE / 隔离度计算。</li>
+</ul>
+<h3>Phase 3 — 系统与落地（Day 6–10）</h3>
+<ul>
+<li>读 <code>06</code>：proxy 选择五原则（白盒可微、loss 匹配、LoRA/head、家族一致性、ranking 相关性验证）与 refresh 策略；</li>
+<li>读 <code>05</code> + <code>07</code>：安全/持续学习约束，coding-data flywheel 的失败簇 → 生成 → 执行验证 → 训练 → 回归；</li>
+<li>读 <code>08</code>：与 <code>ai-data/</code> 的边界，避免重复造笔记；</li>
+<li>产出：一个带质量门、conflict gate、G-Vendi 监控和 shadow mode 的最小 curation job。</li>
+</ul>
+<pre><code class="language-text">01 统一框架 ──► 02 梯度估值 / 10 ICL估值 ──► 03 覆盖 (G-Vendi/Fisher)
+      │                        │                         │
+      ▼                   ▼                      ▼
+06 系统架构 ◄── 09 协调与冲突 ◄── 04 主动生成 (Prismatic)
+      │                   │
+      ▼                   ▼
+05 安全/持续学习 ──► 07 coding flywheel
+</code></pre>
+<p>完成后，你会得到：<strong>一套可复用的 gradient / ICL probe layer + 三维 dashboard（correctness × target value × coverage）+ 可回放的版本化数据版本</strong>。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>核心判断</h2>
+<p>Prismatic Synthesis 把原本分开的三段串成闭环：</p>
+<p>$$\underbrace{\text{LESS-like target signal}}_{\text{想学什么}} +\underbrace{\text{G-Vendi coverage}}_{\text{还缺什么}} +\underbrace{\text{synthetic generation}}_{\text{主动补什么}}.$$</p>
+<p>但它仍是前沿而非成熟范式：</p>
+<ul>
+<li>G-Vendi 测的是<strong>给定代理模型下</strong>的梯度方向覆盖，不自动保证 correctness、safety 或无污染；</li>
+<li>Prismatic 的 $\rho\approx0.9$ 来自论文控制实验中的 Spearman 相关，不应外推成跨任务定律；</li>
+<li>SPICE 的 Fisher/log-det 衡量 coverage，selected-set negative cosine 衡量 optimization coherence；两者不是同一个几何量；</li>
+<li>diversity、selected-set conflict、protected-set retention 与 unlearnability 分别回答“缺不缺”“抵不抵消”“伤不伤旧能力”“学不学得进去”，不能混成一个 cosine score；</li>
+<li>GradAlign、GrADS、OGS 的适用场景不同，不能把“高价值”“高覆盖”“低冲突”压成一个无条件总分；</li>
+<li>RICo 用受控 ICL 效应近似训练价值，降低了逐样本梯度成本，但 ICL contribution 不等于 SGD contribution，且 assessment set 本身定义了价值函数；</li>
+<li>生产系统应保留质量门、执行验证、去污染和周期性全量评估。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Verified headline numbers</h2>
+<ul>
+<li><strong>TRAK (ICML 2023)</strong>：原论文措辞是用 <em>a handful of trained models</em> 匹配需要 <em>thousands of models</em> 的 attribution 方法；没有把 “handful” 固定成一个通用数字。</li>
+<li><strong>Prismatic Synthesis (NeurIPS 2025)</strong>：分析覆盖 <strong>over 300 training runs</strong>；G-Vendi 与 OOD 表现的 **Spearman $\rho\approx0.9$ ** 同时报告于 NLI 和数学推理；论文还构造了超过 300 万条样本的合成池。</li>
+<li><strong>Prismatic 生成闭环</strong>：梯度空间聚类 → few-shot 生成 → 只接收稀疏簇样本；论文实例使用最稀疏的簇（示例为 top 20%，具体实现为保留最小的 $k/2$ 个簇）。</li>
+<li><strong>SPICE (ICLR 2026)</strong>：从约 97.5K 条训练池选择 10%；Qwen2-7B 平均 58.0、full-data 56.4，LLaMA2-7B 平均 31.1、full-data 30.8。经典 submodular/curvature guarantee 直接对应纯 Fisher/log-det greedy，不完整覆盖加入 sign-sensitive conflict penalty 后的实际 score。</li>
+<li><strong>RICo (2025 preprint / AAAI 2026 accepted)</strong>：摘要报告 LLaMA3.1-8B 使用 15% RICo 数据比全量数据平均高 5.42 个百分点；原始 candidate × assessment 评分为 $O(nm)$ ，蒸馏为轻量 selector 后对全池为 $O(m)$ 。这不证明 ICL contribution 与真实 SGD contribution 等价。</li>
+</ul>
+<p>所有数字与出处见 <a href="papers.md"><code>papers.md</code></a>。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/model-aware-data-curation/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

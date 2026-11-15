@@ -1,4 +1,6 @@
 # Day 2 - FSDP intro
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-02-fsdp/README.reading.html
+
 
 - Learning Goal: 知道 FSDP 为什么比 DDP 省显存
 - Task: 把昨天的 mnist 改成 FSDP，对比显存/速度

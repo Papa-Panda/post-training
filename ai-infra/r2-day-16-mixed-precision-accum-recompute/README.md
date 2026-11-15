@@ -1,4 +1,6 @@
 # r2-Day16 — BF16 混合精度 / 梯度累积 / Activation Checkpoint：把每卡的张量再压薄
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-16-mixed-precision-accum-recompute/README.reading.html
+
 
 ## Connection to Prev
 

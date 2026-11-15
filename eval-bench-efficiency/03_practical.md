@@ -1,4 +1,6 @@
 # 03 Practical — 给 agentic RL 的 1% 子集手册
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-bench-efficiency/03_practical.reading.html
+
 
 ## 目标：1% 题 ≈ 99% 排序
 

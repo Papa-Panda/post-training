@@ -1,4 +1,6 @@
 # r2-Day17 — Megatron / DeepSpeed / FSDP 选型：一句话区分三个框架
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-17-framework-selection/README.reading.html
+
 
 ## Connection to Prev
 

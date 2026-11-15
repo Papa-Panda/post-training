@@ -1,4 +1,6 @@
 # AI Infra 45天 · 计划覆盖图（不含设施 PUE）
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/ROADMAP_45D.reading.html
+
 
 > 本文是计划中的课程覆盖图，不代表 45 个主题均已实现或验证。完成状态以各目录中的代码、测试与测量记录为准。
 > 目标：建立纯 AI Infra 全链路的系统直觉，能讲清每层 **牺牲什么、换取什么、何时不赚**。

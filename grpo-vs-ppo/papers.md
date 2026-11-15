@@ -1,4 +1,6 @@
 # Papers & primary sources
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/papers.reading.html
+
 
 只列本专题实际依赖的来源。论文中的结果只证明其公开实验设置，不自动外推到任意模型、reward 或集群。
 

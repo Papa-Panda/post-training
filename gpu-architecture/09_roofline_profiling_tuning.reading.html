@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 — Roofline、Profiling 与性能调优</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">GPU Architecture</span>
+    <h1>09 — Roofline、Profiling 与性能调优</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. Roofline 是假设生成器</a><a href="#sec-2">2. Hierarchical Roofline</a><a href="#sec-3">3. 一个正确的调优闭环</a><a href="#sec-4">4. 症状—指标—动作</a><a href="#sec-5">5. Effective bandwidth 与 MFU</a><a href="#sec-6">6. Occupancy 与利用率分开</a><a href="#sec-7">7. Benchmark 纪律</a><a href="#sec-8">8. 可运行 Roofline 模型</a><a href="#sec-9">9. 从 Roofline 到 LLM</a><a href="#sec-10">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>1. Roofline 是假设生成器</h2>
+<p>算术强度：</p>
+<p>$$I=\frac{F}{Q}\quad[\mathrm{FLOP/byte}].$$</p>
+<p>单层 Roofline：</p>
+<p>$$P_{\mathrm{attainable}}\le\min(P_{\mathrm{peak}},B I).$$</p>
+<p>ridge point：</p>
+<p>$$I^*=\frac{P_{\mathrm{peak}}}{B}.$$</p>
+<p>若 $I&lt;I^*$ ，模型预测 bandwidth-bound；若 $I&gt;I^*$ ，预测 compute-bound。这里 $Q$ 必须说明是哪一级流量（HBM、L2、shared 或 link）， $P/B$ 必须使用同一设备/精度/口径。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Hierarchical Roofline</h2>
+<p>一个 kernel 可能对 HBM 有高复用，却受 L2/shared bandwidth 限制。可分别写：</p>
+<p>$$P\le\min(P_{\mathrm{peak}},B_{\mathrm{HBM}}I_{\mathrm{HBM}},B_{\mathrm{L2}}I_{\mathrm{L2}},B_{\mathrm{SMEM}}I_{\mathrm{SMEM}}).$$</p>
+<p>这解释了为什么“HBM throughput 不满”不能直接判定 compute-bound：瓶颈可能在 latency、L2、shared bank conflicts、instructions 或并发不足。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 一个正确的调优闭环</h2>
+<pre><code class="language-text">定义 workload/正确性
+  -&gt; baseline + timeline
+  -&gt; 提出瓶颈假设
+  -&gt; 选择能证伪的 counters
+  -&gt; 一次只改一个机制
+  -&gt; 重新测 correctness + latency distribution
+  -&gt; 检查跨 shape/device 的回归
+</code></pre>
+<p>不要先打开数百 counters 再找故事。Profiler 本身会增加 overhead；先用 timeline 找区间，再对单 kernel 做深分析。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. 症状—指标—动作</h2>
+<table>
+<thead>
+<tr>
+<th>假设</th>
+<th>观测</th>
+<th>候选动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HBM bandwidth-bound</td>
+<td>高 DRAM throughput、低 $I$ 、memory stalls</td>
+<td>合并访问、复用、fusion、压缩 dtype</td>
+</tr>
+<tr>
+<td>compute/Tensor Core-bound</td>
+<td>高 pipe utilization、足够 $I$</td>
+<td>更好指令/shape、减少多余 FLOPs、负载平衡</td>
+</tr>
+<tr>
+<td>latency-bound</td>
+<td>throughput 均不高、dependency stalls、grid 小</td>
+<td>增加并发/ILP、合并小 kernel、Graph</td>
+</tr>
+<tr>
+<td>occupancy/resource-bound</td>
+<td>register/shared ceiling、少 active warps</td>
+<td>调 tile/block/stages；防 spill</td>
+</tr>
+<tr>
+<td>branch/irregular</td>
+<td>active lanes 低、divergence</td>
+<td>数据分组、warp specialization、改算法</td>
+</tr>
+<tr>
+<td>launch-bound</td>
+<td>timeline 多短 kernel/gaps</td>
+<td>fusion、Graph、batching、persistent kernel</td>
+</tr>
+<tr>
+<td>collective-bound</td>
+<td>NCCL 占关键路径、链路利用/step 多</td>
+<td>bucket、算法/拓扑/rank placement、overlap</td>
+</tr>
+<tr>
+<td>page/migration-bound</td>
+<td>faults/migrations</td>
+<td>prefetch、placement、working-set 分块</td>
+</tr>
+</tbody>
+</table>
+<p>动作只是实验候选，不是看到一个 counter 就自动套用。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Effective bandwidth 与 MFU</h2>
+<p>有效带宽：</p>
+<p>$$B_{\mathrm{eff}}=\frac{Q_{\mathrm{useful}}}{T}.$$</p>
+<p>若 $Q_{\mathrm{useful}}$ 不含过取/重试，它与物理 DRAM bytes 不是同一量。Memory Load/Store Efficiency 描述 requested vs transferred；DRAM throughput 描述实际 memory subsystem activity。</p>
+<p>Model FLOPs Utilization 常写为：</p>
+<p>$$\mathrm{MFU}=\frac{F_{\mathrm{model}}/T}{P_{\mathrm{peak}}}.$$</p>
+<p>必须声明 model FLOPs convention、精度峰值、dense/sparse 口径和是否含 recompute；否则不同报告不可比。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. Occupancy 与利用率分开</h2>
+<ul>
+<li>occupancy：可驻留 warps 比例；</li>
+<li>issue/pipe utilization：执行资源实际繁忙程度；</li>
+<li>achieved occupancy：运行时平均 active warps；</li>
+<li>eligible warps：当前可发射而非等待的 warps。</li>
+</ul>
+<p>高 occupancy + 低 eligible warps 可能说明 memory dependency/barrier；低 occupancy + 高 compute utilization 可能完全健康。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. Benchmark 纪律</h2>
+<ul>
+<li>固定 shape/dtype/layout/seed；</li>
+<li>warmup，避免首次 JIT/library plan/clock state；</li>
+<li>使用 device events 测 kernel，timeline 测 end-to-end；</li>
+<li>报 median 与 tail，不只报最好一次；</li>
+<li>校验输出和 numerical tolerance；</li>
+<li>记录 GPU 型号、功耗模式、driver/runtime/library；</li>
+<li>标注 theoretical estimate、simulated 和 measured，绝不混写。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>8. 可运行 Roofline 模型</h2>
+<p><code>roofline()</code> 输入 FLOPs、bytes、peak compute、bandwidth，返回 $I$ 、ridge、bound 与理想时间。它有意不包含 overlap/cache/launch；作用是验证单位与数量级，并指导下一次测量。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>9. 从 Roofline 到 LLM</h2>
+<ul>
+<li>大 GEMM 通过 tiling 提高 $I$ ，常接近 compute roof；</li>
+<li>elementwise/norm/embedding 更常被 bytes 限制；</li>
+<li>decode 中 batch/token 维度小，权重与 KV traffic 摊薄困难；</li>
+<li>multi-GPU 还要加 network roof： $P\le B_{\mathrm{link}}I_{\mathrm{comm}}$ 。</li>
+</ul>
+<p>下一章将这些信号映射到 Transformer。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>导航</h2>
+<ul>
+<li>上一篇：<a href="08_virtual_memory_iommu_smmu_uvm.md">08 VM/IOMMU/UVM</a></li>
+<li>下一篇：<a href="10_llm_training_inference_mapping.md">10 LLM 训练/推理映射</a></li>
+<li>可运行模型：<a href="code/gpu_models.py">code/gpu_models.py</a></li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/gpu-architecture/09_roofline_profiling_tuning.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

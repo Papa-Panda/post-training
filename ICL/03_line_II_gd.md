@@ -1,4 +1,6 @@
 # 03 线 II：线性注意力与一步梯度下降
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/03_line_II_gd.reading.html
+
 
 [← 02 Bayesian](02_line_I_bayesian.md) · [下一章：Circuit →](04_line_III_circuit.md)
 

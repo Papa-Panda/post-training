@@ -1,4 +1,6 @@
 # Day 11 — Paper2 机械负载 → GPU 热/功耗
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-11-paper2-mech-load/README.reading.html
+
 
 > Date: 2026-08-11 (Foundation 1-3mo, Reasoning Data/Papers)  
 > Source row: `ai_daily.csv:2026-08-11` — Paper2 机械负载 / 非线性物理建模  

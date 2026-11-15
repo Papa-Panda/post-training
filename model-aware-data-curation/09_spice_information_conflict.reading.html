@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 — SPICE：Fisher 覆盖之后，如何选出协调的集合</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Model-Aware Data Curation</span>
+    <h1>09 — SPICE：Fisher 覆盖之后，如何选出协调的集合</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. 先给定位：创新主要在 set-level selection，不在 gradient representation</a><a href="#sec-3">2. Fisher/log-det：覆盖新的梯度方向</a><a href="#sec-4">3. 第一条关键边界：Fisher coverage 对符号不敏感</a><a href="#sec-5">4. SPICE 的实际选择规则：给负向抵消加罚项</a><a href="#sec-6">5. 理论解释在哪里，保证又止于哪里</a><a href="#sec-7">6. 四种不能混成一个 cosine 的梯度几何</a><a href="#sec-8">7. 同一个二维例子，看清四者不等价</a><a href="#sec-9">8. 实验结果与 proxy 边界</a><a href="#sec-10">9. 可运行最小实现</a><a href="#sec-11">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>内容类型</dt><dd>单篇论文精读 + 跨论文几何辨析</dd><dt>Paper</dt><dd><strong>SPICE: Submodular Penalized Information-Conflict Selection for Efficient Large Language Model Training</strong></dd><dt>Venue</dt><dd>ICLR 2026</dd><dt>Sources</dt><dd><a href="<a href="https://arxiv.org/pdf/2601.23155v2">https://arxiv.org/pdf/2601.23155v2</a>">arXiv v2</a> · <a href="<a href="https://openreview.net/attachment?id=9rCRy58TPF&amp;name=pdf">https://openreview.net/attachment?id=9rCRy58TPF&amp;name=pdf</a>">OpenReview</a> · <a href="<a href="https://github.com/Chang-pw/SPICE">https://github.com/Chang-pw/SPICE</a>">official code</a></dd><dt>适用范围</dt><dd>论文研究 SFT 数据选择；RL 和多模态只被列为未来方向。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. 先给定位：创新主要在 set-level selection，不在 gradient representation</h2>
+<p>SPICE 仍从每个样本的 loss gradient 出发：</p>
+<p>$$g_i=\nabla_\theta \ell(z_i;\theta).$$</p>
+<p>per-sample gradient、proxy model、随机投影和 Fisher information 都已有清晰前序工作。SPICE 新增的关键不是一种新的 gradient embedding，而是一个逐步构造集合的规则：</p>
+<ol>
+<li>用 Fisher/log-det 找仍能增加 information volume 的候选；</li>
+<li>用 sign-sensitive penalty 避免候选抵消已选集合的平均更新；</li>
+<li>当边际信息增益衰减到阈值时提前停止。</li>
+</ol>
+<p>因此最准确的归类是：</p>
+<blockquote class="pq">
+<p><strong>SPICE 是 information coverage + selected-set optimization coherence，不是通用的数据价值函数，也不是 retention safety 方法。</strong></p>
+</blockquote>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Fisher/log-det：覆盖新的梯度方向</h2>
+<p>对已选集合 $S$ ，定义经验 Fisher 矩阵：</p>
+<p>$$F_S=\sum_{i\in S}g_i g_i^\top.$$</p>
+<p>信息效用为：</p>
+<p>$$U(S)=\log\det(I+\alpha F_S).$$</p>
+<p>加入候选 $x$ 的边际增益可由 matrix determinant lemma 写为：</p>
+<p>$$\Delta_x(S) = \log\left( 1+\alpha g_x^\top (I+\alpha F_S)^{-1}g_x \right).$$</p>
+<p>如果 $g_x$ 主要落在当前 Fisher 尚未覆盖的方向，逆矩阵项不会把它压小， $\Delta_x(S)$ 较大；如果它与已选子空间高度重复，增益就会下降。</p>
+<p>纯 $U(S)$ 是 normalized、monotone、submodular。固定预算 $k$ 下，纯 Fisher greedy 有经典保证：</p>
+<p>$$U(S_{\mathrm{greedy}}) \ge \left(1-\frac1e\right)U(S^\star).$$</p>
+<p>这部分是 D-optimal design / Fisher selection 的共同数学骨架，不是 SPICE 独有的 gradient representation。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. 第一条关键边界：Fisher coverage 对符号不敏感</h2>
+<p>对任意梯度 $g$ ：</p>
+<p>$$gg^\top=(-g)(-g)^\top.$$</p>
+<p>所以给定同一个已选集合， $g$ 和 $-g$ 的 Fisher marginal gain 完全相同：</p>
+<p>$$\Delta_g(S)=\Delta_{-g}(S).$$</p>
+<p>这意味着 Fisher/log-det 能判断“是否带来新的轴或新的 information volume”，却不能判断“这个更新沿该轴向前还是向后”。</p>
+<p>例如，若当前集合平均梯度是 $e_1$ ，候选分别是 $e_1$ 与 $-e_1$ ：</p>
+<ul>
+<li>两者对 Fisher 都贡献 $e_1e_1^\top$ ；</li>
+<li>但前者强化当前更新，后者抵消当前更新。</li>
+</ul>
+<p>只靠 log-det 无法区分它们。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. SPICE 的实际选择规则：给负向抵消加罚项</h2>
+<p>令已选集合平均梯度为：</p>
+<p>$$\bar g_S=\frac1{|S|}\sum_{i\in S}g_i.$$</p>
+<p>SPICE 定义候选相对于已选集合的冲突：</p>
+<p>$$\mathrm{conflict}(x\mid S) = \max\left\{ 0, -\frac{g_x^\top\bar g_S} {\lVert g_x\rVert_2\lVert\bar g_S\rVert_2+\eta} \right\}.$$</p>
+<p>实际 greedy score 是：</p>
+<p>$$\mathrm{score}(x\mid S) = \Delta_x(S) - \lambda\,\mathrm{conflict}(x\mid S).$$</p>
+<p>因此：</p>
+<ul>
+<li>$g_x$ 与 $\bar g_S$ 同向：penalty 为 0；</li>
+<li>二者正交：penalty 为 0；</li>
+<li>二者反向：按负 cosine 的强度扣分。</li>
+</ul>
+<p>论文默认 $\lambda=0.1$ ，并报告 $\lambda\in[0.1,0.5]$ 时表现较稳定。SPICE+ 还可用信息增益而非总 score 提前停止：</p>
+<p>$$\Delta_{x_t}(S_{t-1}) \le \omega\Delta_{x_1}(\varnothing),$$</p>
+<p>默认 $\omega=0.5$ 。</p>
+<p>这解决的是<strong>训练集合内部的更新协调性</strong>：在仍获得信息覆盖的同时，减少下一条数据对当前 aggregate update 的抵消。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. 理论解释在哪里，保证又止于哪里</h2>
+<p>论文定义空集合上的单点基线：</p>
+<p>$$b_x=\Delta_x(\varnothing) =\log(1+\alpha\lVert g_x\rVert_2^2),$$</p>
+<p>以及边际增益衰减：</p>
+<p>$$\epsilon_x(S)=\Delta_x(S)-b_x\le 0.$$</p>
+<p>其近似分析把衰减幅度连接到 pairwise gradient interaction：</p>
+<p>$$|\epsilon_x(S)| \le C \frac{ \alpha^2\sum_{y\in S}(g_x^\top g_y)^2 }{ 1+\alpha\lVert g_x\rVert_2^2 }.$$</p>
+<p>也可用 total curvature：</p>
+<p>$$c= 1-\min_x \frac{\Delta_x(D\setminus\{x\})} {\Delta_x(\varnothing)}$$</p>
+<p>写出更细的数据依赖保证：</p>
+<p>$$U(S_{\mathrm{greedy}}) \ge \frac{1-e^{-c}}{c}U(S^\star).$$</p>
+<p>但这里有一个不能略过的逻辑边界：理论中的 interaction 是</p>
+<p>$$(g_x^\top g_y)^2,$$</p>
+<p>它对正负号不敏感；实际 conflict penalty 却只惩罚</p>
+<p>$$g_x^\top\bar g_S&lt;0.$$</p>
+<p>所以二者控制的不是同一个量：</p>
+<ul>
+<li>理论 bound 控制 interaction magnitude 与 Fisher marginal-gain decay；</li>
+<li>实际 penalty 控制 negative alignment 与更新抵消；</li>
+<li>经典 submodular / curvature guarantee 直接覆盖的是纯 $U(S)$ greedy；</li>
+<li>加入依赖当前集合均值的 sign-sensitive penalty 后，论文没有完整证明新 score 仍是 monotone submodular，因而不能把原保证原封不动地搬给 SPICE score。</li>
+</ul>
+<p>工程动机与实验结果可以成立，但不能把它们写成“理论已经证明负冲突 penalty 最优”。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. 四种不能混成一个 cosine 的梯度几何</h2>
+<h3>6.1 Diversity / coverage：集合还缺哪个方向？</h3>
+<p>对象是整个已选集合的 span、kernel spectrum 或 information volume：</p>
+<p>$$\Delta_x^{\mathrm{cover}}(S) = \log\det(I+\alpha F_{S\cup\{x\}}) - \log\det(I+\alpha F_S).$$</p>
+<p>参照物是<strong>已覆盖子空间</strong>，输出是 set-dependent marginal gain。它不需要一个单独的 target direction，而且 Fisher 外积本身 sign-blind。</p>
+<h3>6.2 Conflict / coherence：会不会抵消当前训练集合？</h3>
+<p>SPICE 比较：</p>
+<p>$$g_x\quad\text{vs.}\quad\bar g_S.$$</p>
+<p>参照物是<strong>由 selector 自己构造、不断变化的已选集合均值</strong>。它回答的是 optimizer coherence，而不是业务目标价值或安全保留。</p>
+<h3>6.3 Retention：会不会损害明确要保护的能力？</h3>
+<p>真正的 retention anchor 来自 held-out general/safety/replay set：</p>
+<p>$$g_{\mathrm{protected}} = \frac1{|P|}\sum_{p\in P}\nabla_\theta\ell(p;\theta),$$</p>
+<p>$$\mathrm{risk}_{\mathrm{retain}}(x) = \max\{0,-\cos(g_x,g_{\mathrm{protected}})\}.$$</p>
+<p>参照物是<strong>外部定义的 protected objective</strong>。即使 $g_x$ 与 $\bar g_S$ 同向、SPICE conflict 为 0，它也可能与 $g_{\mathrm{protected}}$ 反向并导致遗忘。因此 selected-set conflict 不等于 retention safety。</p>
+<h3>6.4 Unlearnability：当前模型是否有可复用表征把它学进去？</h3>
+<p>梯度孤立只是一个静态症状：</p>
+<p>$$\mathrm{Isolation}(x) = 1- \max_{y\in D\setminus\{x\}} |\cos(g_x,g_y)|.$$</p>
+<p>高 isolation 可能表示：</p>
+<ol>
+<li>真正稀缺而有用的新能力；</li>
+<li>标签错误或低质量 reasoning；</li>
+<li>当前表示空间缺乏可复用 feature，导致 RL/SFT 难以学会；</li>
+<li>proxy gradient 噪声。</li>
+</ol>
+<p>所以 unlearnability 需要时间维度和训练证据，例如 reward trend、重复正确 rollout 后的参数响应、跨 checkpoint gradient similarity 或 mid-training 后可学性变化。它不能由一次 cosine 或“离群 = 多样”直接推出。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. 同一个二维例子，看清四者不等价</h2>
+<p>设当前已选均值、保护梯度和目标梯度分别为：</p>
+<p>$$\bar g_S=e_1, \qquad g_{\mathrm{protected}}=-e_1, \qquad g_{\mathrm{target}}=e_1.$$</p>
+<p>候选 $x$ 的梯度为 $g_x=e_1$ ：</p>
+<ul>
+<li>selected-set conflict $=0$ ，因为它与 $\bar g_S$ 同向；</li>
+<li>retention risk $=1$ ，因为它与 $g_{\mathrm{protected}}$ 完全反向；</li>
+<li>target alignment $=1$ ；</li>
+<li>Fisher coverage marginal gain 取决于当前在 $e_1$ 上已积累多少信息，而不由前三个 cosine 决定。</li>
+</ul>
+<p>再看孤立候选 $g_u=e_2$ ：</p>
+<ul>
+<li>对只覆盖 $e_1$ 的集合，它提供很高的方向 novelty；</li>
+<li>但对 $g_{\mathrm{target}}=e_1$ ，target alignment 为 0；</li>
+<li>若它来自错误标签或当前模型无法形成稳定 credit assignment，则“高 diversity”也不等于“可学且有用”。</li>
+</ul>
+<p>因此四个信号应保留成分开的 feature、constraint 和 dashboard，而不是压成一个没有语义边界的 cosine score。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. 实验结果与 proxy 边界</h2>
+<p>论文从约 97.5K 条、覆盖 math、code、ShareGPT 和 Alpaca 的池中固定选择 10%，在 Qwen2-7B 与 LLaMA2-7B 上评估 8 个 benchmark：</p>
+<ul>
+<li>Qwen2-7B：SPICE 平均 58.0，full-data 为 56.4；</li>
+<li>LLaMA2-7B：SPICE 平均 31.1，full-data 为 30.8；</li>
+<li>Qwen2-7B 的 IFEval：SPICE 38.6，full-data 为 33.5。</li>
+</ul>
+<p>同 family 的小 proxy 到大 target transfer 较稳定；LLaMA proxy 到 Qwen2-7B 较弱，说明 gradient geometry 不能假定跨 architecture 不变。</p>
+<p>数字核查边界：Table 2 把 LLaMA2 平均提升写成 <code>+1.8</code>，但表中平均分是 $31.1-30.8=0.3$ ；<code>1.8</code> 是八项 benchmark 差值之和，不是平均提升。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. 可运行最小实现</h2>
+<p><a href="code/model_aware_curation.py"><code>code/model_aware_curation.py</code></a> 新增：</p>
+<ul>
+<li><code>fisher_logdet</code> 与 <code>fisher_marginal_gain</code>；</li>
+<li><code>selected_set_conflict</code> 与 <code>spice_score</code>；</li>
+<li><code>spice_greedy_select</code>；</li>
+<li><code>gradient_isolation_scores</code>。</li>
+</ul>
+<p><a href="tests/test_model_aware_curation.py"><code>tests/test_model_aware_curation.py</code></a> 明确验证：</p>
+<ol>
+<li>Fisher/log-det 对 $g$ 与 $-g$ 完全等价；</li>
+<li>sign-sensitive selected-set conflict 能区分二者；</li>
+<li>selected-set conflict 与 protected-gradient retention 可以给出相反判断；</li>
+<li>孤立梯度可以有高 novelty、同时没有 target value，因此不能自动标成 useful diversity。</li>
+</ol>
+<p>这个 toy implementation 用完整小矩阵强调数学语义；生产实现需要低秩 sketch、Cholesky/rank-one update、候选预筛和 proxy-transfer 监控。</p>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>导航</h2>
+<ul>
+<li>上一篇：<a href="08_ai_data_boundary.md">08 与 ai-data 边界</a></li>
+<li>下一篇：<a href="10_rico_icl_valuation.md">10 RICo：ICL 估值</a></li>
+<li>回到：<a href="README.md">目录 README</a> | <a href="papers.md">论文证据</a> | <a href="README.md#路线图">路线图</a></li>
+</ul>
+<blockquote class="pq">
+<p>串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 10 RICo → 论文证据</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/model-aware-data-curation/09_spice_information_conflict.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

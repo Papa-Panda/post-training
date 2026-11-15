@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 — Systems：memory、communication、throughput、sample efficiency</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">GRPO vs PPO</span>
+    <h1>04 — Systems：memory、communication、throughput、sample efficiency</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. 两条训练数据流</a><a href="#sec-2">2. Model-state memory accounting</a><a href="#sec-3">3. Communication accounting</a><a href="#sec-4">4. Compute 与吞吐模型</a><a href="#sec-5">5. Synchronization 与 staleness</a><a href="#sec-6">6. Multi-step / tool-use masks</a><a href="#sec-7">7. Sample-efficiency dashboard</a><a href="#sec-8">8. Deployment decision checklist</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>算法名不会直接决定集群成本。先画数据流，再做逐项 accounting。</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. 两条训练数据流</h2>
+<pre><code class="language-text">critic PPO:
+  prompts -&gt; behavior rollout -&gt; reward/env -&gt; critic values -&gt; GAE
+          -&gt; actor forward/backward + critic forward/backward -&gt; refresh snapshot
+
+outcome GRPO:
+  prompts -&gt; G grouped behavior rollouts -&gt; reward/env -&gt; group statistics
+          -&gt; actor forward/backward -&gt; refresh snapshot
+</code></pre>
+<p>两者都可能需要 reference log-probabilities 做 KL；model-based reward 还会增加 reward-model inference。rule/verifier reward 则没有 reward-model parameter memory，但可能有 sandbox、compiler 或 tool-service 成本。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Model-state memory accounting</h2>
+<p>设模型有 $P$ 个参数，不要用“几个模型”直接推显存。按状态拆：</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th style="text-align: right;">actor</th>
+<th style="text-align: right;">critic</th>
+<th style="text-align: right;">reference</th>
+<th style="text-align: right;">behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>weights</td>
+<td style="text-align: right;">trainable</td>
+<td style="text-align: right;">PPO 中 trainable</td>
+<td style="text-align: right;">frozen</td>
+<td style="text-align: right;">可由 actor snapshot 或仅存 old log-probs</td>
+</tr>
+<tr>
+<td>gradients</td>
+<td style="text-align: right;">yes</td>
+<td style="text-align: right;">PPO 中 yes</td>
+<td style="text-align: right;">no</td>
+<td style="text-align: right;">no</td>
+</tr>
+<tr>
+<td>optimizer states</td>
+<td style="text-align: right;">yes</td>
+<td style="text-align: right;">PPO 中 yes</td>
+<td style="text-align: right;">no</td>
+<td style="text-align: right;">no</td>
+</tr>
+<tr>
+<td>activations</td>
+<td style="text-align: right;">backward 所需</td>
+<td style="text-align: right;">PPO backward 所需</td>
+<td style="text-align: right;">通常 inference only</td>
+<td style="text-align: right;">rollout engine KV cache</td>
+</tr>
+</tbody>
+</table>
+<p>若 bf16 weights 每参数约 2 bytes，仅 weight 一项是 $2P$ bytes；Adam moments、master weights、gradients 的具体 bytes 取决于 optimizer precision、sharding、offload 与实现。于是删除“GRPO 固定省 30–50%”或“70B 固定省多少 GB”这类脱离配置的数字。</p>
+<p>GRPO 确定省掉的是 <strong>critic 的 weights/gradients/optimizer/activations/checkpoint/collectives path</strong>。但总 peak 是否明显下降取决于谁主导：</p>
+<ul>
+<li>rollout KV cache 可能主导长上下文 generation；</li>
+<li>actor optimizer state 可能主导训练；</li>
+<li>reference 可 sharding/offload 或预计算 log-probs；</li>
+<li>colocated rollout 与 trainer 的 peak 不同于 disaggregated deployment；</li>
+<li>critic 可以参数共享、较小模型或独立同规模模型，不能默认必为 “1x actor”。</li>
+</ul>
+<p>建议记录实测 breakdown：<code>actor_state</code>, <code>critic_state</code>, <code>ref_state</code>, <code>activations</code>, <code>kv_cache</code>, <code>allocator_reserved</code>，而不是只报 GPU utilization。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. Communication accounting</h2>
+<h3>Critic PPO 多出来的通信</h3>
+<ul>
+<li>critic data-parallel gradient reduce-scatter / all-reduce；</li>
+<li>sharded critic parameter all-gather；</li>
+<li>critic optimizer/checkpoint I/O；</li>
+<li>rollout token/hidden-state 到 critic trainer 的传输（依部署而定）。</li>
+</ul>
+<h3>GRPO 多出来或放大的通信</h3>
+<ul>
+<li>同 prompt 的 $G$ 个 rewards 必须在 group 边界聚合；若 group 跨 ranks，要 all-gather/reduce group statistics；</li>
+<li>rollout 数增大后，tokens、masks、old log-probs、reference log-probs 的搬运量一起增长；</li>
+<li>dynamic sampling 需要 scheduler 不断补齐 non-degenerate groups，容易产生 stragglers；</li>
+<li>variable-length responses 造成 padding 或 load imbalance。</li>
+</ul>
+<p>因此“无 critic = 通信更少”通常方向正确，但不是无条件：当 rollout-to-trainer payload 或 group synchronization 主导时，节省可能被抵消。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Compute 与吞吐模型</h2>
+<p>用一阶 wall-time 分解：</p>
+<p>$$T_{step}=T_{rollout}+T_{reward}+T_{logp/ref}+T_{actor\ train}+\mathbf 1_{PPO}(T_{critic\ fwd}+T_{critic\ train})+T_{sync}+T_{idle}$$</p>
+<p>固定 rollout token budget 时，GRPO 的 $G$ 不创造免费样本：</p>
+<p>$$N_{completion}=N_qG,\qquad B_{tok}\approx\sum_{q=1}^{N_q}\sum_{i=1}^{G}T_{q,i}$$</p>
+<p>增加 $G$ 的收益是更稳定的 within-prompt comparison，成本是 prompt coverage 降低、tail latency 增大、KV cache 增长。应该 sweep $G$ ，画 <strong>reward/eval gain vs generated tokens</strong>，而不是沿用无来源的固定 group size。</p>
+<p>Prefix/KV reuse 可以降低同 prompt group generation 的 prefill 成本，但 decode 仍近似随总 generated tokens 增长。不同 engine 的 continuous batching、prefix caching 与 memory layout 会改变收益，必须 benchmark 当前版本。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Synchronization 与 staleness</h2>
+<p>同步 loop 最简单：rollout 全完成后再训练。问题是 longest response / slowest tool 决定 barrier。</p>
+<p>异步 loop 提高设备利用率，但引入 behavior lag。每条 sample 至少携带：</p>
+<pre><code class="language-text">policy_version, prompt_id, response_id, token_ids, action_mask,
+old_logprobs, rewards, terminated, truncated
+</code></pre>
+<p>训练侧监控：</p>
+<ul>
+<li>policy-version lag；</li>
+<li>token log-ratio quantiles 与 clip fraction；</li>
+<li>sample age；</li>
+<li>dropped-token fraction；</li>
+<li>group completeness（GRPO）；</li>
+<li>environment failure vs policy failure。</li>
+</ul>
+<p>PPO clipping 和 GRPO clipping 都不是无限 staleness 的许可证。若 sample 太旧，应基于已验证的 acceptance rule drop/downweight，而不是伪装成 on-policy。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. Multi-step / tool-use masks</h2>
+<p>Trajectory 中常混有 assistant actions、tool outputs、system text 和 compaction summaries。policy loss 只能落在定义为 action 的 token 上；reward/critic state 可读取 observation，但不要对环境生成的 token 求 policy gradient。</p>
+<ul>
+<li><strong>terminated</strong>：任务自然结束，terminal bootstrap 通常为 0。</li>
+<li><strong>truncated</strong>：超时、context limit、基础设施中断；不一定代表环境终止，PPO 可能需要 value bootstrap。</li>
+<li><strong>invalid</strong>：sandbox crash、reward service error；应与真正的 task failure 分开统计。</li>
+</ul>
+<p>Outcome GRPO 可给整条 assistant action mask 广播一个 reward，但长轨迹 credit 很粗。critic PPO 可估计每个 history 的 value，却不会凭空修复错误/可 hack 的 reward。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. Sample-efficiency dashboard</h2>
+<p>至少同时报四种 denominator：</p>
+<ol>
+<li>per prompt；</li>
+<li>per completion；</li>
+<li>per generated token；</li>
+<li>per accelerator-hour。</li>
+</ol>
+<p>GRPO 还要报：<code>non_degenerate_group_rate</code>, <code>all_equal_rate</code>, reward unique count, group std quantiles, effective prompts after filtering。PPO 还要报：value explained variance、value error by horizon、bootstrap/truncation rate。两者都报 exact-match/pass reward 与独立 held-out eval，防止只优化训练 verifier。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>8. Deployment decision checklist</h2>
+<ul>
+<li>critic 是否能通过小规模 fit/eval 得到正 explained variance？</li>
+<li>verifier 是否可靠，environment failure 是否已单独标记？</li>
+<li>固定 token budget 下，增大 $G$ 是否真的提升 held-out metric？</li>
+<li>memory peak 的主项究竟是 critic、actor optimizer、activation 还是 KV cache？</li>
+<li>groups 是否跨 rank；group statistics 的 collective 是否可见？</li>
+<li>rollout/train 是否 colocated；权重同步成本是多少？</li>
+<li>response/token aggregation 的业务目标是什么？</li>
+</ul>
+<p>没有这些测量时，不能从“PPO”或“GRPO”标签推导固定 GPU 数、吞吐率或最佳超参数。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/grpo-vs-ppo/04_infra_tradeoffs.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

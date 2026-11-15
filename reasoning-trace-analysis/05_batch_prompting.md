@@ -1,4 +1,6 @@
 # 05 — Batch Prompting: 把问题打包，模型自己就想短了
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/05_batch_prompting.reading.html
+
 
 > 把多个问题打包进一次请求（batch prompting），推理 token 从平均 2,950 降到 710（降 $76\%$ ），准确率持平或提升。"Reasoning Under Constraint"（Saurabh Srivastava、Janit Bidhan 等，2511.04108）在 DeepSeek-R1 与 OpenAI-o1、13 个 benchmark 上报告了这个效应。
 >

@@ -1,4 +1,6 @@
 # 02 BenchBench / Efficient Benchmarking — 从 IRT 到特征选择
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-bench-efficiency/02_benchbench_efficient.reading.html
+
 
 ## HELM Efficient Benchmarking (arXiv:2308.11696v5)
 

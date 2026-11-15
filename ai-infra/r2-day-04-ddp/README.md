@@ -1,4 +1,6 @@
 # r2-Day04 — Distributed Data Parallel Semantics
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-04-ddp/README.reading.html
+
 
 ## Connection to Prev
 

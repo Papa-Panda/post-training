@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 — Batch Semantics</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Post-Training Framework</span>
+    <h1>04 — Batch Semantics</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. Four nested quantities</a><a href="#sec-2">2. Concrete example</a><a href="#sec-3">3. “Batch” may count prompts, trajectories, or tokens</a><a href="#sec-4">4. GRPO group integrity</a><a href="#sec-5">5. Token-balanced packing</a><a href="#sec-6">6. Loss normalization changes the estimator</a><a href="#sec-7">7. Reuse epochs and policy semantics</a><a href="#sec-8">8. Critic and actor batch sizes may differ</a><a href="#sec-9">9. Remainder policy</a><a href="#sec-10">10. Configuration validator</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>1. Four nested quantities</h2>
+<p>Names vary by framework, so define meanings before copying a configuration.</p>
+<ul>
+<li>$P$ : prompts sampled for one outer rollout/update iteration.</li>
+<li>$G$ : completions sampled per prompt.</li>
+<li>$B=PG$ : trajectories consumed by the outer update dataset.</li>
+<li>$M$ : <strong>mini-batch size</strong>, trajectories represented by one optimizer step.</li>
+<li>$\mu$ : <strong>micro-batch size per GPU</strong>, trajectories processed by one forward/backward invocation on each data-parallel rank.</li>
+<li>$D$ : number of data-parallel ranks.</li>
+<li>$E$ : number of epochs over the same train batch.</li>
+</ul>
+<p>A common veRL-style configuration mapping is:</p>
+<table>
+<thead>
+<tr>
+<th>Configuration concept</th>
+<th style="text-align: right;">Symbol here</th>
+<th>Unit to verify</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>train_batch_size</code></td>
+<td style="text-align: right;">commonly $P$</td>
+<td>often prompts before rollout expansion; verify whether the pinned version already counts trajectories</td>
+</tr>
+<tr>
+<td>rollout response count (often <code>rollout.n</code>)</td>
+<td style="text-align: right;">$G$</td>
+<td>completions per prompt</td>
+</tr>
+<tr>
+<td>derived update trajectories</td>
+<td style="text-align: right;">$B=PG$</td>
+<td>completed sequences before filtering/remainder handling</td>
+</tr>
+<tr>
+<td><code>ppo_mini_batch_size</code></td>
+<td style="text-align: right;">$M$</td>
+<td>global trajectories/sequences represented by one optimizer step</td>
+</tr>
+<tr>
+<td><code>ppo_micro_batch_size_per_gpu</code></td>
+<td style="text-align: right;">$\mu$</td>
+<td>trajectories/sequences per data-parallel rank per forward/backward wave</td>
+</tr>
+<tr>
+<td>data-parallel world size</td>
+<td style="text-align: right;">$D$</td>
+<td>replicas after accounting for tensor/pipeline/expert parallelism</td>
+</tr>
+<tr>
+<td><code>ppo_epochs</code></td>
+<td style="text-align: right;">$E$</td>
+<td>passes over the generated train batch</td>
+</tr>
+</tbody>
+</table>
+<p>Do not infer units from the option names: inspect the pinned framework version and log resolved prompt, trajectory, and action-token counts.</p>
+<p>Assuming divisibility and equal trajectory weighting, the number of mini-batches per epoch is</p>
+<p>$$N_{\rm mini}=\frac{B}{M}.$$</p>
+<p>The global micro-batch capacity per forward/backward wave is</p>
+<p>$$G_{\rm micro}=D\mu.$$</p>
+<p>The number of gradient-accumulation waves per optimizer step is</p>
+<p>$$A=\frac{M}{D\mu}.$$</p>
+<p>The total optimizer steps and forward/backward waves for the train batch are</p>
+<p>$$N_{\rm step}=E\frac{B}{M},\qquad N_{\rm fb}=E\frac{B}{D\mu}.$$</p>
+<p>These identities require $B\bmod M=0$ and $M\bmod(D\mu)=0$ unless the framework has an explicit remainder policy.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Concrete example</h2>
+<p>Let <code>train_batch_size</code> count $P=256$ prompts and rollout sample $G=4$ completions per prompt. Then</p>
+<p>$$B=PG=1024,\qquad M=256,\qquad \mu=4,\qquad D=8,\qquad E=2.$$</p>
+<p>Then:</p>
+<ul>
+<li>the outer update contains $256\times4=1024$ trajectories;</li>
+<li>global micro-batch capacity is $D\mu=32$ trajectories;</li>
+<li>gradient accumulation is $A=256/32=8$ waves per optimizer step;</li>
+<li>mini-batches per epoch are $1024/256=4$ ;</li>
+<li>optimizer steps are $2\times4=8$ ;</li>
+<li>forward/backward waves are $2\times1024/32=64$ .</li>
+</ul>
+<p>Changing <code>micro_batch_size_per_gpu</code> from 4 to 2 doubles accumulation waves and usually lowers activation memory, but it does <strong>not</strong> change $M$ , $B$ , or the number of optimizer steps.</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. “Batch” may count prompts, trajectories, or tokens</h2>
+<p>With $P$ prompts and $G$ completions per prompt, trajectory count is</p>
+<p>$$B_{\rm traj}=PG.$$</p>
+<p>If response lengths are $L_{i,j}$ , action-token count is</p>
+<p>$$B_{\rm tok}=\sum_{i=1}^{P}\sum_{j=1}^{G}L_{i,j}.$$</p>
+<p>A configuration saying <code>train_batch_size=256</code> is ambiguous unless it declares its unit. Prompt-count batching preserves group accounting; token-count batching improves device balance. Real systems need both logical grouping and physical packing.</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. GRPO group integrity</h2>
+<p>For group size $G\ge2$ , all completions for one prompt must be present when computing group-relative statistics; $G=1$ has no within-prompt comparison signal. A mini-batch boundary is valid when either:</p>
+<ol>
+<li>$M$ is a multiple of $G$ and records are grouped contiguously; or</li>
+<li>the framework computes group statistics before shuffling/packing and attaches immutable advantages.</li>
+</ol>
+<p>The simple structural condition is</p>
+<p>$$M\bmod G=0.$$</p>
+<p>That condition is not sufficient by itself: a careless shuffle can still place partial groups into a mini-batch. Validate group IDs explicitly.</p>
+<h3>All-zero or zero-variance groups</h3>
+<p>If all rewards are equal, then $R_{i,j}-\bar R_i=0$ . With standardized advantages, the group contributes no preference direction. Log:</p>
+<ul>
+<li>fraction of groups with zero variance;</li>
+<li>fraction with all-zero reward;</li>
+<li>group size after failures/timeouts;</li>
+<li>reward diversity by task and curriculum bucket.</li>
+</ul>
+<p>An increasing all-zero fraction can mean tasks are too hard, verifier failure, mode collapse, or reward discretization—not just “bad data.”</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Token-balanced packing</h2>
+<p>Trajectory counts poorly predict memory and compute under variable length. Let estimated cost of trajectory $i$ be</p>
+<p>$$c_i=\alpha L_i^{\rm prompt}+\beta L_i^{\rm response}+\gamma(L_i^{\rm total})^2,$$</p>
+<p>where the quadratic term approximates attention work when applicable. A packer should balance $\sum c_i$ across data-parallel ranks while preserving semantic group constraints.</p>
+<p>Useful outputs are:</p>
+<ul>
+<li>action tokens per rank;</li>
+<li>padded tokens per rank;</li>
+<li>maximum sequence length per rank;</li>
+<li>group fragments per rank;</li>
+<li>estimated and measured step time.</li>
+</ul>
+<p>Sequence parallelism, packing, and backend kernels change the true cost model, so the estimator must be calibrated rather than treated as law.</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. Loss normalization changes the estimator</h2>
+<p>Two common reductions are trajectory-mean and token-mean:</p>
+<p>$$L_{\rm traj}=\frac1B\sum_{i=1}^{B}\frac{1}{|M_i|}\sum_{t\in M_i}\ell_{i,t},$$</p>
+<p>$$L_{\rm token}=\frac{\sum_i\sum_{t\in M_i}\ell_{i,t}}{\sum_i|M_i|}.$$</p>
+<p><code>L_token</code> gives long responses more total weight; <code>L_traj</code> gives each trajectory equal weight. Under distributed training, local means followed by rank averaging are incorrect when valid-token counts differ. Aggregate numerator and denominator globally.</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. Reuse epochs and policy semantics</h2>
+<p>If $E&gt;1$ , later epochs reuse trajectories after the learner has changed. Even a synchronously generated batch becomes off-policy relative to later mini-batches. The update-policy snapshot, ratio denominator, shuffling, and early stopping must be explicit.</p>
+<p>A framework should distinguish:</p>
+<ul>
+<li>outer rollout/update iteration;</li>
+<li>update epoch over stored data;</li>
+<li>optimizer step;</li>
+<li>gradient-accumulation micro-step;</li>
+<li>policy publication version.</li>
+</ul>
+<p>Calling all five <code>step</code> makes logs impossible to interpret.</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>8. Critic and actor batch sizes may differ</h2>
+<p>The actor, critic, reference model, and reward model need not use the same micro-batch because their memory and compute differ. But they must agree on trajectory/token identity. Join by immutable IDs and masks, not by incidental array order.</p>
+<p>A critic may train for more epochs or use bootstrapped targets. Its version should be logged separately from the policy version.</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>9. Remainder policy</h2>
+<p>Production data is rarely perfectly divisible. Choose explicitly:</p>
+<ul>
+<li>drop incomplete mini-batch/group;</li>
+<li>pad with zero-loss records;</li>
+<li>carry remainder to the next update while preserving behavior version;</li>
+<li>form a smaller final optimizer step with corrected normalization;</li>
+<li>wait for replacement trajectories.</li>
+</ul>
+<p>Each changes efficiency or sampling. A hidden <code>drop_last=True</code> can systematically discard long or slow trajectories if ordering correlates with completion time.</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>10. Configuration validator</h2>
+<p>Before launch, check:</p>
+<pre><code class="language-text">B &gt; 0, M &gt; 0, micro &gt; 0, D &gt; 0, epochs &gt; 0
+B % M == 0                         unless remainder policy is declared
+M % (D * micro) == 0               unless uneven accumulation is supported
+logical group size divides group-statistics batch
+no physical pack splits an unfinished group contract
+normalization unit is declared: prompt / trajectory / action token
+every step counter has a precise meaning
+</code></pre>
+<p>The runnable validator in <a href="code/"><code>code/</code></a> intentionally implements the stricter first mode: optimizer batches retain complete groups. It does not model the alternative in which group statistics are precomputed, sealed, and then packed across group boundaries.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/post-training-framework/04_batch_semantics.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

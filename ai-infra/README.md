@@ -1,4 +1,6 @@
 # AI Infrastructure Labs
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/README.reading.html
+
 
 A systems-first path through the compute, communication, and memory costs of training and serving large models. The organizing question is always:
 

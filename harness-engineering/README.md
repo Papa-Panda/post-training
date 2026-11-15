@@ -1,4 +1,6 @@
 # Harness Engineering
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/README.reading.html
+
 
 > **优化 frozen model 如何被运行，而不只是优化模型权重。** 本专题把 context、workflow、可执行代码、工具、副作用、持久状态、subagents、评估、权限与发布统一成一个可测量、可回归、可审计的控制系统。
 

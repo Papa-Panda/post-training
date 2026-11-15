@@ -1,6 +1,8 @@
 > Connection to Prev: Day16 Monetization Story v1 → Day17 Profile Tool: ROI故事算清了\$/useful 0.000244→0.00019省22.1%但没定位通信是AllReduce还是AllGather热点，需要profiler把compute vs comm拆开看瓶颈；Day15 Megatron 3D Parallelism的TP4+PP2 25GB决策坑在今天用torch.profiler + gloo all_reduce SUM/2验证 + per-block 32×1.99ms峰值-35%真数解决。
 
 # Day 17 — Profile Tool: 学会看通信瓶颈，用 torch profiler 看 FSDP 通信占比
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-12b-profile-tool-legacy/README.reading.html
+
 
 > Date: 2026-08-17 (Foundation 1-3mo, Infra Systems) — actually delivered 2026-08-21 PDT 08:11 auto
 > Source row: `ai_daily.csv:2026-08-17` — Infra Systems / PyTorch Distributed / Profile 工具

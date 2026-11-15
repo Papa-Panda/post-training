@@ -1,4 +1,6 @@
 # eval / 评估轨道索引
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval/README.reading.html
+
 
 本目录是评估相关 flat tracks 的索引，**实际内容在顶层平铺**，不在 `eval/` 下嵌套。
 

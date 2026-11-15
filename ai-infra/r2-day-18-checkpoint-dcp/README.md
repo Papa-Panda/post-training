@@ -1,4 +1,6 @@
 # r2-Day18 — Checkpoint & Recovery（DCP）：挂了怎么恢复
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-18-checkpoint-dcp/README.reading.html
+
 
 ## Connection to Prev
 

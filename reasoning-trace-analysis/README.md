@@ -1,4 +1,6 @@
 # Reasoning Trace Analysis
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/README.reading.html
+
 
 > 一条 reasoning trace 有两个身份：它是 RL 优化出的**行为**（只按最终答案给 reward 的副产品），也是人类拿来审计和 debug 的**证据**。本专题研究前者如何被解剖、被压缩、被打分；后者的可靠性问题（faithfulness）暂缓，只留入口。
 >

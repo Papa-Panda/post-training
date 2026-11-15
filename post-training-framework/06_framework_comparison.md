@@ -1,4 +1,6 @@
 # 06 — Framework Comparison
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/06_framework_comparison.reading.html
+
 
 ## 1. Compare layers before features
 

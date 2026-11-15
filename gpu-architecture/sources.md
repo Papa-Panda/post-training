@@ -1,4 +1,6 @@
 # Sources & Evidence Ledger
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/sources.reading.html
+
 
 > 原则：官方 programming/tuning guides 与原论文支撑技术结论；中文文章/视频只作为选题线索。未取得正文时不推断内容。访问状态记录于 2026-09-01。
 

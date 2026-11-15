@@ -1,4 +1,6 @@
 # Post-Training Frameworks
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/README.reading.html
+
 
 > A framework is not an algorithm name. It is the executable contract that turns prompts, policy versions, rollout engines, environments, rewards, buffers, and learners into a reproducible update.
 

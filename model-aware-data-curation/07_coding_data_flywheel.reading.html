@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 — Coding-data Flywheel 落地</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Model-Aware Data Curation</span>
+    <h1>07 — Coding-data Flywheel 落地</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. 闭环目标</a><a href="#sec-3">2. 样本单位</a><a href="#sec-4">3. 四级 gate</a><a href="#sec-5">4. 从失败簇构造 target set</a><a href="#sec-6">5. Prismatic-style generation</a><a href="#sec-7">6. SFT 与 RL 的不同信号</a><a href="#sec-8">7. 实验矩阵</a><a href="#sec-9">8. Go / no-go</a><a href="#sec-10">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>内容类型</dt><dd>应用设计，不对应单篇论文</dd><dt>理论锚点</dt><dd><a href="<a href="https://arxiv.org/abs/2402.04333">https://arxiv.org/abs/2402.04333</a>">LESS</a>（目标价值）· <a href="<a href="https://arxiv.org/abs/2505.20161">https://arxiv.org/abs/2505.20161</a>">Prismatic Synthesis</a>（覆盖与主动生成）· <a href="<a href="https://arxiv.org/abs/2602.06359">https://arxiv.org/abs/2602.06359</a>">OGS</a>（保护能力）</dd><dt>本章定位</dt><dd>把上述信号落到可执行、可验证的 coding-data flywheel。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. 闭环目标</h2>
+<p>不是生成更多题，而是让每轮数据解决当前模型尚未覆盖的可验证能力：</p>
+<pre><code class="language-text">production/eval failures
+  -&gt; error taxonomy + trusted target set
+  -&gt; candidate pool + synthetic proposals
+  -&gt; parse/compile/test/decontam gates
+  -&gt; gradient target + coverage + conflict selection
+  -&gt; SFT/RL
+  -&gt; ID/OOD + retention regression
+  -&gt; next failure map
+</code></pre>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. 样本单位</h2>
+<p>对 coding 数据，样本不应只有 <code>(prompt, answer)</code>，而应保存：</p>
+<pre><code class="language-json">{
+  &quot;prompt&quot;: &quot;...&quot;,
+  &quot;solution&quot;: &quot;...&quot;,
+  &quot;language&quot;: &quot;python&quot;,
+  &quot;tests&quot;: [&quot;...&quot;],
+  &quot;execution&quot;: {&quot;pass&quot;: true, &quot;runtime_ms&quot;: 18},
+  &quot;trace&quot;: {&quot;tool_calls&quot;: [], &quot;errors&quot;: []},
+  &quot;skill_tags&quot;: [&quot;graph&quot;, &quot;invariant&quot;],
+  &quot;source&quot;: &quot;synthetic|human|failure-replay&quot;,
+  &quot;parent_ids&quot;: [&quot;...&quot;],
+  &quot;generator&quot;: &quot;...&quot;,
+  &quot;data_version&quot;: &quot;...&quot;
+}
+</code></pre>
+<p>provenance 和 parent IDs 用于发现生成循环中的近重复与污染。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. 四级 gate</h2>
+<ol>
+<li><strong>Syntax</strong>：parse、依赖白名单、格式；</li>
+<li><strong>Execution</strong>：sandbox、unit tests、timeout/memory；</li>
+<li><strong>Contamination</strong>：exact hash、10-gram、AST/embedding near-match、benchmark隔离；</li>
+<li><strong>Model-aware</strong>：target alignment、coverage gain、conflict。</li>
+</ol>
+<p>前三级是硬门，第四级才做预算排序。梯度大或稀疏不能救回错误程序。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. 从失败簇构造 target set</h2>
+<p>将失败按可操作机制而非 benchmark 名称聚类：</p>
+<ul>
+<li>spec misunderstanding；</li>
+<li>state / invariant tracking；</li>
+<li>algorithm selection；</li>
+<li>long-horizon decomposition；</li>
+<li>tool/API misuse；</li>
+<li>test generation / edge cases；</li>
+<li>efficiency / timeout；</li>
+<li>repair after feedback。</li>
+</ul>
+<p>每簇抽取少量去污染、人工/执行可信的 $V_k$ ，计算 $\bar g_{V_k}$ 。候选样本可同时拥有多个 alignment：</p>
+<p>$$a_{ik}=\cos(\tilde g_i,\bar g_{V_k}).$$</p>
+<p>这样能按能力缺口分配预算，而不是把所有 coding data 压成单个总分。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Prismatic-style generation</h2>
+<p>对“目标相关但 occupancy 低”的簇生成：</p>
+<ol>
+<li>从该簇和相邻簇抽 few-shot；</li>
+<li>约束 generator 改变算法结构/约束组合，而非只换故事皮肤；</li>
+<li>生成 problem、reference solution、tests；</li>
+<li>多解/多语言编译执行验证；</li>
+<li>计算候选梯度，拒绝回到密集簇的样本；</li>
+<li>去污染后进入 train buffer。</li>
+</ol>
+<p>一个批次的 acceptance rate 本身是诊断：若很低，generator prompt 或 seed examples 只会复读已有模式。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. SFT 与 RL 的不同信号</h2>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>梯度</th>
+<th>候选单位</th>
+<th>刷新频率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SFT</td>
+<td>token NLL gradient</td>
+<td><code>(prompt, verified solution)</code></td>
+<td>checkpoint/数据版本级</td>
+</tr>
+<tr>
+<td>RL</td>
+<td>policy gradient / advantage-weighted log-prob gradient</td>
+<td>problem + rollout group</td>
+<td>policy round 级</td>
+</tr>
+</tbody>
+</table>
+<p>RL 中同一道题随 policy 变化可能从“有学习信号”变成“全对/全错”；因此要把成功率、reward variance、trajectory length 与 GradAlign 一起记录。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. 实验矩阵</h2>
+<p>固定同一 base model、token budget 与执行 gate，比较：</p>
+<table>
+<thead>
+<tr>
+<th>Arm</th>
+<th>选择策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>random verified</td>
+</tr>
+<tr>
+<td>B</td>
+<td>embedding diversity</td>
+</tr>
+<tr>
+<td>C</td>
+<td>target alignment only</td>
+</tr>
+<tr>
+<td>D</td>
+<td>G-Vendi coverage only</td>
+</tr>
+<tr>
+<td>E</td>
+<td>target + G-Vendi</td>
+</tr>
+<tr>
+<td>F</td>
+<td>target + G-Vendi + conflict gate</td>
+</tr>
+<tr>
+<td>G</td>
+<td>F + Prismatic-style generation</td>
+</tr>
+</tbody>
+</table>
+<p>报告：</p>
+<ul>
+<li>ID/OOD pass@1 与 pass@k；</li>
+<li>每个失败簇的 recall / accuracy；</li>
+<li>general retention delta；</li>
+<li>G-Vendi 与 embedding Vendi；</li>
+<li>execution/contamination/duplicate rate；</li>
+<li>tokens、GPU-hours、wall time；</li>
+<li>selector 在 proxy 和 target model 上的 rank correlation。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. Go / no-go</h2>
+<p>只有同时满足以下条件才扩大闭环：</p>
+<ul>
+<li>F/G 相比 random 在 OOD 和目标失败簇有稳定增益；</li>
+<li>retention 不超预算；</li>
+<li>proxy-target rank correlation 可接受；</li>
+<li>生成新增覆盖而非新增噪声；</li>
+<li>端到端节省的训练预算大于 gradient/verification 开销。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>导航</h2>
+<ul>
+<li>上一篇：<a href="06_system_architecture.md">06 系统架构</a></li>
+<li>下一篇：<a href="08_ai_data_boundary.md">08 与 ai-data 边界</a></li>
+<li>回到：<a href="README.md">目录 README</a> | <a href="papers.md">论文证据</a> | <a href="README.md#路线图">路线图</a></li>
+</ul>
+<blockquote class="pq">
+<p>串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/model-aware-data-curation/07_coding_data_flywheel.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

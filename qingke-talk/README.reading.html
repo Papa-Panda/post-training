@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>青稞Talk — 固定追更区</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">青稞Talk</span>
+    <h1>青稞Talk — 固定追更区</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">怎么用</a><a href="#sec-2">追更日志（摘要）</a><a href="#sec-3">编号体系说明（重要）</a><a href="#sec-4">建议补看（RL infra 主线相关，往期）</a><a href="#sec-5">相关资源</a><a href="#sec-6">活动合集（嘉年华 / Meetup / AMA）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>B站技术 talk 系列「青稞Talk」，RL / post-training / infra 选题密度极高。
+从 2026-09-20 起固定追，每期一条 log + 一篇要点纪要。
+服务于从 ML for Infra → Post-training / Agentic RL Infra 转型。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>怎么用</h2>
+<ol>
+<li>看到值得追的一期，在 <code>watching-log.csv</code> 加一行（状态 <code>todo</code>）。</li>
+<li>看完（或提炼完要点）后，用 <code>EPISODE_TEMPLATE.md</code> 在 <code>episodes/</code> 下写纪要，命名 <code>EP{期号}-{slug}.md</code>。</li>
+<li>回到 <code>watching-log.csv</code> 把状态改成 <code>done</code>，填上纪要路径。</li>
+</ol>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>追更日志（摘要）</h2>
+<p>完整日志见 <code>watching-log.csv</code>（全量 208 行：官网 156 期 + B站合集独有 52 条），全量索引见 <code>episode-index.csv</code>。每期纪要在 <code>episodes/</code> 下，同名 <code>.html</code> 为阅读版（Pages 链接写在各纪要文首）。原始字幕存 <code>transcripts/</code>。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">期号</th>
+<th>标题</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">15</td>
+<td><a href="episodes/EP15-minicpm-v.md">MiniCPM-V：端侧可用的 GPT-4V 级多模态大模型</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">16</td>
+<td><a href="episodes/EP16-yolo-world.md">YOLO-World：基于视觉语言模型的实时开放词汇物体检测</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">17</td>
+<td><a href="episodes/EP17-seed-story.md">SEED-Story：生成长篇图文故事的多模态大型语言模型</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">18</td>
+<td><a href="episodes/EP18-internvl2.md">InternVL 2.0：通过渐进式策略扩展开源多模态大模型的性能边界</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">22</td>
+<td><a href="episodes/EP22-mplug-owl3.md">mPLUG-Owl3：探索长序列模型架构的通用多模态大模型</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">23</td>
+<td><a href="episodes/EP23-cogvidex.md">CogVideoX 视频生成开源模型上手实践</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">25</td>
+<td><a href="episodes/EP25-llmc-benchmark.md">LLMC：大语言模型的量化基准</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">27</td>
+<td><a href="episodes/EP27-genad-vista.md">GenAD &amp; Vista：构建通用可泛化的自动驾驶世界模型</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">29</td>
+<td><a href="episodes/EP29-vila2.md">VILA^2：视觉语言模型能力的自我提升</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">31</td>
+<td><a href="episodes/EP31-rectified-flow.md">Rectified Flow：矫正流生成式模型的概念及应用实践</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">32</td>
+<td><a href="episodes/EP32-llmc-toolkit.md">LLMC：大语言模型压缩工具的开发实践</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">49</td>
+<td>verl 源码解读与 HybridFlow 编程范式讲解</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">68</td>
+<td>slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">75</td>
+<td>FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">77</td>
+<td><a href="episodes/EP77-theory-of-agent.md">Theory of Agent: From Definition, to Behavior and Objective</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">78</td>
+<td>从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">83</td>
+<td>统一 SFT &amp; RL：迈向大语言模型后训练的统一视角</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td><a href="episodes/EP01-scenetex.md">SceneTex：高质量三维室内场景纹理图生成</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td><a href="episodes/EP02-chatdev.md">ChatDev：大语言模型驱动的多智能体协作与演化</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td><a href="episodes/EP03-3d-llm-multiply.md">从 3D LLM 到 MultiPLY，3D 具身基础模型的构建</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td><a href="episodes/EP04-mini-gemini.md">Mini-Gemini：挖掘多模态视觉语言大模型的潜力</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td><a href="episodes/EP05-3d-vla.md">3D-VLA：构建生成式三维具身世界模型</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td><a href="episodes/EP06-3dgs.md">实时渲染 3DGS 中的反走样及逆渲染应用</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td><a href="episodes/EP07-mixeval.md">MixEval：混合评测数据集来拟合大语言模型的人类评估</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td><a href="episodes/EP08-videobooth.md">VideoBooth：文本和图像提示共同驱动的视频生成</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td><a href="episodes/EP09-embodied-multimodal-pretraining.md">具身多模态大模型的视觉表征预训练研究</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">11</td>
+<td><a href="episodes/EP11-llama-pro.md">LLaMA Pro：扩展 Transformer 块优化的大型语言模型继续预训练</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">12</td>
+<td><a href="episodes/EP12-villager-agent.md">VillagerAgent：减少幻觉、提高任务分解效率的多智能协作体框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td><a href="episodes/EP10-pissa.md">PiSSA：收敛快、误差小的大模型参数高效微调方法</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">13</td>
+<td><a href="episodes/EP13-llama-factory.md">LLaMA Factory：从预训练到RLHF，大模型高效训练框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">33</td>
+<td><a href="episodes/EP33-xgrammar.md">XGrammar：高效实现 LLM 灵活且可移植的结构化生成</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">42</td>
+<td><a href="episodes/EP42-coat.md">COAT：显存高效的 FP8 训练，实现高效深度学习</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">41</td>
+<td><a href="episodes/EP41-pc-agent.md">PC-Agent：面向复杂 PC 任务的多模态智能体框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">44</td>
+<td><a href="episodes/EP44-infercept-preble-cognify.md">InferCept、Preble&amp;Cognify：面向下一代 AI Agent 工作流系统的构建</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">38</td>
+<td><a href="episodes/EP38-satori.md">Satori：通过训练 LLM 做自回归搜索来增强推理能力</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">39</td>
+<td><a href="episodes/EP39-prime.md">PRIME: 结合隐式过程奖励的强化学习</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">45</td>
+<td><a href="episodes/EP45-bstar-simplerl-zoo.md">B-STaR &amp; SimpleRL-Zoo：通过强化学习自我提升推理性能和效率</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">46</td>
+<td><a href="episodes/EP46-tinyzero-apr.md">从 TinyZero 到 APR：语言模型推理能力的探索与自适应并行化</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">48</td>
+<td><a href="episodes/EP48-tts-ttrl.md">从 TTS 到 TTRL：无标签数据强化学习探索与展望</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">53</td>
+<td><a href="episodes/EP53-chain-of-model.md">Chain-of-Model（模型链）：引入因果建模的大模型 Scaling 结构</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">57</td>
+<td><a href="episodes/EP57-fast-dllm.md">Fast-dLLM：无需重训的扩散大语言模型推理加速</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">58</td>
+<td><a href="episodes/EP58-virtual-community.md">Virtual Community 虚拟社区：面向人、机器人与社会的开放世界模拟平台</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">61</td>
+<td><a href="episodes/EP61-gui-reflection.md">GUI-Reflection：让多模态 GUI 智能体获得反思纠错能力的训练框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">59</td>
+<td><a href="episodes/EP59-entropy-mechanism-rl.md">大模型推理强化学习中的熵机制</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">60</td>
+<td><a href="episodes/EP60-satori-swe.md">Satori-SWE：用 Evolutionary Test-Time Scaling 让小语言模型做 SWE</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">62</td>
+<td><a href="episodes/EP62-prorl.md">ProRL：延长强化学习训练框架，拓展大语言模型的推理边界</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">66</td>
+<td><a href="episodes/EP66-simoe.md">SIMoE：稀疏插值混合专家，大模型升级再造的自动化专家发现框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">67</td>
+<td><a href="episodes/EP67-pipeline-parallelism.md">大模型训练流水线并行四部曲：吞吐、内存、负载均衡与线性扩展</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">69</td>
+<td><a href="episodes/EP69-gspo.md">GSPO：大规模强化学习训练算法，迈向持续拓展的语言模型强化学习</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">71</td>
+<td><a href="episodes/EP71-rlpr.md">RLPR：基于参考概率奖励的强化学习，推广 RLVR 到通用领域推理问题</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">74</td>
+<td><a href="episodes/EP74-roll.md">ROLL：面向 Agentic 场景的生产级大规模强化学习训练框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">76</td>
+<td><a href="episodes/EP76-nemo-rl.md">NeMo RL：让大规模 MoE 模型权重 Refit 加速 10 倍</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">79</td>
+<td><a href="episodes/EP79-userrl.md">UserRL &amp; UserBench「知人者智」：以用户为中心的智能体交互与训练</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">81</td>
+<td><a href="episodes/EP81-memgen.md">MemGen：生成式隐式记忆，Agent Memory 的第三种可能</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">82</td>
+<td><a href="episodes/EP82-opencua.md">OpenCUA：用于构建 Computer-Use Agent 的开源框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">80</td>
+<td><a href="episodes/EP80-rl-for-lrms.md">RL for LRMs：探讨面向推理模型的 RL 最新研究</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">84</td>
+<td><a href="episodes/EP84-simplevla-rl.md">SimpleVLA-RL：简单可拓展的VLA强化学习训练</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">87</td>
+<td><a href="episodes/EP87-qerl.md">QeRL：量化技术增强强化学习 Reasoning 探索</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">86</td>
+<td><a href="episodes/EP86-deepseek-ocr-glyph.md">从 DeepSeek-OCR 到 Glyph：深入理解图像-文本压缩技术</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">89</td>
+<td><a href="episodes/EP89-generative-rlhf-v.md">Generative RLHF-V：面向多模态 RLHF 的人类意图对齐框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">91</td>
+<td><a href="episodes/EP91-ktransformers.md">KTransformers，在大模型微调与推理中的系统化实践</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">95</td>
+<td><a href="episodes/EP95-pi-rl.md">从 π_0 到 π_RL：面向流匹配 VLA 的强化学习后训练框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">92</td>
+<td><a href="episodes/EP92-rlinf.md">RLinf：面向具身智能的"渲训推一体化"开源强化训练框架</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">101</td>
+<td>MiniMax M2.1：Agent 后训练经验与认知</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">102</td>
+<td>从 TRPO 到 SAPO：大模型 RL 算法演进</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">111</td>
+<td>RLinf-USER：面向现实世界机器人在线策略学习的统一且可扩展系统</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">123</td>
+<td>DeepSeek V4 模型在 SGLang 中的系统级优化与全栈适配</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">125</td>
+<td>重探 On-Policy Distillation（OPD）：三类典型失败以及修复路径</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">126</td>
+<td>STream3R &amp; 4RC：面向几何与运动理解的流式前馈 3D/4D 重建</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">128</td>
+<td>MinT：面向百万级 LoRA 策略的训练与推理基础设施</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">133</td>
+<td>VeRL-Omni：基于VeRL及vLLM-Omni构建的面向多模态生成模型的开源 RL 后训练框架</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">140</td>
+<td>DRIFT：在线自进化后训练框架</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">145</td>
+<td>JitRL——无需梯度更新的即时强化学习</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">129</td>
+<td><a href="episodes/EP129-arpo-aepo-agent-world.md">从 ARPO，到 AEPO，再到 Agent-World：探索通用智能体训练的可行路径</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">152</td>
+<td>如何在真实 Coding Agent Harness 中接入 RL？</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">153</td>
+<td><a href="episodes/EP153-envharness.md">EnvHarness，Agent 和环境如何"左脚踩右脚"实现自进化</a></td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">154</td>
+<td>Rethinking On-Policy Distillation of Large Language Models：现象学、机制与 Recipe</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">155</td>
+<td>SkyRL：模块化 RL 后训练框架设计，与 397B Office Work Agent 的 RL 训练实战</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">156</td>
+<td>聊聊自我改进、递归自我改进（RSI），以及与自博弈的关系</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">B106</td>
+<td>Intern-S1：科学多模态基础模型（B站合集期号）</td>
+<td>✅ 要点已提炼</td>
+</tr>
+<tr>
+<td style="text-align: right;">B124</td>
+<td>拒绝阈值化：迈向共生关系的新型人机信任（B站合集期号）</td>
+<td>✅ 要点已提炼</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>编号体系说明（重要）</h2>
+<p>官网预告编号与 B站合集编号是两套体系，约 EP93 之后开始分叉：同一期号在两边可能是不同 talk，也有同一 talk 改标题的情况。全量裁决结果见 <code>episode-index.csv</code> 的备注列：</p>
+<ul>
+<li>同一 talk 100 条视频对应 99 个官网期号（EP78 为重复上传，双 BV 并存）；</li>
+<li>56 期官网有预告但合集无视频，记为 official-only；</li>
+<li>52 条视频为合集独有，期号记为 <code>B&lt;n&gt;</code>。</li>
+<li>例：官网 106 期 GDPO、124 期 Scaling Law 均无合集视频；合集的 106 是 Intern-S1、124 是人机信任，两场另有纪要（B106/B124）。</li>
+<li>2026-10-02 复核发现：RollArt、重要性采样与熵调控、OPD 反直觉、MinT-OPD、Harness Engineering 五条 B站独有期此前登记的 BV 实际属于官网对应期视频，其真实 BV 待重新枚举合集确认（索引备注列已标注）。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>建议补看（RL infra 主线相关，往期）</h2>
+<ul>
+<li>124期《大模型强化学习的Scaling Law》（官网期号；合集无此视频，纪要待补）</li>
+<li>83期《统一 SFT &amp; RL：迈向大语言模型后训练的统一视角》✅</li>
+<li>78期《从 LLM-RL 到 Agentic RL：如何让语言模型成为自主智能体》✅</li>
+<li>75期《FlashRL：探讨现代 RL 框架中推理与训练的错位问题及解决方案》✅</li>
+<li>68期《slime：专为 RL Scaling 设计的大规模 RL 训练框架及实践》✅</li>
+<li>49期《verl 源码解读与 HybridFlow 编程范式讲解》✅</li>
+<li>106期《GDPO：解决 GRPO 在多奖励 RL 训练中的"优势崩溃"问题》（官网期号；合集无此视频，纪要待补）</li>
+<li>101期《MiniMax M2.1：Agent 后训练经验与认知》✅</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>相关资源</h2>
+<ul>
+<li>系列主页：B站搜索「青稞Talk」</li>
+<li>SkyRL 代码：https://github.com/NovaSky-AI/SkyRL</li>
+<li>SkyRL-Agent 论文：https://arxiv.org/abs/2511.16108</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>活动合集（嘉年华 / Meetup / AMA）</h2>
+<table>
+<thead>
+<tr>
+<th>场次</th>
+<th>标题</th>
+<th>阅读版</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EP100-RL</td>
+<td><a href="episodes/EP100-rl-panel.md">EP100 RL 专题圆桌</a></td>
+<td><a href="episodes/EP100-rl-panel.html">阅读版</a></td>
+<td>四人共识：2025 进展在 infra 与稳定性不在算法，PPO 还是 2014 年的</td>
+</tr>
+<tr>
+<td>EP100-AGENTIC</td>
+<td><a href="episodes/EP100-agentic-panel.md">EP100 Agentic 专题圆桌</a></td>
+<td><a href="episodes/EP100-agentic-panel.html">阅读版</a></td>
+<td>张绍磊：各种 scaling 的本质都是 scaling reward</td>
+</tr>
+<tr>
+<td>EP100-EMBODIED</td>
+<td><a href="episodes/EP100-embodied-panel.md">EP100 具身智能专题圆桌</a></td>
+<td><a href="episodes/EP100-embodied-panel.html">阅读版</a></td>
+<td>于超第三条路：真机数量 scaling，像使用 GPU 一样使用机器人</td>
+</tr>
+<tr>
+<td>EP100-LLM</td>
+<td><a href="episodes/EP100-llm-panel.md">EP100 LLM/MLLM 专题圆桌</a></td>
+<td><a href="episodes/EP100-llm-panel.html">阅读版</a></td>
+<td>薛复昭：一切用别的东西换 FLOPS 的都是短期解，行业已转 data-bound</td>
+</tr>
+<tr>
+<td>MEETUP-PANEL</td>
+<td><a href="episodes/MEETUP-panel.md">Meetup 圆桌 Panel</a></td>
+<td><a href="episodes/MEETUP-panel.html">阅读版</a></td>
+<td>最大分歧在 reward：implicit PRM 对 LLM-as-judge 的系统账</td>
+</tr>
+<tr>
+<td>MEETUP-VERL</td>
+<td><a href="episodes/MEETUP-verl.md">Meetup verl 分享</a></td>
+<td><a href="episodes/MEETUP-verl.html">阅读版</a></td>
+<td>方家瑞：verl 第一性抽象是 RL = dataflow</td>
+</tr>
+<tr>
+<td>MEETUP-RLITE</td>
+<td><a href="episodes/MEETUP-rlite.md">Meetup RLite 分享</a></td>
+<td><a href="episodes/MEETUP-rlite.html">阅读版</a></td>
+<td>GRPO 只有四步，瓶颈在 HF generate 太慢而非算法</td>
+</tr>
+<tr>
+<td>MEETUP-AREAL</td>
+<td><a href="episodes/MEETUP-areal.md">Meetup AReaL 分享</a></td>
+<td><a href="episodes/MEETUP-areal.html">阅读版</a></td>
+<td>傅伟：全异步训练承接 off-policyness，API 是 tapas 不是三明治</td>
+</tr>
+<tr>
+<td>MEETUP-ENTROPY</td>
+<td><a href="episodes/MEETUP-entropy.md">Meetup 熵机制分享</a></td>
+<td><a href="episodes/MEETUP-entropy.html">阅读版</a></td>
+<td>雨辰：RL 拿熵换性能，前 36 步就能拟合预测整条兑换曲线</td>
+</tr>
+<tr>
+<td>MEETUP-ECHO</td>
+<td><a href="episodes/MEETUP-echo.md">Meetup ECHO 分享</a></td>
+<td><a href="episodes/MEETUP-echo.html">阅读版</a></td>
+<td>Jerry：去中心化异构推理 + verl 训练端，LoRA 下 RL 体验等同 SFT</td>
+</tr>
+<tr>
+<td>MEETUP-ROLL</td>
+<td><a href="episodes/MEETUP-roll.md">Meetup ROLL 分享</a></td>
+<td><a href="episodes/MEETUP-roll.html">阅读版</a></td>
+<td>样本级异步 rollout 消灭 batch 长尾</td>
+</tr>
+<tr>
+<td>MEETUP-OPENRLHF</td>
+<td><a href="episodes/MEETUP-openrlhf.md">Meetup OpenRLHF 分享</a></td>
+<td><a href="episodes/MEETUP-openrlhf.html">阅读版</a></td>
+<td>RL 框架的架构革新由算法侧驱动，框架设计者先是算法研究员</td>
+</tr>
+<tr>
+<td>AMA2</td>
+<td><a href="episodes/AMA2-world-model.md">青稞AMA第2期 World Model 专题</a></td>
+<td><a href="episodes/AMA2-world-model.html">阅读版</a></td>
+<td>世界模型的价值不在卷高清，在能否同时服务 data engine、simulator、policy</td>
+</tr>
+<tr>
+<td>AMA3</td>
+<td><a href="episodes/AMA3-opd.md">青稞AMA第3期 OPD 专题</a></td>
+<td><a href="episodes/AMA3-opd.html">阅读版</a></td>
+<td>纯 OPD 训到底就是复刻 teacher，超过老师依赖外部信息</td>
+</tr>
+<tr>
+<td>CUA-ILLUSION</td>
+<td><a href="episodes/CUA-illusion-self-improving.md">CUA The Illusion of Self-Improving Agents</a></td>
+<td><a href="episodes/CUA-illusion-self-improving.html">阅读版</a></td>
+<td>多数 self-improving 系统在攒数据但不真学习，memory 三关缺一不可</td>
+</tr>
+<tr>
+<td>CUA-SUITE</td>
+<td><a href="episodes/CUA-suite.md">CUA-Suite</a></td>
+<td><a href="episodes/CUA-suite.html">阅读版</a></td>
+<td>企业 CUA 的真瓶颈是长尾专业软件，当年 SOTA 大量归零</td>
+</tr>
+<tr>
+<td>CUA-CONTINUAL</td>
+<td><a href="episodes/CUA-continual-learning.md">CUA 动态环境自主持续学习</a></td>
+<td><a href="episodes/CUA-continual-learning.html">阅读版</a></td>
+<td>ACULL 全自动闭环，目标环境最高涨约 29% 且出现正迁移</td>
+</tr>
+<tr>
+<td>CUA-CHATGPT-MOMENT</td>
+<td><a href="episodes/CUA-chatgpt-moment.md">CUA 圆桌：ChatGPT 时刻</a></td>
+<td><a href="episodes/CUA-chatgpt-moment.html">阅读版</a></td>
+<td>共识瓶颈在环境与数据 scale，开源与闭源差距藏在 planning 不在 grounding</td>
+</tr>
+<tr>
+<td>CUA-WEBAGENT</td>
+<td><a href="episodes/CUA-web-agent.md">CUA Web Agent 泛化与真实任务</a></td>
+<td><a href="episodes/CUA-web-agent.html">阅读版</a></td>
+<td>WebFactory 建站时留蓝图，任务合成从概率生成变确定性可验证</td>
+</tr>
+<tr>
+<td>CUA-MOBILE-AGENT</td>
+<td><a href="episodes/CUA-mobile-agent-v35.md">Mobile-Agent-v3.5</a></td>
+<td><a href="episodes/CUA-mobile-agent-v35.html">阅读版</a></td>
+<td>徐海洋：多端交替 RL 缓解端间拉扯，先修训推不一致再谈 RL 收益</td>
+</tr>
+<tr>
+<td>CUA-OSWORLD-MCP</td>
+<td><a href="episodes/CUA-osworld-mcp.md">OSWorld-MCP</a></td>
+<td><a href="episodes/CUA-osworld-mcp.html">阅读版</a></td>
+<td>张希：给工具普遍涨点，但工具组合与主动调用意愿才是瓶颈</td>
+</tr>
+<tr>
+<td>CUA-PANEL1</td>
+<td><a href="episodes/CUA-panel-1.md">CUA Panel 上半场（科学发现+安全）</a></td>
+<td><a href="episodes/CUA-panel-1.html">阅读版</a></td>
+<td>孙秋实：改源码开接口做 verifier，绕开像素匹配失效</td>
+</tr>
+<tr>
+<td>CUA-PANEL2</td>
+<td><a href="episodes/CUA-panel-2.md">CUA Panel 下半场（数据合成）</a></td>
+<td><a href="episodes/CUA-panel-2.html">阅读版</a></td>
+<td>程侃之：困难还有 knowledge gap，闭源轨迹配方不可见</td>
+</tr>
+<tr>
+<td>CUA-MAI-UI</td>
+<td><a href="episodes/CUA-mai-ui.md">MAI-UI、UI-Ins 技术报告</a></td>
+<td><a href="episodes/CUA-mai-ui.html">阅读版</a></td>
+<td>韩章：把指令角度本身当 grounding 的思考方式，普通 CoT 不 work</td>
+</tr>
+<tr>
+<td>CUA-MOBILEWORLD</td>
+<td><a href="episodes/CUA-mobileworld.md">MobileWorld 评测基准</a></td>
+<td><a href="episodes/CUA-mobileworld.html">阅读版</a></td>
+<td>孔雀鱼：自部署开源 app 拿后端权限，四路确定性校验替代 LLM-as-judge</td>
+</tr>
+<tr>
+<td>ARTICLE-tvm-tirx</td>
+<td><a href="episodes/ARTICLE-tvm-tirx-agent-compiler-foundation.md">陈天奇：构建 Agent 时代的机器学习编译基础层</a></td>
+<td><a href="episodes/ARTICLE-tvm-tirx-agent-compiler-foundation.html">阅读版</a></td>
+<td>文章特辑（非 Talk）：编译器不必再编译东西，但仍需基础层做分析与验证；TVM-TIRx 五元素</td>
+</tr>
+</tbody>
+</table></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/qingke-talk/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

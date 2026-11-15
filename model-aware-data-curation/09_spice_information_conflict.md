@@ -1,4 +1,6 @@
 # 09 — SPICE：Fisher 覆盖之后，如何选出协调的集合
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/09_spice_information_conflict.reading.html
+
 
 ## 元信息
 

@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Infrastructure Labs</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>AI Infrastructure Labs</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Current path</a><a href="#sec-2">Knowledge map: 草帽路飞路线 vs. 我们的 roadmap</a><a href="#sec-3">完整知识地图（草帽路飞原文 · 知识条目转录）</a><a href="#sec-4">Core models</a><a href="#sec-5">Older experiments</a><a href="#sec-6">Boundaries with other tracks</a><a href="#sec-7">Run the current checks</a><a href="#sec-8">Primary references</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>A systems-first path through the compute, communication, and memory costs of training and serving large models. The organizing question is always:</p>
+<blockquote class="pq">
+<p>What extra work or complexity does a technique introduce, what resource does it save, and where does the trade stop paying off?</p>
+</blockquote>
+<p>This directory contains two generations of material. The <code>r2-day-*</code> sequence is the current, cleaner learning path. The older <code>day-*</code> directories are retained as experiments and historical notes; their CPU simulations are not hardware benchmarks.</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>Current path</h2>
+<pre><code class="language-text">model computation
+  -&gt; framework execution
+  -&gt; topology and collectives
+  -&gt; replicated data parallelism
+  -&gt; declarative sharding
+  -&gt; GPU memory wall
+  -&gt; CUDA execution and access patterns
+  -&gt; FSDP / tensor-pipeline-sequence parallelism
+  -&gt; checkpointing
+  -&gt; inference and rollout serving
+  -&gt; evaluation and reliability gates
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Lesson</th>
+<th>Focus</th>
+<th>Executable evidence</th>
+<th>Status</th>
+<th style="text-align: right;">阅读版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="r2-day-01-transformer/README.md"><code>r2-day-01-transformer</code></a></td>
+<td>Decoder dimensions and parameter accounting</td>
+<td>Python dimension/parameter model</td>
+<td>CPU model</td>
+<td style="text-align: right;"><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-01-transformer/">阅读</a></td>
+</tr>
+<tr>
+<td><a href="r2-day-02-pytorch-loop/README.md"><code>r2-day-02-pytorch-loop</code></a></td>
+<td>Training-loop state, optimizer, checkpoint</td>
+<td>Minimal loop with explicit fallback</td>
+<td>CPU path; accelerator profiling pending</td>
+<td style="text-align: right;"><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-02-pytorch-loop/">阅读</a></td>
+</tr>
+<tr>
+<td><a href="r2-day-03-topo-nccl/README.md"><code>r2-day-03-topo-nccl</code></a></td>
+<td>Topology labels and ring collective cost</td>
+<td>Unit-aware $\alpha$ – $\beta$ model and semantic tests</td>
+<td>CPU model; NCCL measurement pending</td>
+<td style="text-align: right;"><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-03-topo-nccl/">阅读</a></td>
+</tr>
+<tr>
+<td><a href="r2-day-04-ddp/README.md"><code>r2-day-04-ddp</code></a></td>
+<td>DDP ownership, data sharding, gradient synchronization</td>
+<td><code>torchrun</code> demo plus dependency-free invariants</td>
+<td>CPU/Gloo when PyTorch is available</td>
+<td style="text-align: right;"><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-04-ddp/">阅读</a></td>
+</tr>
+<tr>
+<td><a href="r2-day-05-jax-mesh/README.md"><code>r2-day-05-jax-mesh</code></a></td>
+<td>Mesh and declarative partitioning</td>
+<td>JAX/fallback shape model</td>
+<td>Multi-device execution pending</td>
+<td style="text-align: right;"><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-05-jax-mesh/">阅读</a></td>
+</tr>
+<tr>
+<td><a href="r2-day-06-gpu-architecture/README.md"><code>r2-day-06-gpu-architecture</code></a></td>
+<td>Roofline, HBM traffic, shared-memory capacity</td>
+<td>Analytical model and six tests</td>
+<td>CPU model; CUDA measurement pending</td>
+<td style="text-align: right;"><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-06-gpu-architecture/">阅读</a></td>
+</tr>
+<tr>
+<td><a href="r2-day-07-cuda-programming-model/README.md"><code>r2-day-07-cuda-programming-model</code></a></td>
+<td>Grid/block/warp, coalescing, bank conflicts</td>
+<td>Address model, eight tests, CUDA source</td>
+<td>CPU model; CUDA run pending</td>
+<td style="text-align: right;"><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-07-cuda-programming-model/">阅读</a></td>
+</tr>
+</tbody>
+</table>
+<h3>全部笔记阅读版索引</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>笔记</th>
+<th>阅读版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>day-01-ddp-basics</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-01-ddp-basics/">阅读</a></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>day-02-fsdp</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-02-fsdp/">阅读</a></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>day-03-fsdp-perblock</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-03-fsdp-perblock/">阅读</a></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>day-04-rlhf-vs-agentic-rl</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-04-rlhf-vs-agentic-rl/">阅读</a></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>day-05-jax-pjit</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-05-jax-pjit/">阅读</a></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>day-06-paper1-rl-infra</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-06-paper1-rl-infra/">阅读</a></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>day-07-checkpoint-recovery</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-07-checkpoint-recovery/">阅读</a></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>day-07-h100-beyond-7b</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-07-h100-beyond-7b/">阅读</a></td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>day-08-eval-infra</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-08-eval-infra/">阅读</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>day-11-paper2-mech-load</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-11-paper2-mech-load/">阅读</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>day-12-reward-model</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-12-reward-model/">阅读</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td><code>day-12b-profile-tool-legacy</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-12b-profile-tool-legacy/">阅读</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td><code>day-13-reliability-slo</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-13-reliability-slo/">阅读</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td><code>day-14-pue-cost</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-14-pue-cost/">阅读</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td><code>day-15-megatron-3d</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-15-megatron-3d/">阅读</a></td>
+</tr>
+<tr>
+<td>16</td>
+<td><code>day-16-monetization-v1</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/day-16-monetization-v1/">阅读</a></td>
+</tr>
+<tr>
+<td>17</td>
+<td><code>r2-day-01-transformer</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-01-transformer/">阅读</a></td>
+</tr>
+<tr>
+<td>18</td>
+<td><code>r2-day-02-pytorch-loop</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-02-pytorch-loop/">阅读</a></td>
+</tr>
+<tr>
+<td>19</td>
+<td><code>r2-day-03-topo-nccl</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-03-topo-nccl/">阅读</a></td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>r2-day-04-ddp</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-04-ddp/">阅读</a></td>
+</tr>
+<tr>
+<td>21</td>
+<td><code>r2-day-05-jax-mesh</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-05-jax-mesh/">阅读</a></td>
+</tr>
+<tr>
+<td>22</td>
+<td><code>r2-day-06-gpu-architecture</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-06-gpu-architecture/">阅读</a></td>
+</tr>
+<tr>
+<td>23</td>
+<td><code>r2-day-07-cuda-programming-model</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-07-cuda-programming-model/">阅读</a></td>
+</tr>
+<tr>
+<td>24</td>
+<td><code>r2-day-08-reduce</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-08-reduce/">阅读</a></td>
+</tr>
+<tr>
+<td>25</td>
+<td><code>r2-day-09-gemm</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-09-gemm/">阅读</a></td>
+</tr>
+<tr>
+<td>26</td>
+<td><code>r2-day-10-flashattention</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-10-flashattention/">阅读</a></td>
+</tr>
+<tr>
+<td>27</td>
+<td><code>r2-day-11-triton--torch.compile</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-11-triton--torch.compile/">阅读</a></td>
+</tr>
+<tr>
+<td>28</td>
+<td><code>r2-day-12-profiling</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-12-profiling/">阅读</a></td>
+</tr>
+<tr>
+<td>29</td>
+<td><code>r2-day-13-mha-mqa-gqa-mla-moe</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/">阅读</a></td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>r2-day-14-fsdp-zero</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-14-fsdp-zero/">阅读</a></td>
+</tr>
+<tr>
+<td>31</td>
+<td><code>r2-day-15-tp-pp-sp-3d-parallel</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-15-tp-pp-sp-3d-parallel/">阅读</a></td>
+</tr>
+<tr>
+<td>32</td>
+<td><code>r2-day-16-mixed-precision-accum-recompute</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-16-mixed-precision-accum-recompute/">阅读</a></td>
+</tr>
+<tr>
+<td>33</td>
+<td><code>r2-day-17-framework-selection</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-17-framework-selection/">阅读</a></td>
+</tr>
+<tr>
+<td>34</td>
+<td><code>r2-day-18-checkpoint-dcp</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-18-checkpoint-dcp/">阅读</a></td>
+</tr>
+<tr>
+<td>35</td>
+<td><code>r2-day-19-review-week</code></td>
+<td><a href="https://papa-panda.github.io/post-training/ai-infra/r2-day-19-review-week/">阅读</a></td>
+</tr>
+</tbody>
+</table>
+<p>The full intended sequence is in <a href="ROADMAP_45D.md"><code>ROADMAP_45D.md</code></a>. It is a curriculum map, not a claim that every planned lesson has been implemented.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>Knowledge map: 草帽路飞路线 vs. 我们的 roadmap</h2>
+<p>本路线以草帽路飞《<a href="https://zhuanlan.zhihu.com/p/2021970155182326008">AI Infra学习路线</a>》为骨架。
+贯穿两者的组织问题是同一个：<strong>计算 / 通信 / 显存</strong>的不可能三角，
+每项技术都问：牺牲什么、换取什么、何时不赚。</p>
+<blockquote class="pq">
+<p>说明：已按原文（最后编辑 2026-06-08）逐条核对；下方"完整知识地图"为原文知识条目转录，
+讲解文字略去，详见原文。</p>
+<p>读图：每个节点 = 原文的一个知识点（名称已缩短）；<strong>绿色节点</strong>纳入我们 30 天浏览计划，
+Dn = 第 n 天（见下节）；白色节点 = 原文有、未排入 30 天（如编程语言、TVM/XLA）。
+推荐资料与检验标准不在图中，见下方文字版。</p>
+</blockquote>
+<p><div class="mermaid">graph TD
+    subgraph L0["第零层 · 前置知识"]
+        subgraph g0a["编程语言"]
+            py["Python"]
+            cpp["C/C++"]
+            linux["Linux"]
+        end
+        subgraph g0b["数学基础"]
+            linalg["线性代数&lt;br/&gt;D1"]
+            prob["概率统计&lt;br/&gt;D1"]
+            calc["微积分&lt;br/&gt;D1"]
+        end
+        subgraph g0c["Transformer"]
+            sa["Self-Attention&lt;br/&gt;D1"]
+            ffn["FFN&lt;br/&gt;D1"]
+            rope["位置编码&lt;br/&gt;D1"]
+            ln["LayerNorm&lt;br/&gt;D1"]
+            fwd["完整前向&lt;br/&gt;D1"]
+        end
+        subgraph g0d["PyTorch"]
+            pt_t["Tensor/autograd&lt;br/&gt;D2"]
+            pt_loop["训练循环&lt;br/&gt;D2"]
+            pt_ckpt["checkpoint&lt;br/&gt;D2"]
+            pt_dbg["profiler 调试&lt;br/&gt;D2"]
+        end
+        subgraph g0e["通信拓扑"]
+            nvlink["NVLink&lt;br/&gt;D3"]
+            ib["IB/RoCE&lt;br/&gt;D3"]
+            coll["集合通信原语&lt;br/&gt;D3"]
+            nccl["NCCL&lt;br/&gt;D3"]
+        end
+    end
+    subgraph L1["第一层 · CUDA 编程与算子优化"]
+        subgraph g1a["GPU 硬件架构"]
+            sm["SM/Tensor Core&lt;br/&gt;D6"]
+            gpuhw["A100/H100/H200&lt;br/&gt;D6"]
+            memwall["Memory Wall&lt;br/&gt;D6"]
+            memhier["存储层次&lt;br/&gt;D6"]
+        end
+        subgraph g1b["CUDA 编程基础"]
+            cudagrid["Grid/Block/Thread&lt;br/&gt;D7"]
+            cudamem["内存模型&lt;br/&gt;D7"]
+            warp["Warp/合并访问&lt;br/&gt;D7"]
+            memint["访存决定速度&lt;br/&gt;D7"]
+        end
+        subgraph g1c["常见算子"]
+            reduce["Reduce&lt;br/&gt;D8"]
+            gemm["GEMM&lt;br/&gt;D9"]
+            softmax["Softmax&lt;br/&gt;D10"]
+            fusion["算子融合&lt;br/&gt;D11"]
+        end
+        subgraph g1d["Attention 算子"]
+            fa12["FlashAttention 1/2&lt;br/&gt;D10"]
+            fa3["FlashAttention-3&lt;br/&gt;D10"]
+            fdec["Flash-Decoding&lt;br/&gt;D10"]
+            finfer["FlashInfer&lt;br/&gt;D10"]
+            pakern["PagedAttn Kernel&lt;br/&gt;D10"]
+        end
+        subgraph g1e["AI 编译器"]
+            triton["Triton&lt;br/&gt;D11"]
+            tvm["TVM/XLA"]
+            tcompile["torch.compile&lt;br/&gt;D11"]
+        end
+    end
+    subgraph L2["第二层 · 分布式训练"]
+        subgraph g2a["架构演进"]
+            attnvar["MHA/MQA/GQA/MLA&lt;br/&gt;D13"]
+            moe["MoE&lt;br/&gt;D13"]
+        end
+        subgraph g2b["数据并行"]
+            dp["DP&lt;br/&gt;D4"]
+            ddp["DDP&lt;br/&gt;D4"]
+            fsdp["FSDP&lt;br/&gt;D14"]
+        end
+        subgraph g2c["3D 并行"]
+            tp["TP&lt;br/&gt;D15"]
+            pp["PP&lt;br/&gt;D15"]
+            sp["SP&lt;br/&gt;D15"]
+        end
+        subgraph g2d["显存优化"]
+            zero["ZeRO-1/2/3&lt;br/&gt;D14"]
+            mixp["混合精度&lt;br/&gt;D16"]
+            gacc["梯度累积&lt;br/&gt;D16"]
+            recomp["重计算&lt;br/&gt;D16"]
+        end
+        subgraph g2e["训练框架"]
+            megatron["Megatron-LM&lt;br/&gt;D17"]
+            deepspeed["DeepSpeed&lt;br/&gt;D17"]
+            fsdpfr["PyTorch FSDP&lt;br/&gt;D17"]
+        end
+    end
+    subgraph L3["第三层 · 推理与部署"]
+        subgraph g3a["推理基础"]
+            predec["Prefill/Decode&lt;br/&gt;D18"]
+            kvcache["KV Cache&lt;br/&gt;D19"]
+            metrics["TTFT/TPOT&lt;br/&gt;D18"]
+        end
+        subgraph g3b["推理引擎"]
+            paged["PagedAttention&lt;br/&gt;D20"]
+            cbatch["Continuous Batching&lt;br/&gt;D20"]
+            prefixc["Prefix Cache&lt;br/&gt;D20"]
+            chunked["Chunked Prefill&lt;br/&gt;D20"]
+            vllm["vLLM&lt;br/&gt;D21"]
+            sglang["SGLang&lt;br/&gt;D21"]
+            trtllm["TensorRT-LLM&lt;br/&gt;D21"]
+        end
+        subgraph g3c["量化"]
+            w8a8["W8A8&lt;br/&gt;D22"]
+            int4["INT4/GPTQ/AWQ&lt;br/&gt;D22"]
+            kvq["KV 量化&lt;br/&gt;D22"]
+            fp8["FP8&lt;br/&gt;D22"]
+            qtree["量化决策树&lt;br/&gt;D22"]
+        end
+        subgraph g3d["Speculative Decoding"]
+            spec["Spec Sampling&lt;br/&gt;D23"]
+            medusa["Medusa&lt;br/&gt;D23"]
+            eagle["EAGLE-2&lt;br/&gt;D23"]
+            blkver["Block 验证&lt;br/&gt;D23"]
+        end
+        subgraph g3e["P/D 解耦"]
+            distserve["DistServe&lt;br/&gt;D24"]
+            splitwise["Splitwise&lt;br/&gt;D24"]
+            taichi["TaiChi&lt;br/&gt;D24"]
+            goodput["Goodput&lt;br/&gt;D24"]
+        end
+        subgraph g3f["Benchmark"]
+            bmetrics["指标体系&lt;br/&gt;D25"]
+            tprof["torch.profiler&lt;br/&gt;D25"]
+            nsight["Nsight&lt;br/&gt;D25"]
+            gperf["GenAI-Perf&lt;br/&gt;D25"]
+            mlperf["MLPerf&lt;br/&gt;D25"]
+            reggate["回归门禁&lt;br/&gt;D25"]
+        end
+        subgraph g3g["选型"]
+            dtree["优化决策树&lt;br/&gt;D22-25"]
+        end
+    end
+    nccl --&gt; sm
+    tcompile --&gt; attnvar
+    fsdpfr --&gt; predec
+    classDef day fill:#d9ead3,stroke:#38761d;
+    class linalg,prob,calc,sa,ffn,rope,ln,fwd day;
+    class pt_t,pt_loop,pt_ckpt,pt_dbg,nvlink,ib,coll,nccl day;
+    class sm,gpuhw,memwall,memhier,cudagrid,cudamem,warp,memint day;
+    class reduce,gemm,softmax,fusion,fa12,fa3,fdec,finfer,pakern,triton,tcompile day;
+    class attnvar,moe,dp,ddp,fsdp,tp,pp,sp,zero,mixp,gacc,recomp,megatron,deepspeed,fsdpfr day;
+    class predec,kvcache,metrics,paged,cbatch,prefixc,chunked,vllm,sglang,trtllm day;
+    class w8a8,int4,kvq,fp8,qtree,spec,medusa,eagle,blkver day;
+    class distserve,splitwise,taichi,goodput,bmetrics,tprof,nsight,gperf,mlperf,reggate,dtree day;
+</div></p>
+<table>
+<thead>
+<tr>
+<th>文章的层</th>
+<th>文章覆盖（原文）</th>
+<th>我们的对应</th>
+<th>差异</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第零层 · 地基</td>
+<td>编程语言、数学基础、Transformer、PyTorch、通信拓扑</td>
+<td>r2-day-01~05（Day 1–5）</td>
+<td>我们把 DDP、JAX 提进地基；编程语言/数学标为前置按需补</td>
+</tr>
+<tr>
+<td>第一层 · CUDA 算子</td>
+<td>GPU 架构、CUDA 编程、Reduce/GEMM/Softmax/融合、FlashAttention 系、AI 编译器</td>
+<td>r2-day-06~12 ＋ <code>gpu-architecture/</code> 独立 track（Day 6–12）</td>
+<td>硬件与 kernel 深挖拆成独立 track，本目录只保留系统视角的成本模型</td>
+</tr>
+<tr>
+<td>第二层 · 分布式训练</td>
+<td>Attention/MoE 变种、DDP/FSDP、TP/PP/SP、ZeRO、混合精度/重计算、框架选型</td>
+<td>r2-day-13~17（Day 13–17）</td>
+<td>对齐；<code>day-15-megatron-3d</code> 等旧实验保留为历史</td>
+</tr>
+<tr>
+<td>第三层 · 推理部署</td>
+<td>推理基础、推理引擎、量化、Spec 解码、P/D 解耦、Benchmark、优化选型决策树</td>
+<td>r2-day-20~25 ＋ <code>vllm-rollout/</code>（Day 18–25）</td>
+<td>对齐；我们加了回归门禁（eval/reliability）</td>
+</tr>
+<tr>
+<td>新人破局指南</td>
+<td>学习路径（0–3/3–6/6+ 月）＋ 核心思维模型（六组权衡）</td>
+<td>—</td>
+<td>文章的权衡表即我们的组织问题"牺牲什么、换取什么"，直接引用</td>
+</tr>
+<tr>
+<td>（文章无）</td>
+<td>—</td>
+<td>Day 26–30 post-training 连接层</td>
+<td><strong>新增</strong>：GRPO vs PPO、RM 校准、训练→推理联动、数据飞轮、E2E</td>
+</tr>
+<tr>
+<td>（文章无）</td>
+<td>—</td>
+<td>side tracks：<code>day-11-paper2-mech-load</code>、<code>day-14-pue-cost</code></td>
+<td><strong>降级</strong>：设施/热/负载预测标为非核心；文章主干本来就不含这类主题</td>
+</tr>
+</tbody>
+</table>
+<p>改动一句话：文章多了编程语言/数学前置与新人破局指南；我们把 DDP/JAX 提进地基、
+硬件深挖独立成 track；文章止于推理部署，我们向后接了 post-training；设施主题明确出界。</p>
+<h3>我们的30天浏览计划：30个主要知识点</h3>
+<p>文章的完整知识树（200+ 知识点）是"地图全貌"，下面是我们自己的浏览路线：
+每天一个主题，浏览足矣——能用一句话说清它<strong>牺牲什么、换取什么、何时不赚</strong>即可，
+推导和实测细节之后再慢慢学。括号内是文章四层中的位置。</p>
+<p><strong>第零层 · 地基（Day 1–5）</strong></p>
+<ol>
+<li>Transformer Decoder 白板（地基）：手绘 (B, S, D) 张量流，hidden 4096、32 层手算总参。</li>
+<li>PyTorch 训练循环（地基）：loop state、optimizer、checkpoint 落盘。</li>
+<li>通信拓扑与 NCCL（地基）：NVLink vs PCIe/IB 数量级， $\alpha$ – $\beta$ 模型，ring all-reduce 公式。</li>
+<li>DDP（地基）：数据分片、梯度 all-reduce 同步；30 分钟把单卡循环改成 DDP。</li>
+<li>JAX Mesh 声明式分片（地基）：pjit/sharding，声明式 vs 命令式。</li>
+</ol>
+<p><strong>第一层 · CUDA 算子（Day 6–12）</strong></p>
+<ol>
+<li>GPU 架构与 Roofline（CUDA）：存储层级、HBM 带宽、算术强度 $I=F/Q$ 。</li>
+<li>CUDA 编程模型（CUDA）：grid/block/warp，coalescing，bank conflict。</li>
+<li>Parallel Reduction（CUDA）：最朴素 → warp shuffle → shared tree。</li>
+<li>GEMM Tiling（CUDA）：分块矩阵乘，目标 50% cuBLAS。</li>
+<li>FlashAttention（CUDA）：tiling + online softmax，省的是 HBM 读写。</li>
+<li>Triton / torch.compile（CUDA）：fused kernel，一句话说清何时不如手写。</li>
+<li>Profiling（CUDA）：Nsight Systems/Compute，看 host 拖后与 SOL%。</li>
+</ol>
+<p><strong>第二层 · 分布式训练（Day 13–17）</strong></p>
+<ol>
+<li>Attention 变种（分布式）：MHA → MQA/GQA/MLA，省的是 KV cache。</li>
+<li>FSDP / ZeRO 显存账（分布式）：7B FP16 14GB + Adam 56GB，ZeRO-2 vs ZeRO-3。</li>
+<li>TP / PP / SP（分布式）：64 卡 TP=8 机内、PP=4、DP=2；为何 TP 不跨机。</li>
+<li>混合精度与重计算（分布式）：BF16 指数位 8 vs 5，重计算换显存。</li>
+<li>框架选型与容错（分布式）：Megatron / DeepSpeed / FSDP 一句选型，DCP async ckpt。</li>
+</ol>
+<p><strong>第三层 · 推理部署（Day 18–25）</strong></p>
+<ol>
+<li>Prefill vs Decode（推理）：compute bound vs memory bound，TTFT/TPOT。</li>
+<li>KV Cache 算账（推理）：7B 模型 32GB 手算，batch 放大。</li>
+<li>PagedAttention + Continuous Batching（推理）：虚拟页表，请求拼单。</li>
+<li>vLLM / SGLang 实战（推理）：部署对比表，vllm-rollout/ 联动。</li>
+<li>量化决策树（推理）：70B INT4 35GB，何时 INT4 反而慢于 INT8。</li>
+<li>Speculative Decoding（推理）：草稿 + 验证，无偏性保证。</li>
+<li>Prefill / Decode 解耦 + Goodput（推理）：配比算账。</li>
+<li>Benchmark 与回归门禁（推理）：6 个指标，TPOT P95 退化 5% 即 block。</li>
+</ol>
+<p><strong>新增 · post-training 连接（Day 26–30）</strong></p>
+<ol>
+<li>GRPO vs PPO 的系统差异（新增）：rollout/buffer 对 infra 的不同要求。</li>
+<li>Reward Model 与校准（新增）： $\sigma$ /ECE，reward hacking 的系统视角。</li>
+<li>训练 → 推理联动（新增）：vLLM rollout pipeline，async eval。</li>
+<li>数据飞轮（新增）：coding data flywheel， $\$/\mathrm{useful}$ rollout。</li>
+<li>E2E 复盘（新增）：系统设计题，可复现配置与残余风险清单。</li>
+</ol>
+<p>完整知识地图见下一节，本节 30 个主题即是从中挑出的浏览主干。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>完整知识地图（草帽路飞原文 · 知识条目转录）</h2>
+<blockquote class="pq">
+<p>转录自原文（最后编辑 2026-06-08），只保留<strong>知识条目、推荐资料、检验标准</strong>三类，
+条目内的讲解文字略去，措辞贴原文、压缩为一行一条。原文全景导语：
+核心权衡是"ZeRO 用通信换显存；重计算用计算换显存；量化用精度换显存和带宽"。
+括号内"→ Day N"指我们 30 天浏览计划中对应的主题。</p>
+</blockquote>
+<h3>第零层 · 前置知识</h3>
+<p><strong>0.1 知识点</strong></p>
+<ul>
+<li>编程语言（前置，未进 30 天）：Python——面向对象、装饰器、生成器、多进程/多线程、性能 profiling；C/C++——指针、内存管理、编译链接，能读懂 C++ 项目代码、写简单 C++ 函数并编译运行；Linux——命令行、Shell 脚本、进程管理、环境变量配置。</li>
+<li>数学基础（前置；线性代数直觉并入 Day 1）：矩阵乘法/转置/分块、特征值分解，维度变换直觉 $(B,S,H)\times(H,V)\to(B,S,V)$ ；概率分布/期望/方差、Softmax 概率解释、交叉熵含义；微积分了解即可（链式法则、梯度含义）。</li>
+<li>Transformer 架构（→ Day 1）：Self-Attention——Q/K/V 含义， $QK^T\to\mathrm{scale}\to\mathrm{softmax}\to PV$ ， $O(N^2)$ 复杂度；FFN——两层线性变换 + 激活；位置编码——Sinusoidal、RoPE；LayerNorm——Pre-Norm vs Post-Norm；完整前向——token embedding → Attention → Add &amp; Norm → FFN → Add &amp; Norm，每步输入输出维度。</li>
+<li>PyTorch 框架（→ Day 2）：Tensor 操作、autograd、Module / Parameter 组织；训练循环 DataLoader → forward → loss → backward → optimizer.step；state_dict、checkpoint；调试 <code>torch.cuda.memory_summary()</code>、<code>torch.profiler</code>。</li>
+<li>通信拓扑（→ Day 3）：NVLink / NVSwitch 带宽与拓扑；InfiniBand、RoCE；AllReduce / AllGather / ReduceScatter 含义与开销；NCCL 用法与调优。</li>
+</ul>
+<p><strong>0.2 推荐资料</strong></p>
+<p>论文 Attention Is All You Need（必读）；The Illustrated Transformer（Jay Alammar）；琳琅阿木 图文详解 LLM inference；PyTorch 官方 60 Minute Blitz；3Blue1Brown 线性代数的本质；MIT 6.S081 / Linux 命令行；Karpathy《Let's build GPT from scratch》；NVIDIA NCCL 文档；NVIDIA Deep Learning Performance Guide。</p>
+<p><strong>0.3 检验标准</strong></p>
+<ul>
+<li>白板默写 Transformer Decoder Block 并标注维度，解释 Q/K/V 线性投影；</li>
+<li>手算 7B（hidden 4096、32 头、32 层、vocab 32000）总参，误差 ≤20%；</li>
+<li>独立写出完整训练循环（含 DataLoader、forward、loss、backward、optimizer step、学习率调度、checkpoint 保存）并在 GPU 跑通；</li>
+<li>读懂 CUDA kernel 的 host 端代码（malloc、memcpy、kernel launch、free）；</li>
+<li>Linux 日常：SSH、tmux、conda/pip、nvidia-smi、git、bash 脚本批量提交任务；</li>
+<li>读懂 <code>nvidia-smi topo -m</code> 的 NV、SYS、NODE 标记；</li>
+<li>画出 AllReduce、AllGather、ReduceScatter 数据流，说清通信量公式（Ring AllReduce ≈ $2(N-1)/N$ × 数据量）。</li>
+</ul>
+<h3>第一层 · CUDA 编程与算子优化</h3>
+<p><strong>1.1 知识点</strong></p>
+<ul>
+<li>GPU 硬件架构（→ Day 6）：SM、Tensor Core、CUDA Core 区别与协作；A100 / H100 / H200 算力、显存带宽、HBM 容量对比；Memory Wall——显存带宽瓶颈比算力瓶颈更致命；存储层次：寄存器 &gt; 共享内存 &gt; L1/L2 Cache &gt; HBM &gt; 主机内存。</li>
+<li>CUDA 编程基础（→ Day 7）：Grid / Block / Thread 层级与线程索引计算；全局内存、共享内存、寄存器、常量内存；Warp（32 线程最小调度单位）、Bank Conflict、Coalesced Access、Occupancy；核心直觉"内存访问模式决定运行速度"。</li>
+<li>常见算子实现与优化（→ Day 8/9/10）：Reduce——Warp Shuffle、多级归约；GEMM——分块、向量化、Shared Memory Tiling、Tensor Core；Softmax——online normalizer；算子融合——合 kernel 减少全局内存读写。</li>
+<li>Attention 算子（→ Day 10）：FlashAttention V1/V2——tiling 降 HBM 访问；FlashAttention-3——Hopper 利用率；Flash-Decoding / ++——Decode 阶段加速；FlashInfer——serving 可组合 Attention 引擎；PagedAttention CUDA Kernel——vLLM 底层实现。</li>
+<li>AI 编译器（→ Day 11）：Triton；TVM / XLA 计算图优化与代码生成；torch.compile——Graph Break 与性能收益。</li>
+</ul>
+<p><strong>1.2 推荐资料</strong></p>
+<p>NVIDIA GPU 架构白皮书（Ampere / Hopper）；小小将 CUDA 编程入门极简教程；CUDA Programming Guide；PeakCrosser CUDA Reduce 优化；猛猿 从零到 CUDA GEMM 优化；MegEngine Bot CUDA 矩阵乘法终极优化；Online normalizer calculation for softmax；OneFlow 高效 Softmax kernel；成诚 OneFlow 世界最快框架；FlashAttention V1/V2/3 论文；Flash-Decoding 技术报告；FlashInfer 论文 + Repo；猛猿 图解 FlashAttention V1/V2；方佳瑞 PagedAttention CUDA 实现；Triton 官方教程；torch.compile profiling；Nsight Systems / Compute User Guide。</p>
+<p><strong>1.3 检验标准</strong></p>
+<ul>
+<li>说出 H100：HBM 80GB、带宽 ~3.35TB/s、L2 50MB、共享内存 228KB/SM，解释带宽先成瓶颈；</li>
+<li>估算 2GB 梯度 AllReduce 在 NVLink（900GB/s）vs PCIe Gen5（64GB/s）耗时差；</li>
+<li>Reduce 三连（原子加 → 共享内存树形归约 → Warp Shuffle），Nsight Compute 对比 throughput；</li>
+<li>32×32 矩阵转置：先写 32-way bank conflict 版，加 padding 消除，Nsight Compute 验证 conflict 降到 0；</li>
+<li>Shared Memory Tiling GEMM，1024×1024 达到 cuBLAS 50% 以上；</li>
+<li>白板推导 FlashAttention tiling（外层 KV block、内层 Q block），online softmax，HBM 读写 $O(N^2)\to O(N)$ ；</li>
+<li>Triton 写 fused Softmax kernel，对比正确性与性能；</li>
+<li>Nsight Systems 抓 iteration trace 定位 GPU idle gap；Nsight Compute 读 SOL 面板判 memory/compute bound。</li>
+</ul>
+<h3>第二层 · 分布式训练</h3>
+<p><strong>2.1 知识点</strong></p>
+<ul>
+<li>模型架构演进（→ Day 13）：MHA → MQA → GQA → MLA（影响 TP 切分与推理显存规划）；MoE / DeepSeekMoE——Expert Parallelism。</li>
+<li>数据并行（→ Day 4/14）：DP 单进程多卡；DDP 多进程 AllReduce 梯度同步；FSDP——PyTorch 原生 ZeRO-3。</li>
+<li>模型并行 3D（→ Day 15）：TP——矩阵乘按维度切分、通信密集、限单机；PP——按层切到多机；SP——按序列切、配 TP 降激活显存。</li>
+<li>显存优化（→ Day 14/16）：ZeRO-1/2/3（优化器/梯度/参数切分，用通信换显存）；混合精度 FP16 / BF16 / FP8；梯度累积；Activation Checkpointing（用计算换显存）。</li>
+<li>训练框架（→ Day 17）：Megatron-LM（TP/PP 标杆）；DeepSpeed（ZeRO 核心）；PyTorch FSDP。</li>
+</ul>
+<p><strong>2.2 推荐资料</strong></p>
+<p>DeepSeek V2（MLA）、DeepSeekMoE 论文；苏剑林 MHA→MLA；Megatron-LM、ZeRO 论文；DeepSpeed 官方文档；PyTorch DDP / FSDP 教程。</p>
+<p><strong>2.3 检验标准</strong></p>
+<ul>
+<li>口算 7B：FP16 参数 ~14GB、Adam 状态 ~56GB，判单卡 80GB 能否放下；</li>
+<li>一句话 ZeRO-2 vs ZeRO-3（ZeRO-2 参数每卡各存一份；ZeRO-3 参数也切，通信量约翻倍）；</li>
+<li>30 分钟把单卡脚本改成 DDP 跑通；</li>
+<li>64 卡（8 节点 × 8 卡）设计 TP=8、PP=4、DP=2，标 NVLink / IB，解释 TP 不跨机；</li>
+<li>BF16 vs FP16（指数 8 位 vs 5 位，动态范围近 FP32）。</li>
+</ul>
+<h3>第三层 · 推理与部署</h3>
+<p><strong>3.1 LLM 推理基础（→ Day 18/19）</strong></p>
+<ul>
+<li>知识点：Prefill vs Decode 两阶段；KV Cache——"显存刺客"，生命周期与碎片；指标 TTFT / TPOT / 吞吐 / P50·P95。</li>
+<li>资料：琳琅阿木 KV Cache 图解；CMU《Towards Efficient Generative LLM Serving》Survey。</li>
+<li>检验：解释 Prefill 快、Decode 慢（compute bound vs memory bound）；手算 LLaMA-2-7B（32 层、32 头、head_dim 128）ctx 4096、batch 16、FP16 ≈ 32GB；链路 tokenize → prefill → decode → sampling（Top-p/Top-k）→ detokenize，指高并发瓶颈。</li>
+</ul>
+<p><strong>3.2 推理引擎（→ Day 20/21）</strong></p>
+<ul>
+<li>知识点：PagedAttention（虚拟页管 KV，解碎片）；Continuous Batching；Prefix Cache / RadixAttention；Chunked Prefill；vLLM / SGLang / TensorRT-LLM 选型。</li>
+<li>资料：vLLM 论文/Repo/文档、猛猿 vLLM 源码解析；SGLang 论文；TensorRT-LLM 文档；Orca 论文；吃果冻不吐果冻皮 Continuous Batching；DefTruth Prefix Cache 图解。</li>
+<li>检验：vLLM + SGLang 部署 7B 成 OpenAI 兼容 API，同压测对比；讲清 Continuous vs Static Batching（利用率 30% 拉到 80%+）；画 KV 管理全链路；结构化回答选型依据。</li>
+</ul>
+<p><strong>3.3 量化（→ Day 22）</strong></p>
+<ul>
+<li>知识点：W8A8 SmoothQuant（activation outlier 转到 weight）；Weight-only INT4（GPTQ / AWQ）；KV Cache 量化（KIVI 2-bit）；FP8（Hopper 原生）；决策树：通用→W8A8，更省→INT4，长上下文/大并发→KV 量化。</li>
+<li>资料：SmoothQuant / GPTQ / AWQ / KIVI / Marlin 论文；TensorRT-LLM 量化工具链；vLLM 量化支持。</li>
+<li>检验：70B + 2×A100 快速判断（FP16 140GB → W8A8 ~70GB → INT4 ~35GB）；FP16 vs AWQ-INT4 throughput + 质量对比报告；解释 INT4 有时慢于 INT8（unpack/dequant、Tensor Core 利用率）；量化掉点排查清单。</li>
+</ul>
+<p><strong>3.4 Speculative Decoding（→ Day 23）</strong></p>
+<ul>
+<li>知识点：Speculative Sampling（Draft 猜、Target 验证，分布无偏）；Medusa（多 head 免 draft）；EAGLE-2（动态 draft tree）；Block Verification。</li>
+<li>资料：四篇论文；vLLM / TensorRT-LLM spec 支持；SGLang cFSM。</li>
+<li>检验：解释 rejection sampling 为何保分布；实测代码生成 vs 开放对话加速差；列 ≥3 种不赚情形（高温采样、大 batch、acceptance &lt; 50%）；与量化 / Continuous Batching 叠加冲突点。</li>
+</ul>
+<p><strong>3.5 Prefill/Decode 解耦（→ Day 24）</strong></p>
+<ul>
+<li>知识点：混合 batching 互扰、尾延迟爆炸；DistServe（OSDI'24）；Splitwise（ISCA）；TaiChi（2025）；Goodput（满足 SLO 的有效吞吐 ≠ 裸 QPS）。</li>
+<li>资料：三篇论文；《Disaggregated Inference: 18 Months Later》；MLC microserving。</li>
+<li>检验：定量证明 decode P95 TPOT 被 prefill 拖慢 3–5 倍；解释 goodput；按负载推导 P/D 池配比；风险清单（KV 迁移带宽、调度复杂度、负载不均浪费）。</li>
+</ul>
+<p><strong>3.6 性能分析与 Benchmark（→ Day 25）</strong></p>
+<ul>
+<li>知识点：指标 QPS / TTFT / TPOT / token/s / P50·P95；torch.profiler；Nsight Systems / Compute；GenAI-Perf、Triton Perf Analyzer；MLPerf Inference；回归门禁。</li>
+<li>资料：profiler / GenAI-Perf / Triton 文档；MLPerf Inference（Datacenter）；v5.0 LLM 任务解读。</li>
+<li>检验：报告含 6 指标；config 化可复现；TPOT P95 退化 15% → bisect → trace 对比；定门禁规则（如退化超 5% block merge）进 CI。</li>
+</ul>
+<p><strong>3.7 优化选型决策树（→ Day 22–25 综合）</strong></p>
+<ul>
+<li>先定症状：[A] TTFT 高 / [B] TPOT 高 / [C] 显存不够 / [D] 尾延迟失控。</li>
+<li>[A]：长 prompt → Chunked Prefill / 高效 GEMM；CPU/调度瓶颈 → Nsight Systems 查 idle gap；高前缀重复 → Prefix Cache / RadixAttention。</li>
+<li>[B]：KV 搬运瓶颈 → FlashAttention / FlashInfer；串行本质 → Speculative；并发不足 → Continuous Batching。</li>
+<li>[C]：KV 大户 → PagedAttention / KIVI；权重大 → INT4（1/4）/ W8A8（1/2）。</li>
+<li>[D]：P/D 互扰 → 解耦部署；SLO 极严 → TaiChi 类统一调度。</li>
+<li>顺序：先 OOM → TTFT → TPOT/吞吐 → 尾延迟。</li>
+</ul>
+<h3>新人破局指南</h3>
+<ul>
+<li>学习路径：0–3 个月——完成第零层检验 + CUDA 基础（Reduce/GEMM）+ DDP 上两卡；3–6 个月——精读 Megatron-LM / ZeRO / FlashAttention / vLLM 四篇 + 开源贡献 + 量化/Spec；6 个月+——集群部署大模型、性能回归体系、P/D 解耦前沿、跟踪 FP8 / RDMA / 新架构。</li>
+<li>核心思维模型（与我们的组织问题一致）：ZeRO——通信换显存；重计算——计算换显存；量化——精度换显存+带宽+吞吐；Spec——Prefill 开销换 Decode 速度；P/D 解耦——复杂度+迁移开销换尾延迟+goodput；FlashAttention——实现复杂度换显存+速度。</li>
+</ul>
+<h3>参考资料（原文：24 篇论文 + 项目 + 文档）</h3>
+<ul>
+<li>论文：Attention Is All You Need；Megatron-LM；ZeRO；FlashAttention V1/V2/3；Flash-Decoding；FlashInfer；vLLM；SGLang；Orca；DistServe；Splitwise；SmoothQuant；GPTQ；AWQ；KIVI；Marlin；Speculative Sampling；Medusa；EAGLE-2；Block Verification；Online normalizer for softmax；DeepSeek V2；DeepSeekMoE；CMU LLM Serving Survey。</li>
+<li>项目/工具：vLLM、SGLang、DeepSpeed、Megatron-LM、FlashAttention、FlashInfer、TensorRT-LLM、Triton。</li>
+<li>文档：CUDA Programming Guide、NCCL、Nsight Systems/Compute、Deep Learning Performance Guide、DeepSpeed、PyTorch 教程/DDP/FSDP、vLLM、TensorRT-LLM、Triton 教程、MLPerf Inference、GenAI-Perf。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>Core models</h2>
+<h3>Communication</h3>
+<p>For a ring over $p$ ranks and a payload of $S$ bytes per rank, the idealized per-rank transfer volumes are:</p>
+<p>$$V_{\mathrm{RS}}=V_{\mathrm{AG}}=\frac{p-1}{p}S,\qquad V_{\mathrm{AR}}=2\frac{p-1}{p}S.$$</p>
+<p>A simple latency-bandwidth estimate is:</p>
+<p>$$T_{\mathrm{ring}}\approx n_{\mathrm{steps}}\alpha+\frac{V}{B_{\mathrm{effective}}}.$$</p>
+<p>This is a lower-order mechanism model. Real NCCL behavior also depends on topology, channel count, protocol, chunking, contention, and its algorithm selection. Product “total bandwidth” and measured collective bandwidth are not interchangeable.</p>
+<h3>Memory</h3>
+<p>For arithmetic intensity $I=F/Q$ with $F$ FLOPs and $Q$ bytes transferred from the bottleneck memory level, the Roofline bound is:</p>
+<p>$$P\le\min(P_{\mathrm{peak}},B I).$$</p>
+<p>A memory-saving method is incomplete until its additional communication, recomputation, fragmentation, and temporary buffers are accounted for.</p>
+<h3>Correctness before speed</h3>
+<p>Every distributed experiment should separate three questions:</p>
+<ol>
+<li><strong>Semantics:</strong> Are samples partitioned as intended, gradients synchronized, and replicas equal after the step?</li>
+<li><strong>Accounting:</strong> Are bytes, bandwidth units, and collective phases defined consistently?</li>
+<li><strong>Measurement:</strong> Was the real backend synchronized and measured with the workload/configuration recorded?</li>
+</ol>
+<p>A CPU fallback can answer the first two in limited cases. It cannot establish GPU latency, bandwidth, MFU, or scaling efficiency.</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>Older experiments</h2>
+<p>The original <code>day-*</code> labs remain useful as focused prototypes:</p>
+<ul>
+<li>distributed basics: <a href="day-01-ddp-basics/"><code>day-01-ddp-basics</code></a>, <a href="day-02-fsdp/"><code>day-02-fsdp</code></a>, <a href="day-03-fsdp-perblock/"><code>day-03-fsdp-perblock</code></a>, <a href="day-07-checkpoint-recovery/"><code>day-07-checkpoint-recovery</code></a>, <a href="day-15-megatron-3d/"><code>day-15-megatron-3d</code></a>;</li>
+<li>post-training links: <a href="day-04-rlhf-vs-agentic-rl/"><code>day-04-rlhf-vs-agentic-rl</code></a>, <a href="day-08-eval-infra/"><code>day-08-eval-infra</code></a>, <a href="day-10-vllm/"><code>day-10-vllm</code></a>, <a href="day-12-reward-model/"><code>day-12-reward-model</code></a>, <a href="day-13-reliability-slo/"><code>day-13-reliability-slo</code></a>;</li>
+<li>capacity/profiling prototypes: <a href="day-07-h100-beyond-7b/"><code>day-07-h100-beyond-7b</code></a>, <a href="day-12b-profile-tool-legacy/"><code>day-12b-profile-tool-legacy</code></a>;</li>
+<li><strong>non-core side tracks:</strong> <a href="day-06-paper1-rl-infra/"><code>day-06-paper1-rl-infra</code></a>, <a href="day-11-paper2-mech-load/"><code>day-11-paper2-mech-load</code></a>, and <a href="day-14-pue-cost/"><code>day-14-pue-cost</code></a> concern workload forecasting or facility/thermal models rather than AI-infrastructure mechanisms.</li>
+</ul>
+<p>Numbers in those directories marked simulation, proxy, estimate, or pending hardware validation must remain labeled that way.</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>Boundaries with other tracks</h2>
+<ul>
+<li><a href="../gpu-architecture/README.md"><code>gpu-architecture/</code></a> owns the deeper hardware/kernel treatment. These labs use that cost model in training and serving systems.</li>
+<li><a href="../vllm-rollout/README.md"><code>vllm-rollout/</code></a> is the canonical rollout-serving stress-test track; <code>day-10-vllm</code> is retained as an earlier snapshot.</li>
+<li><a href="../grpo-vs-ppo/README.md"><code>grpo-vs-ppo/</code></a> owns policy-objective derivations. This directory discusses their systems consequences only.</li>
+<li><a href="../model-aware-data-curation/README.md"><code>model-aware-data-curation/</code></a> owns model-aware data selection; this directory owns execution and resource costs.</li>
+<li><a href="../harness-engineering/README.md"><code>harness-engineering/</code></a> owns agent runtime/control-plane design, not GPU or collective implementation.</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>Run the current checks</h2>
+<pre><code class="language-bash">python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v
+python3 -m unittest discover -s ai-infra/r2-day-04-ddp -p 'test_*.py' -v
+python3 -m unittest discover -s ai-infra/r2-day-06-gpu-architecture -p 'test_*.py' -v
+python3 -m unittest discover -s ai-infra/r2-day-07-cuda-programming-model -p 'test_*.py' -v
+</code></pre>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>Primary references</h2>
+<ul>
+<li>PyTorch DistributedDataParallel design note: https://docs.pytorch.org/docs/main/notes/ddp</li>
+<li>PyTorch DistributedDataParallel API: https://docs.pytorch.org/docs/stable/generated/torch.nn.parallel.DistributedDataParallel.html</li>
+<li>NCCL collective semantics: https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/usage/collectives.html</li>
+<li>CUDA C++ Programming Guide: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html</li>
+<li>CUDA C++ Best Practices Guide: https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

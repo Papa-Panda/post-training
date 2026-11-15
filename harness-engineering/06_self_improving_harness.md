@@ -1,4 +1,6 @@
 # 06 — Self-Improving Harness：从 Failure 到可回滚版本
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/06_self_improving_harness.reading.html
+
 
 ## 元信息
 

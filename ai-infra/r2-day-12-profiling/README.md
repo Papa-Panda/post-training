@@ -1,4 +1,6 @@
 # r2-Day12 — Profiling：Nsight 双剑（Systems 看拖后，Compute 看 SOL）
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-12-profiling/README.reading.html
+
 
 ## Connection to Prev
 

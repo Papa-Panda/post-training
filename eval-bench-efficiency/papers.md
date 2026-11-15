@@ -1,4 +1,6 @@
 # papers — efficient eval 关键论文
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-bench-efficiency/papers.reading.html
+
 
 1. **Metabench** — Sparse Benchmarking
    - arXiv: https://arxiv.org/abs/2407.12844

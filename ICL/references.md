@@ -1,4 +1,6 @@
 # Evidence ledger
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/references.reading.html
+
 
 [← README](README.md)
 

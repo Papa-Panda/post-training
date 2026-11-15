@@ -1,4 +1,6 @@
 # r2-Day10 — FlashAttention：tiling + online softmax，把 O(N²) 中间量留在片上
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-10-flashattention/README.reading.html
+
 
 ## Connection to Prev
 

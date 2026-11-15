@@ -1,4 +1,6 @@
 # 注释版篇目：Synthetic Data / Agentic 数据合成与清洗系列
+> 📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/papers.reading.html
+
 
 每篇的注释只写核实过的事实：方法、数据规模、论文自报的关键数字。
 思考问题是读的时候要带着的，不需要现在回答。

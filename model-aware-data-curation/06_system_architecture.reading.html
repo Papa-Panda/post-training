@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 — 系统架构：Gradient Datastore + Curation Control Plane</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Model-Aware Data Curation</span>
+    <h1>06 — 系统架构：Gradient Datastore + Curation Control Plane</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. 数据面与控制面分离</a><a href="#sec-3">2. Gradient record schema</a><a href="#sec-4">3. 计算路径与 Proxy 选择</a><a href="#sec-5">4. 调度策略</a><a href="#sec-6">5. 可观测性与防 silent failure</a><a href="#sec-7">6. 最小生产护栏</a><a href="#sec-8">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>内容类型</dt><dd>跨论文系统设计，不对应单篇论文</dd><dt>方法来源</dt><dd><a href="<a href="https://arxiv.org/abs/2402.04333">https://arxiv.org/abs/2402.04333</a>">LESS</a> · <a href="<a href="https://arxiv.org/abs/2303.14186">https://arxiv.org/abs/2303.14186</a>">TRAK</a> · <a href="<a href="https://arxiv.org/abs/2505.20161">https://arxiv.org/abs/2505.20161</a>">Prismatic Synthesis</a> · <a href="<a href="https://arxiv.org/abs/2602.21492v2">https://arxiv.org/abs/2602.21492v2</a>">GradAlign</a></dd><dt>本章定位</dt><dd>将论文中的 gradient sketch、attribution、coverage 和动态重算拼成可部署 control plane。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. 数据面与控制面分离</h2>
+<pre><code class="language-text">                        ┌────────────────────────────┐
+raw / synthetic pool ──► quality + execution gates │
+                        └──────────────┬─────────────┘
+                                       ▼
+┌──────────────┐   per-sample grads   ┌───────────────────┐
+│ proxy models │─────────────────────►│ gradient datastore│
+└──────────────┘                      └─────────┬─────────┘
+                                                │
+         ┌──────────────────────────────────────┼──────────────────────┐
+         ▼                                      ▼                      ▼
+ target alignment                         coverage/clusters       conflict/retention
+         └──────────────────────────────────────┬──────────────────────┘
+                                                ▼
+                                      selector / generator policy
+                                                ▼
+                                      train -&gt; eval -&gt; refresh
+</code></pre>
+<ul>
+<li><strong>数据面</strong>：样本、provenance、执行结果、梯度向量、簇标签、版本；</li>
+<li><strong>控制面</strong>：目标权重、预算、阈值、refresh 条件、生成策略；</li>
+<li><strong>训练面</strong>：SFT/RL job 与 checkpoint；</li>
+<li><strong>评估面</strong>：ID/OOD、retention、污染、成本与 rank stability。</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Gradient record schema</h2>
+<pre><code class="language-json">{
+  &quot;sample_id&quot;: &quot;stable-content-hash&quot;,
+  &quot;dataset_version&quot;: &quot;v17&quot;,
+  &quot;proxy_id&quot;: &quot;proxy-family-size-checkpoint&quot;,
+  &quot;objective&quot;: &quot;sft_nll|policy_gradient&quot;,
+  &quot;layer_scope&quot;: &quot;lora|lm_head|selected_blocks&quot;,
+  &quot;projection_seed&quot;: 17,
+  &quot;projection_dim&quot;: 1024,
+  &quot;gradient_uri&quot;: &quot;shard://...&quot;,
+  &quot;norm&quot;: 3.14,
+  &quot;quality_pass&quot;: true,
+  &quot;execution_pass&quot;: true,
+  &quot;contamination_pass&quot;: true,
+  &quot;created_at&quot;: &quot;...&quot;
+}
+</code></pre>
+<p>必须把 <code>proxy_id/objective/layer_scope/projection_seed</code> 放进 key；不同协议的向量不可静默混用。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. 计算路径与 Proxy 选择</h2>
+<p>核心不是模型必须多大，而是两点：<strong>梯度拿得到</strong>，而且<strong>梯度几何能代表目标模型</strong>。</p>
+<ol>
+<li>必须是白盒、可微模型，能计算每条样本的 loss/log-prob 对参数的梯度；只有闭源 API 输出通常不够。</li>
+<li>loss 要与目标匹配：SFT 用 answer NLL；RL 用当前 policy 的 log-prob × advantage；保护能力用 retention set loss。</li>
+<li>不必计算全参数梯度，通常只取 LoRA、LM head 或若干层，再随机投影和归一化。</li>
+<li>proxy 不必和最终模型一样大，但最好同 tokenizer、同模型家族、同训练目标，而且至少已经具备基本任务能力；太弱的模型只会产生“我什么都不会”的噪声梯度。</li>
+<li>必须抽样验证 proxy 与目标模型的数据排名相关性，否则小模型选出的数据未必对大模型有效。</li>
+</ol>
+<p>方法之间要求也不同：<strong>TRAK/TracIn</strong> 若要解释某个具体模型，最好直接用该模型或它的训练 checkpoints；<strong>LESS/Prismatic/G-Vendi</strong> 更适合用小型 instruction-tuned proxy；<strong>GradAlign</strong> 最严格，最好使用当前或接近当前的 policy，并随着 RL 训练周期性刷新。实践上可以从 <strong>0.5B–7B proxy + LoRA/LM-head 梯度 + 256/1024维投影</strong>开始，但这只是工程起点，不是理论保证。</p>
+<h3>Per-sample gradients</h3>
+<p>LLM 全参数逐样本梯度不可直接落盘。由便宜到贵：</p>
+<ol>
+<li>LM-head / embedding gradients；</li>
+<li>LoRA adapter gradients；</li>
+<li>选定 blocks；</li>
+<li>full gradient sketch。</li>
+</ol>
+<p>用 microbatch + vectorized per-sample gradient，立即随机投影并丢弃原始高维向量：</p>
+<p>$$\tilde g_i=\frac{1}{\sqrt d}R^\top g_i, \qquad R_{jk}\in\{-1,+1\}.$$</p>
+<h3>Storage</h3>
+<p>$n$ 条、 $d=1024$ 、FP16 的向量约占 $2nd$ bytes：100 万条约 2.05 GB（不含 metadata/index），可按 task/date/proxy 分 shard。在线 ANN 检索可使用 cosine index；谱统计使用 $d\times d$ covariance，避免构造 $n\times n$ kernel。</p>
+<h3>Refresh</h3>
+<p>定义 proxy drift：</p>
+<p>$$\Delta_t=1-\mathrm{Spearman} \big(s_{\theta_{t-1}}(Q),s_{\theta_t}(Q)\big)$$</p>
+<p>其中 $Q$ 是固定 probe subset。超过阈值才全量刷新；否则只补新数据，降低梯度计算成本。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. 调度策略</h2>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>目标</th>
+<th>推荐动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bootstrap</td>
+<td>建初始地图</td>
+<td>小 proxy + 256/1024D sketch + coarse clusters</td>
+</tr>
+<tr>
+<td>targeted SFT</td>
+<td>快速修能力</td>
+<td>target alignment shortlist，再做 coverage</td>
+</tr>
+<tr>
+<td>online RL</td>
+<td>非平稳 curriculum</td>
+<td>每 N 轮刷新 validation gradient 与候选排名</td>
+</tr>
+<tr>
+<td>synthetic expansion</td>
+<td>补缺口</td>
+<td>对稀疏且目标相关簇生成与 rejection sampling</td>
+</tr>
+<tr>
+<td>continual update</td>
+<td>防遗忘</td>
+<td>conflict gate + replay + retention regression</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. 可观测性与防 silent failure</h2>
+<p>每个 selection job 输出：</p>
+<ul>
+<li>pool → quality pass → gradient pass → selected 的瀑布计数；</li>
+<li>target alignment 分布与 top examples；</li>
+<li>G-Vendi、effective rank、簇 occupancy / entropy；</li>
+<li>proxy–target ranking correlation；</li>
+<li>conflict rate 与保护集 delta；</li>
+<li>duplicate / contamination / execution failure rates；</li>
+<li>GPU-hours、tokens selected、training tokens saved。</li>
+</ul>
+<p>失败时禁止自动回退到“全收”：应 fail closed 或显式标记 fallback。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. 最小生产护栏</h2>
+<ol>
+<li>selector 的 validation set 与最终 test set 隔离；</li>
+<li>generator 不看到 benchmark answers；</li>
+<li>stable sample ID 防止同义重复跨轮回流；</li>
+<li>每轮保留 random control arm，避免只看 selector 自证；</li>
+<li>每周/每里程碑跑全量 eval，日常可跑压缩 eval；</li>
+<li>新 selector shadow mode 先记录、不影响训练；</li>
+<li>数据版本、模型版本和 projection seed 可完全回放。</li>
+</ol>
+<blockquote class="pq">
+<p>相关：proxy 五原则与方法适配见本文 §3，coverage 原理见 <a href="03_gradient_coverage.md">03</a>，SPICE 协调性见 <a href="09_spice_information_conflict.md">09</a>。</p>
+</blockquote>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>导航</h2>
+<ul>
+<li>上一篇：<a href="05_safety_continual_learning.md">05 安全与持续学习</a></li>
+<li>下一篇：<a href="07_coding_data_flywheel.md">07 Coding Flywheel</a></li>
+<li>回到：<a href="README.md">目录 README</a> | <a href="papers.md">论文证据</a> | <a href="README.md#路线图">路线图</a></li>
+</ul>
+<blockquote class="pq">
+<p>串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/model-aware-data-curation/06_system_architecture.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

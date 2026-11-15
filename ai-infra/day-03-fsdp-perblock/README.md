@@ -1,4 +1,6 @@
 # Day 3 - FSDP per-block 显存 + profiler 对应 ai_daily 2026-08-04：Code data flywheel 是主线，今天用 FSDP per-block 作为量化切入，补 infra 可见性。 ## 内存模型
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-03-fsdp-perblock/README.reading.html
+
 - DDP 每卡常驻 4P (param + grad + 2×adam)
 - FSDP 常驻 4P/G
 - 峰值 = (P-b)/G + b + (grad+opt)/G

@@ -1,4 +1,6 @@
 # r2-Day14 — FSDP/ZeRO 显存账：用通信换显存
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-14-fsdp-zero/README.reading.html
+
 
 ## Connection to Prev
 

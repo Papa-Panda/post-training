@@ -1,4 +1,6 @@
 # 04 — Systems：memory、communication、throughput、sample efficiency
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/04_infra_tradeoffs.reading.html
+
 
 算法名不会直接决定集群成本。先画数据流，再做逐项 accounting。
 

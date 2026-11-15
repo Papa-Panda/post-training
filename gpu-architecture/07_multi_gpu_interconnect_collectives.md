@@ -1,4 +1,6 @@
 # 07 — Multi-GPU 互连、NVLink/NVSwitch 与 NCCL
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/07_multi_gpu_interconnect_collectives.reading.html
+
 
 ## 1. “有多张 GPU”不代表全连接同带宽
 

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注释版篇目：Synthetic Data / Agentic 数据合成与清洗系列</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Synthetic Data</span>
+    <h1>注释版篇目：Synthetic Data / Agentic 数据合成与清洗系列</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">01 SPADE：环境自己长出来</a><a href="#sec-2">02 AED：失败样本第一次当成主资产</a><a href="#sec-3">03 WorkForge：真实工作空间才是瓶颈</a><a href="#sec-4">04 ToolLoop：闭环比数据量重要</a><a href="#sec-5">05 Data Turnstile：小模型的工具数据有毒</a><a href="#sec-6">06 ToolRACER：专门练“不合作用户”</a><a href="#sec-7">07 Spotify：合成数据 + 自改进闭环直接上生产</a><a href="#sec-8">08 Harness-S：兄弟 harness 救活 GRPO 有效组</a><a href="#sec-9">09 Agent-R²：真实附件 + 交付级 rubric 的办公 agent 数据</a><a href="#sec-10">10 ToolSpace：以可执行工具依赖为合成单元</a><a href="#sec-11">11 Axion 1.0：把“变难”与“真需工具”拆成两条数据流</a><a href="#sec-12">12 CUA-Master：从外部教程 import 工作流 + 失败快照回滚</a><a href="#sec-13">13 WebHarbor：把真实网站“靠岸”成可离线复现的环境</a><a href="#sec-14">14 VidUEU-Agent：视频数据的证据组织 + 分布反馈外循环</a><a href="#sec-15">15 PyRUA-DataFarm：造数据与批数据分离的机器人数据</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>每篇的注释只写核实过的事实：方法、数据规模、论文自报的关键数字。
+思考问题是读的时候要带着的，不需要现在回答。</p>
+<p>来源：Lei Tian 专栏《Agentic视角下的数据链路》，
+知乎慢读清单 id 259（2026-11-02 刊，Day 01–07）与 id 320（2026-11-09 刊，Day 08–15）。</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>01 SPADE：环境自己长出来</h2>
+<ul>
+<li>论文：SPADE: Self-Play in Adaptive Synthetic Executable Environments，Liu 等，2026，arXiv:2608.19197。</li>
+<li>注释：同一个 LLM 分饰两角。Environment Designer 生成完整可执行
+  Gym 风格环境（reset()/step()、状态转移、奖励、verifier），
+  Reasoning Agent 在里面学。Designer 的奖励不是通过率，而是
+  hint 前后的 regret 差：r = E[R | 有提示] − E[R | 无提示]。
+  Designer 必须从大规模预训练语料采样文档做 grounding，
+  并维护环境记忆库做增量演化。30B 一轮 400 步生成 3,310 个独立环境。
+  Qwen3-30B-A3B 在 8 个 held-out 评测上 50.2 → 58.3。
+  消融：去掉 Designer 训练和记忆直接崩到 40.5，比不训还低 9.7 个点。</li>
+<li>思考：hint-regret 和“学习潜力”度量有什么区别？为什么无锚定的 Designer 会主动误导 Agent？</li>
+</ul>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>02 AED：失败样本第一次当成主资产</h2>
+<ul>
+<li>论文：Agent Error Dataset: Scaling 50,000 Error–Diagnosis Pairs for Failure Analysis and Error-Aware Post-Training，Zhu 等，2026，arXiv:2609.40111。</li>
+<li>注释：50,228 条 error–diagnosis 对，来自 9,961 个任务，
+  33 个环境、19 个 harness、23 个策略模型。五步 AET 流水线：
+  收集真实 rollout 里的自然失败 → citation-first 的 judge 出诊断与修复建议
+  （每条诊断必须引用原始 trace 里的 token）→ 对可复现任务做
+  matched replay 验证修复动作 → 分别建成“诊断 SFT 视图”和
+  “actor 恢复 SFT 视图”。Qwen3-8B 做诊断，teacher-label 的
+  exact-step 一致率从 47.19% 升到 63.56%。
+  警告：只训“出错后怎么修动作”，在 WebShop-lite 上 +6.67 个点，
+  在 TextQuest 上反而 −8.33 个点。</li>
+<li>思考：诊断为什么是可密集学习的“结构化判断”任务？修复监督为什么高度依赖环境？</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>03 WorkForge：真实工作空间才是瓶颈</h2>
+<ul>
+<li>论文：Scaling Verifiable Environments for Long-horizon Work Agents，Zhang 等，2026，arXiv:2610.04906。专栏称之为 WorkForge。</li>
+<li>注释：直接从真实资源（网络检索 + 真实文件）建工作空间，
+  再从真实专家工作流里导出任务指令、解题计划和“程序化 + 语义”双 verifier。
+  一共 16.7K 个可验证环境，覆盖 40 个专业领域、60 种文件类型。
+  真实工作空间比 LLM 合成的多 5.4 倍文件、2.4 倍文件类型，
+  平均大小从 21.5KB 跳到 279KB。Qwen3.5-35B-A3B-Base + WorkForge，
+  GDPval 从 45.5 → 73.6；27B dense 版 GDPval 82.4，
+  超过 Qwen3.5-397B-A17B 的 79.7。</li>
+<li>思考：真实感的哪一部分最关键——文件数量、类型多样性，还是工作流本身？</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>04 ToolLoop：闭环比数据量重要</h2>
+<ul>
+<li>论文：ToolLoop: Closed-Loop Tool-Use Data Synthesis via Decomposed Generation and Dynamic Self-Feedback，Zeng 等，2026，arXiv:2609.09072。</li>
+<li>注释：三段分解 + 动态自验证 + 反馈驱动再生：先把 5,281 个 API
+  聚成 26 组采样组合 → 反向生成强关联的用户 query → 正向生成工具调用。
+  每步都有 verifier，出错就带着错误原因重生成，而不是整条丢掉。
+  Qwen3-4B 只用 11K 样本，BFCL 从 82.14% → 86.40%，
+  超过 60K 的 APIGen（83.11%）和 55K 的 ToolMind（83.53%）。
+  最反直觉的消融：去掉反馈的版本掉到 79.97%，比没训过的 base 还低 2.17 个点。</li>
+<li>思考：反馈修正的收益来自“修错”还是“筛掉难样本”？反向生成 query 会不会引入分布偏差？</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>05 Data Turnstile：小模型的工具数据有毒</h2>
+<ul>
+<li>论文：Data Turnstile: A Scalable Open Framework for Function-Calling Data Generation，Ramakrishnan 等，2026，arXiv:2607.29250。</li>
+<li>注释：把多轮工具交互拆成一个 DAG，按 role 分节点
+  （用户 query / 推理 / API 调用 / 执行输出 / 助手回复），
+  每个 role 独立生成、独立验证、带错误反馈重试，
+  避免单次多轮合成的级联错误。教师用本地跑的 Qwen2.5-32B-Instruct，
+  不依赖闭源 API。Qwen3-0.6B 的 BFCL 从 no-think 58.2% → 75.9%；
+  τ²-bench Telecom 的 pass^1 从 3.5 → 23.0。
+  而 raw xLAM+Glaive 直接训 0.6B 会掉到 55.1%，Irrelevance 检测崩到 35.7%。
+  CoT 分化：单轮 BFCL 上高质量 SFT 后 no-think 反而更好，
+  但多轮 τ²-bench 上关掉 CoT 全线崩 11–22 个点。</li>
+<li>思考：DAG 分角色验证的代价是什么？多轮任务里 CoT 为什么不可替代？</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>06 ToolRACER：专门练“不合作用户”</h2>
+<ul>
+<li>论文：ToolRACER: A Robust Agentic Conversation Emulation Resource for Agent Training and Evaluation，Chakraborty 等，2026，arXiv:2610.09163。</li>
+<li>注释：三个模拟模型配合（用户模拟器、助手、工具模拟器），
+  显式生成三种轨迹：Happy（合作 + 可满足）、Unhappy（摇摆、漂移、含糊）、
+  Impossible（工具满足不了，Agent 应该识别并拒绝）。
+  失败轨迹喂回模拟器再生，救回了 65.4% 一开始失败的轨迹。
+  最后 5.6K 条多轮对话，约 66% 是容易失败的场景。
+  Qwen3-4B 在 τ²-bench 上 32.20% → 39.20%，和 APIGen-MT 叠加能到 41.25%。
+  只训 Impossible 子集能把 BFCL 的 Irrelevance 检测从 85.83% 拉到 95.50%。
+  但不同路径会互相干扰：H+I 合起来反而比单路径差，不能简单拼接。</li>
+<li>思考：三种轨迹为什么不能简单拼接？Impossible 训练的泛化边界在哪里？</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>07 Spotify：合成数据 + 自改进闭环直接上生产</h2>
+<ul>
+<li>论文：Bootstrapping Conversational Recommendation Agents At Spotify: Synthetic Data Generation and Self-Improvement Loops，Palumbo 等，2026，arXiv:2609.30297。</li>
+<li>注释：本系列唯一的工业端到端案例，没有微调模型。
+  先把单轮 prompt 规划成对话计划，再由 UserLLM 实现成多轮对话，
+  用 LLM-as-judge 评估，替代真实用户做测试集；
+  再做自我改进循环，对同一问题多次采样算方差，把失败拆成
+  可靠性失败（高方差，同 prompt 结果不稳定）和能力缺口
+  （低方差但系统性错），前者走方差对比优化，
+  后者交给 coding agent 自动修 prompt / 工具描述 / planner 配置。
+  合成对话的人工评审四维都在 90% 以上。
+  线上 A/B 两周、约 1,500 万用户：收听时长 +14%，WAU +5%，跳过率 −5%。
+  但长对话还是难：7 turn 比 2 turn 的 pass@1 低 11.9 个点。</li>
+<li>思考：方差拆分在什么情况下会误判能力缺口为可靠性问题？合成测试集的天花板在哪里？</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>08 Harness-S：兄弟 harness 救活 GRPO 有效组</h2>
+<ul>
+<li>论文：Harness-S: Learning from Sibling Harnesses for Generalizable Agent Training，Zhang 等，2026，arXiv:2611.04277。</li>
+<li>注释：痛点是原 harness 全组失败时 GRPO 组内无奖励方差。
+  方法是 edit agent 按失败原因生成兄弟 harness；仅当整组失败才路由
+  多兄弟重跑，救援组替换失败组；按行为画像路由并随策略更新重校准。
+  Qwen3.5-4B AppWorld Avg@3 48.98% → 56.87%；
+  有效组比 64.69% → 79.38%；代价 +18.44% rollouts。</li>
+<li>思考：兄弟 harness 的“兄弟”关系怎么定义才不引入捷径？救援组的奖励方差是真信号还是人工抬起来的？</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>09 Agent-R²：真实附件 + 交付级 rubric 的办公 agent 数据</h2>
+<ul>
+<li>论文：Agent-R²: Scaling Agents for Realistic Productivity Work via Real-Source Data Synthesis，Pan 等，2026，arXiv:2611.08219。</li>
+<li>注释：痛点是办公 agent 常不读附件、不验算就交文件。
+  方法是 O*NET 活动播种、真实附件检索验证、沙箱校验、
+  专家执行 + verifier 核对交付物；SFT 后按交付 rubric 做 RL。
+  GDPval Pass@1 32.4% → 45.3% → 51.0%；
+  SFT 后步骤暴涨但完成率跌，RL 后回升——探索与可靠完成要分开量。</li>
+<li>思考：SFT 跌完成率、RL 恢复的模式，在别的 agent 任务里也出现吗？</li>
+</ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>10 ToolSpace：以可执行工具依赖为合成单元</h2>
+<ul>
+<li>论文：ToolSpace: Scaling Tool-Centric Environment Synthesis for Long-Horizon Agents，Dong 等，2026，arXiv:2611.05036。</li>
+<li>注释：痛点是先造库再让 LLM 编工具，调用关系脱离真实执行。
+  方法是从真实 MCP 调用挖掘数据 / 状态 / 重试依赖成加权工具图；
+  随机游走 + 状态检查回滚；三重验证 V_state / V_trace / V_out。
+  35B 七基准均值 23.0 → 41.0 → 43.2；
+  真实执行边胜 LLM 判断边（45.8 vs 37.8）。</li>
+<li>思考：合成单元应该是“工具”还是“可执行依赖”？这对工具库设计有什么启示？</li>
+</ul>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>11 Axion 1.0：把“变难”与“真需工具”拆成两条数据流</h2>
+<ul>
+<li>论文：Axion 1.0: Open Agent Foundation Models, Simplified，Jia 等，2026，arXiv:2611.03233。</li>
+<li>注释：Stage 1 针对基座已会解的题做组合 / 参数化 / 分情形变换再验算；
+  Stage 2 在真实结构化数据上做确定性计算、屏蔽建库、防闭卷可答；
+  RL 用前缀进度奖励。35B HLE-130 47.7% → 70.0%。
+  但 BioMysteryBench SFT-I 先跌后涨，FrontierScience RL 后微跌——
+  最后阶段并非处处有效。</li>
+<li>思考：“变难”和“真需工具”为什么要拆开？合在一起会互相污染什么？</li>
+</ul>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>12 CUA-Master：从外部教程 import 工作流 + 失败快照回滚</h2>
+<ul>
+<li>论文：CUA-Master: Scaling Computer-use Agents through Open-World Recursive Improvements，Yu 等，2026，arXiv:2611.03126。</li>
+<li>注释：方法是从教程视频触发点重建轨迹；任务抽象为原语组合；
+  失败定位最早偏离点、恢复快照、只保留成功且更高效分支；
+  外层循环按能力缺口再采集。长任务同重试预算下
+  全重启成功率 14.6% vs 快照回滚 49.8%。</li>
+<li>思考：快照回滚的收益里，有多少是“少走回头路”，有多少是“避开了难状态”？</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>13 WebHarbor：把真实网站“靠岸”成可离线复现的环境</h2>
+<ul>
+<li>论文：WebHarbor: Docking Real Websites for Evolving GUI Agent Environments，Wang 等，2026，arXiv:2611.03634。</li>
+<li>注释：方法是按目标任务定范围重建前后端 + SQLite 状态；
+  逐步执行修补缺失页 / 状态转移；人工评审视觉、功能、任务有效性。
+  离线重建环境迁移到真实网站 WebVoyager 81.2%；
+  但 WebArena 迁移有限（28.8%），环境建设成本高（57 人约 5 个月）。</li>
+<li>思考：离线复现的保真度天花板在哪里？成本这么高，什么任务值得建？</li>
+</ul>
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>14 VidUEU-Agent：视频数据的证据组织 + 分布反馈外循环</h2>
+<ul>
+<li>论文：VidUEU-Agent: A Data-Curation Agent for Multimodal Understanding, Editing, and Unified Tasks，Ru 等，2026，arXiv:2611.04418。</li>
+<li>注释：方法是三级摘要 + 镜头过滤；按内容规划 OCR / ASR / 检测 / 光流工具；
+  样本必须引用所用信号 ID；每轮 30K 数据、按评估调分布后扩到 100K。
+  InternVL3-8B MMT-Bench 0.546 → 0.596。
+  注意反馈用的是测试集聚合分，held-out VSI-Bench 才是迁移的可靠读数。</li>
+<li>思考：用测试集聚合分调分布，和直接在测试集上训，边界在哪里？</li>
+</ul>
+</section>
+<section class="sec" id="sec-15"><h2><span class="n">15</span>15 PyRUA-DataFarm：造数据与批数据分离的机器人数据</h2>
+<ul>
+<li>论文：PyRUA-DataFarm: LLM Agent as a Cost-Efficient Teleoperator for Real-Ready Robot Data，Zhang 等，2026，arXiv:2611.05320。</li>
+<li>注释：方法是编码 agent 重建场景写专家控制器；
+  独立角色先冻结成功判定；视频模型只按真实参考图渲染外观；
+  每集机器检查 + 独立审片。5 个双臂任务原场景 93/100，
+  胜真人遥操 84/100；未见桌布 / 灯光下 87 vs 46；单集摊薄约 $1.06。</li>
+<li>思考：造数据与批数据分离，为什么是机器人数据特有的关键设计？</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/papers.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

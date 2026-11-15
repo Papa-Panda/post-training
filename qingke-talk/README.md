@@ -1,4 +1,6 @@
 # 青稞Talk — 固定追更区
+> 📖 阅读版：https://papa-panda.github.io/post-training/qingke-talk/README.reading.html
+
 
 > B站技术 talk 系列「青稞Talk」，RL / post-training / infra 选题密度极高。
 > 从 2026-09-20 起固定追，每期一条 log + 一篇要点纪要。

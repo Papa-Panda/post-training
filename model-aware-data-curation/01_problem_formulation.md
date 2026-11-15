@@ -1,4 +1,6 @@
 # 01 — 统一问题：Value × Coverage × Safety
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/01_problem_formulation.reading.html
+
 
 ## 元信息
 - 内容类型：跨论文方法论综合，不对应单篇论文

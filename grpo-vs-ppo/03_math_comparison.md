@@ -1,4 +1,6 @@
 # 03 — 数学对照：到底换掉了什么
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/03_math_comparison.reading.html
+
 
 PPO 与 GRPO 不是“一个有 clip、一个没 clip”。常见实现都使用 clipped surrogate；核心差异是 advantage estimator、采样组织与 loss aggregation。
 

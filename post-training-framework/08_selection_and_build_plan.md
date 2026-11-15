@@ -1,4 +1,6 @@
 # 08 — Selection and Build Plan
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/08_selection_and_build_plan.reading.html
+
 
 ## 1. Start from the research question
 

@@ -1,4 +1,6 @@
 # 04 — Workflow 与 Subagents：把编排写成可验证的图
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/04_workflow_and_subagents.reading.html
+
 
 ## 元信息
 

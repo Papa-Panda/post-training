@@ -1,4 +1,6 @@
 # 05 — Runnable reference code
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/05_code/README.reading.html
+
 
 这是一组 **standard-library-only** 语义参考，不是某个训练框架的 drop-in config。之前两个伪配置文件把未核验的 key、固定超参数和“模型数 = 显存”混在一起，现已删除。
 

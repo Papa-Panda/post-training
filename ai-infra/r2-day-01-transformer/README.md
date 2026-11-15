@@ -1,4 +1,6 @@
 # r2-Day01 - Transformer 架构（第二轮 Day1）
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-01-transformer/README.reading.html
+
 
 > r2 表示第二轮纯 AI Infra，重走草帽路飞四层。
 > Connection: r2-Day01 地基起点，后续所有 CUDA/分布式/推理都围着它转。

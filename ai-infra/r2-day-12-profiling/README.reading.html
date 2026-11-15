@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day12 — Profiling：Nsight 双剑（Systems 看拖后，Compute 看 SOL）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day12 — Profiling：Nsight 双剑（Systems 看拖后，Compute 看 SOL）</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Connection to Prev</a><a href="#sec-2">1. 双剑分工：一句话</a><a href="#sec-3">2. 可手算例子 A：SOL（N=8 FP32 vector add）</a><a href="#sec-4">3. 可手算例子 B：Systems 时间线（N=2^20 softmax，eager vs fused）</a><a href="#sec-5">4. 可执行代码</a><a href="#sec-6">5. 何时不赚（profiling 版）</a><a href="#sec-7">状态</a><a href="#sec-8">原始 / 官方来源</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>Connection to Prev</h2>
+<p>r2-Day11 把 softmax 从 eager 4 遍 fuse 成 1 个 kernel，流量模型说 HBM 往返 $6N\to2N$ （theoretical estimate）。但"省下的流量变成 wall-time 了吗"——流量模型回答不了。r2-Day12 给出验证的仪器：<strong>Nsight Systems</strong> 看时间线（kernel 个数是不是真从 4 个变成 1 个、host 端有没有 launch / recompile 拖后），<strong>Nsight Compute</strong> 看单个 kernel 的 Speed-of-Light（DRAM / SM throughput 离理论峰值差多远、roofline 落在哪）。<strong>牺牲</strong>：profiling 扰动被测对象——Systems 的 tracing 有开销，Compute 对每个 kernel replay 很多遍采 counter（时间被放大，不能直接当 wall-time）；<strong>换取</strong>：把"我觉得快了"变成可复核的测量（GPU busy%、SOL%、gap 归因）；<strong>何时不赚</strong>：正确性还没跑通就 profile；只盯单个 kernel 的 SOL%、不看端到端；小 kernel 上 ncu replay 几十遍的数字外推到大 shape；profile 一次就下结论（忽略噪声）。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. 双剑分工：一句话</h2>
+<ul>
+<li><strong>Nsight Systems（<code>nsys</code>）</strong>：回答"时间去哪了"。全系统时间线：CUDA API 调用、kernel launch 与执行、H2D / D2H memcpy、NCCL、OS runtime、NVTX 标记区间。开销相对低，<strong>先用它</strong>看 GPU 有没有在干活、idle gap 的来源是 host 还是 device。</li>
+<li><strong>Nsight Compute（<code>ncu</code>）</strong>：回答"这个 kernel 为什么慢"。对<strong>单个</strong> kernel 做 kernel replay（为采 counter 把同一个 kernel 跑很多遍，每遍采一组 counter），输出 PM counter section：<strong>SpeedOfLight</strong>（DRAM / L1 / L2 / SM 各单元 throughput 占理论峰值的百分比）、<strong>SpeedOfLight_RooflineChart</strong>（roofline 图）、MemoryWorkloadAnalysis、Occupancy 等。代价高、扰动大，所以流程是：<strong>先 Systems 定位，再 Compute 深挖</strong>。</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. 可手算例子 A：SOL（N=8 FP32 vector add）</h2>
+<p>Day06 的同一算子，N 缩到 8——AI 是 scale-free 的，bound 不变，数字小到可以手算。</p>
+<ul>
+<li>流量：读 x、读 y、写 z → $bytes = 3\times8\times4 = 96\ \text{B}$ ； $flops = 8$ 。</li>
+</ul>
+<p>$$AI = 8/96 = 1/12 \approx 0.0833\ \text{FLOP/byte}$$</p>
+<ul>
+<li>H100 SXM：FP32 峰值 67 TFLOP/s，HBM 3.35 TB/s（Day06 规矩：十进制前缀）→ ridge：</li>
+</ul>
+<p>$$I^* = 67/3.35 = 20\ \text{FLOP/byte}$$</p>
+<ul>
+<li>$AI \ll I^*$ → memory-bound；roofline 可达：</li>
+</ul>
+<p>$$P = AI \times 3.35 = 0.2792\ \text{TFLOP/s}$$</p>
+<ul>
+<li>SOL（相对 FP32 峰值）：$$0.2792/67 = 0.417\%$$——这就是 ncu SpeedOfLight 里"SM throughput ≈ 0.4%、DRAM ≈ 100%"的含义：<strong>不是 kernel 写坏了，是算子本身只能摸到带宽屋顶</strong>。</li>
+<li>理论最短时间：$$t_{min} = 96/3.35\times10^{12} \approx 28.7\ \text{ps}$$——ps 级！真实 kernel 光 launch 就是 µs 级（示意量级，非测量）：<strong>小 N 时 Systems 会告诉你 GPU 几乎全程 idle，瓶颈全在 host 端</strong>。这正是 Day11"小 N 不赚"的测量版表述。</li>
+<li>对比（compute-bound 长什么样）： $flops=800$ 、 $bytes=8$ → $AI=100 &gt; 20$ → compute-bound，SOL_compute = 100%，SOL_bw = 20%（ $=I^*/AI$ ）， $t_{min}=800/67\times10^{12}\approx11.9\ \text{ps}$ 。ncu 里看到 SM 100%、DRAM 20% 就是这个形状。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. 可手算例子 B：Systems 时间线（N=2^20 softmax，eager vs fused）</h2>
+<p>把 Day11 的 $6N\to2N$ 接上时间。模型参数（<strong>非测量</strong>）：单次 host launch 开销 $L=5\ \mu s$ （示意值）；kernel 时间取 roofline 下限 $bytes/3.35\ \text{TB/s}$ 。</p>
+<ul>
+<li>Eager（4 个 kernel，总流量 $6N$ 元素 $= 25{,}165{,}824\ \text{B}$ ）：kernel 时间 $7.512\ \mu s$ ； $span = 4\times5 + 7.512 = 27.512\ \mu s$ ；GPU busy $= 7.512/27.512 = 27.3\%$ ；4 段 idle gap，每段 $5\ \mu s$ ，归因 host launch。</li>
+<li>Fused（1 个 kernel，总流量 $2N$ 元素 $= 8{,}388{,}608\ \text{B}$ ）：kernel 时间 $2.504\ \mu s$ ； $span = 5 + 2.504 = 7.504\ \mu s$ ；GPU busy $= 33.4\%$ 。</li>
+<li>模型加速比： $27.512/7.504 \approx 3.67\times$ ——流量省 $3\times$ ，wall-time 省 $3.67\times$ （还省了 3 次 launch）。<strong>但这是模型</strong>：kernel 时间取的是 roofline 下限、launch 取的是示意值，真实比例必须用 nsys 量。</li>
+<li>Systems 视角的读法：先看 GPU busy%（有没有在干活）→ 再看 kernel 个数（4→1，验证 fuse 真生效）→ 再看 gap 归因（host launch / H2D memcpy / NCCL / dataloader）。ncu 只在"某个 kernel 的 SOL% 值得深挖"时出场。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. 可执行代码</h2>
+<ul>
+<li><code>roofline_sol.py</code>：<code>Hardware</code> / <code>KernelTraffic</code> + AI / ridge / bound / SOL% / $t_{min}$ ，全是纯函数；<code>vecadd_traffic</code> 把"1 FLOP、3 元素流量"的算子知识编码成代码。</li>
+<li><code>timeline_model.py</code>：<code>simulate(events)</code> 真走一遍事件序列累加 span / busy / gap（串行假设已注明）；<code>softmax_demo</code> 把 roofline 算出的 kernel 时间喂给时间线——两层模型是<strong>算出来</strong>连起来的，不是手填的。</li>
+<li><code>nsys_ncu_recipes.py</code>：参考命令的 argv 构造器 + <code>tools_present()</code> 探针（本环境 nsys / ncu 均不存在），<strong>不执行任何 profiling</strong>。</li>
+</ul>
+<pre><code class="language-bash">python3 ai-infra/r2-day-12-profiling/roofline_sol.py
+python3 ai-infra/r2-day-12-profiling/timeline_model.py
+python3 ai-infra/r2-day-12-profiling/nsys_ncu_recipes.py
+python3 -m unittest discover -s ai-infra/r2-day-12-profiling -p 'test_*.py' -v
+</code></pre>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. 何时不赚（profiling 版）</h2>
+<ol>
+<li><strong>正确性未跑通时</strong>：profile 一个错的结果毫无意义。</li>
+<li><strong>只看 SOL% 不看端到端</strong>：单个 kernel DRAM 100% 也可能只占 step 的 1%。</li>
+<li><strong>小 kernel / 小 shape</strong>：ncu replay 放大的是固定开销，% 数字不能外推；先 Systems 看 busy%。</li>
+<li><strong>profile 一次就下结论</strong>：GPU 时钟、缓存状态、系统噪声都会抖；同一配置跑多次，看分布。</li>
+<li><strong>在错误层级用错工具</strong>：全系统问题（dataloader 慢、NCCL hang）用 ncu 单 kernel 深挖是南辕北辙。</li>
+</ol>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>状态</h2>
+<ul>
+<li>已验证：Python 语法；20 个 CPU 单元测试（手算 AI=1/12、ridge=20、SOL=0.417%、 $t_{min}=28.7$ ps；时间线 eager $27.512\mu s$ /27.3%、fused $7.504\mu s$ /33.4%、模型加速比 $3.67\times$ ；recipe argv 断言；本环境无 nsys/ncu 探针断言）。</li>
+<li><strong>execution not validated / 待H100验证</strong>：本环境无 CUDA GPU / nsys / ncu；参考命令未执行；launch 开销 $5\mu s$ 为示意参数非测量；kernel 时间取 roofline 理论下限非测量；任何真实 SOL%、wall-time、加速比均未测量。 $3.67\times$ 是 theoretical model，不是 benchmark。</li>
+<li>本课状态保持 <code>blocked</code>；没有声称 loss、耗时、带宽实测、comm%、MFU、设备拓扑。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>原始 / 官方来源</h2>
+<ul>
+<li>Nsight Compute 文档（SpeedOfLight / Roofline Chart sections）：<a href="https://docs.nvidia.com/nsight-compute/2023.1/NsightCompute/index.html">https://docs.nvidia.com/nsight-compute/2023.1/NsightCompute/index.html</a></li>
+<li>NVIDIA 技术博客（Nsight Compute roofline 方法，<code>--set detailed/full</code> 与 <code>SpeedOfLight_RooflineChart</code>）：<a href="https://developer.nvidia.com/blog/?p=22103">https://developer.nvidia.com/blog/?p=22103</a></li>
+<li>NVIDIA H100 官方规格（FP32 67 TFLOPS、HBM 3.35TB/s；同 r2-day-06 引用）：<a href="https://www.nvidia.com/en-us/data-center/h100/?trk=article-ssr-frontend-pulse_little-text-block">https://www.nvidia.com/en-us/data-center/h100/?trk=article-ssr-frontend-pulse_little-text-block</a></li>
+<li>Roofline 模型原始论文：Williams, Waterman, Patterson, "Roofline: An Insightful Visual Performance Model for Multicore Architectures", CACM 2009</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-12-profiling/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

@@ -1,4 +1,6 @@
 # physical-ai — Physical AI / 人形机器人 / World Model
+> 📖 阅读版：https://papa-panda.github.io/post-training/physical-ai/README.reading.html
+
 
 > 专门读 **Physical AI** 相关的 paper / 系统 / 开源项目的沉淀区。服务于从 ML for Infra → Post-training / Agentic RL Infra → Physical AI 转型，重点是 **humanoid / world model / sim2real / Isaac Lab / Habitat / 控制 / RL for robotics**。
 > Scope：Physical AI 全链路，不谈纯 LLM data curation（那是 ai-data）。

@@ -1,4 +1,6 @@
 # 01 — Serving Metrics Math
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-10-vllm/01_metrics.reading.html
+
 
 Serving ≠ training. 3 core user-facing numbers + 2 system numbers.
 

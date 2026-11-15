@@ -1,4 +1,6 @@
 # 00 — Trace as an Object: 把 trace 写成数学对象
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/00_trace_as_object.reading.html
+
 
 > 先把"一条推理轨迹"形式化，再谈解剖、效率和监督。没有这一步，后面所有的"结构""熵""打分"都无从谈起。
 >

@@ -1,4 +1,6 @@
 # r2-Day09 — GEMM Tiling：用数据复用把乘法从 HBM 喂给寄存器
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-09-gemm/README.reading.html
+
 
 ## Connection to Prev
 

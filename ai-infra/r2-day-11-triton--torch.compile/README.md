@@ -1,4 +1,6 @@
 # r2-Day11 — Triton 与 torch.compile：fused 算子的两种工程形态
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-11-triton--torch.compile/README.reading.html
+
 
 ## Connection to Prev
 

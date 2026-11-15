@@ -1,4 +1,6 @@
 # 07 — Coding-data Flywheel 落地
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/07_coding_data_flywheel.reading.html
+
 
 ## 元信息
 - 内容类型：应用设计，不对应单篇论文

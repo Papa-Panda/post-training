@@ -1,4 +1,6 @@
 # TracIn - Training Data Influence via Tracing Gradient Descent
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/README.reading.html
+
 
 Minimal, practical implementation of TracIn (Pruthi et al., NeurIPS 2020) for data cleaning.
 

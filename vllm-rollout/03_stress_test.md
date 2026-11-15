@@ -1,4 +1,6 @@
 # 03 — Stress-test design and configuration
+> 📖 阅读版：https://papa-panda.github.io/post-training/vllm-rollout/03_stress_test.reading.html
+
 
 ## 1. A benchmark is a workload contract
 

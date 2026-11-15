@@ -1,4 +1,6 @@
 # Post-training Systems & Data
+> 📖 阅读版：https://papa-panda.github.io/post-training/README.reading.html
+
 
 A public, implementation-oriented knowledge base for post-training: objectives, data, distributed systems, rollout serving, evaluation, agent runtimes, and the GPU mechanisms underneath them.
 

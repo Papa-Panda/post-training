@@ -1,4 +1,6 @@
 # 00 — 统一记号 / Notation
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/00_notation.reading.html
+
 
 本专题把语言模型生成看成有限时域 MDP。先固定记号，避免把 **behavior / old policy** 和 **reference policy** 混为一谈。
 

@@ -1,4 +1,6 @@
 # Papers and Evidence Ledger
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/papers.reading.html
+
 
 > 目的：把“论文说了什么”“本专题如何使用”“不能推出什么”分开。数字优先回到论文正文、附录或官方 proceedings；博客只用于建立问题地图。
 

@@ -1,4 +1,6 @@
 # 02 — vLLM Rollout Config for RL vs Inference
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-10-vllm/02_rollout_config.reading.html
+
 
 RL rollouts ≠ prod inference. Different arrival, different failure tolerance.
 

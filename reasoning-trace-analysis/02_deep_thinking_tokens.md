@@ -1,4 +1,6 @@
 # 02 — Deep-Thinking Tokens: 不看长度，看"想了几层"
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/02_deep_thinking_tokens.reading.html
+
 
 > 长度是最容易得到的 trace 统计量，也是最不可靠的效率信号。"Think Deep, Not Just Long"（Wei-Lin Chen 等，2026）提出 deep-thinking token：不数 token 有多少，而看每个 token 的预测分布在模型的多少层里被持续修正。
 >

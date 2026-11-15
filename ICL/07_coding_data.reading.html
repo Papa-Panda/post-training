@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 Coding Data：从失败轨迹到训练样本</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ICL</span>
+    <h1>07 Coding Data：从失败轨迹到训练样本</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. 先定义训练单元</a><a href="#sec-2">2. 闭环而非线性流水线</a><a href="#sec-3">3. 四种数据产物</a><a href="#sec-4">4. 过滤闸门</a><a href="#sec-5">5. 把 ICL 三条线映射到数据实验</a><a href="#sec-6">6. 相关工作如何准确使用</a><a href="#sec-7">7. 最小上线顺序</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p><a href="06_trajectory_error_prompt.md">← 06 Trajectory error</a> · <a href="08_systems_and_evaluation.md">下一章：系统与评测 →</a></p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. 先定义训练单元</h2>
+<p>一条可训练的 repository-level coding record 至少包含：</p>
+<pre><code class="language-text">repository snapshot + environment lock
+issue/task specification
+agent trajectory (actions, tool calls, observations)
+candidate patch
+executable verifier and exit status
+failure taxonomy / derived rule
+provenance and leakage metadata
+</code></pre>
+<p>只保留自然语言“反思”无法复现；只保留最终 patch 无法做 credit assignment；只保留 pass/fail 又无法判断 verifier 是否覆盖需求。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. 闭环而非线性流水线</h2>
+<p>$$\mathcal D_t\to\mathrm{Solver}_t\to\mathrm{traces}_t\to\mathrm{skills}_t\to\mathrm{Generator}_t\to\mathrm{validated\ tasks}_{t+1}$$</p>
+<p>Socratic-SWE 的 2026 预印本给出一个具体实例：从历史 solver traces 蒸馏 recurring failures / effective repair patterns，指导真实仓库中的 targeted repair-task generation，再经 execution validation 与 solver-gradient alignment 筛选。其摘要报告三轮后 SWE-bench Verified 50.40%；这是论文自身设置下的结果，不应写成通用 SOTA 或直接等同于 SFT。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 四种数据产物</h2>
+<h3>A. 成功 imitation</h3>
+<p>保留最短、可复现、测试通过的 trajectory。删除无效探索时要保留必要 observation，否则训练样本会产生“凭空知道答案”的捷径。</p>
+<h3>B. 局部 repair pair</h3>
+<p>共享同一 prefix，构造失败动作 $a^-$ 与纠正动作 $a^+$ ：</p>
+<p>$$q=(s,a^+,a^-),\qquad s=(\text{task},\text{history},\text{tool observations})$$</p>
+<p>只有当 $a^+$ 在同一环境中经 verifier 通过、且差异可归因时，才适合作 preference data。</p>
+<h3>C. 条件式 skill</h3>
+<p>采用 <a href="06_trajectory_error_prompt.md">06</a> 的 <code>WHEN / DO / VERIFY</code> 结构，供检索或 instruction tuning。skill 必须带 evidence ids、反例和版本范围。</p>
+<h3>D. verifier / adversarial task</h3>
+<p>把稳定、可执行的错误原则转成测试或静态检查；再生成恰好触发该 verifier 的新任务。这样规则成为环境反馈，而非模型自评。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. 过滤闸门</h2>
+<p>按顺序执行，任何一步失败即隔离：</p>
+<ol>
+<li><strong>snapshot reproducibility</strong>：锁定 revision、依赖和测试命令；</li>
+<li><strong>fail-to-pass</strong>：原始代码失败、patch 后目标测试通过；</li>
+<li><strong>pass-to-pass</strong>：非目标回归测试仍通过；</li>
+<li><strong>patch locality</strong>：无测试删除、无跳过、无无关大改；</li>
+<li><strong>trajectory faithfulness</strong>：每个关键决定可由此前 observation 支持；</li>
+<li><strong>deduplication</strong>：按 issue、patch AST/语义和测试行为去重；</li>
+<li><strong>contamination split</strong>：同仓库近邻、回移 patch、模板变体不能跨 train/eval；</li>
+<li><strong>difficulty replay</strong>：用目标 solver 重跑，排除已过易题与不可解题。</li>
+</ol>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. 把 ICL 三条线映射到数据实验</h2>
+<table>
+<thead>
+<tr>
+<th>视角</th>
+<th>数据变量</th>
+<th>干预</th>
+<th>读数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bayesian</td>
+<td>bug class / API contract coverage</td>
+<td>替换同类或异类示例</td>
+<td>calibration、pass rate</td>
+</tr>
+<tr>
+<td>GD/kernel</td>
+<td>query-demo 相似度与 residual 方向</td>
+<td>反标签、复制、置换</td>
+<td>logit/prediction delta</td>
+</tr>
+<tr>
+<td>Circuit</td>
+<td>标识符、格式、局部 key-value pattern</td>
+<td>token-preserving rename、head patch</td>
+<td>induction score、causal effect</td>
+</tr>
+<tr>
+<td>Trajectory rule</td>
+<td>condition/action/verifier</td>
+<td>no-rule、random-rule、oracle-rule</td>
+<td>pass、cost、negative transfer</td>
+</tr>
+</tbody>
+</table>
+<p>不要用 induction score 代替 repository correctness；它最多是局部机制 probe。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. 相关工作如何准确使用</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2412.21139">SWE-Gym</a>：面向 real-world software engineering agent learning 的训练环境与数据；具体规模和结果应引用对应版本表格，不在此泛化为“几万条”或“当前 SOTA”。</li>
+<li><a href="https://arxiv.org/abs/2403.18746">CYCLE</a>：训练模型利用 execution feedback 自我修正；原目录曾误链到 CodeGen2 (<code>2305.02309</code>)。</li>
+<li><a href="https://arxiv.org/abs/2304.05128">Self-Debugging</a>：让模型对生成程序进行解释、执行与反馈驱动的调试；注意原目录曾误链到 <code>2304.12243</code>。</li>
+<li><a href="https://arxiv.org/abs/2606.07412">Socratic-SWE</a>：trace-derived skills 驱动 task generation 的闭环；提交于 2026，不是 2025。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. 最小上线顺序</h2>
+<ol>
+<li>先固定 30–50 个 held-out tasks 与容器化 verifier。</li>
+<li>跑 baseline，人工审核首个可归因分叉。</li>
+<li>只抽取 3–5 条高频条件式 rules。</li>
+<li>先做 retrieval-time A/B；稳定后再生成 preference/SFT 数据。</li>
+<li>同时报质量和成本，遵循 <a href="08_systems_and_evaluation.md">08</a>。</li>
+</ol>
+<p>这比先堆大量自然语言原则更容易判断收益来自哪里，也更容易回滚。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ICL/07_coding_data.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

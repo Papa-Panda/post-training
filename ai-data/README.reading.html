@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ai-data — Data-centric AI Papers</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">ai-data</span>
+    <h1>ai-data — Data-centric AI Papers</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">第二轮深度复习（24/30）</a><a href="#sec-2">RL data 补充（Day 32+，第一轮）</a><a href="#sec-3">结构</a><a href="#sec-4">发展路线图（30/30 主干闭环完成；主题延伸至 Day 39）</a><a href="#sec-5">问答记录</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>专门读 <strong>data</strong> 相关的 AI paper 的沉淀区。服务于从 ML for Infra → Post-training / Agentic RL Infra 转型，重点是 <strong>coding data / SFT / RL data / data curation / quality / flywheel</strong>。
+<strong>Scope：只谈数据，不谈算法。</strong> 算法（GRPO/PPO/RLHF、optimizer、TTS解码策略）归 <code>rl-infra/</code>、<code>grpo-vs-ppo/</code> 轨道。这里只关心：数据怎么来、怎么洗、怎么选、怎么评、怎么量多样性/复杂度。
+命名已全量对齐 <code>rl-infra/day-01-xxx</code>；30篇主干闭环后继续以 <code>day-31-xxx</code> 起做主题延伸，便于 Day N 直连。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>第二轮深度复习（24/30）</h2>
+<blockquote class="pq">
+<p>复习期：2026-09-01 → 2026-09-30；固定按 Day 01 → Day 30，一天一篇，只更新已有 NOTES，不新增论文。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Review</th>
+<th>Date</th>
+<th style="text-align: right;">Day</th>
+<th>Paper</th>
+<th>Status</th>
+<th>阅读版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">01/30</td>
+<td>2026-09-01</td>
+<td style="text-align: right;">01</td>
+<td>StarCoder2 / The Stack v2 数据策展入门</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-01-example-starcoder2/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">02/30</td>
+<td>2026-09-02</td>
+<td style="text-align: right;">02</td>
+<td>Understanding Black-box Predictions via Influence Functions</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">03/30</td>
+<td>2026-09-03</td>
+<td style="text-align: right;">03</td>
+<td>Estimating Training Data Influence by Tracing Gradient Descent (TracIn)</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">04/30</td>
+<td>2026-09-04</td>
+<td style="text-align: right;">04</td>
+<td>LESS: Selecting Influential Data for Targeted Instruction Tuning</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">05/30</td>
+<td>2026-09-05</td>
+<td style="text-align: right;">05</td>
+<td>DataInf: Efficiently Estimating Data Influence in LoRA-tuned LLMs and Diffusion Models</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-05-2024-datainf/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">06/30</td>
+<td>2026-09-06</td>
+<td style="text-align: right;">06</td>
+<td>Textbooks Are All You Need (Phi-1)</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-06-2023-phi-1/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">07/30</td>
+<td>2026-09-07</td>
+<td style="text-align: right;">07</td>
+<td>The Llama 3 Herd of Models / 15.6T 预训练数据瀑布</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-07-2024-llama3/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">08/30</td>
+<td>2026-09-08</td>
+<td style="text-align: right;">08</td>
+<td>DeepSeek-V3 Technical Report / 14.8T MoE 数据配方</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-08-2024-deepseek-v3/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">09/30</td>
+<td>2026-09-09</td>
+<td style="text-align: right;">09</td>
+<td>Qwen2.5 Technical Report / 18T→1M SFT→多阶段RL 飞轮</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-09-2024-qwen2.5/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">10/30</td>
+<td>2026-09-10</td>
+<td style="text-align: right;">10</td>
+<td>Llama 3.1 / 3.2 后训练数据引擎 / 多轮RS+DPO / 1B-3B蒸馏</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-10-2024-llama3.1-3.2/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">11/30</td>
+<td>2026-09-11</td>
+<td style="text-align: right;">11</td>
+<td>LIMR: Less is More for RL Scaling / 学习轨迹对齐选 1,389 题</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-11-2025-limr/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">12/30</td>
+<td>2026-09-12</td>
+<td style="text-align: right;">12</td>
+<td>SuperFiltering: Weak-to-Strong Data Filtering / 124M 算 IFD 筛 5% 打赢全量</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">13/30</td>
+<td>2026-09-13</td>
+<td style="text-align: right;">13</td>
+<td>DPO-Gap: 隐式奖励差选难偏好对 / 留 10% 打赢全量</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-13-2025-dpo-reward-gap/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">14/30</td>
+<td>2026-09-14</td>
+<td style="text-align: right;">14</td>
+<td>StarCoder2 / The Stack v2: 900B+ 门禁代码底座 / 容量匹配配比 / repo-context</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-14-2024-starcoder2/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">15/30</td>
+<td>2026-09-15</td>
+<td style="text-align: right;">15</td>
+<td>DeepSeek-R1 / &lt;10k 冷启动+纯RL / (x,verifier) 数据范式</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-15-2025-deepseek-r1/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">16/30</td>
+<td>2026-09-16</td>
+<td style="text-align: right;">16</td>
+<td>Qwen2.5-Coder / 5.2T 执行过滤分诊 / sandbox+checklist</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-16-2024-qwen2.5-coder/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">17/30</td>
+<td>2026-09-17</td>
+<td style="text-align: right;">17</td>
+<td>LIMO: Less is More for Reasoning / 817 条认知模板</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-17-2025-limo/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">18/30</td>
+<td>2026-09-18</td>
+<td style="text-align: right;">18</td>
+<td>s1: Simple test-time scaling / 1k 长链 + budget forcing TTS</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-18-2025-s1/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">19/30</td>
+<td>2026-09-19</td>
+<td style="text-align: right;">19</td>
+<td>Vendi Score / kernel 特征值熵多样性度量（标尺非流程；q 阶旋钮；kernel 即定义）</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-19-2023-vendi-score/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">20/30</td>
+<td>2026-09-20</td>
+<td style="text-align: right;">20</td>
+<td>DEITA: 复杂度×质量×多样性三因子自动选 6K（ $s = c \times q$ + Repr Filter；scaling 非单调）</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-20-2023-deita/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">22/30</td>
+<td>2026-09-22</td>
+<td style="text-align: right;">22</td>
+<td>WizardLM / Evol-Instruct / 52K→250K 复杂度演化（70K 子集对 Vicuna；修正初读 70K 误读）</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">21/30</td>
+<td>2026-09-21</td>
+<td style="text-align: right;">21</td>
+<td>Self-Instruct: 175 种子→52K bootstrap 合成指令源头（output-first 分类实例；ROUGE-L&lt;0.7 去重；+33.1% SuperNI）</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">23/30</td>
+<td>2026-09-23</td>
+<td style="text-align: right;">23</td>
+<td>LIMA: Less Is More for Alignment / 1k 高质策展（社区 750+手写 250；风格统一+τ=3 多样性；§5 消融：多样性/质量有效、数量 16 倍 plateau；打赢 52K Alpaca-65B）</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">24/30</td>
+<td>2026-09-24</td>
+<td style="text-align: right;">24</td>
+<td>D4 / SemDeDup：语义近重复去除+原型式多样化剪枝（ $R = R_{dedup} \times R_{proto}$ ；OPT-125M 表示；20% 效率增益/16 任务最高 +2%；智能重复打赢基线）</td>
+<td>✅ 完成</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/">📖</a></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>RL data 补充（Day 32+，第一轮）</h2>
+<blockquote class="pq">
+<p>2026-09-23 新增：主干 30 篇偏 SFT/curation，RL data 覆盖不足，单开补充系列。第一轮精读，一天一篇。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Day</th>
+<th>Paper</th>
+<th>Status</th>
+<th>阅读版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">31</td>
+<td>DoReMi（此前误加保留，不计入本系列）</td>
+<td>—</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-31-2023-doremi/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">32</td>
+<td>InstructGPT / RLHF 数据管线正典（labeler 指令 + 偏好对 + RM 数据）</td>
+<td>✅ 2026-09-24</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-32-2022-instructgpt/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">33</td>
+<td>STaR / rationalization 自举推理数据</td>
+<td>✅ 2026-09-25</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-33-2022-star/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">34</td>
+<td>Constitutional AI / RLAIF 源头（原则→critique→revision）</td>
+<td>✅ 2026-09-26</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-34-2022-constitutional-ai/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">35</td>
+<td>Let's Verify Step by Step / PRM 800K step-level 标签</td>
+<td>✅ 2026-09-27</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-35-2023-lets-verify-step-by-step/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">36</td>
+<td>RLAIF vs. RLHF / AI 反馈偏好数据 recipe（ICML 2024）</td>
+<td>✅ 2026-09-28</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-36-2023-rlaif/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">37</td>
+<td>DAPO / RL 训练期数据工程（dynamic sampling + overlong shaping）</td>
+<td>✅ 2026-09-29</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-37-2025-dapo/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">38</td>
+<td>Tülu 3 / 开源 post-training 全配方（SFT + DPO + RLVR）</td>
+<td>✅ 2026-09-30</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-38-2024-tulu-3/">📖</a></td>
+</tr>
+<tr>
+<td style="text-align: right;">39</td>
+<td>Kimi k1.5 / long-CoT RL 数据（long2short）</td>
+<td>✅ 2026-10-01</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-39-2025-kimi-k1-5/">📖</a></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>结构</h2>
+<pre><code>ai-data/
+├── README.md                # 本路线图（30篇主干已闭环；Day31起主题延伸）
+├── PAPER_TEMPLATE.md
+├── reading-log.csv          # 快速索引
+└── day-01-xxx/              # 每篇一个文件夹
+    ├── NOTES.md             # 必须含「和之前工作的关系」
+    └── assets/
+</code></pre>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>发展路线图（30/30 主干闭环完成；主题延伸至 Day 39）</h2>
+<blockquote class="pq">
+<p><strong>30篇主干</strong> 已闭环：归因→选择→预训练瀑布→少即是多→合成指令→复杂度演化→对齐极简→语义去重、多样化剪枝→大规模网页过滤→AI反馈偏好数据底座→开源代码锚定合成→可验证RL数据→代码 benchmark 防污染。Day 31 起只补图谱中仍有明确缺口的主题；今日补上跨域数据配比。</p>
+</blockquote>
+<h3>图谱总览（30篇主干 + 主题延伸 + RL 补充系列 Day32–39）</h3>
+<p><div class="mermaid">graph TD
+  subgraph 归因起源 S-tier 已完成
+    A[Day02 Influence 2017] --&gt; B[Day03 TracIn 2020]
+  end
+
+  subgraph 选择主线 S/A-tier 已完成
+    B --&gt; C[Day04 LESS 5%]
+    C --&gt; D[Day05 DataInf LoRA]
+    C --&gt; E[Day12 SuperFiltering IFD]
+    D --&gt; F[Day11 LIMR RL 1.3k]
+    E --&gt; F
+    F --&gt; G[Day17 LIMO 817]
+    G --&gt; H[Day18 s1 1k+TTS]
+  end
+
+  subgraph 预训练瀑布 S-tier 已完成
+    I[Day06 Phi-1 教科书] --&gt; J[Day07 Llama3 15.6T]
+    J --&gt; K[Day08 DeepSeek-V3 14.8T]
+    K --&gt; L[Day09 Qwen2.5 18T]
+    L --&gt; M[Day14 StarCoder2 1T]
+    M --&gt; N[Day16 Qwen2.5-Coder 5.5T exec]
+  end
+
+  subgraph SFTvsRL 范式 S-tier 已完成
+    G --&gt; O[Day15 R1 cold-start+纯RL]
+    H --&gt; O
+    N --&gt; O
+  end
+
+  subgraph 多样性支线 B-tier 已完成
+    M --&gt; P[Day19 Vendi Score]
+    P --&gt; Q[Day20 DEITA 6k 3因子]
+    H --&gt; Q
+    C --&gt; Q
+  end
+
+  subgraph 偏好支线 B-tier 已完成
+    R[Day10 Llama3.1/3.2 后训练] --&gt; S[Day13 DPO-Gap 10%]
+    S --&gt; F
+  end
+
+  subgraph 合成指令源头 已点亮 S-tier
+    T[Day21 Self-Instruct 2022 ✅已完成]
+    T --&gt; U[Day22 Evol-Instruct/WizardLM 2023 ✅已完成]
+    U --&gt; V[Day27 OSS-Instruct/Magicoder 23-24 ✅已完成]
+    V --&gt; I
+  end
+
+  subgraph 预训练去重与过滤源头 Day24-25已完成 S-tier
+    W[Day25 FineWeb/RefinedWeb 24 ✅已完成]
+    X[Day24 D4/SemDeDup 23 ✅已完成]
+    W --&gt; X
+    X --&gt; P
+    X --&gt; J
+    AD[Day31 DoReMi 23 ✅已完成]
+    W --&gt; AD
+    AD --&gt; J
+  end
+
+  subgraph 偏好/RL数据底座 Day26已完成 S-tier
+    Y[Day26 UltraFeedback 23 ✅已完成]
+    Y --&gt; S
+    Z[Day28 DeepScaleR/OpenReasoner-Zero 25 ✅已完成]
+    Z --&gt; F
+    AA[Day29 SWE-Gym 24 ✅已完成]
+    AA --&gt; N
+    AB[Day30 Code Decontamination 24 ✅已完成]
+    AB -.防漏.-&gt; J
+    AB -.防漏.-&gt; O
+  end
+
+  subgraph 对齐极简 已点亮 S-tier
+    AC[Day23 LIMA 1k ✅已完成]
+    AC --&gt; G
+    AC --&gt; Q
+  end
+
+  subgraph RL 补充系列 Day32-39 已完成
+    BA[Day32 InstructGPT 22 ✅已完成]
+    BB[Day33 STaR 22 ✅已完成]
+    BC[Day34 Constitutional AI 22 ✅已完成]
+    BD[Day35 PRM 23 ✅已完成]
+    BE[Day36 RLAIF 23 ✅已完成]
+    BF[Day37 DAPO 25 ✅已完成]
+    BG[Day38 Tülu 3 24 ✅已完成]
+    BH[Day39 Kimi k1.5 25 ✅已完成]
+    AC --&gt; BA
+    BA --&gt; Y
+    BA --&gt; BC
+    BC --&gt; BE
+    Y --&gt; BE
+    BE --&gt; S
+    T --&gt; BB
+    BB --&gt; O
+    BD --&gt; Z
+    Z --&gt; BF
+    O --&gt; BF
+    Z --&gt; BH
+    BF --&gt; BH
+    O --&gt; BH
+    R --&gt; BG
+    Y --&gt; BG
+  end
+
+  style A fill:#ffd700
+  style B fill:#ffd700
+  style C fill:#ffd700
+  style O fill:#ff6b6b
+  style G fill:#ff6b6b
+  style H fill:#ff6b6b
+  style T fill:#ffd700
+  style U fill:#ffd700
+  style AC fill:#ffd700
+  style X fill:#ffd700
+  style Y fill:#ffd700
+  style W fill:#ffd700
+  style V fill:#ffd700
+  style Z fill:#ffd700
+  style AA fill:#ffd700
+  style AB fill:#ffd700
+  style AD fill:#ffd700
+  style BA fill:#ffd700
+  style BB fill:#ffd700
+  style BC fill:#ffd700
+  style BD fill:#ffd700
+  style BE fill:#ffd700
+  style BF fill:#ffd700
+  style BG fill:#ffd700
+  style BH fill:#ffd700
+
+  click A href "https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/"
+  click B href "https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/"
+  click C href "https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/"
+  click D href "https://papa-panda.github.io/post-training/ai-data/day-05-2024-datainf/"
+  click E href "https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/"
+  click F href "https://papa-panda.github.io/post-training/ai-data/day-11-2025-limr/"
+  click G href "https://papa-panda.github.io/post-training/ai-data/day-17-2025-limo/"
+  click H href "https://papa-panda.github.io/post-training/ai-data/day-18-2025-s1/"
+  click I href "https://papa-panda.github.io/post-training/ai-data/day-06-2023-phi-1/"
+  click J href "https://papa-panda.github.io/post-training/ai-data/day-07-2024-llama3/"
+  click K href "https://papa-panda.github.io/post-training/ai-data/day-08-2024-deepseek-v3/"
+  click L href "https://papa-panda.github.io/post-training/ai-data/day-09-2024-qwen2.5/"
+  click M href "https://papa-panda.github.io/post-training/ai-data/day-14-2024-starcoder2/"
+  click N href "https://papa-panda.github.io/post-training/ai-data/day-16-2024-qwen2.5-coder/"
+  click O href "https://papa-panda.github.io/post-training/ai-data/day-15-2025-deepseek-r1/"
+  click P href "https://papa-panda.github.io/post-training/ai-data/day-19-2023-vendi-score/"
+  click Q href "https://papa-panda.github.io/post-training/ai-data/day-20-2023-deita/"
+  click R href "https://papa-panda.github.io/post-training/ai-data/day-10-2024-llama3.1-3.2/"
+  click S href "https://papa-panda.github.io/post-training/ai-data/day-13-2025-dpo-reward-gap/"
+  click T href "https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/"
+  click U href "https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/"
+  click V href "https://papa-panda.github.io/post-training/ai-data/day-27-2023-oss-instruct/"
+  click W href "https://papa-panda.github.io/post-training/ai-data/day-25-2023-fineweb-refinedweb/"
+  click X href "https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/"
+  click AD href "https://papa-panda.github.io/post-training/ai-data/day-31-2023-doremi/"
+  click Y href "https://papa-panda.github.io/post-training/ai-data/day-26-2023-ultrafeedback/"
+  click Z href "https://papa-panda.github.io/post-training/ai-data/day-28-2025-deepscaler-openreasoner/"
+  click AA href "https://papa-panda.github.io/post-training/ai-data/day-29-2024-swe-gym/"
+  click AB href "https://papa-panda.github.io/post-training/ai-data/day-30-2024-decontamination/"
+  click AC href "https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/"
+  click BA href "https://papa-panda.github.io/post-training/ai-data/day-32-2022-instructgpt/"
+  click BB href "https://papa-panda.github.io/post-training/ai-data/day-33-2022-star/"
+  click BC href "https://papa-panda.github.io/post-training/ai-data/day-34-2022-constitutional-ai/"
+  click BD href "https://papa-panda.github.io/post-training/ai-data/day-35-2023-lets-verify-step-by-step/"
+  click BE href "https://papa-panda.github.io/post-training/ai-data/day-36-2023-rlaif/"
+  click BF href "https://papa-panda.github.io/post-training/ai-data/day-37-2025-dapo/"
+  click BG href "https://papa-panda.github.io/post-training/ai-data/day-38-2024-tulu-3/"
+  click BH href "https://papa-panda.github.io/post-training/ai-data/day-39-2025-kimi-k1-5/"
+</div></p>
+<h3>主线 vs 支线 判定（30篇主干已完成；Day31起主题延伸）</h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>判定</th>
+<th>Days</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>S-tier 必读</strong></td>
+<td>范式定义</td>
+<td>02,03,04,06,07,08,09,14,15,16,17,18,21,22,23,24,25,26,27,28,31</td>
+<td>Influence→TracIn→LESS奠定选择；Phi-1/Llama3/DeepSeek/Qwen/StarCoder2/QwenCoder奠定洗数据；R1/LIMO/s1奠定少即是多；Self-Instruct→Evol-Instruct奠定合成指令与复杂度演化；LIMA奠定对齐极简；D4奠定语义去重与多样化剪枝；FineWeb/RefinedWeb奠定可复现大规模网页过滤与消融；UltraFeedback奠定可追溯AI反馈偏好池；OSS-Instruct奠定真实开源代码锚定的合成指令路线；Open-Reasoner-Zero / DeepScaleR 奠定可验证RL题池与困难尾部；DoReMi 奠定跨域数据配比</td>
+</tr>
+<tr>
+<td><strong>A-tier 重要</strong></td>
+<td>你的coding冷启动直接可用</td>
+<td>05,11,29,30</td>
+<td>DataInf LoRA扫脏；LIMR RL少即是多；SWE-Gym repo级可验证任务；代码 benchmark surface+semantic 防污染</td>
+</tr>
+<tr>
+<td><strong>B-tier 技巧</strong></td>
+<td>单点改进，可替换</td>
+<td>10,12,13,19,20</td>
+<td>10 Llama3.1后训练工程化；12 SuperFiltering弱到强IFD；13 DPO-gap难对；19 Vendi多样性度量；20 DEITA三因子工程配方</td>
+</tr>
+<tr>
+<td><strong>示例</strong></td>
+<td>入门</td>
+<td>01</td>
+<td>Day01 example_starcoder2 仅作curation入门示例</td>
+</tr>
+</tbody>
+</table>
+<h3>Day21-30 闭环计划（已完成10/10）</h3>
+<blockquote class="pq">
+<p>Day21-30 已完成；30篇 data 主线现已闭环。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>拟定 Folder</th>
+<th>标题</th>
+<th>为什么是主干 (Data视角)</th>
+<th>Tier</th>
+<th>阅读版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>21</td>
+<td>day-21-2022-self-instruct</td>
+<td>Self-Instruct ✅已完成 2026-08-21</td>
+<td>合成SFT起点，175种子→52k，bootstrap范式，后面所有合成都抄它</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/">📖</a></td>
+</tr>
+<tr>
+<td>22</td>
+<td>day-22-2023-evol-instruct</td>
+<td>WizardLM / Evol-Instruct ✅已完成 2026-08-22</td>
+<td>复杂度演化 In-depth/Breadth 约70k，解决 Self-Instruct 自举数据偏简单</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/">📖</a></td>
+</tr>
+<tr>
+<td>23</td>
+<td>day-23-2023-lima</td>
+<td>LIMA: Less Is More for Alignment ✅已完成 2026-08-23</td>
+<td>1k高质量打赢全量，LIMO/s1前身，证质量&gt;数量</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/">📖</a></td>
+</tr>
+<tr>
+<td>24</td>
+<td>day-24-2023-semdedup-d4</td>
+<td>D4 / SemDeDup ✅已完成 2026-08-24</td>
+<td>语义近重复去除+原型式多样化剪枝，Vendi的工程版，Llama3去重对照</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/">📖</a></td>
+</tr>
+<tr>
+<td>25</td>
+<td>day-25-2023-fineweb-refinedweb</td>
+<td>FineWeb / RefinedWeb ✅已完成 2026-08-25</td>
+<td>15T过滤管线：heuristics+MinHash+C4规则，预训练高质数据标杆</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-25-2023-fineweb-refinedweb/">📖</a></td>
+</tr>
+<tr>
+<td>26</td>
+<td>day-26-2023-ultrafeedback</td>
+<td>UltraFeedback ✅已完成 2026-08-26</td>
+<td>64k prompts×4多模型回答+GPT-4细粒度反馈，偏好数据底座，给DPO-gap提供上游池</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-26-2023-ultrafeedback/">📖</a></td>
+</tr>
+<tr>
+<td>27</td>
+<td>day-27-2023-oss-instruct</td>
+<td>OSS-Instruct / Magicoder ✅已完成 2026-08-27</td>
+<td>开源代码片段锚定合成约75k code指令，补Self-Instruct少种子与Evol固定规则的来源偏置</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-27-2023-oss-instruct/">📖</a></td>
+</tr>
+<tr>
+<td>28</td>
+<td>day-28-2025-deepscaler-openreasoner</td>
+<td>DeepScaleR / OpenReasoner-Zero Data ✅已完成 2026-08-28</td>
+<td>v2 57k可验证题池；v1 129k全量RL→13k困难尾部继续RL，是ProRL长程RL路线的先行证据</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-28-2025-deepscaler-openreasoner/">📖</a></td>
+</tr>
+<tr>
+<td>29</td>
+<td>day-29-2024-swe-gym</td>
+<td>SWE-Gym ✅已完成 2026-08-29</td>
+<td>2,438个真实issue任务+可执行环境+单元测试，形成repo级可验证轨迹数据，接Qwen2.5-Coder exec</td>
+<td>A</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-29-2024-swe-gym/">📖</a></td>
+</tr>
+<tr>
+<td>30</td>
+<td>day-30-2024-decontamination</td>
+<td>Quantifying Code Contamination ✅已完成 2026-08-30</td>
+<td>surface-level + semantic-level code matching 检漏，防 coding SFT/RL 数据泄漏 HumanEval/MBPP，质量门最后一道</td>
+<td>A</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-30-2024-decontamination/">📖</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote class="pq">
+<p>这10篇已跑完，<strong>合成→过滤→去重→多样性→质量→偏好→RL可验证→防漏</strong> 全链条贯通。</p>
+</blockquote>
+<h3>五条子脉络（30篇主干 + Day31延伸）</h3>
+<p><strong>1. 选择线 (Influence → Selection)：</strong> Day02 → Day03 → Day04(LESS 5%) → Day05(DataInf) → Day12(IFD) → Day11(RL轨迹) → Day17(817) → Day18(1k) → Day20(DEITA)。外部方法补充：<a href="../model-aware-data-curation/10_rico_icl_valuation.md">RICo</a> 用受控 ICL 干预提供 gradient-free、assessment-set-conditioned valuation；它不计入 Day 01–30，也不新增重复 NOTES。
+<strong>2. 预训练/合成线 (Quality → Scale)：</strong> Day21(Self-Instruct) → Day22(Evol) → Day27(OSS-Instruct) → Day06(Phi-1) → Day24(D4/SemDeDup) → Day25(FineWeb/RefinedWeb) → Day07(Llama3) → Day08(DeepSeek-V3) → Day09(Qwen2.5) → Day14(StarCoder2) → Day16(Qwen-Coder) → Day29(SWE-Gym)
+<strong>3. SFT vs RL / 偏好数据线：</strong> Day23(LIMA 1k) → Day04/12(SFT选) → Day26(UltraFeedback造偏好池) → Day13(DPO-Gap选难对) → Day11(RL要换LIM) → Day28(ORZ可验证数据+困难尾部挖掘) → Day15(R1冷启动+纯RL) → Day17/18(精心SFT也能OOD)
+<strong>4. 防污染质量门：</strong> Day24(D4训练集内去重) → Day27(OSS-Instruct benchmark decontamination) → Day29(SWE-Gym repo/时间切分问题) → Day30(code surface+semantic train–eval 检漏)
+<strong>5. 数据配比层：</strong> Day25(FineWeb域内过滤) → Day31(DoReMi跨域配比) → Day07/08/09(大模型预训练 mixture)</p>
+<p><strong>长程RL延伸：</strong> Day28 ORZ（约1,200步，证明大规模多样可验证数据可继续支撑RL）→ ProRL（2,000+步，并用动态采样、KL控制与reference-policy reset系统化 prolonged RL）。</p>
+<h3>Day N 映射表（31已完成，纯 Data 视角）</h3>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Folder</th>
+<th>Data贡献 (非算法)</th>
+<th>Tier</th>
+<th>阅读版</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>01</td>
+<td>day-01-example-starcoder2</td>
+<td>入门：600规则扫curation</td>
+<td>示例</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-01-example-starcoder2/">📖</a></td>
+</tr>
+<tr>
+<td>02</td>
+<td>day-02-2017-influence-functions</td>
+<td>数据归因：定义train→test影响</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-02-2017-influence-functions/">📖</a></td>
+</tr>
+<tr>
+<td>03</td>
+<td>day-03-2020-tracin</td>
+<td>归因工程化：ckpt点积无Hessian，可算self-influence扫脏</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-03-2020-tracin/">📖</a></td>
+</tr>
+<tr>
+<td>04</td>
+<td>day-04-2024-less</td>
+<td>选SFT：梯度相似挑5%目标任务数据</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-04-2024-less/">📖</a></td>
+</tr>
+<tr>
+<td>05</td>
+<td>day-05-2024-datainf</td>
+<td>选LoRA：闭式1秒一条，扫脏</td>
+<td>A</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-05-2024-datainf/">📖</a></td>
+</tr>
+<tr>
+<td>06</td>
+<td>day-06-2023-phi-1</td>
+<td>合成数据：教科书1B+精筛6B</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-06-2023-phi-1/">📖</a></td>
+</tr>
+<tr>
+<td>07</td>
+<td>day-07-2024-llama3</td>
+<td>预训练瀑布：15.6T 5级过滤+去重+配比</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-07-2024-llama3/">📖</a></td>
+</tr>
+<tr>
+<td>08</td>
+<td>day-08-2024-deepseek-v3</td>
+<td>MoE数据配比：14.8T 30%code+FIM</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-08-2024-deepseek-v3/">📖</a></td>
+</tr>
+<tr>
+<td>09</td>
+<td>day-09-2024-qwen2.5</td>
+<td>飞轮数据：18T→1M SFT→多阶段RL数据门禁</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-09-2024-qwen2.5/">📖</a></td>
+</tr>
+<tr>
+<td>10</td>
+<td>day-10-2024-llama3.1-3.2</td>
+<td>后训练数据切分：多轮RS/DPO数据来源</td>
+<td>B</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-10-2024-llama3.1-3.2/">📖</a></td>
+</tr>
+<tr>
+<td>11</td>
+<td>day-11-2025-limr</td>
+<td>RL数据：LIM轨迹选1389难例</td>
+<td>A</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-11-2025-limr/">📖</a></td>
+</tr>
+<tr>
+<td>12</td>
+<td>day-12-2024-superfiltering</td>
+<td>SFT数据：125M弱模型IFD选7B</td>
+<td>B</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-12-2024-superfiltering/">📖</a></td>
+</tr>
+<tr>
+<td>13</td>
+<td>day-13-2025-dpo-reward-gap</td>
+<td>偏好数据：gap小难对留10%</td>
+<td>B</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-13-2025-dpo-reward-gap/">📖</a></td>
+</tr>
+<tr>
+<td>14</td>
+<td>day-14-2024-starcoder2</td>
+<td>Code数据：600+语言1T清洗+PII</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-14-2024-starcoder2/">📖</a></td>
+</tr>
+<tr>
+<td>15</td>
+<td>day-15-2025-deepseek-r1</td>
+<td>RL数据：&lt;10k冷启动合成+可验证奖励数据</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-15-2025-deepseek-r1/">📖</a></td>
+</tr>
+<tr>
+<td>16</td>
+<td>day-16-2024-qwen2.5-coder</td>
+<td>Code执行数据：parser+exec三级洗5.5T</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-16-2024-qwen2.5-coder/">📖</a></td>
+</tr>
+<tr>
+<td>17</td>
+<td>day-17-2025-limo</td>
+<td>SFT数据极点：817条认知模板</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-17-2025-limo/">📖</a></td>
+</tr>
+<tr>
+<td>18</td>
+<td>day-18-2025-s1</td>
+<td>SFT+TTS数据：1k长链+难度/去重</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-18-2025-s1/">📖</a></td>
+</tr>
+<tr>
+<td>19</td>
+<td>day-19-2023-vendi-score</td>
+<td>数据多样性度量：kernel熵公理</td>
+<td>B</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-19-2023-vendi-score/">📖</a></td>
+</tr>
+<tr>
+<td>20</td>
+<td>day-20-2023-deita</td>
+<td>数据质量配方：复杂度×质量×多样6k</td>
+<td>B</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-20-2023-deita/">📖</a></td>
+</tr>
+<tr>
+<td>21</td>
+<td>day-21-2022-self-instruct</td>
+<td>合成指令源头：175 种子→52k bootstrap，无外部依赖自举 SFT，合成范式起点</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-21-2022-self-instruct/">📖</a></td>
+</tr>
+<tr>
+<td>22</td>
+<td>day-22-2023-evol-instruct</td>
+<td>指令复杂度演化：52K Alpaca 种子经 4 轮 In-depth/Breadth 演化得 250K（70K 子集与 Vicuna 对比训练）</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-22-2023-evol-instruct/">📖</a></td>
+</tr>
+<tr>
+<td>23</td>
+<td>day-23-2023-lima</td>
+<td>对齐极简：1k 条经来源、风格与多样性策展的高质 SFT，验证质量与覆盖优先于规模</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-23-2023-lima/">📖</a></td>
+</tr>
+<tr>
+<td>24</td>
+<td>day-24-2023-semdedup-d4</td>
+<td>预训练去重：语义近重复删除+原型式多样化剪枝，压缩冗余同时保留长尾覆盖</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/">📖</a></td>
+</tr>
+<tr>
+<td>25</td>
+<td>day-25-2023-fineweb-refinedweb</td>
+<td>网页过滤工厂：15T-token逐级过滤、去重与训练消融，把规则清单升级为可复现可审计数据配方</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-25-2023-fineweb-refinedweb/">📖</a></td>
+</tr>
+<tr>
+<td>26</td>
+<td>day-26-2023-ultrafeedback</td>
+<td>偏好数据底座：64k prompts×4多模型回答，经GPT-4细粒度评价与打分形成可追溯AI反馈池</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-26-2023-ultrafeedback/">📖</a></td>
+</tr>
+<tr>
+<td>27</td>
+<td>day-27-2023-oss-instruct</td>
+<td>Code合成：80K开源代码片段锚定生成，经去重和benchmark防污染得到约75K条现实、多样、可控的coding SFT数据</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-27-2023-oss-instruct/">📖</a></td>
+</tr>
+<tr>
+<td>28</td>
+<td>day-28-2025-deepscaler-openreasoner</td>
+<td>可验证RL数据：v2使用57k题池；v1先在129k上RL 1,100步，再挖出约13k困难尾部继续100步；承接LIMR并为ProRL长程RL提供先行证据</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-28-2025-deepscaler-openreasoner/">📖</a></td>
+</tr>
+<tr>
+<td>29</td>
+<td>day-29-2024-swe-gym</td>
+<td>可执行code环境：2,438个真实issue任务封装repo、依赖、单元测试与agent轨迹，把静态样本升级为仓库级可验证交互数据</td>
+<td>A</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-29-2024-swe-gym/">📖</a></td>
+</tr>
+<tr>
+<td>30</td>
+<td>day-30-2024-decontamination</td>
+<td>代码防污染：surface-level + semantic-level 双重匹配 train–eval 近重复，保护 HumanEval/MBPP 等 benchmark 的可信度</td>
+<td>A</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-30-2024-decontamination/">📖</a></td>
+</tr>
+<tr>
+<td>31</td>
+<td>day-31-2023-doremi</td>
+<td>数据配比：用小 reference/proxy 的跨域 excess loss 学习 domain weights，再重采样给大模型训练，补齐域内过滤之外的 token 预算层</td>
+<td>S</td>
+<td><a href="https://papa-panda.github.io/post-training/ai-data/day-31-2023-doremi/">📖</a></td>
+</tr>
+</tbody>
+</table>
+<blockquote class="pq">
+<p>算法细节(RL用GRPO还是PPO、TTS用Wait截断还是budget forcing)不在此表，NOTES里只记数据构造部分。</p>
+</blockquote>
+<h3>Day21-30 如何接每日Job（Day21-30 已完成）</h3>
+<ul>
+<li>命名继续 <code>day-{21..30}-{year}-{slug}</code> 两位数，顺序递增，对齐 rl-infra</li>
+<li>每日Job自动：建骨架 → 更新 reading-log → push commit <code>feat(ai-data): Day N</code> → 同步Sheet <code>ai data</code> tab → 更新本README映射表新增一行（若为S-tier，同步mermaid点亮从蓝色→金/红）</li>
+<li>Scope约束：每日NOTES只记数据，不谈GRPO/PPO细节</li>
+</ul>
+<hr />
+<p>关联：
+- infra轨道：<code>rl-infra/day-01-ddp-basics/</code> ~ <code>day-12-reward-model</code>
+- 讨论：在 Hatch <code>ai data</code> thread
+- GitHub树：https://github.com/Papa-Panda/post-training/tree/master/ai-data
+- Sheet：<code>ai data</code> tab 日更</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>问答记录</h2>
+<blockquote class="pq">
+<p>来自 <code>ai data</code> side chat 的用户主动问答归档：跨多篇或不归属单篇的问答记在这里；可归属单篇 Day 的记在对应 <code>NOTES.md</code> 末尾的"问答补充"小节。问答原文精简整理，保留关键公式、推导链条与结论；原有内容只追加、不改动。</p>
+</blockquote>
+<h3>2026-09-09 — 评估器三臂实验与"自我参照"RM 的系统性跑偏（跨 Day07 / Day09 / Day04）</h3>
+<p><strong>问题（用户，10:32 PDT）</strong>：Llama 3：评估器=下游分数（外部锚点）；Qwen2.5：评估器=模型自己的偏好（自我参照）；LESS：评估器=目标梯度（任务参照）。这个实验很好设计啊——用评估器筛选数据然后跑训练、看 eval 提升多少。在什么条件下"自我参照"的 RM 会系统性跑偏？validation eval dataset 完全正交、评估器太弱、gradient 用的模型太弱，都有可能系统性跑偏。</p>
+<p><strong>核心答案</strong>：三臂共享同一个候选池、同一个 50k 预算，各自用评估器做分配决策，然后在同一个小 proxy 上训、同一套 held-out 评测上看 delta。但"好设计"的魔鬼在：<strong>ground truth 的定义会不会让某条臂不战而胜</strong>。裁判用 proxy 训完看 HumanEval 涨多少 → Llama 3 那条臂（annealing 本来就是直接测 HumanEval delta）带答案进考场；裁判用人工偏好 → RM 臂天然占优。公平设计必须声明：裁判和三条臂的参照系都不重合——比如裁判是"全新任务簇上的 few-shot 泛化"，三臂只在旧任务上做决策；比的是"便宜信号的外推能力"而非"谁离裁判更近"。另有关键约束：验证用的训练必须是 <strong>proxy 级</strong>（小模型、少 token），否则为验证"便宜评估器"付了"昂贵训练"的全款，实验本身失去意义。</p>
+<p>跑偏情形（记真实目标为 $R^*$ ，不可直接观测；RM 为 $R_\theta$ ；RM 训练数据为 $D_{RM}$ ）：</p>
+<ol>
+<li><strong>eval 与训练目标正交</strong>： $R_\theta$ 只在 $D_{RM}$ 的支撑集 $\mathrm{supp}(D_{RM})$ 上被训练去逼近 $R^*$ ；正交的 eval 维度落在支撑集之外，RM 打分是纯外推——跑偏是数学上<strong>预期内</strong>的。纠正方向不是"换更强的 RM"，而是把正交维度的数据补进 $D_{RM}$ ，扩大支撑集。</li>
+<li><strong>评估器太弱</strong>：逼近误差里的 bias 项，不是 variance。弱 RM 表达能力不够，学不会真正的 $R^*$ （比如 1B 的 RM 验证不了数学推理链），于是锁死在<strong>伪相关特征</strong>上：长度、格式、语气的自信程度。这就是 Goodhart 在这里的形态——"当一个有偏的度量变成目标，偏差会被系统性放大"。与情形一的区别：情形一是"没见过"，情形二是"见过但学不会，只好学歪的"。</li>
+<li><strong>梯度来自太弱的模型（LESS 那条臂的版本）</strong>：LESS 的 score 本质是 $\cos(\Gamma(z), \bar{\Gamma}_{tgt})$ ，其中 $\Gamma$ 是 Adam 感知的投影梯度特征。influence 理论的一阶近似只在 $\theta$ 的局部成立——弱模型的梯度是在<strong>错误的切空间</strong>里算的影响力：弱模型还没学会的特征方向，在它的梯度里根本不存在，所以它选出的数据是对"弱模型有用"的数据，不是对最终强模型有用的数据。形式化地说： $\nabla_\theta \ell$ 在 $\theta_{weak}$ 和 $\theta_{strong}$ 处指向不同的函数空间方向，cosine 相似度量的参照系整个错了。</li>
+<li><strong>闭环迭代放大</strong>（Qwen 飞轮里最危险的）：RM 选数据 → 新模型在 RM 高分区里采样 → 下一轮 RM 的训练数据分布向高分区收缩 → RM 的支撑集越来越窄 → 打分越来越自信、越来越偏。这和 model collapse 是同一数学结构（在自己输出上迭代训练），只是发生在"偏好"维度而非"文本"维度。</li>
+</ol>
+<p><strong>刹车条件（可执行，不用"人工抽检"糊弄）</strong>：每轮记录 $\Delta R_\theta$ （RM 自评分数变化）和 $\Delta A$ （Llama 3 式外部锚点指标变化，RM 永远见不到、也永远不参与选择）。触发条件：<strong>连续两轮 $\mathrm{sign}(\Delta R_\theta) \neq \mathrm{sign}(\Delta A)$ ** ，或在 fresh 样本上 $\mathrm{corr}(R_\theta, A)$ 跌破阈值（比如 0.3）。触发后不停训，而是取"RM 打分高但锚点指标差"的分歧 slice——这是信息量最大的 slice，主动学习里最值得标注的部分——重新人工标注，刷新 $D_{RM}$ ，再开下一轮。这正是 Qwen §4.2 把"白盒信号能评的"切去 offline 的深层原因：</strong>白盒信号就是给自举飞轮配的外部锚点**。</p>
+<p><strong>关联</strong>：Day 07 Llama 3（annealing 下游分数评估）、Day 09 Qwen2.5（§4.2 白盒/黑盒分诊、多轮 RS+DPO 飞轮）、Day 04 LESS（目标梯度选择）。</p>
+<h3>2026-09-09 — SFT-vs-RL 的数据量之争：范畴错误（跨 Day09 / Day15）</h3>
+<p><strong>问题（用户，11:21 PDT）</strong>：SFT-vs-RL 的数据量之争有啥好争的？共识应该是 SFT 的训练数据量小很多而且多了也没用；两者的训练目标完全不是一回事：大 SFT + RM 管 instruction following、safety、小冷启动；纯 RL 管推理性质强的 coding + math。</p>
+<p><strong>核心答案</strong>：(b) 与其说是"量之争"，不如说是个范畴错误——问题本身问错了维度。两条机制钉死：</p>
+<p><strong>第一条：SFT 对推理不是"没用"，是和 RL 互斥。</strong> SFT 的信号是 dense-but-capped：cross-entropy 把策略分布压到 demonstration 的几个 mode 上，输出熵坍缩；而 RL 恰恰需要熵来做探索——策略得先"敢"输出不同的推理链，verifiable reward 才能从中挑出好的。所以 SFT 在推理管线里的正确剂量是"刚好把格式固定"（把策略搬进正确的 basin），再多就是给 RL 挖坑：熵被杀死了，RL 无处探索。R1 的 &lt;10k 冷启动就是这个最小剂量的实验测定值。而 Qwen 的 1M 根本不是用来教推理的——它是 dense 信号去覆盖九轴行为空间（长文本、结构化、多语、system prompt），行为覆盖本来就需要量。两边说的"量"不是同一个东西。</p>
+<p><strong>第二条：分家的真正变量是 reward 可验证性，不是任务名字。</strong> 推理类任务有白盒 verifier（单测、答案匹配）→ 信号稀疏但<strong>无上界</strong>（RL 可以超越 demonstrator，这就是 "SFT memorizes, RL generalizes" 的机制）；instruction following / safety / style 没有便宜 verifier → 只能靠 dense 演示（SFT）或学出来的 RM（而 RM 本身又是贵的人类偏好数据训出来的）。所以"数据量问题"是"评估器可靠性问题"的下游——这和 Qwen §4.2 的 offline / online 切分是同一条线，只是换了个说法。</p>
+<p><strong>可证伪的预测</strong>（"中间路线两头不靠"的形式化）：固定 RL 预算，扫 SFT 量，最终效果应该是<strong>倒 U 型</strong>——太少，格式没固定，RL 把样本浪费在学格式上；太多，熵坍缩，RL 探索不动；sweet spot 就是 R1 的冷启动点。100k SFT 恰好落在"够杀死熵、不够覆盖行为"的死亡谷里。</p>
+<p><strong>历史注脚</strong>："共识"是 R1 之后才有的共识。Qwen2.5 是 2024-12，R1 是 2025-01——在 R1 之前没人知道纯 RL 能把推理 elic 出来，默认答案就是堆 SFT。所以 (b) 真正值得问的不是"选哪边"，而是"为什么是 R1 而不是更早"：答案是可验证奖励的规模化 + GRPO 把 RL 的样本效率推过了实用线，数据路线的分叉点从来都是 infra / 信号成本决定的。</p>
+<p><strong>关联</strong>：Day 09 Qwen2.5（1M+ SFT → offline DPO → online GRPO）、Day 15 DeepSeek-R1（小冷启动 + 纯 RL）。</p>
+<h3>2026-09-09 — 仓库级 agent：Qwen 式还是 R1 式？（跨 Day09 / Day15 / Day29）</h3>
+<p><strong>问题（用户，11:23 PDT）</strong>：对自己的 coding 数据工作：如果目标是"仓库级 agent 能力"（SWE-bench 类），选 Qwen 式还是 R1 式？啥叫仓库级 agent？如果是说出厂就有推理能力，当然是 R1。</p>
+<p><strong>核心答案</strong>：</p>
+<p><strong>定义</strong>：仓库级 agent 和 HumanEval 那种"给函数签名、补全函数体"完全不是一个物种。仓库级 = 以<strong>整个代码仓库为环境</strong>的任务：输入是一个真实的 GitHub issue（"点击 X 按钮报 500 错误"），agent 要自己读仓库结构、定位相关文件、写复现脚本、改多处代码、跑测试套件、根据报错迭代——几十到上百步的工具调用（读文件、跑 shell、跑测试），最后用仓库自带的测试集判定：FAIL_TO_PASS 测例变绿且 PASS_TO_PASS 没变红。SWE-bench 就是这个范式的标准考场。</p>
+<p><strong>拆解</strong>：仓库级 agent = <strong>推理引擎 + 长程行为</strong>，而这两半要的数据不一样。</p>
+<ul>
+<li><strong>推理那半，确实选 R1 式。</strong> 仓库级任务有白盒 outcome reward（测试集通过/不通过），这是 R1 范式的直接平移：outcome 可验证 → 小冷启动 + RL，SFT 只给最小剂量固定格式。</li>
+<li><strong>但行为那半，纯 R1 走不动，原因叫 credit assignment。</strong> 数学题的 trajectory 是几百 token，batch 里总有一定比例做对，reward 不至于全零；仓库级任务的 trajectory 是 50~100 步工具调用，cold policy 的成功率接近零——RL 拿到的全是零信号，学不动。所以必须先有一步 Qwen 式的 dense 信号：<strong>在 expert agent trajectories 上做小量 SFT（behavior cloning）</strong>，教工具调用格式、ReAct 循环、"先复现再修"的仓库导航规范。这正是 SFT 把策略"搬进 basin"——只不过这里的 basin 是"能跑出非零成功率的 agent 行为空间"。</li>
+</ul>
+<p><strong>三段管线</strong>（正好对应 Qwen §4.2 的分诊哲学）：</p>
+<ol>
+<li><strong>SFT（小，约 10k 条 expert trajectory）</strong>：只教格式——工具调用语法、多轮观察-行动循环、长上下文里不丢 issue 描述（这是 Qwen SFT 九轴里 long-gen 那条轴的活）。</li>
+<li><strong>RL（主干，R1 式）</strong>：容器化仓库环境里 rollout，outcome reward = 测试集翻转，GRPO 每 issue 采多条 trajectory。</li>
+<li><strong>把稀疏 reward 变稠（仓库级特有的）</strong>：中间可验证里程碑当 process reward——复现脚本跑通、单个 FAIL_TO_PASS 翻绿，都给分。这是"白盒信号能评的走白盒"那句话在长程任务上的实例化。</li>
+</ol>
+<p>一句话：选 R1 式当主干，但"仓库级"这个定语强制你在 R1 前面加一段 Qwen 式的前置——不是因为推理需要 SFT，而是因为 <strong>100 步的稀疏奖励下，RL 需要 SFT 先把它送进 reward 非零的区域</strong>。</p>
+<p><strong>关联</strong>：Day 09 Qwen2.5（§4.2 分诊、SFT 九轴）、Day 15 DeepSeek-R1（纯 RL）、Day 29 SWE-Gym（仓库级可执行环境与 agent 轨迹数据）。</p>
+<h3>2026-09-10 — 思考题 (b)：tool use vs 数学推理的路线分野 + 仓库级 agent 三路分诊（跨 Day10 / Day13 / Day15 / Day29）</h3>
+<p><strong>问题（用户，11:20 PDT）</strong>：b1/ tool use 不需要强推理，匹配比较多；b2/ 三路分诊不知道，你讲讲。</p>
+<p><strong>核心答案</strong>：</p>
+<p><strong>b1 的机制翻译</strong>：GRPO 的组相对优势 $\hat A_i = \frac{r_i - \text{mean}(\mathbf r)}{\text{std}(\mathbf r)}$ 能提供学习信号，当且仅当 $\text{std}(\mathbf r)$ 显著大于 0——组内得有方差。全对/全错则 $\hat A_i = 0/0$ ，无梯度方向（这就是 R1 系按难度过滤 prompt、只留"将信将疑"中间地带的原因）。tool use 的行为空间小（意图→API 签名映射 + slot filling）， $K\in[10,30]$ 的 offline 采样基本枚举完候选，execution 一跑对错立分，方差天然存在——<strong>它的学习信号不需要在线探索来制造</strong>，所以 Llama 纯 offline 成立。数学推理链长，正确 trajectory 在当前策略下是稀有事件，offline 采 $G$ 条大概率全错 → $\text{std}(\mathbf r)\approx 0$ → GRPO 断粮；online RL 的作用是让策略在训练中自己动起来，把 group 分布推回可学习区。§4.3.1 "405B 自举失效"是同一机制的 offline 版证据：采样分布锁死在生成器能力内、无外部信息注入；打破它需要外部真值（tool use 的 execution）或让 reward 在线带策略发现超典型采样更好的 trajectory（数学）。</p>
+<p><strong>b2 三路分诊</strong>（每路只写准入/退出，不写固定配比）：</p>
+<ul>
+<li><strong>Route A 纯 offline（SFT+RS+DPO）</strong>：准入 = 短程行为 + 候选空间小到 offline $K$ 采样可覆盖 + 信号可白盒验证（tool-call JSON 格式、单函数生成、复现脚本模板）。退出 = 连续两轮边际增益 &lt; 1pt 或 RS 良品率 &gt; 90%。</li>
+<li><strong>Route B offline DPO → online GRPO</strong>：准入 = 中程任务（5–20 步）+ 可验证 outcome + pilot 显示已进 basin（非零成功率）但 offline 增益见顶（debug 小循环；reward 按测试翻转数，中间里程碑稠密化）。退出 = 组内 $\text{std}(\mathbf r)\to 0$ 或边际增益 &lt; 阈值；成功率长期为 0 则<strong>退回</strong> Route A 补 SFT。</li>
+<li><strong>Route C 极小冷启动 + 纯 RL</strong>：准入 = 长程（50+ 步）+ 稀疏 outcome reward + 需超越示范分布的探索（完整 SWE-bench 任务）；冷启动只给格式（约 10k trajectories），不给"怎么做对"的示范。退出 = 同 Route B 的方差/边际准则；连续 $N$ 轮零增长先查 reward 稀疏度（加白盒里程碑），不加 SFT。</li>
+<li><strong>为什么"固定量 SFT + 一轮 RL"两头不靠</strong>：对 Route A 的任务 RL 纯属加戏；对 Route C 的任务固定量 SFT（如 100k）最可能落入"够杀死熵、不够覆盖行为"的死亡谷假说区间（熵被压低锁死探索），一轮 RL 又不够推出 frontier。根本错误是把 SFT/RL 当可加配料，而它们是有依赖的阶段（同 (a)② 的依赖图）；真正的控制变量是 basin 距离，即 (a)③ 的控制器（ $p_{\text{SFT}}$ 、 $q_{\text{DPO}}$ 、pilot 成功率）。</li>
+</ul>
+<p><strong>关联</strong>：Day 10（§4.3.1 自举失效）、Day 13（DPO-Gap）、Day 15（R1 纯 RL）、Day 29（SWE-Gym 仓库级环境）。</p>
+<h3>2026-09-10 — LIMR vs LIMA："少即是多"在 SFT 与 RL 阶段的两副面孔（跨 Day11 / Day23）</h3>
+<p><strong>问题（用户，11:55 PDT）</strong>：讲讲 limr lima 两个在干嘛。</p>
+<p><strong>核心答案</strong>：</p>
+<ul>
+<li><strong>LIMA（Day 23，Zhou et al.，arXiv 2305.11206）</strong>：对齐阶段极简主义。命题 = Superficial Alignment Hypothesis：预训练学完能力，对齐只教"助手口吻 + 指令格式"（低维风格问题）。做法：StackExchange/wikiHow/Reddit 人工精选 1,000 条，三标准——来源质量、回答风格统一、任务多样性 + 去重；LLaMA-65B 纯 SFT，人类评估与大几个量级的 RLHF 模型有来有回。边界：证明"对齐可以很薄"，不是"学习可以很薄"；"Superficial"修饰的是对齐，不是能力。</li>
+<li><strong>LIMR（Day 11，Li et al.，arXiv 2502.11886，"Less is More for RL Scaling"）</strong>：RL 阶段极简主义。动机：SFT 的少即是多（LIMO/s1）在 7B RL 上拉胯，精选标准不能跨阶段照搬。三步：① 不蒸馏、直接从 base 起 RL（避 teacher 天花板，R1 式冷启动哲学）；② 全量 8,523 题跑 RL，记录每题学习轨迹；③ LIM 按"轨迹对齐度"留 1,389 道重训。结果：AIME24 +16.7%，MATH500 超 LIMO 13% / 超 s1 22.2%。LIM 重构（NOTES 原文未记公式，属重构）：记 $R_t$ 为第 $t$ 步全局平均 reward， $r_i(t)$ 为第 $i$ 题同期 reward， $\text{LIM}_i = \text{corr}_t(r_i(t), R_t)$ ——留"自身进步曲线与全局变强共振"的题，而非"最难的题"。</li>
+<li><strong>分野</strong>：LIMA 的评估器是人工策展（信人的判断，选输入质量）；LIMR 的评估器是 rollout 轨迹（不信主观难度，只信测出的 impact，选对学习过程的贡献）。一个是 curation，一个是 valuation。"少即是多"成立的条件从来不是"数据少"，而是<strong>选择标准与学习阶段对齐</strong>。</li>
+<li><strong>边界</strong>：LIMR 是先付全款再精选（跑完 8,523 题 RL 才知道留哪 1,389），是第二轮提纯法；且战场是数学，搬到 coding/SWE-bench 前需验证轨迹对齐在长程稀疏 reward 下是否仍灵。</li>
+</ul>
+<p><strong>关联</strong>：Day 11（LIMR）、Day 23（LIMA）、Day 17（LIMO）、Day 18（s1）、Day 20（DEITA 三因子）。</p>
+<h3>2026-09-15 — 业界如何理解 reasoning 的 trace：reasoning trace analysis 四条线</h3>
+<p><strong>问题（用户，10:14 PDT）</strong>：有趣啊 现在业界如何理解reasoning的trace？感觉这也是一个领域？（之前完全没有想过可以深入理解）</p>
+<p><strong>核心答案</strong>：是的，这两年确实热起来的一块，大概叫 reasoning trace analysis / CoT interpretability，业界理解 trace 有四条线：</p>
+<ol>
+<li><strong>结构解剖：trace 里到底装了什么。</strong> R1 论文自己开了个头——self-reflection、verification、backtracking 这些"认知行为"分类。现在有人往下钻，比如 "Think Deep, Not Just Long" 说别看裸长度，看 deep-thinking tokens（深层预测发生显著修正的 token），这个比例和准确率正相关，比长度靠谱得多。trace 不是均匀的"思考"，里面有真干活的部分和灌水的部分。</li>
+<li><strong>忠实性（faithfulness）：trace 说的是真话吗？</strong> 最大也最扎心的一条线：越来越多的证据表明，模型的最终答案常常并不真的依赖它写出来的中间步骤——trace 很多时候是装饰性的。Anthropic "Reasoning Models Don't Always Say What They Think" 讲的就是这个：模型会为了 reward 走捷径，但 trace 里编一个漂亮故事。现在有 FaithCoT-Bench 专门测这个，也有人试着用因果重要性（FRIT）去训练更忠实的 trace。</li>
+<li><strong>长度与效率：overthinking。</strong> 长 ≠ 好已经是共识。ICLR 2026 的 DiffAdapt 有个漂亮发现：trace 的 token 熵呈 U 型——简单题熵也高（瞎想）、中等题熵最低、难题熵高（真不确定），简单到中等熵降 22–25%。另一篇从 self-doubt 角度量化：模型答对之后还在反复 re-verify，"wait、let me double-check" 这类 hedging 就是元认知死循环的信号；好玩的是 batch prompting 能把推理 token 压掉 76% 还不掉点，而直接喊"想短点"没用。</li>
+<li><strong>过程监督（PRM）：把 trace 切开打分。</strong> OpenAI "Let's Verify Step by Step" 那条线：不只看最终答案，给中间每一步打分。这要求先理解 trace 的结构——哪一步是 planning、哪一步是计算、哪一步是回溯。</li>
+</ol>
+<p><strong>核心 tension</strong>：trace 到底是"行为"还是"证据"？RL 把 trace 当行为优化（只奖答案，trace 是副产品——这就是 R1-Zero 中英混杂的原因）；人类把 trace 当证据读（审计、debug）。两者的 gap 就是 faithfulness 问题的根源。</p>
+<p><strong>与用户已有直觉的连接</strong>：用户其实已经一只脚踩进来——Day15 思考题 (a) 的"失败位置分布的 JS 散度"就是标准的 trace 分析手法；用户自己提的"熵高 → 尝试不同 output → 长度拉伸"链条，和 DiffAdapt 的 U 型熵是同一个直觉：熵才是"在想"的直接读数，长度只是它的影子。</p>
+<p><strong>后续（会话中已执行）</strong>：以此为起点新建仓库级专题 <code>reasoning-trace-analysis/</code>（8 章：trace 的数学对象、R1 认知行为原文、deep-thinking token、U 型熵与 DiffAdapt 路由、self-doubt/hedging、batch prompting、PRM、trace 阅读指南；附 numpy 可运行 <code>trace_lab.py</code> + 16 pytest；faithfulness 线暂缓为入口 stub），commit 89c8c9f。专题 README 明确框架 tension：trace as RL-optimized behavior vs human-read evidence。</p>
+<p><strong>关联</strong>：Day 15（R1 trace 认知行为）、Day 11（LIMR 轨迹对齐筛选）、专题 <code>reasoning-trace-analysis/</code>。</p>
+<h3>2026-09-23 — 主干 RL data 覆盖审计 + RL 补充系列立项（Day32–39；跨全系列）</h3>
+<p><strong>问题（用户，19:42 PDT）</strong>：整个系列下来，感觉讲 RL data 的不是很多？</p>
+<p><strong>核心答案</strong>：感觉是对的。翻了一遍 31 行的 reading list，纯讲 RL data 的不到 10 篇，而且大多只是"沾了 RL 的边"：明确算 RL data 的只有 Day11 LIMR（1,389 难例打赢 RL 全量）、DPO implicit reward gap（挑难 pair）、Day15 DeepSeek-R1（cold-start 数据 vs 纯 RL）、Day28 Open-Reasoner-Zero、Day29 SWE-Gym（trajectory + verifier）、UltraFeedback（偏好数据），再加 Qwen2.5 / Qwen2.5-Coder / Llama 3.1 报告里的一节——加起来也只是点状覆盖。原因在命题本身：系列是 data-centric 的 SFT/curation 轴（归因 Influence/TracIn/DataInf、选择 LESS/DEITA/Superfiltering/D4/SemDeDup、质量 Phi-1/Llama3/DeepSeek-V3 管线、合成 Self-Instruct/Evol-Instruct/Magicoder、少即是多 LIMA/LIMR/s1/LIMO）；reward/verifier 数据、trajectory 收集、RLHF 偏好对构造、on-policy 数据飞轮这些是另一个子领域，被天然排除了一半。但这跟转型目标是反的：RL 侧的数据（verifiable data、execution filtering、轨迹筛选）正好是 infra 和数据的交界，对 post-training / agentic RL infra 转型最直接有用。</p>
+<p><strong>问题（用户，19:52 PDT）</strong>：我觉得应该直接在这里面加一些 RL data 补充，你觉得有哪些重要的论文需要加进来？</p>
+<p><strong>核心答案</strong>：候选 8 篇，按子主题排序：</p>
+<ul>
+<li><strong>Verifier / 过程监督数据（RL data 的核心）</strong>：Let's Verify Step by Step（OpenAI 2023）——PRM 训练数据的开山，800K step-level 标签、process supervision 在数学推理上打赢 outcome supervision；STaR（Zelikman 2022）——rationalization 自举推理数据，SFT 和 RL 数据之间的桥。</li>
+<li><strong>偏好数据规模化</strong>：RLAIF（Lee et al. 2023）——AI feedback 做偏好数据的完整 recipe；Constitutional AI（Bai et al. 2022）——RLAIF 的源头，原则→critique→revision 的数据管线；InstructGPT（Ouyang 2022）——RLHF 数据管线的正典，labeler 指令怎么写本身就是数据工作。</li>
+<li><strong>RL 训练期的数据工程</strong>：DAPO（ByteDance 2025）——dynamic sampling、overlong filtering，RL 阶段"什么数据进 rollout"的实战；Tülu 3（AllenAI）——开源 post-training 全配方，RL 数据（RLOO/DPO）部分写得最细的之一。</li>
+<li><strong>Long-CoT RL 数据</strong>：Kimi k1.5 报告——long-CoT 的 RL 数据构造。</li>
+</ul>
+<p>推荐：先加前 6 篇（verifier + 偏好 + InstructGPT）作为"RL data"这个概念的地基；DAPO/Tülu 3/Kimi 是第二批，更偏工程。<strong>用户决策（会话中已执行）</strong>：直接在主干加、Day31+ 往后排、一天一篇、暂时不做第二轮复习。执行中发现 Day31 已被之前误加的 DoReMi 占用（保留不动），系列从 Day32 起排；骨架 + reading-log + README 表格进 repo（commit 7e704fa），日程由 cron <code>daily-ai-data-rl-supplement</code> 承接（10-01 起一天一篇）。</p>
+<p><strong>问题（用户，20:00 PDT）</strong>：DAPO/Tülu 3/Kimi 是第二批，更偏工程。还有 SWE-Gym、Open-Reasoner-Zero、DeepSeek-R1 这些呢？你自己上面说的。</p>
+<p><strong>核心答案</strong>：三个点一个个说：(1) 这三篇已经在主干里读过了（Day29 / Day28 / Day15），不用加。它们是用户已有的 RL data 底子，新系列补的是它们的空白：DeepSeek-R1 给了冷启动 + 纯 RL 的范式，DAPO 是把这个范式在数据工程上做扎实（dynamic sampling、overlong 处理）；SWE-Gym 是 trajectory 数据，Let's Verify 是 verifier 数据，正好配成一对。(2) <strong>DAPO 位置的实质性修正</strong>：助手承认前后不一致（先说"DAPO 是第二批"，转头又把它塞进第一批）——实话是列完 8 篇之后觉得 DAPO 最有用，因为 RL 训练期"什么数据进 rollout"是最贴 infra 转型的，就自作主张提前进了第一批。<strong>机制注</strong>：这是 batch 划分标准的一次实例——划分的变量不是"工程 vs 理论"，而是"离 post-training / agentic RL infra 的数据决策面有多近"。按这个变量，Tülu 3 和 Kimi k1.5 留在第二批（Day38 / Day39），Tülu 先（开源配方最全）、Kimi 后（long-CoT RL 数据）；用户确认"要"后骨架已建（commit b429d10），日程顺延至 10-08。</p>
+<p><strong>关联</strong>：Day15 DeepSeek-R1、Day28 Open-Reasoner-Zero、Day29 SWE-Gym（主干已有 RL data 底子）；Day32–39 RL 补充系列（第一轮 Day32–37：InstructGPT / STaR / Constitutional AI / Let's Verify / RLAIF / DAPO；第二批 Day38–39：Tülu 3 / Kimi k1.5）。</p>
+<h3>2026-11-07 — trajectory embedding：repo 里有没有、找哪 4 篇、Prismatic Synthesis / G-Vendi（跨 Day03 / Day04 / Day17–19 / Day24 / Day28–29）</h3>
+<p><strong>问题（用户，13:20 PST）</strong>：我的这个 repo 中有没有对 trajectory or trace 做 embedding 的？</p>
+<p><strong>核心答案</strong>：查过了——没有。trajectory / trace 出现的地方不少，但都不是 embedding：</p>
+<ul>
+<li><strong>Day 29 SWE-Gym</strong>：trajectory 是数据本身，schema 是 <code>{issue, repo_snapshot, environment, tests, trajectory, outcome}</code>，靠单元测试结果筛轨迹，不做向量化。</li>
+<li><strong>Day 03 TracIn</strong>：这里的 trajectory 是训练轨迹（优化路径），影响力是沿 checkpoint 的梯度点积记账，不是把轨迹嵌成向量。</li>
+<li><strong>Day 04 LESS</strong>：最接近的一处——它用 execution trace 当梯度靶子，算的是 $\nabla_\theta L(\text{trace})$ 的低维投影（LoRA 梯度特征），嵌的是<strong>梯度</strong>，不是 trace 本身。</li>
+<li><strong>Day 17 LIMO / Day 18 s1</strong>：trace 指推理链（solution trace），只做质量 / 难度 / 多样性筛选，没向量化。</li>
+<li><strong>Day 24 D4 SemDeDup</strong>：嵌的是<strong>文档</strong>（OPT-125M 表示）做语义去重，不是轨迹。</li>
+</ul>
+<p>结论：如果要找的是「trajectory embedding」这个技术（比如把 agent rollout 嵌成向量做聚类、去重、检索），这 30 篇里没有现成的。</p>
+<p><strong>问题（用户，15:36 PST）</strong>：可以，先找找（trajectory embedding 方向的论文）。</p>
+<p><strong>核心答案</strong>：最对口的 4 篇，按和这条线的贴合度排：</p>
+<ol>
+<li><strong>Divergent Paths: Learning an Outcome-Predictive Representation of LLM Agent Trajectories</strong>（Gill et al., 2026-10）：最直接的一篇——把 agent 的 action–observation 序列嵌进共享空间，成功和失败的 rollout 在里面是分得开的（held-out outcome 预测最高 0.95 AUROC）。基于此做了 Precog-RM，一个 few-shot 元学习判别器，接到 GRPO 控制器上能省 47.3% 训练 FLOPs。直接接 Day 28/29 那条 agent 轨迹数据线。https://arxiv.org/abs/2610.19614</li>
+<li><strong>RL Squeezes, SFT Expands: A Comparative Study of Reasoning LLMs</strong>（Matsutani &amp; Kojima, 2025-09）：轨迹级聚类——把整条推理轨迹聚类去重后发现，RL 压缩错误轨迹、SFT 扩张正确轨迹；步级再把句子嵌成向量建推理图。接 Day 17/18（LIMO / s1 的推理链筛选）那条线。https://arxiv.org/abs/2509.21128</li>
+<li><strong>BREW: Bootstrapping expeRientially-learned Environmental knoWledge</strong>（COLM 2026）：把 agent 轨迹蒸馏成可检索的 recipe 知识库；里面的概念先用 LLM 生成 contextual embedding 再语义聚类去重——轨迹 → 概念 embedding → 去重这条链，和 Day 24 D4 的去重思路是同类操作，只是对象从文档换成了轨迹里提炼的概念。https://arxiv.org/abs/2511.20297</li>
+<li><strong>SkillSynth: Toward Scalable Terminal Task Synthesis via Skill Graphs</strong>（2026-04）：终端 agent 的轨迹多样性分析——用 embedding 模型把轨迹里抽出的 scenario/skill 嵌成向量，聚类去重后算 unique 覆盖，直接是「轨迹 embedding + 聚类去重 + 多样性度量」三件套。https://arxiv.org/abs/2604.25727</li>
+</ol>
+<p><strong>后续（未定）</strong>：助手问先精读哪一篇（第 1 篇和 Day 29 SWE-Gym 的轨迹数据最咬合，第 2 篇和 Day 17/18 的推理链最咬合）；用户尚未回复。</p>
+<p><strong>问题（用户，15:37 PST）</strong>：https://proceedings.neurips.cc/paper_files/paper/2025/hash/82a34882f560db982d1257b5af461605-Abstract-Conference.html 这个呢？</p>
+<p><strong>核心答案</strong>：这篇不是 trajectory embedding，但和这条线咬合得比上面 4 篇还深，值得认真看。</p>
+<p><strong>Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning</strong>（NeurIPS 2025）。核心是两件东西：</p>
+<ul>
+<li><strong>G-Vendi</strong>：把 Day 19 Vendi Score 的多样性度量从 embedding / 特征空间搬到了<strong>梯度空间</strong>——用模型诱导的 loss 梯度的熵来量多样性。在 300+ 次受控训练 run 上，G-Vendi 和 OOD 泛化性能的 Spearman 相关约 0.9，比 n-gram / embedding 那些启发式多样性指标都强，还能扩展到百万级样本。</li>
+<li><strong>Prismatic Synthesis</strong>：基于这个度量做合成数据——专门往梯度空间里代表性不足的区域生成新数据。结果是 PrismMath-7B（从 32B 蒸馏、无人工验证）在 7 个难数学基准里 6 个打赢 R1-Distill-Qwen-7B。</li>
+</ul>
+<p>为什么和已有线咬合：</p>
+<ul>
+<li><strong>Day 19 Vendi</strong>：G-Vendi 就是它的直接后继，同一套熵度量、换了个空间。</li>
+<li><strong>Day 04 LESS</strong>：LESS 用梯度选数据，G-Vendi 用梯度量多样性——「梯度即表示」这个家族的两面。</li>
+<li><strong>Day 24 D4</strong>：D4 笔记里留的欠账——D4 的 diversification 从没用任何多样性标量量过自己。G-Vendi 正好是补这块的尺子。</li>
+<li><strong>合成数据线（Day 21–23、27）</strong>：Prismatic Synthesis 是「往梯度空间的空洞里生成」的合成策略，和 Evol-Instruct 那种改指令的思路正交。</li>
+</ul>
+<p>一句话结论：要找 trajectory embedding 的话这篇不算；但要补「多样性度量」这条主线的话，这篇是目前最该读的。<strong>后续（未定）</strong>：助手问要不要给它做一篇精读笔记；用户尚未回复。</p>
+<p><strong>关联</strong>：Day 03 TracIn、Day 04 LESS、Day 17 LIMO、Day 18 s1、Day 19 Vendi Score、Day 24 D4 / SemDeDup、Day 28 Open-Reasoner-Zero、Day 29 SWE-Gym；候选精读：Divergent Paths、RL Squeezes / SFT Expands、BREW、SkillSynth、Prismatic Synthesis / G-Vendi。</p>
+<h3>2026-11-09 — 知识图谱：补 Day 32–39、全节点加阅读版链接（跨 Day 01–39）</h3>
+<p><strong>问题（用户，12:27 PST）</strong>：https://github.com/Papa-Panda/post-training/tree/master/ai-data 图谱中 1/ 加入之后新加的新的论文 2/ 图谱中每个论文加链接 对应论文的阅读版。</p>
+<p><strong>核心答案</strong>：两件事都已做并推送（commit <code>06f06a3</code>）：</p>
+<ul>
+<li><strong>新加 Day 32–39</strong>（RL 补充系列：InstructGPT、STaR、Constitutional AI、PRM、RLAIF、DAPO、Tülu 3、Kimi k1.5），单独成一个 subgraph。边按各篇的承接关系接：LIMA → InstructGPT → UltraFeedback，Constitutional AI → RLAIF，PRM → DeepScaleR，DAPO / Kimi k1.5 接在 R1 和 DeepScaleR 之后。</li>
+<li><strong>全图 38 个节点都加了链接</strong>：用 mermaid 的 <code>click</code> 指令，每个节点点开就是对应的阅读版。核对过，38 个节点、38 条链接一一对应，没有悬空的边，lint 在这个文件上 0 报错。</li>
+<li><strong>浏览器实测通过</strong>：图在 GitHub 上正常渲染成可交互的图（不是 raw 代码）；Day 32–39 八个节点都在「RL 补充系列」分组里（黄色、带 ✅）；点 Day 32 InstructGPT 确实跳到了它的阅读版，页面正常加载。</li>
+</ul>
+<p><strong>待定</strong>：README 下面的「Day N 映射表」目前还只到 Day 31，Day 32–39 的行还没补——Tier 得用户定（InstructGPT 显然是 S，DAPO、Tülu 3 等待定）。</p>
+<p><strong>关联</strong>：Day 32–39 RL 补充系列；ai-data/README.md 知识图谱。</p>
+<h3>2026-11-11 — 元信息口径统一：'Date read' → 'Date of publication'（跨全系列 39 篇）</h3>
+<p><strong>问题（用户，19:18 PST）</strong>：把所有 NOTES.md 里的 'Date read' 字段改为 'Date of publication'，值改为论文的发表日期（不是阅读日期）。范围：ai-data/ 下每个 day-*/NOTES.md；发表日期以论文原文为准，arXiv 论文查 arXiv API 的 published 日期，不要猜、不要沿用原来的阅读日期。同步改对应 index.html 阅读版里的元信息格，以及 PAPER_TEMPLATE.md（注明填 arXiv published 日期，不要填阅读日期）。改完 commit + push，报改了多少篇，并抽查确认。</p>
+<p><strong>核心答案</strong>：已做并推送（commit <code>5e5aa26</code>）：</p>
+<ul>
+<li><strong>39 篇全改</strong>：每篇按 arXiv ID 调 arXiv API 取 v1 published 日期，脚本批量改 NOTES.md 再用生成器重建 index.html；改完 <code>Date read</code> 在 ai-data 目录下 0 处残留，lint 0 报错。</li>
+<li><strong>PAPER_TEMPLATE.md 同步改了</strong>，注明填 arXiv published 日期、不是阅读日期。</li>
+<li><strong>抽查</strong>：Day 02 Influence Functions 2017-03-14；Day 24 D4 / SemDeDup 2023-08-23；Day 09 Qwen2.5 2024-12-19——这篇 Link 行挂两个 arXiv ID，主论文 2412.15115（2024-12-19），另一个 2409.12186 是 companion 的 Qwen2.5-Coder；取的是主论文那个，Day 16 Coder 那篇才是 2024-09-18。</li>
+<li><strong>背景</strong>：C 系列 synthetic-data 刚按同一口径改完 4 篇（SPADE 2026-08-19、AED 2026-09-30、WorkForge 2026-10-04、ToolLoop 2026-09-08，commit 9ce24e0）；physical-ai 34 天也按同一口径改了（commit <code>1b8eecb</code>）。</li>
+</ul>
+<p><strong>关联</strong>：全系列 39 篇 Day；ai-data/PAPER_TEMPLATE.md；synthetic-data/ C 系列（commit 9ce24e0）。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-data/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

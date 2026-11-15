@@ -1,4 +1,6 @@
 # 知识图谱（Roadmap）
+> 📖 阅读版：https://papa-panda.github.io/post-training/experiments/ROADMAP.reading.html
+
 
 > 每条 claim 必须挂到这张图的一个节点上（模板里的"知识图谱节点"字段）。
 > 图的用途就两个：看到哪里是**空白**（该去找 claim 的地方），

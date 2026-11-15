@@ -1,4 +1,6 @@
 # 02 — Continuous batching and KV-cache capacity
+> 📖 阅读版：https://papa-panda.github.io/post-training/vllm-rollout/02_rollout_config.reading.html
+
 
 ## 1. Prefill and decode are different resources
 

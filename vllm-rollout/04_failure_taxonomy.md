@@ -1,4 +1,6 @@
 # 04 — Failure taxonomy and response
+> 📖 阅读版：https://papa-panda.github.io/post-training/vllm-rollout/04_failure_taxonomy.reading.html
+
 
 A useful taxonomy is mutually exclusive at the **attempt** level, while preserving contributing signals. Do not call every dropped trajectory an engine failure.
 

@@ -1,4 +1,6 @@
 # 01 — Cognitive Behaviors: R1 论文里到底写了什么
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/01_cognitive_behaviors.reading.html
+
 
 > "结构解剖"的起点。DeepSeek-R1 论文确实描述了 trace 里的"认知行为"，但它的用词比二手转述更克制。本章只引用论文原文，不发明分类名。
 >

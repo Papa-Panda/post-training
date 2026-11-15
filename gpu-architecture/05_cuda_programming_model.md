@@ -1,4 +1,6 @@
 # 05 — CUDA 编程模型：Groups、Streams 与依赖关系
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/05_cuda_programming_model.reading.html
+
 
 ## 1. Kernel launch 是异步工作提交
 

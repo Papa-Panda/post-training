@@ -1,6 +1,8 @@
 > Connection to Prev: r2-Day01 Transformer 架构 → r2-Day02 PyTorch 基础: 懂了Decoder Block的维度(B,S,D)后需要用PyTorch把它写成可跑的train loop才能验证；Day01的白板公式在今天用Tensor/autograd落地。
 
 # r2-Day02 - PyTorch 基础（第二轮 Day2）
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-02-pytorch-loop/README.reading.html
+
 
 ## 昨日复盘
 r2-Day01 Transformer 白板：Self-Attention QKV O(N²) / FFN 2048升维 / RoPE / Pre-Norm，7B 32层手算总参≈6.7B误差<20%，白板可默写Decoder Block。

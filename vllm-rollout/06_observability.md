@@ -1,4 +1,6 @@
 # 06 — Observability and evidence
+> 📖 阅读版：https://papa-panda.github.io/post-training/vllm-rollout/06_observability.reading.html
+
 
 ## 1. Four correlated layers
 

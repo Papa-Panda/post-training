@@ -1,4 +1,6 @@
 # bench-efficiency — 用 1% 的题拿到 99% 的排序信号
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-bench-efficiency/README.reading.html
+
 
 > 为什么关心：post-training / agentic RL 每天都要跑 eval，全量 28k 题太贵。**eval 压缩**的另一种含义：不压上下文，压**评测集本身**。1% 子集 ≈ 99% 排序保真，就可以做每日回归。
 

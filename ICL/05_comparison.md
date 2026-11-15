@@ -1,4 +1,6 @@
 # 05 三条解释线：统一坐标系，而非单一路径
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/05_comparison.reading.html
+
 
 [← 04 Circuit](04_line_III_circuit.md) · [下一章：Trajectory error →](06_trajectory_error_prompt.md)
 

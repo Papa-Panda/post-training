@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 — 统一问题：Value × Coverage × Safety</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Model-Aware Data Curation</span>
+    <h1>01 — 统一问题：Value × Coverage × Safety</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. 从静态过滤到模型闭环</a><a href="#sec-3">2. 三个不可互相替代的目标</a><a href="#sec-4">3. 不是简单加权平均</a><a href="#sec-5">4. Pareto front 比单一总分更稳</a><a href="#sec-6">5. 假设与失效模式</a><a href="#sec-7">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>内容类型</dt><dd>跨论文方法论综合，不对应单篇论文</dd><dt>核心来源</dt><dd><a href="<a href="https://arxiv.org/abs/1703.04730">https://arxiv.org/abs/1703.04730</a>">Influence Functions</a> · <a href="<a href="https://arxiv.org/abs/2002.08484">https://arxiv.org/abs/2002.08484</a>">TracIn</a> · <a href="<a href="https://arxiv.org/abs/2402.04333">https://arxiv.org/abs/2402.04333</a>">LESS</a> · <a href="<a href="https://arxiv.org/abs/2505.20161">https://arxiv.org/abs/2505.20161</a>">Prismatic Synthesis</a></dd><dt>完整论文索引</dt><dd><a href="papers.md">papers.md</a></dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. 从静态过滤到模型闭环</h2>
+<p>这章不是在讲一篇论文，而是在建立一个<strong>统一数学框架</strong>。核心是：数据价值不是固定的，而取决于“当前模型缺什么”。</p>
+<p>传统 data curation 给每条样本一个与模型弱相关的静态分数：规则质量、长度、语言、去重距离。Model-aware curation 则显式依赖当前模型状态 $\theta_t$ ：</p>
+<p>$$\mathcal D_{t+1}=\mathrm{Curate}(\mathcal P_t,\theta_t,V_t,B), \qquad \theta_{t+1}=\mathrm{Train}(\theta_t,\mathcal D_{t+1}),$$</p>
+<p>其中 $\mathcal P_t$ 是候选池， $V_t$ 是目标/保护验证集， $B$ 是训练预算。因为 $\theta$ 在变，数据价值也会变；因此这不是一次性 ETL，而是控制回路：从候选池中，结合当前模型、验证目标和预算，选出下一轮训练集；训练后得到新模型，再重新选数据，形成闭环。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. 三个不可互相替代的目标</h2>
+<p>对样本 $z$ 计算低维梯度表征 $\tilde g_z\in\mathbb R^d$ ，定义：</p>
+<h3>Target value：能否推动目标能力</h3>
+<p>$$v(z)=\cos(\tilde g_z,\bar g_{V^+}), \qquad \bar g_{V^+}=\frac1{|V^+|}\sum_{v\in V^+}\tilde g_v.$$</p>
+<p>如果样本 $z$ 的梯度与目标验证集梯度同向，训练它大概率能改善目标能力。</p>
+<h3>Coverage gain：是否补了新方向</h3>
+<p>若已选集合为 $S$ ，可用谱熵增益：</p>
+<p>$$c(z\mid S)=\log \mathrm{GV}(S\cup\{z\})- \log \mathrm{GV}(S).$$</p>
+<p>它问的不是“样本新不新”，而是“是否带来了当前数据集没有覆盖的新梯度方向”。</p>
+<h3>Safety / retention：是否与保护能力冲突</h3>
+<p>$$r(z)=\max\left(0,-\cos(\tilde g_z,\bar g_{V^-})\right),$$</p>
+<p>$V^-$ 代表要保留的一般能力、格式约束或安全行为。负余弦表示一步更新可能增加保护集损失。如果新样本梯度与旧能力保护集反向，训练它可能导致遗忘，因此施加惩罚。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. 不是简单加权平均</h2>
+<p>一个可部署的选择形式是带约束的预算优化：在预算内最大化 <strong>目标收益 + 梯度覆盖</strong>，同时要求平均遗忘风险不超过 $\epsilon$ ，并且每条样本必须通过正确性、执行和污染检查：</p>
+<p>$$\max_{S\subseteq\mathcal P,\ |S|\le B} \sum_{z\in S}v(z)+\lambda\log\mathrm{GV}(S) \quad\text{s.t.}\quad \frac1{|S|}\sum_{z\in S}r(z)\le\epsilon, \quad q(z)=1.$$</p>
+<p>$q(z)$ 是 correctness / execution / contamination gate。它必须在梯度目标之外：一个错误答案可能有很大梯度、很高新颖度，却仍然不该进训练集。</p>
+<p>拿 coding data 举例： $V^+$ 是模型经常失败的动态规划题， $V^-$ 是原本会做的通用代码题；我们要选出既能修复动态规划短板、又覆盖新算法方向、还不会破坏已有能力的正确样本。整章本质上是：<strong>选有用的、补缺的、且不会添乱的数据。</strong></p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. Pareto front 比单一总分更稳</h2>
+<p>保留三维向量：</p>
+<p>$$\mathbf s(z)=(v(z),\ c(z\mid S),\ -r(z)).$$</p>
+<p>先剔除被 Pareto 支配的候选，再按当前阶段调度：</p>
+<ul>
+<li>冷启动：coverage 权重大；</li>
+<li>定向修能力：target value 权重大；</li>
+<li>连续更新：retention 约束更严；</li>
+<li>RL 中后期：必须随 $\theta_t$ 重算，避免旧分数过期。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. 假设与失效模式</h2>
+<ol>
+<li><strong>代理模型一致性</strong>：小模型的梯度几何需能迁移到目标模型；必须抽样做 rank-correlation 校准。</li>
+<li><strong>验证集代表性</strong>：target alignment 只能优化 $V^+$ 表示的目标，窄验证集会产生“朝 benchmark 过拟合”。</li>
+<li><strong>梯度可比性</strong>：长度、loss reduction、layer choice、optimizer preconditioning 都会改变方向；需固定协议。</li>
+<li><strong>相关不等于因果</strong>：G-Vendi 与 OOD 的高相关来自受控实验，不替代 train-on-subset 验证。</li>
+<li><strong>非平稳性</strong>：RL policy 或持续学习状态变化后，旧 datastore 需刷新。</li>
+</ol>
+<p>下一步：<a href="02_attribution_to_targeting.md"><code>02_attribution_to_targeting.md</code></a> 将这些量连接到具体方法；<a href="06_system_architecture.md"><code>06_system_architecture.md</code></a> 给出工程实现。</p>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>导航</h2>
+<ul>
+<li>上一篇：<a href="README.md">目录</a></li>
+<li>下一篇：<a href="02_attribution_to_targeting.md">02 归因到目标化</a></li>
+<li>回到：<a href="README.md">目录 README</a> | <a href="papers.md">论文证据</a> | <a href="README.md#路线图">路线图</a></li>
+</ul>
+<blockquote class="pq">
+<p>串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/model-aware-data-curation/01_problem_formulation.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

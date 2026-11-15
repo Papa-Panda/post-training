@@ -1,4 +1,6 @@
 # 10 — RICo：用 ICL 干预近似训练数据价值
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/10_rico_icl_valuation.reading.html
+
 
 ## 元信息
 - Paper: [RICo: Refined In-Context Contribution for Automatic Instruction-Tuning Data Selection](https://arxiv.org/abs/2505.05327)

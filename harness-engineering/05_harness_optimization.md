@@ -1,4 +1,6 @@
 # 05 — Harness Optimization：Context、Workflow、Code 三层搜索
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/05_harness_optimization.reading.html
+
 
 ## 元信息
 

@@ -1,4 +1,6 @@
 # 08 ICL 的系统成本与评测协议
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/08_systems_and_evaluation.reading.html
+
 
 [← 07 Coding data](07_coding_data.md) · [回到 README](README.md) · [证据账本](references.md)
 

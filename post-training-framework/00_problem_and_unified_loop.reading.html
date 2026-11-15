@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>00 — Problem and Unified Loop</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Post-Training Framework</span>
+    <h1>00 — Problem and Unified Loop</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. The framework's real optimization object</a><a href="#sec-2">2. Token-level record</a><a href="#sec-3">3. Four policies that are often conflated</a><a href="#sec-4">4. Unified six-stage transition</a><a href="#sec-5">5. State-machine view</a><a href="#sec-6">6. Core invariants</a><a href="#sec-7">7. Three clocks</a><a href="#sec-8">8. Evaluation is part of the loop</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>1. The framework's real optimization object</h2>
+<p>Let $x\sim\mathcal D$ be a prompt plus environment initial state. A behavior policy with immutable publication version $b$ generates a trajectory</p>
+<p>$$\tau=(x,o_0,a_0,o_1,a_1,\ldots,o_T),\qquad \tau\sim\pi_b(\tau\mid x,h_b,e_b).$$</p>
+<p>Here $h_b$ identifies the harness/context contract and $e_b$ the environment contract. A text-only completion is the special case in which observations are token prefixes and actions are generated tokens. An agent trajectory may additionally contain tool calls, compiler output, web observations, retries, and explicit termination events.</p>
+<p>The intended objective is an expected return under the current policy:</p>
+<p>$$J(\theta)=\mathbb E_{x\sim\mathcal D,\,\tau\sim\pi_\theta}[R(\tau,x)].$$</p>
+<p>The system rarely evaluates that expectation directly. It samples with a behavior policy $\pi_b$ , scores the trajectory, constructs advantages, and updates learner version $k$ . Therefore the actual framework problem is to preserve the estimator's data contract while scheduling expensive, stateful components.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Token-level record</h2>
+<p>For a generated action token $y_t$ , define:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$m_t\in\{0,1\}$</td>
+<td>action mask; \$1\$ only where policy loss is allowed</td>
+</tr>
+<tr>
+<td>$\ell_t^b=\log\pi_b(y_t\mid s_t)$</td>
+<td>behavior log-probability captured for the sampled token</td>
+</tr>
+<tr>
+<td>$\ell_t^k=\log\pi_k(y_t\mid s_t)$</td>
+<td>learner-policy log-probability recomputed at update time</td>
+</tr>
+<tr>
+<td>$\ell_t^{\rm ref}$</td>
+<td>frozen reference-policy log-probability, if a KL term uses one</td>
+</tr>
+<tr>
+<td>$A_t$</td>
+<td>token- or trajectory-level advantage assigned to this token</td>
+</tr>
+<tr>
+<td>$v_t$</td>
+<td>optional critic estimate</td>
+</tr>
+</tbody>
+</table>
+<p>Let $\mathcal A(\tau)$ contain every stochastic policy-generated action in the trajectory. The loss mask selects $M(\tau)=\{t\in\mathcal A(\tau):m_t=1\}$ ; therefore $M(\tau)$ may be a strict subset of the actions needed for an exact trajectory density ratio.</p>
+<p>A token-level current-to-behavior importance ratio is</p>
+<p>$$r_t(k,b)=\exp(\ell_t^k-\ell_t^b).$$</p>
+<p>In the synchronous PPO case where $\pi_b=\pi_{\rm old}$ , the proximal ratio equals this behavior ratio and one common policy term is</p>
+<p>$$L_{\rm clip}=\mathbb E_t\left[m_t\min\left(r_tA_t,\,\mathrm{clip}(r_t,1-\epsilon,1+\epsilon)A_t\right)\right].$$</p>
+<p>When $\pi_b\ne\pi_{\rm old}$ , these roles must not be conflated: behavior correction uses $\pi_{\rm old}/\pi_b$ , while proximal clipping is centered on $\pi_k/\pi_{\rm old}$ . How those factors are truncated or combined is algorithm-specific; simply clipping $\pi_k/\pi_b$ around one is not standard PPO.</p>
+<p>This chapter does not rederive PPO or GRPO. Those derivations live in <a href="../grpo-vs-ppo/README.md"><code>grpo-vs-ppo/</code></a>. The systems point is that every denominator must name the concrete distribution it represents. A field named <code>old_logprob</code> is not sufficient unless its provenance is clear.</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. Four policies that are often conflated</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Role</th>
+<th>Lifecycle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>behavior policy $\pi_b$</td>
+<td>sampled the recorded action</td>
+<td>immutable provenance per action segment; one trajectory may have several segments</td>
+</tr>
+<tr>
+<td>learner/current policy $\pi_k$</td>
+<td>receives gradients now</td>
+<td>changes after optimizer updates</td>
+</tr>
+<tr>
+<td>old/update policy $\pi_{\rm old}$</td>
+<td>denominator for a chosen update epoch</td>
+<td>often a snapshot, not necessarily the rollout policy in async systems</td>
+</tr>
+<tr>
+<td>reference policy $\pi_{\rm ref}$</td>
+<td>anchors KL or preference objective</td>
+<td>usually frozen or updated on a slower schedule</td>
+</tr>
+</tbody>
+</table>
+<p>In a strictly synchronous one-update loop, $\pi_b=\pi_{\rm old}$ at batch construction, so code can hide the distinction. In asynchronous execution, $b&lt;k$ is normal, and $\pi_b$ , $\pi_{\rm old}$ , and $\pi_k$ can all differ. A robust schema names each explicitly.</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. Unified six-stage transition</h2>
+<h3>Stage A — sample prompts</h3>
+<p>The sampler selects prompts, group IDs, seeds, difficulty bands, and environment versions. A curriculum is part of the data distribution and must be versioned.</p>
+<h3>Stage B — generate trajectories</h3>
+<p>Rollout workers load published policy $b$ , then generate tokens/actions. Every trajectory is sealed with tokenizer, decoding, harness, and environment identities plus one or more behavior-policy segments. A segment records its action interval, concrete weight identity, and token-aligned behavior log-probabilities.</p>
+<h3>Stage C — score and validate</h3>
+<p>A rule verifier, reward model, process reward model, environment, or combination produces raw evidence and normalized rewards. Invalid executions are not silently converted to low reward; they retain a failure reason.</p>
+<h3>Stage D — estimate advantages</h3>
+<p>The framework computes returns, critic targets, group-relative baselines, or leave-one-out baselines. This step defines which records must remain together.</p>
+<h3>Stage E — update</h3>
+<p>The learner creates mini-batches and micro-batches, recomputes current-policy log-probabilities, applies the chosen correction/clipping, accumulates gradients, and steps the optimizer.</p>
+<h3>Stage F — publish and evaluate</h3>
+<p>A successfully committed learner checkpoint becomes publication version $k+1$ . Rollout workers switch only after loading and acknowledging that version. Held-out evaluation observes both capability and system correctness.</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. State-machine view</h2>
+<p>A trajectory should move monotonically through explicit states:</p>
+<pre><code class="language-text">reserved -&gt; generating -&gt; sealed -&gt; scored -&gt; eligible -&gt; leased
+         -&gt; consumed
+         -&gt; rejected(reason)
+         -&gt; expired(reason)
+</code></pre>
+<p><code>sealed</code> means generation can no longer append tokens. <code>eligible</code> means all required fields, versions, and masks passed validation. <code>leased</code> prevents duplicate concurrent consumption. A lease timeout permits recovery after trainer failure without pretending the first attempt never happened.</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. Core invariants</h2>
+<h3>I1 — provenance completeness</h3>
+<p>For every sampled action token:</p>
+<p>$$m_t=1\Longrightarrow(b,\ell_t^b,\text{tokenizer},\text{decoding},\text{mask contract})\text{ are known}.$$</p>
+<h3>I2 — trajectory immutability</h3>
+<p>After sealing, content-addressed trajectory bytes and provenance do not change. Derived fields can be attached as separately versioned records.</p>
+<h3>I3 — estimator eligibility</h3>
+<p>Before learner version $k$ consumes a sample, it evaluates</p>
+<p>$$\mathrm{eligible}(\tau,k)=\mathrm{schema\_ok}\land\mathrm{reward\_ok}\land\mathrm{freshness\_ok}\land\mathrm{ratio\_ok}.$$</p>
+<p>Version lag is only one input to <code>freshness_ok</code>; measured ratios and task-specific validation remain necessary.</p>
+<h3>I4 — exact-once accounting</h3>
+<p>A trajectory may be retried operationally, but an update manifest records whether it contributed zero or one weighted contribution to a particular optimizer step.</p>
+<h3>I5 — publication atomicity</h3>
+<p>A policy version is visible to rollout only when all required shards and metadata belong to the same committed checkpoint. Mixed-generation shards are invalid.</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. Three clocks</h2>
+<p>Framework bugs often come from assuming one global step. Keep three clocks:</p>
+<ol>
+<li><strong>generation clock:</strong> rollout reservations and completions;</li>
+<li><strong>learner clock:</strong> optimizer updates $k$ ;</li>
+<li><strong>publication clock:</strong> versions acknowledged by inference workers.</li>
+</ol>
+<p>The learner can be at update $k=17$ while the latest complete publication is $p=16$ and a slow rollout still uses $b=14$ . That is a normal async state, not necessarily a bug. It becomes a bug when the data contract or configured admission policy cannot describe it.</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>8. Evaluation is part of the loop</h2>
+<p>Training reward is not the final objective. At minimum record:</p>
+<ul>
+<li>held-out task success under a frozen evaluator contract;</li>
+<li>reward/verifier versions and disagreement rates;</li>
+<li>policy KL, entropy, clip fraction, and importance-ratio tails;</li>
+<li>invalid/timeout/tool-error rates by environment version;</li>
+<li>accepted valid tokens per second, not just generated tokens per second;</li>
+<li>duplicate, contamination, and reward-hacking filters.</li>
+</ul>
+<p>A rising training reward with falling held-out success can come from reward exploitation, distribution narrowing, stale corrections, masking errors, or evaluation leakage. A framework must preserve enough evidence to distinguish them.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/post-training-framework/00_problem_and_unified_loop.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

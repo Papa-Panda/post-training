@@ -1,4 +1,6 @@
 # 02 — Agent Runtime Loop：状态、动作、副作用与恢复
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/02_agent_runtime_loop.reading.html
+
 
 ## 元信息
 

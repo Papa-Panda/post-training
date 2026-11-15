@@ -1,4 +1,6 @@
 # 03 — Context 与持久记忆：Compiler、Budget 与 Provenance
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/03_context_and_persistent_memory.reading.html
+
 
 ## 元信息
 

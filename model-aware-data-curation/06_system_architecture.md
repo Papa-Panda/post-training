@@ -1,4 +1,6 @@
 # 06 — 系统架构：Gradient Datastore + Curation Control Plane
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/06_system_architecture.reading.html
+
 
 ## 元信息
 - 内容类型：跨论文系统设计，不对应单篇论文

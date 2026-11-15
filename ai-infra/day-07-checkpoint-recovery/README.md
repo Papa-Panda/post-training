@@ -1,4 +1,6 @@
 # Day 7 - 2026-08-08 - Checkpoint & Recovery
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-07-checkpoint-recovery/README.reading.html
+
 
 **Learning Goal**: 理解大规模训练为什么总要断点续训
 

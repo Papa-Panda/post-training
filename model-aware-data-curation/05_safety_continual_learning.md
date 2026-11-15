@@ -1,4 +1,6 @@
 # 05 — 安全与持续学习：GrADS / OGS
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/05_safety_continual_learning.reading.html
+
 
 ## 元信息
 - 内容类型：双论文对照 + 持续学习综合；用 SPICE 反例澄清 selected-set conflict 不等于 retention

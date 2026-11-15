@@ -1,4 +1,6 @@
 # 06 从 Trajectory Error 到可检验规则
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/06_trajectory_error_prompt.reading.html
+
 
 [← 05 比较](05_comparison.md) · [下一章：Coding data →](07_coding_data.md)
 

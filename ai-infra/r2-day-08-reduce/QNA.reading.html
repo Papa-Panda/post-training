@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day08 — Parallel Reduce：问答归档</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day08 — Parallel Reduce：问答归档</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">2026-09-03（周四）</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<p>用户在当天 ai 课程聊天中提出的问题与总结。问题原文保留，答案按聊天记录整理；
+英文术语（atomic、shared memory、warp shuffle、block、barrier）保留。</p>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>2026-09-03（周四）</h2>
+<h3>Q1：三种 reduce 方式的区别是什么</h3>
+<p><strong>A：</strong> 核心不是减少加法次数，而是<strong>让汇合发生在更快、争用更小的层级</strong>。</p>
+<pre><code class="language-text">output = x[0] + x[1] + ... + x[N-1]
+</code></pre>
+<ol>
+<li><strong>每元素 global atomic</strong>：每个 thread 直接 <code>atomicAdd(output, x[i])</code>；
+   <code>N</code> 个 threads 争抢同一个 global 地址，共 <strong>N 次 global atomic</strong>，
+   代码最简单，contention 最大。</li>
+<li><strong>Shared-memory tree</strong>：每个 block 在 shared memory 里做树形归约，
+   只由 block leader 做一次 global atomic；原子数约为 <code>ceil(N/T)</code>。</li>
+<li><strong>Warp shuffle</strong>：先在各 warp 内用 <code>__shfl_down_sync</code> 在 registers 间交换，
+   再把每个 warp 的一个 partial 写入 shared memory，
+   最后由第一个 warp 收尾；仍是一 block 一次 atomic，
+   但只需一次 block barrier。</li>
+</ol>
+<h3>Q2：如果 N=1024, T=256，共有 4 个 blocks，因此从 1024 次 global atomic 降为 4 次：没看懂</h3>
+<p><strong>A：</strong> 这里假设<strong>每个 thread 负责一个元素</strong>，每个 block 有 <code>T=256</code> 个 threads。
+<code>N=1024</code> 个元素分给 <code>1024/256 = 4</code> 个 blocks：</p>
+<pre><code class="language-text">Block 0：256 threads，处理 x[0]   到 x[255]
+Block 1：256 threads，处理 x[256] 到 x[511]
+Block 2：256 threads，处理 x[512] 到 x[767]
+Block 3：256 threads，处理 x[768] 到 x[1023]
+</code></pre>
+<p><strong>朴素 atomic 版</strong>：每个 thread 都执行一次 <code>atomicAdd(output, x[i])</code>，
+共 1024 个 threads，所以是 <strong>1024 次 global atomic</strong>。</p>
+<p><strong>Shared-tree 版</strong>：每个 block 先在 shared memory 中把 256 个元素
+加成一个 <code>block_sum</code>：</p>
+<pre><code class="language-text">Block 0 → sum(x[0:256])    → atomicAdd 一次
+Block 1 → sum(x[256:512])  → atomicAdd 一次
+Block 2 → sum(x[512:768])  → atomicAdd 一次
+Block 3 → sum(x[768:1024]) → atomicAdd 一次
+</code></pre>
+<p>最后只有 4 个 block leaders 更新 global output，
+所以从 <strong>每个元素一次 atomic</strong> 变成 <strong>每个 block 一次 atomic</strong>：1024 → 4。</p>
+<p>一般公式（"一线程处理一个元素"简化模型）：
+<code>global atomic 数量 = ceil(N/T) = blocks 数量</code>。
+求和总量没变，只是绝大部分加法搬到了更快、没有跨 block 争抢的 shared memory。</p>
+<h3>Q3：Shared tree 的问题是：每轮都要读写 shared memory，并让整个 block 同步</h3>
+<p><strong>A：</strong> 对。一个 block 归约 8 个数，<code>shared = [1, 2, 3, 4, 5, 6, 7, 8]</code>：</p>
+<pre><code class="language-cuda">for (int stride = blockDim.x / 2; stride &gt; 0; stride /= 2) {
+    if (threadIdx.x &lt; stride) {
+        s[threadIdx.x] += s[threadIdx.x + stride];
+    }
+    __syncthreads();
+}
+</code></pre>
+<ul>
+<li>stride=4：<code>s[0..3]</code> 分别加上 <code>s[4..7]</code> → <code>[6, 8, 10, 12, ...]</code>；</li>
+<li>必须 <code>__syncthreads()</code>，因为下一轮要读取本轮刚写出的结果；
+  否则 thread 0 可能已经开始第二轮，而 thread 2 还没写完 <code>10</code>，
+  读到旧值 <code>3</code> 就会算错；</li>
+<li>stride=2：<code>6+10=16, 8+12=20</code>；再同步；最后 <code>16+20=36</code>。</li>
+</ul>
+<p>代价不是加法多，而是<strong>每一层都要 shared-memory round trip，
+加上 block-wide barrier</strong>。256 threads 约需 <code>log₂256 = 8</code> 轮；
+warp shuffle 就是为了把 warp 内这些读写和 block-wide barriers
+换成 register 之间的直接交换。</p>
+<h3>Q4：Warp shuffle 那个没看懂</h3>
+<p><strong>A：</strong> 关键是：<strong>同一 warp 内，thread 可以直接读取另一个 thread 的
+register 值，不经过 shared memory。</strong></p>
+<p>缩小版 8-thread warp，每个 thread 的 register <code>v</code> 保存一个数：</p>
+<pre><code class="language-text">lane:  0  1  2  3  4  5  6  7
+v:     1  2  3  4  5  6  7  8
+</code></pre>
+<p>执行 <code>v += __shfl_down_sync(mask, v, 4)</code>：每个 lane 读取右边相距 4 个
+lanes 的 <code>v</code>：</p>
+<pre><code class="language-text">lane 0 读取 lane 4：1 + 5 = 6
+lane 1 读取 lane 5：2 + 6 = 8
+lane 2 读取 lane 6：3 + 7 = 10
+lane 3 读取 lane 7：4 + 8 = 12
+</code></pre>
+<p>offsets 依次为 4、2、1：<code>[6, 8, 10, 12] → [16, 20] → [36]</code>，
+lane 0 得到整个 warp 的和。真实 32-lane warp 的 offsets
+依次为 <code>16, 8, 4, 2, 1</code>。</p>
+<p>与 shared tree 的区别：</p>
+<pre><code class="language-text">Shared tree:  register → shared memory → 同步 → shared memory → register
+Warp shuffle: 一个 lane 的 register → 另一个 lane 的 register
+</code></pre>
+<p>但 shuffle <strong>不能跨 warp</strong>。256-thread block（8 个 warps）的完整流程：</p>
+<pre><code class="language-text">8 个 warps 各自在 registers 内归约出 1 个 partial
+→ 8 个 warp leaders 把 8 个 partials 写入 shared memory
+→ __syncthreads() 一次
+→ 第一个 warp 把这 8 个 partials 继续归约得到 block_sum
+→ global atomic 一次
+</code></pre>
+<p>那一次 barrier 是因为必须等 8 个 warp 都写完 partial sum，
+第一个 warp 才能读取。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-08-reduce/QNA.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

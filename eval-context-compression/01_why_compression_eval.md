@@ -1,4 +1,6 @@
 # 01 Why Compression Eval — 为什么要单独评压缩
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-context-compression/01_why_compression_eval.reading.html
+
 
 ## 问题 Problem
 

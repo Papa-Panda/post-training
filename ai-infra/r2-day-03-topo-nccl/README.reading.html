@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day03 — Topology and Ring Collectives</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day03 — Topology and Ring Collectives</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Connection to Prev</a><a href="#sec-2">1. Collective semantics</a><a href="#sec-3">2. Units before numbers</a><a href="#sec-4">3. Reading nvidia-smi topo -m</a><a href="#sec-5">4. Why tensor parallelism is topology-sensitive</a><a href="#sec-6">5. Run the analytical model</a><a href="#sec-7">Status</a><a href="#sec-8">Primary sources</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>Connection to Prev</h2>
+<p>r2-Day02 established a single-process training loop. Scaling it requires two separate models:</p>
+<ol>
+<li>the <strong>logical collective</strong>: which tensor is reduced or gathered and how many bytes each rank sends;</li>
+<li>the <strong>physical path</strong>: NVLink/NVSwitch, PCIe, or a NIC/fabric, including topology and contention.</li>
+</ol>
+<p>Conflating a product's aggregate link headline with measured collective bandwidth is the main trap in back-of-the-envelope estimates.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. Collective semantics</h2>
+<p>For $p$ ranks and a logical payload of $S$ bytes per rank, a ring partitions the payload into $p$ chunks.</p>
+<ul>
+<li>Reduce-scatter uses $p-1$ steps and sends $(p-1)S/p$ bytes per rank.</li>
+<li>All-gather uses $p-1$ steps and sends $(p-1)S/p$ bytes per rank.</li>
+<li>Ring all-reduce composes the two, using $2(p-1)$ steps and sending $2(p-1)S/p$ bytes per rank.</li>
+</ul>
+<p>$$V_{\mathrm{AR}}=2\frac{p-1}{p}S.$$</p>
+<p>This is <strong>per-rank bytes sent by the algorithm</strong>. It is not the sum over all ranks, and it is not application-level tensor bytes alone.</p>
+<p>A minimal latency-bandwidth model is:</p>
+<p>$$T\approx n_{\mathrm{steps}}\alpha+\frac{V}{B_{\mathrm{effective}}}.$$</p>
+<ul>
+<li>$\alpha$ is startup latency per modeled step;</li>
+<li>$B_{\mathrm{effective}}$ is effective one-way payload bandwidth under a stated assumption or measurement;</li>
+<li>protocol overhead, channels, chunking, contention, routing, and overlap are omitted.</li>
+</ul>
+<p>For 8 ranks and a 1 GB payload, ring all-reduce sends 1.75 GB per rank in 14 steps. If one explicitly assumes 450 GB/s effective one-way bandwidth and $2\ \mu s$ startup per step, the model gives \$3.917\$ ms. That is an estimate, not an H100 or NCCL measurement.</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Units before numbers</h2>
+<ul>
+<li><code>400 Gb/s</code> is a bit rate: the decimal line-rate conversion is <code>50 GB/s</code> before encoding and protocol overhead.</li>
+<li><code>GB/s</code> and <code>GiB/s</code> differ by a factor of $10^9/2^{30}$ .</li>
+<li>A vendor's “total” or bidirectional NVLink number must not be inserted as one-way effective ring bandwidth without explaining the conversion.</li>
+<li>NCCL's algorithm bandwidth and bus bandwidth are reporting conventions; compare like with like.</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. Reading <code>nvidia-smi topo -m</code></h2>
+<p>The matrix describes paths among GPUs and NICs <strong>inside one system</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>X</code></td>
+<td>same device</td>
+</tr>
+<tr>
+<td><code>PIX</code></td>
+<td>at most one PCIe switch</td>
+</tr>
+<tr>
+<td><code>PXB</code></td>
+<td>multiple PCIe switches, no PCIe host bridge</td>
+</tr>
+<tr>
+<td><code>PHB</code></td>
+<td>through a PCIe host bridge</td>
+</tr>
+<tr>
+<td><code>NODE</code></td>
+<td>through PCIe host bridges within one NUMA node</td>
+</tr>
+<tr>
+<td><code>SYS</code></td>
+<td>through PCIe and the interconnect between NUMA nodes</td>
+</tr>
+<tr>
+<td><code>NV#</code></td>
+<td>bonded set of <code>#</code> NVLinks</td>
+</tr>
+</tbody>
+</table>
+<p><code>NODE</code> does <strong>not</strong> mean “another machine” and does not identify InfiniBand or RoCE. Inter-host analysis needs the NIC placement, fabric, routing, and benchmark output in addition to the local matrix.</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. Why tensor parallelism is topology-sensitive</h2>
+<p>Tensor parallelism commonly places collectives inside each transformer layer, so startup and transfer costs repeatedly enter the forward/backward critical path. Pipeline parallelism communicates activations at stage boundaries; data parallelism reduces gradient buckets during backward. Those differences explain why tensor-parallel groups are often kept inside a fast local domain, but “TP can never cross a host” is too absolute: feasibility depends on message size, compute/communication overlap, topology, model shape, and the performance target.</p>
+<p>The correct workflow is:</p>
+<ol>
+<li>derive payload and collective frequency from the actual partitioning;</li>
+<li>inspect GPU–GPU and GPU–NIC locality;</li>
+<li>benchmark the relevant message-size range;</li>
+<li>profile overlap and exposed communication on the real training step.</li>
+</ol>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Run the analytical model</h2>
+<pre><code class="language-bash">python3 ai-infra/r2-day-03-topo-nccl/topo_demo.py
+python3 -m unittest discover -s ai-infra/r2-day-03-topo-nccl -p 'test_*.py' -v
+</code></pre>
+<p>The tests check unit conversion, ring volume/step counts, reduce-scatter + all-gather composition, latency accounting, and the important <code>NODE</code> semantic.</p>
+<p>For hardware validation, record the machine and software configuration, then run the local topology command and an NCCL benchmark over representative sizes. Do not copy a peak product number into the results table.</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>Status</h2>
+<ul>
+<li>Verified here: formulas, units, topology-label semantics, and seven CPU tests.</li>
+<li>Not verified here: NCCL algorithm choice, effective bandwidth, latency, overlap, or any H100 timing.</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>Primary sources</h2>
+<ul>
+<li>NCCL collective semantics: https://docs.nvidia.com/deeplearning/nccl/archives/nccl_2183/user-guide/docs/usage/collectives.html</li>
+<li><code>nvidia-smi topo</code> command and legend: https://man.archlinux.org/man/nvidia-utils/nvidia-smi.1.en</li>
+<li>PyTorch DDP design note (bucketed reductions and overlap): https://docs.pytorch.org/docs/main/notes/ddp</li>
+<li>Ring all-reduce paper: https://doi.org/10.1016/j.jpdc.2009.05.002</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-03-topo-nccl/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

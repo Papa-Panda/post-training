@@ -1,4 +1,6 @@
 # 07 — Observability、Evaluation 与 Security：外置 Control Plane
+> 📖 阅读版：https://papa-panda.github.io/post-training/harness-engineering/07_observability_evaluation_security.reading.html
+
 
 ## 元信息
 

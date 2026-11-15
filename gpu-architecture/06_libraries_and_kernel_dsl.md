@@ -1,4 +1,6 @@
 # 06 — CUDA Libraries、CUTLASS 与 Tile DSL
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/06_libraries_and_kernel_dsl.reading.html
+
 
 ## 1. 抽象层级不是能力排名
 

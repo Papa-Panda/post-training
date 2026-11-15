@@ -1,6 +1,8 @@
 > Connection to Prev: Day11 Paper2 mechanical → GPU thermal Tj_max 82.49°C throttle 0.83% is隐性失败源 → Day12 Reward 噪声是热的下一步：Tj高导致TPOT慢被误判为差答案，用 ensemble σ + |cal-raw| 补偿过滤；Day10 vLLM 长CoT 12-18% 5类失败进入不确定性集合，不进RM负样本；Day08/09 eval nowcasting 二阶γ*(ΔT)^2 同构到 reward 二次Brier/ECE。
 
 # Day 12 — Reward Model 不确定性 + 校准
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/day-12-reward-model/README.reading.html
+
 
 > Date: 2026-08-12 (Foundation 1-3mo, RL Training)
 > Source: ai_daily.csv:2026-08-12 — Reward Model / 理解 reward 模型的不确定性

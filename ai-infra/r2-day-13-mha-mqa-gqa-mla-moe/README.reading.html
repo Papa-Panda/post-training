@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day13 — Attention 变种：MHA→MQA/GQA/MLA（省 KV cache）与 MoE（稀疏换算力）</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day13 — Attention 变种：MHA→MQA/GQA/MLA（省 KV cache）与 MoE（稀疏换算力）</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Connection to Prev</a><a href="#sec-2">0. 符号表（每个字母的含义）</a><a href="#sec-3">1. 可手算例子 A：KV cache 账本（7B 风格： $L=32$ ， $h_q=32$ ， $d=128$ ，fp16， $S=131072$ ）</a><a href="#sec-4">2. 可手算例子 B：GQA 分组（ $n_q=4$ ， $G=2$ ， $d=2$ ， $S=2$ ）</a><a href="#sec-5">3. 可手算例子 C：MoE 路由与账本（ $E=4$ ， $k=1$ ， $d=4$ ， $d_{ff}=8$ ， $T=3$ ）</a><a href="#sec-6">4. 可执行代码</a><a href="#sec-7">5. 何时不赚（分方案）</a><a href="#sec-8">状态</a><a href="#sec-9">原始 / 官方来源</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>Connection to Prev</h2>
+<p>r2-Day12 给了我们验证的仪器（Nsight Systems / Compute）：Day11 的 fused kernel
+到底省没省，要拿测量说话。r2-Day13 往上走一层：<strong>不再是"同样的数学、更快的执行"，
+而是"换一套数学、省掉整块显存"</strong>。r2-Day10 的 FlashAttention 省的是<strong>一次</strong>
+attention 计算内部的 HBM 往返（ $O(N^2)$ 流量 → $O(N)$ ）；今天的
+MHA→MQA/GQA/MLA 省的是 <strong>decode 每一步都要重读的 KV cache</strong>；MoE 走另一条路：
+<strong>参数量涨 $E$ 倍，FLOPs/token 不涨</strong>，用稀疏换算力。</p>
+<p><strong>牺牲</strong>：MQA/GQA 把多个 query head 的 KV 绑在一起 → 表达能力下降（MQA 在部分任务上
+可测的质量损失）；MLA 低秩压缩 → 训练与并行切分的复杂度上升（RoPE 必须解耦、
+吸收技巧与 TP 切分互相作用）；MoE 稀疏 → expert parallelism 的 all-to-all 通信税 +
+负载不均（capacity / dropping）。<strong>换取</strong>：decode 的 KV cache 字节数和 HBM 流量
+成倍下降——decode 是 memory-bound（Day06/Day12 的 roofline 逻辑），省字节 = 省时间；
+MoE 用参数量换"同样 FLOPs 下更强的模型"。<strong>何时不赚</strong>：prefill 阶段（compute-bound，
+ $QK^T$ 的 FLOPs 一点没变，见下）；KV 本来就不占大头的短序列/小模型；MoE 在小 batch
+下专家权重加载摊不薄（见例 C）。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>0. 符号表（每个字母的含义）</h2>
+<ul>
+<li>$L$ ：transformer 层数</li>
+<li>$h_q$ ：query head 数； $h_{kv}$ ：key/value head 数</li>
+<li>$d$ ：每个 head 的维度； $d_{model}$ ：模型 hidden 维</li>
+<li>$B$ ：每个元素的字节数（fp16 → $B=2$ ）</li>
+<li>$S$ ：序列长度（KV cache 里存的 token 数）</li>
+<li>$G$ ：GQA 的组数（ $G$ 个 KV head，每组 $h_q/G$ 个 query head 共享）</li>
+<li>$d_c$ ：MLA 压缩隐向量维度； $d_r$ ：MLA 解耦 RoPE 维度</li>
+<li>$c_t^{KV}$ ：第 $t$ 个 token 的压缩隐向量， $c_t^{KV} = h_t W^{DKV}$ ，
+  $h_t$ 为层输入， $W^{DKV}$ 为下投影矩阵——<strong>cache 里实际存的就是它</strong></li>
+<li>$E$ ：MoE 专家总数； $k$ ：每个 token 激活的 top-k 专家数</li>
+<li>$d_{ff}$ ：专家 FFN 中间维； $T$ ：一次前向的 token 数</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>1. 可手算例子 A：KV cache 账本（7B 风格： $L=32$ ， $h_q=32$ ， $d=128$ ，fp16， $S=131072$ ）</h2>
+<p>每 token 每层存 K 和 V 两个 $(h_{kv}, d)$ 张量：</p>
+<p>$$bytes = L \times 2 \times h_{kv} \times d \times B \times S$$</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>$h_{kv}$</th>
+<th>每 token 每层</th>
+<th>总量（ $S=128k$ ）</th>
+<th>相对 MHA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MHA</td>
+<td>32</td>
+<td>$16384\ \text{B}$</td>
+<td>$68719476736\ \text{B} = 64\ \text{GiB}$</td>
+<td>$1\times$</td>
+</tr>
+<tr>
+<td>GQA-8</td>
+<td>8</td>
+<td>$4096\ \text{B}$</td>
+<td>$17179869184\ \text{B} = 16\ \text{GiB}$</td>
+<td>$4\times$</td>
+</tr>
+<tr>
+<td>MLA（V3 维度 $d_c=512, d_r=64$ ）</td>
+<td>—</td>
+<td>$(512+64)\times2 = 1152\ \text{B}$</td>
+<td>$4831838208\ \text{B} = 4.5\ \text{GiB}$</td>
+<td>$14.2\times$</td>
+</tr>
+<tr>
+<td>MQA</td>
+<td>1</td>
+<td>$512\ \text{B}$</td>
+<td>$2147483648\ \text{B} = 2\ \text{GiB}$</td>
+<td>$32\times$</td>
+</tr>
+</tbody>
+</table>
+<p>（head 口径验算 DeepSeek-V3：MHA $2\times128\times128\times2 = 65536\ \text{B}$ ，
+MLA $(512+64)\times2 = 1152\ \text{B}$ ， $65536/1152 \approx 56.9\times$ 。）</p>
+<p>decode 每步每个 layer 都要把全量 KV 从 HBM 读一遍，所以上表同时是<strong>每步的 KV 流量</strong>。
+换成时间下限（HBM $3.35\ \text{TB/s}$ ，Day06 官方规格，<strong>theoretical estimate</strong>）：
+MHA $64\ \text{GiB}$ → $20.5\ \text{ms}$ ；GQA-8 → $5.1\ \text{ms}$ 。
+这就是"省字节 = 省时间"的定量含义——注意这只是 KV 流量的下限，真实 decode 还要读权重。</p>
+<p>为什么 prefill 不赚：scores 的 FLOPs $= 2 S^2 h_q d$ ，只和 query head 数有关，
+GQA/MQA/MLA 都没动 $h_q$ ，prefill（compute-bound）的算量原样不动。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>2. 可手算例子 B：GQA 分组（ $n_q=4$ ， $G=2$ ， $d=2$ ， $S=2$ ）</h2>
+<p>Group 1（head 1、2 共用）： $K_1 = \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix}$ ，
+ $V_1 = \begin{bmatrix} 1 &amp; 2 \\ 3 &amp; 4 \end{bmatrix}$ ；
+Group 2（head 3、4 共用）： $K_2 = \begin{bmatrix} 1 &amp; 1 \\ 0 &amp; 1 \end{bmatrix}$ ，
+ $V_2 = \begin{bmatrix} 5 &amp; 6 \\ 7 &amp; 8 \end{bmatrix}$ 。</p>
+<p>取 head 1 的 $q_1 = [1, 0]$ ：
+scores $= q_1 K_1^T = [1, 0]$ ；除以 $\sqrt{2}$ 得 <code>[0.7071, 0]</code> ；
+softmax： $e^{0.7071} \approx 2.028$ ， $e^0 = 1$ ，和 <code>3.028</code> →
+$[0.6698,\ 0.3302]$ ；
+输出 $= 0.6698 \times [1,2] + 0.3302 \times [3,4] = [1.6604,\ 2.6604]$ 。
+head 2 的 $q_2 = [0, 1]$ 用<strong>同一份</strong> $K_1, V_1$ 再算一遍——
+KV 只存了一份、读了一份，这就是 GQA 相对 MHA 省掉的那一半流量。
+代码里 <code>test_hand_example_gqa_grouping</code> 断言了 <code>[1.6604, 2.6604]</code> 。</p>
+<p>两个退化（代码已数值验证）： $G = n_q$ 时 GQA $\equiv$ MHA；
+ $G = 1$ 时 GQA $\equiv$ MQA。GQA 就是 MHA↔MQA 之间的连续插值，
+Llama-2-70B 选 GQA-8（64 个 query head，8 个 KV head）是实证折中。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>3. 可手算例子 C：MoE 路由与账本（ $E=4$ ， $k=1$ ， $d=4$ ， $d_{ff}=8$ ， $T=3$ ）</h2>
+<p>Router logits（ $T \times E$ ）：
+token1 <code>[2.0, 1.0, 0.5, 0.1]</code> → expert 0；
+token2 <code>[0.2, 3.0, 0.1, 0.4]</code> → expert 1；
+token3 <code>[0.1, 0.2, 2.5, 0.3]</code> → expert 2。</p>
+<ul>
+<li>FLOPs/token：dense $= 4 d d_{ff} = 128$ ；
+  MoE $= k \times 128 = 128$ （ $k=1$ 时<strong>一分不涨</strong>）。</li>
+<li>参数量：dense $= 2 d d_{ff} = 64$ ；
+  MoE $= E \times 64 = 256$ （ $4\times$ ，这就是"拿参数换能力"）。</li>
+<li>all-to-all：dispatch 把 token 发往专家所在卡、combine 发回拼，
+  $2 \times T \times d \times B = 2\times3\times4\times2 = 48\ \text{B}$ 。
+  这是稀疏的通信税，与 Day03 的 collective 主题直接相连。</li>
+</ul>
+<p>何时不赚（小 batch 算账）： $E=8$ 、 $d=4096$ 、 $d_{ff}=14336$ 时，
+单层 MoE 专家权重 $= 8 \times 2 \times 4096 \times 14336 \times 2\ \text{B} \approx 1.88\ \text{GB}$ ；
+batch=1 时每步都要把 8 个专家的权重从 HBM 读一遍，
+只为算 1 个 token 的 1 个专家——memory-bound 下这就是纯浪费。
+（theoretical estimate：只算了权重流量，未含路由与 all-to-all。）</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>4. 可执行代码</h2>
+<ul>
+<li><code>attention_variants.py</code>：<code>kv_cache_bytes</code>（账本公式）、
+  <code>mla_cache_bytes_per_token</code>、<code>decode_kv_traffic_per_step</code>、
+  <code>kv_time_lower_bound_ms</code>（ $3.35\ \text{TB/s}$ 下限换算）、
+  <code>mha_forward</code> / <code>gqa_forward</code>（numpy，可验证 $G=n_q$ 退化与 $G=1$ 共享）、
+  <code>mla_absorb_demo</code>（验证吸收恒等式，见 NOTES §2）。</li>
+<li><code>moe_accounting.py</code>：<code>router_topk</code>、<code>dense_ffn_flops</code> / <code>moe_ffn_flops</code>、
+  <code>dense_ffn_params</code> / <code>moe_ffn_params</code>、<code>alltoall_bytes</code>（dispatch+combine）。</li>
+</ul>
+<pre><code class="language-bash">python3 ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/attention_variants.py
+python3 ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/moe_accounting.py
+python3 -m unittest discover -s ai-infra/r2-day-13-mha-mqa-gqa-mla-moe -p 'test_*.py' -v
+</code></pre>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>5. 何时不赚（分方案）</h2>
+<ol>
+<li><strong>MQA/GQA 在 prefill 不赚</strong>： $QK^T$ 的 FLOPs 只和 $h_q$ 有关，省的是 decode 的
+   HBM 流量；短 prompt、prefill 主导的离线任务收益很小。</li>
+<li><strong>MQA 走极端有质量代价</strong>：GQA 论文明确报告 MQA 可导致质量下降与训练不稳定，
+   且已有 MHA checkpoint 转 MQA 需要 uptraining（约 5% 预训练算量）。</li>
+<li><strong>MLA 的复杂度税</strong>：RoPE 必须解耦（ $R_t$ 卡在 $W^{UQ}$ 与 $W^{UK}$ 之间，
+   矩阵乘法不可交换，吸收恒等式对 RoPE 部分不成立）；吸收后的投影改变了 TP 切分面，
+   与标准 MHA 的按 head 切 TP 需要额外处理——这是 Day15（TP/PP/SP）的议题。</li>
+<li><strong>MoE 小 batch 不赚</strong>：专家权重全量加载摊不薄；all-to-all 在带宽不足时成为瓶颈；
+   路由抖动带来延迟不确定性；全部专家权重常驻 HBM，单卡推理的显存压力反而更大。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>状态</h2>
+<ul>
+<li>已验证：Python 语法；18 个 CPU 单元测试（账本 $64/16/4.5/2\ \text{GiB}$ 精确整数；
+  GQA $G=n_q$ ≡ MHA、 $G=1$ 共享 KV 数值一致；MLA 吸收恒等式多 seed 通过；
+  手算例 B <code>[1.6604, 2.6604]</code> ；路由 top-k、FLOPs/参数账本、all-to-all $48\ \text{B}$ ；
+  KV 时间下限 $20.5/5.1\ \text{ms}$ ）。</li>
+<li><strong>execution not validated / 待H100验证</strong>：本环境无 torch/CUDA GPU；
+  <code>mha_forward</code> / <code>gqa_forward</code> 的 numpy 语义不等于 <code>torch.nn</code> 算子实测；
+  $20.5/5.1\ \text{ms}$ 是 theoretical estimate（KV 流量下限，未含权重与计算）；
+  未测量任何真实带宽、延迟、MFU、comm%、设备拓扑。</li>
+<li>本课状态保持 <code>blocked</code>；没有声称 loss、耗时实测、带宽实测、comm%、MFU 或设备拓扑。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>原始 / 官方来源</h2>
+<ul>
+<li>MQA：Shazeer, "Fast Transformer Decoding: One Write-Head is All You Need",
+  <a href="https://arxiv.org/abs/1911.02150">https://arxiv.org/abs/1911.02150</a></li>
+<li>GQA：Ainslie et al., "GQA: Training Generalized Multi-Query Transformer Models
+  from Multi-Head Checkpoints", <a href="https://arxiv.org/abs/2305.13245">https://arxiv.org/abs/2305.13245</a></li>
+<li>MLA：DeepSeek-AI, "DeepSeek-V2", <a href="https://arxiv.org/abs/2405.04434">https://arxiv.org/abs/2405.04434</a>；
+  "DeepSeek-V3 Technical Report", <a href="https://arxiv.org/abs/2412.19437">https://arxiv.org/abs/2412.19437</a>
+  （ $d_c=512$ ， $d_r=64$ ， $n_h=128$ ， $d_h=128$ ；V2 236B/21B active，
+  V3 671B/37B active）</li>
+<li>MoE：Shazeer et al., "Outrageously Large Neural Networks",
+  <a href="https://arxiv.org/abs/1701.06538">https://arxiv.org/abs/1701.06538</a>；
+  Fedus et al., "Switch Transformers", <a href="https://arxiv.org/abs/2101.03961">https://arxiv.org/abs/2101.03961</a>；
+  DeepSeekMoE, <a href="https://arxiv.org/abs/2401.06066">https://arxiv.org/abs/2401.06066</a>；
+  Mixtral of Experts, <a href="https://arxiv.org/abs/2401.04088">https://arxiv.org/abs/2401.04088</a></li>
+<li>Llama-2-70B GQA-8 配置：Touvron et al., "Llama 2", <a href="https://arxiv.org/abs/2307.09288">https://arxiv.org/abs/2307.09288</a></li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-13-mha-mqa-gqa-mla-moe/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

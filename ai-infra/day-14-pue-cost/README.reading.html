@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 14 — Paper3 PUE拆解: 能效指标 → 训练成本 per token / per useful rollout</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>Day 14 — Paper3 PUE拆解: 能效指标 → 训练成本 per token / per useful rollout</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">【昨日复盘】Day 13 Reliability / SLO 真数</a><a href="#sec-2">【今日主题】Day 14 目标 + 最小可跑任务</a><a href="#sec-3">Work Connection / Monetization</a><a href="#sec-4">代码 &amp;amp; 资源</a></nav>
+  </details>
+  <section class="sec" id="sec-0"><blockquote class="pq">
+<p>Connection to Prev: Day13 Reliability / SLO → Day14 Paper3 PUE拆解: SLO 定义了什么算失败但没算出失败浪费多少钱，需要 PUE→\$/有用 rollout 把 GPU 空转/重试/制冷开销翻译成 dollars；Day12 Reward Model 的 reward σ 过滤坑在今天用 useful 分母扣除 + retry 成本单计解决，避免把高不确定 rollout 当成 infra 失败。</p>
+</blockquote>
+
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>【昨日复盘】Day 13 Reliability / SLO 真数</h2>
+<ul>
+<li>真数（CPU gloo 2-rank ok, seed42, n=200）：success_rate 0.955 fail 4.5% 5类 timeout5 / vcj_parse3 / tool_retry1 / oom1 / nccl1，queue p50 0.123s p95 0.385s (scaled 1.2s≈真实120s) avg_depth 0.21，power_mean 459.2W σ67.0W jitter0.146 PASS，Tj_max 90.5°C avg73.4°C throttle2.5% 5/200 FAIL → slo_all FAIL。</li>
+<li>SLO 3 条：SLO1 job成功率≥0.98，SLO2 排队p95≤1.2s scaled (真实120s)，SLO3 功率抖动&lt;0.15 + 节流&lt;1%。</li>
+<li>昨日链路：Day12 reward σ 0.045 + |cal-raw| 0.0539 是 SLO1 噪声源，Day11 Tj 82.49°C 热节流映射到 SLO3。</li>
+</ul>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>【今日主题】Day 14 目标 + 最小可跑任务</h2>
+<ul>
+<li><strong>Learning Goal</strong>：画出 PUE vs 训练成本 per token 的类比图，提炼能效指标建模可迁移到 RL infra。</li>
+<li><strong>Topic</strong>：Paper3 拆解 — 数据中心 PUE 建模如何变成 RL 集群的 \$/有用 rollout / \$/k tokens。</li>
+<li><strong>最小可跑</strong>：</li>
+<li><code>python rl-infra/day-14-pue-cost/pue_cost_model.py</code> 单进程 CPU 跑通 seed42 300 rollouts。</li>
+<li><code>torchrun --nproc_per_node=2 rl-infra/day-14-pue-cost/pue_cost_model.py</code> gloo 2-rank 验证通信 ok。</li>
+<li>输出 3 真数 + 待H100 NCCL 扩展：<code>torch.cuda.max_memory_allocated()</code>、<code>nvidia-smi</code> Tj、<code>nvml</code> power trace、真 vLLM 500→5000 tok 长尾 12-18%失败。</li>
+</ul>
+<h3>真数（CPU，seed42，待H100 NCCL 补深）</h3>
+<ul>
+<li>PUE mean 1.2576 p50 1.2381 p95 1.3427 min 1.1646 max 1.3468 overhead 25.76%（IT 477.4W + cooling 123.8W）</li>
+<li>\$/useful rollout 0.000244 \$ /1k useful 0.2438 \$ /1k tokens proxy 0.000116（ \$3.2/GPU-hr proxy，facility_cost \$ 0.0685）</li>
+<li>useful 281/300=93.7% fail 6.33% (timeout7/vcj7/tool3/nccl2) filtered_high_uncert 0 retry 2.6s idle 9.1s Tj_avg 72.4°C Tj_max 92.1°C throttle 3.0%</li>
+</ul>
+<h3>PUE vs COST 类比图（ASCII / Mermaid 思路）</h3>
+<p>```
+DC视角:    P_IT ──┬──► P_cooling(COP, fan^3, hyst 0.85/0.35) ──┬─► P_total
+                  └──► P_loss 3%                              └─► PUE = P_total/P_IT</p>
+<p>RL视角:    GPU_IT_sec (rollout 80%墙钟 40-60k短/8-15k长)
+               ├─ retry_sec (5类失败：timeout/tool/vcj/oom_kv/nccl)
+               ├─ eval_idle_sec (同步→异步 nowcasting EWMA)
+               └─ reward σ 过滤分母扣除 (Day12)
+                     │
+                $/hr 3.2 * PUE 1.2576
+                     ▼
+          $/useful = PUE * $IT / useful
+                     ▼
+          $/1k useful → $/1k tokens (proxy 2.1k tok/rollout)
+                     ▼
+               ROIC故事: 每1k有用rollout省 Z GPU-min
+```
+
+&gt; Paper3 把二次换热 COP 退化 γ*(ΔT)^2 + 风机立方 + 冷机 hyst 建模成 PUE 曲线；RL 集群把同一套物理思维套到 \$/有用 rollout，随负载因子动态看制冷 overhead，何时 PUE 1.16→1.35 吞掉 retry 省出来的钱。
+
+## 【与之前内容的联系】
+- Day13 定了 3 条 SLO（成功率/排队/功率抖动），但 SLO 只回答 pass/fail，没回答 waste 多少钱。今天用 PUE mean 1.2576 把 Day13 的 retry_sec 2.6s + eval_idle 9.1s 换算成 facility_cost $0.0685 vs IT_cost $ 0.0545，overhead 25.76% 是下一轮调度的硬约束：扩容还是降 Tj。
+- Day12 的 reward model ensemble σ 0.045 与 |cal-raw| 0.0539 告诉我们一部分 rollout 被 filtered 不是 infra 失败。昨天 SLO 把所有非成功都算 fail，夸大了 fail_rate 6-15% vs 真实；今天把 filtered_high_uncert 单列，分母只计 useful 281，retry 成本单独计，避免误把不确定性当稳定性问题去扩机柜。
+- Day11 Paper2 机械负载用 γ<em>(ΔT)^2 + COP 二阶 + 冷机 hyst 0.85/0.35 解决了 Day08/09 EWMA nowcasting 的滞后坑（RMSE 55.13kW）。今天直接复用该 SSM 算 cooling power：P_fan 28</em>flow^3+6 + P_chiller = P_IT/COP*1.15/0.35，解释为何 PUE p95 1.3427 出现在 burst 35 个 rollout 一次的长 CoT 时刻。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>Work Connection / Monetization</h2>
+<ul>
+<li>能效 → COST：把机房 PUE 1.x 思维翻译成训练集群每有用 rollout 花多少 GPU-min，压缩1天等待 = 省下一台 H100 小时费的预估，可嵌入 eval 异步调度优先级。</li>
+<li>下一步：待H100 验证 max_memory_allocated + nvidia-smi Tj 真迹 + RAPL power，对比 CPU 模拟的 power_it_mean 477W / Tj_avg 72.4°C 偏差，补回真实 vLLM 7B tokens/sec 3.4-5k 预期。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>代码 &amp; 资源</h2>
+<ul>
+<li>code: <code>rl-infra/day-14-pue-cost/pue_cost_model.py</code> (CPU gloo 2-rank ok)</li>
+<li>Paper3 draft: 数据中心 PUE modeling（SEER/COP 二次项、冷机 hyst、风机立方）</li>
+<li>GitHub Link: https://github.com/Papa-Panda/post-training/tree/master/rl-infra/day-14-pue-cost</li>
+</ul>
+<p>待H100 NCCL：max_memory_allocated + nvidia-smi Tj + RAPL power trace + 真vLLM 500→5000 tok rollout长尾 12-18%失败替换模拟 + 70B外推 tokens/sec。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/day-14-pue-cost/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

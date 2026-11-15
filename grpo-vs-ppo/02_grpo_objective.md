@@ -1,4 +1,6 @@
 # 02 — GRPO：group-relative advantage、KL 与边界
+> 📖 阅读版：https://papa-panda.github.io/post-training/grpo-vs-ppo/02_grpo_objective.reading.html
+
 
 GRPO 的主要动机不是“组内排名”，而是用同一 prompt 的多条 completion reward 构造 baseline，省掉 learned critic。原始 DeepSeekMath 同时给出 outcome-supervision 与 process-supervision 形式；本章先聚焦最常见的 outcome GRPO。
 

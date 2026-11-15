@@ -1,4 +1,6 @@
 # ICL — In-Context Learning：理论、机制与工程
+> 📖 阅读版：https://papa-panda.github.io/post-training/ICL/README.reading.html
+
 
 ICL 指冻结参数的自回归模型，仅通过上下文中的任务描述与示例改变当前预测：
 

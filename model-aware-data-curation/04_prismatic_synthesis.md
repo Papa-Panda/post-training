@@ -1,4 +1,6 @@
 # 04 — Prismatic Synthesis：从选数据到主动造数据
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/04_prismatic_synthesis.reading.html
+
 
 ## 元信息
 - 内容类型：单篇论文精读 + 工程扩展

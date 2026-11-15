@@ -1,4 +1,6 @@
 # vLLM rollout infrastructure
+> 📖 阅读版：https://papa-panda.github.io/post-training/vllm-rollout/README.reading.html
+
 
 A measurement-first guide to the inference side of reinforcement-learning post-training. It connects a rollout request's lifecycle to queue stability, token economics, KV-cache capacity, policy staleness, failure handling, and observability. It deliberately contains **no hardware throughput promises**: values produced by the CPU lab are synthetic inputs, while real capacity must come from a version-pinned benchmark on the target model, engine, and hardware.
 

@@ -1,4 +1,6 @@
 # Sources: 一手来源清单
+> 📖 阅读版：https://papa-panda.github.io/post-training/reasoning-trace-analysis/sources.reading.html
+
 
 > 本专题每个数字、年份、作者、结论都来自下面实际打开过的页面。条目按章节引用顺序排列；"核验内容"只写打开页面时亲眼看到的事实。
 >

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>r2-Day16 — BF16 混合精度 / 梯度累积 / Activation Checkpoint：把每卡的张量再压薄</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">AI Infra</span>
+    <h1>r2-Day16 — BF16 混合精度 / 梯度累积 / Activation Checkpoint：把每卡的张量再压薄</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">Connection to Prev</a><a href="#sec-2">0. 符号表（每个字母的含义）</a><a href="#sec-3">1. 可手算例子 A：三种浮点格式的位布局</a><a href="#sec-4">2. 可手算例子 B：FP16 下溢与 loss scaling</a><a href="#sec-5">3. 可手算例子 C：梯度累积</a><a href="#sec-6">4. 可手算例子 D：activation checkpoint</a><a href="#sec-7">5. 可手算例子 E：7B AMP 显存台账（诚实版）</a><a href="#sec-8">何时不赚（决策表）</a><a href="#sec-9">来源</a><a href="#sec-10">验证状态</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>Connection to Prev</h2>
+<p>r2-Day14 切的是 <strong>model states</strong>（通信换显存），r2-Day15 切的是<strong>模型本身</strong>
+（TP/PP/SP 切张量、层、序列）。r2-Day16 不切分、不加卡，动的是<strong>每个 rank 手里
+剩下的张量本身</strong>：把精度压薄（BF16/FP16 每个数只占 2 字节，Tensor Core 跑得更快）、
+把 batch 拆小再累积（显存只按 microbatch 算）、把 activation 存一部分、
+用的时候重算（计算换显存）。</p>
+<p><strong>牺牲</strong>：BF16 的 7 位尾数带来舍入误差界 <code>u ≈ 2^-8</code>——比更新量还小的权重增量会被
+直接舍入掉；FP16 的 5 位指数让绝对值小于 <code>6.10e-5</code> 的梯度下溢成 0，必须靠
+loss scaling 抢救；activation checkpoint 用多一次 forward（约 +33% 计算）换显存，
+实现上还要处理 RNG 状态与 in-place 操作。<strong>换取</strong>：同 batch 下 activation 字节减半、
+同显存下 batch 放大；梯度累积让有效 batch 放大 <code>m</code> 倍而显存只按 microbatch 算，
+DDP 每样本分摊的通信量 ÷m；checkpoint 把 activation 内存从 <code>O(L·A)</code> 压到
+<code>O(√L·A)</code>；低精度 GEMM 跑在 Tensor Core 上更快。<strong>何时不赚</strong>：小模型单卡随便装时，
+AMP 的 fp32 master copy 把 params+grads 省下的 28GB（7B 口径）又加了回来，
+model-state 总账与纯 fp32 完全相同（112GB），7B 照样装不进 80GB 卡；
+计算已是瓶颈时 recompute 的 +33% 不划算；batch 本来就够大时梯度累积只是拖慢
+optimizer step。</p>
+<p>抄百科类比：混合精度 = 草稿用小字抄（bf16），定稿用大字描一遍存档（fp32 master）；
+梯度累积 = 分四批抄完再统一交卷，交卷只交一次（all-reduce 一次）；
+checkpoint = 只在每章开头折角，中间页看完就撕，反查时照着折角重抄一页。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>0. 符号表（每个字母的含义）</h2>
+<ul>
+<li>$L$ ：层数； $A$ ：每层 activation 的字节数（bytes/layer）</li>
+<li>$b$ ：microbatch 大小（每个 microbatch 的样本数）；
+  $m$ ：梯度累积步数（一次 optimizer step 之前累积的 microbatch 数）；
+  注意本课的 $m$ 与 r2-Day15 的 PP microbatch 数 $m$ 不是同一个 $m$</li>
+<li>$B_{eff} = b\cdot m$ ：有效 batch 大小（optimizer 实际看到的 batch）</li>
+<li>$s$ ：loss scale 因子（把 loss / 梯度整体放大 $s$ 倍再反向）</li>
+<li>$p$ ：显式尾数位数（不含隐藏的 leading 1）； $e$ ：指数位数</li>
+<li>$\text{eps} = 2^{-p}$ ：machine epsilon， <code>1.0</code> 处相邻可表示数的间距</li>
+<li>$u = \text{eps}/2$ ：unit roundoff，舍入到最近时的最大相对误差界</li>
+<li>$k$ ：checkpoint 间隔（每 $k$ 层存一个 checkpoint；反向重算段长度也是 $k$ ）</li>
+<li>本课 GB 均为十进制（与 r2-Day15 一致）</li>
+</ul>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>1. 可手算例子 A：三种浮点格式的位布局</h2>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>符号/指数/尾数</th>
+<th>eps $= 2^{-p}$</th>
+<th>$u$</th>
+<th>最小正规格数</th>
+<th>最大值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FP32</td>
+<td>1+8+23</td>
+<td><code>1.19e-7</code></td>
+<td><code>5.96e-8</code></td>
+<td><code>1.18e-38</code></td>
+<td><code>3.40e38</code></td>
+</tr>
+<tr>
+<td>BF16</td>
+<td>1+8+7</td>
+<td><code>0.0078</code></td>
+<td><code>0.0039</code></td>
+<td><code>1.18e-38</code></td>
+<td><code>3.39e38</code></td>
+</tr>
+<tr>
+<td>FP16</td>
+<td>1+5+10</td>
+<td><code>9.77e-4</code></td>
+<td><code>4.88e-4</code></td>
+<td><code>6.10e-5</code></td>
+<td><code>65504</code></td>
+</tr>
+</tbody>
+</table>
+<p>两个关键观察。第一，<strong>BF16 就是 FP32 砍掉低 16 位尾数</strong>：指数 8 位完全相同，
+动态范围（<code>1.18e-38</code> 到 <code>3.39e38</code>）与 FP32 一致——这就是 BF16 时代 loss scaling
+基本退役的原因。第二，FP16 的指数只有 5 位，最小正规格数 <code>6.10e-5</code>，
+最大值 <code>65504</code>：动态范围窄是它一切数值麻烦的根因。</p>
+<p>为什么 7 位尾数"够"？神经网络对<strong>指数</strong>（动态范围）敏感、对<strong>尾数</strong>（精度）
+不敏感，这是 bfloat16 设计时的经验结论（见来源 Wang &amp; Kanwar）。
+但尾数不是没有代价：代码 <code>round_to_bf16</code> 模拟了真实舍入——权重 <code>1.0</code> 加上更新
+<code>1e-4</code>（小于 <code>u/2</code>），舍入回 <code>1.0</code>，<strong>更新被吞掉</strong>；更新 <code>0.01</code> 则落到
+<code>1.0078125</code>（ $1 + 2^{-7}$ ），保留。这就是 optimizer 状态与 master weights
+必须留在 fp32 的原因：更新量常常比 bf16 在权重尺度上的 spacing 还小。</p>
+<p>代码 <code>test_dtype_bit_layout</code> / <code>test_machine_epsilon</code> / <code>test_unit_roundoff</code> /
+<code>test_min_normal</code> / <code>test_dtype_max</code> / <code>test_bf16_rounding_*</code> 断言了本节全部数字。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>2. 可手算例子 B：FP16 下溢与 loss scaling</h2>
+<p>梯度 <code>g = 3.0e-5</code>：小于 FP16 最小正规格数 <code>6.10e-5</code>，在 fp16 里<strong>直接冲成 0</strong>，
+梯度信号消失。loss scale <code>s = 2^15 = 32768</code>：</p>
+<p>$$g\cdot s = 0.98304$$</p>
+<p>落在 <code>[6.10e-5, 65504]</code> 区间内，可表示。完整链条：<code>loss·s</code> → 反向
+（梯度自动带上 ×s）→ 在缩放域内做 all-reduce → 检查 inf/nan
+（上溢则丢弃本步、缩小 $s$ ）→ 除以 $s$ → 还给 optimizer 干干净净的 fp32 梯度。
+动态 loss scaling：连续多步无上溢则 $s$ 翻倍，省得人工调——代码
+<code>dynamic_loss_scale_update</code> 模拟了"放大"与"上溢回退"两个分支
+（<code>3.0 × 32768 = 98304 &gt; 65504</code> 触发回退）。</p>
+<p>同一梯度在 BF16 下：最小正规格数 <code>2^-126 ≈ 1.18e-38</code>，<code>3e-5</code> 毫无压力，
+无需 loss scaling。<strong>选 BF16 还是 FP16，本质是在选"要不要为下溢操心"</strong>。</p>
+<p>代码 <code>test_fp16_underflow_and_loss_scale</code> / <code>test_dynamic_loss_scale_*</code> 断言了
+<code>32768</code>、<code>0.98304</code> 与回退逻辑。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>3. 可手算例子 C：梯度累积</h2>
+<p><code>b=2, m=4</code> → $B_{eff} = 8$ 。标量 toy：8 个样本的梯度
+<code>[0.1, 0.2, ..., 0.8]</code>，全 batch 求和 <code>= 3.6</code>；
+分成 4 个 microbatch，每 micro 求和 <code>[0.3, 0.7, 1.1, 1.5]</code>，
+累加 <code>= 3.6</code>——数学上精确相等（Python 浮点实现误差 &lt; 1e-12，
+测试用 <code>assertAlmostEqual</code> 锁定）。</p>
+<p>mean-reduction 的坑：每个 micro 内部先平均得 <code>[0.15, 0.35, 0.55, 0.75]</code>，
+直接相加得 <code>1.8</code>，是全 batch 均值 <code>0.45</code> 的 <code>m = 4</code> 倍——
+<strong>累积后必须再除以 $m$ </strong>。DDP 下每 optimizer step 只做一次 all-reduce，
+每样本分摊的通信量是 <code>b = 2</code> 时的 <code>1/4</code>。</p>
+<p>注意：梯度累积 ≠ 大 batch 的全部语义。BN 的 batch 统计、dropout 的随机性
+仍按 microbatch 走；且 optimizer step 变慢 $m$ 倍——它省的是显存，
+不是时间。</p>
+<p>代码 <code>test_grad_accum_*</code> 断言了 <code>[0.3, 0.7, 1.1, 1.5]</code>、<code>3.6</code>、<code>0.45</code> 与通信 ÷m。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>4. 可手算例子 D：activation checkpoint</h2>
+<p>$L = 64$ ， $A = 128$ MB/layer。朴素反向存下全部 activation：</p>
+<p>$$64 \times 128\text{MB} = 8192\text{MB} = 8.192\text{GB}$$</p>
+<p>每 $k = 8$ 层存一个 checkpoint：存 8 个 checkpoint，反向时从最近的 checkpoint
+重算段内 8 层，内存 <code>= (8+8)×128MB = 2048MB = 2.048GB</code>，
+<strong>省 4 倍</strong>。一般公式：内存 $= (\lceil L/k\rceil + k)\cdot A$ ，
+对 $k$ 求极小得 $k = \sqrt{L}$ ，最小值 $2\sqrt{L}\cdot A$ ——
+代码对 $k = 1, 2, 4, 8, 16, 32, 64$ 实测扫描，最小值确实落在 $k = 8$ 。</p>
+<p>代价：反向时每个段多做一次 forward；一次训练迭代 forward:backward $= 1:2$ ，
+额外计算占比 $= 1/3 \approx 33\%$ 。Chen et al. 的论文里，
+1000 层 ResNet 从 48GB 压到 7GB，只多花 30% 时间——量级与我们的 <code>1/3</code> 一致。
+这就是"用计算换显存"的定价：显存从 $O(L)$ 降到 $O(\sqrt{L})$ ，
+计算多付三分之一。</p>
+<p>代码 <code>test_checkpoint_*</code> 断言了 <code>8192</code> MB、<code>2048</code> MB、4 倍、 $k = 8$ 最优、
+额外计算 <code>1/3</code>。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>5. 可手算例子 E：7B AMP 显存台账（诚实版）</h2>
+<p>7e9 参数，十进制 GB：</p>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>AMP（bf16）</th>
+<th>纯 fp32</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>参数</td>
+<td>14GB</td>
+<td>28GB</td>
+</tr>
+<tr>
+<td>梯度</td>
+<td>14GB</td>
+<td>28GB</td>
+</tr>
+<tr>
+<td>fp32 master</td>
+<td>28GB</td>
+<td>—（参数本身即 fp32）</td>
+</tr>
+<tr>
+<td>Adam fp32 m, v</td>
+<td>56GB</td>
+<td>56GB</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td><strong>112GB</strong></td>
+<td><strong>112GB</strong></td>
+</tr>
+</tbody>
+</table>
+<p><code>112GB &gt; 80GB</code>：AMP 独自救不了 7B 上单卡。更诚实的一行：
+<strong>AMP 与纯 fp32 的 model-state 字节数完全相同</strong>——params+grads 省下的 28GB，
+被 fp32 master copy 的 28GB 精确抵消。AMP 真正给的是两样东西：
+activation 字节减半（同 batch 更省 / 同显存 batch 更大）与 Tensor Core 低精度加速。
+想上 80GB 卡，必须叠加 r2-Day14 的 ZeRO（把 112GB 切到 $N$ 卡）、
+r2-Day15 的 TP/PP，或本课的 checkpoint——三条路正交，可叠加。</p>
+<p>代码 <code>test_amp_ledger_7b</code> / <code>test_pure_fp32_ledger_7b</code> 断言了
+<code>14/14/28/56/112</code> 与两份台账相等。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>何时不赚（决策表）</h2>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模型+优化器状态单卡装得下，batch 已够</td>
+<td>纯 fp32 或简单 AMP 即可；checkpoint 的 +33% 计算是纯 overhead</td>
+</tr>
+<tr>
+<td>FP16 梯度大面积下溢</td>
+<td>先换 BF16（指数 8 位与 fp32 同范围，一般无需 loss scaling）；FP16 才需要动态 loss scaling</td>
+</tr>
+<tr>
+<td>计算已是瓶颈</td>
+<td>recompute 把 step time 拉长约 1/3；先从别处压 activation（SP、更小的 b）</td>
+</tr>
+<tr>
+<td>只想放大有效 batch</td>
+<td>梯度累积： $B_{eff} = b\cdot m$ ，显存只按 b 算；代价是 optimizer step 慢 m 倍，且 BN/dropout 语义仍按 microbatch</td>
+</tr>
+<tr>
+<td>7B 单卡 80GB</td>
+<td>AMP 独自 112GB 装不下——必须叠加 ZeRO / checkpoint / TP（Day14/Day15/本课 D）</td>
+</tr>
+<tr>
+<td>只做推理（前向）</td>
+<td>不需要 master copy 与 loss scaling；低精度权重直接跑（那是量化部署，不是 AMP 训练）</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>来源</h2>
+<ul>
+<li>Micikevicius et al., <em>Mixed Precision Training</em>, arXiv:1710.03740（ICLR 2018）：
+  fp32 master weights + loss scaling。https://arxiv.org/abs/1710.03740</li>
+<li>Chen et al., <em>Training Deep Nets with Sublinear Memory Cost</em>, arXiv:1604.06174：
+  O(√L) checkpointing，用一次额外 forward 把 activation 内存压到次线性。
+  https://arxiv.org/abs/1604.06174</li>
+<li>Wang &amp; Kanwar, <em>BFloat16: The secret to high performance on Cloud TPUs</em>,
+  Google Cloud Blog, 2018：bfloat16 语义（1+8+7）与"神经网络对指数敏感、
+  对尾数不敏感"的设计依据。
+  https://cloud.google.com/blog/products/ai-machine-learning/bfloat16-the-secret-to-high-performance-on-cloud-tpus</li>
+</ul>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>验证状态</h2>
+<ul>
+<li>本地： <code>python3 -m unittest discover</code> ，21/21 CPU 测试通过
+  （位布局/eps 与 u/上下溢阈值/最大值/loss scaling 放大与收缩/
+  动态 scale 增减/bf16 舍入三组/梯度累积求和与均值/每样本通信 ÷m/
+  checkpoint 手算数与 k 扫描最优/重算 1/3/AMP 与 fp32 台账）。</li>
+<li><code>tools/check_repo.py</code> 对新目录检查通过；新文件无雇主标识（grep 验证）。</li>
+<li>未验证：无 PyTorch/CUDA/H100，所有字节数/加速比/ <code>1/3</code> 均为理论估计
+  （theoretical estimate），非实测 benchmark；
+  状态保持 blocked，execution not validated / 待H100验证。</li>
+</ul></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/ai-infra/r2-day-16-mixed-precision-accum-recompute/README.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

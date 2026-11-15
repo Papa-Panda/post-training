@@ -1,4 +1,6 @@
 # r2-Day08 — Parallel Reduce：原子加 → Shared Tree → Warp Shuffle
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-08-reduce/README.reading.html
+
 
 ## Connection to Prev
 

@@ -1,4 +1,6 @@
 # Papers and evidence ledger
+> 📖 阅读版：https://papa-panda.github.io/post-training/model-aware-data-curation/papers.reading.html
+
 
 > 原则：已有 `ai-data` 笔记只链接；新论文列出精确标题、年份/状态和本专题使用的 claim。数字若无法从原文核实，不进入 README headline。
 

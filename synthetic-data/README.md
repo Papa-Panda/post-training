@@ -1,4 +1,6 @@
 # Synthetic Data / Agentic 数据合成与清洗系列
+> 📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/README.reading.html
+
 
 Agentic 方式合成 / 清洗训练数据（SFT・mid-training・RL）系列，
 与 AI4Math / RLVR（A 系列）和 RL 环境与合成数据（B 系列）并行，

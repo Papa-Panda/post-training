@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 — 多样性覆盖：从语义空间到梯度空间</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Model-Aware Data Curation</span>
+    <h1>03 — 多样性覆盖：从语义空间到梯度空间</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. “文本不同”不等于“学到不同”</a><a href="#sec-3">2. Vendi 的共同数学骨架</a><a href="#sec-4">3. G-Vendi：把特征换成 model-induced gradients</a><a href="#sec-5">4. D4 / SemDeDup 与 G-Vendi 的关系</a><a href="#sec-6">5. Fisher/log-det：另一种 gradient-space coverage</a><a href="#sec-7">6. Coverage-aware greedy selection</a><a href="#sec-8">7. 证据边界</a><a href="#sec-9">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>内容类型</dt><dd>跨论文方法综述（embedding diversity → gradient diversity）</dd><dt>核心论文</dt><dd><a href="<a href="https://arxiv.org/abs/2505.20161">https://arxiv.org/abs/2505.20161</a>">Prismatic Synthesis: Gradient-based Data Diversification Boosts Generalization in LLM Reasoning</a> · <a href="<a href="https://arxiv.org/pdf/2601.23155v2">https://arxiv.org/pdf/2601.23155v2</a>">SPICE: Submodular Penalized Information-Conflict Selection for Efficient Large Language Model Training</a></dd><dt>已有 ai-data 精读</dt><dd><a href="../ai-data/day-19-2023-vendi-score/NOTES.md">Vendi Score</a> · <a href="../ai-data/day-24-2023-semdedup-d4/NOTES.md">D4 / SemDeDup</a></dd></dl>
+<blockquote class="pq">
+<p>已有逐篇笔记只复用：
+<a href="../ai-data/day-19-2023-vendi-score/NOTES.md">Vendi Score</a> ·
+<a href="../ai-data/day-24-2023-semdedup-d4/NOTES.md">D4 / SemDeDup</a></p>
+</blockquote>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. “文本不同”不等于“学到不同”</h2>
+<p>embedding diversity 衡量表面语义或预训练表示上的差异；model-aware diversity 衡量样本对<strong>当前模型更新方向</strong>的差异。</p>
+<p>两个问题可能词面不同，但诱导几乎平行的梯度；另两个词面接近的问题，可能分别需要不同算法，因此梯度方向显著不同。对 reasoning/coding data，后一种区分更接近“学习方向覆盖”。</p>
+</section>
+<section class="sec sec-math" id="sec-3"><h2><span class="n">3</span>2. Vendi 的共同数学骨架</h2>
+<p>给定单位化特征 $u_i$ ，构造核：</p>
+<p>$$K_{ij}=\frac{u_i^\top u_j}{n},\qquad \sum_j\lambda_j(K)=\mathrm{tr}(K)=1.$$</p>
+<p>Vendi Score 是谱分布的有效秩：</p>
+<p>$$\mathrm{VS}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$</p>
+<ul>
+<li>所有方向完全相同：VS 接近 1；</li>
+<li>$m$ 个正交且均匀方向：VS 接近 $m$ ；</li>
+<li>它不只是平均 pairwise distance，而是看整个方向谱是否被少数主成分支配。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. G-Vendi：把特征换成 model-induced gradients</h2>
+<p>Prismatic Synthesis 定义样本表征。这里用的不是最终 student model，也不是负责生成数据的 32B/72B teacher，而是一个单独的 <strong>gradient proxy model</strong>。论文主设置用 <strong>Qwen2.5-0.5B-Instruct</strong>，直接使用现成权重，<strong>不做额外 warm-up 或微调</strong>。对每条 \$(x,y)\$ 计算整个 proxy 的归一化 NLL 梯度：</p>
+<p>$$g_\theta(x,y)= \frac{-\nabla_\theta\log p_\theta(y\mid x)} {\lVert -\nabla_\theta\log p_\theta(y\mid x)\rVert_2},$$</p>
+<p>再用 Rademacher 随机矩阵 $\Pi\in\{-1,+1\}^{|\theta|\times d}$ 降到 $d=1024$ 维：</p>
+<p>$$\tilde g_\theta(x,y)=\Pi^\top g_\theta(x,y),\qquad d\ll |\theta|.$$</p>
+<p>对 $G=[\tilde g_1;\ldots;\tilde g_n]$ ，以 $GG^\top/n$ （或当 $n\gg d$ 时等价地使用 $G^\top G/n$ 的非零谱）计算 Vendi：</p>
+<p>$$\text{G-Vendi}(D)= \exp\left(-\sum_j\lambda_j\log\lambda_j\right).$$</p>
+<p>Proxy 选择的已核实对比（论文报告 G-Vendi 与 OOD 表现的 Spearman 相关性）：</p>
+<ul>
+<li><strong>Llama-3.2-1B-Instruct</strong>： $\rho=0.909$</li>
+<li><strong>Qwen2.5-0.5B-Instruct</strong>： $\rho=0.898$</li>
+<li><strong>Qwen2.5-0.5B base</strong>： $\rho=0.772$</li>
+</ul>
+<p>说明模型家族影响不算大，但 <strong>instruction-tuned proxy 明显好于 base model</strong>；若 proxy 与最终 student 同模型家族，可能更好。这也解释了论文为何强调无需 in-domain warm-up 的小型 instruction-tuned proxy 也可提供有用梯度几何。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. D4 / SemDeDup 与 G-Vendi 的关系</h2>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>表征</th>
+<th>优化对象</th>
+<th>适合阶段</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>exact / MinHash dedup</td>
+<td>字符、shingle</td>
+<td>去复制</td>
+<td>数据入口</td>
+</tr>
+<tr>
+<td>SemDeDup</td>
+<td>预训练 embedding</td>
+<td>去语义近重复</td>
+<td>大规模 corpus</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>embedding cluster / prototype</td>
+<td>去重后扩覆盖</td>
+<td>预训练选择</td>
+</tr>
+<tr>
+<td>Vendi</td>
+<td>任意用户给定 kernel</td>
+<td>量化集合有效多样性</td>
+<td>通用诊断</td>
+</tr>
+<tr>
+<td>G-Vendi</td>
+<td>当前/代理模型 loss gradient</td>
+<td>覆盖模型学习方向</td>
+<td>SFT/RL/合成闭环</td>
+</tr>
+</tbody>
+</table>
+<p>顺序不是“G-Vendi 替代去重”，而是：</p>
+<pre><code class="language-text">exact dedup -&gt; semantic dedup -&gt; quality gate -&gt; gradient-space coverage
+</code></pre>
+<p>低成本规则先缩池，昂贵梯度只算在剩余候选上。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Fisher/log-det：另一种 gradient-space coverage</h2>
+<p>SPICE 沿用 Fisher/D-optimal design 的集合目标：</p>
+<p>$$F_S=\sum_{i\in S}g_i g_i^\top, \qquad U(S)=\log\det(I+\alpha F_S).$$</p>
+<p>其候选边际覆盖增益为：</p>
+<p>$$\Delta_x(S) = \log\left( 1+\alpha g_x^\top(I+\alpha F_S)^{-1}g_x \right).$$</p>
+<p>它与 G-Vendi 都读取梯度谱，但优化语义不同：</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>集合量</th>
+<th>更直接鼓励什么</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G-Vendi</td>
+<td>归一化谱的指数熵</td>
+<td>有效方向数与谱均匀度</td>
+</tr>
+<tr>
+<td>Fisher/log-det</td>
+<td>$\log\det(I+\alpha F_S)$</td>
+<td>information volume 与新方向的边际增益</td>
+</tr>
+</tbody>
+</table>
+<p>两者还有一个共同边界：基于 $g_i g_i^\top$ 或 Gram spectrum 的 coverage 对 $g_i$ 与 $-g_i$ 不敏感。它们能识别“轴是否新”，不能单独识别“沿该轴更新的符号是否会抵消训练”。SPICE 因此在 Fisher marginal gain 外另加 sign-sensitive conflict penalty；完整推导见 <a href="09_spice_information_conflict.md"><code>09_spice_information_conflict.md</code></a>。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. Coverage-aware greedy selection</h2>
+<p>从目标化 shortlist 中迭代加入使谱熵增益最大的样本：</p>
+<p>$$z^*=\arg\max_{z\notin S} \left[\alpha v(z)+\beta\Delta\log\mathrm{GV}(z\mid S)\right] \quad\text{s.t.}\ r(z)\le\epsilon.$$</p>
+<p>生产上不必每次完整特征分解：</p>
+<ul>
+<li>先对低维梯度做 mini-batch k-means；</li>
+<li>稀疏簇配额上采样，密集簇降采样；</li>
+<li>周期性精确算 G-Vendi 作为监控，而非每个候选都做 eigendecomposition；</li>
+<li>记录每个簇的 correctness rate，防止“噪声 = 多样性”。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. 证据边界</h2>
+<p>Prismatic 报告 G-Vendi 与 OOD performance 的 Spearman $\rho\approx0.9$ ，且在 NLI 和数学推理上观察到；这是受控数据规模/质量下的秩相关。它不意味着：</p>
+<ul>
+<li>任意任务都能复现 0.9；</li>
+<li>最大化 G-Vendi 必然最大化准确率；</li>
+<li>随机/错误输出带来的梯度熵就是有益覆盖。</li>
+</ul>
+<p>因此至少联合三个 dashboard：<code>correctness × target alignment × G-Vendi</code>。</p>
+<blockquote class="pq">
+<p>相关：SPICE 的 Fisher 覆盖见 <a href="09_spice_information_conflict.md">09 SPICE</a>，系统实现见 <a href="06_system_architecture.md">06 系统架构</a>。</p>
+</blockquote>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>导航</h2>
+<ul>
+<li>上一篇：<a href="02_attribution_to_targeting.md">02 归因到目标化</a></li>
+<li>下一篇：<a href="04_prismatic_synthesis.md">04 Prismatic 主动生成</a></li>
+<li>回到：<a href="README.md">目录 README</a> | <a href="papers.md">论文证据</a> | <a href="README.md#路线图">路线图</a></li>
+</ul>
+<blockquote class="pq">
+<p>串联：01 统一框架 → 02 归因/目标化 → 03 覆盖 → 04 生成 → 05 安全 → 06 系统 → 07 Coding 落地 → 08 边界 → 09 SPICE → 论文证据</p>
+</blockquote></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/model-aware-data-curation/03_gradient_coverage.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

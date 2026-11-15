@@ -1,4 +1,6 @@
 # 09 — Roofline、Profiling 与性能调优
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/09_roofline_profiling_tuning.reading.html
+
 
 ## 1. Roofline 是假设生成器
 

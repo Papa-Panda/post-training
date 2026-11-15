@@ -1,4 +1,6 @@
 # 03 Hermes Harness — ahuachen/hermes-compression-eval
+> 📖 阅读版：https://papa-panda.github.io/post-training/eval-context-compression/03_hermes_harness.reading.html
+
 
 > Repo: https://github.com/ahuachen/hermes-compression-eval — offline probe-based harness for `hermes-agent`'s `ContextCompressor`
 

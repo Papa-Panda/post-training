@@ -1,4 +1,6 @@
 # 01 — GPU 架构演进：从吞吐处理器到 AI 数据通路
+> 📖 阅读版：https://papa-panda.github.io/post-training/gpu-architecture/01_architecture_evolution.reading.html
+
 
 ## 1. 不按产品表背架构
 

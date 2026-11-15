@@ -1,4 +1,6 @@
 # r2-Day03 — Topology and Ring Collectives
+> 📖 阅读版：https://papa-panda.github.io/post-training/ai-infra/r2-day-03-topo-nccl/README.reading.html
+
 
 ## Connection to Prev
 

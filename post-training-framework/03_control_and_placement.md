@@ -1,4 +1,6 @@
 # 03 — Control, Placement, and Resharding
+> 📖 阅读版：https://papa-panda.github.io/post-training/post-training-framework/03_control_and_placement.reading.html
+
 
 ## 1. Two control scales
 

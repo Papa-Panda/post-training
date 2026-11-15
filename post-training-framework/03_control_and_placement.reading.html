@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 — Control, Placement, and Resharding</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Post-Training Framework</span>
+    <h1>03 — Control, Placement, and Resharding</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. Two control scales</a><a href="#sec-2">2. Orchestration substrate versus RL semantics</a><a href="#sec-3">3. Role placement is a schedule</a><a href="#sec-4">4. A phase-time model</a><a href="#sec-5">5. Training layout versus generation layout</a><a href="#sec-6">6. Resharding cost model</a><a href="#sec-7">7. 3D-HybridEngine as an architectural lesson</a><a href="#sec-8">8. Resource-pool abstraction</a><a href="#sec-9">9. Communication surfaces</a><a href="#sec-10">10. Failure domains</a><a href="#sec-11">11. Placement experiment checklist</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>1. Two control scales</h2>
+<p>HybridFlow's central idea is easier to understand by separating control scales.</p>
+<h3>Inter-model dataflow</h3>
+<p>A single logical controller expresses coarse dependencies among policy generation, reward, reference, critic, and actor update:</p>
+<pre><code class="language-text">prompts
+  -&gt; actor.generate
+  -&gt; reward.compute + reference.logprob + critic.value
+  -&gt; advantage
+  -&gt; actor.update + critic.update
+</code></pre>
+<p>This view lets an algorithm researcher change the RL dataflow without manually programming every rank-to-rank message.</p>
+<h3>Intra-model execution</h3>
+<p>One logical model operation is collectively executed by many workers under data/tensor/pipeline/expert parallelism. A multi-controller worker abstraction handles these SPMD-like operations close to the distributed backend.</p>
+<p>The hierarchy is therefore:</p>
+<pre><code class="language-text">single controller: dependencies between models and stages
+multi-controller workers: collective execution inside one model role
+</code></pre>
+<p>It is not simply “Ray versus MPI.” The useful abstraction boundary is global RL logic versus internal model parallelism.</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. Orchestration substrate versus RL semantics</h2>
+<p>Ray-style actors and tasks are useful for launching role processes, reserving resources, handling futures, and coordinating failure/restart. That is the <strong>orchestration substrate</strong>. It does not by itself define:</p>
+<ul>
+<li>which policy/log-probability generated a token;</li>
+<li>when a GRPO group is complete;</li>
+<li>whether stale data is eligible;</li>
+<li>how training shards become inference shards;</li>
+<li>which reward or environment version is valid.</li>
+</ul>
+<p>Keep these framework-level contracts above the scheduler. The same logical dataflow may use Ray, a batch scheduler plus RPC services, or another runtime; replacing orchestration must not silently change the estimator.</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. Role placement is a schedule</h2>
+<p>Let role $j$ require memory $M_j(t)$ and compute time $C_j(t)$ during phase $t$ . If two roles are colocated on one device, feasibility requires</p>
+<p>$$\max_t\sum_j M_j(t)\le M_{\rm device},$$</p>
+<p>unless inactive role state is offloaded, sharded, or transformed. Placement also determines communication and idle time.</p>
+<p>Three common patterns are:</p>
+<h3>Fully colocated</h3>
+<p>Rollout and training reuse the same devices in alternating phases.</p>
+<ul>
+<li>advantage: high aggregate device utilization when one phase would otherwise leave dedicated hardware idle;</li>
+<li>cost: switching layouts, freeing caches, and reshaping weights; no true rollout/train overlap on the same capacity.</li>
+</ul>
+<h3>Disaggregated</h3>
+<p>Dedicated inference workers and training workers run concurrently.</p>
+<ul>
+<li>advantage: independent scaling and overlap;</li>
+<li>cost: repeated weight transfer, duplicated model memory, network dependency, and freshness lag.</li>
+</ul>
+<h3>Hybrid</h3>
+<p>Some roles share devices while reward/environment services or overflow rollout remain separate. This is often the realistic choice when model roles have different memory and latency profiles.</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. A phase-time model</h2>
+<p>For alternating colocated execution,</p>
+<p>$$T_{\rm iter}^{\rm coloc}=T_{\rm rollout}+T_{\rm switch}^{g\rightarrow t}+T_{\rm train}+T_{\rm switch}^{t\rightarrow g}.$$</p>
+<p>For an idealized disaggregated pipeline at steady state,</p>
+<p>$$T_{\rm iter}^{\rm disagg}\gtrsim\max(T_{\rm rollout},T_{\rm train},T_{\rm reward})+T_{\rm sync},$$</p>
+<p>but the pipeline fill/drain, queueing, and stale-sample loss are hidden in that lower bound. A fast nominal pipeline can have worse useful throughput if $T_{\rm sync}$ or rejection is large.</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. Training layout versus generation layout</h2>
+<p>Training and generation optimize different communication patterns:</p>
+<ul>
+<li>training shards parameters, gradients, and optimizer state to fit memory and scale matrix operations;</li>
+<li>generation may use tensor/pipeline parallelism optimized for token latency, KV-cache capacity, and many concurrent sequences.</li>
+</ul>
+<p>If a parameter tensor $W$ is held as training shards $S_i^{\rm train}(W)$ and inference requires shards $S_j^{\rm gen}(W)$ , publication performs a layout transform:</p>
+<p>$$\{S_i^{\rm train}(W)\}\rightarrow\{S_j^{\rm gen}(W)\}.$$</p>
+<p>This may require all-gather, all-to-all, point-to-point redistribution, host staging, or a distributed checkpoint format. “Copy weights” hides the main systems problem.</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. Resharding cost model</h2>
+<p>Let $P$ be total published parameter bytes. A rough lower bound is</p>
+<p>$$T_{\rm reshard}\ge \max\left(\frac{P_{\rm moved}}{B_{\rm effective}},\,T_{\rm serialization},\,T_{\rm synchronization}\right).$$</p>
+<p><code>P_moved</code> may be less than $P$ for delta synchronization, but effective bandwidth includes topology, contention, serialization, and receiving-side installation. Publication frequency $f$ consumes network rate approximately</p>
+<p>$$R_{\rm publish}\approx fP_{\rm moved}.$$</p>
+<p>Reducing $P_{\rm moved}$ with deltas saves bandwidth only if all workers share a verified base version and updates are applied atomically.</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. 3D-HybridEngine as an architectural lesson</h2>
+<p>HybridFlow/veRL's 3D-HybridEngine addresses switching an actor between training and generation while using different parallel layouts. The durable lesson is not one API name:</p>
+<ol>
+<li>model identity must survive layout changes;</li>
+<li>resharding must be part of the schedule and cost model;</li>
+<li>generation caches and training activations have distinct lifecycles;</li>
+<li>transition barriers must prevent mixed versions;</li>
+<li>placement should be chosen jointly with the algorithm's dataflow.</li>
+</ol>
+<p>See the paper and project in <a href="sources.md">sources.md</a> for implementation-specific claims.</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>8. Resource-pool abstraction</h2>
+<p>Represent devices as named resource pools with explicit membership and topology:</p>
+<pre><code class="language-text">pool_train: nodes 0..3, GPUs 0..7
+pool_rollout: nodes 4..5, GPUs 0..7
+pool_reward: nodes 6..7, GPUs 0..3
+</code></pre>
+<p>A role-to-pool mapping should declare:</p>
+<ul>
+<li>capacity and exclusivity;</li>
+<li>allowed parallel backends;</li>
+<li>colocated roles and phase schedule;</li>
+<li>network path to producers/consumers;</li>
+<li>failure/restart domain;</li>
+<li>weight and data format at boundaries.</li>
+</ul>
+<p>A flexible placement API is valuable because the best mapping changes with model sizes, sequence lengths, reward cost, and cluster topology.</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>9. Communication surfaces</h2>
+<p>List every cross-role transfer, not only gradients:</p>
+<table>
+<thead>
+<tr>
+<th>Transfer</th>
+<th>Typical payload</th>
+<th>Critical property</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sampler → rollout</td>
+<td>tokenized prompts, seeds, group IDs</td>
+<td>deterministic identity</td>
+</tr>
+<tr>
+<td>rollout → buffer</td>
+<td>trajectories, log-probs, traces</td>
+<td>append/idempotency</td>
+</tr>
+<tr>
+<td>buffer → learner</td>
+<td>packed token batches and manifests</td>
+<td>eligibility and lease</td>
+</tr>
+<tr>
+<td>actor → rollout</td>
+<td>full/delta weights and metadata</td>
+<td>atomic version</td>
+</tr>
+<tr>
+<td>actor → reference/critic</td>
+<td>optional initialization/checkpoints</td>
+<td>lifecycle independence</td>
+</tr>
+<tr>
+<td>environment → verifier</td>
+<td>execution evidence</td>
+<td>replayability</td>
+</tr>
+<tr>
+<td>evaluator → gate</td>
+<td>metrics and confidence intervals</td>
+<td>isolation from training</td>
+</tr>
+</tbody>
+</table>
+<p>For long-context agent RL, trajectory and KV-related data can rival model-sync traffic. Measure bytes by surface rather than assuming parameter movement always dominates.</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>10. Failure domains</h2>
+<ul>
+<li>A single-controller crash should be recoverable from durable stage/manifests rather than rerunning external side effects.</li>
+<li>A worker-group failure should invalidate its collective operation without corrupting unrelated roles.</li>
+<li>A publisher failure should leave the previous complete version active.</li>
+<li>An inference worker that misses an update should advertise its loaded behavior version rather than accepting jobs under the new label.</li>
+<li>A reward-service backlog should trigger backpressure or prioritization, not silently train on unscored placeholders.</li>
+</ul>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>11. Placement experiment checklist</h2>
+<p>For each candidate mapping, record:</p>
+<ol>
+<li>peak memory by phase and role;</li>
+<li>rollout, reward, train, and switch durations;</li>
+<li>bytes and topology for weight/data transfers;</li>
+<li>barrier idle and queue age;</li>
+<li>policy lag and accepted-token rate;</li>
+<li>restart blast radius;</li>
+<li>algorithm code changes required by the placement.</li>
+</ol>
+<p>A placement wins only if it improves the end-to-end objective under controlled quality, not because one kernel or one role reports higher utilization.</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/post-training-framework/03_control_and_placement.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

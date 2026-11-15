@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 — Batch Prompting: 把问题打包，模型自己就想短了</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Reasoning Trace Analysis</span>
+    <h1>05 — Batch Prompting: 把问题打包，模型自己就想短了</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">1. 现象：batch 越大，想得越短</a><a href="#sec-2">2. 四种 overthinking 模式都被压缩</a><a href="#sec-3">3. 反直觉的对照：直接喊"想短点"没用</a><a href="#sec-4">4. 候选解释（注意：是假设，不是定论）</a><a href="#sec-5">5. 代价侧：self-doubt loop 会耗尽预算</a><a href="#sec-6">6. 与 04 的关系：两种干预路线</a><a href="#sec-7">7. 代码对应</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>把多个问题打包进一次请求（batch prompting），推理 token 从平均 2,950 降到 710（降 $76\%$ ），准确率持平或提升。"Reasoning Under Constraint"（Saurabh Srivastava、Janit Bidhan 等，2511.04108）在 DeepSeek-R1 与 OpenAI-o1、13 个 benchmark 上报告了这个效应。</p>
+<p>Packing multiple questions into one request (batch prompting) cuts mean reasoning tokens from 2,950 to 710 (a $76\%$ drop) while accuracy holds or improves. "Reasoning Under Constraint" (Saurabh Srivastava, Janit Bidhan, et al., 2511.04108) reports this on DeepSeek-R1 and OpenAI-o1 across 13 benchmarks.</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>1. 现象：batch 越大，想得越短</h2>
+<p>主对比是 batch size 1 → 15（论文 Figure 1）：</p>
+<ul>
+<li>平均 reasoning tokens：2,950 → 710，下降 $76\%$ 。</li>
+<li>准确率：保持或提升，没有为简短付出代价。</li>
+<li>输出 token 同样下降 83–88% （注意这是输出侧，不是推理侧）。</li>
+</ul>
+<p>这不是"模型被要求简短"——batch prompting 没有加任何长度指令。变短是<strong>涌现的</strong>。</p>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>2. 四种 overthinking 模式都被压缩</h2>
+<p>论文 Figure 4 比较 batch size 1 → 5 时四种模式的频率（频率按 reasoning trace length 归一化）：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>BS=1</th>
+<th>BS=5</th>
+<th>降幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hedging（"wait"、"hold on"、"let me double-check"…）</td>
+<td>0.42</td>
+<td>0.18</td>
+<td>$57\%$</td>
+</tr>
+<tr>
+<td>rechecking</td>
+<td>0.55</td>
+<td>0.22</td>
+<td>$60\%$</td>
+</tr>
+<tr>
+<td>re-derivation</td>
+<td>0.38</td>
+<td>0.16</td>
+<td>$58\%$</td>
+</tr>
+<tr>
+<td>irrelevant tangents</td>
+<td>0.31</td>
+<td>0.12</td>
+<td>$61\%$</td>
+</tr>
+<tr>
+<td>平均降幅</td>
+<td></td>
+<td></td>
+<td>$59\%$</td>
+</tr>
+</tbody>
+</table>
+<p>四种模式无一例外被压缩，平均降 $59\%$ 。这说明 batch 压掉的不是某一种措辞习惯，而是整类元认知空转。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>3. 反直觉的对照：直接喊"想短点"没用</h2>
+<p>论文做了一个关键对照：显式约束如 "Use no more than 100 tokens in thinking"，模型<strong>要么忽略，要么牺牲准确率</strong>。指令式压缩失败，结构式压缩（batch）成功。</p>
+<p>这个对照的工程含义：overthinking 不是模型"不听话"，而是单问题、长上下文的默认工作模式给了它空转的空间。压缩要改变任务结构，而不是加指令。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>4. 候选解释（注意：是假设，不是定论）</h2>
+<p>论文提出了三个候选解释，并<strong>明确标注为 candidate hypotheses / conjectures</strong>，不是已证明的机制：</p>
+<ol>
+<li><strong>Shared-context pressure</strong>：多个问题共享上下文，模型被迫分配注意力，没空在单个问题上打转。</li>
+<li><strong>Sequential anchoring / in-context pattern induction</strong>：前面的短答为后面的生成定了"简洁"的上下文锚。</li>
+<li><strong>Implicit difficulty calibration</strong>：看到一堆问题，模型隐式校准了难度预期，不再对每题都"如临大敌"。</li>
+</ol>
+<p>引用时必须保留这个限定：论文没有证明是哪一个（或哪几个）在起作用。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>5. 代价侧：self-doubt loop 会耗尽预算</h2>
+<p>论文还记录了反面：self-doubt loop 可能耗尽 token budget，导致 API timeout 和 accuracy 下降。这是对 04 章的呼应——空转不只是浪费钱，在有硬预算的 serving 场景下会直接变成失败。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>6. 与 04 的关系：两种干预路线</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Peng 的两步法（04）</th>
+<th>Batch prompting（本章）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>干预点</td>
+<td>prompt 指令：先验输入，够信息就短答</td>
+<td>任务结构：打包多个问题</td>
+</tr>
+<tr>
+<td>假设</td>
+<td>模型听指令</td>
+<td>模型受上下文结构影响</td>
+</tr>
+<tr>
+<td>优点</td>
+<td>单问题可用</td>
+<td>不用改 prompt，大幅压缩</td>
+</tr>
+<tr>
+<td>缺点</td>
+<td>指令可能被忽略（本章 §3 已证）</td>
+<td>需要攒 batch，有延迟代价</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>7. 代码对应</h2>
+<p><code>code/trace_lab.py</code> 的 (c) 部分用 <code>LONG_TRACE</code> vs <code>BATCHED_TRACE</code> 复现了 Figure 4 的定性结论：同一道题，长 trace 里四种模式频率显著高于 batched 短 trace；<code>pattern_frequencies</code> 的"按每 100 token 归一化"与论文的归一化口径一致。<code>tests/test_trace_lab.py</code> 断言 batched 版每种模式都不高于 long 版，且至少一种严格更低。</p></section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/reasoning-trace-analysis/05_batch_prompting.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
