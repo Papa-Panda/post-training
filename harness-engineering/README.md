@@ -121,15 +121,15 @@ $A$ 做 failure attribution； $\rho_\phi$ 是人工、LLM proposer 或搜索算
 
 ## 7. 阅读路线
 
-1. [`01_harness_vs_model.md`](01_harness_vs_model.md)：frozen model 的非参数优化、诱导轨迹分布、updating 与 benefit。
-2. [`02_agent_runtime_loop.md`](02_agent_runtime_loop.md)：状态机、工具事务、event sourcing、停止与恢复。
-3. [`03_context_and_persistent_memory.md`](03_context_and_persistent_memory.md)：context compiler、预算选择、memory 写入与污染控制。
-4. [`04_workflow_and_subagents.md`](04_workflow_and_subagents.md)：workflow graph、调度、join/cancel、并行成本和搜索。
-5. [`05_harness_optimization.md`](05_harness_optimization.md)：context/workflow/code 三层搜索、Pareto archive 与 optimizer overfitting。
-6. [`06_self_improving_harness.md`](06_self_improving_harness.md)：failure attribution、proposal contract、accept/reject/rollback 的完整闭环。
-7. [`07_observability_evaluation_security.md`](07_observability_evaluation_security.md)：外置 verifier/permission、统计 gate、威胁模型与发布状态机。
-8. [`08_harness_rl_and_weight_updates.md`](08_harness_rl_and_weight_updates.md)：与 post-training、replay buffer、rollout infra 的双时间尺度接口。
-9. [`papers.md`](papers.md)：逐篇证据账本。
+1. [`01_harness_vs_model.md`](01_harness_vs_model.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/01_harness_vs_model.html)：frozen model 的非参数优化、诱导轨迹分布、updating 与 benefit。
+2. [`02_agent_runtime_loop.md`](02_agent_runtime_loop.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/02_agent_runtime_loop.html)：状态机、工具事务、event sourcing、停止与恢复。
+3. [`03_context_and_persistent_memory.md`](03_context_and_persistent_memory.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/03_context_and_persistent_memory.html)：context compiler、预算选择、memory 写入与污染控制。
+4. [`04_workflow_and_subagents.md`](04_workflow_and_subagents.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/04_workflow_and_subagents.html)：workflow graph、调度、join/cancel、并行成本和搜索。
+5. [`05_harness_optimization.md`](05_harness_optimization.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/05_harness_optimization.html)：context/workflow/code 三层搜索、Pareto archive 与 optimizer overfitting。
+6. [`06_self_improving_harness.md`](06_self_improving_harness.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/06_self_improving_harness.html)：failure attribution、proposal contract、accept/reject/rollback 的完整闭环。
+7. [`07_observability_evaluation_security.md`](07_observability_evaluation_security.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/07_observability_evaluation_security.html)：外置 verifier/permission、统计 gate、威胁模型与发布状态机。
+8. [`08_harness_rl_and_weight_updates.md`](08_harness_rl_and_weight_updates.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/08_harness_rl_and_weight_updates.html)：与 post-training、replay buffer、rollout infra 的双时间尺度接口。
+9. [`papers.md`](papers.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/papers.html)：逐篇证据账本。
 10. [`code/`](code/) + [`tests/`](tests/)：标准库实现与回归测试。
 
 ## 8. 每章阅读模板
@@ -178,6 +178,6 @@ Demo 覆盖：context/workflow/tool/memory 四类 edit surface；带 evidence、
 <!-- NAVIGATION -->
 ## 导航
 
-- 开始阅读：[01 Harness vs Model](01_harness_vs_model.md)
-- 证据账本：[papers.md](papers.md)
+- 开始阅读：[01 Harness vs Model](01_harness_vs_model.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/01_harness_vs_model.html)
+- 证据账本：[papers.md](papers.md) [📖](https://papa-panda.github.io/post-training/harness-engineering/papers.html)
 - 运行代码：[code/demo.py](code/demo.py) · [tests/test_harness_lab.py](tests/test_harness_lab.py)
