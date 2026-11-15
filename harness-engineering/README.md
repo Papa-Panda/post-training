@@ -167,6 +167,14 @@ Demo 覆盖：context/workflow/tool/memory 四类 edit surface；带 evidence、
 
 本专题由 Lilian Weng 的综述 [Harness Engineering for Self-Improvement](https://lilianweng.github.io/posts/2026-07-04-harness/) 启动；所有重要实验结论回到原论文核查。
 
+## 12. Daily 系列：各家 Harness 设计核查
+
+> 01–08 章是理论；Daily 系列逐日核查各家厂商的落地设计，一天一篇，格式与 `ai-data/`、`synthetic-data/` 的 daily 系列一致（day 文件夹 + NOTES.md + 阅读版 + reading-log.csv）。每篇只写一手来源核实过的事实，未核实项明确标注，不进结论。
+
+| Day | Date | 主题 | 阅读版 |
+|---:|---|---|---|
+| 01 | 2026-11-15 | 各家 Harness 设计大调查：append-only + 70% 压缩模板，谁收敛了、谁没有 | [📖](https://papa-panda.github.io/post-training/harness-engineering/day-01-vendor-harness-survey/) |
+
 <!-- NAVIGATION -->
 ## 导航
 

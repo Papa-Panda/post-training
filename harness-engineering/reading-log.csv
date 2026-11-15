@@ -1,0 +1,2 @@
+date,title,authors,tags,one_line_takeaway,folder,link,status
+2026-11-15,各家 Harness 设计大调查：append-only + 70% 压缩模板，谁收敛了、谁没有，Jun 讨论 + 九家官方文档,harness;context-engineering;kv-cache;compaction;vendor-survey,没有一家用 70% 当默认压缩阈值（Claude 约 96.7%、Gemini 50%），但子 agent 隔离 + 摘要返回是五家以上的共识,day-01-vendor-harness-survey,https://papa-panda.github.io/post-training/harness-engineering/day-01-vendor-harness-survey/,Done
