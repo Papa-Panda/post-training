@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 — Context 与持久记忆：Compiler、Budget 与 Provenance</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>03 — Context 与持久记忆：Compiler、Budget 与 Provenance</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. State：四种信息寿命</a><a href="#sec-3">2. Context selection 是约束优化</a><a href="#sec-4">3. Context compilation pipeline</a><a href="#sec-5">4. Compression 的信息损失</a><a href="#sec-6">5. ACE：增量 playbook 而非整段重写</a><a href="#sec-7">6. MCE：优化 context-management program</a><a href="#sec-8">7. Persistent memory 的读写语义</a><a href="#sec-9">8. Memory lifecycle</a><a href="#sec-10">9. Failure attribution for context</a><a href="#sec-11">10. 与 ICL 的边界</a><a href="#sec-12">11. Failure modes</a><a href="#sec-13">12. Engineering checklist</a><a href="#sec-14">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>核心论文</dt><dd><a href="<a href="https://arxiv.org/abs/2510.04618v3">https://arxiv.org/abs/2510.04618v3</a>">ACE</a> · <a href="<a href="https://arxiv.org/abs/2601.21557">https://arxiv.org/abs/2601.21557</a>">MCE</a></dd><dt>内容边界</dt><dd><a href="../ICL/README.md"><code>ICL/</code></a> 研究给定 demonstrations 后模型为何改变预测；本章研究 runtime 如何选择、编译、更新和持久化 context。</dd><dt>本章目标</dt><dd>把“多塞一些历史”改写成一个有预算、版本、来源与写入门控的状态管理问题。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. State：四种信息寿命</h2>
+<p>在 runtime 状态 $s_t$ 中，信息按寿命和权威性分层：</p>
+<pre><code class="language-text">request facts       当前请求原文与不可漂移约束
+working context     本次模型调用所需的短上下文
+checkpoint state    阶段状态、决策、未完成项、artifact refs
+evidence store      原始 trace、文件、diff、工具结果、verifier evidence
+</code></pre>
+<p>长期 memory 不是第五种“更长 prompt”，而是 evidence store 上的一个可检索、带 provenance 的视图。Context compiler：</p>
+<p>$$c_t=C_{h^C}(s_t;B_t^{\mathrm{ctx}}).$$</p>
+<p>它输出的是一次调用的有序 token 序列，不等于持久状态本身。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Context selection 是约束优化</h2>
+<p>候选信息项为 $I_t=\{i_1,\ldots,i_n\}$ 。每项有 token 成本 $\ell_i$ 、相关性 $r_i$ 、可信度 $g_i$ 、新鲜度 $f_i$ 、依赖集合 $P_i$ 。选择集合 $S$ ：</p>
+<p>$$S_t^\star=\arg\max_{S\subseteq I_t}\left[\sum_{i\in S}u(i\mid s_t)-\lambda_DD(S)-\lambda_CC(S)\right],$$</p>
+<p>$$\text{s.t.}\quad \sum_{i\in S}\ell_i\le B_t^{\mathrm{ctx}},\qquad i\in S\Rightarrow P_i\subseteq S.$$</p>
+<p>$D(S)$ 惩罚重复， $C(S)$ 惩罚冲突/过期组合。这个问题类似带依赖的 knapsack；实践中常用分层 quota、MMR、greedy coverage 和 hard priority，而不是求精确最优。</p>
+<p>一项合理的 utility 可以写成：</p>
+<p>$$u(i\mid s_t)=\alpha r_i+\beta g_i+\gamma f_i+\eta\mathrm{CoverageGain}(i)-\lambda_R\mathrm{Risk}(i).$$</p>
+<p>语义相似度只是 $r_i$ 的一个特征；用户约束、当前 tool schema、失败证据通常比“看起来相关的旧对话”优先级更高。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. Context compilation pipeline</h2>
+<pre><code class="language-text">collect references
+  -&gt; authorize reads
+  -&gt; resolve versions
+  -&gt; rank/select under budget
+  -&gt; detect contradiction
+  -&gt; compress with source pointers
+  -&gt; order sections
+  -&gt; render tool/model schema
+  -&gt; hash compiled context
+</code></pre>
+<p>每步都有可测试 contract：</p>
+<ul>
+<li><code>collect</code> 只能读取允许 scope；</li>
+<li><code>resolve</code> 必须固定 artifact/version，避免 mid-run 漂移；</li>
+<li><code>select</code> 保留 mandatory constraints；</li>
+<li><code>compress</code> 不能丢 provenance；</li>
+<li><code>render</code> 必须满足模型/tool parser schema；</li>
+<li><code>hash</code> 让 rollout 可重现。</li>
+</ul>
+<p>推荐 context layout：</p>
+<pre><code class="language-text">[goal + success contract]
+[hard constraints + permissions]
+[current workflow node]
+[minimum state snapshot]
+[selected evidence with refs]
+[tool schemas]
+[requested output schema]
+</code></pre>
+<p>把工具结果或网页内容放在与系统约束相同层级，会放大 prompt injection；data plane 与 instruction plane 应显式分区。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. Compression 的信息损失</h2>
+<p>设原始证据 $E$ 、摘要 $z=S(E)$ 、当前决策目标 $Y$ 。理想摘要希望保留足够信息：</p>
+<p>$$I(z;Y)\approx I(E;Y),\qquad |z|\ll|E|.$$</p>
+<p>但 $Y$ 会随 workflow 节点变化，固定摘要不可能对所有未来问题都充分。工程上因此采用：</p>
+<ol>
+<li>原始 evidence 不删除；</li>
+<li>摘要带 source pointers；</li>
+<li>针对当前 query 动态展开；</li>
+<li>重要数值/权限/版本不做模糊压缩；</li>
+<li>摘要版本和生成模型写入 metadata。</li>
+</ol>
+<p>反复“摘要的摘要”会累积误差。设每轮保真率为 $1-\epsilon$ ，经过 $k$ 次独立压缩的粗略上界是 $(1-\epsilon)^k$ ；这不是现实误差模型，但直观说明为什么必须从原证据重建，而不是无限递归摘要。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. ACE：增量 playbook 而非整段重写</h2>
+<p><a href="https://arxiv.org/abs/2510.04618v3">Agentic Context Engineering</a> 采用 Generator→Reflector→Curator：</p>
+<p>$$\tau_t\sim p_{\theta,P_t}(\tau\mid x_t),\qquad \Delta_t=R(\tau_t,V),$$</p>
+<p>$$P_{t+1}=\mathrm{Merge}(P_t,\Delta_t).$$</p>
+<p>关键不是角色名称，而是增量、结构化、可追踪的 context update：稳定 ID、成功/失败 evidence、去重、冲突合并和条目生命周期。相对整段重写，它减少 context collapse 和 brevity bias。</p>
+<p>工程条目：</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;retry-after-timeout&quot;,
+  &quot;claim&quot;: &quot;Timeout 后先查询副作用状态，再决定是否重试&quot;,
+  &quot;scope&quot;: [&quot;external-write&quot;],
+  &quot;evidence&quot;: [&quot;run-17:event-42&quot;],
+  &quot;confidence&quot;: 0.93,
+  &quot;status&quot;: &quot;candidate&quot;,
+  &quot;supersedes&quot;: [],
+  &quot;validated_on&quot;: [&quot;eval-v5&quot;]
+}
+</code></pre>
+<p>ACE 报告的 agent/finance 改善与成本口径见 <a href="papers.md"><code>papers.md</code></a>；它支持“增量 context evolution 有效”，不证明所有任务都应使用相同三角色结构。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. MCE：优化 context-management program</h2>
+<p><a href="https://arxiv.org/abs/2601.21557">MCE</a> 把某个 skill $s$ 的 context function 写为：</p>
+<p>$$c_s(x)=F_s(x;\mathcal R_s),$$</p>
+<p>其中 $\mathcal R_s$ 是 prompts、knowledge bases、code 等资源， $F_s$ 是 retrieve/filter/format/update 算子。形成双层问题：</p>
+<p>$$c_s^\star=\arg\max_{c_s}J_{\mathrm{train}}(c_s;s),$$</p>
+<p>$$s^\star=\arg\max_{s\in\mathcal S}J_{\mathrm{val}}(c_s^\star;s).$$</p>
+<p>内层更新内容，外层更新“怎样管理内容”的 executable skill。它把 context engineering 从静态文本提升为 program synthesis，但同时产生更强 leakage 风险：外层若看到 validation labels，就会把评测逻辑编码进 retrieval/update policy。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. Persistent memory 的读写语义</h2>
+<p>Memory item $m$ 至少包含：</p>
+<p>$$m=(\text{claim},\text{scope},\text{source},\text{time},\text{confidence},\text{status},\text{acl}).$$</p>
+<p>写入 gate：</p>
+<p>$$\mathrm{Write}(m)=\mathrm{Grounded}(m)\land\mathrm{Relevant}(m)\land\mathrm{Authorized}(m)\land\neg\mathrm{Contradicted}(m).$$</p>
+<p>这还不够。不同类型要有不同策略：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>例子</th>
+<th>更新规则</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Immutable fact</td>
+<td>已确认接口版本</td>
+<td>新 evidence 不能静默覆盖，必须 supersede</td>
+</tr>
+<tr>
+<td>Preference</td>
+<td>用户输出格式偏好</td>
+<td>保留来源和适用 scope</td>
+</tr>
+<tr>
+<td>Procedure</td>
+<td>timeout recovery</td>
+<td>先 candidate，回归通过后 active</td>
+</tr>
+<tr>
+<td>Ephemeral state</td>
+<td>当前 job 进度</td>
+<td>TTL/完成后归档</td>
+</tr>
+<tr>
+<td>Hypothesis</td>
+<td>可能的 failure root cause</td>
+<td>明确未验证，不升级为事实</td>
+</tr>
+</tbody>
+</table>
+<p>读取时同时检查 ACL、scope、freshness 和 conflicts；“被存过”不等于“当前可用”。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. Memory lifecycle</h2>
+<pre><code class="language-text">OBSERVED -&gt; CANDIDATE -&gt; VALIDATED -&gt; ACTIVE
+                 |           |          |
+                 +-&gt; REJECTED           +-&gt; STALE -&gt; SUPERSEDED
+</code></pre>
+<ul>
+<li><code>OBSERVED</code>：原始 trace 中出现；</li>
+<li><code>CANDIDATE</code>：被提炼成结构化条目；</li>
+<li><code>VALIDATED</code>：有独立证据支持；</li>
+<li><code>ACTIVE</code>：context compiler 可选择；</li>
+<li><code>STALE</code>：版本/时间条件改变；</li>
+<li><code>SUPERSEDED</code>：被新条目替代但保留 lineage。</li>
+</ul>
+<p>删除 active rule 前要检查依赖；否则 workflow 可能引用失效 memory ID。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. Failure attribution for context</h2>
+<p>Context 失败不要统一写成“模型没注意”。至少区分：</p>
+<ol>
+<li><strong>Missing</strong>：必要 evidence 未被检索；</li>
+<li><strong>Buried</strong>：已检索但顺序/长度使其失效；</li>
+<li><strong>Contradictory</strong>：新旧版本同时出现；</li>
+<li><strong>Untrusted</strong>：外部文本被当成指令；</li>
+<li><strong>Overcompressed</strong>：摘要丢失数值或条件；</li>
+<li><strong>Stale</strong>：旧状态覆盖当前环境；</li>
+<li><strong>Mis-scoped</strong>：某任务经验被泛化到不适用任务；</li>
+<li><strong>Write pollution</strong>：错误推断进入长期 memory。</li>
+</ol>
+<p>可定义 attribution score：</p>
+<p>$$A_C(i)=\Pr(Y=1\mid i\ \mathrm{included})-\Pr(Y=1\mid i\ \mathrm{excluded}),$$</p>
+<p>但单条 observational trace 不能识别因果。更可信的方法是 counterfactual replay：固定 model seed/预算，只改变 context item；对随机模型则做多次配对 rollout。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>10. 与 ICL 的边界</h2>
+<p><a href="../ICL/README.md"><code>ICL/</code></a> 研究给定 $c$ 时 $\pi_\theta(y\mid x,c)$ 的机制；本章研究 $c=C_{h^C}(s)$ 的构造与生命周期。接口是：</p>
+<pre><code class="language-text">persistent state -&gt; context compiler -&gt; ICL behavior -&gt; action trace
+       ^                                      |
+       +----------- validated update --------+
+</code></pre>
+<p>不能用 ICL 的“模型会从示例学习”替代 memory correctness；错误示例也会被学习。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>11. Failure modes</h2>
+<ul>
+<li>append-all 导致 token 成本和干扰单调增长；</li>
+<li>只用 embedding similarity，遗漏权限、依赖和版本；</li>
+<li>summary 无 source pointer，无法验证；</li>
+<li>held-out failure 被写入 active memory，造成 test leakage；</li>
+<li>多 agent 同时写同一条目，产生 lost update；</li>
+<li>规则永不过期，旧工具 schema 长期污染；</li>
+<li>proposer 可写 system constraints，memory 变成权限逃逸通道；</li>
+<li>为单一 benchmark 写出的 heuristics 被误称为通用知识。</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>12. Engineering checklist</h2>
+<ul>
+<li>[ ] working context、checkpoint、evidence store 分层；</li>
+<li>[ ] 每次 compiled context 有 digest 和 source refs；</li>
+<li>[ ] mandatory constraints 不参与普通 relevance 竞争；</li>
+<li>[ ] memory 有 schema、ACL、scope、TTL、status 和 supersedes；</li>
+<li>[ ] 原始 evidence 保留，摘要可重建；</li>
+<li>[ ] memory edit 与 verifier/permission 隔离；</li>
+<li>[ ] context ablation 使用配对 rollout，而不是凭直觉归因；</li>
+<li>[ ] $D_{\mathrm{ho}}$ 与 $D_{\mathrm{test}}$ 不进入可写 memory。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>导航</h2>
+<ul>
+<li>上一篇：<a href="02_agent_runtime_loop.md">02 Agent Runtime Loop</a></li>
+<li>下一篇：<a href="04_workflow_and_subagents.md">04 Workflow 与 Subagents</a></li>
+<li>回到：<a href="README.md">专题 README</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

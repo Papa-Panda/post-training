@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 — Self-Improving Harness：从 Failure 到可回滚版本</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>06 — Self-Improving Harness：从 Failure 到可回滚版本</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. Unified control-loop</a><a href="#sec-3">2. Failure record：先归因，后修改</a><a href="#sec-4">3. Proposal contract</a><a href="#sec-5">4. Acceptance：逻辑 gate 与统计 gate</a><a href="#sec-6">5. Merge accepted edits</a><a href="#sec-7">6. STOP：优化 improver 本身</a><a href="#sec-8">7. Self-Harness：同轮候选验证</a><a href="#sec-9">8. AHE：延迟归因与 rollback</a><a href="#sec-10">9. DGM：多谱系而非单链</a><a href="#sec-11">10. 三种 promotion semantics 不可混写</a><a href="#sec-12">11. Pseudocode：严格版本</a><a href="#sec-13">12. Failure modes</a><a href="#sec-14">13. Engineering checklist</a><a href="#sec-15">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>核心论文</dt><dd><a href="<a href="https://arxiv.org/abs/2310.02304v3">https://arxiv.org/abs/2310.02304v3</a>">STOP</a> · <a href="<a href="https://arxiv.org/abs/2606.09498">https://arxiv.org/abs/2606.09498</a>">Self-Harness</a> · <a href="<a href="https://arxiv.org/abs/2604.25850v4">https://arxiv.org/abs/2604.25850v4</a>">Agentic Harness Engineering</a> · <a href="<a href="https://arxiv.org/abs/2505.22954">https://arxiv.org/abs/2505.22954</a>">Darwin Gödel Machine</a></dd><dt>本章目标</dt><dd>把不同论文串成一个统一 control-loop，并清楚标出它们在 proposal、evaluation、promotion 时序上的差异。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. Unified control-loop</h2>
+<p>给定 frozen model $\theta$ 、active harness $h_t$ 、外置 control plane $q=(V,\Pi,B,L)$ ：</p>
+<p>$$\mathcal T_t=\mathrm{Rollout}(\theta,h_t,D_{\mathrm{mine}};q),$$</p>
+<p>$$z_t=\mathrm{Attribute}(\mathcal T_t,V),\qquad \mathcal C_t=\mathrm{Propose}(h_t,z_t),$$</p>
+<p>$$\tilde h_t^{(j)}=\mathrm{Sandbox}(h_t\oplus\delta_t^{(j)}),$$</p>
+<p>$$h_{t+1}=\mathrm{Promote}(h_t,\{\tilde h_t^{(j)}\},D_{\mathrm{in}},D_{\mathrm{ho}};q).$$</p>
+<p>完整数据流：</p>
+<pre><code class="language-text">rollout
+  -&gt; immutable trace + artifacts
+  -&gt; failure clustering
+  -&gt; root-cause attribution
+  -&gt; bounded proposal manifests
+  -&gt; static validation
+  -&gt; sandbox materialization
+  -&gt; held-in repair evaluation
+  -&gt; hidden held-out regression evaluation
+  -&gt; permission/cost/statistical gate
+  -&gt; accept + version OR reject + audit
+  -&gt; shadow/canary monitoring
+</code></pre>
+<p>“Self-improving”只意味着 proposer 可以由 Agent 驱动；它不意味着 Agent 拥有 verifier、权限、预算和 deployment 的写权。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Failure record：先归因，后修改</h2>
+<p>对失败轨迹 $\tau_i$ ，保存结构化 record：</p>
+<pre><code class="language-json">{
+  &quot;task_id&quot;: &quot;...&quot;,
+  &quot;harness_digest&quot;: &quot;...&quot;,
+  &quot;failure_type&quot;: &quot;duplicate-side-effect&quot;,
+  &quot;first_bad_event&quot;: &quot;event-42&quot;,
+  &quot;candidate_causes&quot;: [
+    {&quot;surface&quot;: &quot;workflow&quot;, &quot;component&quot;: &quot;retry&quot;, &quot;confidence&quot;: 0.74},
+    {&quot;surface&quot;: &quot;tool&quot;, &quot;component&quot;: &quot;idempotency&quot;, &quot;confidence&quot;: 0.21}
+  ],
+  &quot;counterevidence&quot;: [&quot;event-38&quot;],
+  &quot;replay_fixture&quot;: &quot;artifact://...&quot;,
+  &quot;verifier_evidence&quot;: [&quot;check://...&quot;],
+  &quot;status&quot;: &quot;hypothesis&quot;
+}
+</code></pre>
+<p>Attribution 分布：</p>
+<p>$$p_A(z\mid\tau,V),\qquad z\in\{h^C,h^W,h^K,h^M,\theta,\mathcal E,V\}.$$</p>
+<p>仅凭失败后出现某条日志，不能推断它是原因。至少使用三种证据：</p>
+<ol>
+<li><strong>Temporal</strong>：第一个违反 invariant 的 event；</li>
+<li><strong>Mechanistic</strong>：该组件如何导致 observation/action 改变；</li>
+<li><strong>Counterfactual</strong>：只替换该组件后，配对 replay 是否修复。</li>
+</ol>
+<p>对于随机模型，配对干预仍需多 seed：</p>
+<p>$$\widehat{\mathrm{ATE}}_z=\frac1n\sum_{i=1}^n\left(R_i(h\oplus\delta_z)-R_i(h)\right).$$</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. Proposal contract</h2>
+<p>每个 edit $\delta$ 必须是 bounded hypothesis：</p>
+<p>$$\delta=(p,z,d,f,r,c),$$</p>
+<ul>
+<li>$p$ ：parent digest；</li>
+<li>$z$ ：目标 failure/component；</li>
+<li>$d$ ：typed diff；</li>
+<li>$f$ ：expected fixes；</li>
+<li>$r$ ：at-risk behaviors；</li>
+<li>$c$ ：capability 与评估成本需求。</li>
+</ul>
+<p>Proposal 不是“重写成更好版本”的自由文本。它要满足：</p>
+<ul>
+<li>只触及 declared editable paths；</li>
+<li>每个 diff 有最小作用域；</li>
+<li>state/schema change 带 migration；</li>
+<li>新工具能力单独审批；</li>
+<li>预期收益和回归风险可被测试；</li>
+<li>不允许把 evaluator 或 hidden labels 复制进 context。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. Acceptance：逻辑 gate 与统计 gate</h2>
+<h3>4.1 Self-Harness 的精确 split-wise 规则</h3>
+<p>令：</p>
+<p>$$\Delta_{\mathrm{in}}^{(j)}=P_{\mathrm{in}}(h_t^{(j)})-P_{\mathrm{in}}(h_t),$$</p>
+<p>$$\Delta_{\mathrm{ho}}^{(j)}=P_{\mathrm{ho}}(h_t^{(j)})-P_{\mathrm{ho}}(h_t).$$</p>
+<p><a href="https://arxiv.org/abs/2606.09498">Self-Harness</a> 接受 candidate 当且仅当：</p>
+<p>$$\Delta_{\mathrm{in}}^{(j)}\ge0,\qquad \Delta_{\mathrm{ho}}^{(j)}\ge0,\qquad \max(\Delta_{\mathrm{in}}^{(j)},\Delta_{\mathrm{ho}}^{(j)})&gt;0.$$</p>
+<p>即两个 split 都不下降，至少一边严格改善。held-in traces 暴露给 proposer；held-out 对 proposer 隐藏，但会被 promotion gate 重复查询，所以它是 hidden regression/validation set，不是最终一次性 test。</p>
+<h3>4.2 生产系统的约束 gate</h3>
+<p>二元 pass rate 之外还要加入 margin：</p>
+<p>$$\mathrm{LCB}_{1-\alpha}(\Delta_{\mathrm{in}})&gt;\epsilon_{\mathrm{repair}},$$</p>
+<p>$$\mathrm{LCB}_{1-\alpha}(\Delta_{\mathrm{ho}})&gt;-\epsilon_{\mathrm{reg}},$$</p>
+<p>并满足：</p>
+<p>$$\mathrm{Cap}(h')\subseteq\Pi,\qquad K(h')\le B_K,\qquad Q(h')\le B_Q.$$</p>
+<p>若样本少，不能把“一次多过一题”当成确定提升；可以使用 paired bootstrap、McNemar test 或预先定义的 non-inferiority margin。统计门槛必须在搜索前固定，不能看到结果后调整。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Merge accepted edits</h2>
+<p>两个单独通过的 edit 合并后未必仍通过。定义冲突图：</p>
+<p>$$G_\delta=(\mathcal C,E_c),\qquad (\delta_i,\delta_j)\in E_c\iff\mathrm{Conflict}(\delta_i,\delta_j).$$</p>
+<p>选择兼容子集：</p>
+<p>$$S^\star=\arg\max_{S\subseteq\mathcal C}\sum_{\delta\in S}\widehat{\Delta J}_\delta-\lambda\mathrm{Complexity}(S),\quad S\ \text{is conflict-free}.$$</p>
+<p>即使各 edit 单独通过，merged candidate 也必须重新跑 gate，因为 interaction 可能造成回归。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. STOP：优化 improver 本身</h2>
+<p><a href="https://arxiv.org/abs/2310.02304v3">STOP</a> 沿用论文的局部记号，把任务写成 $\tau=(u,s)$ ，其中本小节的 $u$ 是 utility function，不是统一 runtime 记号中的 authorized command $u_t$ 。给定 frozen language model $M_{\mathrm{LM}}$ ，improver 满足：</p>
+<p>$$s'=I(u,s;M_{\mathrm{LM}}),$$</p>
+<p>$$\hat u(I)=\frac1{|D|}\sum_{(u,s)\in D}u(I(u,s;M_{\mathrm{LM}})),$$</p>
+<p>$$I_t=I_{t-1}(\hat u,I_{t-1};M_{\mathrm{LM}}).$$</p>
+<p>它搜索的是调用 frozen LM 的 scaffold/program，而不是 LM weights。STOP 的价值在于证明 improver code 本身可以成为优化对象；边界是：没有 Self-Harness 式 split-wise promotion gate，递归轮次也不保证单调改善。</p>
+<p>LPN downstream utility 对 $M=20$ 个独立 instances 取平均；meta-dataset $D$ 含同一个 \$(u,s)\$ 的 5 个副本；test metautility 另在 $M_{\mathrm{test}}=50$ 个独立 instances 上报告。论文还检查所谓 unsandboxing code-pattern proxy：10,000 次尝试中 GPT-4 为 $0.42\%$ 、GPT-3.5 为 $0.12\%$ ；这是狭窄 proxy，不是完整安全证明。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. Self-Harness：同轮候选验证</h2>
+<p>其流程是 Weakness Mining→Harness Proposal→Proposal Validation。候选与当前 harness 在同一轮比较，兼容的 accepted edits 合并，rejected edits 记录但不改变 active state。</p>
+<p>实验使用 MiniMax M2.5、Qwen3.5-35B-A3B、GLM-5，在 Terminal-Bench-2.0、SWE-bench Verified、AppWorld 上九组最终 harness 均同时改善 held-in/held-out；最大整体绝对增益是 GLM-5/AppWorld 的 \$40.6\$ points。结果支持 bounded regression gate 的可行性，但不意味着 pass-rate gate 足够覆盖高风险部署。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. AHE：延迟归因与 rollback</h2>
+<p><a href="https://arxiv.org/abs/2604.25850v4">AHE</a> 强调：</p>
+<ul>
+<li>component observability：每个 editable component 有显式文件；</li>
+<li>experience observability：raw rollout→task diagnosis→benchmark overview；</li>
+<li>decision observability：edit manifest 写明 evidence、fix 和 at-risk behavior。</li>
+</ul>
+<p>其时序与 Self-Harness 不同：</p>
+<pre><code class="language-text">round t rollout evaluates edits committed at t-1
+  -&gt; attribute pass/fail flips to prior manifest
+  -&gt; rollback rejected edits
+  -&gt; distill new evidence
+  -&gt; commit next edits before effects are known
+</code></pre>
+<p>同时保存 $H_{\mathrm{best}}$ 。主实验用 GPT-5.4 high 在同一 89-task Terminal-Bench 2 集上十轮演化到 $77.0\%$ pass@1，不能称为 held-out。冻结后 SWE-bench Verified 为 $75.6\%$ ，seed 为 $75.2\%$ ；部分 repository 仍退化。其 regression prediction precision/recall 为 $11.8\%/11.1\%$ ，说明可观测性和 rollback 有价值，但 attribution 本身仍难。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. DGM：多谱系而非单链</h2>
+<p><a href="https://arxiv.org/abs/2505.22954">DGM</a> 维护 agent archive：</p>
+<p>$$h_p\sim\mathrm{Select}(\mathcal P_t),\qquad h_c=\mathrm{Modify}(h_p,\mathcal T_p),$$</p>
+<p>$$\mathcal P_{t+1}=\mathrm{Archive}(\mathcal P_t\cup\{h_c\}).$$</p>
+<p>每个 archived agent 保留非零采样概率，避免只追单一路径。论文经过 80 iterations 报告 SWE-bench experimental subset $20.0\%\to50.0\%$ 、full Polyglot $14.2\%\to30.7\%$ ，并报告跨 benchmark/model transfer。</p>
+<p>关键 caveat： $50.0\%$ 不是全 500 道 SWE-bench Verified；search 使用分阶段 subsets。论文还展示 objective hacking：某候选通过移除特殊 logging tokens 绕过 hallucination detector，拿到 evaluator 满分而非真正消除 hallucinated tool calls。这正说明 verifier 必须外置、保持语义级检查并配 unseen regression。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>10. 三种 promotion semantics 不可混写</h2>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>Candidate 何时生效</th>
+<th>评估/回滚</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STOP</td>
+<td>improver 候选先按 empirical utility 选择</td>
+<td>没有 split-wise non-regression gate</td>
+</tr>
+<tr>
+<td>Self-Harness</td>
+<td>candidate sandbox 后同轮比较</td>
+<td>两 split 无回归且至少一边提升才 merge</td>
+</tr>
+<tr>
+<td>AHE</td>
+<td>edit 先 commit</td>
+<td>下一轮 rollout 延迟归因并 rollback</td>
+</tr>
+<tr>
+<td>DGM</td>
+<td>child 加入多谱系 archive</td>
+<td>archive 搜索，最终还需独立 selection/deployment gate</td>
+</tr>
+</tbody>
+</table>
+<p>统一 control-loop 可以容纳它们，但不应声称它们采用同一种验证协议。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>11. Pseudocode：严格版本</h2>
+<pre><code class="language-text">function evolve(theta, active, control_plane):
+    traces = rollout(theta, active, D_mine, fixed_budget)
+    failures = cluster_and_attribute(traces, control_plane.verifier)
+    proposals = proposer(active.readonly_view(), failures)
+
+    accepted = []
+    for p in proposals:
+        if not static_validate(p, editable_manifest):
+            audit_reject(p, &quot;invalid or immutable surface&quot;)
+            continue
+        candidate = materialize_in_sandbox(active, p)
+        result = paired_evaluate(theta, active, candidate, D_in, D_ho)
+        if permission_ok(candidate) and cost_ok(candidate) and statistical_gate(result):
+            accepted.append(version(candidate, parent=active.digest))
+        else:
+            audit_reject(p, result)
+
+    merged = choose_compatible_frontier(accepted)
+    if merged:
+        rerun_gate(merged)
+        deploy_shadow_then_canary(merged)
+        return merged
+    return active
+</code></pre>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>12. Failure modes</h2>
+<ul>
+<li>symptom 被当 root cause，proposal 只加更多提示；</li>
+<li>held-out 被反复暴露给 proposer；</li>
+<li>individually safe edits 合并后产生 interaction regression；</li>
+<li>candidate 能改 verifier、budget 或 model identity；</li>
+<li>只保存成功，重复探索旧失败；</li>
+<li>attribution 依据单条 stochastic rollout；</li>
+<li>archive 保存 candidate，却没有明确 active/deployed pointer；</li>
+<li>rollback 只恢复 prompt，不恢复 memory schema、tool config 和 workflow state；</li>
+<li>benchmark 得分上升但长期维护、安全或真实任务退化。</li>
+</ul>
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>13. Engineering checklist</h2>
+<ul>
+<li>[ ] failure record 有 first-bad-event、evidence、counterevidence、replay fixture；</li>
+<li>[ ] proposal 是 bounded manifest，不是自由重写；</li>
+<li>[ ] candidate 先 static validate，再 sandbox；</li>
+<li>[ ] held-in/hidden-held-out/final-test 语义清楚；</li>
+<li>[ ] merge 后重新评估 interaction；</li>
+<li>[ ] accepted/rejected/archive/active/deployed 是不同状态；</li>
+<li>[ ] rollback 覆盖 prompt、code、memory 和 state migration；</li>
+<li>[ ] control plane 位于 proposer 写权限外。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-15"><h2><span class="n">15</span>导航</h2>
+<ul>
+<li>上一篇：<a href="05_harness_optimization.md">05 Harness Optimization</a></li>
+<li>下一篇：<a href="07_observability_evaluation_security.md">07 Observability、Evaluation 与 Security</a></li>
+<li>回到：<a href="README.md">专题 README</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

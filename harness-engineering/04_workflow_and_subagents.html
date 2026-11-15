@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 — Workflow 与 Subagents：把编排写成可验证的图</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>04 — Workflow 与 Subagents：把编排写成可验证的图</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. State：Workflow 是持久化图</a><a href="#sec-3">2. Objective：质量、延迟、成本与风险</a><a href="#sec-4">3. Workflow node contract</a><a href="#sec-5">4. Subagent 的收益条件</a><a href="#sec-6">5. Spawn、join 与 cancellation semantics</a><a href="#sec-7">6. Workflow 搜索空间</a><a href="#sec-8">7. ADAS：Agent design 作为代码候选</a><a href="#sec-9">8. AFlow：MCTS 风格 workflow search</a><a href="#sec-10">9. 调度与资源隔离</a><a href="#sec-11">10. Failure attribution for workflow</a><a href="#sec-12">11. Failure modes</a><a href="#sec-13">12. Engineering checklist</a><a href="#sec-14">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>核心论文</dt><dd><a href="<a href="https://arxiv.org/abs/2408.08435v2">https://arxiv.org/abs/2408.08435v2</a>">ADAS</a> · <a href="<a href="https://arxiv.org/abs/2410.10762v4">https://arxiv.org/abs/2410.10762v4</a>">AFlow</a></dd><dt>内容类型</dt><dd>论文综合 + 分布式 runtime 工程</dd><dt>本章目标</dt><dd>把 planner、tool、verifier 和 subagent 的组合写成有依赖、预算、join 和取消语义的 executable graph。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. State：Workflow 是持久化图</h2>
+<p>令 workflow 为有向图：</p>
+<p>$$W_h=(V_h,E_h,\Gamma_h),$$</p>
+<ul>
+<li>$V_h$ ：model、tool、verifier、human approval、fork/join 等节点；</li>
+<li>$E_h$ ：数据依赖和控制依赖；</li>
+<li>$\Gamma_h$ ：每个节点的 input/output schema、retry、timeout、permission 和 budget。</li>
+</ul>
+<p>运行状态不是当前 prompt，而是：</p>
+<p>$$w_t=(\sigma_t,\kappa_t,\omega_t),$$</p>
+<p>其中 $\sigma_t(v)$ 是节点状态， $\kappa_t$ 是已提交 outputs/artifact refs， $\omega_t$ 是 leases、重试计数和预算预留。</p>
+<p>节点状态机：</p>
+<pre><code class="language-text">PENDING -&gt; READY -&gt; LEASED -&gt; RUNNING -&gt; COMMITTED
+              |         |          |
+              |         |          +-&gt; RETRYABLE_FAILED
+              |         +-&gt; LEASE_EXPIRED -&gt; RECONCILE
+              +-&gt; SKIPPED
+RUNNING -&gt; CANCEL_REQUESTED -&gt; DRAINING -&gt; CANCELLED
+</code></pre>
+<p>只有 <code>COMMITTED</code> output 才能满足强依赖；日志里出现结果文本，不等于已提交。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Objective：质量、延迟、成本与风险</h2>
+<p>对任务 $x$ ，workflow 产生轨迹 $\tau(W,x)$ 。目标是向量：</p>
+<p>$$\mathbf y(W)=(R(W),-K(W),-L(W),-Q(W)).$$</p>
+<p>标量化版本：</p>
+<p>$$G_{\boldsymbol\lambda}(W)=\mathbb E[R]-\lambda_K\mathbb E[K]-\lambda_L\mathbb E[L]-\lambda_Q\mathbb E[Q].$$</p>
+<p>但生产选择最好保留 Pareto frontier，而不是只用一组随意权重。对两个 workflow：</p>
+<p>$$W_a\succ W_b\iff R_a\ge R_b,\ K_a\le K_b,\ L_a\le L_b,\ Q_a\le Q_b,$$</p>
+<p>且至少一项严格更好。若候选只靠增加调用数获得更高分，应明确落在不同成本点，而不是宣称无条件更优。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. Workflow node contract</h2>
+<p>每个节点定义：</p>
+<pre><code class="language-text">NodeSpec:
+  id, kind, version
+  input_schema, output_schema
+  required_artifacts
+  permission_capabilities
+  token/tool/time budget
+  retry_policy, timeout_policy
+  idempotency_policy
+  verifier
+</code></pre>
+<p>执行前必须满足：</p>
+<p>$$\mathrm{Ready}(v)=\mathbf1[\forall u:(u,v)\in E,\sigma(u)=\mathrm{COMMITTED}]\mathbf1[\mathrm{SchemaOK}]\mathbf1[\mathrm{Authorized}].$$</p>
+<p>输出提交时要做 compare-and-swap 或版本检查，防止两个并发 worker 覆盖相同 artifact。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. Subagent 的收益条件</h2>
+<p>把任务拆为 $q_1,\ldots,q_k$ 。并行 wall time 理想下界：</p>
+<p>$$T_{\mathrm{parallel}}\ge\max_iT(q_i)+T_{\mathrm{join}}.$$</p>
+<p>总成本：</p>
+<p>$$K_{\mathrm{parallel}}=\sum_iK(q_i)+K_{\mathrm{coord}}+K_{\mathrm{dup}}.$$</p>
+<p>并行有价值需要：</p>
+<ul>
+<li>子任务依赖弱；</li>
+<li>输入可以被完整封装，不靠父 agent 隐含上下文；</li>
+<li>输出有 schema/provenance；</li>
+<li>失败能单独重试/取消；</li>
+<li>join 不是把全部长文本重新塞回主 context。</li>
+</ul>
+<p>若子任务共享大量未知前提，fan-out 会重复搜索并放大错误。可用粗略净收益条件：</p>
+<p>$$\Delta T&gt;0\quad\land\quad \Delta R-\lambda_K\Delta K-\lambda_Q\Delta Q&gt;0.$$</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Spawn、join 与 cancellation semantics</h2>
+<p>最小 process manager：</p>
+<pre><code class="language-text">spawn(task_spec, input_refs, budget, parent) -&gt; job_id
+observe(job_id) -&gt; state, heartbeat, artifact_refs
+cancel(job_id, reason) -&gt; CANCEL_REQUESTED
+join(job_ids, merge_spec) -&gt; merged_artifact | partial | failed
+</code></pre>
+<h3>Join policy</h3>
+<ul>
+<li><code>ALL</code>：所有必需子任务成功；适合互补分解；</li>
+<li><code>ANY</code>：首个满足 verifier 的结果；适合 speculative execution；</li>
+<li><code>QUORUM(k)</code>：至少 $k$ 个独立证据；适合事实核验；</li>
+<li><code>BEST</code>：外部 scorer 选择；适合候选生成；</li>
+<li><code>REDUCE</code>：按 associative reducer 合并；适合统计量。</li>
+</ul>
+<p>Join 必须定义失败容忍：一个 optional agent 超时是否阻塞？partial result 是否可接受？不同结论由谁裁决？</p>
+<h3>Structured merge</h3>
+<p>若输出为 $y_{1:k}$ ，merge 不应简单拼接：</p>
+<p>$$y^\star=\arg\max_{y\in\mathcal M(y_{1:k})}\left[\mathrm{Score}(y)-\alpha\mathrm{Conflict}(y)-\beta\mathrm{Unsupported}(y)-\gamma K(y)\right].$$</p>
+<p>每个 claim 保留 source agent、evidence pointer 和 confidence。Judge 也可能错，因此高风险结论需要 deterministic verifier 或人工审批。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. Workflow 搜索空间</h2>
+<p>常见 rewrite operators：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Topology</td>
+<td>insert/delete node、fork、join、loop、fallback</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>修改 branch predicate、model/tool selector</td>
+</tr>
+<tr>
+<td>Budget</td>
+<td>节点 token、timeout、fan-out、retry cap</td>
+</tr>
+<tr>
+<td>Verification</td>
+<td>verifier placement、early exit、self-check</td>
+</tr>
+<tr>
+<td>State</td>
+<td>checkpoint、artifact handoff、memory scope</td>
+</tr>
+<tr>
+<td>Recovery</td>
+<td>compensation、retry、rollback、human escalation</td>
+</tr>
+</tbody>
+</table>
+<p>为了保证候选可执行，搜索不直接生成任意代码，而是从 typed grammar 采样：</p>
+<p>$$W'\sim \rho_\phi(W'\mid W,z),\qquad W'\in\mathcal G_{\mathrm{typed}}.$$</p>
+<p>静态 validator 检查：无悬空依赖、无不可达 terminal、所有 side-effect path 都经过 permission node、循环有 budget/stop、join schema 一致。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. ADAS：Agent design 作为代码候选</h2>
+<p><a href="https://arxiv.org/abs/2408.08435v2">ADAS</a> 将自动设计拆成 search space、search algorithm 和 evaluation function。Meta Agent Search 维护 archive：</p>
+<pre><code class="language-text">sample prior designs
+  -&gt; propose new agent description
+  -&gt; implement in code
+  -&gt; repair parse/runtime errors
+  -&gt; evaluate
+  -&gt; add successful design to archive
+</code></pre>
+<p>重要启示不是“让另一个 LLM 写代码”本身，而是：prompt、角色分工、控制流和 aggregation 可以作为一个可执行候选整体评价。风险是 archive 中 benchmark-specific tricks 被误当成一般结构。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. AFlow：MCTS 风格 workflow search</h2>
+<p><a href="https://arxiv.org/abs/2410.10762v4">AFlow</a> 把 LLM actions 表示为节点、代码表示边，并用 MCTS 风格迭代。抽象的 UCB parent selection：</p>
+<p>$$W_t=\arg\max_W\left[\hat G(W)+c\sqrt{\frac{\log N}{n_W}}\right].$$</p>
+<p>其中 $N$ 是父节点总访问数， $n_W$ 是候选 $W$ 的访问数；具体实现的 score normalization 与 exploration schedule 依论文代码而定。</p>
+<p>循环：</p>
+<pre><code class="language-text">select parent with exploitation/exploration
+expand by LLM-generated workflow edit
+execute candidate on search tasks
+backpropagate score to search tree
+stop on budget or top-k plateau
+freeze selected workflow and evaluate held-out
+</code></pre>
+<p>论文数字与成本口径见 <a href="papers.md"><code>papers.md</code></a>。特别注意摘要的 4.55% cost 只支持 parity；超过比较对象的配置成本更高，不能把它写成普遍的“不到 5% 成本即可超越”。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. 调度与资源隔离</h2>
+<p>Workflow scheduler 需要同时考虑 precedence 与资源：</p>
+<p>$$\min \mathrm{makespan}(W)\quad\text{s.t.}\quad \sum_{v\in\mathrm{running}}g_v\le G,\ \sum c_v\le B.$$</p>
+<p>其中 $g_v$ 是 GPU/worker 占用， $c_v$ 是 token/tool budget。实际策略可使用：</p>
+<ul>
+<li>critical-path priority；</li>
+<li>memory-aware batching；</li>
+<li>per-tenant quota；</li>
+<li>backpressure；</li>
+<li>bounded speculative execution；</li>
+<li>deadline-aware cancellation。</li>
+</ul>
+<p>Rollout infra 的 throughput optimization 不能改变任务语义。若 scheduler 在高负载下截断 context 或减少 attempts，必须作为 evaluation condition 记录。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>10. Failure attribution for workflow</h2>
+<p>失败可能来自：</p>
+<ul>
+<li>node 本身输出错误；</li>
+<li>router 选错分支；</li>
+<li>正确节点未运行；</li>
+<li>join 丢失 evidence；</li>
+<li>retry 造成重复副作用；</li>
+<li>stale output 被下游使用；</li>
+<li>timeout 太短；</li>
+<li>fan-out 太大导致预算耗尽。</li>
+</ul>
+<p>对节点 $v$ 的 observational blame：</p>
+<p>$$\mathrm{Blame}(v)=\sum_{\tau}\mathbf1[v\in\tau]\,w(\tau)\,\mathbf1[V(\tau)=0],$$</p>
+<p>只能用于排序，不是因果结论。更强方法是 replay intervention：保持其他版本和 seed 分布不变，只替换 $v$ 或其 routing rule，比较配对 outcome。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>11. Failure modes</h2>
+<ol>
+<li><strong>Graph explosion</strong>：搜索不断插入 agent/judge，成本失控；</li>
+<li><strong>Judge loop</strong>：多个模型相互点评但无外部 verifier；</li>
+<li><strong>Zombie child</strong>：父任务取消后子任务继续写外部状态；</li>
+<li><strong>Merge hallucination</strong>：aggregator 添加输入中不存在的 claim；</li>
+<li><strong>Hidden serialization</strong>：表面并行，关键锁/模型队列使延迟不降；</li>
+<li><strong>Correlated agents</strong>：相同模型/提示产生一致错误，quorum 不等于独立证据；</li>
+<li><strong>Retry storm</strong>：下游故障时所有节点同步重试；</li>
+<li><strong>Search/test leakage</strong>：同一 task 反复改图再当最终结果；</li>
+<li><strong>Unbounded loop</strong>：没有进度度量与 stop budget。</li>
+</ol>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>12. Engineering checklist</h2>
+<ul>
+<li>[ ] node I/O schema、permission、budget、retry 明确；</li>
+<li>[ ] join policy 和 partial-result 语义明确；</li>
+<li>[ ] 子任务用 artifact refs 传递，不复制全部日志；</li>
+<li>[ ] cancel 能向下传播并 reconcile side effects；</li>
+<li>[ ] graph 静态检查覆盖 side-effect path 和循环上界；</li>
+<li>[ ] 并行收益同时报告 latency 与总成本；</li>
+<li>[ ] attribution 用 replay/ablation 验证；</li>
+<li>[ ] workflow search、validation、final test 分离。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>导航</h2>
+<ul>
+<li>上一篇：<a href="03_context_and_persistent_memory.md">03 Context 与持久记忆</a></li>
+<li>下一篇：<a href="05_harness_optimization.md">05 Harness Optimization</a></li>
+<li>回到：<a href="README.md">专题 README</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

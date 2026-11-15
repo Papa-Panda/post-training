@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 — Agent Runtime Loop：状态、动作、副作用与恢复</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>02 — Agent Runtime Loop：状态、动作、副作用与恢复</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. State：显式状态而不是隐含聊天历史</a><a href="#sec-3">2. Runtime 的六阶段循环</a><a href="#sec-4">3. Command 与 side effect 的类型系统</a><a href="#sec-5">4. 工具事务：timeout 不是 rollback</a><a href="#sec-6">5. Event sourcing：状态是事件折叠</a><a href="#sec-7">6. Crash consistency 与 recovery</a><a href="#sec-8">7. Budget 与停止语义</a><a href="#sec-9">8. Concurrency：lease、join 与取消</a><a href="#sec-10">9. Verifier-based completion</a><a href="#sec-11">10. 与 rollout serving 的接口</a><a href="#sec-12">11. Failure modes</a><a href="#sec-13">12. Engineering checklist</a><a href="#sec-14">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>内容类型</dt><dd>系统语义与生产实现</dd><dt>相关专题</dt><dd><a href="../vllm-rollout/README.md"><code>vllm-rollout/</code></a> 负责模型生成服务；本章负责 generation 外围的控制流、工具副作用和持久状态。</dd><dt>本章目标</dt><dd>给出可以实现、重放和验证的 Agent transition system，而不是一句 <code>while not done: call_llm()</code>。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. State：显式状态而不是隐含聊天历史</h2>
+<p>使用专题统一记号，把 runtime 状态展开为：</p>
+<p>$$s_t=(g,w_t,b_t,r_t,m_t,j_t,e_t),$$</p>
+<ul>
+<li>$g$ ：用户目标、success contract 与不可漂移约束；</li>
+<li>$w_t$ ：workflow 节点、依赖和 continuation；</li>
+<li>$b_t$ ：剩余 token、时间、工具、金钱和风险预算；</li>
+<li>$r_t$ ：当前资源与外部对象的已知版本；</li>
+<li>$m_t$ ：memory/artifact references，不是把全部内容复制进 prompt；</li>
+<li>$j_t$ ：subagent、异步工具和后台 job 状态；</li>
+<li>$e_t$ ：append-only events 与 verifier evidence。</li>
+</ul>
+<p>Context compiler 和模型产生建议动作：</p>
+<p>$$c_t=C_{h^C}(s_t),\qquad a_t\sim\pi_\theta(\cdot\mid c_t).$$</p>
+<p>Runtime 再把建议动作解析为 typed command：</p>
+<p>$$u_t=G_{h^W,h^K}(s_t,a_t;\Pi,B).$$</p>
+<p>环境返回 observation 后，event reducer 更新状态：</p>
+<p>$$s_{t+1}=F_h(s_t,u_t,o_{t+1}).$$</p>
+<p>关键语义：<strong>模型输出不是事实，也不是已授权操作；它只是 command proposal。</strong> 权限、参数 schema、幂等、预算和 precondition 都在执行前检查。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Runtime 的六阶段循环</h2>
+<pre><code class="language-text">OBSERVE -&gt; COMPILE -&gt; PROPOSE -&gt; AUTHORIZE -&gt; EXECUTE -&gt; COMMIT/VERIFY
+    ^                                                       |
+    +-------------- RETRY / REPLAN / STOP -----------------+
+</code></pre>
+<ol>
+<li><strong>Observe</strong>：读取任务、active harness/version、未完成 jobs、资源版本；</li>
+<li><strong>Compile</strong>：按预算选择 context，加入 schema、约束和 evidence pointers；</li>
+<li><strong>Propose</strong>：模型返回结构化 action/plan；</li>
+<li><strong>Authorize</strong>：验证权限、参数、precondition、budget 和风险等级；</li>
+<li><strong>Execute</strong>：调用工具或 subagent，记录开始/结束事件；</li>
+<li><strong>Commit/Verify</strong>：持久化结果、更新状态、运行 verifier、选择继续或终止。</li>
+</ol>
+<p>每一阶段都有失败语义。比如 context compile 失败不应伪装成模型推理失败；authorize 拒绝也不应自动重试同一动作。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. Command 与 side effect 的类型系统</h2>
+<p>定义 command envelope：</p>
+<p>$$u_t=(n_t,\xi_t,\iota_t,\chi_t,p_t,d_t),$$</p>
+<ul>
+<li>$n_t$ ：工具名和版本；</li>
+<li>$\xi_t$ ：通过 schema 校验的参数；</li>
+<li>$\iota_t$ ：idempotency key；</li>
+<li>$\chi_t$ ：risk class；</li>
+<li>$p_t$ ：preconditions，例如目标对象版本；</li>
+<li>$d_t$ ：deadline/lease。</li>
+</ul>
+<p>工具按副作用分层：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>示例</th>
+<th>默认策略</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pure read</td>
+<td>查静态配置、读取文件</td>
+<td>可自动执行，仍记录 provenance</td>
+</tr>
+<tr>
+<td>Expensive read</td>
+<td>大检索、长 rollout</td>
+<td>预算 gate、可取消</td>
+</tr>
+<tr>
+<td>Reversible write</td>
+<td>建草稿、写 sandbox 文件</td>
+<td>自动或低风险审批；必须可 rollback</td>
+</tr>
+<tr>
+<td>External send</td>
+<td>发消息、提交表单</td>
+<td>明确授权、去重、发送后确认</td>
+</tr>
+<tr>
+<td>Irreversible/high-risk</td>
+<td>删除、交易、权限扩大</td>
+<td>人工审批或禁止自动执行</td>
+</tr>
+</tbody>
+</table>
+<p>Permission 不应由模型在自然语言里自我声明。令主体 $z$ 对资源 $r$ 的能力集合为 $\mathrm{Cap}(z,r)$ ，执行条件是：</p>
+<p>$$\mathrm{Allow}(u_t)=\mathbf1[\mathrm{cap}(u_t)\in\mathrm{Cap}(z,r)]\mathbf1[\mathrm{Pre}(u_t,s_t)]\mathbf1[\mathrm{Cost}(u_t)\le b_t].$$</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. 工具事务：timeout 不是 rollback</h2>
+<p>建议状态机：</p>
+<pre><code class="language-text">PROPOSED -&gt; AUTHORIZED -&gt; STARTED -&gt; OBSERVED_SUCCEEDED -&gt; COMMITTED
+                 |           |              |
+                 |           |              +-&gt; VERIFY_FAILED
+                 |           +-&gt; UNKNOWN_OUTCOME -&gt; RECONCILE
+                 +-&gt; DENIED
+STARTED -&gt; OBSERVED_FAILED -&gt; RETRYABLE | TERMINAL
+</code></pre>
+<p>最危险的是 <code>UNKNOWN_OUTCOME</code>：客户端 timeout 时，服务端可能已经完成写入。不能直接重试；先用 idempotency key 或业务对象状态 reconcile。</p>
+<p>对外部写操作，理想协议是：</p>
+<ol>
+<li>生成稳定 idempotency key；</li>
+<li>写入 <code>TOOL_STARTED</code> 事件；</li>
+<li>发起操作；</li>
+<li>查询最终状态；</li>
+<li>只有在确认未发生时才 retry；</li>
+<li>写入 <code>TOOL_COMMITTED</code> 或 <code>TOOL_UNKNOWN</code>。</li>
+</ol>
+<p>Exactly-once 通常不是 runtime 单方面能保证的；更现实的是 at-least-once transport + idempotent application，或 at-most-once + 显式人工 reconciliation。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Event sourcing：状态是事件折叠</h2>
+<p>使用 immutable event log：</p>
+<p>$$s_t=\mathrm{Fold}(s_0,e_{1:t}).$$</p>
+<p>最小 event schema：</p>
+<pre><code class="language-json">{
+  &quot;run_id&quot;: &quot;...&quot;,
+  &quot;sequence&quot;: 42,
+  &quot;event_type&quot;: &quot;TOOL_RESULT&quot;,
+  &quot;harness_digest&quot;: &quot;...&quot;,
+  &quot;model_id&quot;: &quot;...&quot;,
+  &quot;workflow_node&quot;: &quot;execute-tests&quot;,
+  &quot;command_id&quot;: &quot;...&quot;,
+  &quot;input_ref&quot;: &quot;artifact://...&quot;,
+  &quot;output_ref&quot;: &quot;artifact://...&quot;,
+  &quot;cost_delta&quot;: {&quot;tokens&quot;: 0, &quot;tool_calls&quot;: 1},
+  &quot;timestamp&quot;: &quot;...&quot;
+}
+</code></pre>
+<p>事件记录 references 和 digest，不必把敏感原文复制到每个 log。事件序号必须单调；state reducer 应确定性且可版本化。</p>
+<h3>为什么同时需要 checkpoint</h3>
+<p>完整重放成本随 horizon 增长。每 $k$ 个事件生成 checkpoint：</p>
+<p>$$\hat s_{mk}=\mathrm{Checkpoint}(e_{1:mk}),\qquad s_t=\mathrm{Fold}(\hat s_{mk},e_{mk+1:t}).$$</p>
+<p>Checkpoint 包含 reducer version 和输入 event digest；否则 schema 迁移后无法证明重放一致。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. Crash consistency 与 recovery</h2>
+<p>崩溃恢复算法：</p>
+<pre><code class="language-text">load latest valid checkpoint
+verify checkpoint digest and reducer version
+replay later events in sequence order
+for every STARTED command without terminal event:
+    query tool using idempotency key
+    mark COMMITTED, FAILED, or UNKNOWN
+resume only nodes whose dependencies are satisfied
+never infer success from missing logs
+</code></pre>
+<p>恢复的核心 invariant：</p>
+<p>$$\forall u,\quad \#\mathrm{CommittedSideEffect}(u)\le1,$$</p>
+<p>前提是下游工具支持相同 idempotency key；如果不支持，runtime 只能提供 reconciliation 和人工决策，不能虚构 exactly-once。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. Budget 与停止语义</h2>
+<p>预算是向量而非单标量：</p>
+<p>$$b_t=(b_t^{\mathrm{tok}},b_t^{\mathrm{tool}},b_t^{\mathrm{wall}},b_t^{\mathrm{money}},b_t^{\mathrm{risk}}).$$</p>
+<p>每步消耗向量为 $\Delta b_t^{\mathrm{use}}$ ：</p>
+<p>$$b_{t+1}=b_t-\Delta b_t^{\mathrm{use}}.$$</p>
+<p>其中任何受保护维度越界都必须阻止执行，而不是执行后再记录。终止谓词：</p>
+<p>$$\mathrm{Stop}(s_t)=V_{\mathrm{done}}(s_t)\lor\mathrm{BudgetExhausted}(b_t)\lor\mathrm{Blocked}(s_t)\lor\mathrm{Unsafe}(s_t).$$</p>
+<p>终态必须区分：</p>
+<ul>
+<li><code>SUCCEEDED</code>：success contract 有独立证据；</li>
+<li><code>PARTIAL</code>：有可复用中间 artifact，但未满足成功条件；</li>
+<li><code>BLOCKED</code>：缺权限、输入或人类判断；</li>
+<li><code>BUDGET_EXHAUSTED</code>：资源耗尽，不冒充成功；</li>
+<li><code>FAILED</code>：已知不可恢复失败；</li>
+<li><code>UNKNOWN</code>：外部副作用结果无法确认。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. Concurrency：lease、join 与取消</h2>
+<p>并发 job $j$ 需要 owner、lease、heartbeat 和 terminal state。令 dependency graph 为 $W=(V,E)$ ，节点只有在所有强依赖提交后才能启动：</p>
+<p>$$\mathrm{Runnable}(v)=\mathbf1[\forall u:(u,v)\in E,\ \mathrm{state}(u)=\mathrm{COMMITTED}].$$</p>
+<p>取消不是简单删除：</p>
+<pre><code class="language-text">CANCEL_REQUESTED -&gt; cancel children -&gt; reconcile side effects
+                 -&gt; persist partial artifacts -&gt; CANCELLED
+</code></pre>
+<p>父任务结束时不能遗留无 owner 的 side effects。对无法取消的外部调用，父任务应标为 <code>DRAINING</code> 直到结果被 reconcile。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. Verifier-based completion</h2>
+<p>模型自报“完成”只是一条 observation。成功条件应由外部 $V$ 给出：</p>
+<p>$$V(\tau,x)=(v_{\mathrm{task}},v_{\mathrm{schema}},v_{\mathrm{sideeffect}},v_{\mathrm{policy}}).$$</p>
+<p>全部硬约束通过才能标记 success；软指标进入 score/cost，不得掩盖 hard failure。比如测试通过但向错误目标发送消息，任务仍失败。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>10. 与 rollout serving 的接口</h2>
+<p>Runtime 向 generation service 提交：</p>
+<pre><code class="language-text">(model_id, decoding_config, context_digest, max_tokens,
+ request_priority, stop_sequences, trace_parent)
+</code></pre>
+<p>Serving 返回 token stream、finish reason、usage 和 request ID。边界如下：</p>
+<ul>
+<li>rollout engine 负责 batching、KV cache、prefill/decode 调度和硬件吞吐；</li>
+<li>harness runtime 负责何时请求、context 是什么、生成后执行什么、预算与终止；</li>
+<li>evaluator 记录两侧版本，避免把 serving 配置变化误判为 harness gain。</li>
+</ul>
+<p>高吞吐不是正确性：若 rollout 被 dynamic batching 改变随机性，需要 seed/decoding config 和重复试验。延迟优化也不能绕过 permission 或 verifier。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>11. Failure modes</h2>
+<ol>
+<li><strong>Implicit state</strong>：关键信息只在 prompt，崩溃后无法恢复；</li>
+<li><strong>Duplicate side effect</strong>：timeout 后盲重试；</li>
+<li><strong>Lost update</strong>：并发节点覆盖相同 artifact；</li>
+<li><strong>Zombie job</strong>：父任务结束，子任务继续产生外部写入；</li>
+<li><strong>False completion</strong>：模型说 done，verifier 未通过；</li>
+<li><strong>Schema drift</strong>：tool/reducer 版本变化，旧事件无法重放；</li>
+<li><strong>Prompt injection</strong>：tool output 被当作权限指令；</li>
+<li><strong>Budget afterthought</strong>：先执行昂贵调用，再发现超预算；</li>
+<li><strong>Untraceable generation</strong>：缺 model/harness/context digest，结果不可归因。</li>
+</ol>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>12. Engineering checklist</h2>
+<ul>
+<li>[ ] state、command、event、terminal status 都有版本化 schema；</li>
+<li>[ ] 模型 action 与 authorized command 分离；</li>
+<li>[ ] side-effecting tools 有 idempotency/reconciliation；</li>
+<li>[ ] checkpoint 可由 event tail 验证和恢复；</li>
+<li>[ ] budget 在执行前原子扣减或预留；</li>
+<li>[ ] verifier 独立于模型自评；</li>
+<li>[ ] subagent/job 有 owner、lease、cancel 和 join；</li>
+<li>[ ] rollout request 保存 model、decoding、context 与 harness digest。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>导航</h2>
+<ul>
+<li>上一篇：<a href="01_harness_vs_model.md">01 Harness vs Model</a></li>
+<li>下一篇：<a href="03_context_and_persistent_memory.md">03 Context 与持久记忆</a></li>
+<li>回到：<a href="README.md">专题 README</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

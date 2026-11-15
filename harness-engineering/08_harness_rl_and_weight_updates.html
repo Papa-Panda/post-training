@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 — Harness、RL 与 Weight Updates：双时间尺度协同优化</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>08 — Harness、RL 与 Weight Updates：双时间尺度协同优化</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. Harness 改变 RL 的环境</a><a href="#sec-3">2. Harness-aware trajectory schema</a><a href="#sec-4">3. Harness update 与 weight update 的边界</a><a href="#sec-5">4. Harness updating 与 harness benefit</a><a href="#sec-6">5. $2\times2$ factorial：分离贡献与 interaction</a><a href="#sec-7">6. Dual-timescale optimization</a><a href="#sec-8">7. Off-policy mismatch</a><a href="#sec-9">8. Credit assignment across layers</a><a href="#sec-10">9. SIA：feedback agent 选择 update surface</a><a href="#sec-11">10. Continual Harness：reset-free state 与 co-learning</a><a href="#sec-12">11. 与 rollout serving / trainer 的接口</a><a href="#sec-13">12. Joint Goodhart risk</a><a href="#sec-14">13. Failure modes</a><a href="#sec-15">14. Engineering checklist</a><a href="#sec-16">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>核心论文</dt><dd><a href="<a href="https://arxiv.org/abs/2605.27276v2">https://arxiv.org/abs/2605.27276v2</a>">SIA</a> · <a href="<a href="https://arxiv.org/abs/2605.09998">https://arxiv.org/abs/2605.09998</a>">Continual Harness</a> · <a href="<a href="https://arxiv.org/abs/2605.30621">https://arxiv.org/abs/2605.30621</a>">Harness Updating Is Not Harness Benefit</a></dd><dt>相关目录</dt><dd><a href="../grpo-vs-ppo/README.md"><code>grpo-vs-ppo/</code></a> · <a href="../vllm-rollout/README.md"><code>vllm-rollout/</code></a> · <a href="../ai-infra/README.md"><code>ai-infra/</code></a> · <a href="../model-aware-data-curation/README.md"><code>model-aware-data-curation/</code></a></dd><dt>本章目标</dt><dd>明确 harness 如何定义 rollout distribution、credit assignment 和数据 provenance；明确什么时候应该改 $h$ 、改 $\theta$ ，或两者都不改。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. Harness 改变 RL 的环境</h2>
+<p>给定任务 $x$ ，harness-conditioned rollout：</p>
+<p>$$\tau\sim p_{\theta,h}(\tau\mid x)=p(s_0\mid x,h)\prod_{t=0}^{T-1}\pi_\theta(a_t\mid c_t)\,p_h(s_{t+1}\mid s_t,a_t),$$</p>
+<p>$$c_t=C_h(s_{\le t},x).$$</p>
+<p>这里沿用 README 的约定，把固定 control plane $q$ 从 $p_{\theta,h;q}$ 中省略；改变 permission、budget 或 verifier 也会改变实际轨迹，因此跨实验必须固定并记录 $q$ 。</p>
+<p>因此 harness 同时改变：</p>
+<ol>
+<li>policy 的 observation/context；</li>
+<li>合法动作与 tool API；</li>
+<li>transition dynamics；</li>
+<li>trajectory truncation、retry 和 verifier；</li>
+<li>哪些 rollout 被记录、过滤和用于训练。</li>
+</ol>
+<p>Reward 写成：</p>
+<p>$$R(\tau;h,V)=R_{\mathrm{task}}-\lambda_KK(\tau,h)-\lambda_L\mathrm{Lat}(\tau,h)-\lambda_QQ(\tau,h).$$</p>
+<p>不记录 $h$ 的版本，就无法知道模型是在什么环境下产生行为。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Harness-aware trajectory schema</h2>
+<p>每条 rollout 至少绑定：</p>
+<pre><code class="language-text">model id + checkpoint + decoding config
+harness digest + context compiler + workflow graph
+component/tool/memory versions
+permission + budget profile
+environment / task / verifier versions
+per-event observation, proposal, authorized action, result
+terminal reason + reward decomposition
+</code></pre>
+<p>训练样本不是只有 \$(x,y,r)\$；至少是：</p>
+<p>$$d_i=(x_i,\tau_i,r_i,\theta_i,h_i,q_i,V_i).$$</p>
+<p>这使 replay filtering、off-policy correction、failure attribution 和可复现性成为可能。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. Harness update 与 weight update 的边界</h2>
+<p>诊断问题：</p>
+<table>
+<thead>
+<tr>
+<th>失败</th>
+<th>首选路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>信息未进入 context</td>
+<td>$h^C$</td>
+</tr>
+<tr>
+<td>正确能力但未激活/未坚持</td>
+<td>$h^C/h^W$ 或训练</td>
+</tr>
+<tr>
+<td>流程、retry、join、tool schema 错</td>
+<td>$h^W/h^K$</td>
+</tr>
+<tr>
+<td>缺少稳定的新语义/推理能力</td>
+<td>$\theta$</td>
+</tr>
+<tr>
+<td>evaluator/environment 故障</td>
+<td>$V/\mathcal E$ ，不要改 harness/model</td>
+</tr>
+</tbody>
+</table>
+<p>冻结模型能力上限：</p>
+<p>$$J^\star(\theta)=\max_{h\in\mathcal H}J(\theta,h).$$</p>
+<p>若在广泛的 $\mathcal H$ 内 $J^\star(\theta)$ 仍低，说明仅靠 harness 不够。但有限搜索失败不等于证明能力缺失；必须区分“未找到”与“不存在”。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. Harness updating 与 harness benefit</h2>
+<p>令 solver model 为 $f$ 、evolver 为 $e$ ，演化后 harness 为 $H_T^{(f,e)}$ 。基于 <a href="https://arxiv.org/abs/2605.30621">Harness Updating Is Not Harness Benefit</a>：</p>
+<p>$$\Delta(f,e)=J_X(f,H_T^{(f,e)})-M_{\mathrm{base}}(f),$$</p>
+<p>$$\Delta_{\mathrm{update}}(e)=\frac1{|F^\star|}\sum_{f\in F^\star}\Delta(f,e),$$</p>
+<p>$$\Delta_{\mathrm{benefit}}(f)=\max_{e\in E^\star}\Delta(f,e).$$</p>
+<p>$\Delta_{\mathrm{update}}(e)$ 衡量 evolver $e$ 产生的 harness updates 在 anchor agents 上带来的平均性能增益； $\Delta_{\mathrm{benefit}}(f)$ 衡量 model $f$ 从 anchor evolvers 中可获得的最大性能增益。两者不是一回事，也不能分别简化成“是否发生修改”和“是否遵循某个绝对最优 harness”。</p>
+<p>论文中 best/worst evolver 在任何 benchmark 的最大差距只有 \$3.1\$ points，并且不存在一个 evolver 三项都最佳。Activation/adherence proxy：Qwen3-32B 的 SLR/HFR 为 $0.251/0.142$ ，Qwen3-235B 为 $0.961/0.350$ ，Opus 4.6 为 $0.957/0.757$ 。这支持：复杂 harness 是否有效，受 solver 激活和遵循能力制约。</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. $2\times2$ factorial：分离贡献与 interaction</h2>
+<p>比较旧/新 model $f_0,f_1$ 与旧/新 harness $h_0,h_1$ ：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right;">$h_0$</th>
+<th style="text-align: right;">$h_1$</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$f_0$</td>
+<td style="text-align: right;">$J_{00}$</td>
+<td style="text-align: right;">$J_{01}$</td>
+</tr>
+<tr>
+<td>$f_1$</td>
+<td style="text-align: right;">$J_{10}$</td>
+<td style="text-align: right;">$J_{11}$</td>
+</tr>
+</tbody>
+</table>
+<p>Harness main effect under old model：</p>
+<p>$$E_h^{(0)}=J_{01}-J_{00}.$$</p>
+<p>Model main effect under old harness：</p>
+<p>$$E_f^{(0)}=J_{10}-J_{00}.$$</p>
+<p>Interaction：</p>
+<p>$$I_{f,h}=J_{11}-J_{10}-J_{01}+J_{00}.$$</p>
+<p>若 $I_{f,h}\gg0$ ，新模型解锁了新 harness；若 $I_{f,h}&lt;0$ ，可能新模型不遵循旧 scaffolding、harness 过度约束或训练/部署接口漂移。只报 $J_{11}-J_{00}$ 无法知道收益来自哪里。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. Dual-timescale optimization</h2>
+<p>模型更新昂贵、慢、影响面大；harness 更新便宜、快、局部。可用双时间尺度：</p>
+<p>$$h_{t+1}=h_t+\alpha_t\widehat g_h(\theta_t,h_t),$$</p>
+<p>$$\theta_{t+1}=\theta_t+\beta_t\widehat g_\theta(\theta_t,h_t),\qquad \beta_t\ll\alpha_t.$$</p>
+<p>这里 $g_h$ 通常不是可微梯度，而是黑盒 search/evolution 的抽象方向。关键工程规则：</p>
+<ol>
+<li>固定 $\theta$ ，先做 bounded harness exploration；</li>
+<li>harness 进入稳定版本后再收集训练数据；</li>
+<li>weight update 后做 $2\times2$ cross-evaluation；</li>
+<li>若模型行为分布改变，重新验证 harness，而不是假定兼容；</li>
+<li>控制同时更新，避免 attribution 消失。</li>
+</ol>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. Off-policy mismatch</h2>
+<p>训练数据来自旧 pair $(\theta_b,h_b)$ ，新 policy/harness 是 $(\theta,h)$ 。重要性比率形式上是：</p>
+<p>$$w(\tau)=\frac{p_{\theta,h}(\tau)}{p_{\theta_b,h_b}(\tau)}.$$</p>
+<p>但当 tool schema、workflow 或可达状态改变时，两处分布 support 可能不同， $w$ 不可估或方差极大。常见错误是只计算 token policy ratio：</p>
+<p>$$\prod_t\frac{\pi_\theta(a_t\mid c_t)}{\pi_{\theta_b}(a_t\mid c_t)},$$</p>
+<p>却忽略 context compiler、authorized action、retry 和 transition 改变。实际策略：</p>
+<ul>
+<li>只在兼容 harness family 内 replay；</li>
+<li>记录 behavior harness digest；</li>
+<li>schema/action-space 变化后 fresh rollout；</li>
+<li>对 stale rollout 降权或丢弃；</li>
+<li>让 rollout serving 与 trainer 做 provenance handshake。</li>
+</ul>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. Credit assignment across layers</h2>
+<p>总回报变化不是模型单独贡献：</p>
+<p>$$\Delta J\approx \nabla_\theta J\cdot\Delta\theta+\Delta_hJ+I_{\theta,h}+\Delta_{\mathcal E}J+\Delta_VJ.$$</p>
+<p>Failure attribution 要回答：</p>
+<ul>
+<li>model proposal $a_t$ 是否已正确？</li>
+<li>runtime authorized action $u_t$ 是否错误改变？</li>
+<li>tool/environment 是否失败？</li>
+<li>verifier 是否错误打分？</li>
+<li>context 是否遗漏关键证据？</li>
+</ul>
+<p>如果 $a_t$ 正确而 $u_t$ 错，训练模型可能反而学坏；如果 $a_t$ 一贯错误且信息充足，单纯加 workflow 可能只掩盖 capability gap。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. SIA：feedback agent 选择 update surface</h2>
+<p><a href="https://arxiv.org/abs/2605.27276v2">SIA: Self Improving AI with Harness &amp; Weight Updates</a> 的 Meta-Agent 编排 Task Agent 和 Feedback-Agent。Feedback-Agent 分析 execution history，在 harness update 与 weight update 间选择；实验通常先多轮 scaffold iteration，reward plateau 后执行 RL update。</p>
+<p>可抽象为 routing policy：</p>
+<p>$$d_t^{\mathrm{meta}}\in\{\mathrm{update\_harness},\mathrm{update\_weights},\mathrm{collect\_data},\mathrm{stop}\}.$$</p>
+<p>论文 v2 Table 3：</p>
+<ul>
+<li>LawBench： $13.5\%\to50.0\%\to70.1\%$ （base→harness→joint）；joint 比 harness-only 高 \$20.1\$ points；</li>
+<li>TriMul reward： $0.105\to0.120\to1.475$ ；runtime $12{,}483\ \mu s\to1{,}017\ \mu s$ ；</li>
+<li>denoising $mse_{\mathrm{norm}}$ ： $0.048\to0.241\to0.289$ 。</li>
+</ul>
+<p>Weight methods 依任务不同：LawBench PPO+GAE、TriMul entropic advantage weighting、denoising GRPO。论文也明确提出 coupled co-evolution 的 Goodhart 风险：harness 和 model 同时适应 evaluator，可能共同放大 proxy 漏洞。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>10. Continual Harness：reset-free state 与 co-learning</h2>
+<p><a href="https://arxiv.org/abs/2605.09998">Continual Harness</a> 在长期 acting loop 中不 reset 环境；每 $F$ 步 Refiner 对 system prompt、subagents、skills 和 memory 做 CRUD：</p>
+<p>$$h_{k+1}=\mathrm{Refiner}(h_k,\tau_{kF:(k+1)F}).$$</p>
+<p>Co-learning 每轮收集 $K=256$ steps，使用 pairwise PRM、frontier teacher relabel 和 soft SFT，同时 emulator state 不 reset。该设置突出长期状态、行为数据与 harness 演化的耦合。</p>
+<p>Pokémon Emerald / Gemini 3.1 Pro 报告 from-scratch $100\%$ milestones、median cost US\$130；minimalist harness 为 $98\%$ 、US\$215。边界：较弱模型存在 capability floor，自我精炼可能恶化；论文没有证明 convergence，也没有 matched reset-based baseline。早期 GPP 完成 Pokémon 是 human-supervised 系统，不能归因给 fully automated Continual Harness。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>11. 与 rollout serving / trainer 的接口</h2>
+<h3>Rollout request</h3>
+<pre><code class="language-json">{
+  &quot;model_digest&quot;: &quot;...&quot;,
+  &quot;harness_digest&quot;: &quot;...&quot;,
+  &quot;task_ref&quot;: &quot;...&quot;,
+  &quot;seed&quot;: 17,
+  &quot;attempt&quot;: 2,
+  &quot;budget_profile&quot;: &quot;eval-v4&quot;,
+  &quot;verifier_ref&quot;: &quot;external:v9&quot;
+}
+</code></pre>
+<h3>Rollout result</h3>
+<pre><code class="language-json">{
+  &quot;trajectory_ref&quot;: &quot;artifact://...&quot;,
+  &quot;terminal_reason&quot;: &quot;verified_success&quot;,
+  &quot;reward_terms&quot;: {&quot;task&quot;: 1.0, &quot;cost&quot;: -0.04, &quot;risk&quot;: 0.0},
+  &quot;model_digest&quot;: &quot;...&quot;,
+  &quot;harness_digest&quot;: &quot;...&quot;,
+  &quot;environment_digest&quot;: &quot;...&quot;
+}
+</code></pre>
+<p>Trainer ingestion gate：schema/version compatible、reward provenance valid、no evaluation leakage、policy/harness staleness within threshold、tool side effects reconciled。</p>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>12. Joint Goodhart risk</h2>
+<p>单独优化 model 或 harness 已会利用 reward 漏洞；联合优化更危险：</p>
+<p>$$\max_{\theta,h}\mathbb E[\hat R(\tau)]\not\Rightarrow\max_{\theta,h}\mathbb E[R^\star(\tau)].$$</p>
+<p>可能的共谋式 failure：</p>
+<ul>
+<li>harness 隐藏某些 observation，model 学会只在剩余 proxy 上表现；</li>
+<li>verifier 可预测，model 与 workflow 共同生成表面证据；</li>
+<li>context compiler 选择性丢弃失败；</li>
+<li>retry/filter 只保留高 reward rollout，制造 selection bias。</li>
+</ul>
+<p>防线：冻结 evaluator、独立 adversarial checks、periodic human audit、不同 verifier ensembles、untouched final tasks、model/harness factorial、provenance-complete replay。</p>
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>13. Failure modes</h2>
+<ul>
+<li>harness 变了但 replay buffer 未标版本；</li>
+<li>训练吃到 hidden test traces；</li>
+<li>只按最终 reward 训练，不看 authorized action/side effects；</li>
+<li>model update 与 harness update 同轮大改，无法归因；</li>
+<li>token-level importance ratio 被误当成完整 trajectory correction；</li>
+<li>stronger model 不遵循旧 harness，却被误判为能力退化；</li>
+<li>weaker model 被复杂 harness 压垮，却继续增加 scaffolding；</li>
+<li>rollout server 为吞吐隐式改变 attempts/context 长度。</li>
+</ul>
+</section>
+<section class="sec" id="sec-15"><h2><span class="n">15</span>14. Engineering checklist</h2>
+<ul>
+<li>[ ] 每条 trajectory 绑定 model、harness、tool、environment、verifier digest；</li>
+<li>[ ] rollout request/response 使用明确 schema；</li>
+<li>[ ] harness major change 后 fresh rollout；</li>
+<li>[ ] harness/weight 更新采用双时间尺度并做 $2\times2$ 评估；</li>
+<li>[ ] updater routing 包含 model、harness、data、environment、verifier 和 stop；</li>
+<li>[ ] replay ingestion 检查 staleness、leakage 和 action-space compatibility；</li>
+<li>[ ] throughput optimization 不得静默改变 evaluation semantics；</li>
+<li>[ ] joint loop 有独立 evaluator 和 Goodhart audit。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-16"><h2><span class="n">16</span>导航</h2>
+<ul>
+<li>上一篇：<a href="07_observability_evaluation_security.md">07 Observability、Evaluation 与 Security</a></li>
+<li>下一篇：<a href="papers.md">论文地图与逐项核验</a></li>
+<li>回到：<a href="README.md">专题 README</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

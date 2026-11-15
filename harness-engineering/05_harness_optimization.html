@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 — Harness Optimization：Context、Workflow、Code 三层搜索</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>05 — Harness Optimization：Context、Workflow、Code 三层搜索</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. Search object：结构化 harness</a><a href="#sec-3">2. Objective：黑盒、约束、多目标</a><a href="#sec-4">3. Typed edit grammar</a><a href="#sec-5">4. 三种搜索粒度</a><a href="#sec-6">5. Search algorithms</a><a href="#sec-7">6. Meta-Harness：端到端 executable harness search</a><a href="#sec-8">7. AlphaEvolve：程序搜索的可迁移机制</a><a href="#sec-9">8. Pareto archive 与选择</a><a href="#sec-10">9. Optimizer overfitting 与 winner's curse</a><a href="#sec-11">10. Failure attribution 决定搜索效率</a><a href="#sec-12">11. Failure modes</a><a href="#sec-13">12. Engineering checklist</a><a href="#sec-14">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>核心论文</dt><dd><a href="<a href="https://arxiv.org/abs/2603.28052">https://arxiv.org/abs/2603.28052</a>">Meta-Harness</a> · <a href="<a href="https://arxiv.org/abs/2506.13131">https://arxiv.org/abs/2506.13131</a>">AlphaEvolve</a></dd><dt>前序方法</dt><dd><a href="<a href="https://arxiv.org/abs/2408.08435v2">https://arxiv.org/abs/2408.08435v2</a>">ADAS</a> · <a href="<a href="https://arxiv.org/abs/2410.10762v4">https://arxiv.org/abs/2410.10762v4</a>">AFlow</a></dd><dt>本章目标</dt><dd>定义可搜索空间、proposal semantics、评价预算与 archive，而不是把“LLM 改 prompt”泛化成任意自改进。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. Search object：结构化 harness</h2>
+<p>使用统一分解：</p>
+<p>$$h=(h^C,h^W,h^K,h^M).$$</p>
+<p>候选 edit：</p>
+<p>$$\delta=(\delta^C,\delta^W,\delta^K,\delta^M),\qquad h'=h\oplus\delta.$$</p>
+<p>不同层的可搜索性不同：</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>参数化方式</th>
+<th>典型优化</th>
+<th>验证难度</th>
+<th>主要风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context $h^C$</td>
+<td>文本、模板、检索/压缩配置</td>
+<td>prompt optimizer、bandit、ACE</td>
+<td>低到中</td>
+<td>leakage、冗余、staleness</td>
+</tr>
+<tr>
+<td>Workflow $h^W$</td>
+<td>typed graph / DSL</td>
+<td>MCTS、graph rewrite、AFlow</td>
+<td>中</td>
+<td>成本膨胀、循环、join error</td>
+</tr>
+<tr>
+<td>Code $h^K$</td>
+<td>source diff、tool/middleware</td>
+<td>coding agent、evolution</td>
+<td>高</td>
+<td>越权、破坏状态、evaluator tampering</td>
+</tr>
+<tr>
+<td>Memory $h^M$</td>
+<td>schema、rules、read/write policy</td>
+<td>incremental curation、MCE</td>
+<td>中到高</td>
+<td>自我污染、错误持久化</td>
+</tr>
+</tbody>
+</table>
+<p>标题中的三层把 $h^M$ 视为 Layer C 的 stateful information plane；这里单独列出，是因为 memory write 会跨 rollout 持久化，验证和回滚语义强于普通 prompt edit。Prompt search 是 $\mathcal H_C$ 的一个子集；完整 Harness Engineering 不是它的同义词。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Objective：黑盒、约束、多目标</h2>
+<p>模型参数冻结时，candidate 仍要通过执行估计效用：</p>
+<p>$$\hat J_D(h)=\frac1{|D|}\sum_{x\in D}\frac1m\sum_{j=1}^mR(\tau_{x,j},x),\qquad \tau_{x,j}\sim p_{\theta,h}.$$</p>
+<p>搜索问题：</p>
+<p>$$\max_{h\in\mathcal H_{\mathrm{editable}}}\ \hat J_D(h)-\lambda_KK(h)-\lambda_L\mathrm{Lat}(h)-\lambda_QQ(h),$$</p>
+<p>$$\text{s.t.}\quad h\models\mathrm{Schema},\quad \mathrm{Cap}(h)\subseteq\Pi,\quad K(h)\le B.$$</p>
+<p>由于 $h$ 包含字符串、图和代码，目标离散、随机、昂贵且不可微。优化器可能是随机搜索、Bayesian optimization、MCTS、evolutionary search 或 LLM proposer；无论哪种，真正瓶颈常是 evaluator sample complexity。</p>
+<p>若一次 candidate evaluation 的方差为 $\sigma^2$ ， $m$ 次独立 rollout 的均值标准误约为：</p>
+<p>$$\mathrm{SE}(\hat J)=\frac{\sigma}{\sqrt m}.$$</p>
+<p>只跑一次就比较小差距，会让搜索偏好 lucky candidate。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. Typed edit grammar</h2>
+<p>任意自由文本 diff 很难保护不变量。可以定义 edit grammar：</p>
+<pre><code class="language-text">ContextEdit:
+  add_rule | remove_rule | reorder_section | change_retrieval | change_compressor
+WorkflowEdit:
+  insert_node | delete_node | replace_node | change_edge | change_join | change_budget
+CodeEdit:
+  patch_tool | patch_parser | patch_middleware | add_test | migrate_state
+MemoryEdit:
+  add_entry | supersede_entry | change_schema | change_read_policy
+</code></pre>
+<p>每个 edit 带 manifest：</p>
+<pre><code class="language-json">{
+  &quot;parent_digest&quot;: &quot;...&quot;,
+  &quot;layer&quot;: &quot;workflow&quot;,
+  &quot;evidence&quot;: [&quot;run-31:event-77&quot;],
+  &quot;failure_cluster&quot;: &quot;duplicate-write-after-timeout&quot;,
+  &quot;hypothesis&quot;: &quot;reconcile before retry removes duplicate side effects&quot;,
+  &quot;operations&quot;: [{&quot;op&quot;: &quot;insert_node&quot;, &quot;after&quot;: &quot;timeout&quot;, &quot;node&quot;: &quot;reconcile&quot;}],
+  &quot;expected_fix&quot;: [&quot;duplicate-write&quot;],
+  &quot;at_risk&quot;: [&quot;latency&quot;, &quot;tool-budget&quot;],
+  &quot;required_capabilities&quot;: [&quot;read-operation-status&quot;]
+}
+</code></pre>
+<p>Static validation 在执行前检查 schema、可达性、循环上界、permission path、import allowlist 和 state migration。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. 三种搜索粒度</h2>
+<h3>4.1 Local edit</h3>
+<p>每次修改一个组件，便于归因：</p>
+<p>$$h_{t+1}=h_t\oplus\delta_t.$$</p>
+<p>优点是 audit 和 rollback 简单；缺点是无法跨越需要协同修改的 valley。</p>
+<h3>4.2 Bundle edit</h3>
+<p>同时改 context、workflow 和 code：</p>
+<p>$$\delta_t=(\delta_t^C,\delta_t^W,\delta_t^K).$$</p>
+<p>能实现完整功能，但若性能变化，难判断是哪一部分贡献。应要求 bundle 内部 ablation 或依赖说明。</p>
+<h3>4.3 Population / archive</h3>
+<p>维护多个候选谱系：</p>
+<p>$$\mathcal P_{t+1}=\mathrm{Keep}(\mathcal P_t\cup\{h_c\}),\qquad h_c=h_p\oplus\delta.$$</p>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Search algorithms</h2>
+<h3>Random / coordinate search</h3>
+<p>逐层采样 edit，适合小空间和建立 baseline。没有简单 baseline，就无法判断复杂 LLM proposer 是否真的有效。</p>
+<h3>Bandit / Bayesian optimization</h3>
+<p>适合低维连续超参，如 retrieval top- $k$ 、timeout、fan-out；对任意代码 diff 的 kernel/距离定义困难。</p>
+<h3>MCTS</h3>
+<p>把 workflow rewrite 视为 tree action。UCB：</p>
+<p>$$h_t=\arg\max_h\left[\hat J(h)+c\sqrt{\frac{\log N}{n_h}}\right].$$</p>
+<p>适合有局部可组合 edit 的结构搜索，但 rollout 昂贵、树统计易受非平稳 evaluator 影响。</p>
+<h3>Evolutionary search</h3>
+<p>$$h_p\sim\mathrm{Select}(\mathcal P_t),\qquad h_c\sim \rho_\phi(\cdot\mid h_p,z_t),$$</p>
+<p>$$\mathcal P_{t+1}=\mathrm{Archive}(\mathcal P_t,h_c,\mathbf y_c).$$</p>
+<p>需要 parent selection、novelty、elitism、lineage、budget 和 sandbox。LLM 负责 mutation 不等于 LLM 负责 acceptance。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. Meta-Harness：端到端 executable harness search</h2>
+<p><a href="https://arxiv.org/abs/2603.28052">Meta-Harness</a> 固定基础模型，用 coding-agent proposer 读取候选代码、scores 和 trajectories，优化 executable harness：</p>
+<p>$$H^\star=\arg\max_H\mathbb E_{x,\tau\sim p_M(H,x)}[r(\tau,x)].$$</p>
+<p>它的重要贡献是把 prompt、control flow、tools 等放进同一 code search space，并保留 quality/cost Pareto frontier。论文报告：online classification 相对 ACE 增加 \$7.7\$ accuracy points 且 context tokens 少 $4\times$ ；200 道未见 IMO-level math problems 上五个模型相对 no retrieval 平均增加 \$4.7\$ points。</p>
+<p>边界同样重要：TerminalBench-2 的 89 tasks 同时用于搜索和最终评估，因此 Opus 4.6 的 $76.4\%$ 、Haiku 4.5 的 $37.6\%$ 不是干净 held-out generalization。详见 <a href="papers.md"><code>papers.md</code></a>。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. AlphaEvolve：程序搜索的可迁移机制</h2>
+<p><a href="https://arxiv.org/abs/2506.13131">AlphaEvolve</a> 的核心：</p>
+<pre><code class="language-text">initial program + mutable blocks + evaluator
+  -&gt; sample parents/inspirations from database
+  -&gt; model ensemble proposes code diff
+  -&gt; execute evaluator cascade
+  -&gt; store fit and diverse children
+  -&gt; repeat
+</code></pre>
+<p>其 archive 类似 MAP-Elites/island 思路，支持多指标和分布式 evaluator。可迁移到 harness 的原则：</p>
+<ul>
+<li>显式标记 mutable region；</li>
+<li>先跑便宜 validity checks，再跑昂贵 benchmark；</li>
+<li>保存 lineage 与失败；</li>
+<li>选择质量和多样性，而非单一最高分；</li>
+<li>evaluator 必须足够自动化。</li>
+</ul>
+<p>论文的数学/系统成果很强，但主要适用于可自动评分问题；“能跑并得高分”不能防止 specification gaming。生产例子还经过额外部署或人工验证，不能只照搬 evolution loop。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. Pareto archive 与选择</h2>
+<p>候选指标：</p>
+<p>$$\mathbf y(h)=(J_{\mathrm{task}},-K_{\mathrm{token}},-K_{\mathrm{tool}},-L,Q_{\mathrm{safety}},-C_{\mathrm{maint}}).$$</p>
+<p>非支配关系：</p>
+<p>$$h_a\succ h_b\iff \forall j,\ y_j(h_a)\ge y_j(h_b)\ \land\ \exists j,\ y_j(h_a)&gt;y_j(h_b).$$</p>
+<p>Archive 只解决“保留哪些候选”，不解决“上线哪一个”。部署仍需要业务权重、hard constraints 和 approval。维护成本可用代码复杂度、组件数、迁移数量、failure recovery time 等 proxy，但不能假装一个 proxy 等于真实长期成本。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. Optimizer overfitting 与 winner's curse</h2>
+<p>若 $N$ 个真实质量相同的候选分数为 $J+\epsilon_i$ ：</p>
+<p>$$\mathbb E\left[\max_{1\le i\le N}(J+\epsilon_i)\right]&gt;J.$$</p>
+<p>搜索次数越多，最高分越可能只是噪声。缓解：</p>
+<ol>
+<li>记录 evaluator query count；</li>
+<li>candidate 使用 $D_{\mathrm{search}}$ ；</li>
+<li>promotion 使用隐藏 $D_{\mathrm{ho}}$ ；</li>
+<li>最终冻结后只在 $D_{\mathrm{test}}$ 一次评估；</li>
+<li>多 seed、paired comparison、置信区间；</li>
+<li>在新模型/新任务上做 transfer；</li>
+<li>对 benchmark-specific rules 加 complexity penalty。</li>
+</ol>
+<p>若 $D_{\mathrm{ho}}$ 被每轮反复查询，它实际上是 validation set，不应再叫 untouched test。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>10. Failure attribution 决定搜索效率</h2>
+<p>没有 attribution，proposal distribution 接近盲搜。给 trace $\tau$ 和 failure label $y$ ，attributor 产生 component posterior：</p>
+<p>$$p_A(z\mid\tau,y),\qquad z\in\{C,W,K,M,\theta,\mathcal E,V\}.$$</p>
+<p>其中 $\mathcal E$ 是外部环境， $V$ 是 verifier。只有 $z\in\{C,W,K,M\}$ 才进入 harness edit；若最大概率是模型能力、环境故障或 verifier bug，应转给相应 owner。</p>
+<p>Proposal acquisition 可综合收益、不确定性和成本：</p>
+<p>$$\mathrm{Acq}(\delta)=\mathbb E[\Delta J\mid z,\delta]+\beta\mathrm{Uncertainty}(\delta)-\lambda_E\mathrm{EvalCost}(\delta)-\lambda_R\mathrm{Risk}(\delta).$$</p>
+<p>高不确定但低风险的 edit 值得探索；高风险 edit 不能仅因潜在收益大而自动测试在真实环境。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>11. Failure modes</h2>
+<ul>
+<li>search space 太宽，候选多数不可执行；</li>
+<li>proposer 同时读 verifier internals 和 hidden labels；</li>
+<li>只报 best-of- $N$ ，不报 $N$ 、成本和方差；</li>
+<li>增加模型能力/预算却记作 harness gain；</li>
+<li>archive diversity 只按文本差异，不按行为差异；</li>
+<li>bundle edit 无 ablation，credit assignment 失真；</li>
+<li>candidate 修改 state schema 却无 migration；</li>
+<li>objective hacking：修 detector 而非真实 failure；</li>
+<li>在 benchmark search set 上长期演化，再宣称泛化。</li>
+</ul>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>12. Engineering checklist</h2>
+<ul>
+<li>[ ] 三层 editable surface 和 control plane 明确分离；</li>
+<li>[ ] edit grammar 有 schema、type 和 static validation；</li>
+<li>[ ] candidate 在 sandbox 内、最小权限运行；</li>
+<li>[ ] archive 保存 lineage、metrics、cost、failures 和 evaluator version；</li>
+<li>[ ] quality/cost/latency/risk 保留 Pareto 信息；</li>
+<li>[ ] evaluator query count、seed、attempts 和选择规则可复现；</li>
+<li>[ ] hidden regression 与 final test 分开；</li>
+<li>[ ] attribution 错误能路由到 model/data/infra/verifier，而不是强行改 harness。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>导航</h2>
+<ul>
+<li>上一篇：<a href="04_workflow_and_subagents.md">04 Workflow 与 Subagents</a></li>
+<li>下一篇：<a href="06_self_improving_harness.md">06 Self-Improving Harness</a></li>
+<li>回到：<a href="README.md">专题 README</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

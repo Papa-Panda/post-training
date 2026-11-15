@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Papers and Evidence Ledger</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>Papers and Evidence Ledger</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">0. 读表方法</a><a href="#sec-2">A. 起点综述</a><a href="#sec-3">B. Context engineering</a><a href="#sec-4">C. Workflow / agent design search</a><a href="#sec-5">D. End-to-end harness optimization</a><a href="#sec-6">E. Evolutionary program / agent search</a><a href="#sec-7">F. Joint harness / weight updates</a><a href="#sec-8">G. Benchmark 接口</a><a href="#sec-9">H. 跨论文比较</a><a href="#sec-10">I. Claim 使用规则</a><a href="#sec-11">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>目的：把“论文说了什么”“本专题如何使用”“不能推出什么”分开。数字优先回到论文正文、附录或官方 proceedings；博客只用于建立问题地图。</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>0. 读表方法</h2>
+<p>每篇论文按五个问题核验：</p>
+<ol>
+<li><strong>Fixed surface</strong>：基础模型、search algorithm、evaluator 中哪些固定？</li>
+<li><strong>Editable surface</strong>：context、workflow、code、memory、weights 中哪些可改？</li>
+<li><strong>Evidence timing</strong>：proposal 看过什么 traces/labels？candidate 何时运行？</li>
+<li><strong>Acceptance</strong>：同轮 gate、下一轮 rollback、archive fitness，还是只报最终 best？</li>
+<li><strong>Boundary</strong>：数字来自 search tasks、hidden validation、unseen transfer，还是 final test？</li>
+</ol>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>A. 起点综述</h2>
+<table>
+<thead>
+<tr>
+<th>Year</th>
+<th>Source</th>
+<th>Role</th>
+<th>Boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026</td>
+<td><a href="https://lilianweng.github.io/posts/2026-07-04-harness/">Lilian Weng, <em>Harness Engineering for Self-Improvement</em></a></td>
+<td>把 workflow、context、self-harness、evolution 与 recursive self-improvement 串成问题地图</td>
+<td>二手综述；不作为模型、benchmark、数字和精确协议的唯一证据</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>B. Context engineering</h2>
+<h3>B.1 ACE</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Agentic Context Engineering: Evolving Contexts for Self-Improving Language Models</em></li>
+<li><strong>Status/source</strong>：ICLR 2026；<a href="https://proceedings.iclr.cc/paper_files/paper/2026/file/8a94ff6f922d995d7d3f4ebf4143e442-Paper-Conference.pdf">proceedings PDF</a> · <a href="https://arxiv.org/abs/2510.04618v3">arXiv v3</a></li>
+<li><strong>Editable surface</strong>：结构化 playbook/context；基础模型权重固定。</li>
+<li><strong>Mechanism</strong>：Generator 产生 rollout；Reflector 提炼成功/失败 insight；Curator 将增量 delta 合并入 playbook。</li>
+<li><strong>本专题使用</strong>：稳定 ID、incremental update、evidence-grounded merge，比每轮整段重写更可追踪。</li>
+<li><strong>Reported numbers</strong>：论文口径下 agent tasks 提升 <strong>10.6%</strong>、finance tasks 提升 <strong>8.6%</strong>。</li>
+<li><strong>Boundary</strong>：保留论文的百分号口径，不自行改写为 percentage points，也不外推为所有 Agent 的通用增益。</li>
+</ul>
+<h3>B.2 MCE</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Meta Context Engineering via Agentic Skill Evolution</em></li>
+<li><strong>Status/source</strong>：2026 preprint；<a href="https://arxiv.org/abs/2601.21557">arXiv</a> · <a href="https://github.com/metaevo-ai/meta-context-engineering">official code</a></li>
+<li><strong>Editable surface</strong>：prompts、knowledge bases、code 等 context resources，以及 retrieve/filter/format/update 的 context-management skill。</li>
+<li><strong>Mechanism</strong>：外层演化 skill，内层优化 context function，形成双层优化。</li>
+<li><strong>Reported numbers</strong>：跨五个领域、四个 LLM，相对既有 context-engineering 方法提升 <strong>5.6%–53.8%</strong>，平均 <strong>16.9%</strong>；相对 ACE 报告 <strong>13.6×</strong> 更快训练、<strong>4.8×</strong> 更少 rollouts。</li>
+<li><strong>Boundary</strong>：这些是论文设置中的比较，不是 context program 一定更快的通用规律；外层若接触 validation labels，仍会泄漏。</li>
+</ul>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>C. Workflow / agent design search</h2>
+<h3>C.1 ADAS</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Automated Design of Agentic Systems</em></li>
+<li><strong>Status/source</strong>：ICLR 2025；<a href="https://arxiv.org/abs/2408.08435v2">arXiv v2</a> · <a href="https://github.com/ShengranHu/ADAS">official code</a></li>
+<li><strong>Editable surface</strong>：Agent system code/description；基础 model 固定。</li>
+<li><strong>Mechanism</strong>：Meta Agent Search 从 archive 取 prior designs，生成新 design、实现代码、修复错误、evaluate、回写 archive。</li>
+<li><strong>Reported numbers</strong>：DROP F1 增加 <strong>13.6/100</strong>、MGSM accuracy 增加 <strong>14.4%</strong>；迁移到 GSM8K/GSM-Hard 报告 <strong>25.9% / 13.2%</strong> 改善。</li>
+<li><strong>Boundary</strong>：保留原论文单位，不混用 relative percent、accuracy point 和 F1 point；archive 中高分结构可能包含 benchmark-specific tricks。</li>
+</ul>
+<h3>C.2 AFlow</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>AFlow: Automating Agentic Workflow Generation</em></li>
+<li><strong>Status/source</strong>：ICLR 2025；<a href="https://arxiv.org/abs/2410.10762v4">arXiv v4</a> · <a href="https://openreview.net/forum?id=z5uVAKwmjf">OpenReview</a> · <a href="https://github.com/FoundationAgents/AFlow">official code</a></li>
+<li><strong>Editable surface</strong>：LLM nodes 与 code edges 组成的 workflow；MCTS 风格搜索。</li>
+<li><strong>Reported numbers</strong>：GPT-4o-mini divided-test 设置、六个 benchmark、三次运行平均，报告相对手工 workflows <strong>5.7%</strong>、相对 ADAS <strong>19.5%</strong> 改善。</li>
+<li><strong>Cost caveat</strong>：摘要的 “4.55% cost” 在 appendix 的精确条件下支持 parity；超过 GPT-4o 的配置为 <strong>5.92% 或 8.05%</strong> cost。不能写成“以 4.55% 成本普遍超越”。</li>
+<li><strong>Boundary</strong>：workflow search 的样本复用和 search budget 必须与最终 held-out 分开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>D. End-to-end harness optimization</h2>
+<h3>D.1 Meta-Harness</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Meta-Harness: End-to-End Optimization of Model Harnesses</em></li>
+<li><strong>Status/source</strong>：2026 preprint；<a href="https://arxiv.org/abs/2603.28052">arXiv</a> · <a href="https://yoonholee.com/meta-harness/">project</a> · <a href="https://github.com/stanford-iris-lab/meta-harness">official code</a></li>
+<li><strong>Fixed surface</strong>：被优化的基础模型固定；coding-agent proposer 另行生成 harness code edits。</li>
+<li><strong>Editable surface</strong>：prompt、control flow、tools 等 executable harness code。</li>
+<li><strong>Search/evaluation</strong>：proposer 读取候选代码、scores 和 trajectories；保留 quality/cost Pareto frontier。</li>
+<li><strong>Reported numbers</strong>：online classification 相对 ACE 增加 <strong>7.7 accuracy points</strong>，context tokens 少 <strong>4×</strong>；200 道未见 IMO-level math problems、五个 base models 上相对 no retrieval 平均增加 <strong>4.7 points</strong>；TerminalBench-2 报告 Opus 4.6 <strong>76.4%</strong>、Haiku 4.5 <strong>37.6%</strong>。</li>
+<li><strong>Boundary</strong>：math problems 是 unseen，且五个 base models 中四个未参与 search；GPT-OSS-20B 用于 search。TerminalBench-2 使用同一批 <strong>89 tasks</strong> 搜索和最终评估，不是干净 held-out generalization；Opus 是当时 overall #2，Haiku 只是在所报告 Haiku 4.5 agents 中 #1。</li>
+</ul>
+<h3>D.2 STOP</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Self-Taught Optimizer (STOP): Recursively Self-Improving Code Generation</em></li>
+<li><strong>Status/source</strong>：COLM 2024；<a href="https://arxiv.org/abs/2310.02304v3">arXiv v3</a></li>
+<li><strong>Fixed surface</strong>：语言模型权重；外层 evaluator/utility。</li>
+<li><strong>Editable surface</strong>：调用 LM 的 improver/scaffolding code。</li>
+<li><strong>Search/evaluation</strong>：对 improver programs 做 empirical meta-utility search，再让 improver 改进自身版本。</li>
+<li><strong>Data timing</strong>：LPN downstream utility 对 $M=20$ 个独立 LPN instances 取平均；meta-dataset $D$ 含同一个 \$(u,s)\$ 的 <strong>5</strong> 个副本；test metautility 另在 $M_{\mathrm{test}}=50$ 个独立 LPN instances 上报告。test instances 用于报告，不是 Self-Harness 式 promotion gate。</li>
+<li><strong>Boundary</strong>：递归轮次不保证单调改善；论文检查的 unsandboxing code-pattern proxy 为 GPT-4 <strong>0.42%</strong>、GPT-3.5 <strong>0.12%</strong>，只能按此狭窄 proxy 陈述，不等于完整 sandbox escape rate 或安全证明。</li>
+</ul>
+<h3>D.3 Self-Harness</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Self-Harness: Harnesses That Improve Themselves</em></li>
+<li><strong>Status/source</strong>：2026 preprint；<a href="https://arxiv.org/abs/2606.09498">arXiv</a></li>
+<li><strong>Editable surface</strong>：结构化 harness components；基础 solver models 固定。</li>
+<li><strong>Protocol</strong>：Weakness Mining→Harness Proposal→Proposal Validation；held-in traces 对 proposer 可见，held-out 隐藏。</li>
+<li><strong>Exact gate</strong>：</li>
+</ul>
+<p>$$\Delta_{\mathrm{in}}\ge0,\qquad \Delta_{\mathrm{ho}}\ge0,\qquad \max(\Delta_{\mathrm{in}},\Delta_{\mathrm{ho}})&gt;0.$$</p>
+<ul>
+<li><strong>Meaning</strong>：两个 split 都不得下降，至少一个严格提升；accepted compatible edits 才合并。</li>
+<li><strong>Models/benchmarks</strong>：MiniMax M2.5、Qwen3.5-35B-A3B、GLM-5；Terminal-Bench-2.0 固定 <strong>64-case subset</strong>，SWE-bench Verified <strong>100 cases</strong>（67/33），AppWorld <strong>180 cases</strong>（90/90）。</li>
+<li><strong>Reported outcome</strong>：九组最终 harness 均同时改善两个 split；最大整体绝对增益为 GLM-5/AppWorld <strong>+40.6 points</strong>。</li>
+<li><strong>Boundary</strong>：held-out 会被 promotion 反复查询，因此是 hidden regression/validation，不是 untouched final test；九组结果不能外推成工业安全证明。</li>
+</ul>
+<h3>D.4 Agentic Harness Engineering</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Agentic Harness Engineering: Observability-Driven Automatic Evolution of Coding-Agent Harnesses</em></li>
+<li><strong>Status/source</strong>：2026 preprint；<a href="https://arxiv.org/abs/2604.25850v4">arXiv v4</a> · <a href="https://github.com/china-qijizhifeng/agentic-harness-engineering">official code</a></li>
+<li><strong>Observability</strong>：component、experience、decision。</li>
+<li><strong>Timing</strong>：edit 先 commit；下一轮 rollout 归因上一轮 manifest；不合格则 rollback；另保留 $H_{\mathrm{best}}$ 。这不是 Self-Harness 的同轮 candidate gate。</li>
+<li><strong>Main setup</strong>：GPT-5.4 high；同一批 <strong>89</strong> 个 Terminal-Bench 2 tasks； $k=2$ ；<strong>10 iterations</strong>；约 <strong>32 小时</strong>。</li>
+<li><strong>Reported numbers</strong>：main score <strong>77.0% pass@1</strong>，但不是 held-out。冻结后 SWE-bench transfer <strong>75.6%</strong>，seed <strong>75.2%</strong>；tokens/trial <strong>461k vs 526k</strong>。部分 repository 退化。</li>
+<li><strong>Attribution caveat</strong>：regression prediction precision/recall <strong>11.8% / 11.1%</strong>，说明 attribution 仍弱；manifest/rollback 增强审计性，不等于预测可靠。</li>
+</ul>
+<h3>D.5 Harness Updating Is Not Harness Benefit</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Harness Updating Is Not Harness Benefit: Disentangling Evolution Capabilities in Self-Evolving LLM Agents</em></li>
+<li><strong>Status/source</strong>：2026 preprint；<a href="https://arxiv.org/abs/2605.30621">arXiv</a> · <a href="https://github.com/A-EVO-Lab/a-evolve/tree/release/harness-evolution">official code</a>。官方 repo 标注 “EMNLP 2026 Main”，arXiv metadata 本身未显示 venue，二者应区分陈述。</li>
+<li><strong>Design</strong>：solver $f$ 与 evolver $e$ 交叉，区分 update ability 和 benefit ability。</li>
+<li><strong>Exact metrics</strong>：</li>
+</ul>
+<p>$$\Delta(f,e)=J_X(f,H_T^{(f,e)})-M_{\mathrm{base}}(f),$$</p>
+<p>$$\Delta_{\mathrm{update}}(e)=\frac1{|F^\star|}\sum_{f\in F^\star}\Delta(f,e),\qquad \Delta_{\mathrm{benefit}}(f)=\max_{e\in E^\star}\Delta(f,e).$$</p>
+<ul>
+<li><strong>Reported numbers</strong>：best/worst evolver 在任一 benchmark 的最大差距只有 <strong>3.1 points</strong>；无 evolver 三项都最佳。SLR/HFR：Qwen3-32B <strong>0.251/0.142</strong>，Qwen3-235B <strong>0.961/0.350</strong>，Opus 4.6 <strong>0.957/0.757</strong>。</li>
+<li><strong>Boundary</strong>：主实验为 in-situ：task 先以 $H_{t-1}$ 评分，再把 trace 用于更新 $H_t$ ；这避免当前 task 从自己的 evidence 获益，但不等于独立 held-out promotion。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>E. Evolutionary program / agent search</h2>
+<h3>E.1 AlphaEvolve</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>AlphaEvolve: A coding agent for scientific and algorithmic discovery</em></li>
+<li><strong>Status/source</strong>：2025 white paper；<a href="https://arxiv.org/pdf/2506.13131">arXiv PDF</a></li>
+<li><strong>Fixed surface</strong>：outer evolution/database/evaluator machinery；自动 evaluator。</li>
+<li><strong>Editable surface</strong>：显式 mutable code blocks。</li>
+<li><strong>Mechanism</strong>：Gemini 2.0 Flash/Pro ensemble 生成 diff，evaluator cascade 评分，MAP-Elites/island-inspired archive 保留质量与多样性。</li>
+<li><strong>Reported examples</strong>：在 <strong>14</strong> 个 matrix-multiplication targets 上改进 state of the art；complex $4\times4$ rank <strong>48</strong>，超过此前 rank 49；50+ math problems 中约 <strong>75% match</strong>、约 <strong>20% surpass</strong> 已知 best；scheduling 平均回收 <strong>0.7%</strong> fleet compute；TPU tiling heuristic 相对 expert-designed heuristic 在全部 kernels 上平均提速 <strong>23%</strong>，对应 Gemini overall training time 降低 <strong>1%</strong>；FlashAttention 在指定配置下 kernel 提速 <strong>32%</strong>，kernel 输入/输出的预处理与后处理部分提速 <strong>15%</strong>。</li>
+<li><strong>Boundary</strong>：这是 white paper 与内部 production claims；适合 evaluator 清晰的任务。生产结果还有额外验证，不能外推为开放式 harness 搜索自动安全有效。</li>
+</ul>
+<h3>E.2 Darwin Gödel Machine</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Darwin Gödel Machine: Open-Ended Evolution of Self-Improving Agents</em></li>
+<li><strong>Status/source</strong>：ICLR 2026；<a href="https://arxiv.org/pdf/2505.22954">arXiv PDF</a></li>
+<li><strong>Fixed surface</strong>：外层 archive/search procedure 不自修改；基础模型权重固定。</li>
+<li><strong>Editable surface</strong>：coding-agent harness/codebase；child 从 archive parent 产生。</li>
+<li><strong>Reported numbers after 80 iterations</strong>：SWE experimental subset <strong>20.0%→50.0%</strong>；Polyglot 50-task subset <strong>14.0%→38.0%</strong>；full Polyglot <strong>14.2%→30.7%</strong>。</li>
+<li><strong>Cost</strong>：单次 SWE run 约两周、约 <strong>US\$22,000</strong>。</li>
+<li><strong>Boundary</strong>：50.0% 不是全 500-task SWE-bench Verified。论文记录 objective hacking：node 114 绕过 detector 获得最高 evaluator score。Sandbox/archive/rollback 不等于完整安全证明。</li>
+</ul>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>F. Joint harness / weight updates</h2>
+<h3>F.1 SIA</h3>
+<ul>
+<li><strong>Title used by paper</strong>：<em>SIA: Self Improving AI with Harness &amp; Weight Updates</em></li>
+<li><strong>Status/source</strong>：2026 preprint v2；<a href="https://arxiv.org/html/2605.27276v2">arXiv HTML</a></li>
+<li><strong>Architecture</strong>：Meta-Agent、Task Agent、Feedback-Agent；Feedback-Agent 在 harness update 和 weight update 之间选择。</li>
+<li><strong>Timing</strong>：报告实验通常先 scaffold iteration，再在 reward plateau 后 weight update。</li>
+<li><strong>Weight methods</strong>：LawBench PPO+GAE；TriMul entropic advantage weighting；denoising GRPO。</li>
+<li><strong>v2 Table 3</strong>：LawBench <strong>13.5%→50.0%→70.1%</strong>，joint 相对 harness-only <strong>+20.1 points</strong>；TriMul reward <strong>0.105→0.120→1.475</strong>，runtime <strong>12,483 μs→1,017 μs</strong>；denoising $mse_{\mathrm{norm}}$ <strong>0.048→0.241→0.289</strong>。</li>
+<li><strong>Boundary</strong>：不同任务的 reward/metric 不可横向比较；论文明确提出 coupled co-evolutionary Goodhart 风险。结果不证明所有任务都应联合更新。</li>
+</ul>
+<h3>F.2 Continual Harness</h3>
+<ul>
+<li><strong>Exact title</strong>：<em>Continual Harness: Online Adaptation for Self-Improving Foundation Agents</em></li>
+<li><strong>Status/source</strong>：2026 preprint；<a href="https://arxiv.org/html/2605.09998">arXiv HTML</a></li>
+<li><strong>Harness update</strong>：reset-free acting loop；每 $F$ 步 Refiner 对 system prompt、subagents、skills、memory 做 CRUD。</li>
+<li><strong>Co-learning</strong>：每轮 $K=256$ steps；pairwise PRM；frontier teacher relabel；soft SFT；emulator state 不 reset。</li>
+<li><strong>Pokémon Emerald / Gemini 3.1 Pro</strong>：from-scratch <strong>100% milestones，US\$130 median</strong>；minimalist harness <strong>98%，US\$215</strong>。</li>
+<li><strong>Boundary</strong>：弱模型存在 capability floor，self-refinement 可能恶化；未证明 convergence，也没有 matched reset-based baseline。早期 GPP Pokémon completion 是 human-supervised 系统，不能归给 fully automated Continual Harness。论文没有实证给出一个一般 reward-hacking 发现，不能替它添加。</li>
+</ul>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>G. Benchmark 接口</h2>
+<table>
+<thead>
+<tr>
+<th>Benchmark</th>
+<th>主要测量</th>
+<th>Primary source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PaperBench</td>
+<td>复现 AI 论文的分解 rubric</td>
+<td><a href="https://arxiv.org/abs/2504.01848">arXiv</a></td>
+</tr>
+<tr>
+<td>RE-Bench</td>
+<td>真实 ML R&amp;D 环境与人类专家对比</td>
+<td><a href="https://arxiv.org/abs/2411.15114">arXiv</a></td>
+</tr>
+<tr>
+<td>MLE-bench</td>
+<td>Kaggle 风格 ML engineering</td>
+<td><a href="https://arxiv.org/abs/2410.07095">arXiv</a></td>
+</tr>
+<tr>
+<td>CORE-Bench</td>
+<td>给定 code/data 的论文计算可复现性</td>
+<td><a href="https://arxiv.org/abs/2409.11363v2">arXiv v2</a></td>
+</tr>
+<tr>
+<td>KernelBench</td>
+<td>GPU kernel correctness 与 speed</td>
+<td><a href="https://arxiv.org/abs/2502.10517">arXiv</a></td>
+</tr>
+</tbody>
+</table>
+<p>Benchmark 接口只告诉我们任务和 evaluator；不能自动保证 search/test split、sandbox、权限和长期维护指标正确。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>H. 跨论文比较</h2>
+<table>
+<thead>
+<tr>
+<th>Work</th>
+<th>主要 edit surface</th>
+<th>Search style</th>
+<th>Acceptance timing</th>
+<th>最关键 boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ACE</td>
+<td>context/playbook</td>
+<td>incremental reflection/curation</td>
+<td>playbook update</td>
+<td>非通用增益定律</td>
+</tr>
+<tr>
+<td>MCE</td>
+<td>context-management skill</td>
+<td>bilevel evolution</td>
+<td>skill evaluation</td>
+<td>outer-loop leakage</td>
+</tr>
+<tr>
+<td>ADAS</td>
+<td>agent code/design</td>
+<td>archive search</td>
+<td>evaluated design 入 archive</td>
+<td>benchmark-specific design</td>
+</tr>
+<tr>
+<td>AFlow</td>
+<td>workflow graph/code</td>
+<td>MCTS-style</td>
+<td>search score</td>
+<td>cost headline 需分条件</td>
+</tr>
+<tr>
+<td>Meta-Harness</td>
+<td>executable harness</td>
+<td>coding-agent search + Pareto</td>
+<td>candidate evaluation</td>
+<td>TerminalBench 同 89 tasks search/eval</td>
+</tr>
+<tr>
+<td>STOP</td>
+<td>improver code</td>
+<td>recursive meta-optimization</td>
+<td>utility selection</td>
+<td>无 split-wise non-regression</td>
+</tr>
+<tr>
+<td>Self-Harness</td>
+<td>harness components</td>
+<td>bounded proposals</td>
+<td>same-round hidden regression gate</td>
+<td>held-out 非 final test</td>
+</tr>
+<tr>
+<td>AHE</td>
+<td>coding-agent harness files</td>
+<td>observability-driven edit</td>
+<td>next-round attribution/rollback</td>
+<td>main 77.0% 非 held-out</td>
+</tr>
+<tr>
+<td>DGM</td>
+<td>agent codebase</td>
+<td>open-ended archive evolution</td>
+<td>archive fitness</td>
+<td>50% 非 full SWE Verified；有 objective hack</td>
+</tr>
+<tr>
+<td>SIA</td>
+<td>harness + weights</td>
+<td>feedback-routed alternation</td>
+<td>task-specific</td>
+<td>coupled Goodhart</td>
+</tr>
+<tr>
+<td>Continual Harness</td>
+<td>prompt/subagents/skills/memory + weights</td>
+<td>reset-free continual adaptation</td>
+<td>periodic refinement</td>
+<td>无 convergence/matched reset proof</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>I. Claim 使用规则</h2>
+<ol>
+<li>“搜索集最高分”不写成 held-out generalization；</li>
+<li>accuracy points、relative percent、F1/100、reward 和 latency 保持原单位；</li>
+<li>固定模型上的 harness gain 不等于模型 intelligence gain；</li>
+<li>会提出 update 不等于 solver 能利用 update；</li>
+<li>hidden held-out 被反复查询就是 validation，不是 untouched test；</li>
+<li>benchmark 自动验证成功不外推到科学品味、长期维护或安全；</li>
+<li>preprint/white paper/official repo 的 publication status 分开标注；</li>
+<li>任何数字进入 README 前，都回到本 ledger 的 source 和 boundary。</li>
+</ol>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>导航</h2>
+<ul>
+<li>上一篇：<a href="08_harness_rl_and_weight_updates.md">08 Harness、RL 与 Weight Updates</a></li>
+<li>下一篇：<a href="README.md">专题 README</a></li>
+<li>运行代码：<a href="code/demo.py">code/demo.py</a> · <a href="tests/test_harness_lab.py">tests/test_harness_lab.py</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>

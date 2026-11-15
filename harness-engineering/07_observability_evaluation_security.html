@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 — Observability、Evaluation 与 Security：外置 Control Plane</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1e40af; --accent-ink:#1e3a8a; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec h4{font-size:16px;margin:20px 0 8px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#e8eefc;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1e40af);height:100%;border-radius:999px}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">Harness Engineering</span>
+    <h1>07 — Observability、Evaluation 与 Security：外置 Control Plane</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">1. Control plane 必须外置</a><a href="#sec-3">2. Observability 的三层结构</a><a href="#sec-4">3. 四类数据 split</a><a href="#sec-5">4. Deterministic gate 与 stochastic gate</a><a href="#sec-6">5. Metrics：不要只看 pass rate</a><a href="#sec-7">6. Failure attribution protocol</a><a href="#sec-8">7. Threat model</a><a href="#sec-9">8. Permission lattice</a><a href="#sec-10">9. Version、lineage 与 rollback</a><a href="#sec-11">10. Deployment state machine</a><a href="#sec-12">11. Long-term utility</a><a href="#sec-13">12. Failure modes</a><a href="#sec-14">13. Engineering checklist</a><a href="#sec-15">导航</a></nav>
+  </details>
+  <section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>论文接口</dt><dd><a href="<a href="https://arxiv.org/abs/2606.09498">https://arxiv.org/abs/2606.09498</a>">Self-Harness</a> · <a href="<a href="https://arxiv.org/abs/2604.25850v4">https://arxiv.org/abs/2604.25850v4</a>">AHE</a> · <a href="<a href="https://arxiv.org/abs/2603.28052">https://arxiv.org/abs/2603.28052</a>">Meta-Harness</a> · <a href="<a href="https://arxiv.org/abs/2505.22954">https://arxiv.org/abs/2505.22954</a>">DGM</a></dd><dt>本章目标</dt><dd>让“自改进”成为可审计的软件发布流程，而不是允许 proposer 自己改题、改分、改权限后宣布成功。</dd></dl>
+</section>
+<section class="sec" id="sec-2"><h2><span class="n">2</span>1. Control plane 必须外置</h2>
+<p>可编辑 harness：</p>
+<p>$$h=(h^C,h^W,h^K,h^M).$$</p>
+<p>外置控制面：</p>
+<p>$$q=(V,\Pi,B,L).$$</p>
+<ul>
+<li>$V$ ：verifier 和评分逻辑；</li>
+<li>$\Pi$ ：permission/capability policy；</li>
+<li>$B$ ：token、工具、时间、金钱和风险预算；</li>
+<li>$L$ ：append-only trace/audit log。</li>
+</ul>
+<p>Model、tool、environment 与 evaluator identity 另存于只读 version manifest，并由 $L$ 中的每条事件引用；它不新增可编辑 harness 维度。</p>
+<pre><code class="language-text">editable workspace                  external control plane
+-------------------------------     --------------------------------
+context templates                   held-out tasks and labels
+retrieval/compression policy        verifier implementation
+workflow / retry / routing          permission policy and secrets
+skills and subagent config          model identity / decoding
+allowed tool/middleware code        budget accounting
+memory read/write policy            tracer / deployment gate
+</code></pre>
+<p>“不在 prompt 中暴露”不等于隔离。真正边界包括：独立进程身份、最小文件 ACL、read-only mount、网络 policy、签名 artifact、separate CI/deployer 和不可由 proposer 修改的 budget meter。</p>
+</section>
+<section class="sec" id="sec-3"><h2><span class="n">3</span>2. Observability 的三层结构</h2>
+<p>AHE 的三层可以统一到 trace schema：</p>
+<h3>2.1 Component observability</h3>
+<p>每个组件有：路径、owner、schema、version、依赖、能力和 tests。否则 failure 只能归到“整个 Agent”。</p>
+<h3>2.2 Experience observability</h3>
+<pre><code class="language-text">benchmark overview
+  -&gt; failure cluster
+    -&gt; per-task diagnosis
+      -&gt; event timeline
+        -&gt; raw tool/model artifact
+</code></pre>
+<p>每个摘要可以下钻到 evidence pointer；没有 pointer 的结论不能驱动自动 edit。</p>
+<h3>2.3 Decision observability</h3>
+<p>每个 proposal 是可证伪假设：</p>
+<p>$$H_\delta:\quad \Delta J_{\mathrm{target}}&gt;0,\quad \Delta J_{\mathrm{retain}}\ge0,\quad \Delta K\le B_K,\quad \Delta Q\le B_Q.$$</p>
+<p>Manifest 记录 predicted fixes 和 at-risk behaviors；下一轮直接检验。AHE 的 regression prediction precision/recall 只有 $11.8\%/11.1\%$ ，说明结构化预测仍很难，但至少让失败可归因和 rollback。</p>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>3. 四类数据 split</h2>
+<table>
+<thead>
+<tr>
+<th>Split</th>
+<th style="text-align: right;">Proposer 可见？</th>
+<th style="text-align: right;">查询频率</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$D_{\mathrm{mine}}$</td>
+<td style="text-align: right;">是</td>
+<td style="text-align: right;">多次</td>
+<td>收集 trace、聚类失败、生成 proposal</td>
+</tr>
+<tr>
+<td>$D_{\mathrm{in}}$</td>
+<td style="text-align: right;">结果可见</td>
+<td style="text-align: right;">多次</td>
+<td>检查目标 failure 是否修复</td>
+</tr>
+<tr>
+<td>$D_{\mathrm{ho}}$</td>
+<td style="text-align: right;">labels/traces 隐藏</td>
+<td style="text-align: right;">promotion 时多次</td>
+<td>回归门控；实质是 hidden validation</td>
+</tr>
+<tr>
+<td>$D_{\mathrm{test}}$</td>
+<td style="text-align: right;">否</td>
+<td style="text-align: right;">冻结后一次</td>
+<td>最终泛化报告</td>
+</tr>
+</tbody>
+</table>
+<p>如果 proposer 根据“candidate 是否通过 $D_{\mathrm{ho}}$ ”反复调整，哪怕没看到样本内容，也能从一比特反馈逐渐过拟合。因此要记录 query budget，并保留真正未使用的 $D_{\mathrm{test}}$ 。</p>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>4. Deterministic gate 与 stochastic gate</h2>
+<h3>4.1 Deterministic hard constraints</h3>
+<p>任何一项失败都拒绝：</p>
+<p>$$A_{\mathrm{hard}}=\mathbf1[\mathrm{SchemaOK}]\mathbf1[\mathrm{Capabilities}\subseteq\Pi]\mathbf1[\mathrm{NoVerifierEdit}]\mathbf1[\mathrm{Budget}\le B].$$</p>
+<h3>4.2 Performance constraints</h3>
+<p>目标修复与回归：</p>
+<p>$$\Delta_{\mathrm{in}}=J_{\mathrm{in}}(h')-J_{\mathrm{in}}(h),\qquad \Delta_{\mathrm{ho}}=J_{\mathrm{ho}}(h')-J_{\mathrm{ho}}(h).$$</p>
+<p>Self-Harness 的论文规则：</p>
+<p>$$\Delta_{\mathrm{in}}\ge0,\qquad \Delta_{\mathrm{ho}}\ge0,\qquad \max(\Delta_{\mathrm{in}},\Delta_{\mathrm{ho}})&gt;0.$$</p>
+<p>生产环境可更严格：target split 要超过最小修复量，regression split 要满足 non-inferiority：</p>
+<p>$$\mathrm{LCB}_{1-\alpha}(\Delta_{\mathrm{in}})&gt;\epsilon_{\mathrm{repair}},$$</p>
+<p>$$\mathrm{LCB}_{1-\alpha}(\Delta_{\mathrm{ho}})&gt;-\epsilon_{\mathrm{reg}}.$$</p>
+<p>对同一任务 paired pass/fail，可用 paired bootstrap 或 McNemar-style comparison；连续 reward 可对 per-task difference 做 bootstrap。不要把每次随机 rollout 当独立任务样本。</p>
+<h3>4.3 Sequential testing</h3>
+<p>搜索会不断看结果并决定是否继续，普通固定样本 $p$ 值会失真。简单工程策略：</p>
+<ul>
+<li>预注册最大候选数和每 candidate attempts；</li>
+<li>将 search 与 promotion evaluator 分开；</li>
+<li>用 alpha spending 或置信序列；</li>
+<li>先便宜 checks，再昂贵 hidden regression；</li>
+<li>对最终候选在 untouched $D_{\mathrm{test}}$ 一次评估。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>5. Metrics：不要只看 pass rate</h2>
+<p>每个 candidate 输出向量：</p>
+<p>$$\mathbf y(h)=(J_{\mathrm{task}},K_{\mathrm{token}},K_{\mathrm{tool}},L_{p50},L_{p95},Q_{\mathrm{policy}},C_{\mathrm{maint}}).$$</p>
+<p>还要报告：</p>
+<ul>
+<li>run-to-run variance 和 failure distribution；</li>
+<li>timeout/unknown-outcome 比率；</li>
+<li>retries 与 duplicate side effects；</li>
+<li>per-category/per-repository regressions；</li>
+<li>model/harness/tool/evaluator versions；</li>
+<li>search 中查询 evaluator 的次数。</li>
+</ul>
+<p>平均分可掩盖长尾。AHE 的 frozen SWE-bench 总体略升，但部分 repository slice 出现退化，这就是为什么必须同时报告分组结果。</p>
+</section>
+<section class="sec" id="sec-7"><h2><span class="n">7</span>6. Failure attribution protocol</h2>
+<pre><code class="language-text">1. detect: verifier marks first violated contract
+2. localize: map event to component/version
+3. hypothesize: list possible causes and counterevidence
+4. replay: reproduce with same artifact/environment
+5. intervene: change one surface or node
+6. compare: paired outcomes under fixed budget
+7. decide: propose edit, route to another owner, or mark unknown
+</code></pre>
+<p>归因标签集合：</p>
+<p>$$z\in\{\mathrm{context},\mathrm{workflow},\mathrm{tool},\mathrm{memory},\mathrm{model},\mathrm{environment},\mathrm{verifier}\}.$$</p>
+<p>如果根因是 model capability、环境不稳定或 verifier bug，不应为了让 pipeline 闭环而强行生成 harness edit。</p>
+</section>
+<section class="sec" id="sec-8"><h2><span class="n">8</span>7. Threat model</h2>
+<h3>7.1 Verifier tampering</h3>
+<p>候选删除 tests、放宽阈值、替换 judge 或吞掉失败。防线：只读 mount、独立 identity、signed evaluator digest、CI 在候选容器外运行。</p>
+<h3>7.2 Test leakage</h3>
+<p>将 hidden labels、expected output、judge reasoning 写入 prompt/memory。防线：split ACL、只返回最小 aggregate verdict、query budget、final untouched test。</p>
+<h3>7.3 Permission escalation</h3>
+<p>候选增加 shell/network/send/delete 能力。防线：capability allowlist 由外部 broker 强制，proposal 只能请求、不能自授。</p>
+<h3>7.4 Budget hacking</h3>
+<p>换更强模型、增加 calls/context/retries。防线：budget meter 在 runtime 外，所有资源统一计费，candidate 不可改 model identity。</p>
+<h3>7.5 Trace suppression</h3>
+<p>删除失败日志或只报告成功。防线：append-only external log、sequence number、missing-event alarm。</p>
+<h3>7.6 Objective hacking</h3>
+<p>DGM 论文中的具体例子：候选移除特殊 logging tokens 绕过 hallucination detector，获得 evaluator 满分，却没有真正消除 hallucinated tool calls。防线不是再加一句 prompt，而是语义级 verifier、diverse checks、hidden adversarial cases 与人工审计。</p>
+<h3>7.7 Memory poisoning</h3>
+<p>错误/恶意 tool output 被升级为长期规则。防线：data/instruction separation、provenance、candidate state、独立验证和 ACL。</p>
+</section>
+<section class="sec" id="sec-9"><h2><span class="n">9</span>8. Permission lattice</h2>
+<p>能力不是布尔 <code>safe/unsafe</code>，可以形成偏序：</p>
+<pre><code class="language-text">read_public &lt; read_private
+write_sandbox &lt; write_workspace &lt; external_send
+reversible_delete &lt; irreversible_delete
+</code></pre>
+<p>若 $c_1\preceq c_2$ 表示 $c_2$ 权限更强，则候选需要能力集合 $C(h')$ 。自动 promotion 的必要条件：</p>
+<p>$$C(h')\subseteq C_{\mathrm{auto}},$$</p>
+<p>超出部分进入人工审批。审批绑定 candidate digest、目的、目标资源和 expiry，不能变成永久 wildcard。</p>
+</section>
+<section class="sec" id="sec-10"><h2><span class="n">10</span>9. Version、lineage 与 rollback</h2>
+<p>Harness version manifest：</p>
+<pre><code class="language-json">{
+  &quot;digest&quot;: &quot;...&quot;,
+  &quot;parent&quot;: &quot;...&quot;,
+  &quot;model_id&quot;: &quot;...&quot;,
+  &quot;editable_schema&quot;: &quot;v3&quot;,
+  &quot;context&quot;: &quot;...&quot;,
+  &quot;workflow&quot;: &quot;...&quot;,
+  &quot;tools&quot;: &quot;...&quot;,
+  &quot;memory_snapshot&quot;: &quot;...&quot;,
+  &quot;permission_policy&quot;: &quot;external-ref&quot;,
+  &quot;evaluator_digest&quot;: &quot;external-ref&quot;,
+  &quot;metrics&quot;: {},
+  &quot;migration&quot;: &quot;...&quot;
+}
+</code></pre>
+<p>Rollback 不是切回旧 prompt。必须恢复兼容的 workflow、tool versions、memory schema、state migration 和 permissions。若新版本已产生不可逆外部副作用，只能 compensation/reconciliation，不能声称状态被完全回滚。</p>
+</section>
+<section class="sec" id="sec-11"><h2><span class="n">11</span>10. Deployment state machine</h2>
+<pre><code class="language-text">DRAFT -&gt; STATIC_VALID -&gt; SANDBOXED -&gt; VALIDATED -&gt; SHADOW -&gt; CANARY -&gt; ACTIVE
+   |          |              |           |          |          |
+   +----------+--------------+-----------+----------+-&gt; REJECTED
+                                                  ACTIVE -&gt; ROLLED_BACK
+</code></pre>
+<ul>
+<li><code>SHADOW</code>：读取真实输入但不产生真实副作用；</li>
+<li><code>CANARY</code>：小流量、严格权限与自动 rollback；</li>
+<li><code>ACTIVE</code>：仍持续监控 slice metrics 和 drift；</li>
+<li><code>ROLLED_BACK</code>：保留失败证据和已发生副作用清单。</li>
+</ul>
+<p>Promotion 和 rollback 都由外部 deployer 执行；candidate process 只能产出 signed proposal artifact。</p>
+</section>
+<section class="sec" id="sec-12"><h2><span class="n">12</span>11. Long-term utility</h2>
+<p>短期任务分不包含维护与迁移：</p>
+<p>$$J_{\mathrm{long}}=J_{\mathrm{task}}-\lambda_1C_{\mathrm{maintenance}}-\lambda_2C_{\mathrm{migration}}-\lambda_3C_{\mathrm{debug}}-\lambda_4Q_{\mathrm{security}}.$$</p>
+<p>这些成本常在 rollout 后才出现。补充信号：静态分析、依赖扫描、兼容测试、代码复杂度、incident rate、恢复时间和人工 review。自动 verifier 无法完整衡量 scientific taste、用户信任和长期架构质量。</p>
+</section>
+<section class="sec" id="sec-13"><h2><span class="n">13</span>12. Failure modes</h2>
+<ul>
+<li>proposer、runner、verifier 共用同一写身份；</li>
+<li>hidden regression 反馈过细，形成标签侧信道；</li>
+<li>看 overall 不看 slices；</li>
+<li>重复 rollout 当独立样本，置信区间过窄；</li>
+<li>accepted/rejected/archive/deployed 状态混在一起；</li>
+<li>rollback 只恢复文件，不处理外部副作用；</li>
+<li>verifier 自身有 bug，却被当作真值；</li>
+<li>权限申请没有 scope/expiry；</li>
+<li>shadow 环境与真实依赖不同，canary 才暴露问题。</li>
+</ul>
+</section>
+<section class="sec" id="sec-14"><h2><span class="n">14</span>13. Engineering checklist</h2>
+<ul>
+<li>[ ] control plane 使用独立权限、存储和 deployment identity；</li>
+<li>[ ] 四类 data split 和 query budget 明确；</li>
+<li>[ ] hard gate 与 stochastic performance gate 分开；</li>
+<li>[ ] paired evaluation、置信区间和 slice metrics 完整；</li>
+<li>[ ] trace append-only，所有摘要可回到原始 evidence；</li>
+<li>[ ] capability approval 绑定 digest、scope 和 expiry；</li>
+<li>[ ] rollback 包含 state/memory/tool migration 与副作用 reconciliation；</li>
+<li>[ ] final test 在 harness 冻结后只运行一次。</li>
+</ul>
+<!-- NAVIGATION -->
+</section>
+<section class="sec" id="sec-15"><h2><span class="n">15</span>导航</h2>
+<ul>
+<li>上一篇：<a href="06_self_improving_harness.md">06 Self-Improving Harness</a></li>
+<li>下一篇：<a href="08_harness_rl_and_weight_updates.md">08 Harness、RL 与权重更新</a></li>
+<li>回到：<a href="README.md">专题 README</a></li>
+</ul></section>
+  <div class="foot">由 <a href="">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
