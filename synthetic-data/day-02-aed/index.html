@@ -113,7 +113,7 @@ pre code{background:none;padding:0;color:inherit}
   </header>
   <details class="toc" open>
     <summary>目录（点击跳转）</summary>
-    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a></nav>
   </details>
   <section class="sec" id="sec-0">
 <blockquote class="pq">
@@ -169,13 +169,6 @@ pre code{background:none;padding:0;color:inherit}
 <li>与 Day 01 SPADE 构成对照：SPADE 是合成环境、AED 是真实失败；SPADE 的验证在环境 verifier 里，AED 的验证在 matched replay 里——两种“验证”的活法。</li>
 <li>如果复现，第一步先攒带完整 trace 的真实失败 rollout，再谈 judge——没有 trace，citation-first 无从谈起。</li>
 </ul>
-</section>
-<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
-<ol>
-<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
-<li>数据 pipeline 中哪个环节最容易藏 bug？（judge 的 citation 是否真指向因果 token；matched replay 的“可复现”筛选是否偏向简单任务）</li>
-<li>换成今天的模型规模，这个方法还成立吗？</li>
-</ol>
 </section>
   <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-02-aed/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2609.40111">论文原文 arXiv:2609.40111</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
 </div>

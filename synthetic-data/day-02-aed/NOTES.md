@@ -18,3 +18,23 @@
 ## 3 个问题
 
 1. citation-first 的作用到底是"防 judge 胡编"还是"防 judge 说对位置、说错原因"？设计一个实验：固定同一批失败 trace，trace 全程保持完整，三臂——A citation-first 且引用须校验（引用必须是 trace 里的原文子串，无效引用驳回）；B 同样的 judge 但去掉引用要求；C 引用要求保留、但引用不校验（可以现编 token）。评两个指标：diagnosis 的 teacher-label exact-step 一致率（位置），以及在位置答对的条件下、原因类别与 teacher 的一致率。判据：若 A 只在位置上 ≫B、原因给定位置后两边一样 → 引用主要是防胡编；若 A 只在原因上 ≫B、位置两边一样 → 引用主要是改善因果归因；若 A≫C≈B → 起作用的是 grounding（引用必须真指到证据上），引用的形式本身没用；若 A≈C≫B → 起作用的是引用这个动作本身。漏洞：不要拿"打乱 trace"当对照臂——打乱是销毁信息（失败 step 的因果链断了，任务本身变不可解），不是控制变量；而且被迫引用噪声 token 会主动把 judge 往随机位置上锚，C 的低分是构造出来的，什么都证明不了。
+2. 修复监督 WebShop-lite +6.67、TextQuest −8.33。设计一个 2×2：修复训练 ∈ {开，关} × 评测环境 ∈ {WebShop-lite，TextQuest}，再加一列“只训诊断、不训修复”作为第三臂。先预测六个格子的排序并写理由；再问：TextQuest 上 −8.33 是修复监督“教坏了”（学了错误恢复模式），还是“分布漂移”（修复数据来自别的环境）？设计一个检验区分两者：把 TextQuest 风格的失败 trace 混入修复训练，看 −8.33 是否消失。
+3. matched replay 只对“可复现任务”验证修复动作。构造一个反例：什么样的修复会在 matched replay 里通过、到真实环境里失效？（提示：replay 的初始状态是不是和真实失败的初始状态同一分布？）再设计一个对照：replay 验证通过的修复子集 vs 未通过的子集，分别训 actor，看真实环境成功率——若通过组反而更差，说明 matched replay 的筛选在挑什么？
+
+## 核心机制
+
+1. **Motivation**：合成数据都在教模型怎么做对的事，失败样本一直被当成废料丢掉。但失败里藏着“错在哪、为什么错、怎么修”的结构化信息，而且真实 rollout 的失败是自然分布的，不用编。
+2. **方法**：五步 AET 流水线：收集真实 rollout 里的自然失败 → citation-first 的 judge 出诊断与修复建议（每条诊断必须引用原始 trace 里的 token）→ 对可复现任务做 matched replay 验证修复动作 → 分别建成“诊断 SFT 视图”和“actor 恢复 SFT 视图”。
+3. **关键数字**（论文自报，经本系列 papers.md 注释核实）：50,228 条 error–diagnosis 对，来自 9,961 个任务，33 个环境、19 个 harness、23 个策略模型；Qwen3-8B 做诊断，teacher-label 的 exact-step 一致率从 47.19% 升到 63.56%。警告：只训“出错后怎么修动作”，在 WebShop-lite 上 +6.67 个点，在 TextQuest 上反而 −8.33 个点。
+
+## 边界
+
+- 修复监督高度依赖环境：WebShop-lite +6.67，TextQuest −8.33——“学会修”不等于“学会做”，换个环境可能倒扣。
+- 诊断质量挂在 judge 身上：citation-first 要求引用 trace token，但引用不等于因果，judge 可能引对了位置、说错了原因。
+- 50,228 对来自 23 个策略模型的 rollout，分布随模型变；新一代模型失败模式不同，数据集会老化。
+
+## 迁移
+
+- “失败当主资产”可搬到 coding agent / 数学 RL：错题本比做对的题更值钱，但要配 citation 式的归因约束，不然就是拿错答案训。
+- 与 Day 01 SPADE 构成对照：SPADE 是合成环境、AED 是真实失败；SPADE 的验证在环境 verifier 里，AED 的验证在 matched replay 里——两种“验证”的活法。
+- 如果复现，第一步先攒带完整 trace 的真实失败 rollout，再谈 judge——没有 trace，citation-first 无从谈起。
