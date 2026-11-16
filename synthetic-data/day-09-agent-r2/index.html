@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 09 Agent-R² — 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#1d4ed8; --accent-ink:#1e40af; --accent-bg:#eff6ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);border-color:#bfdbfe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  border:1px solid #bfdbfe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #bfdbfe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#dbeafe;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#1d4ed8);height:100%;border-radius:999px}
+.barfill.bad{background:linear-gradient(90deg,#fca5a5,#dc2626)}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.callout b{color:#92400e}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">synthetic-data · C 系列 Day 09</span>
+    <h1>Agent-R²：真实附件 + 交付级 rubric 的办公 agent 数据</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/day-09-agent-r2/</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Agent-R²: Scaling Agents for Realistic Productivity Work via Real-Source Data Synthesis</dd><dt>Authors</dt><dd>Pan 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2611.08219">https://arxiv.org/abs/2611.08219</a></dd><dt>Date of publication</dt><dd>2026-11-05</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">office-agents</span><span class="tag">rubric</span><span class="tag">real-attachments</span></div></dd><dt>与前篇的关系</dt><dd>Day 08 Harness-S 修的是 RL 训练信号（全败组没有梯度）；Day 09 回到数据本身——办公 agent 的瓶颈不是训练信号，是数据里根本没有“真实附件 + 交付级评判”。Day 02 AED 把真实失败样本当主资产进 SFT，Day 09 同样是“真实当资产”，但资产是真实办公附件和交付 rubric，不是失败样本。Day 07 Spotify 用合成对话当测试集、修规划层而不动模型权重，Day 09 反其道而行之：合成只搭架子（O*NET 活动播种），证据和附件必须来自真实来源——合成数据在这里是脚手架，不是建材。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>办公 agent 常犯的错不是不会调工具，是不读附件、不验算就交文件——交出来的东西看着像回事，细看全是没落地的空壳。Agent-R² 的判断是：这个问题不是模型能力问题，是数据问题——现有的办公 agent 训练数据里没有“真实工作意图 + 真实多格式附件 + 交付级评判”这三样东西。做法是全程用真实来源打底（real-source）：O*NET 职业活动播种任务意图，从 10k 个网络语料候选里蒸馏出 4k 个任务实例，每个实例配真实多格式附件和细粒度交付级 rubric；附件经过检索验证，交付物经过沙箱校验，再由专家执行 + verifier 核对；然后先 SFT、再按交付 rubric 做 RL，训出 Agent-R²-4B。GDPval Pass@1 从 32.4% 经 SFT 到 45.3%、RL 后到 51.0%；只用 4k 条实例训出的 4B 模型，在 GDPval 上 51.0% 对 48.0%、OfficeQA 上 14.8% 对 13.8%，都超过了 Qwen3-235B-A22B-Thinking-2507。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">51.0%</div><div class="l">GDPval Pass@1<br>基线 32.4% → SFT 45.3% → RL 51.0%</div></div><div class="stat"><div class="v">4k</div><div class="l">任务实例<br>从 10k 网络语料候选中蒸馏</div></div><div class="stat"><div class="v">51.0% vs 48.0%</div><div class="l">GDPval 超过 Qwen3-235B<br>4B 模型胜 235B 思考模型</div></div><div class="stat"><div class="v">14.8% vs 13.8%</div><div class="l">OfficeQA<br>同样超过 Qwen3-235B</div></div></div>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
+<ol>
+<li>Rubric RL 的功劳，到底是 rubric 细，还是 RL 本身？三臂——A SFT only（基线）；B SFT + 二值结果奖励 RL（只按交付物过/不过给 0/1）；C SFT + 交付 rubric 奖励 RL（论文方法）。指标：GDPval Pass@1、OfficeQA、捷径率（不读附件/不验算就交文件的比例）、平均步数。判据：若 C ≫ B ≈ A → 细粒度 rubric 是真功臣，二值奖励学不到“先 grounding 再交件”的顺序；若 B ≈ C ≫ A → 功劳在 RL 不在 rubric，rubric 只是个昂贵的包装；若 C 的 Pass@1 高但捷径率也高 → rubric 被 hack 了，模型学会了“在 rubric 项上刷分”而不是“真把活干对”。再预测一个 2×2 格子：{rubric 细粒度，二值} × {真实附件，合成附件}，哪个格子的捷径率最低并写理由。再构造一个具体反例：rubric 里有一项“引用附件中的关键数字”——模型在交付物里堆一堆从附件抄来的数字，每项都沾一点边，rubric 分刷满了，但数字之间的逻辑关系全是错的；若 C 臂里这类交付物占多数，51.0% 的 Pass@1 就是 rubric 本身在放水。漏洞：B 臂的二值奖励本身也可能被 hack（交个空文件碰运气过 checker）；捷径率没有标准定义，得自己先定“什么算没读附件”（比如交付物里引用的数字在附件里查无此数）——定义一变，结论跟着变；而且 C 臂的 rubric 是谁写的没有交代——如果是 LLM 写的 rubric，rubric 质量本身就是变量。</li>
+<li>真实附件到底是“真实”重要，还是“多格式、带噪声”重要？三臂——A 真实附件（论文方法）；B LLM 按任务生成的合成附件（格式、内容都仿真）；C 任务文本 only，无附件（附件信息由 LLM 自己编）。指标：GDPval Pass@1、交付物数字与附件的一致率（grounding 率）、幻觉率（交付物里出现附件中不存在的数字/事实）。判据：若 A ≫ B ≈ C → “真实”本身是关键——合成附件再像，也缺真实文件那种“信息藏在犄角旮旯、格式不规整”的难度；若 B ≈ A ≫ C → 关键是有附件这个训练信号，不必非得真实来源，合成附件够便宜就能规模化；若 B 的 grounding 率 ≫ A → 真实附件反而带了噪声和无关信息，合成附件更干净、更好学。再预测一个 2×2 格子：{真实附件，合成附件} × {rubric RL，SFT only}，哪个格子的幻觉率最低并写理由。再构造一个具体反例：真实附件里有一份 40 页 PDF，关键数字在第 37 页脚注里——模型如果只读前两页就交件，交付物数字大概率是编的；若 A 臂的模型在这个任务上仍然不翻到第 37 页，说明“真实附件”并没有教会它“读完再交”，只是让它记住了“附件里有答案”这个先验。漏洞：B 臂的合成附件是 LLM 生成的，生成时可能无意中把答案“泄露”进附件的显眼位置——合成附件的难度分布和真实附件根本不同，直接比 Pass@1 是在比任务难度；而且真实附件经过“检索验证”筛过一轮，被筛掉的任务可能恰恰是最难的那些。</li>
+<li>SFT 扩探索、RL 收可靠——这个两阶段曲线在别的 agent 任务里也出现吗？——综合 Day 08 Harness-S。注释说 SFT 后步数暴涨但完成率跌，RL 后回升：SFT 把“多走几步、多试几种做法”学进来了，但“一次交对”的可靠性反而掉了，RL 按交付 rubric 把可靠性拉回来。Day 08 的 Harness-S 也有类似的张力：救援组带来方差（探索），但要靠回原 harness 校验（可靠）。设计一个实验：三臂——A 在 AppWorld 上复现 Agent-R² 的两阶段（SFT → rubric RL），每 100 步记一次 checkpoint 的步数与完成率；B 只 SFT 不 RL，看步数与完成率的曲线是不是一直“步数涨、完成率跌”；C 只 RL 不 SFT（基线直接上 rubric RL），看没有 SFT 扩探索，RL 能不能把完成率拉起来。指标：分 checkpoint 的步数、完成率、Pass@1。判据：若 A 的曲线复现“先跌后升”而 B 一直跌、C 涨不动 → 两阶段分工是真规律：SFT 负责把探索空间撑开，RL 负责在撑开的空间里挑可靠路径；若 C 的完成率也涨 → RL 自己就能扩探索，SFT 那一步是多余的；若 A 在 AppWorld 上没有“先跌后升” → 这个曲线是办公任务特有的（办公任务的“交件”动作本身就是个容易提前触发的捷径），不是 agent 训练的通用规律。再预测一个 2×2 格子：{SFT 后，RL 后} × {步数，完成率}，哪个格子最反直觉并写理由。漏洞：步数暴涨可能不是探索，是 SFT 把模型训“啰嗦”了——多走的步数可能全是无意义的重复查询和自我纠错，拿步数当探索的代理指标会高估 SFT 的贡献；而且“完成率跌”是相对哪个基线跌的，注释没给数字——SFT 后的完成率跌到多少、RL 后回升到多少，都得自己跑出来才能下结论。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
+<h3>Real-source 全程打底：合成搭架子，真实当建材</h3>
+<div class="viz viz-flow flow"><div class="fnode">O*NET 职业活动播种任务意图</div><div class="farrow">→</div><div class="fnode">10k 网络语料候选</div><div class="farrow">→</div><div class="fnode">检索验证真实附件 + 沙箱校验交付物</div><div class="farrow">→</div><div class="fnode">专家执行 + verifier 核对</div><div class="farrow">→</div><div class="fnode">4k 任务实例（真实附件 + 交付 rubric）</div><div class="farrow">→</div><div class="fnode">SFT → rubric RL</div></div>
+<div class="viz">
+<pre class="mermaid">flowchart TB
+    S[O*NET 职业活动播种任务意图] --> C[10k 网络语料候选]
+    C --> A[真实多格式附件 检索验证]
+    A --> V[交付物沙箱校验]
+    V --> E[专家执行 + verifier 按 rubric 核对交付物]
+    E --> D[4k 任务实例 真实附件 + 细粒度交付 rubric]
+    D --> SFT[SFT 学会照着附件把活干完]
+    SFT --> RL[按交付 rubric 做 RL 逐项得分]
+    RL --> M[Agent-R²-4B]
+    M --> G[GDPval Pass@1 32.4% → 45.3% → 51.0%]
+    G --> W[超过 Qwen3-235B GDPval 51.0% vs 48.0% OfficeQA 14.8% vs 13.8%]
+    SFT -.->|步数暴涨 但完成率跌| RL
+    RL -.->|回升| G
+</pre>
+</div>
+<h3>Motivation：不读附件、不验算就交文件</h3>
+<p>办公 agent 的失败模式很具体：不读附件、不验算就交文件。交出来的交付物表面上格式齐全、数字俱全，但数字是编的、结论没根据——“看着像回事”是这类任务最危险的失败，因为用户一眼看不出来。根子在数据：现有办公 agent 训练数据没有“真实工作意图 + 真实多格式附件 + 交付级评判”——任务是人工编的、附件是 LLM 生成的、评判是过/不过的二值。模型在这种数据上训出来，自然学会“先交件再说”，因为数据里从来没有因为“没读附件”而被扣分的例子。</p>
+<h3>二值奖励 vs 交付级 rubric 奖励</h3>
+<div class="viz vs"><div class="vscol vs-a"><h4>老路：二值结果奖励</h4><ul><li>交付物过 / 不过，只给 0 或 1</li><li>模型学不到“先读附件再交件”的顺序</li><li>“看着像回事”的空壳交付物也能碰运气过关</li><li>捷径行为（不 grounding 就交件）没有被扣分的环节</li></ul></div><div class="vscol vs-b"><h4>Agent-R²：交付级 rubric 奖励</h4><ul><li>交付物按 rubric 一项一项得分</li><li>读没读附件、算没算对、格式对不对，每项单独计分</li><li>SFT 先学“照着附件把活干完”，RL 再按 rubric 收可靠性</li><li>捷径行为在 rubric 里直接被扣分</li></ul></div></div>
+<h3>关键数字：GDPval 32.4% → 45.3% → 51.0%，4k 实例胜 235B</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">GDPval 基线</div><div class="bartrack"><div class="barfill" style="width:32.4%"></div></div><div class="barval">32.4%</div></div><div class="barrow"><div class="barlabel">GDPval SFT 后</div><div class="bartrack"><div class="barfill" style="width:45.3%"></div></div><div class="barval">45.3%</div></div><div class="barrow"><div class="barlabel">GDPval RL 后</div><div class="bartrack"><div class="barfill" style="width:51.0%"></div></div><div class="barval">51.0%</div></div><div class="barrow"><div class="barlabel">Qwen3-235B 思考模型</div><div class="bartrack"><div class="barfill bad" style="width:48.0%"></div></div><div class="barval">48.0%</div></div></div>
+<p>GDPval Pass@1 从 32.4%（基线）经 SFT 到 45.3%、RL 后到 51.0%（+18.6 个百分点）；Agent-R²-4B 只用 4k 实例，GDPval 51.0% 对 48.0%、OfficeQA 14.8% 对 13.8%，均超过 Qwen3-235B-A22B-Thinking-2507（条形按 0–100% 刻度）。</p>
+<p>把交付级 rubric 想成加权和（示意，非论文公式）：</p>
+<p>$$ R = \sum_{i=1}^{n} w_i \cdot r_i $$</p>
+<p>其中 $r_i$ 是第 $i$ 项 rubric 的得分， $w_i$ 是权重——与二值奖励只给 0/1 不同，rubric 奖励把“交件”拆成可逐项得分的交付标准：读没读附件、算没算对、格式对不对，每一项单独计分。</p>
+<p>数字均为论文自报，出自 papers.md 注释与论文摘要。</p>
+<div class="callout"><b>反直觉点：</b>SFT 后步数暴涨、完成率反而跌，RL 后才回升——探索（多走几步）与可靠完成（一次交对）要分开量，Pass@1 的三段净数字（32.4% → 45.3% → 51.0%）看不出中间的波动曲线。而且“超过 235B”的两个优势只有 3 个和 1 个百分点，OfficeQA 绝对值只有 14.8%——标题上赢了，绝对值上仍然是“都不会做”。</div>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>边界</h2>
+<ul>
+<li>4k 实例很小：整个方法建立在 4k 个任务实例上——O*NET 播种 + 检索验证的 pipeline 能不能从 4k 扩到 40k、400k，注释和摘要都没给数字；4k 规模下“真实附件”的多样性（行业、文件格式、语言）覆盖面有限，换一个没覆盖到的职业，效果可能直接掉。</li>
+<li>“SFT 后完成率跌”没有数字：注释只说步骤暴涨但完成率跌、RL 后回升，没给 SFT 阶段完成率跌到多少、步数涨到多少——这个反直觉现象的幅度没法从注释里核实，RL“回升”回升到多高也不清楚；Pass@1 的三段数字（32.4% → 45.3% → 51.0%）是净效果，中间的波动曲线是黑的。</li>
+<li>Rubric 的质量没有交代：交付级 rubric 是谁写的、怎么验证 rubric 本身是对的，注释里没有——如果 rubric 是 LLM 写的，RL 就是在优化 LLM 写的标准，标准错了模型越训越偏；而且 rubric 逐项得分天然可 hack：模型可以学会“每项都沾一点边”而不是“把活干对”。</li>
+<li>真实附件经过筛选：10k 候选只留下 4k，筛掉的 6k 是什么？检索验证和沙箱校验筛掉的可能恰恰是最难、最脏、最真实的任务——留下的 4k 是“真实来源里最好训的那部分”，评测数字可能高估了在未筛选真实任务上的表现。</li>
+<li>评测可质疑处：GDPval 51.0% 对 48.0% 的优势只有 3 个百分点，OfficeQA 14.8% 对 13.8% 只有 1 个百分点——两个 benchmark 的绝对值都很低（OfficeQA 只有 14.8%），“超过 235B 思考模型”的标题在绝对值上仍然是“都不会做”；而且对照的 Qwen3-235B 是零样本还是同等 SFT 后的，摘要没说——如果 235B 没经过办公数据 SFT，这个比较是在比“训没训过”，不是比“方法好不好”。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>迁移</h2>
+<ul>
+<li>“真实附件 + 交付 rubric”可搬到任何“交件型”任务：写报告、做表格、编代码——只要交付物是文件，评判就可以从“过/不过”改成“按交付标准逐项打分”；关键是先有“真实来源的输入材料”（真实文件、真实代码库、真实数据表），没有真实材料，rubric 再细也是在真空里打分。</li>
+<li>与 Day 02 AED 构成对照：AED 是把真实失败样本当主资产进 SFT，Agent-R² 是把真实附件当主资产进 SFT+RL。两者都拒绝合成数据当建材，但 AED 的真实来自“失败轨迹”，Agent-R² 的真实来自“工作材料”——失败样本教你“别这么干”，真实附件教你“按这个干”。</li>
+<li>与 Day 08 Harness-S 构成对照：Harness-S 是“训练信号不够，换环境造信号”；Agent-R² 是“数据里没有交付标准，加 rubric 造信号”。一个在 RL 采样环节补信号，一个在数据环节补信号——但两者都面临同一个问题：补进来的信号是不是真的？Harness-S 靠“回原 harness 校验”，Agent-R² 靠“专家执行 + verifier 核对”。</li>
+<li>与 Day 07 Spotify 构成对照：Spotify 用合成对话当测试集、修规划层而不动模型权重；Agent-R² 用真实附件当训练集、动模型权重（SFT+RL）。合成数据当测试集是便宜的，但当训练集会把模型的“交件习惯”带偏——Day 07 和 Day 09 合起来看，合成与真实的分工是：合成搭架子、做测试，真实当建材、做训练。</li>
+<li>如果复现，第一步先定“什么算没读附件”：写一个自动检查——交付物里的每个数字、每个引用，在附件里能不能找到出处；没有这个检查，rubric 的“grounding 项”没法自动打分，RL 的奖励就落不了地；再拿 100 个任务人工跑一遍，量一量“不读附件就交件”在你的任务上占多大比例——如果不到 10%，这套方法解决的不是你的主要矛盾。</li>
+</ul>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
+<ol>
+<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
+<li>数据 pipeline 中哪个环节最容易藏 bug？（O*NET 播种是不是把任务意图框死了；检索验证筛掉的 6k 候选里是不是藏着最难的任务；专家执行 + verifier 核对是不是在把“专家习惯”当成“唯一正确答案”；rubric 是不是可 hack 的）</li>
+<li>换成今天的模型规模，这个方法还成立吗？</li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-09-agent-r2/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2611.08219">论文原文 arXiv:2611.08219</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
