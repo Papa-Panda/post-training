@@ -129,7 +129,7 @@ pre code{background:none;padding:0;color:inherit}
 </section>
 <section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
 <ol>
-<li>citation-first 的作用到底是“防 judge 胡编”还是“防 judge 说对位置、说错原因”？设计一个实验：固定同一批失败 trace，三臂——A citation-first（必须引用 token）；B 同样的 judge 但去掉引用要求；C 引用要求保留、但把 trace 里的 token 随机打乱后引用。评：diagnosis 的 teacher-label exact-step 一致率。判据：若 A≈B≫C → 引用本身是防作弊的关键；若 A≫B≈C → 关键不是引用动作，而是引用逼 judge 看证据的过程。再说漏洞：C 的打乱 trace 会不会让任务本身变得不可解（控制变量不干净）？</li>
+<li>citation-first 的作用到底是"防 judge 胡编"还是"防 judge 说对位置、说错原因"？设计一个实验：固定同一批失败 trace，trace 全程保持完整，三臂——A citation-first 且引用须校验（引用必须是 trace 里的原文子串，无效引用驳回）；B 同样的 judge 但去掉引用要求；C 引用要求保留、但引用不校验（可以现编 token）。评两个指标：diagnosis 的 teacher-label exact-step 一致率（位置），以及在位置答对的条件下、原因类别与 teacher 的一致率。判据：若 A 只在位置上 ≫B、原因给定位置后两边一样 → 引用主要是防胡编；若 A 只在原因上 ≫B、位置两边一样 → 引用主要是改善因果归因；若 A≫C≈B → 起作用的是 grounding（引用必须真指到证据上），引用的形式本身没用；若 A≈C≫B → 起作用的是引用这个动作本身。漏洞：不要拿"打乱 trace"当对照臂——打乱是销毁信息（失败 step 的因果链断了，任务本身变不可解），不是控制变量；而且被迫引用噪声 token 会主动把 judge 往随机位置上锚，C 的低分是构造出来的，什么都证明不了。</li>
 <li>修复监督 WebShop-lite +6.67、TextQuest −8.33。设计一个 2×2：修复训练 ∈ {开，关} × 评测环境 ∈ {WebShop-lite，TextQuest}，再加一列“只训诊断、不训修复”作为第三臂。先预测六个格子的排序并写理由；再问：TextQuest 上 −8.33 是修复监督“教坏了”（学了错误恢复模式），还是“分布漂移”（修复数据来自别的环境）？设计一个检验区分两者：把 TextQuest 风格的失败 trace 混入修复训练，看 −8.33 是否消失。</li>
 <li>matched replay 只对“可复现任务”验证修复动作。构造一个反例：什么样的修复会在 matched replay 里通过、到真实环境里失效？（提示：replay 的初始状态是不是和真实失败的初始状态同一分布？）再设计一个对照：replay 验证通过的修复子集 vs 未通过的子集，分别训 actor，看真实环境成功率——若通过组反而更差，说明 matched replay 的筛选在挑什么？</li>
 </ol>
