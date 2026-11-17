@@ -8,7 +8,7 @@ date,title,authors,tags,one_line_takeaway,folder,link,status
 2026-11-14,Bootstrapping Conversational Recommendation Agents At Spotify: Synthetic Data Generation and Self-Improvement Loops,Palumbo 等,industry;self-improvement;synthetic-dialogue,合成对话当测试集 + 方差拆分自改进，线上 A/B 收听时长 +14%,day-07-spotify,https://arxiv.org/abs/2609.30297,Done
 2026-11-15,Harness-S,Zhang 等,grpo;harness;effective-groups,兄弟 harness 救活 GRPO 有效组,day-08-harness-s,https://arxiv.org/abs/2611.04277,Done
 2026-11-16,Agent-R²,Pan 等,office-agents;rubric;real-attachments,真实附件 + 交付级 rubric 的办公 agent 数据,day-09-agent-r2,https://arxiv.org/abs/2611.08219,Done
-,ToolSpace,Dong 等,tool-dependency;executable-graph,以可执行工具依赖为合成单元,day-10-toolspace,https://arxiv.org/abs/2611.05036,Todo
+2026-11-17,ToolSpace,Dong 等,tool-dependency;executable-graph,以可执行工具依赖为合成单元,day-10-toolspace,https://arxiv.org/abs/2611.05036,Done
 ,Axion 1.0,Jia 等,difficulty;tool-need;data-streams,把“变难”与“真需工具”拆成两条数据流,day-11-axion,https://arxiv.org/abs/2611.03233,Todo
 ,CUA-Master,Yu 等,computer-use;workflow-import;rollback,从外部教程 import 工作流 + 失败快照回滚,day-12-cua-master,https://arxiv.org/abs/2611.03126,Todo
 ,WebHarbor,Wang 等,web-environments;offline-replay,把真实网站“靠岸”成可离线复现的环境,day-13-webharbor,https://arxiv.org/abs/2611.03634,Todo
