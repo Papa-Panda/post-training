@@ -133,6 +133,7 @@ pre code{background:none;padding:0;color:inherit}
 <li>修复监督 WebShop-lite +6.67、TextQuest −8.33。设计一个 2×2：修复训练 ∈ {开，关} × 评测环境 ∈ {WebShop-lite，TextQuest}，再加一列“只训诊断、不训修复”作为第三臂。先预测六个格子的排序并写理由；再问：TextQuest 上 −8.33 是修复监督“教坏了”（学了错误恢复模式），还是“分布漂移”（修复数据来自别的环境）？设计一个检验区分两者：把 TextQuest 风格的失败 trace 混入修复训练，看 −8.33 是否消失。</li>
 <li>matched replay 只对“可复现任务”验证修复动作。构造一个反例：什么样的修复会在 matched replay 里通过、到真实环境里失效？（提示：replay 的初始状态是不是和真实失败的初始状态同一分布？）再设计一个对照：replay 验证通过的修复子集 vs 未通过的子集，分别训 actor，看真实环境成功率——若通过组反而更差，说明 matched replay 的筛选在挑什么？</li>
 </ol>
+<p>相关讨论（Gemini 网页版，2026-11-16）：https://gemini.google.com/app/61c957e7c34bbfe7</p>
 </section>
 <section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
 <h3>五步 AET 流水线</h3>
