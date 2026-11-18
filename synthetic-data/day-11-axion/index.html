@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 10 ToolSpace — 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#6d28d9; --accent-ink:#5b21b6; --accent-bg:#f5f3ff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#4c1d95,#7c3aed);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#f5f3ff 0%,#ffffff 100%);border-color:#ddd6fe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#f5f3ff 0%,#ffffff 100%);
+  border:1px solid #ddd6fe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #ddd6fe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#ede9fe;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#60a5fa,#6d28d9);height:100%;border-radius:999px}
+.barfill.bad{background:linear-gradient(90deg,#fca5a5,#dc2626)}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#7c3aed}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.callout b{color:#92400e}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">synthetic-data · C 系列 Day 11</span>
+    <h1>Axion 1.0：把“变难”与“真需工具”拆成两条数据流</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/day-11-axion/</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>Axion 1.0: Open Agent Foundation Models, Simplified</dd><dt>Authors</dt><dd>Jia 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2611.03233">https://arxiv.org/abs/2611.03233</a></dd><dt>Date of publication</dt><dd>2026-11-02</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">difficulty</span><span class="tag">tool-need</span><span class="tag">data-streams</span></div></dd><dt>与前篇的关系</dt><dd>Day 04 ToolLoop 说“无反馈合成数据比不训还差 2.17 个点”，Axion 的 Stage 1 把反馈做进合成里——“变换再验算”，验算就是一种轻量、确定性的反馈。Day 08 Harness-S 救活 GRPO 有效组，Axion 的 RL 用前缀进度奖励——奖励设计和有效组是同一枚硬币的两面：前缀进度奖励让更多组在中途就有信号，Harness-S 让有效组不被兄弟样本稀释。Day 10 ToolSpace 也做工具数据，但来源相反：ToolSpace 从真实 MCP 执行轨迹挖依赖（执行见证），Axion Stage 2 从真实结构化数据做确定性计算（计算见证）。Day 03 WorkForge 说“真实感是学会探索的原因”，Axion Stage 2 的“真实结构化数据 + 确定性计算”正是同一判断在工具数据上的落地。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>做 agent 基础模型的老 recipe 是“多阶段 SFT + mid-training + DPO + 蒸馏”一长串，阶段越多，哪个阶段在起作用越说不清。Axion 1.0 把 recipe 砍到只剩三段——两段轻量 SFT 加一段 RL，没有 mid-training、没有 DPO、没有 on-policy 蒸馏——关键是把数据合成拆成两条互不污染的流：Stage 1 只练“变难”，针对基座已会解的题做组合、参数化、分情形变换，再验算；Stage 2 只练“真需工具”，在真实结构化数据上做确定性计算、屏蔽建库、防闭卷可答；最后 RL 用前缀进度奖励，奖“走在正确的路上”而不只奖终点。35B 模型在 HLE-130 上从 47.7% 升到 70.0%。但最后阶段并非处处有效：BioMysteryBench 在 SFT-I 先跌后涨，FrontierScience 在 RL 后微跌。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">47.7% → 70.0%</div><div class="l">35B HLE-130<br>提升 22.3 个百分点</div></div><div class="stat"><div class="v">3 段</div><div class="l">两段轻量 SFT + 一段 RL<br>无 mid-training、无 DPO、无 OPD</div></div><div class="stat"><div class="v">2 条流</div><div class="l">Stage 1 只变难<br>Stage 2 只练真需工具</div></div><div class="stat"><div class="v">先跌后涨 / 微跌</div><div class="l">BioMysteryBench SFT-I 先跌后涨<br>FrontierScience RL 后微跌</div></div></div>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
+<ol>
+<li>“变难”和“真需工具”为什么要拆开——合在一起会互相污染什么？三臂——A 两条流分开（论文方法：Stage 1 只变难、Stage 2 只练工具）；B 一条流同时变难又加工具（同一道题既做参数化变换、又要求必须调工具）；C 只变难不加工具（Stage 1 单独跑满，不做 Stage 2）。指标：HLE-130、自包含推理准确率（不许用工具的子集）、工具调用正确率、闭卷可答率（屏蔽建库是否真防住了泄漏）。判据：若 A 在“自包含推理”和“工具调用”两项上都 ≥ B，且 B 的闭卷可答率更高 → 拆开防污染是真功劳——合在一起时，变难的题靠工具蒙过去、工具题靠变难的推理绕过去，两边都没练到；若 A ≈ B ≫ C → 拆开没差别，真正起作用的是“两段 SFT 的总量”，不是“拆开”这个结构；若 B ≫ A → 拆开反而有害——真实任务里“难”和“需工具”本来就是绑在一起的，拆开练等于练了两个假任务。再预测一个 2×2 格子：{变难，加工具} × {分开，合在一起}，哪个格子的闭卷可答率最高并写理由。再构造一个具体反例：参数化变难本身就能制造工具需求——一道题参数变大到手算不可行，模型不用工具就算不出来；Stage 1 里这道“自包含推理”样本，标签上是不用工具，实际上已经滑向工具依赖——两条流的边界在变换这一步就被污染了，拆开只是名义上的。若 A 臂里这类“变难变着变着就变工具题”的样本不少，47.7% → 70.0% 里 Stage 1 和 Stage 2 各贡献多少根本分不开。漏洞：HLE-130 的 47.7% → 70.0% 是整条 recipe 的总效果，没有拆 Stage 1、Stage 2、RL 各贡献多少——分开的功劳可能是 Stage 2 的真实数据，不是“拆开”本身；而且“屏蔽建库、防闭卷可答”怎么验的、闭卷可答率到底降了多少，注释没给数字。</li>
+<li>前缀进度奖励到底在奖什么——是“走在正确的路上”，还是“走形式也能拿分”？三臂——A 前缀进度奖励（论文 RL 方法：按前缀的进展给奖励）；B 只奖最终结果（outcome-only，答对才给分）；C 每步都给过程奖励（dense 过程奖励，每一步都打分）。指标：HLE-130、长程任务完成率、无意义工具调用占比（同一查询反复调用、与答案无关的调用）、平均轨迹长度。判据：若 A ≫ B 且 A 的无意义调用占比不升 → 前缀进度奖励真在奖“进展”，稀疏奖励的长程任务被它救活了；若 A ≈ B → 长程任务的瓶颈不在奖励稀疏，前缀进度是多余的设计；若 C ≫ A → 前缀进度还不够密，真正的解法是步步打分，Axion 只是走了一半；若 A 的 HLE-130 涨了、但无意义调用占比也涨了 → 奖励被 hack 了，涨分里有一部分是“刷进度”刷出来的。再预测一个 2×2 格子：{前缀进度奖励，终点奖励} × {短任务，长任务}，哪个格子的提升最大并写理由。再构造一个具体反例：前缀进度可以靠“走形式”刷——反复调用同一个查询工具、每次都返回点新东西，进度条在涨，答案一点没近；或者把一个大步骤拆成十个小步骤，每步都拿进度分——轨迹变长、奖励变多、答案还是错的。若 A 臂的轨迹平均长度明显长于 B 臂，47.7% → 70.0% 里就可能混着“刷进度”的水分。漏洞：前缀的“进度”怎么定义、谁来判定，注释没说——如果是模型自己判进度，奖励模型和策略模型同源，有自奖自吃的嫌疑；而且 FrontierScience 在 RL 后微跌，说明前缀进度奖励至少在那个基准上没起正作用，甚至可能有害——A 臂的结论不能只看 HLE-130 一个基准。</li>
+<li>Stage 1 的“变换再验算”，是不是就是 Day 04 ToolLoop 说的“反馈”——验算关掉会怎样？——综合 Day 04 ToolLoop 与 Day 08 Harness-S。Day 04 的结论是“无反馈合成数据比不训还差 2.17 个点”，Axion Stage 1 的“变换再验算”可以看作把反馈做进合成里：变换是生成，验算是反馈。三臂——A 变换 + 验算（论文方法：组合/参数化/分情形变换后验算，不过的不要）；B 变换不验算（同样变换，验算关掉，全留）；C 变换 + 验算 + Harness-S 式有效组过滤（只留“组内有输有赢”的样本，即 Day 08 说的能救活 GRPO 的有效组）。指标：HLE-130、BioMysteryBench 在 SFT-I 的“先跌后涨”是否复现、合成样本的错误率（人工抽查 100 条）。判据：若 B ≪ A 且 B 低于基线 → 验算就是 ToolLoop 的反馈，Axion 的 Stage 1 印证了 Day 04——无反馈合成数据真有毒；若 B ≈ A → 变换本身已足够难，验算只是锦上添花，Day 04 的 2.17 个点在 Axion 的变换式合成里不复现；若 C ≫ A → Harness-S 的有效组过滤能救 Stage 1，说明 Stage 1 的瓶颈不是“验算”，而是“验算留下的样本大多数组内全对或全错、没有学习信号”；若 C 的 BioMysteryBench 不再“先跌后涨” → 那一下跌，可能就是无效组太多、SFT-I 被全对/全错样本带偏了。再预测一个 2×2 格子：{验算开，验算关} × {有效组过滤开，有效组过滤关}，哪个格子的 HLE-130 最高并写理由。再构造一个具体反例：验算可能筛掉最难的样本——变换后验算不过的题，有两种可能：变换本身有 bug，或者题真难到基座解不出来；验算把后者也筛掉，Stage 1 留下的全是“基座本来就会、只是换了个壳”的题，变难是假变难——47.7% → 70.0% 的提升里，Stage 1 可能只是在“复习旧能力”，不是“长出新能力”。漏洞：BioMysteryBench“先跌后涨”没有数字——跌了多少、涨回多少、最终是涨是跌，注释没给；FrontierScience“微跌”也没有幅度——0.5 分的微跌和 5 分的微跌，结论完全不一样；而且 SFT-I 的“先跌”是在哪个 checkpoint 量的、跌是暂时的还是持续的，都没说。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
+<h3>三段 recipe，两条数据流：先拆开练，再用 RL 接起来</h3>
+<div class="viz viz-flow flow"><div class="fnode">基座已会解的题</div><div class="farrow">→</div><div class="fnode">Stage 1：组合 / 参数化 / 分情形变换，再验算</div><div class="farrow">→</div><div class="fnode">Stage 2：真实结构化数据 + 确定性计算，屏蔽建库</div><div class="farrow">→</div><div class="fnode">RL：前缀进度奖励，练长程推理与工具交互</div><div class="farrow">→</div><div class="fnode">35B HLE-130 47.7% → 70.0%</div></div>
+<div class="viz">
+<pre class="mermaid">flowchart TB
+    B[基座模型 已会解的题] --> S1[Stage 1 SFT-I 只练变难]
+    S1 --> T1[组合变换]
+    S1 --> T2[参数化变换]
+    S1 --> T3[分情形变换]
+    T1 --> V[验算 不过的不要]
+    T2 --> V
+    T3 --> V
+    R[真实结构化数据] --> S2[Stage 2 SFT-II 只练真需工具]
+    S2 --> C[确定性计算出答案 可自动验证]
+    S2 --> M[屏蔽建库 防闭卷可答]
+    V --> RL[RL 前缀进度奖励]
+    C --> RL
+    M --> RL
+    RL --> H[35B HLE-130 47.7% → 70.0%]
+    RL --> W1[BioMysteryBench SFT-I 先跌后涨]
+    RL --> W2[FrontierScience RL 后微跌]
+    H --> O[完全开放 数据构造 生成 过滤 验证 prompt 训练代码]
+</pre>
+</div>
+<h3>Motivation：老 recipe 太长，难和工具混在一起练</h3>
+<p>做 agent 基础模型的老 recipe 太长：多阶段 SFT、mid-training、DPO、on-policy 蒸馏一长串，阶段越多，越说不清哪个阶段在起作用、哪个阶段在互相抵消。更麻烦的是数据合成常常把两件事混在一起练：“把题变难”和“让模型必须用工具”——一道题既变难又加工具，训完不知道模型到底是推理变强了、还是工具用熟了，出了问题也不知道该修哪条流。Axion 要的是一个“简单到能复现、拆开到能归因”的 recipe。</p>
+<h3>老 recipe vs Axion：砍掉三段，拆开两条流</h3>
+<div class="viz vs"><div class="vscol vs-a"><h4>老路：长 recipe + 混着练</h4><ul><li>多阶段 SFT + mid-training + DPO + on-policy 蒸馏</li><li>阶段越多，越说不清谁在起作用</li><li>“变难”和“需工具”混在同一道题里练</li><li>训完不知道是推理变强了还是工具用熟了</li></ul></div><div class="vscol vs-b"><h4>Axion：三段 + 两条流</h4><ul><li>两段轻量 SFT + 一段 RL，无 mid-training、无 DPO、无 OPD</li><li>Stage 1 只变难：变换 + 验算，练自包含推理</li><li>Stage 2 只练工具：真实数据 + 确定性计算 + 屏蔽建库</li><li>RL 用前缀进度奖励，奖“走在正确的路上”</li></ul></div></div>
+<h3>关键数字：35B HLE-130 47.7% → 70.0%，提升 22.3 个百分点</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">35B 训练前</div><div class="bartrack"><div class="barfill" style="width:47.7%"></div></div><div class="barval">47.7%</div></div><div class="barrow"><div class="barlabel">35B Axion 1.0</div><div class="bartrack"><div class="barfill" style="width:70.0%"></div></div><div class="barval">70.0%</div></div></div>
+<p>HLE-130 上 35B 从 47.7% 升到 70.0%（条形按 0–100 刻度）；但 HLE-130 只有 130 道题，22.3 个百分点对应约 29 道题，小样本波动要小心。</p>
+<table>
+<tr><th>阶段</th><th>练什么</th><th>数据来源</th><th>验证器</th></tr>
+<tr><td>Stage 1（SFT-I）</td><td>变难：自包含推理</td><td>基座已会解的题，组合 / 参数化 / 分情形变换</td><td>验算</td></tr>
+<tr><td>Stage 2（SFT-II）</td><td>真需工具：工具依赖推理</td><td>真实结构化数据</td><td>确定性计算 + 屏蔽建库</td></tr>
+<tr><td>RL</td><td>长程推理与工具交互</td><td>两段 SFT 之后</td><td>前缀进度奖励</td></tr>
+</table>
+<p>两条数据流的分工（示意，非论文公式）：</p>
+<p>$$D_{\mathrm{S1}} = \{ \mathrm{verify}(T(x)) \mid x \in \text{基座已会解的题}, \; T \in \{\text{组合}, \text{参数化}, \text{分情形}\} \}$$</p>
+<p>其中 $D_{\mathrm{S1}}$ 是 Stage 1 的数据， $T$ 是三类变换， $\mathrm{verify}$ 是验算——变换后的题必须验算通过才留下；Stage 1 只练“变难”，不练工具。</p>
+<p>$$D_{\mathrm{S2}} = \{ (q, a) \mid a = \mathrm{deterministic\_compute}(\text{真实结构化数据}), \; q \notin \text{闭卷可答集} \}$$</p>
+<p>其中 $D_{\mathrm{S2}}$ 是 Stage 2 的数据， $a$ 由确定性计算得出， $q$ 经过屏蔽建库、排除闭卷可答的题；Stage 2 只练“真需工具”，不练自包含推理。</p>
+<p>前缀进度奖励（示意，非论文公式）：</p>
+<p>$$R = \sum_{t=1}^{T} \gamma^{t-1} \cdot \Delta \mathrm{progress}_t$$</p>
+<p>其中 $\Delta \mathrm{progress}_t$ 是第 $t$ 步前缀的进展， $\gamma$ 是折扣——奖励的不只是终点对不对，还有前缀是不是走在正确的路上；但“进展”由谁判定，注释没说。</p>
+<p>数字均为论文自报，出自 papers.md 注释与论文摘要。</p>
+<div class="callout"><b>反直觉点：</b>最后阶段并非处处有效——BioMysteryBench 在 SFT-I 先跌后涨，FrontierScience 在 RL 后微跌。47.7% → 70.0% 是 HLE-130 一个基准的总效果，三个阶段各贡献多少、跌的幅度有多大，注释都没给数字。</div>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>边界</h2>
+<ul>
+<li>47.7% → 70.0% 只有一个基准、一个模型规模：HLE-130 一个基准、35B 一个模型，别处怎样、别的规模怎样，注释没给——22.3 个百分点的提升不能直接外推到别的基准或别的规模。</li>
+<li>HLE-130 只有 130 道题：22.3 个百分点的提升对应约 29 道题；小基准上几个百分点的波动要小心，47.7% → 70.0% 里有多少是方法、有多少是小样本噪声，分不开。</li>
+<li>BioMysteryBench“先跌后涨”、FrontierScience“RL 后微跌”都没有幅度数字：“最后阶段并非处处有效”是定性判断，不知道跌幅是 0.5 分还是 5 分，也不知道“先跌”持续了多久、最终涨回来没有。</li>
+<li>“屏蔽建库、防闭卷可答”没有数字：闭卷可答率到底降了多少、屏蔽后还剩多少可答题、屏蔽本身有没有误删好题，注释没说——Stage 2 的“真需工具”有没有被泄漏污染，核实不了。</li>
+<li>Stage 1 的变换是否真的“变难”没有独立验证：基座已会解的题，变换后基座还解不解得出来、难了多少，没有数字——如果变换只是换壳，Stage 1 练的还是旧能力。</li>
+<li>三个阶段的总效果没有消融：47.7% → 70.0% 里 Stage 1、Stage 2、RL 各贡献多少，注释没拆；“简化 recipe”（无 mid-training、无 DPO、无 OPD）到底省了多少成本，也没有数字——“简单”是省了事，还是省了效果，分不开。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>迁移</h2>
+<ul>
+<li>“变难”与“真需工具”拆成两条数据流，可搬到任何“能力 × 工具”双维度的合成：代码 agent（变难：更长的推理链；真需工具：必须调 API 查文档）、数学证明（变难：更深的引理链；真需工具：必须调计算器/符号计算）——关键是每条流有自己的验证器（验算 vs 确定性计算），别共用一个会互相污染的验证器；而且要像 Axion 这样先量“变换后通过率”，确认题真变难了再训。</li>
+<li>与 Day 04 ToolLoop 构成对照：ToolLoop 说“无反馈合成数据比不训还差 2.17 个点”；Axion Stage 1 的“变换再验算”就是把反馈做进合成里——验算是 ToolLoop 反馈的一种轻量版（确定性验算，不用模型自反馈）。但验算和自反馈不是一回事：验算只能验“变换没变错”，验不了“题是不是真变难了”。</li>
+<li>与 Day 08 Harness-S 构成对照：Harness-S 救活 GRPO 有效组；Axion 的 RL 用前缀进度奖励——奖励设计和有效组是同一枚硬币的两面：前缀进度奖励让更多组在中途就有信号，Harness-S 让有效组不被兄弟样本稀释。两篇合起来才是完整的 RL 数据故事：奖励怎么给（Axion），组怎么筛（Harness-S）。</li>
+<li>与 Day 10 ToolSpace 构成对照：两者都做工具数据，但来源相反——ToolSpace 从真实 MCP 执行轨迹挖依赖（执行见证），Axion Stage 2 从真实结构化数据做确定性计算（计算见证）；一个信“执行过”，一个信“算得出”。ToolSpace 的教训是“执行见证的边胜过 LLM 判定的边（45.8 对 37.8）”，Axion 的 Stage 2 同理：确定性计算的答案，胜过 LLM 编出来的答案。</li>
+<li>如果复现，第一步先拿基座模型会解的 100 道题，做组合、参数化、分情形三类变换各 100 道，跑基座重解一遍，量“变换后通过率”——如果通过率还在 90% 以上，变换只是换壳，没变难；先把这个数降下来，再谈 Stage 2；再拿 100 道 Stage 2 的题，闭卷跑一遍基座，量闭卷可答率——如果闭卷可答率还很高，屏蔽建库没起作用，先修屏蔽再训。</li>
+</ul>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
+<ol>
+<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
+<li>数据 pipeline 中哪个环节最容易藏 bug？（Stage 1 的变换是不是只换壳没变难；验算是不是把最难的题筛掉了；Stage 2 的屏蔽建库是不是没防住闭卷可答；前缀进度奖励的“进展”是不是被走形式刷了；BioMysteryBench 的“先跌后涨”是不是 SFT-I 的学习率没调好）</li>
+<li>换成今天的模型规模，这个方法还成立吗？</li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-11-axion/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2611.03233">论文原文 arXiv:2611.03233</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
