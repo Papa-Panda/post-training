@@ -155,20 +155,20 @@ ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px
 <div class="wrap">
 
   <header class="hero">
-    <div class="eyebrow"><span class="pill">Same-Task Comparison · SAME TASKS</span><span class="pill sft">SFT · Trajectory Supervision</span><span class="pill grpo">GRPO · Online RL</span><span class="pill">19 Core Papers + 11 Behavior Groups · 2024—2026</span></div>
+    <div class="eyebrow"><span class="pill">Same-Task Comparison · SAME TASKS</span><span class="pill sft">SFT · Trajectory Supervision</span><span class="pill grpo">GRPO · Online RL</span><span class="pill">19 Core Papers + 11 Behavior Groups + 10 Fair-Comparison Papers · 2024—2026</span></div>
     <h1>Train SFT and GRPO on the same tasks —<br>where do the results actually differ?</h1>
-    <p class="lede">Neither one dominates across the board. The stable conclusion, verified across multiple same-task, same-model comparisons, is a <strong>division of labor</strong>: <strong>SFT installs what the model doesn't yet know; GRPO sharpens what it can already do a little.</strong> Getting the order right matters far more than arguing about which is stronger. The new agent-behavior evidence below adds a second lens: <strong>accuracy is not behavior</strong> — length, turns, tool calls, abstention, and error recovery move in different, sometimes opposite, directions.</p>
+    <p class="lede">Neither one dominates across the board. The stable conclusion, verified across multiple same-task, same-model comparisons, is a <strong>division of labor</strong>: <strong>SFT installs what the model doesn't yet know; GRPO sharpens what it can already do a little.</strong> Getting the order right matters far more than arguing about which is stronger. Two further lenses below: <strong>accuracy is not behavior</strong> — length, turns, tool calls, abstention, and error recovery move in different, sometimes opposite, directions — and <strong>accuracy is not compute</strong>: GRPO costs roughly <strong>1.3–1.7 × G times SFT per prompt</strong> before waste, so most published “wins” are not compute-matched at all. §08–§09 give the full ledger and the fair-comparison method.</p>
 
     <div class="verdict" aria-label="Core conclusions">
       <div><h3>What SFT does</h3><p><span class="big">Install</span>Format, knowledge, new reasoning patterns. Fastest, most stable, cheapest gains in-distribution; the cost is memorizing trajectories, a narrower distribution, OOD drop, and forgetting of old abilities.</p></div>
       <div><h3>What GRPO does</h3><p><span class="big">Sharpen</span>Turns Pass@k into Pass@1. Better OOD retention, stronger rule generalization; it requires that the model can already succeed occasionally, and a verifiable reward.</p></div>
       <div><h3>The production optimum</h3><p><span class="big">SFT → GRPO</span>The mainstream recipe behind DeepSeek-R1 and Tülu 3. Don't overtrain SFT, or entropy collapse will strangle the GRPO signal that follows.</p></div>
     </div>
-    <p class="meta">Research compiled 2026-11-19, behavior update also 2026-11-19 · Data from paper texts, arXiv abstract pages, or search abstracts, with verification status marked per paper · Every number is labeled with its starting checkpoint and setup — comparing SFT vs GRPO without the checkpoint is meaningless. Behavior sources: Chu et al., DeepSeek-R1, ASTER, ToolRL, WebExplorer, Mercor/SkyRL blog, AutoTool and others cited in §08–§10.</p>
+    <p class="meta">Research compiled 2026-11-19; behavior and compute updates also 2026-11-19 · Data from paper texts, arXiv abstract pages, or search abstracts, with verification status marked per paper · Every number is labeled with its starting checkpoint and setup — comparing SFT vs GRPO without the checkpoint is meaningless. Behavior sources: Chu et al., DeepSeek-R1, ASTER, ToolRL, WebExplorer, Mercor/SkyRL blog, AutoTool and others cited in §10–§12. Compute sources: DeepSeek-R1 (<em>Nature</em> 2025, Suppl.), DeepSeekMath, DAPO, ScaleRL, Web Agent (NeurIPS 2025), Singh et al. (2026) and others cited in §08–§09 — vendor MFU claims are flagged as vendor-reported, not benchmarks.</p>
   </header>
 
   <nav class="toc" aria-label="Contents">
-    <a href="#mechanism">① Mechanism</a><a href="#data">② Empirical Data</a><a href="#passk">③ The Pass@1 vs Pass@k Debate</a><a href="#papers">④ Paper List</a><a href="#decision">⑤ Choosing a Method</a><a href="#pitfalls">⑥ Negative Results &amp; Pitfalls</a><a href="#behavior">⑦ Agent Behavior</a><a href="#behavior-papers">⑧ Behavior Papers</a><a href="#measurement">⑨ How Behavior Is Measured</a>
+    <a href="#mechanism">① Mechanism</a><a href="#data">② Empirical Data</a><a href="#passk">③ The Pass@1 vs Pass@k Debate</a><a href="#papers">④ Paper List</a><a href="#decision">⑤ Choosing a Method</a><a href="#pitfalls">⑥ Negative Results &amp; Pitfalls</a><a href="#compute">⑦ Compute Cost</a><a href="#fair">⑧ Fair Comparison</a><a href="#behavior">⑨ Agent Behavior</a><a href="#behavior-papers">⑩ Behavior Papers</a><a href="#measurement">⑪ How Behavior Is Measured</a>
   </nav>
 
   <!-- 1 mechanism -->
@@ -250,7 +250,7 @@ ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px
         </tbody>
       </table>
     </div>
-    <p class="small">Note: a blog table circulating online (“SFT 68.4% vs GRPO 86.2% on GSM8K”) has no primary-paper source and is excluded here. Cost claims are similar: no paper gives a clean FLOPs comparison on the same hardware and prompts — the circulating “2.4× compute / 2.5× memory” figures are unverified. The qualitative consensus: GRPO costs several times SFT (sampling-dominated); SFT is the 1× baseline.</p>
+    <p class="small">Note: a blog table circulating online (“SFT 68.4% vs GRPO 86.2% on GSM8K”) has no primary-paper source and is excluded here. On cost, the earlier shorthand “several times SFT” understates it: §08 derives <strong>~1.3–1.7 × G per prompt</strong> (≈21–27× at G=16, ≈85–107× at G=64, before zero-variance waste and the generation MFU penalty) and gives verified anchor GPU-hours. The circulating “2.4× compute / 2.5× memory” figures remain unverified and are not used.</p>
   </section>
 
   <!-- 3 passk -->
@@ -330,7 +330,7 @@ ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px
         <thead><tr><th>Baseline to try first</th><th>Notes</th></tr></thead>
         <tbody>
           <tr><td data-l="Baseline"><strong>RFT / RAFT (rejection-sampling fine-tuning)</strong></td><td data-l="Notes">Xiong et al.: SFT on only the correct rollouts already matches GRPO / PPO; GRPO's main advantage is actually discarding all-wrong prompts. Cost ≈ SFT + sampling — this should be your first RL baseline before paying GRPO's cost. Chen et al.'s NFT (negative-aware SFT) is equivalent to GRPO under strict on-policy conditions and in practice matches or beats GRPO / DAPO — the supervised/RL boundary is thinner than it looks.</td></tr>
-          <tr><td data-l="Baseline"><strong>Cost ordering (qualitative)</strong></td><td data-l="Notes">SFT = 1× (one pass over fixed data, stable, easy to debug) &lt; RFT / RAFT (+ sampling) &lt; GRPO (G rollouts per prompt, generation-dominated, several times SFT, plus KL / entropy / sampling tuning). PivotRL-style local RL at pivot turns is currently the clearest quantified cost reduction: ~1/4 the rollout rounds to match end-to-end RL.</td></tr>
+          <tr><td data-l="Baseline"><strong>Cost ordering (quantified in §08)</strong></td><td data-l="Notes">SFT = 1× per prompt (6·N per token, one forward+backward) &lt; RFT / RAFT (+ sampling) &lt; GRPO ≈ <strong>1.33×G without reference, 1.67×G with KL</strong> per prompt at μ=1 — i.e. ~11–13× at G=8, ~21–27× at G=16, ~85–107× at G=64 — <em>before</em> zero-variance waste (~40% of groups; 71% of random agentic turns) and before generation's lower MFU makes wall-clock worse than FLOPs. PivotRL-style local RL is the clearest quantified saving: ~1/4 the rollout turns and ~1/5.5 the wall-clock at matched 32.67% on SWE-Bench — at matched accuracy, not a higher final score.</td></tr>
         </tbody>
       </table>
     </div>
@@ -350,7 +350,8 @@ ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px
         <div class="card">
           <h3 style="margin-top:0">Still-open questions</h3>
           <ul class="tight">
-            <li><strong>A clean same-prompt, same-FLOPs cost table does not exist</strong> — no primary paper compares SFT vs GRPO on identical hardware, so cost figures remain qualitative for now.</li>
+            <li><strong>No joint SFT-vs-RL scaling law exists.</strong> ScaleRL gives RL-only sigmoidal compute–performance curves (&gt;400k GPU-hours); Chinchilla's 6ND is pretraining-only. Patel et al. (arXiv:2611.13276) offer a solvable linear-model theory for the optimal SFT/RL budget split, validated only qualitatively on OLMo-2 1B / GSM8K — hypothesis-grade, not a predictive law. See §08–§09 for the ledger and frontier method that substitute for a law today.</li>
+            <li><strong>Hyperparameter-search cost is almost never counted</strong> in either arm's budget. The Web Agent study's 1,370 configurations are the exception — and even there the search cost is not folded into the frontier.</li>
             <li><strong>Whether long-horizon RL (ProRL etc.) can truly break Yue et al.'s Pass@k ceiling</strong> — claimed (arXiv:2505.24864), but not independently verified in this round of research.</li>
             <li><strong>PivotRL's single-domain SWE figures</strong> — the abstract average (+4.17 pp) and the secondary abstract's per-domain numbers (32.67% vs SFT 37.40%) coexist without full reconciliation; cite the abstract average as the primary figure and the per-domain number as a caveat.</li>
             <li><strong>Rajani's MLP hypothesis</strong> — “SFT moves middle-layer MLPs more, causing OOD degradation” remains a hypothesis; freezing experiments are inconsistent.</li>
@@ -361,9 +362,139 @@ ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px
     </div>
   </section>
 
-  <!-- 8 behavior -->
+  <!-- 8 compute -->
+  <section id="compute">
+    <div class="sec-head"><span class="sec-num">08</span><h2>Compute: what each actually costs — per prompt, per run, and where the time goes</h2></div>
+    <p class="sub">Short answer: the cost structures are qualitatively different, not just different sizes. SFT pays ~one forward+backward per token on fixed data. GRPO pays, per prompt, <strong>G generations + a forward+backward on those G generations + (usually) a reference forward + reward / verifier / environment</strong> — and most of that generation is wasted when a group has zero reward variance. In wall-clock the gap is <em>worse</em> than in FLOPs, because autoregressive decode is memory-bandwidth-bound and runs at far lower MFU than training.</p>
+
+    <div class="grid2">
+      <article class="card vs-sft">
+        <span class="tag sft">SFT · COST FORMULA</span>
+        <h3 style="margin-top:10px">6·N·D — one pass, high utilisation</h3>
+        <div class="formula">Training FLOPs ≈ 6 · N · D &nbsp;·&nbsp; 2 forward + 4 backward per param per token</div>
+        <ul class="kv">
+          <li><b>Counted</b><span>N = parameters, D = training tokens. Prompt tokens are still forwarded (usually without loss) — a common under-count.</span></li>
+          <li><b>Ignored</b><span>Attention's quadratic term (small at moderate context, material at 32k–128k and 1M-token sessions) and embedding / optimizer overhead.</span></li>
+          <li><b>MFU</b><span>Typically 40–50% on H100-class hardware — <em>secondary rule of thumb</em> (Hands-on Modern RL, ch. 16), not a measurement.</span></li>
+          <li><b>Hidden cost</b><span>Teacher inference / distillation to create the data in the first place — see the ledger in §09. R1's SFT-data creation was only 5k H800-h because the 800k samples came from an already-trained R1; distilling from a 70B or frontier teacher can dwarf student training.</span></li>
+        </ul>
+      </article>
+      <article class="card vs-grpo">
+        <span class="tag grpo">GRPO · COST FORMULA (PER STEP)</span>
+        <h3 style="margin-top:10px">Generation + training + reference, × G</h3>
+        <div class="formula">Per prompt, μ=1, KL kept: (2 + 6 + 2)·G·L·N = 10·G·L·N &nbsp;vs SFT 6·L·N → ~1.67×G</div>
+        <ul class="kv">
+          <li><b>Rollout</b><span>~2·N FLOPs/token, forward only. For DeepSeek-V3-class MoE, attention at L=4k roughly doubles this to ~4N per generated token (Epoch AI note). Use <em>active</em> N for MoE.</span></li>
+          <li><b>Actor update</b><span>6·N × μ on all B·G·L tokens. μ=1 in DeepSeekMath / R1-Zero; DAPO does 16 minibatch updates per rollout (8,192 seq / 512 minibatch) — off-policy reuse, not free.</span></li>
+          <li><b>Reference</b><span>2·N if KL is kept. DeepSeekMath β=0.04, R1-Zero β=0.001; DAPO drops KL entirely (β=0) → per-prompt ratio falls to ~1.33×G.</span></li>
+          <li><b>Reward</b><span>0 for a rule verifier → 2·N<sub>RM</sub>/token for a learned RM → far more for GenRM / Monte-Carlo continuations. In Singh et al., MC continuations were <strong>91% of all generated tokens</strong>.</span></li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="chart-box" style="margin-top:16px">
+      <div class="tabs" role="tablist" aria-label="Switch compute view">
+        <button class="tab active" data-cchart="perprompt">Per-prompt cost vs SFT (by G)</button>
+        <button class="tab" data-cchart="anchors">Verified anchor runs</button>
+      </div>
+      <div id="compChartArea"></div>
+      <p class="small" id="compChartNote" style="margin-top:12px"></p>
+      <p class="small">Derivation, not a measurement: assembled from the papers' hyperparameters and the standard 6ND / 2N approximations. Worked example (estimate, arithmetic from the formulas above — not a paper number): 7B dense, L=2,000, G=8, μ=1, KL kept → SFT ≈ 8.4×10<sup>13</sup> FLOPs/prompt vs GRPO ≈ 1.12×10<sup>15</sup> ≈ <strong>13.3×</strong>. The same prompt budget therefore buys ~13–100× fewer <em>distinct prompts</em> under GRPO — the prompt-diversity vs response-diversity trade-off DeepSeekMath embodies: at G=64 with a 1,024-rollout batch, only <strong>16 prompts/step</strong>.</p>
+    </div>
+
+    <div class="table-wrap" style="margin-top:16px">
+      <table>
+        <thead><tr><th style="width:22%">Anchor / claim</th><th style="width:34%">Number</th><th>Status — read before citing</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Anchor"><strong>DeepSeek-R1-Zero RL</strong></td><td data-l="Number"><strong>101k H800 GPU-hours</strong>, ~198 h on 512 H800s, 10,400 steps, 32 questions/step, G=16, max len 32,768 → 65,536. AIME24 Pass@1 15.6% → 77.9% (R1-Zero); R1 itself 79.8%, 86.7% with self-consistency.</td><td data-l="Status"><strong>Verified (primary)</strong> — DeepSeek-AI, <em>Nature</em> 645:633–638 (2025), Suppl. Tables 3/4, App. B.4.4. <a href="https://arxiv.org/abs/2501.12948" target="_blank" rel="noopener">arXiv:2501.12948</a> · <a href="https://www.nature.com/articles/s41586-025-09422-z" target="_blank" rel="noopener">Nature</a></td></tr>
+          <tr><td data-l="Anchor"><strong>DeepSeek-R1 total post-training</strong></td><td data-l="Number"><strong>147k H800-h / $294k at $2/h</strong> = 101k (R1-Zero) + 41k (R1) + 5k (SFT-data creation). Excludes V3 pretraining (2.788M H800-h) and failed runs.</td><td data-l="Status"><strong>Verified (primary, same source).</strong> ScaleRL cross-check: R1-Zero's 100k H800-h ≈ 3.75% of V3 pretraining compute.</td></tr>
+          <tr><td data-l="Anchor"><strong>DeepSeekMath GRPO</strong></td><td data-l="Number">G=64, batch 1,024 <em>rollouts</em>/step (= 16 prompts/step), LR 1e-6, KL 0.04, max len 1,024, ~144k questions. GSM8K 82.9→88.2, MATH 46.8→51.7.</td><td data-l="Status"><strong>Verified (primary)</strong> — Shao et al. 2024. <a href="https://arxiv.org/abs/2402.03300" target="_blank" rel="noopener">arXiv:2402.03300</a></td></tr>
+          <tr><td data-l="Anchor"><strong>Epoch AI's original R1 estimate — a cautionary error</strong></td><td data-l="Number">6.1×10<sup>23</sup> FLOPs / $1M — <strong>wrong by 64×</strong>. Corrected ≈ 9.5×10<sup>21</sup> FLOPs. JoshBuild's re-estimate: ~2×10<sup>22</sup> FLOPs.</td><td data-l="Status">Epoch borrowed DeepSeekMath's B=1,024 as <em>questions</em>/step; it was <em>rollouts</em>/step (B×G), so true B=16. <strong>Batch-size notation is the single largest error source in this literature.</strong> DeepSeek never published RL FLOPs — GPU-hours (101k) are primary; all FLOPs figures for R1 are estimates differing ~2× by assumed mean length / attention correction. <a href="https://epoch.ai/gradient-updates/what-went-into-training-deepseek-r1" target="_blank" rel="noopener">Epoch AI</a> · <a href="https://joshbuild.substack.com/p/deepseek-r1-zeros-rl-training-used" target="_blank" rel="noopener">JoshBuild (secondary estimate)</a></td></tr>
+          <tr><td data-l="Anchor"><strong>DAPO</strong></td><td data-l="Number">Qwen2.5-32B, G=16, prompt batch 512 (8,192 seq/step), 16 minibatch updates/rollout, ε<sub>low</sub> 0.2 / ε<sub>high</sub> 0.28, no KL. Naive GRPO 30 → DAPO 50 on AIME24 avg@32 (vs R1-Zero-Qwen-32B 47) in <strong>50% of training steps</strong>; dynamic sampling alone 42→50.</td><td data-l="Status"><strong>Verified (primary)</strong> — Yu et al. 2025, <a href="https://arxiv.org/abs/2503.14476" target="_blank" rel="noopener">arXiv:2503.14476</a>. Caveat carried from the report: “50% steps” ≠ 50% FLOPs/time — dynamic sampling oversamples and discards.</td></tr>
+          <tr><td data-l="Anchor"><strong>PivotRL</strong></td><td data-l="Number">At matched SWE-Bench 32.67%: ~133k vs ~542k rollout turns (<strong>~4× fewer</strong>), <strong>5.5× less wall-clock</strong>; +4.17 pp in-domain, +10.04 pp OOD retention vs same-data SFT. But SWE-Bench Verified itself: 32.67% vs SFT 37.40%.</td><td data-l="Status"><strong>Verified (primary preprint)</strong> — <a href="https://arxiv.org/abs/2603.21383" target="_blank" rel="noopener">arXiv:2603.21383</a>. Savings are at matched accuracy, not a higher final score; excludes demo-generation / profiling cost. Also: 71% of randomly sampled turns give zero group-normalised gradient.</td></tr>
+          <tr><td data-l="Anchor"><strong>ScaleRL</strong></td><td data-l="Number">&gt;400,000 GPU-hours total; RL reward follows a <strong>sigmoid</strong>, not a power law; a 100k GPU-h 8B run (asymptote A=0.61) is predictable from an early fit.</td><td data-l="Status"><strong>Verified (primary)</strong> — Khatri et al. (Meta), <a href="https://arxiv.org/abs/2510.13786" target="_blank" rel="noopener">arXiv:2510.13786</a>. Implication: single checkpoints mislead — fit curves (§09).</td></tr>
+          <tr><td data-l="Anchor"><strong>DaisyRose-27B / Miles (RadixArk)</strong></td><td data-l="Number">Qwen3.8-27B, 1,200 tasks, 18 days, 144 H200, <strong>63,000 GPU-hours</strong>, sessions to 1M tokens; Terminal-Bench 4.1 Pass@1 5.6% → 12.0%. 128 GPUs inference + 16 trainer, fully async. Internal backend <strong>37% MFU vs 16%</strong> for an open-source Megatron trainer → 57% less GPU time, 2× throughput; MoE claims 6.2× / &gt;10×.</td><td data-l="Status"><strong>Vendor-reported (company blog / HF), NOT peer-reviewed, NOT independently replicated.</strong> Treat the MFU comparison as marketing-grade evidence; “comparable runs” is not defined. <a href="https://huggingface.co/blog/RadixArk/daisyrose-27b-pushing-the-frontier-of-post-trainin" target="_blank" rel="noopener">HF blog</a> · <a href="https://www.radixark.com/blog/daisyrose-27b" target="_blank" rel="noopener">RadixArk</a>. Note on the 128:16 split: task length, not a fixed recipe, drives the rollout:trainer ratio — long agentic sessions push inference share up; larger models push trainer share up.</td></tr>
+          <tr><td data-l="Anchor"><strong>Blog rules of thumb — do not cite as measurements</strong></td><td data-l="Number">“RLHF 5–10× SFT at equal tokens; GRPO ~60% of PPO”; rollout 50–60% / actor 20–25% / ref 10–15% / reward 5–10% (7B, 512 prompts × 8); veRL 14.01% training MFU (7B GRPO, MI300X); long-CoT generation 70–90% of wall time.</td><td data-l="Status"><strong>Secondary only.</strong> <a href="https://cdiddy77.github.io/hands-on-modern-rl/en/chapter16_llm_rl_industrial/intro" target="_blank" rel="noopener">Hands-on Modern RL ch. 16</a> · <a href="https://abhinavnandwani.com/posts/rlvr-training-costs.html" target="_blank" rel="noopener">RLVR cost notes</a> (±30–50% stated). The 5–10× figure in particular conflates PPO (critic + RM) with GRPO. Verified-adjacent throughput point: veRL / AMD ROCm (Apr 2025, vendor blog) reports 7B GRPO at 1,544 tok/GPU/s (H100) and 1,748 (MI300X) at response length 1,024, GRPO 1.7–2.5× PPO throughput — measured in that harness, not a paper.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0">Where the cost actually sits — and why it grows during RL</h3>
+        <ul class="tight">
+          <li><strong>Generation dominates wall-clock, not FLOPs.</strong> Typical synchronous GRPO: generation 60–80% of step time; long-CoT 70–90%; agentic multi-turn ~95% (Selective Rollout, arXiv:2605.05802 — rollout ~95% of wall-clock on ALFWorld, Qwen2.5-7B, G=8, 20–30 env steps/rollout). Decode reads the whole model + KV per token, runs at low MFU, and the slowest episode gates the step in synchronous veRL / OpenRLHF. Async systems (AReaL, arXiv:2505.24298: sync GPU util &lt;30%, async SWE-bench 35%→85%) exist precisely to fix this.</li>
+          <li><strong>Rollout length grows during RL.</strong> R1-Zero's response length rises throughout training (cap 32k→65k); DAPO's overlong shaping exists because length inflation is a cost <em>and</em> a reward-hacking vector. A fixed-FLOPs budget computed at step 0 understates late-training cost by multiples.</li>
+          <li><strong>Zero-variance waste is structural.</strong> All-correct / all-wrong groups give exactly zero advantage → zero gradient. Rates: ~40% of groups (Selective Rollout, ALFWorld) and 71% of random agentic turns (PivotRL). DAPO dynamic sampling, Online Difficulty Filtering (arXiv:2504.03380 — matched GRPO accuracy in &lt;half the steps on Qwen2.5-3B), and prompt selection near p≈0.5 all spend <em>extra</em> rollout compute to buy back this waste — the cost belongs on the oversampled side of the ledger.</li>
+          <li><strong>Verifier / environment dominates in agentic RL.</strong> Each rollout is 20–30 env steps × an LLM call; sandboxes, tool latency, and failed trajectories are wall-clock, not FLOPs. PivotRL's 5.5× wall-clock saving vs 4× rollout-turn saving shows the two diverge.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Memory: GRPO trades compute for memory</h3>
+        <p style="font-size:14px">GRPO removes PPO's critic — the most expensive trainable model. For a 7B model at ~16 bytes/param (mixed-precision Adam: weights + grad + fp32 master + 2 moments) vs ~2 bytes/param frozen: PPO with a learned RM ≈ 252 GB vs GRPO with a learned RM ≈ 140 GB (<strong>−44%</strong>) vs GRPO with a verifier reward ≈ 126 GB.</p>
+        <p class="small">Secondary explainer arithmetic (Vitor Sousa, citing the DeepSeekMath design) — arithmetic, not a benchmark. It still does not fit on one 80 GB GPU at 7B full fine-tuning. LoRA / PEFT changes this qualitatively and is rarely held fixed across comparisons — another confound for §09.</p>
+        <h3>Hidden SFT cost, quantified once</h3>
+        <p style="font-size:14px">Liu et al. (OPD vs GRPO, §09): external-teacher distillation on code peaked at 28.7% after <strong>68.7 EFLOP</strong> vs GRPO 46.4% at <strong>0.6 EFLOP</strong> — a 114× FLOP gap in GRPO's favour, driven by teacher-forward cost per token. Whether “SFT is cheap” is true depends entirely on whether the teacher is in the ledger.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 fair comparison -->
+  <section id="fair">
+    <div class="sec-head"><span class="sec-num">09</span><h2>Is there a fair comparison method? Yes — but it is a frontier, not a number</h2></div>
+    <p class="sub">There is <strong>no single canonical “fair” comparison</strong>, and most published SFT-vs-RL wins are not compute-matched. The emerging consensus method: plot held-out Pass@1 (at fixed eval sampling) against <strong>total FLOPs <em>and</em> total wall-clock / GPU-hours</strong> as a Pareto frontier, with the <strong>full ledger</strong> counted — teacher / data-generation, discarded and failed rollouts, verifier / environment, reference forward, and the SFT warm-start both arms share.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:24%">Hold fixed</th><th style="width:30%">What it tests</th><th>What it hides / confound</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Hold fixed"><strong>Same base model + same prompts / data</strong></td><td data-l="Tests">Algorithmic difference, given identical information</td><td data-l="Hides">GRPO <em>generates</em> its data (more tokens, more compute); SFT <em>consumes</em> teacher data (hidden teacher cost)</td></tr>
+          <tr><td data-l="Hold fixed"><strong>Same training tokens (loss tokens)</strong></td><td data-l="Tests">Per-token learning efficiency</td><td data-l="Hides">GRPO's generated tokens ≠ SFT's curated tokens; generation tokens cost wall-clock / MFU differently; zero-variance tokens contribute nothing</td></tr>
+          <tr><td data-l="Hold fixed"><strong>Same FLOPs (total, incl. generation + teacher + verifier)</strong></td><td data-l="Tests">Compute efficiency</td><td data-l="Hides">FLOPs ≠ wall-clock (decode MFU ≪ train MFU); FLOPs ≠ dollars (async utilisation, env cost, GPU type); attention / MoE active-vs-total ambiguity</td></tr>
+          <tr><td data-l="Hold fixed"><strong>Same wall-clock / GPU-hours</strong></td><td data-l="Tests">What a practitioner with a deadline actually gets</td><td data-l="Hides">Hardware / framework-dependent (vLLM vs HF generate = 5–10×; async vs sync = 35%→85% util); rewards engineering, not the algorithm</td></tr>
+          <tr><td data-l="Hold fixed"><strong>Same dollars</strong></td><td data-l="Tests">Deployment-relevant cost</td><td data-l="Hides">Price varies by GPU, region, spot vs on-demand; excludes human / annotation cost</td></tr>
+          <tr><td data-l="Hold fixed"><strong>Same sampling budget at eval</strong> (Pass@1, same T / top-p, same n)</td><td data-l="Tests">Final model quality, not test-time compute</td><td data-l="Hides">SFT models often benefit more from majority voting / self-consistency; RL raises Maj@K but not Pass@K in DeepSeekMath — comparing Pass@1 after RL vs Pass@k after SFT is a category error</td></tr>
+          <tr><td data-l="Hold fixed"><strong>Same number of unique prompts / labels</strong></td><td data-l="Tests">Data / label efficiency</td><td data-l="Hides">GRPO reuses prompts G×; SFT needs G× more labelled prompts to match token count</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout teal"><strong>Recommended design (synthesis of the strongest papers):</strong> (a) fix base model, prompt set, verifier, eval protocol, and seeds (≥3); (b) plot <em>both</em> total-FLOPs and total-GPU-hours Pareto frontiers — not a single checkpoint (ScaleRL's sigmoid point: single checkpoints mislead; fit curves); (c) count the <em>full ledger</em> (Web Agent Eq. 5: FLOPs(tb) = F<sub>SFT</sub>(tb) + F<sub>RL</sub>(T<sub>RL</sub>), with teacher inference incl. discarded trajectories, RL rollouts incl. discarded / zero-variance groups, reference, verifier, environment); (d) report Pass@1 at matched eval sampling <em>and</em> Pass@k / Maj@k, so distribution-sharpening (RL) vs capability-addition (SFT / distillation) is visible; (e) tune <em>both</em> arms comparably — the “Is it RL or Data?” paper gave RFT a 27-run sweep vs GRPO's fixed recipe and GRPO still won; that is the standard to beat, and most papers tune only the favoured arm.</div>
+
+    <h3>Papers that explicitly try a fair, compute-matched comparison</h3>
+    <div id="fairPaperList"></div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Matched-compute reversals and nulls — the evidence that matching matters</h3>
+        <ul class="tight">
+          <li><strong>Dense rewards reverse (Singh et al., arXiv:2611.13560, Nov 2026).</strong> Dense Monte-Carlo rewards in GRPO look +1.5 pp better <em>per update</em> but are <strong>−14.3 pp at equal generated tokens and −7.8 pp at equal training time</strong>; none of four dense variants beats GRPO at equal time. Prompt selection (+0.8–1.7 pp) survives matching. <em>Verified, preregistered, 1,668 runs, 6 models</em> — the cleanest reversal in the set.</li>
+          <li><strong>SFT 2k matches / beats GRPO 20k (Yu et al., arXiv:2512.12690, Dec 2025).</strong> On VLM reasoning at identical data (≤50k) and matched optimisation, SFT with <strong>2k</strong> samples matches/beats GRPO with <strong>20k</strong> — a 10× data-efficiency advantage for SFT. SFT wins weak/small; RL wins strong/large-data. <em>Verified (primary).</em></li>
+          <li><strong>Iso-FLOP nulls at 0.6B (Bishnoi 2026).</strong> SFT response-masking does not separate from an iso-FLOP (within 5%) control; GRPO does not separate from a random-reward gate (single seed), under 3 paired seeds with 95% CIs. Small scale, preprint — <em>weak evidence, but the only study found that enforces iso-FLOP within 5% with paired seeds.</em> <a href="https://raw.githubusercontent.com/yashb98/BuildFromScratch/94de6ef882fb66c0100353127bab3d66ee8981be/research/papers/qwen3-0.6b-study/qwen3-0.6b-study.pdf" target="_blank" rel="noopener">PDF</a></li>
+          <li><strong>Banking routing (Golbaghi 2026, niche).</strong> SFT 0.787 vs GRPO 0.608 at identical 1,106 labels; quadrupling GRPO's verifier budget only reaches 0.645; 78–99.7% of GRPO groups had zero gradient. Tiny CPU models (Pythia-14M/31M) — <em>do not generalise</em>, but it demonstrates advantage-collapse as a mechanism. <a href="https://www.aryangolbaghi.com/research/grpo-routing" target="_blank" rel="noopener">Study page</a></li>
+          <li><strong>“GRPO” as a label spans 20 points.</strong> DAPO's own baseline: naive GRPO on Qwen2.5-32B reached only 30 on AIME vs 47 for R1-Zero-Qwen. Comparing a tuned GRPO to an untuned SFT (or vice versa) is the modal error.</li>
+          <li><strong>Online data + filtering, not normalisation?</strong> RAFT within 3% of GRPO; explicit rejection filtering (REINFORCE-Rej) matches GRPO — suggesting much of GRPO's apparent edge over SFT/RFT is <em>online data + filtering</em>, not group normalisation. <em>Preprint / under review (TMLR, via OpenReview) — hypothesis-grade.</em> <a href="https://openreview.net/notes/edits/attachment?id=8rGibudunH&amp;name=pdf" target="_blank" rel="noopener">OpenReview PDF</a></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Designing your own fair comparison — checklist</h3>
+        <p style="font-size:14px"><strong>Fix the budget in the unit the decision-maker actually pays, then report the other two as well:</strong></p>
+        <ul class="tight">
+          <li><strong>Fixed total FLOPs:</strong> use the Web Agent Eq. 5 ledger. Count teacher inference (all attempts, not just kept), student SFT (6ND), GRPO generation (2N per generated token, attention-corrected at long context), actor updates (6N × μ), reference forward (2N if KL), verifier / RM forward, MC continuations, environment steps (convert to GPU-hours separately — do not fold into FLOPs). Plot accuracy vs cumulative FLOPs; do not compare single endpoints.</li>
+          <li><strong>Fixed wall-clock:</strong> fix GPU type/count, framework (vLLM/SGLang rollout + FSDP/Megatron train), sync vs async, and report MFU, tokens/s, and the rollout-vs-train split. Expect async to change the winner (AReaL 35%→85% util; Miles 128 inference + 16 trainer GPUs).</li>
+          <li><strong>Fixed dollars:</strong> GPU-hours × $/h <em>plus</em> teacher/API cost, annotation cost, and failed-run cost. DeepSeek's $294k excludes failed runs and pretraining — say so explicitly if you quote it.</li>
+        </ul>
+        <p style="font-size:14px"><strong>Report, at minimum:</strong> base model + size (active vs total for MoE); G, B (prompts vs rollouts — state which), L (mean <em>and</em> distribution — it grows), μ, KL β, verifier type/cost; total generated tokens, total loss tokens, total FLOPs by component, total GPU-hours by phase (data-gen / rollout / train / verifier / env), MFU (train and overall), tokens/s, wall-clock, $; seeds (≥3); eval Pass@1 <em>and</em> Pass@k / Maj@k at fixed sampling; hyperparameter search budget per arm.</p>
+        <p style="font-size:14px"><strong>Common pitfalls (each observed in the literature above):</strong> ① ignoring teacher cost (SFT) or failed/discarded rollouts (GRPO); ② comparing per-update or per-step (DAPO “50% steps” ≠ 50% compute; dense-reward per-update win reverses at matched tokens); ③ comparing Pass@1 after unequal compute, or Pass@1 vs Pass@k; ④ single seed / best checkpoint (use Pareto curves + CIs; ScaleRL sigmoid fit); ⑤ tuning one arm only; ⑥ reporting FLOPs without MFU/wall-clock, or GPU-hours without FLOPs — the two diverge by 2–5× in RL; ⑦ treating data efficiency as compute efficiency (RL wins on labels — e.g. 10–100× more label-efficient in content moderation, Meta arXiv:2512.20061; DPO 3k &gt; SFT 40k in PIVOT — but each RL label costs G rollouts + verifier calls; report both axes separately); ⑧ assuming G is free signal — G buys baseline precision (~1/√G, fastest-diminishing), group coverage, and hard-prompt success, but costs linearly; G=2–8 with dynamic sampling often matches G=64 at far lower cost (It Takes Two, arXiv:2510.00977, secondary summary).</p>
+      </div>
+    </div>
+
+    <div class="callout warn"><strong>Open questions, plainly:</strong> ① No canonical joint SFT-vs-RL scaling law exists (see §07). ② DaisyRose/Miles MFU (37% vs 16%) is vendor-reported with no definition of “comparable runs” — do not use as a benchmark. ③ R1 FLOPs are estimates (~9.5×10<sup>21</sup> corrected Epoch vs ~2×10<sup>22</sup> JoshBuild); GPU-hours are the primary figure. ④ Most matched comparisons are single-task, single-family, ≤3 seeds (math / VLM / agentic toy tasks) — generalisation to production-scale, long-horizon, human-preference RLHF (learned/human verifiers, not rule-based) is untested in the matched-compute literature found. ⑤ Warm-start asymmetry: most “RL vs SFT” papers actually compare SFT vs SFT+RL (Chu et al.: direct RL from base failed; SFT stabilises format) — the honest question is usually <em>marginal</em> RL after SFT, and <em>where to branch</em> (Web Agent: early-but-not-immediate branching is optimal).</div>
+  </section>
+
+  <!-- 10 behavior -->
   <section id="behavior">
-    <div class="sec-head"><span class="sec-num">08</span><h2>Agent behavior after training: what actually changes — and what doesn't line up</h2></div>
+    <div class="sec-head"><span class="sec-num">10</span><h2>Agent behavior after training: what actually changes — and what doesn't line up</h2></div>
     <p class="sub">This section integrates the 2026-11-19 behavior research. Headline, stated plainly: <strong>no single paper compares SFT vs GRPO on the same agentic tasks across the full behavior battery</strong> — length, turns, tool calls, retry, diversity, and stopping. The evidence is fragmented, each paper measures a slice, and the direction flips by domain and reward. That gap is itself the finding.</p>
 
     <div class="callout warn"><strong>Read this before quoting any behavior claim:</strong> SFT copies the demonstrated form; RL re-optimises form for outcome. That is why RL can <em>lengthen</em> reasoning in maths (DeepSeek-R1, WebExplorer, ASearcher) and <em>shorten / collapse</em> it in tool use (AutoTool, ASTER interaction collapse). Any blanket claim like “GRPO makes agents more concise” or “GRPO makes them longer” is contradicted inside this literature.</div>
@@ -428,14 +559,14 @@ ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px
 
   <!-- 9 behavior papers -->
   <section id="behavior-papers">
-    <div class="sec-head"><span class="sec-num">09</span><h2>Behavior papers: 11 groups, with what each actually measured</h2></div>
+    <div class="sec-head"><span class="sec-num">11</span><h2>Behavior papers: 11 groups, with what each actually measured</h2></div>
     <p class="sub">These overlap with the 19-paper list above where the same work appears in both (Chu, DeepSeek-R1, PivotRL) — here the entry is re-read for behavior, not accuracy. Numbers keep the report's verification flags.</p>
     <div id="behPaperList"></div>
   </section>
 
   <!-- 10 measurement -->
   <section id="measurement">
-    <div class="sec-head"><span class="sec-num">10</span><h2>How behavior is measured — and the gaps</h2></div>
+    <div class="sec-head"><span class="sec-num">12</span><h2>How behavior is measured — and the gaps</h2></div>
     <p class="sub">There is no standardised “agent behavior” benchmark. Each paper invents its own proxy, which is why cross-paper behavior comparisons are fragile.</p>
     <div class="table-wrap">
       <table>
@@ -472,8 +603,9 @@ ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px
       <div class="card"><b>SFT</b><p style="font-size:14px;margin:4px 0 0">Can't → can. Installs format, knowledge, new patterns; cheap and stable; beware memorization, forgetting, and overtraining.</p></div>
       <div class="card"><b>GRPO</b><p style="font-size:14px;margin:4px 0 0">Occasionally can → reliably can. Turns Pass@k into Pass@1; needs a verifiable reward and a nonzero success rate; beware entropy collapse.</p></div>
       <div class="card"><b>SFT → GRPO</b><p style="font-size:14px;margin:4px 0 0">The default production recipe. When the hardest problems sit at acc=0, interleave SFT back in (ReLIFT) instead of forcing RL.</p></div>
+      <div class="card"><b>Compute &amp; fairness</b><p style="font-size:14px;margin:4px 0 0">GRPO ≈ 1.3–1.7 × G per prompt vs SFT, before waste. Fair comparison = full-ledger Pareto frontier on FLOPs <em>and</em> GPU-hours, Pass@1 <em>and</em> Pass@k, ≥3 seeds, both arms tuned. No single fixed number is fair on its own.</p></div>
     </div>
-    <p class="small" style="margin-top:16px">Sources: DeepSeekMath (2402.03300), DeepSeek-R1 (2501.12948), Chu et al. (2501.17161), Yue et al. (2504.13837), Xiong et al. (2504.11343), Chen et al. NFT (2505.18116), Rajani et al. (2507.10616), Wang et al. 1-shot RLVR (2504.20571), Yuan et al. (2509.25123), Cheng et al. (2512.01970), Ma et al. ReLIFT (2506.07527), Ding et al. (2512.11470), DeReason (2603.11193), DAPO (2503.14476), PivotRL (2603.21383), Rath et al. (2610.07405), Tülu 3 (2411.15124), Multi-Harness RL (2609.04518), etc.; full links in the paper list above. Behavior update sources: ToolRL (2504.13958), ASTER (2602.01204), WebExplorer (2509.06501), Beyond Ten Turns / ASearcher (2508.07976), AutoTool (2603.13348), FuseSearch (2601.19568), StateAlign (2611.16304), PSFT (2508.17784), LoopTool (2511.09148), Mercor / SkyRL blog (2026-09-01), DaisyRose-27B HF blog (2026-11-19, no behavior metrics — see §10). Research date 2026-11-19; figures are as reported in the papers, not experiments reproduced on this page.</p>
+    <p class="small" style="margin-top:16px">Sources: DeepSeekMath (2402.03300), DeepSeek-R1 (2501.12948), Chu et al. (2501.17161), Yue et al. (2504.13837), Xiong et al. (2504.11343), Chen et al. NFT (2505.18116), Rajani et al. (2507.10616), Wang et al. 1-shot RLVR (2504.20571), Yuan et al. (2509.25123), Cheng et al. (2512.01970), Ma et al. ReLIFT (2506.07527), Ding et al. (2512.11470), DeReason (2603.11193), DAPO (2503.14476), PivotRL (2603.21383), Rath et al. (2610.07405), Tülu 3 (2411.15124), Multi-Harness RL (2609.04518), etc.; full links in the paper list above. Behavior update sources: ToolRL (2504.13958), ASTER (2602.01204), WebExplorer (2509.06501), Beyond Ten Turns / ASearcher (2508.07976), AutoTool (2603.13348), FuseSearch (2601.19568), StateAlign (2611.16304), PSFT (2508.17784), LoopTool (2511.09148), Mercor / SkyRL blog (2026-09-01), DaisyRose-27B HF blog (2026-11-19, no behavior metrics — see §12). Compute update sources: DeepSeek-R1 Nature Suppl. (2501.12948), DAPO (2503.14476), ScaleRL (2510.13786), Web Agent (2507.04103), Singh et al. (2611.13560), Liu et al. OPD vs GRPO (2611.08453), Is it RL or Data? (2610.25812), Yu et al. VLM SFT (2512.12690), Patel et al. (2611.13276), Selective Rollout (2605.05802), AReaL (2505.24298), Online Difficulty Filtering (2504.03380), Epoch AI R1 accounting, RadixArk DaisyRose (vendor-reported). Research date 2026-11-19; figures are as reported in the papers, not experiments reproduced on this page.</p>
   </footer>
 </div>
 
@@ -525,6 +657,7 @@ var CHARTS = {
 };
 function renderChart(key){
   var d = CHARTS[key];
+  if(!d) return;
   var html = '<h3 style="margin:0 0 6px;font-size:16px">'+d.title+'</h3>';
   d.rows.forEach(function(r){
     html += '<div class="bar-row"><span>'+r.label+'</span><div class="bar-track"><div class="bar-fill" style="width:'+r.v+'%;background:'+r.c+'"></div></div><b class="mono">'+r.v.toFixed(1)+'%</b></div>';
@@ -532,9 +665,9 @@ function renderChart(key){
   document.getElementById('chartArea').innerHTML = html;
   document.getElementById('chartNote').textContent = d.note;
 }
-document.querySelectorAll('.tab').forEach(function(b){
+document.querySelectorAll('[data-chart]').forEach(function(b){
   b.addEventListener('click', function(){
-    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+    document.querySelectorAll('[data-chart]').forEach(function(x){x.classList.remove('active')});
     b.classList.add('active'); renderChart(b.getAttribute('data-chart'));
   });
 });
@@ -666,6 +799,69 @@ BEH_PAPERS.forEach(function(p){
 });
 var behList = document.getElementById('behPaperList');
 if(behList) behList.innerHTML = behHtml;
+
+var CCHARTS = {
+  perprompt: {
+    title: "Per-prompt FLOPs vs SFT = 1× — derivation at μ=1 (range: without reference → with KL)",
+    rows: [
+      {label:"SFT · 1 prompt", v:1, disp:"1×", c:"#d97706"},
+      {label:"GRPO · G=8", v:13.3, disp:"~11–13×", c:"#0f766e"},
+      {label:"GRPO · G=16", v:26.7, disp:"~21–27×", c:"#0f766e"},
+      {label:"GRPO · G=64", v:100, disp:"~85–107×", c:"#b91c1c"}
+    ],
+    note: "Bars are scaled to the with-KL upper end (G=64 capped at 100 for display; true upper end ~107×). Without reference: 8·G·L·N / 6·L·N = 1.33×G. With KL: 10·G·L·N / 6·L·N = 1.67×G. Before waste: zero-variance groups (~40%), dynamic-sampling oversampling, truncated/overlong rollouts, and discarded teacher trajectories all add on top — and before the MFU penalty that makes wall-clock worse than FLOPs."
+  },
+  anchors: {
+    title: "Anchor runs — total post-training GPU-hours (H800 unless noted)",
+    rows: [
+      {label:"R1 SFT-data creation", v:3.4, disp:"5k h", c:"#d97706"},
+      {label:"R1 (full)", v:27.9, disp:"41k h", c:"#1e3a5f"},
+      {label:"DaisyRose-27B · 144×H200", v:42.9, disp:"63k h †", c:"#9ca3af"},
+      {label:"R1-Zero RL", v:68.7, disp:"101k h", c:"#0f766e"},
+      {label:"R1 total post-training", v:100, disp:"147k h", c:"#0f766e"}
+    ],
+    note: "Bars scaled to R1 total = 100. DeepSeek figures verified (primary, Nature Suppl.); total $294k at $2/h, excluding V3 pretraining (2.788M H800-h) and failed runs. † DaisyRose is vendor-reported (RadixArk, H200 not H800, 18 days × 144 GPUs) — shown for scale only, not as a benchmark. ScaleRL's programme total (>400k GPU-hours across runs) is off this scale and is not plotted as a single run."
+  }
+};
+function renderCompChart(key){
+  var d = CCHARTS[key]; if(!d) return;
+  var html = '<h3 style="margin:0 0 6px;font-size:16px">'+d.title+'</h3>';
+  d.rows.forEach(function(r){
+    html += '<div class="bar-row"><span>'+r.label+'</span><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(r.v,1.5)+'%;background:'+r.c+'"></div></div><b class="mono">'+r.disp+'</b></div>';
+  });
+  var area = document.getElementById('compChartArea');
+  var note = document.getElementById('compChartNote');
+  if(area) area.innerHTML = html;
+  if(note) note.textContent = d.note;
+}
+document.querySelectorAll('[data-cchart]').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('[data-cchart]').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active'); renderCompChart(b.getAttribute('data-cchart'));
+  });
+});
+renderCompChart('perprompt');
+
+var FAIR_PAPERS = [
+ {title:'How to Train Your LLM Web Agent: A Statistical Diagnosis', authors:'ServiceNow / Mila · NeurIPS 2025', arxiv:'2507.04103', url:'https://arxiv.org/abs/2507.04103', setup:'Full-ledger FLOPs (teacher incl. discarded + student + RL rollouts + updates), 1,370 configs, bootstrap, Pareto frontier', concl:'Hybrid SFT→GRPO matches peak pure-SFT at 55% of the FLOPs on MiniWob++; only the hybrid closes the gap to closed-source; early-but-not-immediate branching is best. The ledger method this page recommends in §09.', badge:'Full-ledger frontier'},
+ {title:'SFT Memorizes, RL Generalizes', authors:'Chu et al. · ICML 2025', arxiv:'2501.17161', url:'https://arxiv.org/abs/2501.17161', setup:'Shared SFT init, equal estimated GFLOPs incl. RL generation, OOD rule/visual transfer', concl:'At equal estimated GFLOPs, RL wins OOD transfer (GP-L 15.0% vs 3.4%; V-IRL per-step 45.0% vs 2.5%) while SFT wins in-domain memorisation. RL needs the SFT init — direct RL from base failed.', badge:'Equal-GFLOPs'},
+ {title:'Are Dense Rewards Worth Their Tokens in GRPO?', authors:'Singh et al. · Nov 2026', arxiv:'2611.13560', url:'https://arxiv.org/abs/2611.13560', setup:'Matched generated-token and GPU-hour budgets, preregistered, 1,668 runs, 6 models', concl:'Ranking reverses under matching: MC dense reward −14.3 pp at equal tokens / −7.8 pp at equal time vs GRPO; prompt selection +0.8–1.7 pp survives. The cleanest demonstration that per-update comparisons mislead.', badge:'Preregistered reversal'},
+ {title:'The Art of Scaling RL Compute for LLMs (ScaleRL)', authors:'Khatri et al. (Meta) · Oct 2025', arxiv:'2510.13786', url:'https://arxiv.org/abs/2510.13786', setup:'Sigmoidal compute–performance curves, asymptote vs efficiency split, >400k GPU-h', concl:'Recipe details change efficiency (B), not the asymptote (A); a 100k GPU-h run is predictable from an early sigmoid fit. Method lesson: compare curves, not checkpoints.', badge:'Scaling curves'},
+ {title:'Unpacking the Compute Efficiency of Strong-to-Weak OPD against GRPO', authors:'Liu et al. (Salesforce) · Nov 2026', arxiv:'2611.08453', url:'https://arxiv.org/abs/2611.08453', setup:'Matched training FLOPs, accuracy vs cumulative FLOPs', concl:'External-teacher OPD loses to GRPO (28.7% at 68.7 EFLOP vs 46.4% at 0.6 EFLOP); self-checkpoint OPD uses 50× fewer FLOPs; multi-teacher 42% fewer total FLOPs. The teacher\u2019s identity, not the algorithm family, decides the FLOP ranking.', badge:'Matched FLOPs'},
+ {title:'Is it RL or Data? A Controlled Comparison of GRPO and Rejection-Sampling Fine-Tuning', authors:'— · Oct 2026', arxiv:'2610.25812', url:'https://arxiv.org/abs/2610.25812', setup:'Same prompts/verifier/token cap, 3 seeds, RFT given a 27-run sweep, matched rollout budgets post-hoc', concl:'GRPO +10.9 pp on curated data, +8.4/+9.2 pp at matched budget; iterated RFT recovers ~30% of the gap. Sets the tuning-parity standard: the baseline got a sweep and GRPO still won.', badge:'Tuning parity'},
+ {title:'Reassessing the Role of SFT: An Empirical Study in VLM Reasoning', authors:'Yu et al. · Dec 2025', arxiv:'2512.12690', url:'https://arxiv.org/abs/2512.12690', setup:'Identical data (≤50k), matched optimisation, model × data scaling', concl:'SFT 2k ≈/beats RL 20k; SFT wins weak/small, RL wins strong/large-data. A compute/data-efficiency win for SFT, stated with its boundary conditions.', badge:'SFT wins at equal data'},
+ {title:'RL Makes MLLMs See Better Than SFT (PIVOT)', authors:'— · ICLR 2026', arxiv:'papernotes', url:'https://en.papernotes.org/ICLR2026/multimodal_vlm/rl_makes_mllms_see_better_than_sft/', setup:'Same 20k samples, SFT vs DPO, vision × language scaling', concl:'DPO +3–4 pp on vision tasks; 3k DPO > 40k SFT. Data-efficiency evidence — report it on the label axis, not the FLOP axis (each RL/DPO label still costs sampling).', badge:'Label efficiency'},
+ {title:'DeepSeekMath §5.2.1 — A Unified Gradient View', authors:'Shao et al. · 2024', arxiv:'2402.03300', url:'https://arxiv.org/abs/2402.03300', setup:'SFT / RFT / online-RFT / DPO / PPO / GRPO on the same model under one gradient framework', concl:'Online > offline; graded coefficients (GRPO) > uniform (RFT). The framing that lets later matched comparisons attribute gains to data freshness vs coefficient shape.', badge:'Unified view'},
+ {title:'An Analytical Model of Compute-Limited Multistage Training Pipelines', authors:'Patel et al. · 2026', arxiv:'2611.13276', url:'https://arxiv.org/abs/2611.13276', setup:'Theory: fixed-budget allocation across pretrain → SFT → RL; SFT shortens the RL plateau', concl:'Optimal RL share is non-monotonic in budget; SFT/RL share follows α^−1/2 error scaling. Solvable linear model, qualitative validation only — hypothesis-grade, not a predictive joint scaling law.', badge:'Theory · Hypothesis-grade'}
+];
+var fairEl = document.getElementById('fairPaperList');
+if(fairEl){
+  var fh='';
+  FAIR_PAPERS.forEach(function(p){
+    fh += '<article class="paper"><h4><a href="'+p.url+'" target="_blank" rel="noopener">'+p.title+'</a><span class="badge">'+p.badge+'</span></h4><div class="meta2">'+p.authors+' · arXiv:'+p.arxiv+' · Setup: '+p.setup+'</div><p>'+p.concl+'</p></article>';
+  });
+  fairEl.innerHTML = fh;
+}
 </script>
 </body>
 </html>
