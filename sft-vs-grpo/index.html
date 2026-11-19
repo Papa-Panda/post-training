@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>SFT vs GRPO on the Same Tasks — How the Two Training Methods Actually Differ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,700;8..60,900&family=Source+Sans+3:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5f0; --surface:#ffffff; --surface2:#fcfaf6; --ink:#16130e; --muted:#6b655c; --line:#e6e0d6;
+  --sft:#b45309; --sft-bg:#fef3c7; --sft-soft:#fffbeb;
+  --grpo:#0f766e; --grpo-bg:#ccfbf1; --grpo-soft:#f0fdfa;
+  --accent:#1e3a5f; --red:#b91c1c; --green:#15803d;
+  --radius:16px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0f0e0c; --surface:#1a1815; --surface2:#211e1a; --ink:#f3efe8; --muted:#a8a099; --line:#2e2a25; --sft-bg:#451a03; --sft-soft:#1c1408; --grpo-bg:#042f2e; --grpo-soft:#08201e; --accent:#93c5fd; }
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.75;font-size:16px}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+button,select{font:inherit;min-height:44px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 64px}
+.mono{font-family:"JetBrains Mono",monospace}
+
+/* hero */
+.hero{padding:36px 0 8px}
+.eyebrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.pill{font-size:12px;font-weight:700;letter-spacing:.06em;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface)}
+.pill.sft{color:var(--sft);border-color:#f59e0b55;background:var(--sft-soft)}
+.pill.grpo{color:var(--grpo);border-color:#14b8a655;background:var(--grpo-soft)}
+h1{font-family:"Source Serif 4",serif;font-size:42px;line-height:1.15;margin:0 0 14px;letter-spacing:-.02em}
+@media(max-width:640px){h1{font-size:32px}}
+.lede{font-size:18px;line-height:1.7;color:var(--muted);max-width:760px;margin:0}
+.lede strong{color:var(--ink)}
+.verdict{margin-top:24px;background:var(--ink);color:#fff;border-radius:20px;padding:24px 24px 20px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;overflow:hidden}
+@media(max-width:760px){.verdict{grid-template-columns:1fr}}
+.verdict>div{padding:6px 18px;border-left:1px solid #ffffff22}
+.verdict>div:first-child{border-left:none;padding-left:0}
+@media(max-width:760px){.verdict>div{border-left:none;border-top:1px solid #ffffff22;padding:14px 0 0;margin-top:14px}.verdict>div:first-child{border-top:none;margin-top:0;padding-top:0}}
+.verdict h3{margin:0 0 6px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+.verdict p{margin:0;font-size:15px;line-height:1.6}
+.verdict .big{font-size:22px;font-weight:900;line-height:1.2;display:block;margin-bottom:4px}
+.meta{font-size:13px;color:var(--muted);margin-top:12px}
+
+/* nav */
+.toc{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 92%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin:28px -20px 0;padding:10px 20px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.toc::-webkit-scrollbar{display:none}
+.toc a{white-space:nowrap;font-size:13px;font-weight:700;padding:8px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);min-height:36px;display:inline-flex;align-items:center}
+.toc a:hover{background:var(--surface2);text-decoration:none}
+
+/* sections */
+section{padding-top:42px}
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+.sec-num{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700;color:var(--muted);border:1px solid var(--line);background:var(--surface);padding:4px 8px;border-radius:999px}
+h2{font-family:"Source Serif 4",serif;font-size:28px;line-height:1.25;margin:0}
+@media(max-width:640px){h2{font-size:24px}}
+.sub{color:var(--muted);margin:6px 0 18px;max-width:760px}
+h3{font-size:17px;margin:22px 0 8px}
+p{margin:8px 0}
+.small{font-size:13px;color:var(--muted);line-height:1.6}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* vs cards */
+.vs-sft{border-top:4px solid #f59e0b}
+.vs-grpo{border-top:4px solid #14b8a6}
+.tag{display:inline-block;font-size:12px;font-weight:900;letter-spacing:.05em;padding:4px 8px;border-radius:999px}
+.tag.sft{background:var(--sft-bg);color:var(--sft)} .tag.grpo{background:var(--grpo-bg);color:var(--grpo)}
+.kv{list-style:none;padding:0;margin:12px 0 0}
+.kv li{display:flex;gap:10px;padding:9px 0;border-top:1px dashed var(--line);font-size:14px;line-height:1.6}
+.kv li b{min-width:86px;flex-shrink:0}
+.formula{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.7;overflow-x:auto;white-space:nowrap;margin:12px 0}
+
+/* table */
+.table-wrap{overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6}
+th{ text-align:left;background:var(--surface2);padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px}
+td{padding:12px 14px;border-top:1px solid var(--line);vertical-align:top}
+tr:first-child td{border-top:none}
+@media(max-width:760px){
+  .table-wrap{border:none;background:transparent}
+  table,thead,tbody,tr,td{display:block;width:100%}
+  thead{display:none}
+  tr{background:var(--surface);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;padding:6px 0}
+  td{border:none;padding:6px 14px}
+  td::before{content:attr(data-l);display:block;font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+}
+
+/* chart */
+.chart-box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px;cursor:pointer;min-height:40px}
+.tab.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:6px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 64px;gap:10px;align-items:center;margin:10px 0;font-size:14px}
+@media(max-width:560px){.bar-row{grid-template-columns:86px 1fr 52px;font-size:13px}}
+.bar-track{height:14px;background:var(--line);border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;border-radius:999px;transition:width .5s ease}
+.callout{border-left:4px solid var(--ink);background:var(--surface);padding:14px 16px;border-radius:0 12px 12px 0;margin:16px 0}
+.callout.warn{border-left-color:#dc2626}
+.callout.teal{border-left-color:#14b8a6}
+
+/* passk visual */
+.passk{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.passk{grid-template-columns:1fr}}
+.dist{height:120px;display:flex;align-items:flex-end;gap:4px;padding-top:10px}
+.dist i{flex:1;background:var(--line);border-radius:6px 6px 0 0;display:block}
+.dist.narrow i:nth-child(4),.dist.narrow i:nth-child(5){background:#14b8a6}
+.dist.wide i{background:#f59e0b;opacity:.85}
+
+/* papers */
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.fbtn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:999px;font-weight:700;cursor:pointer;font-size:14px}
+.fbtn.active{background:var(--ink);color:var(--bg)}
+.paper{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:10px}
+.paper h4{margin:0 0 4px;font-size:16px;line-height:1.4}
+.paper h4 a{color:var(--ink)}
+.paper .meta2{font-size:13px;color:var(--muted)}
+.paper p{font-size:14px;margin:6px 0 0;color:#3f3a33}
+@media(prefers-color-scheme:dark){.paper p{color:#d6d0c6}}
+.badge{font-size:11px;font-weight:800;padding:3px 7px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);vertical-align:middle;margin-left:6px;white-space:nowrap}
+
+/* decision */
+.scenarios{display:grid;grid-template-columns:280px 1fr;gap:16px}
+@media(max-width:760px){.scenarios{grid-template-columns:1fr}}
+.sbtn{width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;font-weight:700;line-height:1.4;margin-bottom:8px}
+.sbtn.active{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.rec{min-height:220px}
+.rec h3{margin-top:0}
+.pill-rec{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:13px;margin-bottom:10px}
+
+/* timeline */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:760px){.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.steps{grid-template-columns:1fr}}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;position:relative}
+.step b{font-size:22px}
+.step span{font-size:12px;font-weight:800;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+
+footer{margin-top:48px;border-top:1px solid var(--line);padding-top:20px}
+details{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:10px 0}
+summary{cursor:pointer;font-weight:700;min-height:36px;display:flex;align-items:center}
+ul.tight{margin:8px 0;padding-left:20px} ul.tight li{margin:6px 0;font-size:14px;line-height:1.65}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow"><span class="pill">Same-Task Comparison · SAME TASKS</span><span class="pill sft">SFT · Trajectory Supervision</span><span class="pill grpo">GRPO · Online RL</span><span class="pill">19 Core Papers + 11 Behavior Groups · 2024—2026</span></div>
+    <h1>Train SFT and GRPO on the same tasks —<br>where do the results actually differ?</h1>
+    <p class="lede">Neither one dominates across the board. The stable conclusion, verified across multiple same-task, same-model comparisons, is a <strong>division of labor</strong>: <strong>SFT installs what the model doesn't yet know; GRPO sharpens what it can already do a little.</strong> Getting the order right matters far more than arguing about which is stronger. The new agent-behavior evidence below adds a second lens: <strong>accuracy is not behavior</strong> — length, turns, tool calls, abstention, and error recovery move in different, sometimes opposite, directions.</p>
+
+    <div class="verdict" aria-label="Core conclusions">
+      <div><h3>What SFT does</h3><p><span class="big">Install</span>Format, knowledge, new reasoning patterns. Fastest, most stable, cheapest gains in-distribution; the cost is memorizing trajectories, a narrower distribution, OOD drop, and forgetting of old abilities.</p></div>
+      <div><h3>What GRPO does</h3><p><span class="big">Sharpen</span>Turns Pass@k into Pass@1. Better OOD retention, stronger rule generalization; it requires that the model can already succeed occasionally, and a verifiable reward.</p></div>
+      <div><h3>The production optimum</h3><p><span class="big">SFT → GRPO</span>The mainstream recipe behind DeepSeek-R1 and Tülu 3. Don't overtrain SFT, or entropy collapse will strangle the GRPO signal that follows.</p></div>
+    </div>
+    <p class="meta">Research compiled 2026-11-19, behavior update also 2026-11-19 · Data from paper texts, arXiv abstract pages, or search abstracts, with verification status marked per paper · Every number is labeled with its starting checkpoint and setup — comparing SFT vs GRPO without the checkpoint is meaningless. Behavior sources: Chu et al., DeepSeek-R1, ASTER, ToolRL, WebExplorer, Mercor/SkyRL blog, AutoTool and others cited in §08–§10.</p>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <a href="#mechanism">① Mechanism</a><a href="#data">② Empirical Data</a><a href="#passk">③ The Pass@1 vs Pass@k Debate</a><a href="#papers">④ Paper List</a><a href="#decision">⑤ Choosing a Method</a><a href="#pitfalls">⑥ Negative Results &amp; Pitfalls</a><a href="#behavior">⑦ Agent Behavior</a><a href="#behavior-papers">⑧ Behavior Papers</a><a href="#measurement">⑨ How Behavior Is Measured</a>
+  </nav>
+
+  <!-- 1 mechanism -->
+  <section id="mechanism">
+    <div class="sec-head"><span class="sec-num">01</span><h2>Start with the mechanism: why the results must differ</h2></div>
+    <p class="sub">The two methods fundamentally optimize different things. SFT is behavior cloning on fixed expert tokens; GRPO is policy gradient on trajectories the model samples itself, scored by outcome reward. This one fact determines every difference that follows.</p>
+
+    <div class="grid2">
+      <article class="card vs-sft">
+        <span class="tag sft">SFT · SUPERVISED FINE-TUNING</span>
+        <h3 style="margin-top:10px">Learn how the expert writes</h3>
+        <div class="formula">Loss = − Σ log π(y*_t | x, y*_{&lt;t}) &nbsp;·&nbsp; every token of every demonstration weighted equally</div>
+        <ul class="kv">
+          <li><b>Data</b><span>Offline, fixed expert / teacher trajectories (off-policy)</span></li>
+          <li><b>Can teach</b><span>Sequences the model would never sample on its own — new knowledge, new formats, hard problems with a zero pass rate</span></li>
+          <li><b>Strengths</b><span>Stable, cheap (one forward + backward pass per token), largest in-distribution gains</span></li>
+          <li><b>Weaknesses</b><span>Memorizes style and incidental choices; at inference it runs on its own distribution → exposure bias, and one wrong step compounds in multi-turn tasks; large updates, prone to forgetting</span></li>
+          <li><b>Weight fingerprint</b><span>Rajani et al.: update magnitudes far larger than GRPO's, with more movement in middle-layer MLPs — hypothesized as the source of OOD degradation (freezing experiments still inconclusive)</span></li>
+        </ul>
+      </article>
+      <article class="card vs-grpo">
+        <span class="tag grpo">GRPO · GROUP RELATIVE POLICY OPTIMIZATION</span>
+        <h3 style="margin-top:10px">Reinforce the right answers among its own attempts</h3>
+        <div class="formula">A_i = (r_i − mean(r_group)) / std(r_group) &nbsp;·&nbsp; sample G completions per prompt, weight by relative reward within the group, no critic needed</div>
+        <ul class="kv">
+          <li><b>Data</b><span>Online rollouts generated by the model itself (on-policy) + verifiable reward</span></li>
+          <li><b>Can teach</b><span>Can only reweight sequences it can already sample — turning occasional success into reliable success, and composing existing atomic skills</span></li>
+          <li><b>Strengths</b><span>Scored by outcome rather than surface form, so it generalizes better across rule / visual variants; gentler updates, better retention of old OOD abilities</span></li>
+          <li><b>Weaknesses</b><span>Expensive and unstable: G samples per prompt (DeepSeekMath used G=64); when a group is all-correct or all-wrong, the advantage is 0 and the gradient is 0 — nothing is learned</span></li>
+          <li><b>Zero-gradient condition</b><span>This is the key to every GRPO failure: problems that are too easy (saturated) and too hard (acc=0) produce no signal — DAPO's dynamic sampling and ReLIFT's routing of hard problems to SFT both exist to work around it</span></li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="callout"><strong>The mechanism in one sentence:</strong> SFT can teach token sequences the model has never produced; GRPO can only choose among sequences it can already produce. The former expands the boundary, the latter raises purity — the later debate between Yue et al. and Yuan / Cheng is essentially this one fact playing out under different conditions.</div>
+  </section>
+
+  <!-- 2 data -->
+  <section id="data">
+    <div class="sec-head"><span class="sec-num">02</span><h2>Empirical data: how much does each gain on the same tasks?</h2></div>
+    <p class="sub">Don't just look at one summary table. The effect depends heavily on the starting checkpoint: on a strong instruct model, SFT can even hurt, while from a weak starting point GRPO may get no signal at all. Below, results are separated by experimental setup.</p>
+
+    <div class="chart-box">
+      <div class="tabs" role="tablist" aria-label="Switch dataset">
+        <button class="tab active" data-chart="deepseek">DeepSeekMath · SFT→GRPO</button>
+        <button class="tab" data-chart="tulu">Tülu 3 Pipeline · 8B</button>
+        <button class="tab" data-chart="oneshot">1-shot RLVR · Extreme Sample Efficiency</button>
+        <button class="tab" data-chart="overtrain">The Cost of Overtraining SFT</button>
+      </div>
+      <div id="chartArea"></div>
+      <div class="legend"><span><span class="dot" style="background:#d97706"></span>SFT / Starting point</span><span><span class="dot" style="background:#0f766e"></span>GRPO / After RL</span><span><span class="dot" style="background:#1e3a5f"></span>Intermediate stage / Control</span></div>
+      <p class="small" id="chartNote" style="margin-top:12px"></p>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3>The cleanest same-task, same-model comparison — Rajani et al., “Scalpel vs. Hammer”</h3>
+        <p style="font-size:14px">Same set of math problems, same model, similar hyperparameters, 20 checkpoints each (ICML 2025 workshop; the authors call it preliminary). The conclusion isn't who wins, but that <strong>magnitude is proportional to cost</strong>: SFT gains more in-distribution and loses more OOD (knowledge tasks such as MMLU); GRPO gains modestly but basically preserves OOD. SFT's KL from the base model shoots up early; GRPO's grows gradually.</p>
+        <p class="small">arXiv:2507.10616 · Abstract verified from the original</p>
+      </div>
+      <div class="card">
+        <h3>Agentic / Coding: RL's margin over SFT is surprisingly small</h3>
+        <ul class="tight">
+          <li><strong>Multi-Harness study (Qwen3-8B, SWE-bench Verified):</strong> from the same starting point and the same data, RL beats SFT by only <strong>+0.48 ~ +0.77 pp</strong>, and the difference is not significant on unseen harnesses; meanwhile the harnesses themselves differ by 7.13 pp — choosing the harness matters more than choosing RL.</li>
+          <li><strong>PivotRL (Qwen3-30B-A3B, four agentic domains):</strong> on identical trajectories vs SFT, +4.17 pp average in-domain and +10.04 pp OOD retention (SFT averages −9.83 pp); but on SWE-Bench Verified alone it actually loses to SFT (32.67% vs 37.40%, per secondary-abstract figures, coexisting with the abstract's averages). It also matches end-to-end RL with about 1/4 the rollout rounds and about 1/5.5 the wall-clock time.</li>
+          <li><strong>An extreme forgetting case:</strong> in the PivotRL paper, after SFT on the terminal domain, AIME25 falls from 86.04% to 21.56% (−64.5 pp).</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:16px">
+      <table>
+        <thead><tr><th style="width:22%">Comparison setting</th><th style="width:26%">SFT</th><th style="width:26%">GRPO</th><th>How to read it</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Setting"><strong>Qwen2.5-1.5B-Instruct · Same GSM8K training set</strong><br><span class="small">Secondary summary — cite with care</span></td><td data-l="SFT">GSM8K 69.7% → <strong>54.5% (−15.2)</strong>; MATH 49.2% → 25.1% (−24.1)</td><td data-l="GRPO">GSM8K → <strong>81.6% (+11.9)</strong>; MATH → 52.3% (+3.1); training on the test set still generalizes to MATH</td><td data-l="Reading">Narrow-domain SFT on an already-strong instruct model skews it; here SFT is harmful — GRPO isn't magical</td></tr>
+          <tr><td data-l="Setting"><strong>Qwen2.5-7B · After a strong SFT cold start</strong><br><span class="small">HF model card, secondary</span></td><td data-l="SFT">GSM8K 75.51% · MATH-500 24.20%</td><td data-l="GRPO">GSM8K 75.66% (+0.15) · MATH-500 24.20% (+0)</td><td data-l="Reading"><strong>Reward saturation:</strong> 63% of groups have a reward standard deviation of 0, and KL over 1000 steps never exceeds 0.0006 — no variance, no learning</td></tr>
+          <tr><td data-l="Setting"><strong>Offline, same rollouts · Qwen3-4B</strong><br><span class="small">Weight-Space Geometry, 2026</span></td><td data-l="SFT" colspan="2">SFT / RFT / RIFT / offline GRPO all reach <strong>87–88%</strong> on GSM8K, pairwise McNemar p ≥ 0.15, no significant differences; SFT-family weight deltas have cosine similarity ≥ 0.97, nearly collinear</td><td data-l="Reading">Offline with the same data, <strong>the loss function matters far less than the data</strong>; most of RL's supposed advantage comes from online sampling + filtering, which RFT/RAFT obtains more cheaply</td></tr>
+          <tr><td data-l="Setting"><strong>GRPO vs RFT · Qwen2.5-1.5B-Instruct</strong><br><span class="small">Rath et al., 2026</span></td><td data-l="SFT">RFT (SFT on its own shortest correct rollouts) widens diversity</td><td data-l="GRPO">Narrows entropy and answer diversity; correct solutions show 15% lower lexical diversity</td><td data-l="Reading">No stable winner at Pass@8 / Pass@32; relative to the starting point, <strong>neither significantly expands hard-problem coverage</strong> — GRPO's Pass@1 edge is only “falls less than the base”</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small">Note: a blog table circulating online (“SFT 68.4% vs GRPO 86.2% on GSM8K”) has no primary-paper source and is excluded here. Cost claims are similar: no paper gives a clean FLOPs comparison on the same hardware and prompts — the circulating “2.4× compute / 2.5× memory” figures are unverified. The qualitative consensus: GRPO costs several times SFT (sampling-dominated); SFT is the 1× baseline.</p>
+  </section>
+
+  <!-- 3 passk -->
+  <section id="passk">
+    <div class="sec-head"><span class="sec-num">03</span><h2>The core debate: does RL create new capability, or only amplify what exists?</h2></div>
+    <p class="sub">This is the most fiercely debated question since 2025, and the one most easily misled by a single Pass@1 table. Both sides have hard evidence; what matters is the conditions under which each holds.</p>
+
+    <div class="passk">
+      <div class="card">
+        <span class="tag grpo">Evidence A · Amplification</span>
+        <h3>Yue et al. (NeurIPS 2025 Oral): RLVR does not expand the boundary</h3>
+        <div class="dist narrow" aria-hidden="true"><i style="height:30%"></i><i style="height:38%"></i><i style="height:52%"></i><i style="height:92%"></i><i style="height:100%"></i><i style="height:88%"></i><i style="height:44%"></i><i style="height:28%"></i></div>
+        <p style="font-size:14px">Across multiple model families, 6 RLVR algorithms, and math/code/vision: RL models beat the base at small k (Pass@1) but lose at large k — the longer training runs, the narrower the set of solvable problems. All RLVR algorithms perform similarly and far below the base model's ceiling. <strong>Distillation (strong-teacher SFT), by contrast, genuinely expands the boundary.</strong> The original DeepSeekMath paper had in fact observed the same phenomenon early on: RL improves majority voting, but not “at least one correct in K tries.”</p>
+        <p class="small">arXiv:2504.13837</p>
+      </div>
+      <div class="card">
+        <span class="tag sft">Evidence B · Composition</span>
+        <h3>Yuan / Cheng: when atomic skills are in place, RL synthesizes new combinations</h3>
+        <div class="dist wide" aria-hidden="true"><i style="height:55%"></i><i style="height:62%"></i><i style="height:58%"></i><i style="height:70%"></i><i style="height:66%"></i><i style="height:74%"></i><i style="height:68%"></i><i style="height:60%"></i></div>
+        <p style="font-size:14px">In synthetic tasks, once the model has separately mastered the atomic skills f and g, RL learns the never-demonstrated composition h = g∘f, and generalizes to compositions of depth two and beyond, plus cross-task transfer; <strong>SFT on the same data learns no such composition at all</strong> (Cheng: composite SFT scores 90.3% in-domain but only 18.4% zero-shot). The precondition is stated plainly: <strong>without mastery of the atomic skills, RL is still only amplification.</strong></p>
+        <p class="small">Yuan et al. arXiv:2509.25123 (ICLR 2026) · Cheng et al. arXiv:2512.01970</p>
+      </div>
+    </div>
+
+    <div class="callout teal"><strong>Synthesis (the safest current formulation):</strong> RL does not invent a brand-new atomic skill out of nothing. What it can do is ① surface latent capability (1-shot RLVR: a single example takes MATH500 from 36.0% → 73.6% — elicitation, not teaching; beyond format fixes there is still +8.6 points of latent capability released); ② compose existing atomic skills into new solution methods. SFT / distillation injects the atomic skills and new knowledge. Conflating these three things is the root of most “RL is everything / RL is useless” arguments.</div>
+
+    <div class="grid3">
+      <div class="card"><h3 style="margin-top:0">Pass@1 ↑</h3><p style="font-size:14px;margin:0">RL's certain payoff: the distribution concentrates on high-reward modes, so greedy / single-sample decoding is more accurate. If deployment samples once, this is a real gain.</p></div>
+      <div class="card"><h3 style="margin-top:0">Entropy ↓ · Pass@k (large k) flat or ↓</h3><p style="font-size:14px;margin:0">The other side of the same coin: diversity is cut. If deployment relies on self-consistency voting, tree search, or multiple samples, Pass@1 overstates RL's value — track Pass@k and entropy alongside it.</p></div>
+      <div class="card"><h3 style="margin-top:0">SFT narrows too</h3><p style="font-size:14px;margin:0">SFT also collapses onto demonstration style. In Rath et al., RFT actually widened — whether things narrow depends on data construction, not just the algorithm's name.</p></div>
+    </div>
+  </section>
+
+  <!-- pipeline -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><h2>Order effects: why the mainstream is SFT → GRPO, not the reverse</h2></div>
+    <p class="sub">Ding et al.'s Plasticity-Ceiling framework states this most completely: the final ceiling = SFT foundation + RL plasticity. Pure RL rises fast and caps fast (plateauing at ~71.5 points within ~25 exaFLOPs); the scale of the SFT data is the primary determinant of the ceiling.</p>
+    <div class="steps">
+      <div class="step"><span>Step 1 · Cold start</span><br><b>SFT</b><p style="font-size:14px;margin:6px 0 0">Install format and basic patterns first. Chu et al.: RL directly without SFT fails; and RL cannot rescue an extremely overfit SFT checkpoint either.</p></div>
+      <div class="step"><span>Step 2 · Handoff point</span><br><b>Light SFT</b><p style="font-size:14px;margin:6px 0 0">Hand off in the “stable / slightly overfit” zone. Pick trajectories by minimum validation loss; don't pick the checkpoint with the highest Pass@1 as the RL starting point.</p></div>
+      <div class="step"><span>Step 3 · Sharpening</span><br><b>GRPO</b><p style="font-size:14px;margin:6px 0 0">Convert Pass@k into Pass@1. Monitor within-group advantage variance and entropy; DAPO's dynamic sampling (dropping zero-variance groups) lifts AIME 2024 from naive GRPO's 30 to 50.</p></div>
+      <div class="step"><span>Step 4 · Recovery</span><br><b>RL → SFT</b><p style="font-size:14px;margin:6px 0 0">DeepSeek-R1 stage three: collect the good trajectories RL discovered, via rejection sampling, back into SFT, repairing readability and general-capability regressions. This is a different thing — don't confuse it with SFT→RL.</p></div>
+    </div>
+    <div class="grid2" style="margin-top:16px">
+      <div class="card"><h3 style="margin-top:0">Better than a sequential pipeline: interleaved ReLIFT</h3><p style="font-size:14px">Ma et al. (ICLR 2026): RL is good at problems “within capability,” SFT at the hardest “beyond capability” ones (acc=0, where RL gets no signal at all). ReLIFT is RL-led, interleaving SFT only on the hardest problems, with solutions collected online: <strong>52.6%</strong> average across 5 math + 1 OOD benchmarks, 6.7 points above prior RLVR, using only ~13% of the demonstration data (SFT-only baseline 49.0%). Random interleaving gets only 45.5% — what you interleave matters more than interleaving itself.</p><p class="small">arXiv:2506.07527</p></div>
+      <div class="card"><h3 style="margin-top:0">Divide by difficulty: DeReason</h3><p style="font-size:14px">Assigning low-reasoning-intensity (knowledge-type) data to SFT and hard problems to RL beats random splits, pure SFT, and pure RL; and with medium-quality responses, pure RLVR from the base “consistently and significantly” loses to SFT. Joint / synchronous SFT+RL (LUFFY, SRFT, etc.) underperforms the sequential approach in Ding et al.'s comparisons and is less stable.</p><p class="small">arXiv:2603.11193 (author details not verified in the sources read)</p></div>
+    </div>
+  </section>
+
+  <!-- papers -->
+  <section id="papers">
+    <div class="sec-head"><span class="sec-num">05</span><h2>Paper list: who has studied this, and what they concluded</h2></div>
+    <p class="sub">19 core papers in total (some verified via search abstracts; status marked per paper). Filter by category; each entry gives the setup and a one-sentence conclusion, so numbers are never quoted out of context.</p>
+    <div class="filters" id="filters">
+      <button class="fbtn active" data-f="all">All 19</button>
+      <button class="fbtn" data-f="found">Foundations &amp; Pipelines</button>
+      <button class="fbtn" data-f="head">Head-to-Head</button>
+      <button class="fbtn" data-f="debate">The Capability-Boundary Debate</button>
+      <button class="fbtn" data-f="method">Methods &amp; Ordering</button>
+      <button class="fbtn" data-f="agent">Agentic / Code</button>
+    </div>
+    <div id="paperList"></div>
+    <p class="small">Status key: “Verified” means the arXiv abstract page was read during research; “Index” means verified via search abstract. A few 2026 preprints (e.g., arXiv:2603.*, 2609.*, 2610.*) keep the numbers and years as originally reported — reopen the original to confirm the final version before citing.</p>
+  </section>
+
+  <!-- decision -->
+  <section id="decision">
+    <div class="sec-head"><span class="sec-num">06</span><h2>Choosing a method: which one fits your scenario?</h2></div>
+    <p class="sub">Pick a scenario on the left; the right side gives a recommendation backed by papers. There are only three core criteria: is there a trustworthy reward, can the model already succeed occasionally, and are there high-quality demonstrations?</p>
+    <div class="scenarios">
+      <div id="scenarioBtns"></div>
+      <div class="card rec" id="recBox"></div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:16px">
+      <table>
+        <thead><tr><th>Baseline to try first</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Baseline"><strong>RFT / RAFT (rejection-sampling fine-tuning)</strong></td><td data-l="Notes">Xiong et al.: SFT on only the correct rollouts already matches GRPO / PPO; GRPO's main advantage is actually discarding all-wrong prompts. Cost ≈ SFT + sampling — this should be your first RL baseline before paying GRPO's cost. Chen et al.'s NFT (negative-aware SFT) is equivalent to GRPO under strict on-policy conditions and in practice matches or beats GRPO / DAPO — the supervised/RL boundary is thinner than it looks.</td></tr>
+          <tr><td data-l="Baseline"><strong>Cost ordering (qualitative)</strong></td><td data-l="Notes">SFT = 1× (one pass over fixed data, stable, easy to debug) &lt; RFT / RAFT (+ sampling) &lt; GRPO (G rollouts per prompt, generation-dominated, several times SFT, plus KL / entropy / sampling tuning). PivotRL-style local RL at pivot turns is currently the clearest quantified cost reduction: ~1/4 the rollout rounds to match end-to-end RL.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- pitfalls -->
+  <section id="pitfalls">
+    <div class="sec-head"><span class="sec-num">07</span><h2>Negative results, pitfalls, and unanswered questions</h2></div>
+    <div class="grid2">
+      <div>
+        <details open><summary>The better the SFT, the worse GRPO can get — rank reversal</summary><p style="font-size:14px">Aphale &amp; Liu (Qwen2.5-Coder-3B, 3-seed mean): as SFT depth increases, pre-RL Pass@1 rises, but GRPO's peak Pass@10 falls monotonically <strong>0.806 → 0.481</strong>. Mechanism: entropy collapse → within-group advantage variance p(1−p) → 0. Practical rule: <strong>don't hand GRPO the SFT checkpoint with the highest Pass@1</strong> — watch entropy and Pass@64. On DeepSeek-Coder-6.7B the ranking is only compressed, not reversed — strong model dependence.</p></details>
+        <details><summary>An “RL beats SFT” claim reporting only in-distribution Pass@1 is basically incomplete</summary><p style="font-size:14px">Rajani: SFT's in-distribution gains are larger to begin with; the cost shows up OOD. Chu et al. (ICML 2025): SFT can win or tie in-domain, then collapse when the rules change — e.g., continued SFT on V-IRL-L drops 80.8% → 1.3%, while RL climbs gradually 35.7% → 45.0% on an unseen action space, where SFT gets only 2.5%. Evaluation must report OOD and large-k Pass@k together.</p></details>
+        <details><summary>Evaluation itself is fragile</summary><p style="font-size:14px">Pass@k is extremely sensitive to prompt format, temperature, and the grader: one 2026 preprint (not peer-reviewed, preliminary) shows that after giving each arm its own best prompt, a +36.5 pp MATH-500 Pass@1 advantage shrinks to +12.27 pp. Whenever you cite a comparison number, attach the prompt, temperature, k, and base-model control.</p></details>
+        <details><summary>The base model decides everything — don't transplant conclusions across families</summary><p style="font-size:14px">Qwen models, with heavy math pretraining, show far larger “RL gains” than the Llama family; 1-shot RLVR works precisely because the capability is already in pretraining. Switching base-model families requires re-testing.</p></details>
+      </div>
+      <div>
+        <div class="card">
+          <h3 style="margin-top:0">Still-open questions</h3>
+          <ul class="tight">
+            <li><strong>A clean same-prompt, same-FLOPs cost table does not exist</strong> — no primary paper compares SFT vs GRPO on identical hardware, so cost figures remain qualitative for now.</li>
+            <li><strong>Whether long-horizon RL (ProRL etc.) can truly break Yue et al.'s Pass@k ceiling</strong> — claimed (arXiv:2505.24864), but not independently verified in this round of research.</li>
+            <li><strong>PivotRL's single-domain SWE figures</strong> — the abstract average (+4.17 pp) and the secondary abstract's per-domain numbers (32.67% vs SFT 37.40%) coexist without full reconciliation; cite the abstract average as the primary figure and the per-domain number as a caveat.</li>
+            <li><strong>Rajani's MLP hypothesis</strong> — “SFT moves middle-layer MLPs more, causing OOD degradation” remains a hypothesis; freezing experiments are inconsistent.</li>
+          </ul>
+        </div>
+        <div class="callout warn" style="margin-top:14px"><strong>How Jun should read this:</strong> if you read only three papers — start with <strong>Chu et al. (2501.17161)</strong> to build the “memorization vs generalization” intuition, then <strong>Yue et al. (2504.13837)</strong> to calibrate expectations about RL's boundary, and finally <strong>Ding et al. (2512.11470)</strong> for actionable SFT→RL handoff rules. Look up the rest in the table as needed.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 behavior -->
+  <section id="behavior">
+    <div class="sec-head"><span class="sec-num">08</span><h2>Agent behavior after training: what actually changes — and what doesn't line up</h2></div>
+    <p class="sub">This section integrates the 2026-11-19 behavior research. Headline, stated plainly: <strong>no single paper compares SFT vs GRPO on the same agentic tasks across the full behavior battery</strong> — length, turns, tool calls, retry, diversity, and stopping. The evidence is fragmented, each paper measures a slice, and the direction flips by domain and reward. That gap is itself the finding.</p>
+
+    <div class="callout warn"><strong>Read this before quoting any behavior claim:</strong> SFT copies the demonstrated form; RL re-optimises form for outcome. That is why RL can <em>lengthen</em> reasoning in maths (DeepSeek-R1, WebExplorer, ASearcher) and <em>shorten / collapse</em> it in tool use (AutoTool, ASTER interaction collapse). Any blanket claim like “GRPO makes agents more concise” or “GRPO makes them longer” is contradicted inside this literature.</div>
+
+    <div class="chart-box">
+      <div class="tabs" role="tablist" aria-label="Switch Chu OOD view">
+        <button class="tab active" data-bchart="rule">Chu et al. · Rule shift</button>
+        <button class="tab" data-bchart="visual">Chu et al. · Visual shift</button>
+      </div>
+      <div id="behChartArea"></div>
+      <div class="legend"><span><span class="dot" style="background:#9ca3af"></span>Starting point</span><span><span class="dot" style="background:#d97706"></span>After SFT</span><span><span class="dot" style="background:#0f766e"></span>After RL (PPO, after SFT)</span></div>
+      <p class="small" id="behChartNote" style="margin-top:12px"></p>
+      <p class="small">Source: Chu et al., “SFT Memorizes, RL Generalizes,” ICML 2025, arXiv:2501.17161, §5.1–§5.2. Backbone Llama-3.2-Vision-11B, equal compute. Note the caveat the report carries: RL here is multi-turn PPO, not GRPO, and RL is initialised from SFT. Without SFT, RL on the base model failed entirely — the base produced long, tangential, unstructured responses and no reward could be retrieved (§5.4).</p>
+    </div>
+
+    <div class="table-wrap" style="margin-top:16px">
+      <table>
+        <thead><tr><th style="width:20%">Behavior dimension</th><th style="width:26%">SFT effect (as reported)</th><th style="width:30%">GRPO / RL effect (as reported)</th><th>Source &amp; caveat</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Dimension"><strong>Length — maths reasoning</strong></td><td data-l="SFT">Copies teacher length; no length scaling reported for distillation SFT</td><td data-l="GRPO / RL">R1-Zero: steady increase in thinking time, “hundreds to thousands of tokens,” longer on harder problems; verification, reflection, and alternative approaches emerge. AIME 2024 pass@1 15.6% → 71.0% for R1-Zero in the paper's Fig. 1a</td><td data-l="Source">DeepSeek-R1, arXiv:2501.12948. Length is an emergent outcome of accuracy reward, not a length reward. Secondary summaries quoting “wait” 5–7× and ~500 → ~15,000 tokens are <strong>not verified in the primary text</strong> — do not cite as primary.</td></tr>
+          <tr><td data-l="Dimension"><strong>Length — tool use</strong></td><td data-l="SFT">Teacher length is the baseline; AutoTool notes distilled / scaled models “require lengthy reasoning trajectories for all queries”</td><td data-l="GRPO / RL"><strong>Reasoning collapse:</strong> accuracy rises while response length shortens sharply; model defaults to short reasoning. Opposite direction to maths</td><td data-l="Source">AutoTool, ICLR 2026, arXiv:2603.13348. Cause identified as entropy collapse, not data distribution.</td></tr>
+          <tr><td data-l="Dimension"><strong>Tool calls / turns — web search</strong></td><td data-l="SFT">SFT cold start: ~11 tool calls / trajectory (starting point after SFT)</td><td data-l="GRPO / RL">GRPO after SFT: ~11 → <strong>&gt;16 tool calls / trajectory</strong>, trajectory length <strong>&gt;40k tokens</strong>; performance rises in parallel</td><td data-l="Source">WebExplorer, arXiv:2509.06501, Qwen3-8B, SFT 13k → GRPO 12k, group 8, max 100 turns / 128k context.</td></tr>
+          <tr><td data-l="Dimension"><strong>Tool calls / turns — long-horizon search, no SFT</strong></td><td data-l="SFT">— (prompt-based QwQ-32B, RL from prompt, not SFT)</td><td data-l="GRPO / RL">Async RL: <strong>&gt;40 turns, &gt;150k tokens</strong> (v2 abstract); v4 abstract: <strong>&gt;100 turns, &gt;400k tokens</strong> during training</td><td data-l="Source">Beyond Ten Turns / ASearcher, arXiv:2508.07976. Prior ≤10-turn limits blocked learning complex search strategies.</td></tr>
+          <tr><td data-l="Dimension"><strong>Turns / tokens per turn — knowledge work</strong></td><td data-l="SFT">— (no SFT arm; RL without SFT warmup)</td><td data-l="GRPO / RL">DPPO vs GLM-5 loss, epoch 1, score within noise, behavior differs: <strong>21 → 32 turns; 834 → 588 assistant tokens / turn</strong>. Implied total assistant tokens ~17.5k → ~18.8k — <em>not</em> a net shortening</td><td data-l="Source">Mercor / SkyRL blog, 2026-09-01. Authors' own caveat: “look at behavior, not just reward… We have no rigorous justification for reading the table this way.” Blog, not peer-reviewed; no SFT arm.</td></tr>
+          <tr><td data-l="Dimension"><strong>Redundant tool calls</strong></td><td data-l="SFT">SFT alone (fixed parallelism): <strong>34.9% of enforced parallel tool calls redundant</strong></td><td data-l="GRPO / RL">SFT filtered for efficiency + GRPO (F1 + tool-efficiency reward): <strong>−67.7% turns, −68.9% tokens, 93.6% faster</strong>, matching 84.7% file-level on SWE-bench Verified</td><td data-l="Source">FuseSearch, ACL 2026 Findings, arXiv:2601.19568. Efficiency is explicitly rewarded as information gain per call; a naive length penalty “fails to distinguish searching new areas from re-searching old areas.”</td></tr>
+          <tr><td data-l="Dimension"><strong>Abstention / not calling</strong></td><td data-l="SFT">SFT-only tool models tend to over-call. Counter-example: Hammer reaches irrelevance 72.87% by <em>explicit</em> SFT data design (7,500 no-call examples)</td><td data-l="GRPO / RL">Irrelevance / abstention reported as emerging from GRPO without explicit abstention training; also proactiveness, self-reflection, self-correction, long-horizon planning reported qualitatively</td><td data-l="Source">ToolRL, arXiv:2504.13958; Hammer, arXiv:2410.04587 via secondary summary. <strong>ToolRL irrelevance 76.68% for Qwen2.5-7B cold-start GRPO is a secondary project-page figure</strong>, not verified in the primary abstract — treat as secondary.</td></tr>
+          <tr><td data-l="Dimension"><strong>Error recovery / state consistency</strong></td><td data-l="SFT">Imitates reference actions from fixed demonstrations; own errors lead to histories not covered by demonstrations, where it may struggle to recover</td><td data-l="GRPO / RL">StateAlign (state-contrastive RL): Qwen3-8B BFCL v4 multi-turn <strong>45.5% → 55.2%</strong>; no-tool hallucination <strong>62.2% → 56.1%</strong> vs outcome-only RL; “more consistent decisions, more complete multi-call execution, and stronger recovery after tool errors”</td><td data-l="Source">StateAlign, arXiv:2611.16304. Directly measures a behavior SFT is structurally weak at (covariate shift / off-demonstration states).</td></tr>
+          <tr><td data-l="Dimension"><strong>Planning vs acting / interaction collapse</strong></td><td data-l="SFT">Sparse SFT (mostly 1–2 tool calls, &lt;2% &gt;10 calls) induces a shallow prior. Density matters: SFT data with &gt;9 calls / trajectory matters more than its accuracy in ASTER's comparison</td><td data-l="GRPO / RL">Zero gravitates to minimal tool use; ZeroForceTool regresses to shallow verification; ReTool drops to low tool use after an initial rise. <strong>Interaction collapse:</strong> heavy internal reasoning with only trivial, post-hoc code verification</td><td data-l="Source">ASTER, arXiv:2602.01204, §3.2. RL does not rescue a bad SFT prior; it amplifies it.</td></tr>
+          <tr><td data-l="Dimension"><strong>Diversity / entropy</strong></td><td data-l="SFT">Entropy drops sharply after each epoch (sawtooth); Pass@K at large K below base — SFT narrows the effective output distribution</td><td data-l="GRPO / RL">RL entropy also collapses if unconstrained (AutoTool, ComputerRL as cited in the report); interaction-dense SFT (≥9 calls) “maintains higher entropy throughout training”</td><td data-l="Source">PSFT, arXiv:2508.17784; ASTER §3.3; AutoTool. See also §03 above on Pass@k.</td></tr>
+          <tr><td data-l="Dimension"><strong>Tool selection / harness transfer</strong></td><td data-l="SFT">—</td><td data-l="GRPO / RL">35B increasingly relies on <strong>code execution</strong> over MCP tools during RL; 397B stays with MCP. Gains transfer to a held-out harness (OpenCode) and Terminal-Bench 2.1, but 35B transfers better — plausibly because of the code preference</td><td data-l="Source">Mercor / SkyRL, Step 6. Behavior shift is model-size- and history-dependent, not a universal RL effect.</td></tr>
+          <tr><td data-l="Dimension"><strong>Stopping / context exhaustion</strong></td><td data-l="SFT">—</td><td data-l="GRPO / RL">Harness nudge (wrap-up notice at 20% context remaining): <strong>+3.0 pts</strong>, purely by reducing zeroed overlong rollouts. Stopping here is harness-induced, not learned</td><td data-l="Source">Mercor / SkyRL, Step 4. Also: harness fixes alone moved base 35B reward 22.74% → 28.69% with zero training.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="card">
+        <h3 style="margin-top:0">Why the direction flips — mechanisms (verified / well-supported)</h3>
+        <ul class="tight">
+          <li><strong>SFT = behavior cloning.</strong> Cross-entropy pushes up every demonstrated token with no constraint on policy drift (PSFT framing: “policy gradient with strictly positive advantages,” advantage always 1). It reproduces surface form — format, phrasing, tool-call syntax, trajectory shape — and teaches the format RL needs to get any reward on a non-instruction-following base.</li>
+          <li><strong>RL = outcome optimisation.</strong> Reward is usually only for the final answer / verifier pass, regardless of form. Any trajectory shape that reaches reward is reinforced; shapes that do not are suppressed. Hence both discovery (R1 self-verification, ToolRL proactiveness, ASearcher &gt;100-turn search) and collapse to the cheapest rewarded shape (AutoTool short reasoning, ASTER shallow verification, Mercor DPPO short turns).</li>
+          <li><strong>Entropy is the mediator.</strong> Both methods can collapse entropy — SFT by sharpening on a narrow teacher distribution, RL by reinforcing currently-best trajectories. Low entropy → loss of exploration → premature convergence to short / shallow policies. Entropy constraints, restoration, and trust regions are all attempts to manage this one variable.</li>
+          <li><strong>Covariate shift.</strong> SFT trains only on expert-induced states; at deployment the model's own errors put it in states the teacher never visited. RL trains on its own rollouts, so it visits — and learns to recover from — its own error states.</li>
+          <li><strong>Reward hacking as a class.</strong> The report cites the Reward Hacking survey (arXiv:2604.13602) and related work: policies first exploit feature-level correlates (verbosity, sycophancy), then representation- and evaluator-level shortcuts. Length penalties can themselves create a shortcut — extreme brevity / omitted steps.</li>
+        </ul>
+        <p class="small">Hypotheses, labelled as such in the report: that KL-regularised RL is “implicitly regularised” and therefore generalises (a theoretical framing, not a measured behavior in Chu); Mercor's “deliberate multi-step work” reading of turn/token metrics (authors disclaim rigorous justification); and that ToolRL's emergent proactiveness is “genuine reasoning, not memorised patterns” (no ablation in the reviewed material distinguishes the two).</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Negative / null behavior findings</h3>
+        <ul class="tight">
+          <li><strong>PivotRL loses to SFT on SWE-Bench Verified</strong> (32.67 vs 37.40) despite winning on average (+4.17 pp in-domain, +10.04 pp OOD retention). Domain matters; averages hide it.</li>
+          <li><strong>Mercor ablations are nulls for behavior-shaping knobs:</strong> overlong filtering −1.5 pts; adaptive length penalty neutral-to-negative at every setting; DPPO vs GLM-5 loss within noise on score (behavior differs, score does not).</li>
+          <li><strong>Cold-start SFT can hurt downstream RL.</strong> ASTER: sparse / short-horizon SFT priors “fail to outperform Zero.” ToolRL: SFT-initialised GRPO underperforms cold-start GRPO; ToolRL reports GRPO cold-start beats same-data SFT by ~15% and ~+17% over base (see paper card).</li>
+          <li><strong>RL without SFT fails entirely</strong> on Llama-3.2-Vision-11B in Chu §5.4 — a null for “RL alone changes behavior” when the base cannot follow instructions.</li>
+          <li><strong>Mercor HLE / GPQA: no regression, no improvement</strong> after agent RL — change is task-bound, not a general capability shift.</li>
+          <li><strong>Shorter is not automatically better:</strong> in the ProCredit ablation cited in the report, discounting turn-level returns shortens trajectories and loses hard tasks; adding final progress alone does not improve performance.</li>
+          <li><strong>No paper in the set reports “RL changed accuracy with zero observable behavior change” as a headline.</strong> The closest are Mercor's DPPO-vs-GLM-5 (score tie, behavior differs — the inverse) and the HLE/GPQA null (accuracy tie, behavior unmeasured).</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 behavior papers -->
+  <section id="behavior-papers">
+    <div class="sec-head"><span class="sec-num">09</span><h2>Behavior papers: 11 groups, with what each actually measured</h2></div>
+    <p class="sub">These overlap with the 19-paper list above where the same work appears in both (Chu, DeepSeek-R1, PivotRL) — here the entry is re-read for behavior, not accuracy. Numbers keep the report's verification flags.</p>
+    <div id="behPaperList"></div>
+  </section>
+
+  <!-- 10 measurement -->
+  <section id="measurement">
+    <div class="sec-head"><span class="sec-num">10</span><h2>How behavior is measured — and the gaps</h2></div>
+    <p class="sub">There is no standardised “agent behavior” benchmark. Each paper invents its own proxy, which is why cross-paper behavior comparisons are fragile.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:28%">Method</th><th style="width:28%">Used by</th><th>What it captures / limits</th></tr></thead>
+        <tbody>
+          <tr><td data-l="Method"><strong>OOD rule / visual shift accuracy</strong></td><td data-l="Used by">Chu (GeneralPoints / V-IRL)</td><td data-l="Captures">Cleanest SFT-vs-RL behavior proxy: adaptation to a new rule, not memorisation. Does not describe how trajectories differ.</td></tr>
+          <tr><td data-l="Method"><strong>Training-dynamics curves: avg tool calls / trajectory length vs step</strong></td><td data-l="Used by">WebExplorer Fig. 5; ASTER Fig. 3/6; DeepSeek-R1 Fig. 1b; ASearcher</td><td data-l="Captures">Direct behavior time-series. WebExplorer 11→&gt;16 calls, &gt;40k tokens; ASTER U-shaped (decrease then increase); R1 monotonic length growth.</td></tr>
+          <tr><td data-l="Method"><strong>Tool-call count distributions</strong></td><td data-l="Used by">ASTER Fig. 2a/3b</td><td data-l="Captures">Shows prior sparsity (1–2 calls, &lt;2% &gt;10) and collapse (regression to low counts).</td></tr>
+          <tr><td data-l="Method"><strong>Entropy curves / Pass@K</strong></td><td data-l="Used by">PSFT, ASTER, AutoTool (as cited in the report)</td><td data-l="Captures">Entropy = exploration-capacity proxy. SFT sawtooth drop; interaction-dense SFT maintains higher entropy. Pass@K at large K below base = narrowed distribution.</td></tr>
+          <tr><td data-l="Method"><strong>Reflective-token frequency</strong> (“wait”, “check”, “verify”, “mistake”)</td><td data-l="Used by">DeepSeek-R1 Fig. 9b; ConciseR Table 1 as cited in the report</td><td data-l="Captures">Cheap, countable proxy for self-reflection. Brittle: a model can say “wait” without rethinking; length/verbosity can mask hacking (TRACE, cited in the report).</td></tr>
+          <tr><td data-l="Method"><strong>Agentic judger (LLM rubric)</strong></td><td data-l="Used by">ASTER (GPT-5 rubric: planning, code modelling, error handling, tool efficiency, overall)</td><td data-l="Captures">Only paper in the set with an explicit behavior rubric. Judge is a frontier model, rubric is fixed, no human agreement reported in the reviewed material.</td></tr>
+          <tr><td data-l="Method"><strong>Behavioural proxies: turns, tokens/turn, tool-call success, code vs MCP fraction</strong></td><td data-l="Used by">Mercor (21→32 turns, 834→588 tokens/turn)</td><td data-l="Captures">Authors' own caveat applies: no rigorous justification; “deliberate” is an interpretation.</td></tr>
+          <tr><td data-l="Method"><strong>Efficiency metrics: information gain / call, redundant-call rate</strong></td><td data-l="Used by">FuseSearch (34.9% redundant)</td><td data-l="Captures">Behavior quality, not just count — the right metric when the goal is conciseness without losing coverage.</td></tr>
+          <tr><td data-l="Method"><strong>Abstention / irrelevance accuracy; state-conditional consistency</strong></td><td data-l="Used by">ToolRL (BFCL irrelevance), Hammer, StateAlign</td><td data-l="Captures">Measures not acting, and whether decisions follow the current state — the behavior that distinguishes an agent from a memorised script.</td></tr>
+          <tr><td data-l="Method"><strong>Qualitative trace analysis</strong></td><td data-l="Used by">DeepSeek-R1 (“aha moment” trace); Chu (base-model failure trace); ToolRL examples</td><td data-l="Captures">Essential for claiming “self-correction” vs “longer output”, but anecdotal and cherry-picked by construction.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">Open questions — marked plainly</h3>
+      <ul class="tight">
+        <li><strong>No direct SFT-vs-GRPO behavior battery on the same agent tasks was found.</strong> Chu uses PPO, not GRPO; ToolRL / PivotRL control for data but do not publish turn/length/diversity tables; Mercor has no SFT arm; DaisyRose-27B (HF blog, 2026-11-19) has no SFT arm and no behavior metrics — do not cite it as evidence for SFT-vs-RL behavior change. Its reported figures are Terminal-Bench 4.1 pass@1 5.6% → 12.0%, 1,200 curated tasks, sessions up to 1M tokens via harness summarisation, with &gt;100 tool calls / &gt;256k output tokens per attempt as <em>task allowances</em>, not a measured before/after change.</li>
+        <li><strong>“DPPO makes behavior more concise”</strong> is verified only as more, shorter turns; implied total assistant tokens rise slightly. Do not report it as net conciseness.</li>
+        <li><strong>LoopTool</strong> (arXiv:2511.09148) — no behavior table was found in the reviewed material; its contribution is the data loop (BFCL-v3 74.93% vs 66.34% base; ACEBench 73.4% vs 67.1%), not a measured behavior change. Do not cite it as a behavior-change measurement.</li>
+        <li><strong>Whether SFT and RL converge to similar behavior</strong> on any agent task: no paper in the set tests this directly. ASTER's budget-alignment result (training with a 50-call budget: 83.0% at 256 inference calls vs 77.7% for 10-call training; at only 2 inference calls, 10-call training wins 51.5% vs 32.3%) suggests behavior is contingent on training / inference budgets, not convergent.</li>
+        <li><strong>Diversity is almost always proxied</strong> by entropy / Pass@K, not by trajectory clustering or action-distribution distance; stopping behavior is rarely measured except via overlong / context-exhaustion rates; most comparisons confound data (teacher trajectories vs own rollouts) with objective (cross-entropy vs reward) — PivotRL and ToolRL's same-data SFT baselines are the exceptions that control for data.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <h3 style="margin-top:0">Take away on one page</h3>
+    <div class="grid3">
+      <div class="card"><b>SFT</b><p style="font-size:14px;margin:4px 0 0">Can't → can. Installs format, knowledge, new patterns; cheap and stable; beware memorization, forgetting, and overtraining.</p></div>
+      <div class="card"><b>GRPO</b><p style="font-size:14px;margin:4px 0 0">Occasionally can → reliably can. Turns Pass@k into Pass@1; needs a verifiable reward and a nonzero success rate; beware entropy collapse.</p></div>
+      <div class="card"><b>SFT → GRPO</b><p style="font-size:14px;margin:4px 0 0">The default production recipe. When the hardest problems sit at acc=0, interleave SFT back in (ReLIFT) instead of forcing RL.</p></div>
+    </div>
+    <p class="small" style="margin-top:16px">Sources: DeepSeekMath (2402.03300), DeepSeek-R1 (2501.12948), Chu et al. (2501.17161), Yue et al. (2504.13837), Xiong et al. (2504.11343), Chen et al. NFT (2505.18116), Rajani et al. (2507.10616), Wang et al. 1-shot RLVR (2504.20571), Yuan et al. (2509.25123), Cheng et al. (2512.01970), Ma et al. ReLIFT (2506.07527), Ding et al. (2512.11470), DeReason (2603.11193), DAPO (2503.14476), PivotRL (2603.21383), Rath et al. (2610.07405), Tülu 3 (2411.15124), Multi-Harness RL (2609.04518), etc.; full links in the paper list above. Behavior update sources: ToolRL (2504.13958), ASTER (2602.01204), WebExplorer (2509.06501), Beyond Ten Turns / ASearcher (2508.07976), AutoTool (2603.13348), FuseSearch (2601.19568), StateAlign (2611.16304), PSFT (2508.17784), LoopTool (2511.09148), Mercor / SkyRL blog (2026-09-01), DaisyRose-27B HF blog (2026-11-19, no behavior metrics — see §10). Research date 2026-11-19; figures are as reported in the papers, not experiments reproduced on this page.</p>
+  </footer>
+</div>
+
+<script>
+var CHARTS = {
+  deepseek: {
+    title: "DeepSeekMath-7B: GRPO on top of an SFT checkpoint (GSM8K / MATH, no tools)",
+    rows: [
+      {label:"GSM8K · SFT", v:82.9, c:"#d97706"},
+      {label:"GSM8K · +GRPO", v:88.2, c:"#0f766e"},
+      {label:"MATH · SFT", v:46.8, c:"#d97706"},
+      {label:"MATH · +GRPO", v:51.7, c:"#0f766e"}
+    ],
+    note: "Shao et al. 2024 (arXiv:2402.03300). This is the SFT→GRPO increment (+5.3 / +4.9 points), not GRPO-alone vs SFT-alone. The paper also reports that RL improved majority-vote accuracy but not the probability of at least one correct in K samples — the earliest foreshadowing of the Pass@k debate. MATH with self-consistency decoding is also reported as 60.9% under a different setting."
+  },
+  tulu: {
+    title: "Tülu 3 pipeline · Llama-3.1-8B: how much each stage adds",
+    rows: [
+      {label:"GSM8K · SFT", v:76.2, c:"#d97706"},
+      {label:"GSM8K · +DPO", v:84.3, c:"#1e3a5f"},
+      {label:"GSM8K · +RLVR(PPO)", v:87.6, c:"#1e3a5f"},
+      {label:"GSM8K · +RLVR(GRPO)", v:90.0, c:"#0f766e"},
+      {label:"MATH · SFT", v:31.5, c:"#d97706"},
+      {label:"MATH · +DPO", v:42.0, c:"#1e3a5f"},
+      {label:"MATH · +RLVR(GRPO)", v:47.8, c:"#0f766e"}
+    ],
+    note: "Lambert et al. (arXiv:2411.15124), HF model-card numbers. Note: the largest single jump is SFT→DPO (GSM8K +8.1), not the RL stage; GRPO adds a further +2.4 (GSM8K) / +4.1 (MATH) over PPO-RLVR. This is a pipeline, not a same-data ablation — the stages use different data, so it cannot be read directly as an algorithm verdict."
+  },
+  oneshot: {
+    title: "1-shot RLVR · Qwen2.5-Math-1.5B base: how much can 1 example elicit?",
+    rows: [
+      {label:"MATH500 · Base", v:36.0, c:"#9ca3af"},
+      {label:"MATH500 · 1 example", v:73.6, c:"#0f766e"},
+      {label:"MATH500 · 2 examples", v:74.8, c:"#0f766e"},
+      {label:"MATH500 · 1.2k-example control", v:73.6, c:"#1e3a5f"},
+      {label:"6-benchmark avg · Base", v:17.6, c:"#9ca3af"},
+      {label:"6-benchmark avg · 1 example", v:35.7, c:"#0f766e"}
+    ],
+    note: "Wang et al. (NeurIPS 2025, arXiv:2504.20571), replicated on 7B / Llama-3.2-3B / R1-Distill. The authors' own decomposition: beyond format fixes there is still +8.6 points — but this is latent capability already in the base model being elicited, not one example teaching math. Reading it as “RL has infinite sample efficiency” is a misreading."
+  },
+  overtrain: {
+    title: "The deeper the SFT, the lower the GRPO ceiling · Qwen2.5-Coder-3B (Pass@10, endpoint values)",
+    rows: [
+      {label:"Shallow SFT → GRPO peak", v:80.6, c:"#0f766e"},
+      {label:"Deep SFT → GRPO peak", v:48.1, c:"#b91c1c"}
+    ],
+    note: "Aphale & Liu (ICML 2026 DL4C workshop, per search-abstract figures): as SFT depth increases, GRPO's peak Pass@10 falls monotonically from 0.806 to 0.481 (3-seed mean), while pre-RL Pass@1 rises — a rank reversal. Mechanism: entropy collapse → within-group advantage variance p(1−p) → 0. The chart shows endpoint values (×100); the trend between them is monotonically decreasing."
+  }
+};
+function renderChart(key){
+  var d = CHARTS[key];
+  var html = '<h3 style="margin:0 0 6px;font-size:16px">'+d.title+'</h3>';
+  d.rows.forEach(function(r){
+    html += '<div class="bar-row"><span>'+r.label+'</span><div class="bar-track"><div class="bar-fill" style="width:'+r.v+'%;background:'+r.c+'"></div></div><b class="mono">'+r.v.toFixed(1)+'%</b></div>';
+  });
+  document.getElementById('chartArea').innerHTML = html;
+  document.getElementById('chartNote').textContent = d.note;
+}
+document.querySelectorAll('.tab').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active'); renderChart(b.getAttribute('data-chart'));
+  });
+});
+renderChart('deepseek');
+
+var PAPERS = [
+ {cat:'found', title:'DeepSeekMath: Pushing the Limits of Mathematical Reasoning — Where GRPO Comes From', authors:'Shao et al. · 2024', arxiv:'2402.03300', url:'https://arxiv.org/abs/2402.03300', setup:'DeepSeekMath-7B; GRPO run on an SFT checkpoint; GSM8K + MATH', concl:'GRPO = PPO without the critic, using a within-group baseline: GSM8K 82.9→88.2%, MATH 46.8→51.7%. Also the earliest observation that RL does not improve Pass@k.', badge:'Foundational'},
+ {cat:'found', title:'DeepSeek-R1: Incentivizing Reasoning Capability via RL', authors:'DeepSeek-AI et al. · 2025 / Nature 2025', arxiv:'2501.12948', url:'https://arxiv.org/abs/2501.12948', setup:'R1-Zero: pure GRPO from the base model (no SFT); R1: cold-start SFT → GRPO → rejection sampling + SFT → GRPO', concl:'Pure RL can elicit self-reflection, verification, and backtracking, and beat human-demonstration SFT on verifiable tasks; but the production version still needs SFT stages to fix readability and language mixing.', badge:'Verified'},
+ {cat:'found', title:'Tülu 3: Pushing Frontiers in Open Language Model Post-Training', authors:'Lambert et al. (AI2) · 2024', arxiv:'2411.15124', url:'https://arxiv.org/abs/2411.15124', setup:'Llama-3.1-8B/70B/405B; SFT → DPO → RLVR pipeline (introduced the RLVR concept)', concl:'The template production pipeline. The GRPO version (3.1) reaches GSM8K 90.0% / MATH 47.8%; the biggest jump comes from the DPO stage, not the RL stage.', badge:'Pipeline'},
+ {cat:'head', title:'SFT Memorizes, RL Generalizes', authors:'Chu et al. · ICML 2025', arxiv:'2501.17161', url:'https://arxiv.org/abs/2501.17161', setup:'Llama-3.2-Vision-11B; GeneralPoints + V-IRL; both arms start from the same SFT checkpoint with equal compute', concl:'Outcome-reward RL generalizes to rule/visual variants; SFT memorizes and collapses OOD. But SFT is a necessary first step: RL without SFT fails, and RL cannot rescue an extremely overfit SFT checkpoint.', badge:'Head-to-Head'},
+ {cat:'head', title:'Scalpel vs. Hammer: GRPO Amplifies Existing Capabilities, SFT Replaces Them', authors:'Rajani et al. · ICML 2025 Workshop', arxiv:'2507.10616', url:'https://arxiv.org/abs/2507.10616', setup:'Same math problems, same model, similar hyperparameters, 20 checkpoints each', concl:'SFT: larger in-distribution gains, larger OOD losses, larger and faster weight changes. GRPO: modest gains, OOD preserved. The authors explicitly label these preliminary conclusions.', badge:'Verified · Cleanest Comparison'},
+ {cat:'head', title:'What pass@k Cannot Measure', authors:'Rath et al. · NeurIPS 2026 Workshop (non-archival)', arxiv:'2610.07405', url:'https://arxiv.org/abs/2610.07405', setup:'Qwen2.5-1.5B-Instruct, GSM8K, GRPO vs RFT, 3 seeds', concl:'The two methods push entropy and diversity in exactly opposite directions with zero overlap across seeds (GRPO narrows, RFT widens); no stable winner at Pass@8/32; neither significantly expands hard-problem coverage relative to the starting point.', badge:'Null Result'},
+ {cat:'head', title:'Weight-Space Geometry of Offline Reasoning Training', authors:'— · 2026', arxiv:'2606.23740', url:'https://arxiv.org/html/2606.23740', setup:'Qwen3-4B; the same batch of math rollouts; 6 offline methods (SFT/RFT/DFT/RIFT/offline GRPO/DPO)', concl:'SFT/RFT/RIFT weight deltas are nearly collinear (cosine ≥ 0.97); all reach 87–88% on GSM8K with no significant differences. Offline with the same data, data >> loss function. DPO is the outlier (93.5%), but its learning rate is 10× smaller — read with care.', badge:'Null Result'},
+ {cat:'debate', title:'Does RL Really Incentivize Reasoning Capacity Beyond the Base Model?', authors:'Yue et al. · NeurIPS 2025 Oral', arxiv:'2504.13837', url:'https://arxiv.org/abs/2504.13837', setup:'Multiple model families, 6 RLVR algorithms, math/code/vision, Pass@k at large k', concl:'RLVR wins at small k, loses to the base at large k; the reasoning boundary narrows with training; distillation expands the boundary, current RLVR does not. The strongest counter-evidence to “RL creates new capability.”', badge:'Verified'},
+ {cat:'debate', title:'From f(x) and g(x) to f(g(x)): LLMs Learn New Skills in RL by Composing Old Ones', authors:'Yuan et al. · ICLR 2026', arxiv:'2509.25123', url:'https://arxiv.org/abs/2509.25123', setup:'Synthetic string transformations; atomic skills f, g guaranteed mastered', concl:'RL learns the never-demonstrated composition g∘f and generalizes to deeper compositions and across tasks; SFT on the same data shows no such compositional generalization. A conditional counterexample to Yue.', badge:'Composition'},
+ {cat:'debate', title:'Atomic Skills are the Prerequisite', authors:'Cheng et al. · 2025 (v3 2026)', arxiv:'2512.01970', url:'https://arxiv.org/abs/2512.01970', setup:'Synthetic biographical tasks, Qwen-2.5-1.5B, complementary reasoning', concl:'Composite SFT: 90.3% in-domain, 18.4% zero-shot (pure memorization); learning the atomic skills separately first, then GRPO, synthesizes composite capability, with the Pass@k gap persisting to k=512. Without atomic mastery, RL is only amplification.', badge:'Composition'},
+ {cat:'debate', title:'Reinforcement Learning for Reasoning with One Training Example (1-shot RLVR)', authors:'Wang et al. · NeurIPS 2025', arxiv:'2504.20571', url:'https://arxiv.org/abs/2504.20571', setup:'Qwen2.5-Math-1.5B base; GRPO/PPO with only 1 training example', concl:'MATH500 36.0%→73.6%, matching the 1.2k-example control. The mechanism is policy gradient eliciting latent capability (entropy exploration is key), not one example teaching math.', badge:'Verified'},
+ {cat:'method', title:'A Minimalist Approach: from Rejection Sampling to Reinforce', authors:'Xiong et al. · 2025', arxiv:'2504.11343', url:'https://arxiv.org/abs/2504.11343', setup:'NuminaMath ~860k problems; Qwen2.5-Math-7B / Llama-3.2-3B; RAFT vs GRPO vs PPO', concl:'Simple rejection sampling (RAFT — SFT on positive samples only) matches GRPO and PPO; GRPO\u2019s main advantage is discarding all-wrong prompts. Proposes Reinforce-Rej: filter both all-correct and all-wrong.', badge:'Verified'},
+ {cat:'method', title:'NFT: Bridging Supervised Learning and RL in Math Reasoning', authors:'Chen et al. (NVIDIA) · 2025', arxiv:'2505.18116', url:'https://arxiv.org/abs/2505.18116', setup:'7B and 32B math reasoning; negative-aware SFT', concl:'A supervised method that uses self-generated negatives well beats RFT and matches or beats GRPO and DAPO; under strict on-policy conditions NFT is equivalent to GRPO. The SL/RL boundary is much thinner than usually assumed.', badge:'Verified'},
+ {cat:'method', title:'Rethinking Expert Trajectory Utilization in LLM Post-training', authors:'Ding et al. · ACL 2026', arxiv:'2512.11470', url:'https://arxiv.org/abs/2512.11470', setup:'Qwen2.5-7B (889k SFT) / Llama-3.2-3B; 6 math benchmarks; GRPO/DAPO', concl:'Plasticity-Ceiling framework: ceiling = SFT foundation + RL plasticity. Sequential SFT→RL beats pure RL and synchronous SFT+RL; hand off in the stable/slightly-overfit SFT zone; data scale (not “less is more”) sets the ceiling; pure RL rises fast early, then plateaus.', badge:'Verified'},
+ {cat:'method', title:'Learning What RL Can\u2019t: Interleaved Online Fine-Tuning — ReLIFT', authors:'Ma et al. · ICLR 2026', arxiv:'2506.07527', url:'https://arxiv.org/abs/2506.07527', setup:'Qwen2.5-Math-7B; OpenR1-Math-46k', concl:'RL handles within-capability problems; SFT handles the hardest acc=0 ones. Interleaved: 52.6% average, 6.7 points above prior RLVR, with only ~13% of the demonstration data; SFT-only is 49.0%.', badge:'Verified'},
+ {cat:'method', title:'DAPO: An Open-Source LLM RL System at Scale', authors:'Yu et al. · 2025', arxiv:'2503.14476', url:'https://arxiv.org/abs/2503.14476', setup:'Qwen2.5-32B base; decoupled clipping + dynamic sampling', concl:'Naive GRPO scores only 30 on AIME 2024; after dropping zero-advantage groups and other fixes it reaches 50, beating R1-Zero-Qwen-32B\u2019s 47 in half the steps. Many “GRPO vs SFT” comparisons are really “tuned GRPO vs naive GRPO.”', badge:'System'},
+ {cat:'method', title:'DeReason: Difficulty-Aware Curriculum for Decoupled SFT-then-RL', authors:'— · 2026 (authors unverified)', arxiv:'2603.11193', url:'https://ar5iv.arxiv.org/html/2603.11193', setup:'General STEM + math; data split between SFT / RL by difficulty', concl:'Pure RLVR from the base consistently and significantly loses to SFT (with medium-quality responses); low-reasoning-intensity data to SFT, hard problems to RL beats random splits and any single method.', badge:'Difficulty Split'},
+ {cat:'agent', title:'PivotRL: Local On-Policy RL at Pivot Turns for Agentic Tasks', authors:'Yi et al. (NVIDIA / UC Berkeley) · 2026', arxiv:'2603.21383', url:'https://arxiv.org/abs/2603.21383', setup:'Qwen3-30B-A3B; tool use / SWE / terminal / web, four domains; exactly the same trajectories as SFT', concl:'On identical data: +4.17 pp average in-domain, +10.04 pp OOD retention; matches end-to-end RL with ~1/4 the rollout rounds and ~1/5.5 the time. On secondary SWE-Bench Verified figures alone it loses to SFT — averages hide per-domain differences.', badge:'Verified'},
+ {cat:'agent', title:'Multi-Harness RL for Coding Agents', authors:'— · 2026', arxiv:'2609.04518', url:'https://arxiv.org/pdf/2609.04518.pdf', setup:'Qwen3-8B; same SFT checkpoint, same replay data, differing only in reward normalization; SWE-bench Verified', concl:'RL beats SFT by only +0.48 / +0.77 pp, not significant on unseen harnesses; the 7.13 pp gap between harnesses dwarfs the training gain. A sobering null/small-effect result for agentic settings.', badge:'Small Effect'}
+];
+function renderPapers(f){
+  var el = document.getElementById('paperList'); var html='';
+  PAPERS.filter(function(p){return f==='all'||p.cat===f}).forEach(function(p){
+    html += '<article class="paper"><h4><a href="'+p.url+'" target="_blank" rel="noopener">'+p.title+'</a><span class="badge">'+p.badge+'</span></h4><div class="meta2">'+p.authors+' · arXiv:'+p.arxiv+' · Setup: '+p.setup+'</div><p>'+p.concl+'</p></article>';
+  });
+  el.innerHTML = html;
+}
+document.querySelectorAll('#filters .fbtn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('#filters .fbtn').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active'); renderPapers(b.getAttribute('data-f'));
+  });
+});
+renderPapers('all');
+
+var SCEN = [
+ {id:'noreward', label:'No usable reward — only high-quality demonstrations', rec:'SFT only', color:'var(--sft-bg);color:var(--sft)', why:'RL has no signal to optimize, and the demonstrations themselves are the ceiling. Forcing GRPO here only adds instability and reward-hacking risk.', ev:'Consensus across the selection table; the premise of every RL paper fails without a verifier.'},
+ {id:'zero', label:'The model can\u2019t do it at all / even the format is wrong (Pass@k ≈ 0)', rec:'SFT cold start first', color:'var(--sft-bg);color:var(--sft)', why:'All rollouts in a group are wrong → advantage is identically 0 → GRPO gradient is 0; no amount of training learns anything. SFT must first lift the success rate off zero.', ev:'Chu et al.: RL without SFT fails; DeReason: pure RLVR from the base significantly loses to SFT on medium data.'},
+ {id:'sometimes', label:'There is a verifier, and the model succeeds occasionally (0 < Pass@1 < Pass@k)', rec:'Light SFT → GRPO (default recipe)', color:'var(--grpo-bg);color:var(--grpo)', why:'This is GRPO\u2019s home turf: groups contain both right and wrong answers, advantage variance is maximal, occasional success is sharpened into reliable success, and OOD is preserved. Keep SFT light and hand off early.', ev:'DeepSeekMath +5.3/+4.9; the Tülu 3 pipeline; Ding et al.: sequential is optimal.'},
+ {id:'hardest', label:'The hardest problems stay at acc = 0 throughout RL', rec:'Interleaved SFT (ReLIFT-style)', color:'var(--grpo-bg);color:var(--grpo)', why:'All-wrong groups never give RL a signal; only SFT / teacher solutions can inject the pattern, after which RL consolidates it. Do this only for the hardest problems, not across the board.', ev:'ReLIFT averages 52.6% (+6.7) with only ~13% of the demonstration data; random interleaving gets only 45.5%.'},
+ {id:'scale', label:'Lots of data; the goal is the highest possible ceiling', rec:'Scale SFT data first, then RL', color:'var(--sft-bg);color:var(--sft)', why:'The ceiling is set mainly by SFT data scale and trajectory difficulty; RL only decides how close you get to it. Pick trajectories by minimum validation loss; difficulty is a multiplier.', ev:'Ding et al.: refutes “less is more”; pure RL plateaus after ~25 exaFLOPs.'},
+ {id:'agent', label:'Multi-turn agentic / tool use, with the same batch of trajectories on hand', rec:'SFT → pivot-point / end-to-end RL, with modest expectations', color:'var(--grpo-bg);color:var(--grpo)', why:'The main payoff isn\u2019t in-domain score (only +0.5~0.8 pp on SWE-bench) but OOD retention (~+10 pp) and resistance to forgetting. First confirm the harness itself isn\u2019t the bottleneck — harness differences dwarf training gains.', ev:'PivotRL (+4.17 in-domain / +10.04 OOD retention); the Multi-Harness study (7.13 pp harness gap).'},
+ {id:'diversity', label:'Deployment uses multiple samples / self-consistency voting / search (Pass@k matters)', rec:'Use heavy RL with caution; watch entropy and Pass@k', color:'#fee2e2;color:#b91c1c', why:'RL trades diversity for Pass@1: entropy falls, Pass@k at large k is flat or down. If downstream profits from sampling diversity, heavy RL can be a net loss; consider early stopping, forward-KL-style methods, or keeping the RFT route (diversity actually widens).', ev:'Yue et al.\u2019s large-k reversal; Rath et al.\u2019s exactly-opposite diversity comparison.'},
+ {id:'pure', label:'No demonstrations — only problems + a verifier', rec:'Pure RL is feasible, but only at scale', color:'var(--grpo-bg);color:var(--grpo)', why:'R1-Zero proved the concept: pure GRPO can grow long reasoning and self-reflection. But at small scale it is slow and unstable, and on medium data it loses to the SFT-first route.', ev:'DeepSeek-R1-Zero; DeReason\u2019s counter-comparison.'}
+];
+var btnHtml='';
+SCEN.forEach(function(s,i){ btnHtml += '<button class="sbtn'+(i===2?' active':'')+'" data-id="'+s.id+'">'+s.label+'</button>'; });
+document.getElementById('scenarioBtns').innerHTML = btnHtml;
+function showRec(id){
+  var s = SCEN.filter(function(x){return x.id===id})[0];
+  document.getElementById('recBox').innerHTML = '<span class="pill-rec" style="background:'+s.color+'">Recommended: '+s.rec+'</span><h3>'+s.label+'</h3><p style="font-size:15px">'+s.why+'</p><p class="small"><strong>Evidence:</strong> '+s.ev+'</p>';
+}
+document.querySelectorAll('.sbtn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.sbtn').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active'); showRec(b.getAttribute('data-id'));
+  });
+});
+showRec('sometimes');
+
+var BCHARTS = {
+  rule: {
+    title: "Chu et al. — Rule shift: SFT collapses, RL improves",
+    rows: [
+      {label:"GP-L · Start", v:11.5, c:"#9ca3af"},
+      {label:"GP-L · SFT", v:3.4, c:"#d97706"},
+      {label:"GP-L · RL", v:15.0, c:"#0f766e"},
+      {label:"V-IRL-L · Start", v:80.8, c:"#9ca3af"},
+      {label:"V-IRL-L · SFT", v:1.3, c:"#d97706"},
+      {label:"V-IRL-L · RL", v:91.8, c:"#0f766e"}
+    ],
+    note: "Rule shift (§5.1): GeneralPoints J/Q/K = 10 → 11/12/13 (GP-L) and V-IRL absolute → relative action space (V-IRL-L). SFT: GP-L 11.5%→3.4%, V-IRL-L 80.8%→1.3%. RL: GP-L 11.5%→15.0%, V-IRL-L 80.8%→91.8%. The report also lists GP-VL 11.2%→5.6% (SFT) / →14.2% (RL) and V-IRL-VL 35.7%→2.5% (SFT) / →45.0% (RL) in the same §5.1 table — use the Visual tab for the §5.2 visual-shift figures, which use different starting points."
+  },
+  visual: {
+    title: "Chu et al. — Visual shift: SFT degrades recognition, RL improves it",
+    rows: [
+      {label:"GP-VL · Start", v:23.6, c:"#9ca3af"},
+      {label:"GP-VL · SFT", v:13.7, c:"#d97706"},
+      {label:"GP-VL · RL", v:41.2, c:"#0f766e"},
+      {label:"V-IRL-VL · Start", v:16.7, c:"#9ca3af"},
+      {label:"V-IRL-VL · SFT", v:11.1, c:"#d97706"},
+      {label:"V-IRL-VL · RL", v:77.8, c:"#0f766e"}
+    ],
+    note: "Visual shift (§5.2): GP-VL black → red suits, 23.6%→13.7% (SFT) vs 23.6%→41.2% (RL); V-IRL-VL NYC → world cities, 16.7%→11.1% (SFT) vs 16.7%→77.8% (RL). RL also improved underlying visual recognition accuracy as compute scaled; SFT deteriorated recognition and success together (§5.3). V-IRL mini SOTA in the same section: 44.0%→77.8% (+33.8 pp) for RL."
+  }
+};
+function renderBehChart(key){
+  var d = BCHARTS[key];
+  if(!d) return;
+  var html = '<h3 style="margin:0 0 6px;font-size:16px">'+d.title+'</h3>';
+  d.rows.forEach(function(r){
+    html += '<div class="bar-row"><span>'+r.label+'</span><div class="bar-track"><div class="bar-fill" style="width:'+r.v+'%;background:'+r.c+'"></div></div><b class="mono">'+r.v.toFixed(1)+'%</b></div>';
+  });
+  var area = document.getElementById('behChartArea');
+  var note = document.getElementById('behChartNote');
+  if(area) area.innerHTML = html;
+  if(note) note.textContent = d.note;
+}
+document.querySelectorAll('[data-bchart]').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('[data-bchart]').forEach(function(x){x.classList.remove('active')});
+    b.classList.add('active'); renderBehChart(b.getAttribute('data-bchart'));
+  });
+});
+renderBehChart('rule');
+
+var BEH_PAPERS = [
+ {title:'Chu et al. — SFT Memorizes, RL Generalizes', authors:'Chu et al. · ICML 2025', arxiv:'2501.17161', url:'https://arxiv.org/abs/2501.17161', setup:'Llama-3.2-Vision-11B; GeneralPoints + V-IRL; SFT vs multi-turn PPO, equal compute', concl:'Cleanest direct comparison in the behavior set. RL generalises to rule/visual variants; SFT memorises and actively degrades OOD (V-IRL-L 80.8%→1.3%). More verification iterations help RL generalise (+0.48% at 1 step vs +5.99% at 10 steps on GP-L OOD). Limits: RL is PPO, not GRPO; behavior measured is accuracy/recognition, not turn counts or diversity.', badge:'Direct · PPO not GRPO'},
+ {title:'DeepSeek-R1 — Pure GRPO elicits longer, reflective reasoning', authors:'DeepSeek-AI · 2025 / Nature 2025', arxiv:'2501.12948', url:'https://arxiv.org/abs/2501.12948', setup:'R1-Zero: pure GRPO on DeepSeek-V3-Base, no SFT; full R1 adds cold-start SFT stages', concl:'R1-Zero “naturally developed” longer responses, verification, reflection, and exploration of alternatives; “aha moment” with a sudden increase in “wait” (Fig. 9b). Exact length / “wait” multipliers (5–7×, ~500→~15,000 tokens) are secondary-only — flagged, not primary.', badge:'Verified direction · Secondary multipliers'},
+ {title:'PivotRL — Change behavior only at pivot turns', authors:'Yi et al. (NVIDIA / UC Berkeley) · 2026', arxiv:'2603.21383', url:'https://arxiv.org/abs/2603.21383', setup:'Qwen3-30B-A3B; four agentic domains; exactly the same trajectories as SFT; local RL at high-variance pivot turns', concl:'+4.17 pp in-domain average, +10.04 pp OOD retention vs same-data SFT; ~1/4 the rollout turns of end-to-end RL. Negative inside the paper: SWE-Bench Verified 32.67 vs SFT 37.40. Designed to change behavior only where it matters and preserve it elsewhere.', badge:'Same-data control'},
+ {title:'ToolRL — Reward Is All Tool Learning Needs', authors:'Qian et al. (UIUC) · NeurIPS 2025', arxiv:'2504.13958', url:'https://arxiv.org/abs/2504.13958', setup:'GRPO (also PPO) for tool-integrated reasoning; baselines: raw instruct, SFT on RL data, GRPO on SFT model, GRPO cold-start', concl:'+17% over base, +15% over SFT across tool-use/QA benchmarks; GRPO cold-start beats SFT-initialised GRPO. Emergent proactiveness, rejecting inappropriate tool calls, self-reflection, self-correction, long-horizon planning — reported qualitatively. Irrelevance 76.68% is a secondary project-page figure.', badge:'Emergent behavior · Secondary number flagged'},
+ {title:'ASTER — Interaction collapse and the SFT behavioral prior', authors:'Zhang et al. (Nanjing Univ. / Huawei) · 2026', arxiv:'2602.01204', url:'https://arxiv.org/abs/2602.01204', setup:'Qwen3-4B-Thinking; controlled cold starts: Zero, ZeroForceTool, ReTool-SFT, DemyAgent-SFT, ASTER-SFT (45k, stratified by tool-call count); GRPO, max 50 calls/trajectory', concl:'Sparse SFT priors collapse under RL into shallow verification. Interaction density ordering: ≥9-call SFT > full 45k > ≤5 > ≤1 for final AIME25 accuracy, with ≥9 maintaining higher entropy. Tool calls and length first decrease, then increase across RL stages. Budget alignment: behavior is contingent on the training call budget.', badge:'Behavioral prior'},
+ {title:'Mercor / SkyRL — 397B knowledge-work RL recipe (blog)', authors:'Mercor Research + SkyRL · Blog 2026-09-01', arxiv:'blog — no arXiv', url:'https://www.mercor.com/blog/training-frontier-knowledge-work-agents-a-397b-rl-training-guide-with-skyrl/', setup:'RL without SFT warmup; DPPO + prompt_mean; Qwen3.6-35B-A3B → Qwen3.5-397B-A17B; 1,928 APEX-Agents tasks, 480 held out; APEX Pass@1 16.11% → 27.29% for 397B', concl:'DPPO: 21→32 turns, 834→588 tokens/turn (score within noise). prompt_mean +3.9 pts over token_mean; context nudge +3.0 pts; overlong filtering −1.5 pts; length penalty neutral-to-negative. Harness fixes alone: base 35B 22.74%→28.69% with zero training. No SFT arm — it answers “which RL knob changes behavior,” not “SFT vs RL.”', badge:'Blog · No SFT arm'},
+ {title:'WebExplorer — SFT → GRPO lengthens search trajectories', authors:'Liu et al. · 2025', arxiv:'2509.06501', url:'https://arxiv.org/abs/2509.06501', setup:'Qwen3-8B; SFT 13k → GRPO 12k, group 8, 128k context, max 100 turns', concl:'Tool calls ~11 → >16 per trajectory, trajectory length >40k tokens, average 16 turns after RL. Behavior and accuracy rise together — the lengthening case for tool use.', badge:'Lengthening'},
+ {title:'Beyond Ten Turns / ASearcher — RL unlocks extreme long-horizon search', authors:'Gao et al. · 2025', arxiv:'2508.07976', url:'https://arxiv.org/abs/2508.07976', setup:'QwQ-32B prompt-based agent; fully-async RL, no SFT arm', concl:'>40 turns / >150k tokens (v2 abstract); >100 turns / >400k tokens (v4 abstract). xBench / GAIA Avg@4 gains +78.0% / +34.3% in the v4 abstract (earlier version +46.7% / +20.8%). Mechanism claim: turn limits ≤10 in prior work prevented learning complex search strategies.', badge:'Extreme horizon'},
+ {title:'AutoTool — Reasoning collapse in direct tool-use RL', authors:'Zeng, Ding et al. · ICLR 2026', arxiv:'2603.13348', url:'https://arxiv.org/abs/2603.13348', setup:'Direct RL in tool use; warm-up SFT (mixed long/short) + decoupled adaptive entropy constraints in GRPO + asymmetric reward', concl:'Direct RL: accuracy up, length down sharply — reasoning collapse, caused by entropy collapse. Fix is entropy control, not a length penalty. Reported result: +9.8% accuracy, ~81% lower token overhead; +11.95% over SFT-trained models, +16.43% over base on BFCL (as reported in the research report).', badge:'Shortening / Collapse'},
+ {title:'FuseSearch — Efficiency must be rewarded as information gain', authors:'— · ACL 2026 Findings', arxiv:'2601.19568', url:'https://aclanthology.org/2026.findings-acl.143.pdf', setup:'SFT filtered on F1 + tool efficiency, then GRPO on F1 + efficiency (novel entities / total entities per call)', concl:'Baseline 34.9% redundant parallel calls → −67.7% turns, −68.9% tokens, 93.6% faster, 84.7% file-level on SWE-bench Verified. Shows behavior change is reward-shaped: a naive length penalty cannot distinguish searching new areas from re-searching old ones.', badge:'Efficiency reward'},
+ {title:'StateAlign — State-contrastive RL for recovery and consistency', authors:'— · 2026', arxiv:'2611.16304', url:'https://arxiv.org/html/2611.16304v1', setup:'Qwen3-8B; BFCL v4 multi-turn; state-contrastive RL vs outcome-only RL', concl:'Multi-turn 45.5%→55.2%; no-tool hallucination 62.2%→56.1% vs outcome-only RL. Behavioral analysis: more consistent decisions, more complete multi-call execution, stronger recovery after tool errors. Adds the state-conditional dimension (ask vs retrieve vs execute vs decline) that outcome accuracy alone misses.', badge:'Error recovery'}
+];
+var behHtml='';
+BEH_PAPERS.forEach(function(p){
+  behHtml += '<article class="paper"><h4><a href="'+p.url+'" target="_blank" rel="noopener">'+p.title+'</a><span class="badge">'+p.badge+'</span></h4><div class="meta2">'+p.authors+' · '+p.arxiv+' · Setup: '+p.setup+'</div><p>'+p.concl+'</p></article>';
+});
+var behList = document.getElementById('behPaperList');
+if(behList) behList.innerHTML = behHtml;
+</script>
+</body>
+</html>

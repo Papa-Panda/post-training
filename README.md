@@ -19,6 +19,7 @@ The repository favors a consistent progression:
 | [AI infrastructure](ai-infra/README.md) | How do training and inference systems trade compute, communication, and memory? | Current second-pass labs, then the 45-day map |
 | [GPU architecture](gpu-architecture/README.md) | Which hardware and kernel mechanisms create those costs? | SIMT → memory → GEMM → collectives → profiling |
 | [PPO vs. GRPO](grpo-vs-ppo/README.md) | How do the objectives and training-system requirements differ? | Objective derivations before infra trade-offs |
+| [SFT vs. GRPO](sft-vs-grpo/README.md) | For the same tasks, how do SFT on trajectories and GRPO differ in accuracy, generalisation, and agent behaviour? | Empirical comparisons → mechanisms → scenario selector |
 | [Post-training frameworks](post-training-framework/README.md) | How do rollout, reward, buffers, learners, placement, and policy versions form one correct system? | Unified dataflow → sync/async → framework selection |
 | [Reasoning trace analysis](reasoning-trace-analysis/README.md) | What is inside a chain-of-thought trace, which parts are waste, and how are intermediate steps scored? | Structure → efficiency → process supervision |
 | [vLLM rollout](vllm-rollout/README.md) | How should rollout serving be measured and stress-tested? | TTFT/TPOT metrics → configuration → failures |
@@ -39,6 +40,7 @@ The repository favors a consistent progression:
 - **`ai-data/** is a paper-reading corpus. **`model-aware-data-curation/** is a cross-paper synthesis and runnable model-in-the-loop selection system.
 - **`ICL/** studies behavior induced by context. **`harness-engineering/** studies the executable system that constructs context, calls tools, manages state, and promotes changes.
 - **`grpo-vs-ppo/** owns optimization-objective comparisons; infrastructure tracks discuss only their systems consequences.
+- **`sft-vs-grpo/** owns the empirical SFT-versus-GRPO comparison on the same tasks, including agent behaviour after training; it links to `grpo-vs-ppo/` for objective derivations rather than duplicating them.
 - **`reasoning-trace-analysis/** dissects reasoning traces as behavior: trace structure, overthinking/efficiency, and process supervision (PRM). It defers faithfulness and does not own RL dataflow or serving.
 - **`eval-*** tracks own measurement methodology and should not be treated as training or serving implementations.
 
