@@ -12,5 +12,5 @@ date,title,authors,tags,one_line_takeaway,folder,link,status
 2026-11-18,Axion 1.0,Jia 等,difficulty;tool-need;data-streams,把“变难”与“真需工具”拆成两条数据流,day-11-axion,https://arxiv.org/abs/2611.03233,Done
 2026-11-19,CUA-Master,Yu 等,computer-use;workflow-import;rollback,从外部教程 import 工作流 + 失败快照回滚,day-12-cua-master,https://arxiv.org/abs/2611.03126,Done
 2026-11-20,WebHarbor,Wang 等,web-environments;offline-replay,把真实网站“靠岸”成可离线复现的环境,day-13-webharbor,https://arxiv.org/abs/2611.03634,Done
-,VidUEU-Agent,Ru 等,video-data;evidence;distribution-feedback,视频数据的证据组织 + 分布反馈外循环,day-14-vidueu-agent,https://arxiv.org/abs/2611.04418,Todo
+2026-11-21,VidUEU-Agent,Ru 等,video-data;evidence;distribution-feedback,视频数据的证据组织 + 分布反馈外循环,day-14-vidueu-agent,https://arxiv.org/abs/2611.04418,Done
 ,PyRUA-DataFarm,Zhang 等,robotics;data-generation;verification,造数据与批数据分离的机器人数据,day-15-pyrua-datafarm,https://arxiv.org/abs/2611.05320,Todo

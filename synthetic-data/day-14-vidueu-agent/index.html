@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 14 VidUEU-Agent — 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#0e7490; --accent-ink:#155e75; --accent-bg:#ecfeff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#164e63,#0891b2);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#ecfeff 0%,#ffffff 100%);border-color:#cffafe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#ecfeff 0%,#ffffff 100%);
+  border:1px solid #cffafe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #cffafe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#cffafe;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#22d3ee,#0e7490);height:100%;border-radius:999px}
+.barfill.bad{background:linear-gradient(90deg,#fca5a5,#dc2626)}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#0891b2}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.callout b{color:#92400e}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">synthetic-data · C 系列 Day 14</span>
+    <h1>VidUEU-Agent：视频数据的证据组织 + 分布反馈外循环</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+  </details>
+  <section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/day-14-vidueu-agent/</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>VidUEU-Agent: A Data-Curation Agent for Multimodal Understanding, Editing, and Unified Tasks</dd><dt>Authors</dt><dd>Ru 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2611.04418">https://arxiv.org/abs/2611.04418</a></dd><dt>Date of publication</dt><dd>2026-11-03</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">video-data</span><span class="tag">evidence</span><span class="tag">distribution-feedback</span></div></dd><dt>与前篇的关系</dt><dd>Day 02 AED 说“失败样本第一次当成主资产”，诊断必须 citation-first——每条诊断要引出处的证据；VidUEU-Agent 把同一个“引用即证据”的规矩搬到视频数据上——每个样本必须引用它所用的信号 ID，没有引用的样本不算数。两篇都信“引用是防幻觉的锚”，只不过 AED 锚的是失败诊断的出处，VidUEU-Agent 锚的是视频信号的出处。Day 04 ToolLoop 说“闭环比数据量重要”：无反馈合成数据比不训还差 2.17 个点，有反馈才正收益；VidUEU-Agent 也是闭环——每轮 30K 数据，拿下游评估的聚合分调下一轮的分布，再扩到 100K——但它的反馈源是测试集聚合分，ToolLoop 的反馈是执行成功与否的工具信号；一个反馈来自“做没做成”，一个反馈来自“考了多少分”，后者离测试集更近，边界更值得追问。Day 08 Harness-S 用“兄弟 harness”救活 GRPO 有效组，反馈发生在训练轮次之内；VidUEU-Agent 的反馈发生在数据轮次之间——调的是数据分布，不是训练信号；两篇合起来是两层反馈：Harness-S 修“怎么训”，VidUEU-Agent 修“训什么”。Day 07 Spotify 用合成对话当测试集 + 方差拆分自改进，线上 A/B 收听时长 +14%——也是“评估 → 调数据”的外循环；但 Spotify 的循环拆的是方差（哪类对话拖了后腿），VidUEU-Agent 的循环调的是分布（哪类任务多采、哪类少采），前者告诉你“错在哪”，后者只告诉你“多采哪”。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>视频 instruction 数据缺的不是 raw 视频，是“证据站得住脚 + 分布调得过来”的造数据 agent：原始视频量大、标注贵，直接拿视频训多模态模型，样本要么幻觉（答案和视频对不上）、要么分布偏了（好采的任务采了一堆、难的任务没人采）。VidUEU-Agent 造了一个四阶段数据 agent：三级摘要 + 镜头过滤筛掉低质量镜头，按内容规划 OCR / ASR / 检测 / 光流工具挖关键帧和多模态信号，每个样本必须引用它所用的信号 ID，最后拿下游评估的聚合分调下一轮的数据分布；每轮 30K 数据，调分布后扩到 100K（VidUEU-100K），InternVL3-8B 在 MMT-Bench 上从 0.546 涨到 0.596——但反馈用的是测试集聚合分，held-out 的 VSI-Bench 才是迁移的可靠读数。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">100K</div><div class="l">VidUEU-100K 总样本数<br>每轮 30K，调分布后扩到</div></div><div class="stat"><div class="v">30K / 轮</div><div class="l">每轮采的数据量<br>按评估调分布后再采下一轮</div></div><div class="stat"><div class="v">0.546 → 0.596</div><div class="l">InternVL3-8B MMT-Bench<br>涨 5.0 个点，相对 +9.2%</div></div><div class="stat"><div class="v">4 阶段</div><div class="l">全局感知过滤 → 挖信号<br>→ 元数据路由合成 → 分布反馈</div></div><div class="stat"><div class="v">信号 ID 引用</div><div class="l">每个样本必须引用<br>所用信号 ID，引用即证据</div></div></div>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
+<ol>
+<li>用测试集聚合分调分布，和直接在测试集上训，边界在哪里？——取 papers.md 的思考题。VidUEU-Agent 的外循环是“每轮 30K 数据，按评估调分布后扩到 100K”，注释点明反馈用的是测试集聚合分，held-out VSI-Bench 才是迁移的可靠读数。三臂——A 测试集反馈（论文方法：每轮拿 MMT-Bench 这类测试集的聚合分调下一轮分布）；B held-out 反馈（反馈只来自一个与测试集不重叠的验证集，比如 VSI-Bench 的 held-out 部分，测试集只在最后量一次）；C 无反馈固定分布（每轮 30K、分布固定，100K 采完为止）。指标：MMT-Bench 分数、VSI-Bench held-out 分数、一个全程没碰过的第三基准分数、每轮各任务类型占比的变化（分布到底往哪偏了）、分布偏移量（本轮分布与上一轮分布的距离）。判据：若 A 在 MMT-Bench 上 0.596 但在 VSI-Bench held-out 和第三基准上 ≈ C 或 &lt; B → 测试集反馈就是在“对着测试集调分布”——聚合分涨了，迁移没涨，边界已经越过了；若 A 在三个基准上都 &gt; C 且 ≈ B → 聚合分反馈是安全的，测试集的聚合信号没有泄露到具体样本选择里；若 A ≈ C 在所有基准上 → 反馈本身没起作用，100K 的涨分来自“数据多了”，不是“分布调对了”；若 A 的分布逐轮往 MMT-Bench 占比最高的任务类型上偏 → 反馈在奖励“好考的任务”，不是“模型弱的任务”。再预测一个 2×2 格子：{测试集反馈，held-out 反馈} × {MMT-Bench，VSI-Bench held-out}，哪个格子的分数最高、哪个最低，并写理由。再构造一个具体反例：聚合分可以靠“多采好考的任务”涨上去——假设 MMT-Bench 里理解类任务占 70%、编辑类占 30%，反馈看到理解类分数高，就多采理解类、少采编辑类；下一轮聚合分涨了，但编辑能力其实退了——聚合分这个“平均数”把“哪类任务涨、哪类任务跌”藏起来了；更糟的是“按评估调分布”如果调的是“采样比例”，模型可能只是在“多见同类题”上提分，而不是“学会了新能力”。漏洞：注释没说反馈到底调了什么——是“各任务类型的采样比例”、还是“各视频域的采样比例”、还是“工具组合的比例”；也没说调了几轮、每轮的分布变化和分数变化——不知道 0.546 → 0.596 这 5.0 个点里，有多少来自“第一轮 30K”、多少来自“后几轮调分布”；而且 100K 是“扩到”的总数还是“新增”的总数，注释没说——如果是“每轮 30K、调分布后扩到 100K”，总共采了几轮、每轮 30K 是不是有重叠，也没说。</li>
+<li>信号 ID 引用到底防住了什么？——样本必须引用所用信号 ID，是这篇最硬的证据规矩。三臂——A 强制引用且核验（论文方法：每个样本必须引用所用信号 ID，且引用要能对上挖出来的信号）；B 无引用要求（同一条四阶段 pipeline，只去掉“必须引用信号 ID”这一条）；C 强制引用但不核验（样本里必须写信号 ID，但没人查这个 ID 是不是真对应答案用的那段视频）。指标：视频 grounding 问答的幻觉率（答案声称的视频内容在视频里不存在的比例）、MMT-Bench 分数、VSI-Bench held-out 分数、引用审计通过率（抽查样本，引用 ID 实际支撑答案的比例）、每 1K 样本的造数据成本。判据：若 A 的幻觉率 ≪ B、且 A 的引用审计通过率高 → 引用规矩真防住了“答案和视频对不上”；若 A ≈ C 在幻觉率上 → 规矩本身没用，有用的是“核验”那一步——只要求写 ID 不查，模型照样可以编一个真实存在的 ID 配一个编造的答案；若 B ≈ A 在基准分数上、但 B 的幻觉率 ≫ A → 基准分数量不出幻觉——MMT-Bench 涨 5.0 个点可能是“答题技巧涨了”，不是“证据站住了”，引用规矩的价值在基准之外；若 A 的造数据成本 ≫ B、但幻觉率只降一点 → 引用规矩的性价比要重算。再预测一个 2×2 格子：{引用且核验，只引用不核验} × {答案用的信号真在视频里，答案编造了信号}，哪个格子的幻觉率最高、哪个最低，并写理由。再构造一个具体反例：模型可以引用一个真实存在的信号 ID、但答案用的却是另一段视频的内容——比如引用了第 3 秒的 OCR 信号 ID，答案却描述的是第 30 秒的画面；ID 本身是真的，引用关系是假的——“引用存在”不等于“引用支撑答案”；更糟的是三级摘要可能把关键细节摘要掉了，信号 ID 指向的是“摘要后的信号”，不是原始视频——样本引用的证据链断在摘要那一步，审计查 ID 查不出来。漏洞：注释没说“信号 ID”到底是什么粒度——是一个镜头的 ID、一个关键帧的 ID、还是一条 OCR / ASR 文本的 ID；也没说核验是怎么做的——是程序化查 ID 存在性、还是人工抽查引用与答案的一致性；而且“必须引用”有没有例外——编辑类任务的答案（比如“把这段视频剪成 30 秒”）要引用什么信号，注释没说。</li>
+<li>三级摘要 + 镜头过滤，是提纯还是把难的都筛掉了？——综合 Day 05 Data Turnstile 与 Day 07 Spotify。VidUEU-Agent 的第一阶段是三级摘要 + 镜头过滤，筛掉低质量镜头；Day 05 Data Turnstile 说“小模型上未加工合成数据有毒”，过滤是必需的；Day 07 Spotify 用合成对话当测试集，方差拆分告诉你哪类对话拖后腿——过滤掉“低质量”之前，得先知道“低质量”是谁定义的。三臂——A 三级摘要 + 镜头过滤（论文方法：每轮 30K，先摘要再过滤低质量镜头）；B 不过滤（同样的视频源、同样的 30K 预算，不过滤直接挖信号造样本）；C 只过滤不摘要（镜头过滤保留，三级摘要去掉，直接拿原始镜头挖信号）。指标：MMT-Bench 分数、VSI-Bench held-out 分数、每 1K 样本成本、被筛掉的镜头占比、被筛掉镜头里“难但有信息量”的占比（比如快切镜头、低光镜头、长镜头）、理解类 vs 编辑类任务各自的分数。判据：若 A &gt; B 且 A 的被筛镜头里“难但有信息量”的占比低 → 过滤是真提纯，筛掉的是噪声；若 A ≈ B → 过滤没起作用，30K 里的低质量镜头本来就不影响分数，摘要 + 过滤是白干的活；若 A 在理解类上 &gt; B、但在编辑类上 &lt; B → 三级摘要把编辑任务要的细节摘要掉了——编辑要的是“第几秒切到哪”，摘要只留“视频讲了什么”，过滤 + 摘要对理解是提纯、对编辑是截肢；若 C ≈ A → 三级摘要没贡献，起作用的只是镜头过滤，摘要那一级可以砍掉省成本。再预测一个 2×2 格子：{过滤开，过滤关} × {理解类任务，编辑类任务}，哪个格子的分数最高、哪个最低，并写理由。再构造一个具体反例：镜头过滤筛掉的“低质量镜头”可能恰恰是模型最该学的——快切的体育镜头、晃动的跟拍镜头、低光的夜景镜头，在“质量”标准下都是低质量，但真实世界的多模态任务里全是这种镜头；过滤掉它们，数据集变“干净”了，模型在干净数据上 MMT-Bench 涨 5.0 个点，到了真实视频上反而不会了——“低质量”的定义如果是“画面稳不稳、清不清”，筛掉的就是“真实世界的难度”；更糟的是三级摘要的“级”是怎么分的，注释没说——如果三级是“视频级 → 镜头级 → 帧级”，摘要每往下一级都丢信息，编辑任务要的“帧级精确时间”可能在第一级就丢了。漏洞：注释没给被筛掉的镜头占比、没给三级摘要各自保留了什么信息、没给“低质量”的判定标准——不知道过滤筛掉了 5% 还是 50%，不知道筛掉的是噪声还是难度；而且 30K / 轮的“轮”有没有过滤率的变化，注释没说——不知道过滤是越筛越严、还是固定阈值。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
+<h3>四阶段 pipeline：全局感知过滤 → 按内容规划工具挖信号 → 元数据路由合成（样本必须引用信号 ID）→ 按评估调分布</h3>
+<div class="viz viz-flow flow"><div class="fnode">全局感知 + 三级摘要 + 镜头过滤</div><div class="farrow">→</div><div class="fnode">按内容规划 OCR / ASR / 检测 / 光流，挖关键帧与信号</div><div class="farrow">→</div><div class="fnode">构造元数据，路由合成样本（必须引用信号 ID）</div><div class="farrow">→</div><div class="fnode">每轮 30K，按评估调分布，扩到 100K</div></div>
+<div class="viz">
+<pre class="mermaid">flowchart TB
+    V[原始视频] --> G[全局感知 三级摘要]
+    G --> F{镜头质量过关吗}
+    F -->|否| DROP[筛掉低质量镜头]
+    F -->|是| P[按内容规划工具]
+    P --> T1[OCR 文字多的视频]
+    P --> T2[ASR 有声视频]
+    P --> T3[检测 目标多的视频]
+    P --> T4[光流 动作多的视频]
+    T1 --> K[挖关键帧与多模态信号]
+    T2 --> K
+    T3 --> K
+    T4 --> K
+    K --> M[构造元数据]
+    M --> S[路由合成 instruction 样本]
+    S --> C{样本引用了信号 ID 吗}
+    C -->|否| REJ[不算数 打回]
+    C -->|是| D[本轮 30K 数据]
+    D --> E[下游训练 + 评估聚合分]
+    E --> A{调下一轮分布}
+    A -->|继续| G
+    A -->|扩到 100K| OUT[VidUEU-100K]
+</pre>
+</div>
+<h3>Motivation：视频 instruction 数据的瓶颈不在视频量</h3>
+<p>视频 instruction 数据的瓶颈不在视频量——raw 视频到处都是，瓶颈在“把视频变成站得住脚的 instruction 样本”：直接拿视频训多模态模型，样本要么幻觉（答案说的视频里没有）、要么分布偏了（好采的任务采了一堆、难的任务没人采、模型弱的任务没人补）。VidUEU-Agent 要的是一个“能自己迭代分布”的造数据 agent：不是一次采完 100K 就交差，而是每轮采 30K、看下游评估的聚合分、调下一轮的分布——数据分布跟着模型的能力缺口走，而不是跟着“什么好采”走。</p>
+<h3>老路 vs VidUEU-Agent：一次采完 vs 每轮调分布，答案自由发挥 vs 引用即证据</h3>
+<div class="viz vs"><div class="vscol vs-a"><h4>老路：一次采完、答案自由发挥</h4><ul><li>视频量大、标注贵，直接拿视频训，样本幻觉多</li><li>好采的任务采了一堆，难的任务没人采，分布偏了没人管</li><li>答案和视频对不上，没法审计——错在哪不知道</li><li>一次采完交差，分布定死了</li></ul></div><div class="vscol vs-b"><h4>VidUEU-Agent：四阶段 + 分布反馈外循环</h4><ul><li>三级摘要 + 镜头过滤，先筛掉低质量镜头</li><li>按内容规划工具：OCR / ASR / 检测 / 光流各就其位</li><li>每个样本必须引用所用信号 ID，引用是出生证</li><li>每轮 30K，按评估调分布，扩到 100K</li></ul></div></div>
+<h3>关键数字：每轮 30K，扩到 100K；MMT-Bench 0.546 → 0.596</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">微调前 MMT-Bench</div><div class="bartrack"><div class="barfill" style="width:54.6%"></div></div><div class="barval">0.546</div></div><div class="barrow"><div class="barlabel">微调后 MMT-Bench</div><div class="bartrack"><div class="barfill" style="width:59.6%"></div></div><div class="barval">0.596</div></div></div>
+<p>InternVL3-8B 在 VidUEU-100K 上微调前后的 MMT-Bench 分数（条形按 0–1 刻度）；涨 5.0 个点，相对涨幅约 9.2%——但反馈用的是测试集聚合分，held-out 的 VSI-Bench 才是迁移的可靠读数。</p>
+<table>
+<tr><th>阶段</th><th>做什么</th><th>证据 / 反馈钩子</th><th>关键点</th></tr>
+<tr><td>全局感知</td><td>三级摘要 + 镜头过滤</td><td>筛掉低质量镜头</td><td>摘要分三级，镜头是过滤单位</td></tr>
+<tr><td>挖信号</td><td>按内容规划工具，挖关键帧与多模态信号</td><td>OCR / ASR / 检测 / 光流按内容选</td><td>文字多的上 OCR，动作多的上光流</td></tr>
+<tr><td>合成样本</td><td>构造元数据，路由合成 instruction 样本</td><td>样本必须引用所用信号 ID</td><td>引用是样本的出生证，没引用不算数</td></tr>
+<tr><td>分布反馈</td><td>每轮 30K，按评估调分布，扩到 100K</td><td>反馈是下游测试集聚合分</td><td>held-out VSI-Bench 才是迁移的可靠读数</td></tr>
+</table>
+<p>MMT-Bench 涨幅（由论文自报数字算得，非论文公式）：</p>
+<p>$$0.596 - 0.546 = 0.050$$</p>
+<p>其中 0.596 是 InternVL3-8B 在 VidUEU-100K 上微调后的 MMT-Bench 分数，0.546 是微调前的基线分数——涨 5.0 个点，相对涨幅约 9.2%。</p>
+<p>相对涨幅（由论文自报数字算得，非论文公式）：</p>
+<p>$$\frac{0.596}{0.546} \approx 1.092$$</p>
+<p>其中分子是微调后分数，分母是基线分数——相对涨约 9.2%；但注意这个 9.2% 是在 0.546 的低基数上算的，绝对涨幅只有 5.0 个点。</p>
+<p>规模倍数（由论文自报数字算得，非论文公式）：</p>
+<p>$$\frac{100K}{30K} \approx 3.3$$</p>
+<p>其中 100K 是最终数据集 VidUEU-100K 的总样本数，30K 是每轮采的数据量——最终规模约等于每轮的 3.3 倍；但“扩到 100K”不等于“采了 3.3 轮”，各轮之间有没有重叠、分布调整后有没有重采，注释没说。</p>
+<p>数字均为论文自报，出自 papers.md 注释与论文摘要；涨幅与倍数由上述数字算得。</p>
+<div class="callout"><b>反直觉点：</b>这篇最硬的规矩不是四阶段 pipeline，而是“样本必须引用信号 ID”——引用是防幻觉的锚。但最值得追问的数字恰恰不在 pipeline 里，而在反馈信号里：外循环调分布用的，是测试集的聚合分——0.546 → 0.596 这 5.0 个点，有多少是“分布调对了”，有多少是“对着测试集调出来的”，注释没法分开；held-out 的 VSI-Bench 被点名为“迁移的可靠读数”，分数却没给。</div>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>边界</h2>
+<ul>
+<li>反馈用的是测试集聚合分：外循环调分布的信号是下游测试集的聚合分，不是 held-out 验证集——0.546 → 0.596 这 5.0 个点，有多少是“分布调对了”、有多少是“对着测试集调分布调出来的”，注释没法分开；held-out 的 VSI-Bench 才是迁移的可靠读数，但注释没给 VSI-Bench 的具体分数——只说了“才是可靠读数”，没说读数是多少。</li>
+<li>聚合分把“哪类任务涨、哪类任务跌”藏起来了：反馈信号是一个平均数——如果理解类任务涨 10 个点、编辑类任务跌 5 个点，聚合分照样涨；分布往“好考的任务”上偏，聚合分也会涨；注释没给各任务类型的分项分数，不知道 5.0 个点的涨幅里有没有“拆东墙补西墙”。</li>
+<li>“调分布”调的是什么，注释没说：是各任务类型的采样比例、各视频域的采样比例、还是工具组合的比例——调了几轮、每轮分布怎么变、每轮分数怎么变，全没说；100K 是“扩到”的总数还是“新增”的总数、每轮 30K 之间有没有重叠，也没说。</li>
+<li>信号 ID 引用的粒度与核验方式没给：信号 ID 是一个镜头的 ID、一个关键帧的 ID、还是一条 OCR / ASR 文本的 ID，注释没说；“必须引用”有没有程序化核验、还是只要求写上，注释没说；编辑类任务的答案要引用什么信号，也没说——“引用存在”不等于“引用支撑答案”。</li>
+<li>三级摘要的信息损失没量：摘要分三级，但每级保留了什么、丢了什么，注释没说；编辑类任务要的帧级精确时间，可能在摘要的第一级就丢了——三级摘要对理解是提纯、对编辑可能是截肢。</li>
+<li>镜头过滤的“低质量”标准没给：被筛掉的镜头占多少、筛掉的是噪声还是难度，注释没说；快切、低光、晃动镜头在“质量”标准下都是低质量，但真实世界的多模态任务里全是这种镜头——过滤可能筛掉的恰恰是模型最该学的难度。</li>
+<li>只有一个基线模型、一个主分数：注释只给了 InternVL3-8B 一个模型、MMT-Bench 一个主分数（0.546 → 0.596）——换个模型、换个基准，涨幅还剩多少，不知道；VSI-Bench 被点名为“迁移的可靠读数”，但分数没给，迁移到底有没有发生，没法从注释里验证。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>迁移</h2>
+<ul>
+<li>“每个样本必须引用所用信号 ID”可搬到任何“合成数据怕幻觉”的领域：Day 02 AED 的 citation-first 诊断、Day 05 Data Turnstile 的 DAG 分角色验证，都是同一个思路——给每个样本一个“出生证”，让它能被审计。搬到文本 SFT 数据上，就是“每条回答必须引用它用的检索片段 ID”；搬到代码数据上，就是“每段生成代码必须引用它参考的 API 文档 ID”；关键是引用要能被程序化核验——只要求写 ID 不查，等于没要求。</li>
+<li>“按内容规划工具”可搬到任何“多工具、多信号”的造数据 pipeline：VidUEU-Agent 按视频内容决定用 OCR、ASR、检测、光流中的哪几个；搬到文档数据上，就是按文档类型决定用表格解析、公式解析、图表解析中的哪几个；搬到代码数据上，就是按仓库语言决定用静态分析、测试运行、文档检索中的哪几个。关键是“规划”这一步本身要可验证——如果规划错了（文字视频没上 OCR），后面挖出来的信号就是缺的，样本从出生就残。</li>
+<li>“每轮 30K、按评估调分布”的外循环可搬到任何“分布会偏”的数据工作：Day 04 ToolLoop 的闭环反馈、Day 07 Spotify 的方差拆分自改进、Day 08 Harness-S 的兄弟 harness，都是“评估 → 调数据 / 调训练”的外循环。搬过去要改的第一件事，就是把反馈信号从“测试集聚合分”换成“held-out 验证集分项分”——VidUEU-Agent 的教训是聚合分会藏事：分项分才能告诉你“哪类任务涨、哪类任务跌”，held-out 才能告诉你“涨分是不是对着测试集调出来的”。</li>
+<li>与 Day 04 ToolLoop 构成对照：ToolLoop 说“无反馈合成数据比不训还差 2.17 个点”，反馈是闭环的生死线；VidUEU-Agent 的反馈是“按评估调分布”，比 ToolLoop 的“执行成功与否”更间接——一个反馈来自“做没做成”，一个反馈来自“考了多少分”。两篇合起来是反馈信号的光谱：越靠近“任务本身的成功标准”，反馈越可靠；越靠近“聚合的考试分数”，反馈越容易被分布偏移钻空子。</li>
+<li>与 Day 08 Harness-S 构成对照：Harness-S 的反馈发生在训练轮次之内（兄弟 harness 救活 GRPO 有效组），VidUEU-Agent 的反馈发生在数据轮次之间（调数据分布）。两篇合起来是两层反馈：Harness-S 修“怎么训”，VidUEU-Agent 修“训什么”——但两层反馈叠加时，涨分归因就分不开了：MMT-Bench 涨 5.0 个点，是数据分布调对了、还是训练本身变好了，单看这篇没法回答。</li>
+<li>如果复现，第一步先拿 1 个视频域、30K 样本跑一轮四阶段 pipeline，不加分布反馈，量 InternVL3-8B 在 MMT-Bench 和 held-out VSI-Bench 上的分项分——如果分项分显示理解涨、编辑跌，先别加外循环，回去查三级摘要是不是把编辑要的帧级信息摘要掉了；再加一轮“held-out 反馈调分布”，对比“测试集反馈调分布”——如果两者在 MMT-Bench 上差不多、但在 held-out 上差 3 个点以上，反馈信号就只用 held-out 的，测试集聚合分只用来最后量一次。</li>
+</ul>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
+<ol>
+<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
+<li>数据 pipeline 中哪个环节最容易藏 bug？（三级摘要是不是把编辑要的帧级信息摘要掉了；镜头过滤是不是筛掉了真实世界的难度；按内容规划工具是不是规划错了——文字视频没上 OCR；信号 ID 引用是不是“引用存在但不支撑答案”；分布反馈是不是对着测试集聚合分调出来的；聚合分是不是把“哪类任务涨、哪类任务跌”藏起来了）</li>
+<li>换成今天的模型规模，这个方法还成立吗？</li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-14-vidueu-agent/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2611.04418">论文原文 arXiv:2611.04418</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
