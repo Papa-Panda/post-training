@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Day 15 PyRUA-DataFarm — 阅读版</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+:root{
+  --bg:#f7f5f1; --card:#ffffff; --ink:#23272f; --muted:#6b7280;
+  --accent:#0e7490; --accent-ink:#155e75; --accent-bg:#ecfeff;
+  --border:#e8e4dc; --radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;z-index:50}
+.wrap{max-width:800px;margin:0 auto;padding:32px 20px 80px}
+.hero{background:linear-gradient(135deg,#164e63,#0891b2);color:#fff;border-radius:20px;padding:40px 36px}
+.kicker{display:inline-block;font-size:13px;letter-spacing:.1em;background:rgba(255,255,255,.18);padding:4px 14px;border-radius:999px;margin-bottom:16px}
+.hero h1{margin:0 0 10px;font-size:29px;line-height:1.45;font-weight:700}
+.hero .sub{opacity:.88;font-size:14.5px;margin:0}
+.toc{position:sticky;top:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:12px 18px;margin:20px 0;box-shadow:0 2px 12px rgba(0,0,0,.05);z-index:10}
+.toc summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--muted);list-style:none}
+.toc summary::-webkit-details-marker{display:none}
+.toc nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toc a{font-size:13.5px;color:var(--accent-ink);background:var(--accent-bg);padding:4px 12px;border-radius:999px;text-decoration:none}
+.sec{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px 34px;margin:0 0 18px;box-shadow:0 1px 6px rgba(0,0,0,.03);scroll-margin-top:80px}
+.sec h2{margin:0 0 18px;font-size:21px;display:flex;align-items:center;gap:12px;line-height:1.5}
+.sec h2 .n{display:inline-flex;width:32px;height:32px;border-radius:50%;background:var(--accent-bg);
+  color:var(--accent-ink);font-size:15px;align-items:center;justify-content:center;flex:none;font-weight:700}
+.sec h3{font-size:17.5px;margin:26px 0 10px}
+.sec p{margin:0 0 14px}
+.sec ul,.sec ol{margin:0 0 14px;padding-left:24px}
+.sec li{margin-bottom:10px}
+.sec li::marker{color:var(--accent);font-weight:600}
+.sec-lede{background:linear-gradient(180deg,#ecfeff 0%,#ffffff 100%);border-color:#cffafe}
+.sec-lede p{font-size:18px}
+.sec-qa ol{list-style:none;padding:0;counter-reset:q}
+.sec-qa ol>li{counter-increment:q;background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:18px 20px 18px 66px;position:relative;margin-bottom:14px}
+.sec-qa ol>li::before{content:counter(q);position:absolute;left:20px;top:20px;width:30px;height:30px;
+  border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;
+  justify-content:center;font-size:15px}
+.sec blockquote{border-left:4px solid var(--accent);background:var(--accent-bg);border-radius:0 12px 12px 0;
+  padding:14px 22px;margin:0 0 16px;color:var(--accent-ink);font-size:17px}
+.sec blockquote p{margin:0}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin:6px 0 4px;line-height:1.6}
+th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+th{background:#f3f4f6;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafafa}
+a{color:var(--accent)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f3f4f6;padding:2px 6px;border-radius:6px;font-size:.88em}
+pre{background:#1f2937;color:#e5e7eb;border-radius:12px;padding:16px 18px;overflow-x:auto}
+pre code{background:none;padding:0;color:inherit}
+.katex{font-size:1.05em}
+.katex-display{margin:18px 0;overflow-x:auto;overflow-y:hidden}
+.mermaid{display:flex;justify-content:center;margin:10px 0 20px;overflow-x:auto;
+  background:#fbfcfe;border:1px solid var(--border);border-radius:12px;padding:18px 12px}
+.mermaid svg{max-width:100%;height:auto}
+.tag{display:inline-block;font-size:12.5px;background:#f3f4f6;border:1px solid var(--border);
+  border-radius:999px;padding:2px 10px;margin:2px 4px 2px 0;color:var(--muted)}
+.meta{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 10px}
+.meta-grid{display:grid;grid-template-columns:132px 1fr;gap:10px 14px;font-size:15px;margin:2px 0 8px;align-items:start}
+.meta-grid dt{color:var(--muted);font-weight:600}
+.meta-grid dd{margin:0;line-height:1.7;overflow-wrap:anywhere}
+.viz{margin:8px 0 22px}
+.stat-strip{display:flex;flex-wrap:wrap;gap:12px}
+.stat{flex:1 1 150px;min-width:128px;background:linear-gradient(180deg,#ecfeff 0%,#ffffff 100%);
+  border:1px solid #cffafe;border-radius:12px;padding:14px 14px;text-align:center}
+.stat .v{font-size:25px;font-weight:800;color:var(--accent-ink);line-height:1.35}
+.stat .l{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.55}
+.flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.fnode{flex:1 1 0;min-width:104px;background:var(--accent-bg);border:1.5px solid #cffafe;border-radius:12px;
+  padding:10px 10px;font-size:13.5px;font-weight:600;color:var(--accent-ink);text-align:center;
+  display:flex;align-items:center;justify-content:center;line-height:1.5}
+.farrow{align-self:center;flex:0 0 auto;color:var(--accent);font-weight:800;font-size:19px;padding:2px 5px}
+.viz-bars{display:flex;flex-direction:column;gap:10px}
+.barrow{display:grid;grid-template-columns:minmax(80px,150px) 1fr 72px;gap:10px;align-items:center;font-size:14px}
+.barlabel{text-align:right;font-weight:600;line-height:1.4;overflow:hidden}
+.bartrack{background:#cffafe;border-radius:999px;height:22px;overflow:hidden}
+.barfill{background:linear-gradient(90deg,#22d3ee,#0e7490);height:100%;border-radius:999px}
+.barfill.bad{background:linear-gradient(90deg,#fca5a5,#dc2626)}
+.barval{font-weight:700;color:var(--accent-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vscol{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.vscol h4{margin:0 0 10px;font-size:15px}
+.vscol.vs-a h4{color:var(--accent-ink)}
+.vscol.vs-b h4{color:#0891b2}
+.vscol ul{margin:0;padding-left:20px}
+.vscol li{margin-bottom:8px;font-size:14.5px}
+.callout{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin:0 0 16px;font-size:15px}
+.callout b{color:#92400e}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:36px;line-height:2}
+.foot a{color:var(--accent)}
+@media(max-width:640px){.sec{padding:22px 20px}.hero{padding:30px 24px}.hero h1{font-size:23px}body{font-size:16px}
+.vs{grid-template-columns:1fr}.barrow{grid-template-columns:86px 1fr 62px}.meta-grid{grid-template-columns:104px 1fr}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="wrap">
+  <header class="hero">
+    <span class="kicker">synthetic-data · C 系列 Day 15 · 完结篇</span>
+    <h1>PyRUA-DataFarm：造数据与批数据分离的机器人数据</h1>
+    <p class="sub">完整阅读版 · 由 GitHub NOTES.md 生成</p>
+  </header>
+  <details class="toc" open>
+    <summary>目录（点击跳转）</summary>
+    <nav><a href="#sec-1">元信息</a><a href="#sec-2">一句话总结</a><a href="#sec-3">3 个问题</a><a href="#sec-4">核心机制</a><a href="#sec-5">边界</a><a href="#sec-6">迁移</a><a href="#sec-7">讨论题</a></nav>
+  </details>
+<section class="sec" id="sec-0">
+<blockquote class="pq">
+<p>📖 阅读版：https://papa-panda.github.io/post-training/synthetic-data/day-15-pyrua-datafarm/</p>
+</blockquote>
+</section>
+<section class="sec" id="sec-1"><h2><span class="n">1</span>元信息</h2>
+<dl class="meta-grid"><dt>Title</dt><dd>PyRUA-DataFarm: LLM Agent as a Cost-Efficient Teleoperator for Real-Ready Robot Data</dd><dt>Authors</dt><dd>Zhang 等</dd><dt>Link / arXiv</dt><dd><a href="https://arxiv.org/abs/2611.05320">https://arxiv.org/abs/2611.05320</a></dd><dt>Date of publication</dt><dd>2026-11-03</dd><dt>Tags</dt><dd><div class="meta"><span class="tag">robotics</span><span class="tag">data-generation</span><span class="tag">verification</span></div></dd><dt>与前篇的关系</dt><dd>Day 09 Agent-R² 说办公 agent 数据要“真实附件 + 交付级 rubric”，PyRUA-DataFarm 把同一个“交付级”思路搬到机器人：成功判定要先冻结、每集要独立审片——判定就是机器人数据的 rubric，只不过办公任务的 rubric 写在纸面上，机器人任务的判定必须能在仿真里跑起来，冻结的是一段代码。Day 05 Data Turnstile 把工具调用图的生成与验证拆成 DAG 上的不同角色，DataFarm 拆的是“造数据”与“批数据”——造数据的 agent 和批数据的角色分离，同一个“角色分离防自证”思路。Day 02 AED 说失败诊断必须 citation-first，每条诊断要引出处的证据；DataFarm 的独立 judges 认证专家控制器、再逐集认证渲染好的 episode，相当于每个样本都要有“出生证”才能入库。Day 03 WorkForge 说 16.7K 真实工作空间，真实感是学会探索的原因；DataFarm 的回答是“仿真里重建 + 按真实参考图渲染外观”——真实感靠渲染补、物理靠仿真给。Day 14 VidUEU-Agent 说每个样本必须引用信号 ID，引用是防幻觉的锚；DataFarm 则是每个样本必须过“机器检查 + 独立审片”两道关，审片是防幻觉的锚。</dd></dl>
+</section>
+<section class="sec sec-lede" id="sec-2"><h2><span class="n">2</span>一句话总结</h2>
+<p>机器人遥操数据贵在每集都要真人真机、每个新任务都从零开始；PyRUA-DataFarm 让编码 agent 拿一个数据请求加一个标定集，在仿真里重建场景、写专家控制器、冻结成功判定，仿真器给精确动作、视频模型按真实参考图渲染外观，每集机器检查加独立审片才入库；5 个双臂任务原场景 93/100 胜真人遥操 84/100，未见桌布 / 灯光下 87 vs 46，单集摊薄约 $1.06。</p>
+<div class="viz viz-stats stat-strip"><div class="stat"><div class="v">93 / 100</div><div class="l">原场景 farm 数据策略成功数<br>真人遥操数据 84 / 100，领先 9 个点</div></div><div class="stat"><div class="v">87 vs 46</div><div class="l">未见桌布 / 灯光下成功数<br>farm 约是遥操的 1.89 倍</div></div><div class="stat"><div class="v">约 $1.06</div><div class="l">单集摊薄成本<br>此后每集边际成本 $0.80</div></div><div class="stat"><div class="v">$107 / 小时</div><div class="l">一小时三视角数据<br>中国遥操 $117，北美仅人力 $290</div></div><div class="stat"><div class="v">5 个双臂任务</div><div class="l">每个任务 1 个标定集重建<br>适配全自动，$21 + $5 一次性</div></div></div>
+</section>
+<section class="sec sec-qa" id="sec-3"><h2><span class="n">3</span>3 个问题</h2>
+<ol>
+<li>造数据与批数据分离，为什么是机器人数据特有的关键设计？——取 papers.md 的思考题。PyRUA-DataFarm 的做法是编码 agent 只管“造”——在仿真里重建场景、写专家控制器；独立角色先冻结成功判定、每集独立审片只管“批”。三臂——A 分离（论文方法：造数据的 agent 与批数据的角色分离，成功判定先冻结，每集机器检查加独立审片）；B 不分离（同一个 agent 既写专家控制器、又写成功判定、又自己审片，流水线其他部分不变）；C 分离但判定不冻结（审片角色和造数据角色分开，但成功判定不预先冻结，审片时可以改）。指标：5 个双臂任务原场景成功率、未见桌布 / 灯光成功率、每集成本、审片挡下的坏集占比、成功判定在造数据过程中被改动的次数。判据：若 A 在原场景 93/100、未见场景 87，且 B 在原场景 ≈ A 但在未见场景 ≪ A → 不分离的代价不在“原场景”，而在“泛化”——自己审自己的数据，会把“在原场景能过关”当成“学会了任务”，未见场景一换就露馅；若 A ≈ B 在所有指标上 → 分离没起作用，机器人数据的关键不在“谁批”，而在“仿真重建得准不准”；若 C ≈ B 且 C ≪ A → 起作用的不是“角色分开”，而是“判定先冻结”——分开的审片角色如果还能改判定，等于没分开；若 A 的审片挡下占比高、但 A 的成功率仍最高 → 审片挡下的恰恰是“看起来成功、物理上不对”的集，分离的价值在“挡”上，不在“评”上。再预测一个 2×2 格子：{造批分离，造批一体} × {原场景，未见场景}，哪个格子的成功率最高、哪个最低，并写理由。再构造一个具体反例：视频模型按真实参考图渲染外观——外观可以渲染，物理接触（抓取力度、摩擦、物体变形）渲染不出来；造数据的 agent 可以生成一段“看起来抓住了、实际上手指穿过了杯子”的视频，审片只看视频会放过它——分离的审片如果只审“画面”，不审“动作标签与画面的对齐”，分离了也白分离；更糟的是专家控制器和成功判定如果出自同一个 agent，控制器可以“教”判定放水——比如把“放进盒子”判成“碰到盒子边缘就算”，判定冻结防的是“出题人给自己改卷”，但防不住“出题人和答题人串通好了出同一道送分题”。漏洞：注释没说独立审片到底审什么——是看视频画面、还是核对动作标签与画面是否对齐、还是在仿真里重跑一遍；也没说每集机器检查查的是什么——是“视频能不能播”、还是“动作与画面对得上”；而且“独立角色”到底有多独立——是另一个模型、还是同一个模型换个 prompt，注释没说。</li>
+<li>成功判定先冻结，到底防住了什么？——综合 Day 02 AED 与 Day 05 Data Turnstile。AED 的 citation-first 是“诊断必须引出处的证据”，Data Turnstile 的 DAG 分角色验证是“生成与验证不是同一个人”；DataFarm 的“独立角色先冻结成功判定”是同一个思路在机器人数据上的版本——判定是数据的 rubric，rubric 必须在造数据之前定死。三臂——A 独立角色先冻结成功判定（论文方法：判定由独立角色写好并冻结，造数据的 agent 不能再改）；B 判定由造数据的 agent 自己写、事后可改（同一条流水线，只去掉“独立角色先冻结”这一条，判定随造数据过程调整）；C 冻结判定但审片只机器检查、不要独立审片（判定冻结保留，逐集的独立审片去掉，只留机器检查）。指标：5 个任务原场景成功率、未见场景成功率、判定在造数据过程中被改动的次数、被审片挡下的集数占比、每集成本。判据：若 A 的未见场景 87、B 的未见场景 ≪ A 且 B 的判定被改动次数高 → 冻结防住的是“判定被悄悄放宽”——不冻结，造数据的 agent 会把判定改成“自己的控制器能过的样子”，原场景 93/100 是改卷改出来的；若 A ≈ B 在成功率上、但 B 的判定被改动次数高 → 判定改动没影响结果，冻结是“仪式感”，真正起作用的是仿真重建本身；若 A ≈ C 在成功率上 → 独立审片没贡献，机器检查就够了，逐集审片是白花的钱；若 C ≪ A 且 C 的被挡集数占比低 → 机器检查查不出“看起来成功、物理上不对”的集，独立审片的价值恰恰在机器查不出的地方。再预测一个 2×2 格子：{判定冻结，判定可改} × {机器检查，独立审片}，哪个格子的未见场景成功率最高、哪个最低，并写理由。再构造一个具体反例：冻结的判定可能只认一种解法——假设专家控制器只会从右侧抓杯子，独立角色冻结的判定写的是“杯子被从右侧抓起就算成功”，数据里就全是右侧抓取；到了未见场景，杯子在左侧，策略只会右侧抓，87 vs 46 的泛化涨幅里可能有一部分是“判定本身就把任务变窄了”——冻结防住了“改卷”，但防不住“出题偏”；更糟的是判定冻结的是“一段代码”，代码里的阈值（比如“放进盒子”要离盒底多近）是谁定的，注释没说——阈值定得松，93/100 里有一部分是“判松了”。漏洞：注释没给判定被改动的基线次数、没给被审片挡下的集数占比、没给 5 个任务各自的分数——不知道 93/100 与 84/100 的差距里，有多少来自“冻结判定”、有多少来自“仿真重建”；而且“独立角色”与“造数据的 agent”到底是不是同一个模型，注释没说——如果是同一个模型换个 prompt，独立性就是 prompt 级别的，不是模型级别的。</li>
+<li>87 vs 46 的泛化涨幅，到底是数据好还是“未见场景”选得巧？——综合 Day 03 WorkForge。WorkForge 说真实工作空间是瓶颈，真实感是学会探索的原因；DataFarm 在未见桌布 / 灯光下 87 vs 46，大胜真人遥操——但未见场景只换了桌布和灯光，都是外观变量，而视频模型恰恰最擅长渲染外观（按真实参考图渲染）。三臂——A farm 数据（论文方法：仿真重建加真实参考图渲染，每集机器检查加独立审片）；B 同等集数的真人遥操数据（论文对照：as many teleoperated episodes）；C farm 数据但只换桌布不换灯光、只换灯光不换桌布的拆分（把“未见场景”拆成两个单变量臂）。指标：原场景成功率（93 vs 84）、未见桌布成功率、未见灯光成功率、桌布加灯光都换的成功率、每集成本、5 个任务各自的分项成功率。判据：若 A 在“只换桌布”和“只换灯光”上都 ≫ B、且在“都换”上仍 ≫ B → 泛化是真的，farm 数据的策略对“外观变了、任务结构没变”鲁棒；若 A 在“只换桌布”上 ≫ B、但在“只换灯光”上 ≈ B → 泛化涨幅来自桌布，不来自灯光——视频模型渲染桌布纹理容易，渲染彩色灯光下的阴影与反光难，87 vs 46 的平均数把“哪种外观变量好泛化”藏起来了；若 A 在“都换”上 ≈ B → 87 vs 46 是“单变量好泛化、双变量就露馅”，泛化涨幅经不起两个变量一起换；若 A 的 5 个任务里有的任务 ≫ B、有的任务 ≈ B → 泛化涨幅是任务挑出来的——有的任务（比如对外观不敏感的）天然好泛化，有的任务不行，聚合的 87 vs 46 把任务间的差异藏起来了。再预测一个 2×2 格子：{farm 数据，真人遥操数据} × {原场景，未见场景}，哪个格子的成功率最高、哪个最低，并写理由。再构造一个具体反例：未见场景换的桌布和灯光都是“看起来不一样”，但任务的物理结构（杯子重量、桌面摩擦、抓取点）一点没变——视频模型最擅长的就是“外观变了、结构不变”的渲染，87 vs 46 可能不是“策略更鲁棒”，而是“考题正好考在视频模型的强项上”；换成物理变量（不同重量的杯子、不同摩擦的桌面、不同弹性的物体），farm 数据的策略可能立刻跌回去，而真人遥操数据的策略因为见过真实的物理反馈，反而跌得少——“未见桌布 / 灯光”这个“未见”的定义，本身就是对 farm 数据友好的。漏洞：注释没给 5 个任务各自的分数、没给每任务采了多少集、没给“未见”到底换了几张桌布、几种灯光——不知道 87 vs 46 是 5 个任务都赢、还是 2 个任务大赢、3 个任务打平；而且 93/100 与 84/100 的分母都是 100 次试验，但试验次数不等于训练集集数——“as many episodes”到底是多少集，注释没说。</li>
+</ol>
+</section>
+<section class="sec" id="sec-4"><h2><span class="n">4</span>核心机制</h2>
+<h3>DataFarm 流水线：标定集重建 → 冻结判定 → 仿真出动作 → 渲染外观 → 机器检查 + 独立审片</h3>
+<div class="viz viz-flow flow"><div class="fnode">数据请求 + 1 个标定集</div><div class="farrow">→</div><div class="fnode">编码 agent 在仿真里重建任务</div><div class="farrow">→</div><div class="fnode">独立角色先冻结成功判定</div><div class="farrow">→</div><div class="fnode">仿真出精确动作，视频模型渲染外观</div><div class="farrow">→</div><div class="fnode">每集机器检查 + 独立审片才入库</div></div>
+<div class="viz">
+<pre class="mermaid">flowchart TB
+    R[数据请求加一个标定集] --> A[编码 agent 在仿真里重建任务]
+    A --> S[写场景]
+    A --> C[写专家控制器]
+    A --> J[写成功判定]
+    J --> F{独立角色冻结成功判定}
+    F -->|冻结后不可改| SIM[仿真器出精确动作]
+    SIM --> V[视频模型按真实参考图渲染外观]
+    V --> E[每集机器检查]
+    E --> I{独立审片通过吗}
+    I -->|否| DROP[挡下 不入库]
+    I -->|是| D[入库 同步多视角画面加动作标签]
+    D --> P[训策略 直接部署真机]
+</pre>
+</div>
+<h3>Motivation：遥操是默认采法，但每集都要真人真机</h3>
+<p>遥操是采机器人示教数据的默认方式，但每集都要真人真机、耗费机器人与操作员时间，而且每个新任务都从零开始——新任务没有旧数据可复用。机器人数据不像文本数据可以“多采一点”，真机时间是硬成本；而且遥操数据还带着“人”的方差——操作员水平、疲劳、当天状态都进数据里。PyRUA-DataFarm 问的是：编码 agent 能不能接过遥操员的工作——只给一个数据请求加一个标定集，就把任务在仿真里重建出来，批量造出“直接能上真机”的数据。</p>
+<h3>老路 vs DataFarm：真人真机逐集采 vs 仿真重建批量造</h3>
+<div class="viz vs"><div class="vscol vs-a"><h4>老路：真人遥操，逐集采</h4><ul><li>每集都要真人真机，机器人与操作员时间都是硬成本</li><li>每个新任务从零开始，没有旧数据可复用</li><li>操作员水平、疲劳、状态都进数据里，方差大</li><li>未见场景下 46/100——换个桌布灯光就跌一半</li></ul></div><div class="vscol vs-b"><h4>DataFarm：仿真重建 + 渲染外观 + 冻结判定</h4><ul><li>1 个标定集重建任务，适配全自动，$21 + $5 一次性</li><li>仿真器给精确动作，视频模型只按真实参考图渲染外观</li><li>独立角色先冻结成功判定，出题人不能给自己改卷</li><li>每集机器检查 + 独立审片，过了才入库；未见场景 87/100</li></ul></div></div>
+<h3>关键数字：原场景 93 vs 84；未见场景 87 vs 46；单集摊薄约 $1.06</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">原场景 farm 数据</div><div class="bartrack"><div class="barfill" style="width:93%"></div></div><div class="barval">93 / 100</div></div><div class="barrow"><div class="barlabel">原场景真人遥操</div><div class="bartrack"><div class="barfill bad" style="width:84%"></div></div><div class="barval">84 / 100</div></div><div class="barrow"><div class="barlabel">未见场景 farm 数据</div><div class="bartrack"><div class="barfill" style="width:87%"></div></div><div class="barval">87 / 100</div></div><div class="barrow"><div class="barlabel">未见场景真人遥操</div><div class="bartrack"><div class="barfill bad" style="width:46%"></div></div><div class="barval">46 / 100</div></div></div>
+<p>5 个双臂任务、100 次试验的成功数（条形按 0–100 刻度）。原场景 farm 只领先 9 个点，未见场景领先 41 个点——泛化涨幅比原场景涨幅大得多，这是这篇最值得追问的数字。</p>
+<h3>成本对照：一小时三视角数据 $107 vs 中国遥操 $117 vs 北美仅人力 $290</h3>
+<div class="viz viz-bars"><div class="barrow"><div class="barlabel">farm 数据</div><div class="bartrack"><div class="barfill" style="width:36.9%"></div></div><div class="barval">$107</div></div><div class="barrow"><div class="barlabel">中国遥操报价</div><div class="bartrack"><div class="barfill bad" style="width:40.3%"></div></div><div class="barval">$117</div></div><div class="barrow"><div class="barlabel">北美仅人力</div><div class="bartrack"><div class="barfill bad" style="width:100%"></div></div><div class="barval">$290</div></div></div>
+<p>一小时三视角数据的平均成本（条形按 0–$290 刻度）。farm 只比中国遥操报价低 $10（“略低”），但比北美仅人力低 $183——成本优势的大小取决于你拿哪个口径当对照；而且 $117 含设备与场地、$290 只算人力，两个对照口径本来就不一样。</p>
+<table>
+<tr><th>阶段</th><th>做什么</th><th>证据 / 反馈钩子</th><th>关键点</th></tr>
+<tr><td>请求与标定</td><td>数据请求 + 目标场景下 1 个标定集</td><td>标定集是唯一的真机输入</td><td>标定集做偏了，后面全跟着偏</td></tr>
+<tr><td>仿真重建</td><td>编码 agent 写场景、专家控制器、成功判定</td><td>仿真器给精确动作</td><td>物理靠仿真，外观靠渲染，分工明确</td></tr>
+<tr><td>冻结判定</td><td>独立角色先冻结成功判定</td><td>冻结后造数据的 agent 不能再改</td><td>出题人不能给自己改卷</td></tr>
+<tr><td>渲染外观</td><td>视频模型只按真实参考图渲染外观</td><td>多视角同步一致渲染</td><td>外观对了不等于物理对了</td></tr>
+<tr><td>检查与审片</td><td>每集机器检查 + 独立审片</td><td>独立 judges 先认证专家，再逐集认证</td><td>过了才入库，审片是防幻觉的锚</td></tr>
+</table>
+<p>原场景领先（由论文自报数字算得，非论文公式）：</p>
+<p>$$93 - 84 = 9$$</p>
+<p>其中 93 是 farm 数据训出的策略在原场景 100 次试验里的成功数，84 是真人遥操数据训出的策略的成功数——原场景领先 9 个点。</p>
+<p>未见场景领先（由论文自报数字算得，非论文公式）：</p>
+<p>$$87 - 46 = 41$$</p>
+<p>其中 87 是 farm 数据训出的策略在未见桌布 / 灯光下 100 次试验里的成功数，46 是真人遥操数据训出的策略的成功数——未见场景领先 41 个点。</p>
+<p>未见场景倍数（由论文自报数字算得，非论文公式）：</p>
+<p>$$\frac{87}{46} \approx 1.89$$</p>
+<p>其中分子是 farm 数据的成功数，分母是真人遥操数据的成功数——未见场景下 farm 策略的成功数约是遥操策略的 1.89 倍。</p>
+<p>北美人力成本倍数（由论文自报数字算得，非论文公式）：</p>
+<p>$$\frac{290}{107} \approx 2.71$$</p>
+<p>其中分子是北美仅人力成本 $290，分母是一小时三视角 farm 数据成本 $107——北美仅人力约是 farm 的 2.71 倍；中国遥操报价 $117 与 $107 只差 $10，farm 只“略低”。</p>
+<p>成本自洽验算（由论文自报数字算得，非论文公式）：</p>
+<p>$$26 + 100 \times 0.80 = 106 \approx 107$$</p>
+<p>其中 26 是适配一个任务的一次性成本（$21 API 加 $5 渲染合约），0.80 是此后每集的平均成本，107 是一小时三视角数据的平均成本——若每任务采约 100 集，一次性成本加 100 集边际成本约等于 $106，与 $107/小时 吻合；这说明“单集摊薄约 $1.06”（$106 / 100 集）与“$107/小时”自洽，均为论文自报数字的算术推论，非论文原话。</p>
+<p>数字均为论文自报，出自 papers.md 注释与论文摘要；差值、倍数与自洽验算由上述数字算得。</p>
+<div class="callout"><b>反直觉点：</b>这篇最值得追问的数字不是原场景的 93 vs 84（只领先 9 个点），而是未见场景的 87 vs 46——farm 数据的策略在“没见过的桌布和灯光”下几乎没跌（93 → 87），真人遥操数据的策略却跌了一半（84 → 46）。但未见场景只换了外观变量，而视频模型最擅长的就是渲染外观——87 vs 46 可能不是“策略更鲁棒”，而是“考题正好考在视频模型的强项上”。换成物理变量（不同重量的杯子、不同摩擦的桌面），farm 数据还赢不赢，注释没给答案。</div>
+</section>
+<section class="sec" id="sec-5"><h2><span class="n">5</span>边界</h2>
+<ul>
+<li>未见场景只换了外观变量：桌布加灯光都是“看起来不一样”，视频模型恰恰最擅长渲染外观——87 vs 46 的泛化涨幅可能有一部分是“考题正好考在视频模型的强项上”；物理变量（不同重量的杯子、不同摩擦的桌面、不同弹性的物体）没换过，换了会怎样不知道。</li>
+<li>“成功判定”的冻结只防“改卷”，不防“出题偏”：判定由独立角色冻结，但场景、专家控制器、判定最初都是同一个编码 agent 体系里写出来的——如果控制器本身只会一种解法（比如只会从右侧抓），冻结的判定可能恰好只认这一种解法，数据里就全是这一种解法。</li>
+<li>视频模型“只按真实参考图渲染外观”：外观对了不等于物理对了——抓取瞬间的接触、滑动、遮挡，视频模型可以“画”出来，但画出来的动作和仿真器给的精确动作标签之间有没有错位，注释没说；审片看的是视频，动作标签来自仿真器，两者对不上时，审片看不出来。</li>
+<li>5 个任务、100 次试验：注释只给了 5 个双臂任务的聚合成功率，没给每个任务各自的分数、每个任务采了多少集、“as many episodes”到底是多少集；93/100 与 84/100 的分母都是 100 次试验，但试验次数不等于训练集集数。</li>
+<li>成本数字是“平均”：$21 加 $5 是“平均”、$0.80 是“平均”、$107 是“平均”——方差没给；某个难任务的适配成本如果翻倍，摊薄到每集的 $1.06 就不成立；而且 $117 是“中国遥操报价”、$290 是“北美仅人力”，两个对照口径本来就不一样（一个含设备与场地、一个只算人力）。</li>
+<li>只有一个标定集：每个任务只用一个标定集重建场景——标定集本身的质量（操作员那一集做得好不好、有没有覆盖任务的关键步骤）决定了整个任务的数据质量；标定集要是做偏了，后面 100 集全跟着偏。</li>
+<li>“独立角色”到底有多独立，注释没说：是另一个模型、还是同一个模型换个 prompt——如果是同一个模型换个 prompt，独立性就是 prompt 级别的，不是模型级别的；成功判定冻结的是一段代码，代码里的阈值（比如“放进盒子”要离盒底多近）是谁定的，注释也没说——阈值定得松，93/100 里有一部分是“判松了”。</li>
+</ul>
+</section>
+<section class="sec" id="sec-6"><h2><span class="n">6</span>迁移</h2>
+<ul>
+<li>“造数据与批数据分离”可搬到任何“生成器会给自己放水”的领域：Day 05 Data Turnstile 的 DAG 分角色验证、Day 02 AED 的 citation-first 诊断，都是同一个思路——让“批”的人和“造”的人不是同一个，批的标准在造之前冻结。搬到文本 SFT 数据上，就是“写答案的模型不能同时写评分标准，评分标准由另一个模型先冻结”；搬到代码数据上，就是“生成测试用例的模型不能同时写被测代码的通过标准”。关键是冻结要在生成之前——事后冻结等于没冻结。</li>
+<li>“成功判定先冻结”可搬到 RL 环境的数据工作：Day 03 WorkForge 说真实工作空间是瓶颈，真实感是学会探索的原因——WorkForge 的环境判定如果也是“先冻结、后生成”，环境生成器就不能为了让 agent 好过关而把任务改简单；搬到 Day 10 ToolSpace 的可执行工具依赖上，就是“工具依赖图的验收条件先冻结，生成工具链的 agent 不能为了过关而把依赖改弱”。</li>
+<li>“仿真给物理、渲染给外观”的分工可搬到任何“物理难、画面易”的合成数据：视频模型只负责它擅长的外观，精确动作与物理交互留给仿真器——分工本身就是防幻觉，让每个模块只干它能验证的事。搬到自动驾驶数据上，就是“仿真器给轨迹与碰撞，渲染模型只给天气与光照”；搬到 Day 13 WebHarbor 的网站环境，就是“浏览器给真实交互状态，语言模型只给界面描述”。</li>
+<li>与 Day 09 Agent-R² 构成对照：Agent-R² 用真实附件加交付级 rubric 练办公 agent，DataFarm 用冻结的成功判定加独立审片练机器人策略——两篇都在回答“数据怎么才算 real-ready”，一个靠“真实附件加 rubric”，一个靠“冻结判定加独立审片”；差别在于办公任务的 rubric 可以写在纸面上，机器人任务的判定必须能在仿真里跑起来——判定本身就是代码，冻结的是一段代码，不是一段文字。</li>
+<li>与 Day 03 WorkForge 构成对照：WorkForge 说 16.7K 真实工作空间，真实感是学会探索的原因；DataFarm 说仿真重建加真实参考图渲染也能做到 93/100，甚至在未见场景下 87 vs 46 反超真人遥操——两篇合起来是“真实感从哪来”的两种答案：WorkForge 是“直接用真实的”，DataFarm 是“仿真里重建加外观上渲染”；DataFarm 的 87 vs 46 提醒我们，“真实感”可能不是“场景本身真不真”，而是“策略在场景变化下还认不认得任务”——外观变了、任务结构没变，策略照样会。</li>
+<li>如果复现，第一步先拿 1 个双臂任务、1 个标定集跑通“重建场景 → 写专家控制器 → 冻结成功判定 → 仿真出动作 → 视频模型渲染”这一条链，不追求集数，先量 3 个数：专家控制器在仿真里的成功率、冻结的判定与人工判定的一致率、渲染视频与仿真动作的对齐率（抽查 10 集，人工看动作标签与画面是否对得上）；如果判定一致率低，先别扩集数，回去查判定是不是只认一种解法；如果对齐率低，先别加任务，回去查视频模型是不是在“画”动作。</li>
+</ul>
+</section>
+<section class="sec sec-qa" id="sec-7"><h2><span class="n">7</span>讨论题</h2>
+<ol>
+<li>这篇的结论里，哪一条最可能被后来的工作推翻？</li>
+<li>数据 pipeline 中哪个环节最容易藏 bug？（标定集本身做偏了；专家控制器只会一种解法；成功判定冻结的是“一段代码”还是“一个文字描述”；视频模型渲染的外观与仿真动作标签错位；审片只看视频、看不到动作标签错位；每集机器检查查的是什么——是“视频能不能播”还是“动作与画面对得上”；$1.06 的摊薄口径——集数一少就涨上去）</li>
+<li>换成今天的模型规模，这个方法还成立吗？</li>
+</ol>
+</section>
+  <div class="foot">由 <a href="https://github.com/Papa-Panda/post-training/blob/master/synthetic-data/day-15-pyrua-datafarm/NOTES.md">GitHub NOTES.md</a> 生成 · 公式由 KaTeX、流程图由 Mermaid 渲染（需联网加载）<br><a href="https://arxiv.org/abs/2611.05320">论文原文 arXiv:2611.05320</a> · <a href="https://github.com/Papa-Panda/post-training">synthetic-data 仓库</a></div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "$", right: "$", display: false}
+    ],
+    throwOnError: false
+  });
+  if (window.mermaid) {
+    mermaid.initialize({startOnLoad: true, theme: "default", securityLevel: "loose"});
+  }
+  var bar = document.getElementById("progress");
+  window.addEventListener("scroll", function() {
+    var h = document.documentElement;
+    var p = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    bar.style.width = p + "%";
+  }, {passive: true});
+});
+</script>
+</body>
+</html>
