@@ -534,3 +534,33 @@ graph TD
 - **背景**：C 系列 synthetic-data 刚按同一口径改完 4 篇（SPADE 2026-08-19、AED 2026-09-30、WorkForge 2026-10-04、ToolLoop 2026-09-08，commit 9ce24e0）；physical-ai 34 天也按同一口径改了（commit `1b8eecb`）。
 
 **关联**：全系列 39 篇 Day；ai-data/PAPER_TEMPLATE.md；synthetic-data/ C 系列（commit 9ce24e0）。
+
+### 2026-11-22 — mid-training 数学语料管线：SFT 语料生成论文总结 + 六处改进（跨 Day 19 / 24 / 25 等）
+
+**问题（用户，11:53 PST）**：总结下 SFT 语料生成的论文。
+
+**问题（用户，11:54 PST）**：我现在在搞 mid-train 数学语料，不太确定我现在的做法是否能有别的改进。
+
+**核心答案**：两问相隔 26 秒，助手合并一次回答。先对齐现状——把数学研究论文转成 textbook 式内容做 mid-training，合作方 Shuchao Bi，质量关五类 QA（SymPy、数值代入、模型交叉、Lean、故意放错测检出率）。六处可抠的方向：
+
+1. **选源**：加教育价值分类器（FineWeb-Edu 思路，按定理密度、证明完整度、符号内容占比打分，只转高分区）；或用小模型跑 selective language modeling 式打分（Rho-1 思路），只保留对目标能力"可学"的部分。
+2. **转换**：输出格式锁死成固定结构——定义 → 直觉 → 定理 → 证明梗概 → 例题 → 习题；定理和证明核心步骤尽量贴原文，只扩写解释性文字。
+3. **去重和去污染**：同一条定理从不同论文转出来，n-gram 去重抓不住，语义去重（SemDeDup 那套，Day 24）才抓得住；去污染对着 GSM8K / MATH / AIME 做 n-gram + embedding 两层，别等训完才发现分数是漏的。
+4. **验证**：五类 QA 再加两道——往返一致性（从生成的教材内容自动出习题，用独立模型解，答案对不上就把那段教材打回）；多样性尺子（整个语料算一个 Vendi 分数，Day 19，看覆盖是不是塌到几个热门方向上了）。
+5. **混合比**：数学教材 : 通用数据的比例、退火阶段怎么收尾，先做小规模消融（30% / 50% / 70% 三档），用固定评测套件看曲线再定全量。Llemma、DeepSeekMath 的经验都是配比错了，单篇质量再好也救不回来。
+6. **评估**：便宜的代理评估先行——held-out 数学文本的 perplexity、base 模型 few-shot MATH/GSM8K、"教材续写"探针（给定义让模型补定理陈述）；小规模跑通了再放大。
+
+**后续（未定）**：助手问选源、转换、验证、混合这四段里哪段最没把握、往那段深挖；用户未直接回答，随后只要求重印带阅读版链接（见下一条）。
+
+**问题（用户，15:00 PST）**：重新打印上面这些，相应的文章给一个 GitHub 阅读版链接。
+
+**核心答案**：重印六条，每条附链接，并说明 repo 里有阅读版的只有三篇（Vendi、SemDeDup、FineWeb），Llemma、DeepSeekMath、Rho-1 在 repo 里没有，给 arXiv 原文链接：
+
+- FineWeb / RefinedWeb（最接近 FineWeb-Edu 的 repo 内阅读版）：[Day 25 阅读版](https://papa-panda.github.io/post-training/ai-data/day-25-2023-fineweb-refinedweb/)
+- Rho-1（repo 里没有阅读版）：[arXiv:2404.07965](https://arxiv.org/abs/2404.07965)
+- SemDeDup / D4：[Day 24 阅读版](https://papa-panda.github.io/post-training/ai-data/day-24-2023-semdedup-d4/)
+- Vendi Score：[Day 19 阅读版](https://papa-panda.github.io/post-training/ai-data/day-19-2023-vendi-score/)
+- Llemma（repo 里没有阅读版）：[arXiv:2310.10631](https://arxiv.org/abs/2310.10631)
+- DeepSeekMath（repo 里没有阅读版）：[arXiv:2402.03300](https://arxiv.org/abs/2402.03300)
+
+**关联**：Day 19 Vendi Score、Day 24 SemDeDup / D4、Day 25 FineWeb / RefinedWeb；repo 外：Rho-1（arXiv:2404.07965）、Llemma（arXiv:2310.10631）、DeepSeekMath（arXiv:2402.03300）。
